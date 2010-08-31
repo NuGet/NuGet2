@@ -15,9 +15,11 @@ function global:Install-Package {
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
         
-        [string]$Source,
-
+        [string]$Project = $DefaultProjectName,
+        
         [Version]$Version,
+        
+        [string]$Source,
 
         [switch]$IgnoreDependencies
     )
@@ -26,8 +28,15 @@ function global:Install-Package {
     }
     Process {
         try {
-            # Run the install
-            DoInstallPackage $packageManager $Id $Version $IgnoreDependencies
+            
+            if ($Project) {
+                DoAddPackageReference $packageManager $Project $Id $Version $IgnoreDependencies
+            }
+            else {
+                # Run the install
+                # DoInstallPackage $packageManager $Id $Version $IgnoreDependencies
+                Write-Error "Missing project parameter and the default project is not set."
+            }
         }
         catch {
             _WriteError $_.Exception
@@ -38,8 +47,14 @@ function global:Install-Package {
 function global:Uninstall-Package {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, Position=0)]
         [string]$Id,
+        
+        [parameter(ParameterSetName = "SingleProject", Position = 1)]
+        [string]$Project = $DefaultProjectName,
+        
+        [parameter(ParameterSetname = "AllProjects", Position = 1)]
+        [switch]$AllProjects,
 
         [Version]$Version,
 
@@ -52,7 +67,17 @@ function global:Uninstall-Package {
     }
     Process {
         try {
-            DoUninstallPackage $packageManager $Id $Version $Force $RemoveDependencies
+        
+            if ($AllProjects) {
+                GetProjectNames | ForEach-Object { DoRemovePackageReference $packageManager $_ $Id $Force $RemoveDependencies }
+            }
+            elseif ($Project) {
+                DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
+            }
+            else {
+                #DoUninstallPackage $packageManager $Id $Version $Force $RemoveDependencies
+                Write-Error "Missing project parameter and the default project is not set."
+            }
         }
         catch {
             _WriteError $_.Exception
@@ -65,6 +90,8 @@ function global:Update-Package {
     param(
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
+        
+        [string]$Project = $DefaultProjectName,
 
         [Version]$Version,
 
@@ -75,82 +102,12 @@ function global:Update-Package {
     }
     Process {
         try {
-            $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
-        }
-        catch {
-            _WriteError $_.Exception
-        }
-    }
-}
-
-function global:Add-PackageReference {
-    [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [string]$Id,
-        
-        [string]$Project = $DefaultProjectName,
-
-        [Version]$Version,
-
-        [switch]$IgnoreDependencies
-    )
-    Begin {
-        $packageManager = _GetPackageManager
-    }
-    Process {        
-        try {
-            DoAddPackageReference $packageManager $Project $Id $Version $IgnoreDependencies
-        }
-        catch {
-            _WriteError $_.Exception
-        }
-    }
-}
-
-function global:Remove-PackageReference {
-    [CmdletBinding()]    
-    param(
-        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [string]$Id,
-
-        [string]$Project = $DefaultProjectName,
-
-        [switch]$Force,
-
-        [switch]$RemoveDependencies
-    )
-    Begin {
-        $packageManager = _GetPackageManager
-    }
-    Process {                
-        try {
-            DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
-        }
-        catch {
-            _WriteError $_.Exception
-        }
-    }
-}
-
-function global:Update-PackageReference {
-    [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [string]$Id,
-
-        [string]$Project = $DefaultProjectName,
-        
-        [Version]$Version,
-
-        [switch]$UpdateDependencies = $true
-    )
-    Begin {
-        $packageManager = _GetPackageManager
-    }
-    Process {
-        try {
-            DoUpdatePackageReference $packageManager $Project $Id $Version $UpdateDependencies
+            if ($Project) {
+                DoUpdatePackageReference $packageManager $Project $Id $Version $UpdateDependencies
+            }
+            else {
+                $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+            }
         }
         catch {
             _WriteError $_.Exception
@@ -197,7 +154,7 @@ function global:List-Package {
     return $repository.GetPackages() | Select-Object Id, Version, Description
 }
 
-function global:Change-PackageSource {
+function global:Update-PackageSource {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)]
@@ -207,7 +164,7 @@ function global:Change-PackageSource {
     $global:DefaultPackageSource = $Source
 }
 
-function global:Change-DefaultProject {
+function global:Update-DefaultProject {
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true)]
@@ -224,7 +181,7 @@ function global:Change-DefaultProject {
 }
 
 # This is called directly by the combobox in VS.NET
-# When I tried calling Change-DefaultProject directly from Package Console, I got an cryptic COM exception
+# When I tried calling Change-DefaultProject directly from NuPack Console, I got an cryptic COM exception
 function global:_SetDefaultProjectInternal($Project) {
     $global:DefaultProjectName = $Project
 }
@@ -365,30 +322,18 @@ function global:TabExpansion($line, $lastWord) {
     
     switch ($tokens[0]) {
         'Install-Package' {
-            $choices = _TabExpansionForInstallPackage $secondLastToken $filter
+            $choices = _TabExpansionForInstallPackage $secondLastToken $tokens.length $filter
         }
 
         'Uninstall-Package' {
-            $choices = _TabExpansionForUninstallPackage $secondLastToken $filter
+            $choices = _TabExpansionForUninstallPackage $secondLastToken $tokens.length $filter
         }
 
         'Update-Package' {
-            $choices = _TabExpansionForUninstallPackage $secondLastToken $filter
-        }
-
-        'Add-PackageReference' {
-            $choices = _TabExpansionForAddPackageReference $secondLastToken $tokens.length $filter
-        }
-
-        'Remove-PackageReference' {
-            $choices = _TabExpansionForRemovePackageReference $secondLastToken $tokens.length $filter
-        }
-
-        'Update-PackageReference' {
-            $choices = _TabExpansionForAddPackageReference $secondLastToken $tokens.length $filter
+            $choices = _TabExpansionForUninstallPackage $secondLastToken $tokens.length $filter
         }
         
-        'Change-DefaultProject' {
+        'Update-DefaultProject' {
           $choices = _TabExpansionForChangeDefaultProject $secondLastToken $filter
         }
     }
@@ -403,30 +348,12 @@ function global:TabExpansion($line, $lastWord) {
     }
 }
 
-function _TabExpansionForInstallPackage([string]$secondLastWord, [string]$filter) {
+function _TabExpansionForInstallPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        List-Package | ForEach-Object { $_.Id }
-    }
-}
-
-function _TabExpansionForUninstallPackage([string]$secondLastWord, [string]$filter) {
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
-    }
-    elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (List-Package -local) | ForEach-Object { $_.Id }
-    }
-}
-
-function _TabExpansionForAddPackageReference([string]$secondLastWord, [int] $tokenCount, [string]$filter) {
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
-    }
-    elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        List-Package | ForEach-Object { $_.Id }
+        List-Package | Group-Object -Property "ID" | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
@@ -434,12 +361,12 @@ function _TabExpansionForAddPackageReference([string]$secondLastWord, [int] $tok
     }
 }
 
-function _TabExpansionForRemovePackageReference([string]$secondLastWord, [int] $tokenCount, [string]$filter) {
+function _TabExpansionForUninstallPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (List-Package -local) | ForEach-Object { $_.Id }
+        (List-Package -local) | Group-Object -Property "ID" | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
@@ -483,7 +410,7 @@ function global:_EnsureProjectCache {
                 $projectStack.Push($projectItem.SubProject)
             }
         }
-    }            
+    }
 }
 
 # Private functions (meant to be private not actually private)
@@ -501,9 +428,6 @@ function global:_GetPackageManager($Source) {
     if(!$dte) {
         throw "DTE isn't loaded"
     }
-
-    # Load the package manager assembly if it's not loaded
-    _LoadRequiredAssemblies
 
     # Use default feed if one wasn't specified
     if (!$Source) {
@@ -559,8 +483,10 @@ function global:_OnBeforeUninstall($context) {
 
 function global:_ExecuteScript([string]$rootPath, [string]$scriptFile) {
     $fullPath = (Join-Path $rootPath $scriptFile)
+    
     if (Test-Path $fullPath) {
-        & $fullPath
+        $folder = Split-Path $fullPath
+        & $fullPath $folder
     }
 }
 
@@ -573,95 +499,6 @@ function global:_AddToolsFolderToEnv([string]$rootPath) {
         }
         # add the tools folder to the environment path
         $env:path = $env:path + $toolsPath
-    }
-}
-
-function global:_LoadRequiredAssemblies() {
-	if ($global:__packagingAssembliesLoaded) {
-		return;
-	}
-
-    # List of paths we use for loading the required assemblies if not in the gac or solution
-    $vsPackagePath = Join-Path $env:LocalAppData Microsoft\VisualStudio\10.0\Extensions\Microsoft
-    $assemblyProbingPaths = @($vsPackagePath)
-
-    # Function to load the assembly
-    function LoadAssembly($assemblyShortName) {
-        if(!$dte) {
-            throw "Error: $assemblyShortName could not be loaded from the GAC"
-        }
-
-        # Try to find it in the solution
-        $projectWithAssembly = $dte.Solution.FindProjectItem("$assemblyShortName.dll")
-        
-        if ($projectWithAssembly) {
-            $assemblyFullPath = $projectWithAssembly.FileNames(1)
-        }
-        else {
-            # Try looping over all the projects and looking for the assembly in the references
-            foreach ($project in $dte.Solution.Projects) {
-                if (!$project.Object -or !$project.Object.References) {
-                    continue;
-                }
-
-                try {
-                    $assemblyRef = $project.Object.References.Item($assemblyShortName)
-                    if ($assemblyRef) {
-                        $assemblyFullPath = $assemblyRef.Path
-                        break;
-                    }
-                }
-                catch {
-                    # This call sometimes fails with E_INVALIDARG error message, so just swallow it and move on
-                }
-            }
-        }
-
-        # We still haven't found anything so look in the probing paths we have listed
-        if(!$assemblyFullPath) {
-            foreach($path in $assemblyProbingPaths) {            
-                # REVIEW: Try to find the assembly in the probing path and pick the first one
-                $match = Get-ChildItem -Recurse $path -Filter "$assemblyName.dll" | Select -First 1
-                if($match) {
-                    $assemblyFullPath = $match.FullName
-                    break
-                }
-            }
-        }
-    
-        try {
-            # Try loading it from the full path
-            Add-Type -EA SilentlyContinue -Path $assemblyFullPath
-        }
-        catch {
-            throw "Error: $assemblyShortName could not be loaded from the GAC, and was not found in the solution."
-        }    
-    }
-
-    # Version and public key string for our assembly
-    $versionAndPublicKey = "Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
-
-    # Required assemblies for running these commands
-    $requiredAssemblies = @{ 
-        "NuPack" = "NuPack, $versionAndPublicKey";
-        "NuPack.VisualStudio" = "NuPack.VisualStudio, $versionAndPublicKey"
-    }    
-
-    $requiredAssemblies.Keys | ForEach-Object {        
-        # Get the assembly name
-        $assemblyName = $_
-
-        try {
-            # Try the GAC first with the full name
-            Add-Type -EA SilentlyContinue -AssemblyName $requiredAssemblies[$assemblyName]
-        }
-        catch {
-            # Try the fallback heuristics for loading an assembly
-            LoadAssembly($assemblyName)
-
-            # Set assemblies as loaded so we only do it once
-            $global:__packagingAssembliesLoaded = $true
-        }
     }
 }
 
