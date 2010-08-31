@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="NuPack.BasicPackageWalker" Collapsed="true">
+    <Position X="5.25" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAIAAAIAABCAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PackageWalker\BasicPackageWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.InstallWalker" Collapsed="true">
+    <Position X="3" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAgAACAAgAIAAAAAEAAAAAAAAAAAAAAIRA=</HashCode>
+      <FileName>PackageWalker\InstallWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.PackageWalker" Collapsed="true">
+    <Position X="6.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CEgAAAAAAAAAABCAAgABAQAAAEAAIAgAAAAAAQAAAQA=</HashCode>
+      <FileName>PackageWalker\PackageWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.ProjectInstallWalker" Collapsed="true">
+    <Position X="2.5" Y="7.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AgQAAAAAAAAAQAAAAAAAAAAAAAAAAIEAAAAAAQAAIAA=</HashCode>
+      <FileName>PackageWalker\ProjectInstallWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.ProjectUninstallWalker" Collapsed="true">
+    <Position X="7.75" Y="7.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PackageWalker\ProjectUninstallWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.ProjectUpdateInstallWalker" Collapsed="true">
+    <Position X="3" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAgAAAAAAAAAAAg=</HashCode>
+      <FileName>PackageWalker\ProjectUpdateInstallWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.ProjectUpdateUninstallWalker" Collapsed="true">
+    <Position X="5.25" Y="7.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>PackageWalker\ProjectUpdateUninstallWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.ReverseDependencyWalker" Collapsed="true">
+    <Position X="9.75" Y="4.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAIAAAAAAACAAAAAAAAAAAAAAAAAAAAEAQAAAAA=</HashCode>
+      <FileName>PackageWalker\ReverseDependencyWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.UninstallWalker" Collapsed="true">
+    <Position X="7" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CgAAAAAAAAAAABCEAgAIAAAAAEAIAAkAAAAAAAAAAAQ=</HashCode>
+      <FileName>PackageWalker\UninstallWalker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="NuPack.AtomFeedPackageRepository" Collapsed="true">
+    <Position X="3.5" Y="4.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>Repositories\AtomFeedPackageRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.LocalPackageRepository" Collapsed="true">
+    <Position X="7.25" Y="4.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAIAAQBAAAAAACAAAAAA=</HashCode>
+      <FileName>Repositories\LocalPackageRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.PackageReferenceRepository" Collapsed="true">
+    <Position X="10.75" Y="4.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAACAAAAIAAABAAAAgACAgAABA=</HashCode>
+      <FileName>Repositories\PackageReferenceRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuPack.PackageRepositoryBase" Collapsed="true">
+    <Position X="7.25" Y="3" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAIAAABAAAAAACAAAAAA=</HashCode>
+      <FileName>Repositories\PackageRepositoryBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="NuPack.IPackageRepository" Collapsed="true">
+    <Position X="7.25" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAIAAABAAAAAACAAAAAA=</HashCode>
+      <FileName>Repositories\IPackageRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>
