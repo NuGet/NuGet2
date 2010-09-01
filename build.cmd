@@ -1,0 +1,1 @@
+msbuild NuPack.sln
