@@ -3,7 +3,9 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using System.Linq;
+    using System.Net;
 
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Our implementation of PackageProperties has nothing to dispose")]
     internal class FeedPackage : LazyPackage {
@@ -39,7 +41,7 @@
         }
 
         public override string Category {
-            get {                
+            get {
                 if (_item.Categories.Count > 0) {
                     return _item.Categories[0].Name;
                 }
@@ -84,7 +86,14 @@
         }
 
         protected override Package CreatePackage() {
-            return WebClientUtility.DownloadPackage(_item.SourceUrl);
+            // REVIEW: Should we be using WebClient?
+            using (var client = new WebClient()) {
+                // TODO: Verify package hash and length
+                byte[] rawPackage = client.DownloadData(_item.DownloadLink.Uri);
+                using (var stream = new MemoryStream(rawPackage)) {
+                    return new ZipPackage(stream);
+                }
+            }
         }
     }
 }

@@ -2,7 +2,9 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
+    using System.Security.Cryptography;
     using System.ServiceModel.Syndication;
     using System.Xml;
     using System.Xml.Linq;
@@ -22,7 +24,7 @@
             var items = new List<SyndicationItem>();
             foreach (var package in repository.GetPackages()) {
                 // REVIEW: We should to change this format to a valid URI                
-                string entryId = String.Format(CultureInfo.InvariantCulture, "uuid:{0:d};id={1}", Guid.NewGuid(), package.Id);
+                string entryId = String.Format(CultureInfo.InvariantCulture, "urn:uuid:{0:d}", Guid.NewGuid());
 
                 // Set the description from the package core properties
                 var description = new TextSyndicationContent(package.Description);
@@ -33,14 +35,23 @@
                                                uriSelector(package),
                                                entryId,
                                                package.Modified);
-                // Add the creator
+
+                // Setup the link for the download
+                SyndicationLink downloadLink = item.Links[0];
+                downloadLink.RelationshipType = "enclosure";
+                using (var stream = new MemoryStream()) {
+                    package.Save(stream);
+                    downloadLink.Length = stream.Length;
+                    var hashAttributeName = new XmlQualifiedName("hash");
+                    downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);
+                }
+
                 foreach (var author in package.Authors) {
                     item.Authors.Add(new SyndicationPerson {
                         Name = author
                     });
                 }
 
-                // Add the category if there is any
                 if (!String.IsNullOrEmpty(package.Category)) {
                     item.Categories.Add(new SyndicationCategory(package.Category));
                 }
@@ -49,6 +60,7 @@
                 item.PublishDate = package.Created;
 
                 // Add our custom extensions with our namespace
+                item.ElementExtensions.Add("packageId", Package.SchemaNamespace, package.Id);
                 item.ElementExtensions.Add("version", Package.SchemaNamespace, package.Version.ToString());
 
                 if (!String.IsNullOrEmpty(package.Language)) {
@@ -77,6 +89,12 @@
             // Add package as a top level namespace in the feed
             feed.AttributeExtensions.Add(new XmlQualifiedName(PackageXmlNamespace, XNamespace.Xmlns.NamespaceName), Package.SchemaNamespace);
             return feed;
+        }
+
+        private static string GetHash(Stream stream) {
+            return String.Join(String.Empty, SHA512.Create()
+                                                   .ComputeHash(stream)
+                                                   .Select(b => b.ToString("x2")));
         }
     }
 }
