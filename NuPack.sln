@@ -12,6 +12,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Powershell", "Powershell", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Test", "NuPack.Test\NuPack.Test.csproj", "{D3106412-E3AF-4CB6-B6D3-3664465B491F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{FAB2DDD1-4A49-4792-A540-FA669357308C}"
+	ProjectSection(SolutionItems) = preProject
+		packages\Moq.3.1.416.3.nupack = packages\Moq.3.1.416.3.nupack
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Moq.3.1.416.3", "Moq.3.1.416.3", "{4C3D9934-BD4F-4901-86F4-49D11F27D006}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{03657BC6-EE34-4406-8607-4DF957573C85}"
+	ProjectSection(SolutionItems) = preProject
+		packages\Moq.3.1.416.3\lib\Moq.dll = packages\Moq.3.1.416.3\lib\Moq.dll
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Server", "NuPack.Server\NuPack.Server.csproj", "{793B20A9-E263-4B54-BB31-305B602087CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,8 +44,16 @@ Global
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{793B20A9-E263-4B54-BB31-305B602087CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{793B20A9-E263-4B54-BB31-305B602087CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4C3D9934-BD4F-4901-86F4-49D11F27D006} = {FAB2DDD1-4A49-4792-A540-FA669357308C}
+		{03657BC6-EE34-4406-8607-4DF957573C85} = {4C3D9934-BD4F-4901-86F4-49D11F27D006}
 	EndGlobalSection
 EndGlobal
