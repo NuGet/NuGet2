@@ -13,6 +13,12 @@ namespace NuPack.Server {
         public static void RegisterRoutes(RouteCollection routes) {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Map a feed route at the root
+            routes.MapRoute("feed", 
+                            "feed", 
+                            new { controller = "Packages", action = "Feed" }
+            );
+
             routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters

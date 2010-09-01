@@ -7,7 +7,7 @@
     using System.Text.RegularExpressions;
 
     internal static class Utility {
-        internal const string PackageExtension = ".apkg";
+        internal const string PackageExtension = ".nupack";
         private static readonly Regex _versionRegex = new Regex(@"Version=(.+?),");
         private const string NetFrameworkIdentifier = ".NETFramework";
 

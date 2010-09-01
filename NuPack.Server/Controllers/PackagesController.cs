@@ -13,6 +13,12 @@ namespace NuPack.Server.Controllers {
             return View();
         }
 
+        public ActionResult Download(string packageFile) {
+            string physicalPath = Server.MapPath(PackageVirtualPath);
+            string fullPath = Path.Combine(physicalPath, packageFile);
+            return File(fullPath, "application/zip", packageFile);
+        }
+
         public ActionResult Feed() {
             SyndicationFeed packageFeed = PackageSyndicationFeed.Create(
                 Server.MapPath(PackageVirtualPath),
@@ -31,13 +37,7 @@ namespace NuPack.Server.Controllers {
                                              feed => new Atom10FeedFormatter(feed),
                                              "application/atom+xml");
         }
-
-        public ActionResult Download(string packageFile) {
-            string physicalPath = Server.MapPath(PackageVirtualPath);
-            string fullPath = Path.Combine(physicalPath, packageFile);
-            return File(fullPath, "application/zip", packageFile);
-        }
-
+        
         private string GetPackageDownloadUrl(Package package) {
             string appRoot = Request.ApplicationPath;
             if (!appRoot.EndsWith("/")) {
@@ -48,7 +48,7 @@ namespace NuPack.Server.Controllers {
         }
 
         public static string GetPackageFileName(Package package) {
-            return package.Id + package.Version + ".apkg";
+            return package.Id + package.Version + ".nupack";
         }
     }
 }

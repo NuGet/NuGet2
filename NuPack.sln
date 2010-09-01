@@ -14,7 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Test", "NuPack.Test\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{FAB2DDD1-4A49-4792-A540-FA669357308C}"
 	ProjectSection(SolutionItems) = preProject
-		packages\Moq.3.1.416.3.apkg = packages\Moq.3.1.416.3.apkg
+		packages\Moq.3.1.416.3.nupack = packages\Moq.3.1.416.3.nupack
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Moq.3.1.416.3", "Moq.3.1.416.3", "{4C3D9934-BD4F-4901-86F4-49D11F27D006}"
