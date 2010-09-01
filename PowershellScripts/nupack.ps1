@@ -9,7 +9,7 @@ $global:DefaultPackageSource = "";
 
 $global:DefaultProjectName = $null
 
-function global:Install-Package {
+function global:Add-Package {
     [CmdletBinding()]    
     param(
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -28,13 +28,13 @@ function global:Install-Package {
     }
     Process {
         try {
-            
             if ($Project) {
-                DoAddPackageReference $packageManager $Project $Id $Version $IgnoreDependencies
+                $projectIns = Get-Project $Project
+                $projectManager = $packageManager.GetProjectManager($projectIns)
+                $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
             }
             else {
-                # Run the install
-                # DoInstallPackage $packageManager $Id $Version $IgnoreDependencies
+                # TODO: Detect if this is a solution-level package. If it is, call InstallPackage
                 Write-Error "Missing project parameter and the default project is not set."
             }
         }
@@ -44,7 +44,7 @@ function global:Install-Package {
     }
 }
 
-function global:Uninstall-Package {
+function global:Remove-Package {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, Position=0)]
@@ -75,7 +75,7 @@ function global:Uninstall-Package {
                 DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
             }
             else {
-                #DoUninstallPackage $packageManager $Id $Version $Force $RemoveDependencies
+                # TODO: Detect if this is a solution-level package. If it is, call UninstallPackage
                 Write-Error "Missing project parameter and the default project is not set."
             }
         }
@@ -103,7 +103,9 @@ function global:Update-Package {
     Process {
         try {
             if ($Project) {
-                DoUpdatePackageReference $packageManager $Project $Id $Version $UpdateDependencies
+                $projectIns = Get-Project $Project
+                $projectManager = $packageManager.GetProjectManager($projectIns)
+                $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
             }
             else {
                 $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
@@ -187,31 +189,10 @@ function global:_SetDefaultProjectInternal($Project) {
 }
 
 # Package Manager functions
-function global:DoInstallPackage($packageManager, $Id, $Version, $IgnoreDependencies) {
-    $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
-}
-
-function global:DoUninstallPackage($packageManager, $Id, $Version, $Force, $RemoveDependencies) {
-    $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
-}
-
-# Project Manager functions
-function global:DoAddPackageReference($packageManager, $projectName, $Id, $Version, $IgnoreDependencies) {
-    $project = Get-Project $projectName
-    $projectManager = $packageManager.GetProjectManager($project)
-    $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
-}
-
 function global:DoRemovePackageReference($packageManager, $projectName, $Id, $Force, $RemoveDependencies) {
     $project = Get-Project $projectName
     $projectManager = $packageManager.GetProjectManager($project)
     $projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
-}
-
-function global:DoUpdatePackageReference($packageManager, $projectName, $Id, $Version, $IgnoreDependencies) {
-    $project = Get-Project $projectName
-    $projectManager = $packageManager.GetProjectManager($project)
-    $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
 }
 
 # Helper functions
@@ -321,16 +302,16 @@ function global:TabExpansion($line, $lastWord) {
     }
     
     switch ($tokens[0]) {
-        'Install-Package' {
-            $choices = _TabExpansionForInstallPackage $secondLastToken $tokens.length $filter
+        'Add-Package' {
+            $choices = _TabExpansionForAddPackage $secondLastToken $tokens.length $filter
         }
 
-        'Uninstall-Package' {
-            $choices = _TabExpansionForUninstallPackage $secondLastToken $tokens.length $filter
+        'Remove-Package' {
+            $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
 
         'Update-Package' {
-            $choices = _TabExpansionForUninstallPackage $secondLastToken $tokens.length $filter
+            $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
         
         'Update-DefaultProject' {
@@ -348,12 +329,12 @@ function global:TabExpansion($line, $lastWord) {
     }
 }
 
-function _TabExpansionForInstallPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function _TabExpansionForAddPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        List-Package | Group-Object -Property "ID" | ForEach-Object { $_.Name }
+        List-Package | Group-Object ID | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
@@ -361,12 +342,12 @@ function _TabExpansionForInstallPackage([string]$secondLastWord, [int]$tokenCoun
     }
 }
 
-function _TabExpansionForUninstallPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function _TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (List-Package -local) | Group-Object -Property "ID" | ForEach-Object { $_.Name }
+        (List-Package -local) | Group-Object ID | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
