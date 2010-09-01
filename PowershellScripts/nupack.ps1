@@ -302,15 +302,15 @@ function global:TabExpansion($line, $lastWord) {
     }
     
     switch ($tokens[0]) {
-        'Add-Package' {
+        { $_ -eq 'Add-Package' -or $_ -eq 'nap' } {
             $choices = _TabExpansionForAddPackage $secondLastToken $tokens.length $filter
         }
 
-        'Remove-Package' {
+        { $_ -eq 'Remove-Package' -or $_ -eq 'nrp' } {
             $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
 
-        'Update-Package' {
+        { $_ -eq 'Update-Package' -or $_ -eq 'nup' } {
             $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
         
@@ -491,3 +491,11 @@ function global:_IsSupportedProject($project) {
     
     return $project.Kind -and $supportedProjectTypes -contains $project.Kind
 }
+
+# assign aliases to package cmdlets
+
+New-Alias 'nnp' 'New-Package'
+New-Alias 'nlp' 'List-Package'
+New-Alias 'nap' 'Add-Package'
+New-Alias 'nrp' 'Remove-Package'
+New-Alias 'nup' 'Update-Package'
