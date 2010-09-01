@@ -1,27 +1,26 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.ServiceModel.Syndication;
 
     public class PackageSyndicationItem : SyndicationItem {
         private Version _version;
         private IEnumerable<PackageDependency> _dependencies;
-        private string _packageId;
         private IEnumerable<string> _keywords;
-        
-        public string PackageId {
+
+        public SyndicationLink DownloadLink {
             get {
-                if (_packageId == null) {
-                    _packageId = ParsePackageId(Id);
-                }
-                return _packageId;
+                var link = Links.Single(l => l.RelationshipType == "enclosure");
+                Debug.Assert(link != null);
+                return link;
             }
         }
 
-        public Uri SourceUrl {
+        public string PackageId {
             get {
-                return Links[0].Uri;
+                return ElementExtensions.ReadElementExtensions<string>("packageId", Package.SchemaNamespace).Single();
             }
         }
 
@@ -72,21 +71,15 @@
             get {
                 if (_dependencies == null) {
                     var dependencies = ElementExtensions.ReadElementExtensions<PackageFeedDependency[]>("dependencies", Package.SchemaNamespace).SingleOrDefault();
-                    if(dependencies != null) {
+                    if (dependencies != null) {
                         _dependencies = dependencies.Select(d => d.ToPackageDependency());
                     }
                     else {
                         _dependencies = Enumerable.Empty<PackageDependency>();
-                    }           
+                    }
                 }
                 return _dependencies;
             }
-        }
-        
-        private static string ParsePackageId(string entryId) {
-            // Entry Id format
-            // uuid:{guid};id={packageId}
-            return entryId.Split(';')[1].Substring(3);
         }
     }
 }
