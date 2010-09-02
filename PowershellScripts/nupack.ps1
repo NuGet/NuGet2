@@ -33,7 +33,7 @@ function global:Add-Package {
             if ($isSOlutionLevel) {
             
                 if ($Project) {
-                    Write-Error "Project '$Project' is a solution-level package. Remove the -Project parameter."
+                    Write-Error "Package '$Id' is a solution-level package. Remove the -Project parameter."
                     return
                 }
                 else  {
@@ -89,7 +89,7 @@ function global:Remove-Package {
             if ($isSolutionLevel) {
                 
                 if ($Project -or $AllProjects) {
-                     Write-Error "Project '$Project' is a solution-level package. Remove the -Project or the -AllProjects parameter."
+                     Write-Error "Package '$Id' is a solution-level package. Remove the -Project or the -AllProjects parameter."
                      return
                 }
                 else {
@@ -125,7 +125,7 @@ function global:Update-Package {
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
         
-        [string]$Project = $DefaultProjectName,
+        [string]$Project,
 
         [Version]$Version,
 
@@ -136,13 +136,32 @@ function global:Update-Package {
     }
     Process {
         try {
-            if ($Project) {
-                $projectIns = Get-Project $Project
-                $projectManager = $packageManager.GetProjectManager($projectIns)
-                $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
-            }
+            $isSolutionLevel = $packageManager.IsSolutionLevelPackage($Id, $Version)
+             
+            if ($isSolutionLevel) {
+                
+                if ($Project) {
+                     Write-Error "Package '$Id' is a solution-level package. Remove the -Project parameter."
+                     return
+                }
+                else {
+                     $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                }
+            } 
             else {
-                $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+                
+                if (!$Project) {
+                    $Project = $DefaultProjectName
+                }
+            
+                if ($Project) {
+                    $projectIns = Get-Project $Project
+                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
+                }
+                else {
+                    $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+                }
             }
         }
         catch {
