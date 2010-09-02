@@ -8,10 +8,14 @@
     <RootNamespace>NuPackConsole</RootNamespace>
     <AssemblyName>NuPack.Console</AssemblyName>
     <ProjectGuid>{50E33DA2-AF14-486D-81B8-BD8409744A38}</ProjectGuid>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <CreateVsixContainer>False</CreateVsixContainer>
     <DeployExtension>False</DeployExtension>
     <SignAssembly>true</SignAssembly>
