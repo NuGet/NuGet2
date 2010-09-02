@@ -1,5 +1,6 @@
 ﻿namespace NuPack.VisualStudio {
     using System;
+    using System.Diagnostics;
     using EnvDTE;
 
     internal class VSProjectManager : ProjectManager {
@@ -24,10 +25,15 @@
 
         public override void UpdatePackageReference(string packageId, Version version = null, bool updateDependencies = true) {
             Package oldPackage = GetPackageReference(packageId);
-            _vsPackageManager.InstallPackage(packageId, version, !updateDependencies);
+            // Only install the package to the solution if the project has a reference to it.
+            if (oldPackage != null) {
+                _vsPackageManager.InstallPackage(packageId, version, !updateDependencies);
+            }
 
             base.UpdatePackageReference(packageId, version, updateDependencies);
 
+            // If oldPackage is null then the above code will fail so we don't need to check
+            Debug.Assert(oldPackage != null);
             _vsPackageManager.OnPackageReferenceRemoved(oldPackage, removeDependencies: updateDependencies);
         }
     }
