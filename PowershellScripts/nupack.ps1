@@ -45,7 +45,7 @@ function global:Add-Package {
 }
 
 function global:Remove-Package {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = "SingleProject")]
     param(
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, Position=0)]
         [string]$Id,
