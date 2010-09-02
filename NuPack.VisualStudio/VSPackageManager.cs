@@ -7,7 +7,7 @@
     using EnvDTE;
 
     public class VSPackageManager : PackageManager {
-        private static ConcurrentDictionary<string, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<string, VSPackageManager>(StringComparer.OrdinalIgnoreCase);
+        private static ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager>();
 
         // List of prokect types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
@@ -127,9 +127,11 @@
         }
 
         private static VSPackageManager GetPackageManager(string source, DTE dte) {
-            // We're caching a package manager per source since we can't change the source after the fact (right now at least)
+            // Since we can't change the repository of an existing package manager
+            // we need to create an entry that is based on the soltuion and the repository source
+            var solutionEntry = Tuple.Create(dte.Solution, source);
             VSPackageManager packageManager;
-            if (!_packageManagerCache.TryGetValue(source, out packageManager)) {
+            if (!_packageManagerCache.TryGetValue(solutionEntry, out packageManager)) {
                 // Create a repository for this source
                 IPackageRepository repository = PackageRepositoryFactory.CreateRepository(source);
 
@@ -140,7 +142,7 @@
                 packageManager = new VSPackageManager(dte, repository, solutionFileSystem);
 
                 // Add it to the cache
-                _packageManagerCache.TryAdd(source, packageManager);
+                _packageManagerCache.TryAdd(solutionEntry, packageManager);
             }
             return packageManager;
         }
@@ -162,6 +164,14 @@
         private void OnBeforeClosing() {
             // Invalidate our cache on closing
             _projectManagers = null;
+
+            // Remove all of the entries that have this package manager as the value
+            foreach (var entry in _packageManagerCache.ToList()) {
+                if (entry.Value == this) {
+                    VSPackageManager removed;
+                    _packageManagerCache.TryRemove(entry.Key, out removed);
+                }
+            }
         }
 
         private void OnProjectRemoved(Project project) {
