@@ -60,7 +60,7 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            Package package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            Package package = FindPackageWithOptionalVersion(packageId, version);
 
             if (package == null) {
                 throw new InvalidOperationException(
@@ -183,6 +183,10 @@
 
             // Delete the package directory if any
             FileSystem.DeleteDirectory(Utility.GetPackageDirectory(package), true);
+        }
+
+        protected Package FindPackageWithOptionalVersion(string packageId, Version version) {
+            return SourceRepository.FindPackage(packageId, exactVersion: version);
         }
 
         public bool IsPackageInstalled(Package package) {

@@ -131,5 +131,14 @@ namespace NuPack.VisualStudio.Resources {
                 return ResourceManager.GetString("DTE_ProjectUnsupported", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find package &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnknownPackage {
+            get {
+                return ResourceManager.GetString("UnknownPackage", resourceCulture);
+            }
+        }
     }
 }

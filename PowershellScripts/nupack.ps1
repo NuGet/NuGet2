@@ -15,7 +15,7 @@ function global:Add-Package {
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
         
-        [string]$Project = $DefaultProjectName,
+        [string]$Project,
         
         [Version]$Version,
         
@@ -28,14 +28,31 @@ function global:Add-Package {
     }
     Process {
         try {
-            if ($Project) {
-                $projectIns = Get-Project $Project
-                $projectManager = $packageManager.GetProjectManager($projectIns)
-                $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
+            $isSolutionLevel = $packageManager.IsSolutionLevelPackage($Id, $Version)
+        
+            if ($isSOlutionLevel) {
+            
+                if ($Project) {
+                    Write-Error "Project '$Project' is a solution-level package. Remove the -Project parameter."
+                    return
+                }
+                else  {
+                    $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
+                }
             }
             else {
-                # TODO: Detect if this is a solution-level package. If it is, call InstallPackage
-                Write-Error "Missing project parameter and the default project is not set."
+                if (!$Project) {
+                    $Project = $DefaultProjectName
+                }
+                
+                if ($Project) {
+                    $projectIns = Get-Project $Project
+                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
+                }
+                else {
+                    Write-Error "Missing project parameter and the default project is not set."
+                }
             }
         }
         catch {
@@ -51,7 +68,7 @@ function global:Remove-Package {
         [string]$Id,
         
         [parameter(ParameterSetName = "SingleProject", Position = 1)]
-        [string]$Project = $DefaultProjectName,
+        [string]$Project,
         
         [parameter(ParameterSetname = "AllProjects", Position = 1)]
         [switch]$AllProjects,
@@ -67,16 +84,33 @@ function global:Remove-Package {
     }
     Process {
         try {
-        
-            if ($AllProjects) {
-                GetProjectNames | ForEach-Object { DoRemovePackageReference $packageManager $_ $Id $Force $RemoveDependencies }
-            }
-            elseif ($Project) {
-                DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
-            }
+            $isSolutionLevel = $packageManager.IsSolutionLevelPackage($Id, $Version)
+             
+            if ($isSolutionLevel) {
+                
+                if ($Project -or $AllProjects) {
+                     Write-Error "Project '$Project' is a solution-level package. Remove the -Project or the -AllProjects parameter."
+                     return
+                }
+                else {
+                     $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                }
+            } 
             else {
-                # TODO: Detect if this is a solution-level package. If it is, call UninstallPackage
-                Write-Error "Missing project parameter and the default project is not set."
+        
+                if (!$Project) {
+                    $Project = $DefaultProjectName
+                }
+        
+                if ($AllProjects) {
+                    GetProjectNames | ForEach-Object { DoRemovePackageReference $packageManager $_ $Id $Force $RemoveDependencies }
+                }
+                elseif ($Project) {
+                    DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
+                }
+                else {
+                    Write-Error "Missing project parameter and the default project is not set."
+                }
             }
         }
         catch {
@@ -490,7 +524,7 @@ function global:_IsSupportedProject($project) {
                                 "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") # VB Project
     
     return $project.Kind -and $supportedProjectTypes -contains $project.Kind
-}
+}	
 
 # assign aliases to package cmdlets
 

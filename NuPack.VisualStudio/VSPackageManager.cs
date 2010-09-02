@@ -5,6 +5,9 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using EnvDTE;
+    using System.Globalization;
+    using NuPack.VisualStudio.Resources;
+    using Microsoft.Internal.Web.Utils;
 
     public class VSPackageManager : PackageManager {
         private static ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager>();
@@ -107,6 +110,22 @@
             else {
                 base.UninstallPackage(package, force, removeDependencies);
             }
+        }
+
+        public bool IsSolutionLevelPackage(string packageId, Version version) {
+            if (String.IsNullOrEmpty(packageId)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            Package package = FindPackageWithOptionalVersion(packageId, version);
+
+            if (package == null) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.UnknownPackage, packageId));
+            }
+
+            return !(package.AssemblyReferences.Any() || package.GetContentFiles().Any() || package.GetConfiguration() != null);
         }
 
         internal void OnPackageReferenceRemoved(Package removedPackage, bool force = false, bool removeDependencies = false) {
