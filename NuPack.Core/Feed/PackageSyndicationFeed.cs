@@ -92,9 +92,10 @@
         }
 
         private static string GetHash(Stream stream) {
-            return String.Join(String.Empty, SHA512.Create()
-                                                   .ComputeHash(stream)
-                                                   .Select(b => b.ToString("x2")));
+            using (var hashAlgorithm = SHA512.Create()) {
+                return String.Join(String.Empty, hashAlgorithm.ComputeHash(stream)
+                                                              .Select(b => b.ToString("x2")));
+            }
         }
     }
 }
