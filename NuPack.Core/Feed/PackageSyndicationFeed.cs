@@ -10,7 +10,7 @@
     using System.Xml.Linq;
 
     public class PackageSyndicationFeed : SyndicationFeed {
-        private const string PackageXmlNamespace = "nupack";
+        private const string PackageXmlNamespace = "pkg";
 
         protected override SyndicationItem CreateItem() {
             return new PackageSyndicationItem();
