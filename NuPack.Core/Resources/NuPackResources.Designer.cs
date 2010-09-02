@@ -322,6 +322,15 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Identifier and version are not specified..
+        /// </summary>
+        internal static string PackageBuilder_IdAndVersionRequired {
+            get {
+                return ResourceManager.GetString("PackageBuilder_IdAndVersionRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to uninstall &apos;{0}&apos; because &apos;{1}&apos; depends on it.
         /// </summary>
         internal static string PackageHasDependent {

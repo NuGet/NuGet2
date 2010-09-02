@@ -204,6 +204,9 @@
   <data name="NewerVersionAlreadyReferenced" xml:space="preserve">
     <value>{0} is already referencing a newer version of '{1}'</value>
   </data>
+  <data name="PackageBuilder_IdAndVersionRequired" xml:space="preserve">
+    <value>Identifier and version are not specified.</value>
+  </data>
   <data name="PackageHasDependent" xml:space="preserve">
     <value>Unable to uninstall '{0}' because '{1}' depends on it</value>
   </data>
