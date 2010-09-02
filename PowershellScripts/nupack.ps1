@@ -1,5 +1,3 @@
-# Set the execution policy and scope it to the process
-Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 
 # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"

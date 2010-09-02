@@ -46,9 +46,23 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
             LoadPackagingAssemblies();
 
+            LoadStartupScripts();
+
+            LoadProfilesIntoRunspace(_myRunSpace);
+
             // IMPORTANT: should only register for DTE solution event after we have setup the Runspace. 
             // Otherwise, some weird COM exceptions will occur.
             _solutionHelper.RegisterSolutionEvents();
+        }
+
+        private void LoadStartupScripts() {
+            string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
+            string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
+            string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
+
+            Invoke("Set-ExecutionPolicy RemoteSigned -Scope Process -Force", null, false);
+            Invoke("Import-Module '" + profilePath + "'", null, false);
+            Invoke("Import-Module '" + npackPath + "'", null, false);
         }
 
         private void LoadPackagingAssemblies()
@@ -68,22 +82,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             {
                 return;
             }
-
-            // load profile scripts for PowerShell host
-            string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
-            string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
-
+            
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
-            initialSessionState.ImportPSModule(new string[] { profilePath, npackPath });
-
-            // set this flag to prevent npack script from trying to load the assemblies again
-            var assembliesLoadedEntry = new SessionStateVariableEntry(
-                "__packagingAssembliesLoaded",
-                "true",
-                "Set the flag to npack script to indicate the required assemblies have been loaded.");
-            initialSessionState.Variables.Add(assembliesLoadedEntry);
-
             if (_init != null)
             {
                 _init(initialSessionState);
@@ -108,8 +108,6 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             // ScriptBlock event handlers execute on DefaultRunspace.
             //
             Runspace.DefaultRunspace = _myRunSpace;
-
-            LoadProfilesIntoRunspace(_myRunSpace);
         }
 
         private static void LoadProfilesIntoRunspace(Runspace _myRunSpace)
