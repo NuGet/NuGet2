@@ -6,28 +6,31 @@ using System.IO;
 using System.Globalization;
 
 namespace NuPack {
-    public class AuthoringPackageFile : IPackageFile {
+    public class PhysicalPackageFile : IPackageFile {
 
         public string Name {
             get;
             set;
         }
 
+        /// <summary>
+        /// Path on disk
+        /// </summary>
+        public string SourcePath {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Path in package
+        /// </summary>
         public string Path {
             get;
             set;
         }
 
-        public Func<Stream> SourceStream {
-            set;
-            get;
-        }
-
         public Stream Open() {
-            if (SourceStream == null) {
-                throw new InvalidOperationException("Property \"SourceStream\" must be specified.");
-            }
-            return SourceStream();
+            return File.OpenRead(SourcePath);
         }
     }
 }

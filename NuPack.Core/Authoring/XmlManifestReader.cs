@@ -11,32 +11,27 @@ using System.Runtime.Versioning;
 
 
 namespace NuPack {
-    public class XmlManifestSource {
+    public class XmlManifestReader {
         private XDocument _manifestFile;
 
-        public XmlManifestSource(string manifestFile) {
+        public XmlManifestReader(string manifestFile) {
             _manifestFile = XDocument.Load(manifestFile);
             BasePath = Path.GetDirectoryName(manifestFile);
         }
 
-        public XmlManifestSource(Stream stream) {
-            _manifestFile = XDocument.Load(stream);
+        public XmlManifestReader(XDocument document) {
+            _manifestFile = document;
         }
 
-        public XmlManifestSource(TextReader reader) {
-            _manifestFile = XDocument.Load(reader);
+        /// <summary>
+        /// Used to resolve relative paths. 
+        /// Assigned the manifest file's path when we receieve a file to start with. 
+        /// </summary>
+        public string BasePath {
+            get; 
+            set;
         }
 
-        public XmlManifestSource(XDocument document) {
-           _manifestFile = document;
-        }
-
-        public XmlManifestSource(XmlReader reader) {
-            _manifestFile = XDocument.Load(reader);
-        }
-
-        public string BasePath { get; set; }
-        
         public virtual void ReadContentTo(PackageBuilder builder) {
             ReadMetaData(builder);
             ReadDependencies(builder);
@@ -60,7 +55,11 @@ namespace NuPack {
             }
 
             builder.Description = metadataElement.GetOptionalElementValue("Description");
-            builder.Authors.AddRange((metadataElement.GetOptionalElementValue("Author") ?? String.Empty).Split(','));
+            var authorsElement = metadataElement.Element("Authors");
+            if (authorsElement != null) {
+                builder.Authors.AddRange(from e in authorsElement.Elements("Author") select e.Value);
+            }
+
             builder.Category = metadataElement.GetOptionalElementValue("Category");
             builder.Keywords.AddRange((metadataElement.GetOptionalElementValue("Keywords") ?? String.Empty).Split(','));
         }
@@ -69,8 +68,8 @@ namespace NuPack {
             var dependenciesElement = _manifestFile.Root.Element("Dependencies");
             if (dependenciesElement != null) {
                 var dependenices = from item in dependenciesElement.Elements()
-                                       select ReadPackageDepedency(item);
-                foreach(var item in dependenices) {
+                                   select ReadPackageDepedency(item);
+                foreach (var item in dependenices) {
                     builder.Dependencies.Add(item);
                 }
             }
@@ -79,25 +78,37 @@ namespace NuPack {
         private void ReadReferences(PackageBuilder builder) {
             var assemblies = _manifestFile.Root.Element("Assemblies");
             if (assemblies != null) {
-                
+
                 foreach (var item in assemblies.Elements()) {
-                    foreach (var reference in ReadAssemblyReference(item)) {
+                    foreach (var reference in ReadAssemblyReferences(item)) {
                         builder.References.Add(reference);
                     }
                 }
             }
         }
 
-        private IEnumerable<AuthoringAssemblyReference> ReadAssemblyReference(XElement item) {
+        private IEnumerable<PhysicalAssemblyReference> ReadAssemblyReferences(XElement item) {
             var src = item.GetOptionalAttributeValue("src");
+            if (String.IsNullOrEmpty(src)) {
+                return Enumerable.Empty<PhysicalAssemblyReference>();
+            }
             var frameworkVersionString = item.GetOptionalAttributeValue("TargetFramework");
-            FrameworkName frameworkVersion = new FrameworkName(frameworkVersionString);
+            
+            FrameworkName frameworkVersion = null;
+            if (frameworkVersionString != null) {
+                frameworkVersion = new FrameworkName(frameworkVersionString);
+            }
             var name = item.GetOptionalAttributeValue("name");
+            var searchFilter = PathResolver.ResolvePath(BasePath, src);
 
-            return from packageFile in PathResolver.ResolvePath(BasePath, src, String.Empty)
-                select new AuthoringAssemblyReference { SourceStream = packageFile.SourceStream, 
-                                                        Name = name ?? Path.GetFileNameWithoutExtension(packageFile.Name),
-                                                        TargetFramework =  frameworkVersion  };
+            return 
+                from file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)
+                select new PhysicalAssemblyReference {
+                    SourcePath = file,
+                    Name = name ?? Path.GetFileNameWithoutExtension(file),
+                    Path = Path.GetFileName(file), // The package builder would force drop this in a location determined by version
+                    TargetFramework = frameworkVersion
+                };
 
         }
 
@@ -138,8 +149,11 @@ namespace NuPack {
 
         private void AddFilesFromSource(PackageBuilder builder, PackageFileType fileType, string source, string destination) {
             var fileList = builder.GetFiles(fileType);
-            foreach (var resolvedFile in PathResolver.ResolvePath(BasePath, source, destination)) {
-                fileList.Add(resolvedFile);
+
+            PathSearchFilter searchFilter = PathResolver.ResolvePath(BasePath, source);
+            foreach(var file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)) {
+                var destinationPath = PathResolver.ResolvePackagePath(BasePath, file, destination);
+                fileList.Add(new PhysicalPackageFile { Name = Path.GetFileName(file), SourcePath = file, Path = destinationPath });
             }
         }
     }
