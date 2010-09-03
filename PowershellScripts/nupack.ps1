@@ -1,6 +1,3 @@
-# Set the execution policy and scope it to the process
-Set-ExecutionPolicy RemoteSigned -Scope Process -Force
-
 # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
@@ -15,7 +12,7 @@ function global:Add-Package {
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
         
-        [string]$Project = $DefaultProjectName,
+        [string]$Project,
         
         [Version]$Version,
         
@@ -28,14 +25,31 @@ function global:Add-Package {
     }
     Process {
         try {
-            if ($Project) {
-                $projectIns = Get-Project $Project
-                $projectManager = $packageManager.GetProjectManager($projectIns)
-                $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
+        
+            if ($isSolutionLevel) {
+            
+                if ($Project) {
+                    Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
+                    return
+                }
+                else  {
+                    $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
+                }
             }
             else {
-                # TODO: Detect if this is a solution-level package. If it is, call InstallPackage
-                Write-Error "Missing project parameter and the default project is not set."
+                if (!$Project) {
+                    $Project = $DefaultProjectName
+                }
+                
+                if ($Project) {
+                    $projectIns = Get-Project $Project
+                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
+                }
+                else {
+                    Write-Error "Missing project parameter and the default project is not set."
+                }
             }
         }
         catch {
@@ -51,7 +65,7 @@ function global:Remove-Package {
         [string]$Id,
         
         [parameter(ParameterSetName = "SingleProject", Position = 1)]
-        [string]$Project = $DefaultProjectName,
+        [string]$Project,
         
         [parameter(ParameterSetname = "AllProjects", Position = 1)]
         [switch]$AllProjects,
@@ -67,16 +81,33 @@ function global:Remove-Package {
     }
     Process {
         try {
-        
-            if ($AllProjects) {
-                GetProjectNames | ForEach-Object { DoRemovePackageReference $packageManager $_ $Id $Force $RemoveDependencies }
-            }
-            elseif ($Project) {
-                DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
-            }
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
+             
+            if ($isSolutionLevel) {
+                
+                if ($Project -or $AllProjects) {
+                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project or the -AllProjects parameter."
+                     return
+                }
+                else {
+                     $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                }
+            } 
             else {
-                # TODO: Detect if this is a solution-level package. If it is, call UninstallPackage
-                Write-Error "Missing project parameter and the default project is not set."
+        
+                if (!$Project) {
+                    $Project = $DefaultProjectName
+                }
+        
+                if ($AllProjects) {
+                    GetProjectNames | ForEach-Object { DoRemovePackageReference $packageManager $_ $Id $Force $RemoveDependencies }
+                }
+                elseif ($Project) {
+                    DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
+                }
+                else {
+                    Write-Error "Missing project parameter and the default project is not set."
+                }
             }
         }
         catch {
@@ -91,7 +122,7 @@ function global:Update-Package {
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
         
-        [string]$Project = $DefaultProjectName,
+        [string]$Project,
 
         [Version]$Version,
 
@@ -102,13 +133,32 @@ function global:Update-Package {
     }
     Process {
         try {
-            if ($Project) {
-                $projectIns = Get-Project $Project
-                $projectManager = $packageManager.GetProjectManager($projectIns)
-                $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
+             
+            if ($isSolutionLevel) {
+                
+                if ($Project) {
+                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
+                     return
+                }
+                else {
+                     $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+                }
             }
             else {
-                $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+                
+                if (!$Project) {
+                    $Project = $DefaultProjectName
+                }
+            
+                if ($Project) {
+                    $projectIns = Get-Project $Project
+                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
+                }
+                else {
+                    $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+                }
             }
         }
         catch {
@@ -490,6 +540,13 @@ function global:_IsSupportedProject($project) {
                                 "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") # VB Project
     
     return $project.Kind -and $supportedProjectTypes -contains $project.Kind
+}	
+
+function global:_IsSolutionOnlyPackage($packageManager, $id, $version) {    
+    $repository = $packageManager.ExternalRepository
+    $package = [NuPack.PackageRepositoryExtensions]::FindPackage($repository, $id, $null, $null, $version)
+
+    return $package -and !$package.HasProjectContent
 }
 
 # assign aliases to package cmdlets

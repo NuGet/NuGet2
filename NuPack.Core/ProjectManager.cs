@@ -68,6 +68,12 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
+            if (!package.HasProjectContent) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture, 
+                    NuPackResources.PackageHasNoProjectContent, package));
+            }
+
             AddPackageReference(package, ignoreDependencies);
         }
 

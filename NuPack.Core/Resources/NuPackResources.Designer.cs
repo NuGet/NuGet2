@@ -367,6 +367,15 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to add reference to &apos;{0}&apos; because it has no project content..
+        /// </summary>
+        internal static string PackageHasNoProjectContent {
+            get {
+                return ResourceManager.GetString("PackageHasNoProjectContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package is missing required property &apos;{0}&apos;.
         /// </summary>
         internal static string PackageMissingRequiredProperty {

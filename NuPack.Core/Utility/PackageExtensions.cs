@@ -64,7 +64,7 @@
             return isSatisfied;
         }
 
-        internal static IEnumerable<IPackageFile> GetContentFiles(this Package package) {
+        public static IEnumerable<IPackageFile> GetContentFiles(this Package package) {
             return package.GetFiles("content");
         }
 
@@ -72,7 +72,7 @@
             return package.GetFiles("tool");
         }
 
-        internal static IPackageFile GetConfiguration(this Package package) {
+        public static IPackageFile GetConfiguration(this Package package) {
             return package.GetFiles("configuration").SingleOrDefault();
         }
     }

@@ -184,7 +184,7 @@
             // Delete the package directory if any
             FileSystem.DeleteDirectory(Utility.GetPackageDirectory(package), true);
         }
-
+        
         public bool IsPackageInstalled(Package package) {
             return LocalRepository.FindPackage(package.Id, exactVersion: package.Version) != null;
         }

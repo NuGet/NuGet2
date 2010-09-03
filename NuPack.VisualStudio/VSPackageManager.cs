@@ -3,8 +3,11 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Linq;
     using EnvDTE;
+    using Microsoft.Internal.Web.Utils;
+    using NuPack.VisualStudio.Resources;
 
     public class VSPackageManager : PackageManager {
         private static ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager>();

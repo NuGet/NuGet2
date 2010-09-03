@@ -1,6 +1,7 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.IO;
 
     public abstract class Package {
@@ -44,6 +45,12 @@
 
         public abstract string LastModifiedBy {
             get;
+        }
+
+        public bool HasProjectContent {
+            get {
+                return AssemblyReferences.Any() || this.GetContentFiles().Any() || this.GetConfiguration() != null;
+            }
         }
         
         public abstract IEnumerable<IPackageFile> GetFiles(string fileType);

@@ -219,6 +219,9 @@
   <data name="PackageHasMultipleDependentsReferenced" xml:space="preserve">
     <value>Unable to remove reference to '{0}' because '{1}' depend on it</value>
   </data>
+  <data name="PackageHasNoProjectContent" xml:space="preserve">
+    <value>Unable to add reference to '{0}' because it has no project content.</value>
+  </data>
   <data name="PackageMissingRequiredProperty" xml:space="preserve">
     <value>Package is missing required property '{0}'</value>
   </data>

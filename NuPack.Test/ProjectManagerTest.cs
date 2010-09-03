@@ -4,8 +4,8 @@
     using System.Linq;
     using System.Runtime.Versioning;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using NuPack.Test.Mocks;
     using Moq;
+    using NuPack.Test.Mocks;
 
     [TestClass]
     public class ProjectManagerTest {
@@ -18,7 +18,7 @@
             ExceptionAssert.ThrowsArgNullOrEmpty(() => projectManager.AddPackageReference((string)null), "packageId");
             ExceptionAssert.ThrowsArgNullOrEmpty(() => projectManager.AddPackageReference(String.Empty), "packageId");
         }
-
+        
         [TestMethod]
         public void AddingUnknownPackageReferenceThrows() {
             // Arrange
@@ -29,6 +29,18 @@
         }
 
         [TestMethod]
+        public void AddingPackageReferenceWithoutProjectContentThrows() {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            Package packageA = PackageUtility.CreatePackage("A", "1.0");            
+            sourceRepository.AddPackage(packageA);
+            
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to add reference to 'A 1.0' because it has no project content.");
+        }
+
+        [TestMethod]
         public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -36,12 +48,12 @@
             Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B")
-                                                                });
+                                                                }, files: new[] { "foo" });
             Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B")
-                                                                });
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
+                                                                }, files: new[] { "foo" });
+            Package packageB10 = PackageUtility.CreatePackage("B", "1.0", files: new[] { "foo" });
             projectManager.LocalRepository.AddPackage(packageA20);
             projectManager.LocalRepository.AddPackage(packageB10);
 
@@ -176,13 +188,16 @@
             Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version:new Version("1.0"))
-                                                                });
+                                                                },
+                                                                files: new[] { "foo" });
+
             Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version:new Version("2.0"))
-                                                                });
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
-            Package packageB20 = PackageUtility.CreatePackage("B", "2.0");
+                                                                },
+                                                                files: new[] { "bar" });
+            Package packageB10 = PackageUtility.CreatePackage("B", "1.0", files: new[] { "foo" });
+            Package packageB20 = PackageUtility.CreatePackage("B", "2.0", files: new[] { "foo" });
 
             projectManager.LocalRepository.AddPackage(packageA10);
             projectManager.LocalRepository.AddPackage(packageB10);
@@ -635,14 +650,16 @@
             Package packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
                     PackageDependency.CreateDependency("B")
-                });
+                },
+                files: new[] { "foo" });
 
             Package packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("C")
-                                                            });
+                                                            },
+                                                            files: new[] { "bar" });
 
-            var packageC = PackageUtility.CreatePackage("C", "1.0");
+            var packageC = PackageUtility.CreatePackage("C", "1.0", files: new[] { "baz" });
 
             projectManager.LocalRepository.AddPackage(packageA);
             projectManager.LocalRepository.AddPackage(packageB);
