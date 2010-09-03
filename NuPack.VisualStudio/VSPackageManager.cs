@@ -112,22 +112,6 @@
             }
         }
 
-        public bool IsSolutionLevelPackage(string packageId, Version version) {
-            if (String.IsNullOrEmpty(packageId)) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
-
-            Package package = FindPackageWithOptionalVersion(packageId, version);
-
-            if (package == null) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    VsResources.UnknownPackage, packageId));
-            }
-
-            return !(package.AssemblyReferences.Any() || package.GetContentFiles().Any() || package.GetConfiguration() != null);
-        }
-
         internal void OnPackageReferenceRemoved(Package removedPackage, bool force = false, bool removeDependencies = false) {
             if (!IsPackageReferenced(removedPackage)) {
                 // There are no packages that depend on this one so just uninstall it

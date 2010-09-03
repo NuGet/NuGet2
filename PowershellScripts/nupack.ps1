@@ -25,9 +25,9 @@ function global:Add-Package {
     }
     Process {
         try {
-            $isSolutionLevel = $packageManager.IsSolutionLevelPackage($Id, $Version)
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
         
-            if ($isSOlutionLevel) {
+            if ($isSolutionLevel) {
             
                 if ($Project) {
                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
@@ -81,7 +81,7 @@ function global:Remove-Package {
     }
     Process {
         try {
-            $isSolutionLevel = $packageManager.IsSolutionLevelPackage($Id, $Version)
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
              
             if ($isSolutionLevel) {
                 
@@ -133,7 +133,7 @@ function global:Update-Package {
     }
     Process {
         try {
-            $isSolutionLevel = $packageManager.IsSolutionLevelPackage($Id, $Version)
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
              
             if ($isSolutionLevel) {
                 
@@ -541,6 +541,13 @@ function global:_IsSupportedProject($project) {
     
     return $project.Kind -and $supportedProjectTypes -contains $project.Kind
 }	
+
+function global:_IsSolutionOnlyPackage($packageManager, $id, $version) {    
+    $repository = $packageManager.ExternalRepository
+    $package = [NuPack.PackageRepositoryExtensions]::FindPackage($repository, $id, $null, $null, $version)
+
+    return $package -and !$package.HasProjectContent
+}
 
 # assign aliases to package cmdlets
 
