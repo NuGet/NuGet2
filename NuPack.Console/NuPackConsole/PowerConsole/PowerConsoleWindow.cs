@@ -127,7 +127,6 @@ namespace NuPackConsole.Implementation.PowerConsole
                 return new string[] 
                 {
                     // TODO: read this list from somewhere
-                    "http://dfowler-beast/packagefeed/feed",
                     "http://www.codeplex.com",
                     "http://www.asp.net"
                 };
