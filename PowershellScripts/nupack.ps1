@@ -1,4 +1,3 @@
-
 # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
@@ -31,7 +30,7 @@ function global:Add-Package {
             if ($isSOlutionLevel) {
             
                 if ($Project) {
-                    Write-Error "Package '$Id' is a solution-level package. Remove the -Project parameter."
+                    Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
                     return
                 }
                 else  {
@@ -87,7 +86,7 @@ function global:Remove-Package {
             if ($isSolutionLevel) {
                 
                 if ($Project -or $AllProjects) {
-                     Write-Error "Package '$Id' is a solution-level package. Remove the -Project or the -AllProjects parameter."
+                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project or the -AllProjects parameter."
                      return
                 }
                 else {
@@ -139,13 +138,13 @@ function global:Update-Package {
             if ($isSolutionLevel) {
                 
                 if ($Project) {
-                     Write-Error "Package '$Id' is a solution-level package. Remove the -Project parameter."
+                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
                      return
                 }
                 else {
-                     $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                     $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
                 }
-            } 
+            }
             else {
                 
                 if (!$Project) {
