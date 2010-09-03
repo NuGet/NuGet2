@@ -33,7 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>  
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
@@ -52,18 +52,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NuPackResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="MimeMapping.cs" />
-    <Compile Include="PackageBuilder.cs" />
     <Compile Include="PackageAuthoring.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Common\CommonResources.cs">
       <Link>Common\CommonResources.cs</Link>
     </Compile>
-    <Compile Include="XElementExtensions.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <None Include="app.config" />
+    <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
+      <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
+      <Name>NuPack.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Common\CommonResources.resx">

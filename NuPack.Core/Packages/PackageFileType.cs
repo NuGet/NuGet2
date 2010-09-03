@@ -5,7 +5,8 @@ using System.Text;
 
 namespace NuPack {
     public enum PackageFileType {
-        Resource,
-        Content
+        Resources,
+        Content,
+        Configuration
     }
 }

@@ -56,21 +56,19 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authoring\PathSearchFilter.cs" />
     <Compile Include="Feed\PackageFeedDependency.cs" />
     <Compile Include="Logging\CallbackListener.cs" />
     <Compile Include="Logging\PackageEventListener.cs" />
     <Compile Include="Logging\OperationContext.cs" />
     <Compile Include="Logging\StatusLevel.cs" />
     <Compile Include="PackageManager.cs" />
-    <Compile Include="Authoring\AuthoringAssemblyReference.cs" />
-    <Compile Include="Authoring\AuthoringPackageFile.cs" />
+    <Compile Include="Authoring\PhysicalAssemblyReference.cs" />
+    <Compile Include="Authoring\PhysicalPackageFile.cs" />
     <Compile Include="Authoring\PackageBuilder.cs" />
-    <Compile Include="Authoring\PackageBuilderAdapter.cs" />
-    <Compile Include="Authoring\PackageBuilderOPCUtil.cs" />
     <Compile Include="Packages\PackageFileType.cs" />
-    <Compile Include="Authoring\PackageMetaData.cs" />
     <Compile Include="Authoring\PathResolver.cs" />
-    <Compile Include="Authoring\XmlManifestSource.cs" />
+    <Compile Include="Authoring\XmlManifestReader.cs" />
     <Compile Include="Packages\DefaultPackageAssemblyPathResolver.cs" />
     <Compile Include="Packages\IPackageAssemblyPathResolver.cs" />
     <Compile Include="PackageWalker\ProjectUninstallWalker.cs" />

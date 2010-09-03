@@ -6,68 +6,79 @@ using System.IO;
 
 namespace NuPack {
     internal static class PathResolver {
-        public static IEnumerable<AuthoringPackageFile> ResolvePath(string basePath, string source, string destination) {
+        public static PathSearchFilter ResolvePath(string basePath, string source) {
             basePath = basePath ?? String.Empty;
-            destination = destination ?? String.Empty;
-            string pathFromBase = Path.Combine(basePath, source);
-            return from path in ResolveSourcePath(pathFromBase)
-                   let destinationPath = ResolveDestinationPath(destination, pathFromBase, path)
-                   select new AuthoringPackageFile { Path = destinationPath, 
-                       Name = Path.GetFileName(pathFromBase), 
-                       SourceStream = () => File.OpenRead(pathFromBase) } ;
-        }
+            string pathFromBase = Path.Combine(basePath, source.TrimStart(Path.DirectorySeparatorChar));
 
-        private static string ResolveDestinationPath(string destinationBase, string sourcePath, string actualPath) {
-            string fileName = Path.GetFileName(actualPath);
-            string sourcePathDir = Path.GetDirectoryName(sourcePath).TrimEnd('*');
-            string actualPathDir = Path.GetDirectoryName(actualPath);
-            string packageRelativePath = String.Empty;
-            //If there's a directory structure in the actual path, we need to recreate it
-            int index = actualPathDir.IndexOf(sourcePathDir);
-            if (index != -1 && (index + sourcePathDir.Length) < actualPathDir.Length) {
-                packageRelativePath = actualPathDir.Substring(index + sourcePathDir.Length);
+            if (pathFromBase.Contains("*")) {
+                return GetPathSearchFilter(pathFromBase);
             }
-            return Path.Combine(destinationBase, packageRelativePath, fileName);
-        }
-
-        private static IEnumerable<string> ResolveSourcePath(string filePath) {
-            if (IsFullPath(filePath)) {
-                //The path contains a single file. Since no directory structure can be constructed, return
-                return new[] { filePath };
+            else { 
+                pathFromBase = Path.GetFullPath(pathFromBase.TrimStart(Path.DirectorySeparatorChar));
+                string directory = Path.GetDirectoryName(pathFromBase);
+                string searchFilter = Path.GetFileName(pathFromBase);
+                return new PathSearchFilter(NormalizeSearchDirectory(directory), NormalizeSearchFilter(searchFilter), SearchOption.TopDirectoryOnly);
             }
-            else {
-                PathSearchFilter searchFilter = GetPathSearchFilter(filePath);
-                return Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption);
-            }
-        }
-
-        private static bool IsFullPath(string filePath) {
-            // Any path that contains a file name and does not contain a wild card is considered a full path
-            return !filePath.Contains('*') && !String.IsNullOrEmpty(Path.GetFileName(filePath));
         }
 
         private static PathSearchFilter GetPathSearchFilter(string path) {
-            var searchFilter = new PathSearchFilter { SearchDirectory = path, SearchOption = SearchOption.TopDirectoryOnly };
-            bool recursiveWildCardSearch = path.Contains("**"), wildCardSearch = path.Contains('*');
-            string fileName = Path.GetFileName(path);
-
-            searchFilter.SearchOption = recursiveWildCardSearch ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            searchFilter.SearchDirectory = Path.GetDirectoryName(path).TrimEnd('*', Path.DirectorySeparatorChar);
-
-            if (String.IsNullOrEmpty(searchFilter.SearchDirectory)) {
-                searchFilter.SearchDirectory = ".";
+            int recursiveSearchIndex = path.IndexOf("**");
+            if (recursiveSearchIndex != -1) {
+                // Recursive searches are of the format /foo/bar/**/*[.abc]
+                string searchPattern = path.Substring(recursiveSearchIndex + 2).TrimStart(Path.DirectorySeparatorChar);
+                string searchDirectory = recursiveSearchIndex == 0 ? "." : path.Substring(0, recursiveSearchIndex - 1);
+                return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern), SearchOption.AllDirectories);
             }
+            else {
+                int wildCardIndex = path.IndexOf('*');
+                string searchDirectory;
+                searchDirectory = Path.GetDirectoryName(path);
+                if (String.IsNullOrEmpty(searchDirectory)) {
+                    // Path starts with a wildcard e.g. *, *.foo, *foo, foo*
+                    // Set the current directory to be the search path
+                    searchDirectory = ".";
+                }
+                string searchPattern = Path.GetFileName(path);
 
-            searchFilter.SearchPattern = String.IsNullOrEmpty(fileName) ? "*" : fileName;
-            return searchFilter;
+                return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern), 
+                    SearchOption.TopDirectoryOnly);
+            }
         }
 
-        private class PathSearchFilter {
-            public string SearchDirectory { get; set; }
+        /// <summary>
+        /// Resolves the path of a file inside of a package 
+        /// For paths that are relative, the destination path is resovled as the path relative to the basePath (path to the manifest file)
+        /// For all other paths, the path is resolved as the first path portion that does not contain 
+        /// </summary>
+        /// <param name="basePath"></param>
+        /// <param name="actualPath"></param>
+        /// <param name="searchPath"></param>
+        /// <param name="targetPath"></param>
+        /// <returns></returns>
+        public static string ResolvePackagePath(string basePath, string actualPath, string targetPath) {
+            if (String.IsNullOrEmpty(basePath)) {
+                basePath = ".";
+            }
+            basePath = Path.GetFullPath(basePath);
+            actualPath = Path.GetFullPath(actualPath);
+            string packagePath = null;
+            if (actualPath.StartsWith(basePath)) {
+                packagePath = actualPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
+            }
+            else{
+                packagePath = Path.GetFileName(actualPath);
+            }
+            return Path.Combine(targetPath ?? String.Empty, packagePath);
+        }
 
-            public SearchOption SearchOption { get; set; }
+        private static string NormalizeSearchDirectory(string directory) {
+            return Path.GetFullPath(String.IsNullOrEmpty(directory) ? "." : directory);
+        }
 
-            public string SearchPattern { get; set; }
+        private static string NormalizeSearchFilter(string filter) {
+            return String.IsNullOrEmpty(filter) ? "*" : filter;
         }
     }
+
+
 }
