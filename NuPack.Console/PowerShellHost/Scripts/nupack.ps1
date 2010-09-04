@@ -6,6 +6,54 @@ $global:DefaultPackageSource = "";
 
 $global:DefaultProjectName = $null
 
+function global:New-Package {
+    [CmdletBinding()]
+    param(
+        [string]$Project = $DefaultProjectName,
+        [string]$Spec,
+        [string]$TargetFile
+    )
+        
+    Process {
+    
+        if (!$Project) {
+            Write-Error "Missing -Project parameter and the default project is not set."
+            return
+        }
+        
+        $ProjectIns = Get-Project $Project
+        
+        if ($ProjectIns -eq $null) {
+            Write-Error "Project '$Project' is not found."
+            return
+        }
+        
+        $SpecItem = _LookForSpecFile $ProjectIns $Spec
+        if ($SpecItem -eq $null) {
+            Write-Error "Unable to locate the nuspec file."
+            return
+        }
+                
+        # $SpecItem.FileNames returns an instance of PSParameterizedProperty.
+        $xmlReader = New-Object "NuPack.XmlManifestReader" $SpecItem.FileNames.Invoke(0)
+        
+        $builder = New-Object "NuPack.PackageBuilder"
+        $xmlReader.ReadContentTo($builder)
+        
+        if (!$TargetFile){
+            $TargetFile = Join-Path (Split-Path $ProjectIns.FullName) ($builder.Id + '.' + $builder.Version + '.nupack')
+        }
+        
+        Write-Output "Creating package at '$TargetFile'..."
+        
+        $stream = [System.IO.File]::Create($TargetFile)
+        $builder.Save($stream)
+        $stream.Close()
+        
+        Write-Output "Package file successfully created..."
+    }
+}
+
 function global:Add-Package {
     [CmdletBinding()]    
     param(
@@ -200,7 +248,12 @@ function global:List-Package {
             return
         }
 
-        $repository = [NuPack.PackageRepositoryFactory]::CreateRepository($global:DefaultPackageSource)
+        if ($DefaultPackageSource) {
+            $repository = [NuPack.PackageRepositoryFactory]::CreateRepository($global:DefaultPackageSource)
+        }
+        else {
+            []
+        }
     }
 
     return $repository.GetPackages() | Select-Object Id, Version, Description
@@ -352,11 +405,15 @@ function global:TabExpansion($line, $lastWord) {
     }
     
     switch ($tokens[0]) {
+        { $_ -eq 'New-Package' -or $_ -eq 'nep' } {
+            $choices = _TabExpansionForNewPackage $secondLastToken $tokens.length $filter
+        }
+    
         { $_ -eq 'Add-Package' -or $_ -eq 'nap' } {
             $choices = _TabExpansionForAddPackage $secondLastToken $tokens.length $filter
         }
 
-        { $_ -eq 'Remove-Package' -or $_ -eq 'nrp' } {
+        { $_ -eq 'Remove-Package' -or $_ -eq 'nop' } {
             $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
 
@@ -376,6 +433,16 @@ function global:TabExpansion($line, $lastWord) {
     else {
         # Fallback the to default tab expansion
         DefaultTabExpansion $line $lastWord 
+    }
+}
+
+function _TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+    if ($filter.StartsWith('-')) {
+       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
+    }
+    elseif (($secondLastWord -eq '-project') -or 
+            ($tokenCount -eq 2 -and !$secondLastWord.StartsWith('-'))) {
+        GetProjectNames
     }
 }
 
@@ -549,10 +616,22 @@ function global:_IsSolutionOnlyPackage($packageManager, $id, $version) {
     return $package -and !$package.HasProjectContent
 }
 
+function global:_LookForSpecFile($projectIns, $spec) {
+    if ($spec) {
+        $projectIns.ProjectItems.Item($spec)
+    }
+    else {
+        $allNuspecs = @($projectIns.ProjectItems | Where-Object { $_.Name.EndsWith('.nuspec') })
+        if ($allNuspecs.length -eq 1) {
+            $allNuspecs[0]
+        }
+    }
+}
+
 # assign aliases to package cmdlets
 
-New-Alias 'nnp' 'New-Package'
-New-Alias 'nlp' 'List-Package'
+New-Alias 'nep' 'New-Package'
+New-Alias 'nip' 'List-Package'
 New-Alias 'nap' 'Add-Package'
-New-Alias 'nrp' 'Remove-Package'
+New-Alias 'nop' 'Remove-Package'
 New-Alias 'nup' 'Update-Package'
