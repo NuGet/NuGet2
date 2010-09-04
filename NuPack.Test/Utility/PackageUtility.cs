@@ -87,35 +87,39 @@
 
         internal static Package CreatePackage(string id,
                                               string version,
-                                              IEnumerable<string> files = null,
+                                              IEnumerable<string> content = null,
                                               IEnumerable<string> assemblyReferences = null,
-                                              IEnumerable<string> tools = null,
+                                              IEnumerable<string> resources = null,
                                               IEnumerable<PackageDependency> dependencies = null) {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
-                                 files,
+                                 content,
                                  CreateAssemblyReferences(assemblyReferences),
-                                 tools,
+                                 resources,
                                  dependencies);
         }
 
         internal static Package CreatePackage(string id,
                                               string version,
-                                              IEnumerable<string> files,
+                                              IEnumerable<string> content,
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
-                                              IEnumerable<string> tools,
+                                              IEnumerable<string> resources,
                                               IEnumerable<PackageDependency> dependencies) {
-            files = files ?? Enumerable.Empty<string>();
+            content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
-            tools = tools ?? Enumerable.Empty<string>();
+            resources = resources ?? Enumerable.Empty<string>();
+
+            var allFiles = new List<IPackageFile>();
+            allFiles.AddRange(CreateFiles(content, "content"));
+            allFiles.AddRange(CreateFiles(resources, "resources"));
+            allFiles.AddRange(assemblyReferences);
 
             var mockPackage = new Mock<Package>() { CallBase = true };
             mockPackage.Setup(m => m.Id).Returns(id);
             mockPackage.Setup(m => m.Version).Returns(new Version(version));
-            mockPackage.Setup(m => m.GetFiles("content")).Returns(CreateFiles(files));
-            mockPackage.Setup(m => m.GetFiles("tool")).Returns(CreateFiles(tools));
+            mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
             mockPackage.Setup(m => m.AssemblyReferences).Returns(assemblyReferences);
             mockPackage.Setup(m => m.Dependencies).Returns(dependencies);
             return mockPackage.Object;
@@ -142,12 +146,13 @@
             return mockAssemblyReference.Object;
         }
 
-        internal static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames) {
+        internal static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "") {
             var files = new List<IPackageFile>();
             foreach (var fileName in fileNames) {
+                string path = Path.Combine(directory, fileName);
                 var mockFile = new Mock<IPackageFile>();
-                mockFile.Setup(m => m.Path).Returns(fileName);
-                mockFile.Setup(m => m.Open()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(fileName)));
+                mockFile.Setup(m => m.Path).Returns(path);
+                mockFile.Setup(m => m.Open()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(path)));
                 files.Add(mockFile.Object);
             }
             return files;

@@ -7,12 +7,14 @@
     using System.IO;
     using System.Linq;
     using System.Runtime.Versioning;
-    using System.Xml.Linq;
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
     public class ProjectManager {
         private PackageEventListener _listener;
+        private IDictionary<string, IPackageFileModifier> _modifiers = new Dictionary<string, IPackageFileModifier>(StringComparer.OrdinalIgnoreCase) {
+            { ".transform", new XmlTransfomer() }
+        };
 
         public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot, string packageFileRoot = "")
             : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot) {
@@ -70,7 +72,7 @@
 
             if (!package.HasProjectContent) {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, 
+                    String.Format(CultureInfo.CurrentCulture,
                     NuPackResources.PackageHasNoProjectContent, package));
             }
 
@@ -154,10 +156,11 @@
             // Resolve assembly references
             var assemblyReferences = ResolveAssemblyReferences(package);
 
-            AddPackageConfiguration(package);
-
             // Add content files
-            Project.AddFiles(package.GetContentFiles(), Listener);
+            Project.AddFiles(package.GetContentFiles(),
+                             Listener,
+                             ExecuteModify,
+                             GetContentFilePath);
 
             // Add the references to the reference path
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
@@ -168,6 +171,28 @@
             }
 
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package, Project.ProjectName);
+        }
+
+        private string GetContentFilePath(IPackageFile packageFile) {
+            return packageFile.Path.Substring(@"content\".Length);
+        }
+
+        private bool ExecuteModify(IPackageFile file) {
+            string extension = Path.GetExtension(file.Path);
+            IPackageFileModifier modifier;
+            if (_modifiers.TryGetValue(extension, out modifier)) {
+                modifier.Modify(file, Project);
+                return true;
+            }
+            return false;
+        }
+
+        private void ExecuteRevert(IPackageFile file, IEnumerable<IPackageFile> matchingFiles) {
+            string extension = Path.GetExtension(file.Path);
+            IPackageFileModifier modifier;
+            if (_modifiers.TryGetValue(extension, out modifier)) {
+                modifier.Revert(file, matchingFiles, Project);
+            }
         }
 
         public void RemovePackageReference(string packageId, bool force = false, bool removeDependencies = false) {
@@ -206,9 +231,6 @@
                                 where p.Id != package.Id
                                 select p;
 
-            // Delete all sections that aren't in use by any other packages
-            RemovePackageConfiguration(otherPackages, package);
-
             // Get other references
             var otherAssemblyReferences = from p in otherPackages
                                           let assemblyReferences = GetCompatibleAssemblyReferences(Project.TargetFramework, p.AssemblyReferences)
@@ -225,7 +247,13 @@
             var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
-            Project.DeleteFiles(contentFilesToDelete, Listener);
+            Project.DeleteFiles(contentFilesToDelete, 
+                                Listener, 
+                                file => ExecuteRevert(file, from p in otherPackages
+                                                            from otherFile in p.GetFiles()
+                                                            where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
+                                                            select otherFile), 
+                                        GetContentFilePath);
 
             // Remove references
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {
@@ -329,51 +357,6 @@
                             String.Format(CultureInfo.CurrentCulture, NuPackResources.NewerVersionAlreadyReferenced, Project.ProjectName, package.Id));
                     }
                 }
-            }
-        }
-
-        private void AddPackageConfiguration(Package package) {
-            IPackageFile configurationFile = package.GetConfiguration();
-            if (configurationFile == null) {
-                return;
-            }
-            // Get the configuration
-            XDocument configuration = ConfigUtility.GetConfiguration(Project, configurationFile.Path);
-            // Get the package fragment
-            XElement packageConfigFragment = GetConfigurationFragment(configurationFile);
-            // Do a merge
-            configuration.Root.MergeWith(packageConfigFragment);
-            // Save the new config            
-            Project.AddFile(configurationFile.Path, configuration.Save);
-
-            Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Log_ModifiedConfiguration);
-        }
-
-        private void RemovePackageConfiguration(IEnumerable<Package> otherPackages, Package package) {
-            IPackageFile configurationFile = package.GetConfiguration();
-            if (configurationFile == null) {
-                return;
-            }
-
-            XDocument configuration = ConfigUtility.GetConfiguration(Project, configurationFile.Path);
-            // Get the config snippet
-            XElement packageConfigFragment = GetConfigurationFragment(configurationFile);
-            // Merge the other xml elements into one element
-            var mergedFragments = otherPackages.Where(p => p.GetConfiguration() != null)
-                                          .Select(p => GetConfigurationFragment(p.GetConfiguration()))
-                                          .Aggregate(new XElement("configuration"), (left, right) => left.MergeWith(right));
-
-            // Take the difference of the xml and remove it from the main config
-            configuration.Root.Except(packageConfigFragment.Except(mergedFragments));
-
-            Project.AddFile(configurationFile.Path, configuration.Save);
-
-            Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Log_ModifiedConfiguration);
-        }
-
-        private static XElement GetConfigurationFragment(IPackageFile configFragmentFile) {
-            using (Stream stream = configFragmentFile.Open()) {
-                return XElement.Load(stream);
             }
         }
 

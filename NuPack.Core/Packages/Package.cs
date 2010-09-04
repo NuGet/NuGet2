@@ -49,11 +49,11 @@
 
         public bool HasProjectContent {
             get {
-                return AssemblyReferences.Any() || this.GetContentFiles().Any() || this.GetConfiguration() != null;
+                return AssemblyReferences.Any() || this.GetContentFiles().Any();
             }
         }
-        
-        public abstract IEnumerable<IPackageFile> GetFiles(string fileType);
+
+        public abstract IEnumerable<IPackageFile> GetFiles();
 
         public abstract IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get;
@@ -62,8 +62,6 @@
         public abstract IEnumerable<PackageDependency> Dependencies {
             get;
         }
-
-        public abstract void Save(Stream stream);
 
         public override string ToString() {
             return Id + " " + Version;

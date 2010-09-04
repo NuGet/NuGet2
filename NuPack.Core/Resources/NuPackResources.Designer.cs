@@ -331,6 +331,15 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package does not contain a manifest..
+        /// </summary>
+        internal static string PackageDoesNotContainManifest {
+            get {
+                return ResourceManager.GetString("PackageDoesNotContainManifest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to uninstall &apos;{0}&apos; because &apos;{1}&apos; depends on it.
         /// </summary>
         internal static string PackageHasDependent {

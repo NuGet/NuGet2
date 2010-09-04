@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 
 namespace NuPack {
     public class PackageAuthoring {
+        private static readonly HashSet<string> _exclude = new HashSet<string>(new[] { ".nupack", ".nuspec" },
+                                                                              StringComparer.OrdinalIgnoreCase);
+
         public static void Main(string[] args) {
             // Review: Need to use a command-line parsing library instead of parsing it this way.
             string executable = Path.GetFileName(Environment.GetCommandLineArgs().First());
@@ -16,16 +20,21 @@ namespace NuPack {
             }
 
             try {
-                Console.ReadKey();
                 // Parse the arguments. The last argument is the content to be added to the package
                 var manifestFile = args.First();
-                XmlManifestReader manifestReader = new XmlManifestReader(manifestFile);
-                PackageBuilder builder = new PackageBuilder();
-                manifestReader.ReadContentTo(builder);
-                var destinationFile = String.Join(".", builder.Id, builder.Version, "nupack");
-                using (Stream stream = File.Create(destinationFile)) {
+                PackageBuilder builder = PackageBuilder.ReadFrom(manifestFile);
+                builder.Created = DateTime.Now;
+                builder.Modified = DateTime.Now;
+                var outputFile = String.Join(".", builder.Id, builder.Version, "nupack");
+
+                // Remove the output file or the package spec might try to include it (which is default behavior)
+                builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
+
+                using (Stream stream = File.Create(outputFile)) {
                     builder.Save(stream);
                 }
+
+                Console.WriteLine("{0} created successfully", outputFile);
             }
             catch (Exception exception) {
                 Console.Error.WriteLine(exception.Message);

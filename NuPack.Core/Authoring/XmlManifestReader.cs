@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
-using System.Xml;
-using System.Globalization;
-using System.ComponentModel;
-using System.Runtime.Versioning;
-
 
 namespace NuPack {
-    public class XmlManifestReader {
+    internal class XmlManifestReader {
         private XDocument _manifestFile;
 
         public XmlManifestReader(string manifestFile) {
@@ -28,18 +21,14 @@ namespace NuPack {
         /// Assigned the manifest file's path when we receieve a file to start with. 
         /// </summary>
         public string BasePath {
-            get; 
+            get;
             set;
         }
 
         public virtual void ReadContentTo(PackageBuilder builder) {
             ReadMetaData(builder);
             ReadDependencies(builder);
-            ReadReferences(builder);
-            foreach (int value in Enum.GetValues(typeof(PackageFileType))) {
-                var key = (PackageFileType)value;
-                ReadPackageFiles(builder, key);
-            }
+            ReadFiles(builder);
         }
 
         private void ReadMetaData(PackageBuilder builder) {
@@ -60,8 +49,18 @@ namespace NuPack {
                 builder.Authors.AddRange(from e in authorsElement.Elements("Author") select e.Value);
             }
 
+            builder.Language = metadataElement.GetOptionalElementValue("Language");
+            DateTime created;
+            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("Created"), out created)) {
+                builder.Created = created;
+            }
+            DateTime modified;
+            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("Modified"), out modified)) {
+                builder.Modified = modified;
+            }
+            builder.LastModifiedBy = metadataElement.GetOptionalElementValue("LastModifiedBy");
             builder.Category = metadataElement.GetOptionalElementValue("Category");
-            builder.Keywords.AddRange((metadataElement.GetOptionalElementValue("Keywords") ?? String.Empty).Split(','));
+            builder.Keywords.AddRange((metadataElement.GetOptionalElementValue("Keywords") ?? String.Empty).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
         }
 
         private void ReadDependencies(PackageBuilder builder) {
@@ -73,43 +72,6 @@ namespace NuPack {
                     builder.Dependencies.Add(item);
                 }
             }
-        }
-
-        private void ReadReferences(PackageBuilder builder) {
-            var assemblies = _manifestFile.Root.Element("Assemblies");
-            if (assemblies != null) {
-
-                foreach (var item in assemblies.Elements()) {
-                    foreach (var reference in ReadAssemblyReferences(item)) {
-                        builder.References.Add(reference);
-                    }
-                }
-            }
-        }
-
-        private IEnumerable<PhysicalAssemblyReference> ReadAssemblyReferences(XElement item) {
-            var src = item.GetOptionalAttributeValue("src");
-            if (String.IsNullOrEmpty(src)) {
-                return Enumerable.Empty<PhysicalAssemblyReference>();
-            }
-            var frameworkVersionString = item.GetOptionalAttributeValue("TargetFramework");
-            
-            FrameworkName frameworkVersion = null;
-            if (frameworkVersionString != null) {
-                frameworkVersion = new FrameworkName(frameworkVersionString);
-            }
-            var name = item.GetOptionalAttributeValue("name");
-            var searchFilter = PathResolver.ResolvePath(BasePath, src);
-
-            return 
-                from file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)
-                select new PhysicalAssemblyReference {
-                    SourcePath = file,
-                    Name = name ?? Path.GetFileNameWithoutExtension(file),
-                    Path = Path.GetFileName(file), // The package builder would force drop this in a location determined by version
-                    TargetFramework = frameworkVersion
-                };
-
         }
 
         private static PackageDependency ReadPackageDepedency(XElement item) {
@@ -134,26 +96,38 @@ namespace NuPack {
             return PackageDependency.CreateDependency(id, minVersion, maxVersion, version);
         }
 
-        private void ReadPackageFiles(PackageBuilder builder, PackageFileType fileType) {
-            var packageFiles = _manifestFile.Root.Element(fileType.ToString());
-            if (packageFiles != null) {
-                foreach (var file in packageFiles.Elements()) {
+        private void ReadFiles(PackageBuilder builder) {
+            // Do nothing with files if the base path is null.
+            if (String.IsNullOrEmpty(BasePath)) {
+                return;
+            }
+
+            var files = _manifestFile.Root.Element("Files");
+            if (files != null) {
+                // REVIEW: Should we look for specific elements?
+                foreach (var file in files.Elements()) {
                     var source = file.GetOptionalAttributeValue("src");
                     var destination = file.GetOptionalAttributeValue("dest");
                     if (!String.IsNullOrEmpty(source)) {
-                        AddFilesFromSource(builder, fileType, source, destination);
+                        AddFiles(builder, source, destination);
                     }
                 }
             }
+            else {
+                // No files element so assume we want to package everything recursively from the manifest root
+                AddFiles(builder, @"**\*.*", null);
+            }
         }
 
-        private void AddFilesFromSource(PackageBuilder builder, PackageFileType fileType, string source, string destination) {
-            var fileList = builder.GetFiles(fileType);
-
+        private void AddFiles(PackageBuilder builder, string source, string destination) {
             PathSearchFilter searchFilter = PathResolver.ResolvePath(BasePath, source);
-            foreach(var file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)) {
+            foreach (var file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)) {
                 var destinationPath = PathResolver.ResolvePackagePath(BasePath, file, destination);
-                fileList.Add(new PhysicalPackageFile { Name = Path.GetFileName(file), SourcePath = file, Path = destinationPath });
+                builder.Files.Add(new PhysicalPackageFile {
+                    Name = Path.GetFileName(file),
+                    SourcePath = file,
+                    Path = destinationPath
+                });
             }
         }
     }

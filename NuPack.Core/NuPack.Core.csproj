@@ -46,6 +46,7 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="XmlTransfomer.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -57,16 +58,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authoring\PathSearchFilter.cs" />
+    <Compile Include="Authoring\XmlManifestWriter.cs" />
     <Compile Include="Feed\PackageFeedDependency.cs" />
     <Compile Include="Logging\CallbackListener.cs" />
     <Compile Include="Logging\PackageEventListener.cs" />
     <Compile Include="Logging\OperationContext.cs" />
     <Compile Include="Logging\StatusLevel.cs" />
     <Compile Include="PackageManager.cs" />
-    <Compile Include="Authoring\PhysicalAssemblyReference.cs" />
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
     <Compile Include="Authoring\PackageBuilder.cs" />
-    <Compile Include="Packages\PackageFileType.cs" />
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\XmlManifestReader.cs" />
     <Compile Include="Packages\DefaultPackageAssemblyPathResolver.cs" />
@@ -76,6 +76,7 @@
     <Compile Include="PackageWalker\ProjectUpdateUninstallWalker.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="PackageWalker\DependencyManager.cs" />
+    <Compile Include="IPackageFileModifier.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
@@ -102,7 +103,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NuPackResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Utility\ConfigUtility.cs" />
+    <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="Repositories\AtomFeedPackageRepository.cs" />
     <Compile Include="ProjectSystem\ProjectSystem.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />

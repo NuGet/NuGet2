@@ -151,7 +151,7 @@
         }
 
         private ProjectManager CreateProjectManager(Project project) {
-            var assemblyPathResolver = new DefaultPackageAssemblyPathResolver(FileSystem, ReferencesDirectory);
+            var assemblyPathResolver = new DefaultPackageAssemblyPathResolver(FileSystem);
             var projectManager = new VSProjectManager(this, assemblyPathResolver, project);
             projectManager.Listener = Listener;
             return projectManager;

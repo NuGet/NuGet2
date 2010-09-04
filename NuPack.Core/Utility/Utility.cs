@@ -2,12 +2,16 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Runtime.Versioning;
     using System.Text.RegularExpressions;
 
     internal static class Utility {
+        // REVIEW: Should this be static public readonly
         internal const string PackageExtension = ".nupack";
+        internal const string ManifestExtension = ".nuspec";
+
         private static readonly Regex _versionRegex = new Regex(@"Version=(.+?),");
         private const string NetFrameworkIdentifier = ".NETFramework";
 
@@ -86,6 +90,10 @@
 
             string versionString = match.Groups[1].Value;
             return new Version(versionString);
+        }
+
+        internal static bool IsManifest(string path) {
+            return Path.GetExtension(path).Equals(ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         internal static FrameworkName GetDefaultTargetFramework() {

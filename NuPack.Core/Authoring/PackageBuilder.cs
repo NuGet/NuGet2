@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
 using NuPack.Resources;
 using Opc = System.IO.Packaging;
@@ -9,25 +8,13 @@ using Opc = System.IO.Packaging;
 namespace NuPack {
     public class PackageBuilder {
         private const string DefaultContentType = "application/octet";
-        private const string ReferenceRelationType = "Reference";
-        private const string DependencyRelationType = "Dependency";
-        private const string DependencyFileName = "Dependencies.xml";
-
-        private readonly Dictionary<PackageFileType, List<IPackageFile>> _packageFiles;
-        private readonly List<IPackageAssemblyReference> _references;
-        private readonly List<PackageDependency> _dependencies;
+        internal const string ManifestRelationType = "manifest";
 
         public PackageBuilder() {
-            _packageFiles = new Dictionary<PackageFileType, List<IPackageFile>>();
-            _dependencies = new List<PackageDependency>();
-            _references = new List<IPackageAssemblyReference>();
+            Files = new List<IPackageFile>();
+            Dependencies = new List<PackageDependency>();
             Keywords = new List<string>();
             Authors = new List<string>();
-
-            foreach (int value in Enum.GetValues(typeof(PackageFileType))) {
-                var key = (PackageFileType)value;
-                _packageFiles[key] = new List<IPackageFile>();
-            }
         }
 
         public string Id {
@@ -80,52 +67,46 @@ namespace NuPack {
             set;
         }
 
-        public List<IPackageFile> PackageFiles {
-            get {
-                return _packageFiles[PackageFileType.Content];
-            }
-        }
-
-        public List<IPackageFile> Resources {
-            get {
-                return _packageFiles[PackageFileType.Resources];
-            }
-        }
-
-        public List<IPackageFile> Configuration {
-            get {
-                return _packageFiles[PackageFileType.Configuration];
-            }
-        }
-
         public List<PackageDependency> Dependencies {
-            get {
-                return _dependencies;
-            }
+            get;
+            private set;
         }
 
-        public List<IPackageAssemblyReference> References {
-            get {
-                return _references;
-            }
-        }
-
-        public List<IPackageFile> GetFiles(PackageFileType type) {
-            return _packageFiles[type];
+        public List<IPackageFile> Files {
+            get;
+            private set;
         }
 
         public void Save(Stream stream) {
-            if (!IsValidBuild()) {
-                throw new InvalidOperationException(NuPackResources.PackageBuilder_IdAndVersionRequired);
-            }
+            VerifyPackage();
             WritePackageContent(stream);
         }
 
-        public bool IsValidBuild() {
-            return !String.IsNullOrEmpty(Id) && (Version != null);
+        private void VerifyPackage() {
+            if (String.IsNullOrEmpty(Id) || Version == null) {
+                throw new InvalidOperationException(NuPackResources.PackageBuilder_IdAndVersionRequired);
+            }
         }
 
-        public static PackageBuilder ReadContentFrom(Package package) {
+        public static void Save(Package package, Stream stream) {
+            ReadFrom(package).Save(stream);
+        }
+
+        public static PackageBuilder ReadFrom(Stream stream) {
+            XmlManifestReader reader = new XmlManifestReader(XDocument.Load(stream));
+            PackageBuilder builder = new PackageBuilder();
+            reader.ReadContentTo(builder);
+            return builder;
+        }
+
+        public static PackageBuilder ReadFrom(string path) {
+            XmlManifestReader reader = new XmlManifestReader(path);
+            PackageBuilder builder = new PackageBuilder();
+            reader.ReadContentTo(builder);
+            return builder;
+        }
+
+        public static PackageBuilder ReadFrom(Package package) {
             PackageBuilder packageBuilder = new PackageBuilder();
 
             // Copy meta data
@@ -136,23 +117,26 @@ namespace NuPack {
             packageBuilder.Id = package.Id;
             packageBuilder.Keywords.AddRange(package.Keywords);
             packageBuilder.Version = package.Version;
+            packageBuilder.LastModifiedBy = package.LastModifiedBy;
+            packageBuilder.Language = package.Language;
+            packageBuilder.Modified = package.Modified;
+
+            // Copy dependencies
+            packageBuilder.Dependencies.AddRange(package.Dependencies);
 
             // Copy files
-            packageBuilder.Dependencies.AddRange(package.Dependencies);
-            packageBuilder.References.AddRange(package.AssemblyReferences);
-            packageBuilder.Resources.AddRange(package.GetFiles(PackageFileType.Resources.ToString()));
-            packageBuilder.PackageFiles.AddRange(package.GetFiles(PackageFileType.Content.ToString()));
-            packageBuilder.Configuration.AddRange(package.GetFiles(PackageFileType.Configuration.ToString()));
+            packageBuilder.Files.AddRange(package.GetFiles());
+
+            // Remove the manifest file
+            packageBuilder.Files.RemoveAll(file => Utility.IsManifest(file.Path));
 
             return packageBuilder;
         }
 
-        public void WritePackageContent(Stream stream) {
+        private void WritePackageContent(Stream stream) {
             using (Opc.Package package = Opc.Package.Open(stream, FileMode.Create)) {
-
-                WriteReferences(package);
+                WriteManifest(package);
                 WriteFiles(package);
-                WriteDepdendencies(package);
 
                 // Copy the metadata properties back to the package
                 package.PackageProperties.Category = Category;
@@ -161,70 +145,38 @@ namespace NuPack {
                 package.PackageProperties.Description = Description;
                 package.PackageProperties.Identifier = Id;
                 package.PackageProperties.Version = Version.ToString();
+                package.PackageProperties.Keywords = String.Join(", ", Keywords);
+                package.PackageProperties.LastModifiedBy = LastModifiedBy;
+                package.PackageProperties.Modified = Modified;
+                package.PackageProperties.Language = Language;
             }
         }
 
-        private void WriteDepdendencies(Opc.Package package) {
-            XDocument doc = new XDocument(new XElement("Dependencies"));
-            foreach (var item in Dependencies) {
-                var element = new XElement("Dependency", new XAttribute("id", item.Id));
-                if (item.Version != null) {
-                    element.Add(new XAttribute("Version", item.Version));
-                }
-                if (item.MinVersion != null) {
-                    element.Add(new XAttribute("MinVersion", item.MinVersion));
-                }
-                if (item.MaxVersion != null) {
-                    element.Add(new XAttribute("MaxVersion", item.MaxVersion));
-                }
-                doc.Root.Add(element);
-            }
-            
-            Uri uri = UriHelper.CreatePartUri(DependencyFileName);
+        private void WriteManifest(Opc.Package package) {
+            Uri uri = UriHelper.CreatePartUri(Id + Utility.ManifestExtension);
 
-            // Create the relationship type
-            package.CreateRelationship(uri, Opc.TargetMode.Internal, Package.SchemaNamespace + DependencyRelationType);
+            // Create the manifest relationship
+            package.CreateRelationship(uri, Opc.TargetMode.Internal, Package.SchemaNamespace + ManifestRelationType);
 
             // Create the part
             Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
 
             using (Stream outStream = packagePart.GetStream()) {
-                doc.Save(outStream);
-            }
-
-        }
-
-        private void WriteReferences(Opc.Package package) {
-            foreach (var referenceFile in References) {
-                using (Stream readStream = referenceFile.Open()) {
-                    var version = referenceFile.TargetFramework == null ? String.Empty : referenceFile.TargetFramework.ToString();
-                    string path = Path.Combine("assemblies", version, Path.GetFileName(referenceFile.Path));
-                    Uri uri = UriHelper.CreatePartUri(path);
-                    Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
-                    using (Stream outStream = packagePart.GetStream()) {
-                        readStream.CopyTo(outStream);
-                    }
-                    package.CreateRelationship(uri, Opc.TargetMode.Internal, Package.SchemaNamespace + ReferenceRelationType);
-                }
+                var writer = new XmlManifestWriter(this);
+                writer.Save(outStream);
             }
         }
 
         private void WriteFiles(Opc.Package package) {
-            foreach (var fileTypeValue in Enum.GetValues(typeof(PackageFileType))) {
-                var fileType = (PackageFileType)fileTypeValue;
-                foreach (var packageFile in _packageFiles[fileType]) {
-                    using (Stream stream = packageFile.Open()) {
-                        CreatePart(package, fileType, packageFile.Path, stream);
-                    }
+            foreach (var file in Files) {
+                using (Stream stream = file.Open()) {
+                    CreatePart(package, file.Path, stream);
                 }
             }
         }
 
-        private void CreatePart(Opc.Package package, PackageFileType fileType, string packagePath, Stream sourceStream) {
+        private void CreatePart(Opc.Package package, string packagePath, Stream sourceStream) {
             Uri uri = UriHelper.CreatePartUri(packagePath);
-
-            // Create the relationship type
-            package.CreateRelationship(uri, Opc.TargetMode.Internal, GetPackageRelationName(fileType));
 
             // Create the part
             Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
@@ -232,10 +184,6 @@ namespace NuPack {
             using (Stream outStream = packagePart.GetStream()) {
                 sourceStream.CopyTo(outStream);
             }
-        }
-
-        private static string GetPackageRelationName(PackageFileType fileType) {
-            return Package.SchemaNamespace + fileType.ToString();
         }
     }
 }

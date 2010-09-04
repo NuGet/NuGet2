@@ -8,23 +8,19 @@
     using NuPack.Resources;
 
     public class PackageManager {
-        private const string DefaultToolsDirectory = "tools";
-        private const string DefaultReferencesDirectory = "lib";
-
         private PackageEventListener _listener;
 
-        public PackageManager(IPackageRepository sourceRepository, string path, string referencesDirectory = DefaultReferencesDirectory)
-            : this(sourceRepository, new FileBasedProjectSystem(path), referencesDirectory) {
+        public PackageManager(IPackageRepository sourceRepository, string path)
+            : this(sourceRepository, new FileBasedProjectSystem(path)) {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem, string referencesDirectory = DefaultReferencesDirectory) :
-            this(sourceRepository, fileSystem, new LocalPackageRepository(fileSystem), referencesDirectory) {
+        public PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem) :
+            this(sourceRepository, fileSystem, new LocalPackageRepository(fileSystem)) {
         }
 
-        internal PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem, IPackageRepository localRepository, string referencesDirectory = DefaultReferencesDirectory) {
+        internal PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem, IPackageRepository localRepository) {
             SourceRepository = sourceRepository;
             FileSystem = fileSystem;
-            ReferencesDirectory = referencesDirectory;
             LocalRepository = localRepository;
         }
 
@@ -116,14 +112,10 @@
         }
 
         private void ExpandFiles(Package package) {
-            // Add tool files
-            FileSystem.AddFiles(package.GetToolFiles(), GetToolPath(package), Listener);
+            string packageDirectory = Utility.GetPackageDirectory(package);
 
-            // Add content files
-            FileSystem.AddFiles(package.GetContentFiles(), Utility.GetPackageDirectory(package), Listener);
-
-            // Add the references to the reference path
-            FileSystem.AddFiles(package.AssemblyReferences, GetReferencePath(package), Listener);
+            // Add files files
+            FileSystem.AddFiles(package.GetFiles(), packageDirectory, Listener);
         }
 
         public virtual void UninstallPackage(string packageId, Version version = null, bool force = false, bool removeDependencies = false) {
@@ -172,29 +164,17 @@
         }
 
         private void RemoveFiles(Package package) {
-            // Remove tool files
-            FileSystem.DeleteFiles(package.GetToolFiles(), GetToolPath(package), Listener);
+            string packageDirectory = Utility.GetPackageDirectory(package);
 
-            // Remove content files
-            FileSystem.DeleteFiles(package.GetContentFiles(), Utility.GetPackageDirectory(package), Listener);
-
-            // Removed the references and all of its files
-            FileSystem.DeleteFiles(package.AssemblyReferences, GetReferencePath(package), Listener);
-
+            // Remove resource files
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Listener);
+            
             // Delete the package directory if any
-            FileSystem.DeleteDirectory(Utility.GetPackageDirectory(package), true);
+            FileSystem.DeleteDirectory(packageDirectory, true);
         }
-        
+
         public bool IsPackageInstalled(Package package) {
             return LocalRepository.FindPackage(package.Id, exactVersion: package.Version) != null;
-        }
-
-        private string GetReferencePath(Package package) {
-            return Path.Combine(Utility.GetPackageDirectory(package), ReferencesDirectory);
-        }
-
-        private static string GetToolPath(Package package) {
-            return Path.Combine(Utility.GetPackageDirectory(package), DefaultToolsDirectory);
         }
 
         public string GetPackagePath(Package package) {

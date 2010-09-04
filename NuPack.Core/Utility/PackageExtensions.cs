@@ -5,6 +5,8 @@
     using System.Linq;
 
     public static class PackageExtensions {
+        private static readonly string ContentDir = "content";
+
         public static Package FindByVersion(this IQueryable<Package> source, Version minVersion, Version maxVersion, Version exactVersion) {
             IEnumerable<Package> packages = from p in source
                                              orderby p.Version descending
@@ -64,16 +66,8 @@
             return isSatisfied;
         }
 
-        public static IEnumerable<IPackageFile> GetContentFiles(this Package package) {
-            return package.GetFiles("content");
-        }
-
-        internal static IEnumerable<IPackageFile> GetToolFiles(this Package package) {
-            return package.GetFiles("tool");
-        }
-
-        public static IPackageFile GetConfiguration(this Package package) {
-            return package.GetFiles("configuration").SingleOrDefault();
+        internal static IEnumerable<IPackageFile> GetContentFiles(this Package package) {
+            return package.GetFiles().Where(file => file.Path.StartsWith(ContentDir, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
