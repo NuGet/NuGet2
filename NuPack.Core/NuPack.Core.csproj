@@ -46,7 +46,7 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="XmlTransfomer.cs" />
+    <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -76,7 +76,7 @@
     <Compile Include="PackageWalker\ProjectUpdateUninstallWalker.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="PackageWalker\DependencyManager.cs" />
-    <Compile Include="IPackageFileModifier.cs" />
+    <Compile Include="FileModifiers\IPackageFileModifier.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
