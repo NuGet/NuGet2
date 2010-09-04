@@ -5,11 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Core", "NuPack.Core\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.VisualStudio", "NuPack.VisualStudio\NuPack.VisualStudio.csproj", "{6146CA62-CC16-422C-A105-3E81F7452AA6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Powershell", "Powershell", "{6DF001C2-5A19-4E00-A11E-885F1B8091B7}"
-	ProjectSection(SolutionItems) = preProject
-		PowershellScripts\nupack.ps1 = PowershellScripts\nupack.ps1
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Test", "NuPack.Test\NuPack.Test.csproj", "{D3106412-E3AF-4CB6-B6D3-3664465B491F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{FAB2DDD1-4A49-4792-A540-FA669357308C}"

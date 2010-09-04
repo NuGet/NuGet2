@@ -1,96 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <SchemaVersion>2.0</SchemaVersion>        
-        <ProjectGuid>{D0F9864B-D782-4471-81A2-29555E5DC0D7}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>NuPack.Tools</RootNamespace>
-        <AssemblyName>NuPack.Tools</AssemblyName>
-        <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-        <VsSdkTargets>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets</VsSdkTargets>
-    </PropertyGroup>
-    <Choose>
-        <When Condition="Exists($(VsSdkTargets))">
-            <PropertyGroup>
-                <GeneratePkgDefFile>false</GeneratePkgDefFile>
-                <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
-                <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
-                <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
-                <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-                <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-            </PropertyGroup>
-        </When>
-    </Choose>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-        <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-        <Optimize>false</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
-        <DefineConstants>DEBUG;TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <DebugType>pdbonly</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>bin\Release\</OutputPath>
-        <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <ItemGroup>
-        <Compile Include="Properties\AssemblyInfo.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="..\NuPack.Console\PowerShellHost\Scripts\Profile.ps1">
-            <Link>Scripts\Profile.ps1</Link>
-            <IncludeInVSIX>true</IncludeInVSIX>
-        </Content>
-        <Content Include="..\NuPack.UI\NuPack.VisualStudio.Package.dll">
-            <Link>NuPack.VisualStudio.Package.dll</Link>
-            <IncludeInVSIX>true</IncludeInVSIX>
-        </Content>
-        <Content Include="..\PowershellScripts\nupack.ps1">
-            <Link>Scripts\nupack.ps1</Link>
-            <IncludeInVSIX>true</IncludeInVSIX>
-        </Content>
-        <None Include="source.extension.vsixmanifest">
-            <SubType>Designer</SubType>
-        </None>
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="..\NuPack.UI\NuPack.VisualStudio.Package.pkgdef">
-            <Link>NuPack.VisualStudio.Package.pkgdef</Link>
-            <IncludeInVSIX>true</IncludeInVSIX>
-        </Content>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\NuPack.Console\NuPackConsole\NuPack.Console.csproj">
-            <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
-            <Name>NuPack.Console</Name>
-            <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bPkgdefProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-            <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-        </ProjectReference>
-        <ProjectReference Include="..\NuPack.Console\PowerShellHost\PowerShellHost.csproj">
-            <Project>{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}</Project>
-            <Name>PowerShellHost</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
-            <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
-            <Name>NuPack.Core</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\NuPack.VisualStudio\NuPack.VisualStudio.csproj">
-            <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
-            <Name>NuPack.VisualStudio</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <ItemGroup />
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D0F9864B-D782-4471-81A2-29555E5DC0D7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuPack.Tools</RootNamespace>
+    <AssemblyName>NuPack.Tools</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <VsSdkTargets>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets</VsSdkTargets>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="Exists($(VsSdkTargets))">
+      <PropertyGroup>
+        <GeneratePkgDefFile>false</GeneratePkgDefFile>
+        <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
+        <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+        <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+        <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+        <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\NuPack.Console\PowerShellHost\Scripts\Profile.ps1">
+      <Link>Scripts\Profile.ps1</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\NuPack.UI\NuPack.VisualStudio.Package.dll">
+      <Link>NuPack.VisualStudio.Package.dll</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\NuPack.Console\PowerShellHost\Scripts\nupack.ps1">
+      <Link>Scripts\nupack.ps1</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <None Include="source.extension.vsixmanifest">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\NuPack.UI\NuPack.VisualStudio.Package.pkgdef">
+      <Link>NuPack.VisualStudio.Package.pkgdef</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NuPack.Console\NuPackConsole\NuPack.Console.csproj">
+      <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
+      <Name>NuPack.Console</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bPkgdefProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\NuPack.Console\PowerShellHost\PowerShellHost.csproj">
+      <Project>{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}</Project>
+      <Name>PowerShellHost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
+      <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
+      <Name>NuPack.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuPack.VisualStudio\NuPack.VisualStudio.csproj">
+      <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
+      <Name>NuPack.VisualStudio</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
