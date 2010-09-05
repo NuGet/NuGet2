@@ -124,6 +124,9 @@
     <Compile Include="Packages\PackageFile.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Authoring\nuspec.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="Class diagrams\Packages.cd" />
     <None Include="Class diagrams\PackageWalkers.cd" />
     <None Include="Class diagrams\Repositories.cd" />

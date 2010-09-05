@@ -1,19 +1,25 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 
 namespace NuPack {
     internal class XmlManifestReader {
-        private XDocument _manifestFile;
+        private XDocument _manifestDocument;
 
         public XmlManifestReader(string manifestFile) {
-            _manifestFile = XDocument.Load(manifestFile);
+            _manifestDocument = XDocument.Load(manifestFile);
+            ValidateSchema(_manifestDocument);
             BasePath = Path.GetDirectoryName(manifestFile);
+
         }
 
         public XmlManifestReader(XDocument document) {
-            _manifestFile = document;
+            ValidateSchema(document);
+            _manifestDocument = document;
         }
 
         /// <summary>
@@ -26,69 +32,111 @@ namespace NuPack {
         }
 
         public virtual void ReadContentTo(PackageBuilder builder) {
-            ReadMetaData(builder);
+            ReadMetadata(builder);
             ReadDependencies(builder);
             ReadFiles(builder);
         }
 
-        private void ReadMetaData(PackageBuilder builder) {
-            XElement metadataElement = _manifestFile.Root.Element("Metadata");
 
-            if (metadataElement.Element("Identifier") != null) {
-                builder.Id = metadataElement.Element("Identifier").Value;
-            }
-            if (metadataElement.Element("Version") != null) {
-                Version version = null;
-                Version.TryParse(metadataElement.Element("Version").Value, out version);
-                builder.Version = version;
+        private static void EnsureNamespace(XElement element) {            
+            // This method recursively goes through all descendants and makes sure it's in the nuspec namespace.
+            // Namespaces are hard to type by hand so we don't want to require it, but we can 
+            // transform the document in memory before validation if the namespace wasn't specified.
+            if (String.IsNullOrEmpty(element.Name.NamespaceName)) {
+                element.Name = MakeName(element.Name.LocalName);
             }
 
-            builder.Description = metadataElement.GetOptionalElementValue("Description");
-            var authorsElement = metadataElement.Element("Authors");
-            if (authorsElement != null) {
-                builder.Authors.AddRange(from e in authorsElement.Elements("Author") select e.Value);
-            }
-
-            builder.Language = metadataElement.GetOptionalElementValue("Language");
-            DateTime created;
-            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("Created"), out created)) {
-                builder.Created = created;
-            }
-            DateTime modified;
-            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("Modified"), out modified)) {
-                builder.Modified = modified;
-            }
-            builder.LastModifiedBy = metadataElement.GetOptionalElementValue("LastModifiedBy");
-            builder.Category = metadataElement.GetOptionalElementValue("Category");
-            builder.Keywords.AddRange((metadataElement.GetOptionalElementValue("Keywords") ?? String.Empty).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-        }
-
-        private void ReadDependencies(PackageBuilder builder) {
-            var dependenciesElement = _manifestFile.Root.Element("Dependencies");
-            if (dependenciesElement != null) {
-                var dependenices = from item in dependenciesElement.Elements()
-                                   select ReadPackageDepedency(item);
-                foreach (var item in dependenices) {
-                    builder.Dependencies.Add(item);
+            foreach (var childElement in element.Descendants()) {
+                if (String.IsNullOrEmpty(childElement.Name.NamespaceName)) {
+                    childElement.Name = MakeName(childElement.Name.LocalName);
                 }
             }
         }
 
-        private static PackageDependency ReadPackageDepedency(XElement item) {
-            var id = item.Attribute("id").Value;
+        internal static void ValidateSchema(XDocument document) {
+            if (document.Root != null) {
+                EnsureNamespace(document.Root);
+            }
+
+            // Get the xsd from the assembly
+            var stream = typeof(XmlManifestReader).Assembly.GetManifestResourceStream("NuPack.Authoring.nuspec.xsd");
+            Debug.Assert(stream != null);
+
+            // Validate the document against the xsd schema
+            using (StreamReader reader = new StreamReader(stream)) {
+                XmlSchemaSet schemaSet = new XmlSchemaSet();
+                XmlReader schemaReader = XmlReader.Create(new StringReader(reader.ReadToEnd()));
+                schemaSet.Add(Package.ManifestSchemaNamespace, schemaReader);
+                document.Validate(schemaSet, OnValidate);
+            }
+        }
+
+        private static void OnValidate(object sender, ValidationEventArgs e) {
+            if (e.Severity == XmlSeverityType.Error) {
+                // Throw an exception if there is a validation error
+                throw new InvalidOperationException(e.Message);
+            }
+        }
+
+        private void ReadMetadata(PackageBuilder builder) {
+            XElement metadataElement = _manifestDocument.Root.Element(MakeName("metadata"));
+
+            builder.Id = metadataElement.Element(MakeName("id")).Value;
+            string versionString = metadataElement.Element(MakeName("version")).Value;
+            // This will fail if the version is invalid
+            builder.Version = new Version(versionString);
+            builder.Description = metadataElement.Element(MakeName("description")).Value;
+
+            XElement authorsElement = metadataElement.Element(MakeName("authors"));
+            builder.Authors.AddRange(from e in authorsElement.Elements(MakeName("author"))
+                                     select e.Value);
+
+            DateTime created;
+            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("created", Package.ManifestSchemaNamespace), out created)) {
+                builder.Created = created;
+            }
+            DateTime modified;
+            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("modified", Package.ManifestSchemaNamespace), out modified)) {
+                builder.Modified = modified;
+            }
+            builder.Language = metadataElement.GetOptionalElementValue("language", Package.ManifestSchemaNamespace);
+            builder.LastModifiedBy = metadataElement.GetOptionalElementValue("lastmodifiedby", Package.ManifestSchemaNamespace);
+            builder.Category = metadataElement.GetOptionalElementValue("category", Package.ManifestSchemaNamespace);
+            string keywords = metadataElement.GetOptionalElementValue("keywords", Package.ManifestSchemaNamespace);
+
+            if (!String.IsNullOrWhiteSpace(keywords)) {
+                builder.Keywords.AddRange(keywords.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+            }
+        }
+
+        private static XName MakeName(string name) {
+            return XName.Get(name, Package.ManifestSchemaNamespace);
+        }
+
+        private void ReadDependencies(PackageBuilder builder) {
+            XElement dependencies = _manifestDocument.Root.Element(MakeName("dependencies"));
+            if (dependencies != null) {
+                builder.Dependencies.AddRange(from dependency in dependencies.Elements(MakeName("dependency"))
+                                              select ReadPackageDepedency(dependency));
+            }
+        }
+
+        private static PackageDependency ReadPackageDepedency(XElement dependency) {
+            var id = dependency.Attribute("id").Value;
+
             Version version = null, minVersion = null, maxVersion = null;
 
-            var versionString = item.GetOptionalAttributeValue("version");
+            var versionString = dependency.GetOptionalAttributeValue("version");
             if (!String.IsNullOrEmpty(versionString)) {
                 Version.TryParse(versionString, out version);
             }
 
-            versionString = item.GetOptionalAttributeValue("minversion");
+            versionString = dependency.GetOptionalAttributeValue("minversion");
             if (!String.IsNullOrEmpty(versionString)) {
                 Version.TryParse(versionString, out minVersion);
             }
 
-            versionString = item.GetOptionalAttributeValue("maxversion");
+            versionString = dependency.GetOptionalAttributeValue("maxversion");
             if (!String.IsNullOrEmpty(versionString)) {
                 Version.TryParse(versionString, out maxVersion);
             }
@@ -102,15 +150,12 @@ namespace NuPack {
                 return;
             }
 
-            var files = _manifestFile.Root.Element("Files");
-            if (files != null) {
-                // REVIEW: Should we look for specific elements?
-                foreach (var file in files.Elements()) {
-                    var source = file.GetOptionalAttributeValue("src");
-                    var destination = file.GetOptionalAttributeValue("dest");
-                    if (!String.IsNullOrEmpty(source)) {
-                        AddFiles(builder, source, destination);
-                    }
+            var files = _manifestDocument.Root.Elements(MakeName("files"));
+            if (files.Any()) {
+                foreach (var file in files) {
+                    var source = file.Element("src").Value;
+                    var destination = file.GetOptionalAttributeValue("target");
+                    AddFiles(builder, source, destination);
                 }
             }
             else {
