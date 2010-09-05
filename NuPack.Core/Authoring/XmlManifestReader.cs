@@ -153,7 +153,7 @@ namespace NuPack {
             var files = _manifestDocument.Root.Elements(MakeName("files"));
             if (files.Any()) {
                 foreach (var file in files) {
-                    var source = file.Element("src").Value;
+                    var source = file.Attribute("src").Value;
                     var destination = file.GetOptionalAttributeValue("target");
                     AddFiles(builder, source, destination);
                 }
