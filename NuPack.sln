@@ -7,18 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.VisualStudio", "NuPa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Test", "NuPack.Test\NuPack.Test.csproj", "{D3106412-E3AF-4CB6-B6D3-3664465B491F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{FAB2DDD1-4A49-4792-A540-FA669357308C}"
-	ProjectSection(SolutionItems) = preProject
-		packages\Moq.3.1.416.3.nupack = packages\Moq.3.1.416.3.nupack
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Moq.3.1.416.3", "Moq.3.1.416.3", "{4C3D9934-BD4F-4901-86F4-49D11F27D006}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{03657BC6-EE34-4406-8607-4DF957573C85}"
-	ProjectSection(SolutionItems) = preProject
-		packages\Moq.3.1.416.3\lib\Moq.dll = packages\Moq.3.1.416.3\lib\Moq.dll
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Server", "NuPack.Server\NuPack.Server.csproj", "{793B20A9-E263-4B54-BB31-305B602087CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Tools", "NuPack.Tools\NuPack.Tools.csproj", "{D0F9864B-D782-4471-81A2-29555E5DC0D7}"
@@ -28,6 +16,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost", "NuPack.Console\PowerShellHost\PowerShellHost.csproj", "{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack", "NuPack\NuPack.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{733A0BFB-51E2-4247-A077-F720DC1B69D4}"
+	ProjectSection(SolutionItems) = preProject
+		packages\Moq.3.1.416.3.nupack = packages\Moq.3.1.416.3.nupack
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Moq.3.1.416.3", "Moq.3.1.416.3", "{44A09399-704B-4270-9BC8-3860925CE07C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{3A1A3132-B336-4AA2-8CCE-119452099511}"
+	ProjectSection(SolutionItems) = preProject
+		packages\Moq.3.1.416.3\lib\Moq.dll = packages\Moq.3.1.416.3\lib\Moq.dll
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -168,7 +168,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{4C3D9934-BD4F-4901-86F4-49D11F27D006} = {FAB2DDD1-4A49-4792-A540-FA669357308C}
-		{03657BC6-EE34-4406-8607-4DF957573C85} = {4C3D9934-BD4F-4901-86F4-49D11F27D006}
+		{44A09399-704B-4270-9BC8-3860925CE07C} = {733A0BFB-51E2-4247-A077-F720DC1B69D4}
+		{3A1A3132-B336-4AA2-8CCE-119452099511} = {44A09399-704B-4270-9BC8-3860925CE07C}
 	EndGlobalSection
 EndGlobal
