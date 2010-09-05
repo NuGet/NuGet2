@@ -14,7 +14,6 @@ namespace NuPack {
             _manifestDocument = XDocument.Load(manifestFile);
             ValidateSchema(_manifestDocument);
             BasePath = Path.GetDirectoryName(manifestFile);
-
         }
 
         public XmlManifestReader(XDocument document) {
@@ -28,7 +27,7 @@ namespace NuPack {
         /// </summary>
         public string BasePath {
             get;
-            set;
+            private set;
         }
 
         public virtual void ReadContentTo(PackageBuilder builder) {
@@ -145,8 +144,8 @@ namespace NuPack {
         }
 
         private void ReadFiles(PackageBuilder builder) {
-            // Do nothing with files if the base path is null.
-            if (String.IsNullOrEmpty(BasePath)) {
+            // Do nothing with files if the base path is null (empty means current directory)
+            if (BasePath == null) {
                 return;
             }
 
