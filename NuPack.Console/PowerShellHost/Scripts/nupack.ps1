@@ -33,12 +33,15 @@ function global:New-Package {
             Write-Error "Unable to locate the nuspec file."
             return
         }
-                
-        # $SpecItem.FileNames returns an instance of PSParameterizedProperty.
-        $xmlReader = New-Object "NuPack.XmlManifestReader" $SpecItem.FileNames.Invoke(0)
         
-        $builder = New-Object "NuPack.PackageBuilder"
-        $xmlReader.ReadContentTo($builder)
+        # $SpecItem.FileNames returns an instance of PSParameterizedProperty.
+        $SpecFilePath = $SpecItem.FileNames.Invoke(0)
+        
+        # Prepare the builder
+        $builder = [NuPack.PackageBuilder]::ReadFrom($SpecFilePath)
+        $builder.Created = [System.DateTime]::Now
+        $builder.Modified = $builder.Created
+        $builder.Files.RemoveAll( { param($file) (".nupack", ".nuspec") -contains [System.IO.Path]::GetExtension($file.Path) } ) | out-null
         
         if (!$TargetFile){
             $TargetFile = Join-Path (Split-Path $ProjectIns.FullName) ($builder.Id + '.' + $builder.Version + '.nupack')
@@ -46,9 +49,13 @@ function global:New-Package {
         
         Write-Output "Creating package at '$TargetFile'..."
         
-        $stream = [System.IO.File]::Create($TargetFile)
-        $builder.Save($stream)
-        $stream.Close()
+        try { 
+            $stream = [System.IO.File]::Create($TargetFile)
+            $builder.Save($stream)
+        }
+        finally {
+            $stream.Close()
+        }
         
         Write-Output "Package file successfully created..."
     }
@@ -630,8 +637,8 @@ function global:_LookForSpecFile($projectIns, $spec) {
 
 # assign aliases to package cmdlets
 
-New-Alias 'nep' 'New-Package'
-New-Alias 'nip' 'List-Package'
+New-Alias 'nnp' 'New-Package'
+New-Alias 'nlp' 'List-Package'
 New-Alias 'nap' 'Add-Package'
-New-Alias 'nop' 'Remove-Package'
+New-Alias 'nrp' 'Remove-Package'
 New-Alias 'nup' 'Update-Package'
