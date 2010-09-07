@@ -207,6 +207,9 @@
   <data name="PackageBuilder_IdAndVersionRequired" xml:space="preserve">
     <value>Identifier and version are not specified.</value>
   </data>
+  <data name="PackageDoesNotContainManifest" xml:space="preserve">
+    <value>Package does not contain a manifest.</value>
+  </data>
   <data name="PackageHasDependent" xml:space="preserve">
     <value>Unable to uninstall '{0}' because '{1}' depends on it</value>
   </data>

@@ -93,9 +93,9 @@
             var packageManager = new PackageManager(sourceRepository, projectSystem, new MockPackageRepository());
 
             Package packageA = PackageUtility.CreatePackage("A", "1.0", 
-                                                             new[] { "content", @"sub\content" }, 
-                                                             new[] { "reference.dll" }, 
-                                                             new[] { "init.ps1" });
+                                                             new[] { "contentFile", @"sub\contentFile" }, 
+                                                             new[] { @"lib\reference.dll" }, 
+                                                             new[] { @"readme.txt" });
 
             sourceRepository.AddPackage(packageA);
 
@@ -105,10 +105,10 @@
             // Assert
             Assert.AreEqual(0, projectSystem.References.Count);
             Assert.AreEqual(4, projectSystem.Paths.Count);
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\sub\content"));
+            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\contentFile"));
+            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\sub\contentFile"));
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\lib\reference.dll"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\tools\init.ps1"));
+            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\resources\readme.txt"));
         }
 
         [TestMethod]

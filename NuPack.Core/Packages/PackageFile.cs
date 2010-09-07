@@ -31,5 +31,9 @@
         public Stream Open() {
             return _streamFactory();
         }
+
+        public override string ToString() {
+            return Path;
+        }
     }
 }

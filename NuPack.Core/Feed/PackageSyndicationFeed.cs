@@ -39,8 +39,10 @@
                 // Setup the link for the download
                 SyndicationLink downloadLink = item.Links[0];
                 downloadLink.RelationshipType = "enclosure";
+
+                // TODO: Move this code outside of auto feed generation
                 using (var stream = new MemoryStream()) {
-                    package.Save(stream);
+                    PackageBuilder.Save(package, stream);
                     downloadLink.Length = stream.Length;
                     var hashAttributeName = new XmlQualifiedName("hash");
                     downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);

@@ -34,12 +34,8 @@
             }
         }
 
-        public override void Save(Stream stream) {
-            Package.Save(stream);
-        }
-
-        public override IEnumerable<IPackageFile> GetFiles(string fileType) {
-            return Package.GetFiles(fileType);
+        public override IEnumerable<IPackageFile> GetFiles() {
+            return Package.GetFiles();
         }
 
         /// <summary>

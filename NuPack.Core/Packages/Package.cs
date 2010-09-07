@@ -1,11 +1,12 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.IO;
+    using System.Linq;
 
     public abstract class Package {
         internal const string SchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/";
+        internal const string ManifestSchemaNamespace = SchemaNamespace + "nuspec.xsd";
 
         public abstract string Id {
             get;
@@ -49,11 +50,11 @@
 
         public bool HasProjectContent {
             get {
-                return AssemblyReferences.Any() || this.GetContentFiles().Any() || this.GetConfiguration() != null;
+                return AssemblyReferences.Any() || this.GetContentFiles().Any();
             }
         }
-        
-        public abstract IEnumerable<IPackageFile> GetFiles(string fileType);
+
+        public abstract IEnumerable<IPackageFile> GetFiles();
 
         public abstract IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get;
@@ -62,8 +63,6 @@
         public abstract IEnumerable<PackageDependency> Dependencies {
             get;
         }
-
-        public abstract void Save(Stream stream);
 
         public override string ToString() {
             return Id + " " + Version;

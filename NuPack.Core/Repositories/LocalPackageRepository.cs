@@ -50,7 +50,7 @@
         public override void AddPackage(Package package) {
             string packageFileName = Utility.GetPackageFileName(package);
 
-            FileSystem.AddFile(packageFileName, package.Save);
+            FileSystem.AddFile(packageFileName, stream => PackageBuilder.Save(package, stream));
 
             base.AddPackage(package);
         }

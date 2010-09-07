@@ -57,6 +57,7 @@
     <Compile Include="Utility\Capture.cs" />
     <Compile Include="Utility\ExceptionAssert.cs" />
     <Compile Include="XmlExtensionsTest.cs" />
+    <Compile Include="XmlManifestReaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">

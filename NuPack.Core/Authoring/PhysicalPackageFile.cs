@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Globalization;
+﻿using System.IO;
 
 namespace NuPack {
     public class PhysicalPackageFile : IPackageFile {
@@ -31,6 +26,10 @@ namespace NuPack {
 
         public Stream Open() {
             return File.OpenRead(SourcePath);
+        }
+
+        public override string ToString() {
+            return SourcePath;
         }
     }
 }
