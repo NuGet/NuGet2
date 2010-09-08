@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
 namespace NuPack {
-    public class PhysicalPackageFile : IPackageFile {        
+    public sealed class PhysicalPackageFile : IPackageFile {        
         /// <summary>
         /// Path on disk
         /// </summary>

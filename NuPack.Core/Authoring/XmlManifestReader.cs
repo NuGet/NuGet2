@@ -64,9 +64,11 @@ namespace NuPack {
             // Validate the document against the xsd schema
             using (StreamReader reader = new StreamReader(stream)) {
                 XmlSchemaSet schemaSet = new XmlSchemaSet();
-                XmlReader schemaReader = XmlReader.Create(new StringReader(reader.ReadToEnd()));
-                schemaSet.Add(Package.ManifestSchemaNamespace, schemaReader);
-                document.Validate(schemaSet, OnValidate);
+                using (var stringReader = new StringReader(reader.ReadToEnd())) {
+                    XmlReader schemaReader = XmlReader.Create(stringReader);
+                    schemaSet.Add(Package.ManifestSchemaNamespace, schemaReader);
+                    document.Validate(schemaSet, OnValidate);
+                }
             }
         }
 
