@@ -1,13 +1,7 @@
 ﻿using System.IO;
 
 namespace NuPack {
-    public class PhysicalPackageFile : IPackageFile {
-
-        public string Name {
-            get;
-            set;
-        }
-
+    public class PhysicalPackageFile : IPackageFile {        
         /// <summary>
         /// Path on disk
         /// </summary>
@@ -19,9 +13,15 @@ namespace NuPack {
         /// <summary>
         /// Path in package
         /// </summary>
-        public string Path {
+        public string TargetPath {
             get;
             set;
+        }
+
+        string IPackageFile.Path {
+            get {
+                return TargetPath;
+            }
         }
 
         public Stream Open() {
@@ -29,7 +29,7 @@ namespace NuPack {
         }
 
         public override string ToString() {
-            return SourcePath;
+            return TargetPath;
         }
     }
 }

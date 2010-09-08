@@ -168,9 +168,8 @@ namespace NuPack {
             foreach (var file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)) {
                 var destinationPath = PathResolver.ResolvePackagePath(BasePath, file, destination);
                 builder.Files.Add(new PhysicalPackageFile {
-                    Name = Path.GetFileName(file),
                     SourcePath = file,
-                    Path = destinationPath
+                    TargetPath = destinationPath
                 });
             }
         }
