@@ -20,8 +20,8 @@ namespace NuPack {
             }
 
             try {
-                // Parse the arguments. The last argument is the content to be added to the package
                 var manifestFile = args.First();
+                string outputDirectory = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
                 PackageBuilder builder = PackageBuilder.ReadFrom(manifestFile);
                 builder.Created = DateTime.Now;
                 builder.Modified = DateTime.Now;
@@ -30,11 +30,13 @@ namespace NuPack {
                 // Remove the output file or the package spec might try to include it (which is default behavior)
                 builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
 
-                using (Stream stream = File.Create(outputFile)) {
+                string outputPath = Path.Combine(outputDirectory, outputFile);
+
+                using (Stream stream = File.Create(outputPath)) {
                     builder.Save(stream);
                 }
 
-                Console.WriteLine("{0} created successfully", outputFile);
+                Console.WriteLine("{0} created successfully", outputPath);
             }
             catch (Exception exception) {
                 Console.Error.WriteLine(exception.Message);
