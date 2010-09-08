@@ -41,7 +41,7 @@ namespace NuPack {
                 metadataElement.Add(new XElement("category", _builder.Category));
             }
             if (_builder.Keywords.Any()) {
-                metadataElement.Add(new XElement("Keywords", String.Join(", ", _builder.Keywords)));
+                metadataElement.Add(new XElement("keywords", String.Join(", ", _builder.Keywords)));
             }
 
             metadataElement.Add(new XElement("created", _builder.Created));
