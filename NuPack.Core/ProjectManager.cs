@@ -250,7 +250,7 @@
             Project.DeleteFiles(contentFilesToDelete, 
                                 Listener, 
                                 file => ExecuteRevert(file, from p in otherPackages
-                                                            from otherFile in p.GetFiles()
+                                                            from otherFile in p.GetContentFiles()
                                                             where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
                                                             select otherFile), 
                                         GetContentFilePath);
