@@ -322,15 +322,6 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Identifier and version are not specified..
-        /// </summary>
-        internal static string PackageBuilder_IdAndVersionRequired {
-            get {
-                return ResourceManager.GetString("PackageBuilder_IdAndVersionRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Package does not contain a manifest..
         /// </summary>
         internal static string PackageDoesNotContainManifest {

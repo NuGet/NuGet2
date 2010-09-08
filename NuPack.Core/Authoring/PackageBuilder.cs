@@ -76,20 +76,28 @@ namespace NuPack {
             get;
             private set;
         }
-
-        public void Save(Stream stream) {
-            VerifyPackage();
-            WritePackageContent(stream);
-        }
-
-        private void VerifyPackage() {
-            if (String.IsNullOrEmpty(Id) || Version == null) {
-                throw new InvalidOperationException(NuPackResources.PackageBuilder_IdAndVersionRequired);
-            }
-        }
-
+        
         public static void Save(Package package, Stream stream) {
             ReadFrom(package).Save(stream);
+        }
+
+        public void Save(Stream stream) {
+            using (Opc.Package package = Opc.Package.Open(stream, FileMode.Create)) {
+                WriteManifest(package);
+                WriteFiles(package);
+
+                // Copy the metadata properties back to the package
+                package.PackageProperties.Category = Category;
+                package.PackageProperties.Created = Created;
+                package.PackageProperties.Creator = String.Join(", ", Authors);
+                package.PackageProperties.Description = Description;
+                package.PackageProperties.Identifier = Id;
+                package.PackageProperties.Version = Version.ToString();
+                package.PackageProperties.Keywords = String.Join(", ", Keywords);
+                package.PackageProperties.LastModifiedBy = LastModifiedBy;
+                package.PackageProperties.Modified = Modified;
+                package.PackageProperties.Language = Language;
+            }
         }
 
         public static PackageBuilder ReadFrom(Stream stream) {
@@ -133,25 +141,6 @@ namespace NuPack {
             return packageBuilder;
         }
 
-        private void WritePackageContent(Stream stream) {
-            using (Opc.Package package = Opc.Package.Open(stream, FileMode.Create)) {
-                WriteManifest(package);
-                WriteFiles(package);
-
-                // Copy the metadata properties back to the package
-                package.PackageProperties.Category = Category;
-                package.PackageProperties.Created = Created;
-                package.PackageProperties.Creator = String.Join(", ", Authors);
-                package.PackageProperties.Description = Description;
-                package.PackageProperties.Identifier = Id;
-                package.PackageProperties.Version = Version.ToString();
-                package.PackageProperties.Keywords = String.Join(", ", Keywords);
-                package.PackageProperties.LastModifiedBy = LastModifiedBy;
-                package.PackageProperties.Modified = Modified;
-                package.PackageProperties.Language = Language;
-            }
-        }
-
         private void WriteManifest(Opc.Package package) {
             Uri uri = UriHelper.CreatePartUri(Id + Utility.ManifestExtension);
 
@@ -161,9 +150,14 @@ namespace NuPack {
             // Create the part
             Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
 
-            using (Stream outStream = packagePart.GetStream()) {
+            using (Stream stream = packagePart.GetStream()) {
                 var writer = new XmlManifestWriter(this);
-                writer.Save(outStream);
+                writer.Save(stream);                
+            }
+
+            // We need to reopen the stream after we've written the manifest so we can validate it
+            using (Stream stream = packagePart.GetStream()) {                
+                XmlManifestReader.ValidateSchema(XDocument.Load(stream));
             }
         }
 
@@ -181,8 +175,8 @@ namespace NuPack {
             // Create the part
             Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
 
-            using (Stream outStream = packagePart.GetStream()) {
-                sourceStream.CopyTo(outStream);
+            using (Stream stream = packagePart.GetStream()) {
+                sourceStream.CopyTo(stream);
             }
         }
     }
