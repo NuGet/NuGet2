@@ -4,11 +4,11 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.Versioning;
     using System.Text.RegularExpressions;
 
-    internal static class Utility {        
-        private static readonly Regex _versionRegex = new Regex(@"Version=(.+?),");
+    internal static class Utility {                
         private const string NetFrameworkIdentifier = ".NETFramework";
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -80,12 +80,7 @@
             // We need to parse the version name out from the mscorlib's assembly name since
             // we can't call GetName() in medium trust
             string assemblyFullName = typeof(string).Assembly.FullName;
-            Match match = _versionRegex.Match(assemblyFullName);
-
-            Debug.Assert(match.Success, "Failed to parse version");
-
-            string versionString = match.Groups[1].Value;
-            return new Version(versionString);
+            return new AssemblyName(assemblyFullName).Version;
         }
 
         internal static bool IsManifest(string path) {
