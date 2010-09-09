@@ -167,10 +167,7 @@
             string packageDirectory = Utility.GetPackageDirectory(package);
 
             // Remove resource files
-            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Listener);
-            
-            // Delete the package directory if any
-            FileSystem.DeleteDirectory(packageDirectory, true);
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Listener);            
         }
 
         public bool IsPackageInstalled(Package package) {

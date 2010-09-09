@@ -6,26 +6,26 @@
     using NuPack.Resources;
 
     internal static class FileSystemExtensions {
-        internal static void AddFiles(this IFileSystem fileSystem, 
-                                      IEnumerable<IPackageFile> files, 
-                                      PackageEventListener listener, 
-                                      Func<IPackageFile, bool> addFileCallback = null, 
-                                      Func<IPackageFile, string> pathSelector = null) {
-            AddFiles(fileSystem, files, String.Empty, listener, addFileCallback, pathSelector);
+        internal static void AddFiles(this IFileSystem fileSystem,
+                                      IEnumerable<IPackageFile> files,
+                                      PackageEventListener listener,
+                                      Func<IPackageFile, bool> addFileCallback = null,
+                                      Func<string, string> pathResolver = null) {
+            AddFiles(fileSystem, files, String.Empty, listener, addFileCallback, pathResolver);
         }
 
-        internal static void AddFiles(this IFileSystem fileSystem, 
-                                      IEnumerable<IPackageFile> files, 
-                                      string rootDir, 
-                                      PackageEventListener listener, 
-                                      Func<IPackageFile, bool> addFileCallback = null, 
-                                      Func<IPackageFile, string> pathSelector = null) {
+        internal static void AddFiles(this IFileSystem fileSystem,
+                                      IEnumerable<IPackageFile> files,
+                                      string rootDir,
+                                      PackageEventListener listener,
+                                      Func<IPackageFile, bool> addFileCallback = null,
+                                      Func<string, string> pathResolver = null) {
             foreach (IPackageFile file in files) {
                 if (addFileCallback != null && addFileCallback(file)) {
                     continue;
                 }
 
-                string path = Path.Combine(rootDir, GetFilePath(file, pathSelector));
+                string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
                 // Don't overwrite file if it exists if force wasn't set to true
                 if (fileSystem.FileExists(path)) {
                     listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
@@ -38,33 +38,39 @@
             }
         }
 
-        internal static void DeleteFiles(this IFileSystem fileSystem, 
-                                         IEnumerable<IPackageFile> files, 
-                                         PackageEventListener listener, 
-                                         Action<IPackageFile> deleteFileCallback = null, 
-                                         Func<IPackageFile, string> pathSelector = null) {
-            DeleteFiles(fileSystem, files, String.Empty, listener, deleteFileCallback, pathSelector);
+        internal static void DeleteFiles(this IFileSystem fileSystem,
+                                         IEnumerable<IPackageFile> files,
+                                         PackageEventListener listener,
+                                         Action<IPackageFile> deleteFileCallback = null,
+                                         Func<string, string> pathResolver = null) {
+            DeleteFiles(fileSystem, files, String.Empty, listener, deleteFileCallback, pathResolver);
         }
 
-        internal static void DeleteFiles(this IFileSystem fileSystem, 
-                                         IEnumerable<IPackageFile> files, 
-                                         string rootDir, 
-                                         PackageEventListener listener, 
-                                         Action<IPackageFile> deleteFileCallback = null, 
-                                         Func<IPackageFile, string> pathSelector = null) {
-            // Order by longest directory path so we delete the deepest sub folders first
-            var fileGroups = from file in files
-                             group file by Path.GetDirectoryName(file.Path) into g
-                             orderby g.Key.Length descending
-                             select g;
+        internal static void DeleteFiles(this IFileSystem fileSystem,
+                                         IEnumerable<IPackageFile> files,
+                                         string rootDir,
+                                         PackageEventListener listener,
+                                         Action<IPackageFile> deleteFileCallback = null,
+                                         Func<string, string> pathResolver = null) {
 
-            // Remove files
-            foreach (var grouping in fileGroups) {
-                foreach (var file in grouping) {
+            // First get all directories that contain files
+            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
+
+
+            // Get all directories that this package may have added
+            var directories = from grouping in directoryLookup
+                              from directory in GetDirectories(grouping.Key)
+                              orderby directory.Length descending
+                              select directory;
+
+            // Remove files from every directory
+            foreach (var directory in directories) {
+                var directoryFiles = directoryLookup.Contains(directory) ? directoryLookup[directory] : Enumerable.Empty<IPackageFile>();
+                foreach (var file in directoryFiles) {
                     if (deleteFileCallback != null) {
                         deleteFileCallback(file);
                     }
-                    string path = Path.Combine(rootDir, GetFilePath(file, pathSelector));
+                    string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
                     // Only delete the file if it exists and the checksum is the same
                     if (fileSystem.FileExists(path)) {
                         if (ChecksumEqual(fileSystem, file, path)) {
@@ -77,13 +83,32 @@
                     }
                 }
 
+                string dirPath = ResolvePath(directory, pathResolver);
+
                 // If the directory is empty then delete it
-                string directory = Path.Combine(rootDir, grouping.Key);
-                if (!fileSystem.GetFiles(directory).Any() &&
-                    !fileSystem.GetDirectories(directory).Any()) {
-                    fileSystem.DeleteDirectory(directory, recursive: false);
+                if (!fileSystem.GetFiles(dirPath).Any() &&
+                    !fileSystem.GetDirectories(dirPath).Any()) {
+                    fileSystem.DeleteDirectory(dirPath, recursive: false);
                 }
             }
+        }
+
+        private static IEnumerable<string> GetDirectories(string path) {
+            foreach (var index in IndexOfAll(path, Path.DirectorySeparatorChar)) {
+                yield return path.Substring(0, index);
+            }
+            yield return path;
+        }
+
+        private static IEnumerable<int> IndexOfAll(string value, char ch) {
+            int index = -1;
+            do {
+                index = value.IndexOf(ch, index + 1);
+                if (index >= 0) {
+                    yield return index;
+                }
+            }
+            while (index >= 0);
         }
 
         private static bool ChecksumEqual(IFileSystem fileSystem, IPackageFile file, string path) {
@@ -109,13 +134,10 @@
             }
         }
 
-        private static string GetFilePath(IPackageFile file, Func<IPackageFile, string> pathSelector) {
-            string filePath = null;
+        private static string ResolvePath(string path, Func<string, string> pathSelector) {
+            string filePath = path;
             if (pathSelector != null) {
-                filePath = pathSelector(file);
-            }
-            if (String.IsNullOrEmpty(filePath)) {
-                filePath = file.Path;
+                filePath = pathSelector(path);
             }
             return filePath;
         }

@@ -160,7 +160,7 @@
             Project.AddFiles(package.GetContentFiles(),
                              Listener,
                              ExecuteModify,
-                             GetContentFilePath);
+                             ResolvePath);
 
             // Add the references to the reference path
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
@@ -173,8 +173,12 @@
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package, Project.ProjectName);
         }
 
-        private string GetContentFilePath(IPackageFile packageFile) {
-            return packageFile.Path.Substring(@"content\".Length);
+        private string ResolvePath(string path) {
+            // Return empty string for the content directory
+            if (path.Equals("content", StringComparison.OrdinalIgnoreCase)) {
+                return String.Empty;
+            }
+            return path.Substring(@"content\".Length);
         }
 
         private bool ExecuteModify(IPackageFile file) {
@@ -247,13 +251,13 @@
             var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
-            Project.DeleteFiles(contentFilesToDelete, 
-                                Listener, 
+            Project.DeleteFiles(contentFilesToDelete,
+                                Listener,
                                 file => ExecuteRevert(file, from p in otherPackages
                                                             from otherFile in p.GetContentFiles()
                                                             where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
-                                                            select otherFile), 
-                                        GetContentFilePath);
+                                                            select otherFile),
+                                ResolvePath);
 
             // Remove references
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {

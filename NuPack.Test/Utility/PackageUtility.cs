@@ -122,6 +122,9 @@
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
             mockPackage.Setup(m => m.AssemblyReferences).Returns(assemblyReferences);
             mockPackage.Setup(m => m.Dependencies).Returns(dependencies);
+            mockPackage.Setup(m => m.Description).Returns("Mock package " + id);
+            mockPackage.Setup(m => m.Language).Returns("en-US");
+            mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
             return mockPackage.Object;
         }
 
@@ -129,7 +132,7 @@
             var assemblyReferences = new List<IPackageAssemblyReference>();
             foreach (var fileName in fileNames) {
                 var mockAssemblyReference = new Mock<IPackageAssemblyReference>();
-                mockAssemblyReference.Setup(m => m.Open()).Returns(new MemoryStream());
+                mockAssemblyReference.Setup(m => m.Open()).Returns(() => new MemoryStream());
                 mockAssemblyReference.Setup(m => m.Path).Returns(fileName);
                 mockAssemblyReference.Setup(m => m.Name).Returns(Path.GetFileName(fileName));
                 assemblyReferences.Add(mockAssemblyReference.Object);
@@ -139,7 +142,7 @@
 
         internal static IPackageAssemblyReference CreateAssemblyReference(string path, FrameworkName targetFramework) {
             var mockAssemblyReference = new Mock<IPackageAssemblyReference>();
-            mockAssemblyReference.Setup(m => m.Open()).Returns(new MemoryStream());
+            mockAssemblyReference.Setup(m => m.Open()).Returns(() => new MemoryStream());
             mockAssemblyReference.Setup(m => m.Path).Returns(path);
             mockAssemblyReference.Setup(m => m.Name).Returns(path);
             mockAssemblyReference.Setup(m => m.TargetFramework).Returns(targetFramework);

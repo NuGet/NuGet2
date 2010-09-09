@@ -5,6 +5,9 @@
     using System.Linq;
 
     public abstract class Package {
+        // REVIEW: Should these be public
+        internal const string PackageExtension = ".nupack";
+        internal const string ManifestExtension = ".nuspec";
         internal const string SchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/";
         internal const string ManifestSchemaNamespace = SchemaNamespace + "nuspec.xsd";
 

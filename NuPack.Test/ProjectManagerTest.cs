@@ -181,6 +181,28 @@
         }
 
         [TestMethod]
+        public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty() {
+            // Arrange
+            MockProjectSystem mockProjectSystem = new MockProjectSystem();
+            MockPackageRepository mockRepository = new MockPackageRepository();
+
+            ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem);
+            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                             new[] { @"sub\file1", @"sub\file2" });
+            
+            mockRepository.AddPackage(packageA);
+            projectManager.AddPackageReference("A");
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"sub\file1"));
+            Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"sub\file2"));
+            Assert.IsTrue(mockProjectSystem.Deleted.Contains("sub"));
+        }
+
+        [TestMethod]
         public void AddPackageReferenceWhenOlderVersionOfPackageInstalledDoesAnUpgrade() {
             // Arrange
             var sourceRepository = new MockPackageRepository();

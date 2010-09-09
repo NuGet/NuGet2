@@ -142,7 +142,7 @@ namespace NuPack {
         }
 
         private void WriteManifest(Opc.Package package) {
-            Uri uri = UriHelper.CreatePartUri(Id + Utility.ManifestExtension);
+            Uri uri = UriHelper.CreatePartUri(Id + Package.ManifestExtension);
 
             // Create the manifest relationship
             package.CreateRelationship(uri, Opc.TargetMode.Internal, Package.SchemaNamespace + ManifestRelationType);

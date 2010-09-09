@@ -89,8 +89,8 @@
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
             MockProjectSystem projectSystem = new MockProjectSystem();            
-            var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, projectSystem, new MockPackageRepository());
+            var sourceRepository = new MockPackageRepository();            
+            var packageManager = new PackageManager(sourceRepository, projectSystem);
 
             Package packageA = PackageUtility.CreatePackage("A", "1.0", 
                                                              new[] { "contentFile", @"sub\contentFile" }, 
@@ -104,11 +104,12 @@
 
             // Assert
             Assert.AreEqual(0, projectSystem.References.Count);
-            Assert.AreEqual(4, projectSystem.Paths.Count);
+            Assert.AreEqual(5, projectSystem.Paths.Count);
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\contentFile"));
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\sub\contentFile"));
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\lib\reference.dll"));
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\resources\readme.txt"));
+            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\A.1.0.nupack"));
         }
 
         [TestMethod]

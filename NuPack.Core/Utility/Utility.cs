@@ -7,11 +7,7 @@
     using System.Runtime.Versioning;
     using System.Text.RegularExpressions;
 
-    internal static class Utility {
-        // REVIEW: Should this be static public readonly
-        internal const string PackageExtension = ".nupack";
-        internal const string ManifestExtension = ".nuspec";
-
+    internal static class Utility {        
         private static readonly Regex _versionRegex = new Regex(@"Version=(.+?),");
         private const string NetFrameworkIdentifier = ".NETFramework";
 
@@ -93,7 +89,7 @@
         }
 
         internal static bool IsManifest(string path) {
-            return Path.GetExtension(path).Equals(ManifestExtension, StringComparison.OrdinalIgnoreCase);
+            return Path.GetExtension(path).Equals(Package.ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         internal static FrameworkName GetDefaultTargetFramework() {
@@ -101,7 +97,7 @@
         }
 
         internal static string GetPackageFileName(Package package) {
-            return package.Id + "." + package.Version + PackageExtension;
+            return package.Id + "." + package.Version + Package.PackageExtension;
         }
 
         internal static string GetPackageDirectory(Package package) {
