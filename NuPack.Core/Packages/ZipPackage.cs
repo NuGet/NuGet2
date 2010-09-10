@@ -6,7 +6,7 @@
     using NuPack.Resources;
     using Opc = System.IO.Packaging;
 
-    internal class ZipPackage : Package {
+    public class ZipPackage : Package {
         private const string AssemblyReferencesDir = "lib";
         private const string AssemblyReferencesExtension = ".dll";
 
@@ -152,7 +152,7 @@
         public override IEnumerable<IPackageFile> GetFiles() {
             return _files;
         }
-
+        
         private bool IsAssemblyReference(Opc.PackagePart part) {
             // Assembly references are in lib/ and have a .dll extension
             var path = UriHelper.GetPath(part.Uri);
@@ -166,6 +166,5 @@
             return !_excludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
                    !Utility.IsManifest(path);
         }
-
     }
 }

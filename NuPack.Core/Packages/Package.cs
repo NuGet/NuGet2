@@ -70,9 +70,5 @@
         public override string ToString() {
             return Id + " " + Version;
         }
-
-        public static Package Open(Stream stream) {
-            return new ZipPackage(stream);
-        }
     }
 }
