@@ -6,51 +6,53 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 
 namespace NuPack.VisualStudio {
-    public class VSPackageSourceProvider : PackageSourceProvider {
+    public class VSPackageSourceProvider {
         
         private PackageSourceSettingsManager _settingsManager;
         private HashSet<PackageSource> _packageSources;
+        private PackageSource _activePackageSource;
 
-        public VSPackageSourceProvider(_DTE dte) {
-
-            ServiceProvider serviceProvider = new ServiceProvider(dte as Microsoft.VisualStudio.OLE.Interop.IServiceProvider);
+        public VSPackageSourceProvider(IServiceProvider serviceProvider) {
             _settingsManager = new PackageSourceSettingsManager(serviceProvider);
-            
+
             DeserializePackageSources();
             DeserializeActivePackageSource();
+        }
+
+        public VSPackageSourceProvider(_DTE dte) : 
+            this(new ServiceProvider(dte as Microsoft.VisualStudio.OLE.Interop.IServiceProvider))
+        {
         }
 
         private void DeserializePackageSources() {
             string propertyString = _settingsManager.PackageSourcesString;
 
-            if (string.IsNullOrEmpty(propertyString)) {
-                return;
+            if (!String.IsNullOrEmpty(propertyString)) {
+                _packageSources = SerializationHelper.Deserialize<HashSet<PackageSource>>(propertyString);
             }
-
-            _packageSources = SerializationHelper.Deserialize<HashSet<PackageSource>>(propertyString);
         }
 
         private void DeserializeActivePackageSource() {
-            base.ActivePackageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
+            ActivePackageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
         }
         
-        public override PackageSource ActivePackageSource {
+        public PackageSource ActivePackageSource {
             get {
-                return base.ActivePackageSource;
+                return _activePackageSource;
             }
             set {
-                base.ActivePackageSource = value;
+                _activePackageSource = value;
 
                 // persist the value into VS settings store
                 _settingsManager.ActivePackageSourceString = SerializationHelper.Serialize(value);
             }
         }
 
-        public override IEnumerable<PackageSource> GetPackageSources() {
+        public IEnumerable<PackageSource> GetPackageSources() {
             return _packageSources;
         }
 
-        public override void AddPackageSource(PackageSource source) {
+        public void AddPackageSource(PackageSource source) {
 
             if (source == null) {
                 throw new ArgumentNullException("source");
@@ -62,7 +64,7 @@ namespace NuPack.VisualStudio {
             }
         }
 
-        public override bool RemovePackageSource(PackageSource source) {
+        public bool RemovePackageSource(PackageSource source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -73,7 +75,15 @@ namespace NuPack.VisualStudio {
             }
 
             return result;
-        }       
+        }
+
+        public void TryAddAndSetActivePackageSource(PackageSource source) {
+            if (!_packageSources.Contains(source)) {
+                _packageSources.Add(source);
+            }
+
+            ActivePackageSource = source;
+        }
 
         private void PersistPackageSources() {
             _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources);

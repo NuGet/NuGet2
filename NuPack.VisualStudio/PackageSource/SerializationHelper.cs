@@ -1,14 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace NuPack.VisualStudio {
+
     internal static class SerializationHelper {
         
         public static string Serialize<T>(T objectGraph) where T : class {
             using (MemoryStream stream = new MemoryStream()) {
-                DataContractSerializer _serializer = new DataContractSerializer(typeof(T));
-                _serializer.WriteObject(stream, objectGraph);
+                DataContractSerializer serializer = new DataContractSerializer(typeof(T));
+                serializer.WriteObject(stream, objectGraph);
 
                 stream.Seek(0, SeekOrigin.Begin);
                 byte[] buffer = new byte[stream.Length];
@@ -19,18 +21,18 @@ namespace NuPack.VisualStudio {
         }
 
         public static T Deserialize<T>(string serializedString) where T : class {
-            if (string.IsNullOrEmpty(serializedString)) {
+            if (String.IsNullOrEmpty(serializedString)) {
                 return null;
             }
 
             using (MemoryStream stream = new MemoryStream()) {
-                DataContractSerializer _serializer = new DataContractSerializer(typeof(T));
+                DataContractSerializer serializer = new DataContractSerializer(typeof(T));
 
                 byte[] buffer = Encoding.UTF8.GetBytes(serializedString);
                 stream.Write(buffer, 0, buffer.Length);
                 stream.Seek(0, SeekOrigin.Begin);
                 
-                return (T)_serializer.ReadObject(stream);
+                return (T)serializer.ReadObject(stream);
             }
         }
     }

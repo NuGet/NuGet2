@@ -34,6 +34,7 @@
     <EmbeddedResource Include="Resources\NuPackResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>NuPackResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -70,8 +71,6 @@
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\XmlManifestReader.cs" />
     <Compile Include="PackageSource\PackageSource.cs" />
-    <Compile Include="PackageSource\PackageSourceProvider.cs" />
-    <Compile Include="PackageSource\PackageSourceStore.cs" />
     <Compile Include="Packages\DefaultPackageAssemblyPathResolver.cs" />
     <Compile Include="Packages\IPackageAssemblyPathResolver.cs" />
     <Compile Include="PackageWalker\ProjectUninstallWalker.cs" />

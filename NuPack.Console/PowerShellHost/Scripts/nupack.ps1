@@ -1,4 +1,4 @@
-# make sure we stop on exceptions
+	# make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null
@@ -274,7 +274,7 @@ function global:Update-PackageSource {
         [string]$Source
     )
 
-    [NuPack.PackageSourceStore]::ActivePackageSource = New-Object "NuPack.PackageSource" @($Name, $Source)
+    $PackageSourceStore.TryAddAndSetActivePackageSource((New-Object "NuPack.PackageSource" @($Name, $Source)))
 }
 
 function global:Update-DefaultProject {
@@ -637,7 +637,7 @@ function global:_LookForSpecFile($projectIns, $spec) {
 }
 
 function global:_GetDefaultPackageSource() {
-    $ActivePackageSource = [NuPack.PackageSourceStore]::ActivePackageSource
+    $ActivePackageSource = $PackageSourceStore.ActivePackageSource
     if ($ActivePackageSource) {
         $ActivePackageSource.Source
     }

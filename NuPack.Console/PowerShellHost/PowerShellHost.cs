@@ -25,6 +25,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         private Runspace _myRunSpace;
         private MyHost _myHost;
         private SolutionProjectsHelper _solutionHelper;
+        private VSPackageSourceProvider _packageSourceProvider;
 
         protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, Action<InitialSessionState> init, object privateData)
         {
@@ -33,7 +34,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             this.Console = console;
             this.IsAsync = isAsync;
 
-            PackageSourceStore.DefaultProvider = new VSPackageSourceProvider(dte);
+            _packageSourceProvider = new VSPackageSourceProvider(dte);
 
             _solutionHelper = new SolutionProjectsHelper(dte, this);
             _name = name;
@@ -79,6 +80,13 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             {
                 _init(initialSessionState);
             }
+
+            initialSessionState.Variables.Add(
+                new SessionStateVariableEntry(
+                    "PackageSourceStore", 
+                    _packageSourceProvider, 
+                    null, 
+                    ScopedItemOptions.ReadOnly));
 
             // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
             // will reveal syntax error information if there is any.
@@ -225,7 +233,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         {
             get
             {
-                var activePackageSource = PackageSourceStore.ActivePackageSource;
+                var activePackageSource = _packageSourceProvider.ActivePackageSource;
                 return activePackageSource == null ? null : activePackageSource.Source;
             }
             set
@@ -234,8 +242,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation
                     throw new ArgumentNullException();
                 }
 
-                PackageSourceStore.ActivePackageSource =
-                    PackageSourceStore.GetPackageSources().FirstOrDefault(
+                _packageSourceProvider.ActivePackageSource =
+                    _packageSourceProvider.GetPackageSources().FirstOrDefault(
                         ps => ps.Source.Equals(value, StringComparison.OrdinalIgnoreCase));
             }
         }
@@ -244,7 +252,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         {
             get 
             {
-                return NuPack.PackageSourceStore.GetPackageSources().Select(ps => ps.Source).ToArray();
+                return _packageSourceProvider.GetPackageSources().Select(ps => ps.Source).ToArray();
             }
         }
 

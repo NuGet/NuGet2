@@ -21,13 +21,26 @@ namespace NuPack {
                 throw new ArgumentNullException("name");
             }
 
-            this.Name = name;
-            this.Source = source;
+            Name = name;
+            Source = source;
         }
 
         public bool Equals(PackageSource other) {
             return Name.Equals(other.Name, StringComparison.CurrentCultureIgnoreCase) &&
                 Source.Equals(other.Source, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override bool Equals(object obj) {
+            if (obj == null) {
+                return base.Equals(obj);
+            }
+
+            if (!(obj is PackageSource)) {
+                throw new InvalidCastException("The 'obj' argument is not a PackageSource object.");
+            }
+            else {
+                return Equals(obj as PackageSource);
+            }
         }
 
         public override string ToString() {
