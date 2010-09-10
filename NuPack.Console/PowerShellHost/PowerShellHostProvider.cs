@@ -11,7 +11,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 {
     [Export(typeof(IHostProvider))]
     [HostName(PowerShellHostProvider.HostName)]
-    [DisplayName("Package Manager")]
+    [DisplayName("NuPack Provider")]
     class PowerShellHostProvider : IHostProvider
     {
         /// <summary>
@@ -25,7 +25,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         /// <summary>
         /// This PowerShell host name. Used for PowerShell "$host".
         /// </summary>
-        public const string PowerConsoleHostName = "Package Manager";
+        public const string PowerConsoleHostName = "NuPack";
 
         [Import]
         internal IPowerShellHostService PowerShellHostService { get; set; }
