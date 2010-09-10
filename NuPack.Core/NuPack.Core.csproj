@@ -69,6 +69,9 @@
     <Compile Include="Authoring\PackageBuilder.cs" />
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\XmlManifestReader.cs" />
+    <Compile Include="PackageSource\PackageSource.cs" />
+    <Compile Include="PackageSource\PackageSourceProvider.cs" />
+    <Compile Include="PackageSource\PackageSourceStore.cs" />
     <Compile Include="Packages\DefaultPackageAssemblyPathResolver.cs" />
     <Compile Include="Packages\IPackageAssemblyPathResolver.cs" />
     <Compile Include="PackageWalker\ProjectUninstallWalker.cs" />

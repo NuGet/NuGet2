@@ -124,12 +124,7 @@ namespace NuPackConsole.Implementation.PowerConsole
         {
             get 
             {
-                return new string[] 
-                {
-                    // TODO: read this list from somewhere
-                    "http://www.codeplex.com",
-                    "http://www.asp.net"
-                };
+                return ActiveHostInfo.WpfConsole.Host.AvailableSettings;
             }
         }
 

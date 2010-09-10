@@ -1,9 +1,6 @@
 # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
-# Default feed
-$global:DefaultPackageSource = "";
-
 $global:DefaultProjectName = $null
 
 function global:New-Package {
@@ -254,9 +251,11 @@ function global:List-Package {
             Write-Error "No solution is found in the current environment."
             return
         }
+        
+        $DefaultPackageSource = _GetDefaultPackageSource
 
         if ($DefaultPackageSource) {
-            $repository = [NuPack.PackageRepositoryFactory]::CreateRepository($global:DefaultPackageSource)
+            $repository = [NuPack.PackageRepositoryFactory]::CreateRepository($DefaultPackageSource)
         }
         else {
             []
@@ -270,10 +269,12 @@ function global:Update-PackageSource {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)]
+        [string]$Name,
+        [parameter(Mandatory = $true)]
         [string]$Source
     )
 
-    $global:DefaultPackageSource = $Source
+    [NuPack.PackageSourceStore]::ActivePackageSource = New-Object "NuPack.PackageSource" @($Name, $Source)
 }
 
 function global:Update-DefaultProject {
@@ -412,7 +413,7 @@ function global:TabExpansion($line, $lastWord) {
     }
     
     switch ($tokens[0]) {
-        { $_ -eq 'New-Package' -or $_ -eq 'nep' } {
+        { $_ -eq 'New-Package' -or $_ -eq 'nnp' } {
             $choices = _TabExpansionForNewPackage $secondLastToken $tokens.length $filter
         }
     
@@ -420,7 +421,7 @@ function global:TabExpansion($line, $lastWord) {
             $choices = _TabExpansionForAddPackage $secondLastToken $tokens.length $filter
         }
 
-        { $_ -eq 'Remove-Package' -or $_ -eq 'nop' } {
+        { $_ -eq 'Remove-Package' -or $_ -eq 'nrp' } {
             $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
 
@@ -536,7 +537,7 @@ function global:_GetPackageManager($Source) {
 
     # Use default feed if one wasn't specified
     if (!$Source) {
-        $Source = $global:DefaultPackageSource
+        $Source = _GetDefaultPackageSource
     }
     
     # Create a visual studio package manager
@@ -632,6 +633,13 @@ function global:_LookForSpecFile($projectIns, $spec) {
         if ($allNuspecs.length -eq 1) {
             $allNuspecs[0]
         }
+    }
+}
+
+function global:_GetDefaultPackageSource() {
+    $ActivePackageSource = [NuPack.PackageSourceStore]::ActivePackageSource
+    if ($ActivePackageSource) {
+        $ActivePackageSource.Source
     }
 }
 

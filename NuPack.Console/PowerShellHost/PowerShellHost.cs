@@ -8,6 +8,8 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
 using EnvDTE80;
+using NuPack;
+using NuPack.VisualStudio;
 
 namespace NuPackConsole.Host.PowerShell.Implementation
 {
@@ -31,6 +33,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             this.Console = console;
             this.IsAsync = isAsync;
 
+            PackageSourceStore.DefaultProvider = new VSPackageSourceProvider(dte);
+
             _solutionHelper = new SolutionProjectsHelper(dte, this);
             _name = name;
             _init = init;
@@ -43,8 +47,6 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             // load user profile scripts before the command prompt shows up. It also helps with 
             // tab expansion right from the beginning
             SetupRunspace();
-
-            LoadPackagingAssemblies();
 
             LoadStartupScripts();
 
@@ -65,17 +67,6 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             Invoke("Import-Module '" + npackPath + "'", null, false);
         }
 
-        private void LoadPackagingAssemblies()
-        {
-            // load the two Packaging assemblies 
-            //Assembly.Load("NuPack.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
-            //Assembly.Load("NuPack.VisualStudio, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
-
-            // TODO: when the assemblies are signed, change this to using full assembly names
-            Assembly.Load("NuPack.Core");
-            Assembly.Load("NuPack.VisualStudio");
-        }
-
         private void SetupRunspace()
         {
             if (_myRunSpace != null)
@@ -88,6 +79,14 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             {
                 _init(initialSessionState);
             }
+
+            // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
+            // will reveal syntax error information if there is any.
+            //
+            //string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
+            //string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
+            //string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
+            //initialSessionState.ImportPSModule(new string[] { profilePath, npackPath });
 
             _myHost = new MyHost(this, _name, _privateData);
             _myRunSpace = RunspaceFactory.CreateRunspace(_myHost, initialSessionState);
@@ -224,18 +223,28 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
         public string Setting
         {
-            get 
+            get
             {
-                return (string)InvokeResult("get-variable DefaultPackageSource");
+                var activePackageSource = PackageSourceStore.ActivePackageSource;
+                return activePackageSource == null ? null : activePackageSource.Source;
             }
             set
             {
-                if (string.IsNullOrEmpty(value))
-                {
+                if (string.IsNullOrEmpty(value)) {
                     throw new ArgumentNullException();
                 }
 
-                Invoke("Update-PackageSource '" + value + "'", null, false);
+                PackageSourceStore.ActivePackageSource =
+                    PackageSourceStore.GetPackageSources().FirstOrDefault(
+                        ps => ps.Source.Equals(value, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        public string[] AvailableSettings 
+        {
+            get 
+            {
+                return NuPack.PackageSourceStore.GetPackageSources().Select(ps => ps.Source).ToArray();
             }
         }
 

@@ -30,6 +30,8 @@ namespace NuPackConsole
 
         string Setting { get; set; }
 
+        string[] AvailableSettings { get; }
+
         string DefaultProject { get; set; }
 
         string[] AvailableProjects { get; }
