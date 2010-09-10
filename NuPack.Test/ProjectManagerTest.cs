@@ -1,6 +1,7 @@
 ﻿namespace NuPack.Test {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Runtime.Versioning;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,7 +19,7 @@
             ExceptionAssert.ThrowsArgNullOrEmpty(() => projectManager.AddPackageReference((string)null), "packageId");
             ExceptionAssert.ThrowsArgNullOrEmpty(() => projectManager.AddPackageReference(String.Empty), "packageId");
         }
-        
+
         [TestMethod]
         public void AddingUnknownPackageReferenceThrows() {
             // Arrange
@@ -33,11 +34,29 @@
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
-            Package packageA = PackageUtility.CreatePackage("A", "1.0");            
+            Package packageA = PackageUtility.CreatePackage("A", "1.0");
             sourceRepository.AddPackage(packageA);
-            
+
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to add reference to 'A 1.0' because it has no project content.");
+        }
+
+        [TestMethod]
+        public void AddingPackageReferenceThrowsExceptionPackageReferenceIsNotAdded() {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new Mock<ProjectSystem>();
+            projectSystem.Setup(m => m.AddFile("file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
+            projectSystem.Setup(m => m.Root).Returns("FakeRoot");
+            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), projectSystem.Object);
+            Package packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            ExceptionAssert.Throws<UnauthorizedAccessException>(() => projectManager.AddPackageReference("A"));
+
+            // Assert
+            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA));
         }
 
         [TestMethod]
@@ -189,7 +208,7 @@
             ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem);
             Package packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
-            
+
             mockRepository.AddPackage(packageA);
             projectManager.AddPackageReference("A");
 

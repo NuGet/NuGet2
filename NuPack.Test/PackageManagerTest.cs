@@ -1,8 +1,10 @@
 ﻿namespace NuPack.Test {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using NuPack.Test.Mocks;    
+    using Moq;
+    using NuPack.Test.Mocks;
 
     [TestClass]
     public class PackageManagerTest {
@@ -17,7 +19,7 @@
                                                             dependencies: new List<PackageDependency> {
                                                                  new PackageDependency("C")
                                                              });
-            
+
             Package packageC = PackageUtility.CreatePackage("C", "1.0");
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageC);
@@ -28,7 +30,7 @@
             // Assert
             Assert.IsTrue(localRepository.IsPackageInstalled(packageA));
             Assert.IsFalse(localRepository.IsPackageInstalled(packageC));
-        }        
+        }
 
         [TestMethod]
         public void UninstallingUnknownPackageThrows() {
@@ -88,13 +90,13 @@
         [TestMethod]
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
-            MockProjectSystem projectSystem = new MockProjectSystem();            
-            var sourceRepository = new MockPackageRepository();            
+            MockProjectSystem projectSystem = new MockProjectSystem();
+            var sourceRepository = new MockPackageRepository();
             var packageManager = new PackageManager(sourceRepository, projectSystem);
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0", 
-                                                             new[] { "contentFile", @"sub\contentFile" }, 
-                                                             new[] { @"lib\reference.dll" }, 
+            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                             new[] { "contentFile", @"sub\contentFile" },
+                                                             new[] { @"lib\reference.dll" },
                                                              new[] { @"readme.txt" });
 
             sourceRepository.AddPackage(packageA);
@@ -170,6 +172,27 @@
             Assert.IsTrue(localRepository.IsPackageInstalled(packageA));
             Assert.IsTrue(localRepository.IsPackageInstalled(packageB));
             Assert.IsTrue(localRepository.IsPackageInstalled(packageC));
+        }
+
+        [TestMethod]
+        public void InstallPackageThrowsExceptionPackageIsNotInstalled() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new Mock<ProjectSystem>();
+            projectSystem.Setup(m => m.AddFile(@"A.1.0\content\file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
+            projectSystem.Setup(m => m.Root).Returns("FakeRoot");
+            PackageManager packageManager = new PackageManager(sourceRepository, projectSystem.Object, localRepository);
+
+            Package packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });            
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            ExceptionAssert.Throws<UnauthorizedAccessException>(() => packageManager.InstallPackage("A"));
+            
+
+            // Assert
+            Assert.IsFalse(packageManager.IsPackageInstalled(packageA));
         }
 
         private PackageManager CreatePackageManager() {

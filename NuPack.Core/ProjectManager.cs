@@ -149,10 +149,7 @@
             }
         }
 
-        protected void AddPackageReferenceToProject(Package package) {
-            // Add package to local repository
-            LocalRepository.AddPackage(package);
-
+        protected void AddPackageReferenceToProject(Package package) {            
             // Resolve assembly references
             var assemblyReferences = ResolveAssemblyReferences(package);
 
@@ -169,6 +166,9 @@
 
                 Project.AddReference(referencePath);
             }
+
+            // Add package to local repository
+            LocalRepository.AddPackage(package);
 
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package, Project.ProjectName);
         }

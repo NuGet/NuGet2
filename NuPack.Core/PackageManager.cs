@@ -101,10 +101,10 @@
             // notify listener before installing
             var context = new OperationContext(package, GetPackagePath(package));
             Listener.OnBeforeInstall(context);
+            
+            ExpandFiles(package);
 
             LocalRepository.AddPackage(package);
-
-            ExpandFiles(package);
 
             // notify listener after installing
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package);
