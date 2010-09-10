@@ -122,7 +122,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             var powerShell = System.Management.Automation.PowerShell.Create();
             powerShell.Runspace = _myRunSpace;
             
-            PSCommand[] profileCommands = HostUtilities.GetProfileCommands("PackageManager");
+            PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuPack");
             foreach (PSCommand command in profileCommands)
             {
                 powerShell.Commands = command;
