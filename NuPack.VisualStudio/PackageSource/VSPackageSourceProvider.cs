@@ -77,12 +77,13 @@ namespace NuPack.VisualStudio {
             return result;
         }
 
-        public void TryAddAndSetActivePackageSource(PackageSource source) {
-            if (!_packageSources.Contains(source)) {
-                _packageSources.Add(source);
+        public void TryAddAndSetActivePackageSource(string name, string source) {
+            PackageSource packageSource = new PackageSource(name, source);
+            if (!_packageSources.Contains(packageSource)) {
+                _packageSources.Add(packageSource);
             }
 
-            ActivePackageSource = source;
+            ActivePackageSource = packageSource;
         }
 
         private void PersistPackageSources() {

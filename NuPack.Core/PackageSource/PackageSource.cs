@@ -35,11 +35,11 @@ namespace NuPack {
                 return base.Equals(obj);
             }
 
-            if (!(obj is PackageSource)) {
-                throw new InvalidCastException("The 'obj' argument is not a PackageSource object.");
+            if (obj is PackageSource) {
+                return Equals(obj as PackageSource);
             }
             else {
-                return Equals(obj as PackageSource);
+                return false;
             }
         }
 

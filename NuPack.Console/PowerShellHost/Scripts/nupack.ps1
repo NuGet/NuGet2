@@ -274,7 +274,7 @@ function global:Update-PackageSource {
         [string]$Source
     )
 
-    $PackageSourceStore.TryAddAndSetActivePackageSource((New-Object "NuPack.PackageSource" @($Name, $Source)))
+    $PackageSourceStore.TryAddAndSetActivePackageSource($Name, $Source)
 }
 
 function global:Update-DefaultProject {
