@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-    <Identifier Id="NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5">
-        <Name>NuPack Tools</Name>
-        <Author>Microsoft</Author>
+    <Identifier Id="d07580fc-4834-4a8f-b13d-469c7932de68">
+        <Name>NuPack UI</Name>
+        <Author>NuPack</Author>
         <Version>1.0</Version>
-        <Description xml:space="preserve">a collection of tools to automate the process of installing, upgrading, configuring, and removing packages from a VS Project.</Description>
+        <Description xml:space="preserve">NuPack Packaging UI for Visual Studio</Description>
         <Locale>1033</Locale>
+        <InstalledByMsi>false</InstalledByMsi>
         <SupportedProducts>
             <VisualStudio Version="10.0">
                 <Edition>Pro</Edition>
@@ -19,9 +20,6 @@
         </Reference>
     </References>
     <Content>
-        <MefComponent>|PowerShellHost|</MefComponent>
-        <MefComponent>|NuPack.Console|</MefComponent>
-        <VsPackage>|NuPack.Console;PkgdefProjectOutputGroup|</VsPackage>
-        <VsPackage>|NuPack.Dialog;PkgdefProjectOutputGroup|</VsPackage>
+        <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     </Content>
 </Vsix>

@@ -1,0 +1,15 @@
+﻿<ResourceDictionary x:Uid="ResourceDictionary_1" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0">
+  <Style x:Uid="HyperlinkStyle" TargetType="{x:Type Hyperlink}">
+    <Setter x:Uid="Setter_1" Property="Foreground" Value="{DynamicResource {x:Static vsshell:VsBrushes.ControlLinkTextKey}}" />
+    <Style.Triggers>
+      <Trigger x:Uid="Trigger_1" Property="IsMouseOver" Value="True">
+        <Setter x:Uid="Setter_2" Property="Foreground" Value="{DynamicResource {x:Static vsshell:VsBrushes.ControlLinkTextHoverKey}}" />
+      </Trigger>
+      <Trigger x:Uid="Trigger_2" Property="IsMouseOver" Value="False">
+        <Setter x:Uid="Setter_3" Property="TextBlock.TextDecorations" Value="{x:Null}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

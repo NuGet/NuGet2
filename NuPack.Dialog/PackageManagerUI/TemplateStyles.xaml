@@ -1,0 +1,122 @@
+﻿<ResourceDictionary x:Uid="ResourceDictionary_1" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
+    xmlns:shared="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
+    xmlns:self="clr-namespace:NuPack.Dialog.PackageManagerUI">
+    <ResourceDictionary.MergedDictionaries>
+      <ResourceDictionary x:Uid="ResourceDictionary_2" Source="CommonStyles.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    <Style x:Uid="Style_1" x:Key="TileTemplateGridStyle" TargetType="{x:Type Grid}">
+        <Setter x:Uid="Setter_2" Property="Margin" Value="0,0,-10,0" />
+        <Setter x:Uid="Setter_28" Property="MinHeight" Value="62" />
+    </Style>
+    <Style x:Uid="Style_10" x:Key="TileImageStyle" TargetType="{x:Type Image}">
+        <Setter x:Uid="Setter_30" Property="Margin" Value="0,4,4,4" />
+        <Setter x:Uid="Setter_31" Property="Height" Value="32" />
+        <Setter x:Uid="Setter_32" Property="Width" Value="32" />
+        <Setter x:Uid="Setter_33" Property="VerticalAlignment" Value="Top" />
+        <Setter x:Uid="Setter_34" Property="StretchDirection" Value="DownOnly" />
+        <Setter x:Uid="Setter_35" Property="Stretch" Value="Uniform" />
+    </Style>
+    <c:FontSizeConverter x:Uid="FontSizeConverter_1" x:Key="FontSizeConverter" />
+    <Style x:Uid="Style_11" x:Key="TileTitleTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_36" Property="ToolTipService.ShowOnDisabled" Value="True" />
+        <Setter x:Uid="Setter_37" Property="FontWeight" Value="Bold" />
+        <!--Environment FontSize + 2-->
+        <Setter x:Uid="Setter_38" Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource FontSizeConverter}, ConverterParameter=2.0}" />
+        <Setter x:Uid="Setter_39" Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style x:Uid="Style_12" x:Key="TileDescriptionTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_40" Property="ToolTipService.ShowOnDisabled" Value="True" />
+        <Setter x:Uid="Setter_41" Property="MaxHeight" Value="44" />
+        <Setter x:Uid="Setter_42" Property="TextWrapping" Value="Wrap" />
+        <Setter x:Uid="Setter_43" Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style x:Uid="Style_13" x:Key="TileToolTipStyle" TargetType="{x:Type TextBlock}">
+        <Setter x:Uid="Setter_44" Property="MaxWidth" Value="300" />
+        <Setter x:Uid="Setter_45" Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Uid="Style_14" x:Key="TileMiddleStackPanelStyle" TargetType="{x:Type StackPanel}">
+        <Setter x:Uid="Setter_46" Property="Margin" Value="8,2,0,0" />
+    </Style>
+    <Style x:Uid="Style_15" x:Key="TileRightStackPanelStyle" TargetType="{x:Type StackPanel}">
+        <Setter x:Uid="Setter_47" Property="Margin" Value="6,2,0,0" />
+        <Setter x:Uid="Setter_48" Property="VerticalAlignment" Value="Top" />
+        <Setter x:Uid="Setter_49" Property="HorizontalAlignment" Value="Right" />
+        <Setter x:Uid="Setter_50" Property="Visibility" Value="Collapsed" />
+    </Style>
+    <Style x:Uid="Style_3" x:Key="DetailButtonStyle" TargetType="{x:Type Button}">
+        <!-- 75 x 23 is the standard button size : http://vsuiguide/rootFolder/05%20Dialogs/5.02%20Designing%20Dialogs/05.02.08%20Spacing%20Guidelines.html-->
+        <Setter x:Uid="Setter_6" Property="MinWidth" Value="75" />
+        <Setter x:Uid="Setter_29" Property="MinHeight" Value="23" />
+        <Setter x:Uid="Setter_25" Property="Margin" Value="6,3" />
+        <Setter x:Uid="Setter_7" Property="ToolTipService.ShowOnDisabled" Value="True" />
+    </Style>
+    <Style x:Uid="Style_2" TargetType="{x:Type self:TextBlockControl}">
+        <Style.Triggers>
+            <Trigger x:Uid="Trigger_1" Property="UIElement.IsEnabled" Value="False">
+                <Setter x:Uid="Setter_4" Property="TextElement.Foreground">
+                    <Setter.Value>
+                        <DynamicResource x:Uid="DynamicResource_1" ResourceKey="{x:Static SystemColors.GrayTextBrushKey}" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Uid="Style_5" x:Key="DetailBorderStyle" TargetType="{x:Type Border}">
+        <Setter x:Uid="Setter_14" Property="BorderThickness" Value="1" />
+        <Setter x:Uid="Setter_15" Property="BorderBrush" Value="DarkGray" />
+        <Setter x:Uid="Setter_16" Property="CornerRadius" Value="2" />
+        <Setter x:Uid="Setter_17" Property="Background" Value="#FFFAFAFA" />
+        <Setter x:Uid="Setter_18" Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect x:Uid="DropShadowEffect_1" Color="Black" Direction="320"
+                                  ShadowDepth="4"
+                                  Opacity="0.5"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Uid="Style_12" x:Key="DetailDescriptionTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_d25" Property="Margin" Value="0,8,0,8" />
+        <Setter x:Uid="Setter_d41" Property="MaxHeight" Value="200" />
+        <Setter x:Uid="Setter_d42" Property="TextWrapping" Value="Wrap" />
+        <Setter x:Uid="Setter_d43" Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style x:Uid="Style_12" x:Key="DetailDependenciesTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_d25" Property="Margin" Value="0,8,0,8" />
+        <Setter x:Uid="Setter_d41" Property="MaxHeight" Value="200" />
+        <Setter x:Uid="Setter_d42" Property="TextWrapping" Value="NoWrap" />
+        <Setter x:Uid="Setter_d43" Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style x:Uid="Style_16" x:Key="DetailImageStyle" TargetType="{x:Type Image}">
+        <Setter x:Uid="Setter_52" Property="Width" Value="200" />
+        <Setter x:Uid="Setter_53" Property="Height" Value="200" />
+    </Style>
+    <Style x:Uid="Style_8" x:Key="DetailMetadataStyle" TargetType="{x:Type StackPanel}">
+        <Setter x:Uid="Setter_21" Property="Margin" Value="0,3,0,0" />
+        <Setter x:Uid="Setter_22" Property="Orientation" Value="Horizontal" />
+    </Style>
+    <Style x:Uid="Style_9" x:Key="DetailHyperlinkTextBlockStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_27" Property="Margin" Value="0,3,0,0" />
+    </Style>
+    <Style x:Uid="Style_6" x:Key="DetailMetadataLabelStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_19" Property="FontWeight" Value="Bold" />
+        <Setter x:Uid="Setter_23" Property="Margin" Value="0,0,0,0" />
+    </Style>
+    <Style x:Uid="Style_7" x:Key="DetailMetadataValueStyle" TargetType="{x:Type self:TextBlockControl}">
+        <Setter x:Uid="Setter_20" Property="Margin" Value="3,0,0,0" />
+        <Setter x:Uid="Setter_51" Property="ToolTip">
+            <Setter.Value>
+                <ToolTip x:Uid="ToolTip_1" DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                    <TextBlock x:Uid="TextBlock_1" Text="{Binding Text}" Style="{StaticResource TileToolTipStyle}"/>
+                </ToolTip>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <shared:UriToBitmapImageConverter x:Uid="shared:UriToBitmapImageConverter_1" x:Key="uriToPreviewImageConverter" />
+    <shared:UriToBitmapImageConverter x:Uid="shared:UriToBitmapImageConverter_2" x:Key="uriToIconConverter" />
+
+    <BitmapImage x:Uid="BitmapImage_DefaultIcon" x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/Icon.png" />
+    <BitmapImage x:Uid="BitmapImage_DefaultPreviewImage" x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/PreviewImage.png" />
+</ResourceDictionary>

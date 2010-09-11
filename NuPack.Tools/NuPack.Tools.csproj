@@ -49,10 +49,6 @@
       <Link>Scripts\Profile.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\NuPack.UI\NuPack.VisualStudio.Package.dll">
-      <Link>NuPack.VisualStudio.Package.dll</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="..\NuPack.Console\PowerShellHost\Scripts\nupack.ps1">
       <Link>Scripts\nupack.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -60,12 +56,6 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\NuPack.UI\NuPack.VisualStudio.Package.pkgdef">
-      <Link>NuPack.VisualStudio.Package.pkgdef</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NuPack.Console\NuPackConsole\NuPack.Console.csproj">
@@ -81,6 +71,12 @@
     <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>NuPack.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NuPack.Dialog\NuPack.Dialog.csproj">
+      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
+      <Name>NuPack.Dialog</Name>
+        <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bPkgdefProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+        <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\NuPack.VisualStudio\NuPack.VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
