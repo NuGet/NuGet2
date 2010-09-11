@@ -83,7 +83,7 @@
                     }
                 }
 
-                string dirPath = ResolvePath(directory, pathResolver);
+                string dirPath = Path.Combine(rootDir, ResolvePath(directory, pathResolver));
 
                 // If the directory is empty then delete it
                 if (!fileSystem.GetFiles(dirPath).Any() &&
