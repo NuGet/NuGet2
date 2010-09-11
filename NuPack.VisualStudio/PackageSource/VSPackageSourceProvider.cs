@@ -30,6 +30,9 @@ namespace NuPack.VisualStudio {
             if (!String.IsNullOrEmpty(propertyString)) {
                 _packageSources = SerializationHelper.Deserialize<HashSet<PackageSource>>(propertyString);
             }
+            else {
+                _packageSources = new HashSet<PackageSource>();
+            }
         }
 
         private void DeserializeActivePackageSource() {
