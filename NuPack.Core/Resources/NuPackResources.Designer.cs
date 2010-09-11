@@ -61,6 +61,24 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to read feed contents. Verify that the feed conforms to the Atom Syndication format..
+        /// </summary>
+        internal static string AtomFeedPackageRepo_InvalidFeedContent {
+            get {
+                return ResourceManager.GetString("AtomFeedPackageRepo_InvalidFeedContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to read feed. Verify that a feed is hosted at the remote server and is available..
+        /// </summary>
+        internal static string AtomFeedPackageRepo_InvalidFeedSource {
+            get {
+                return ResourceManager.GetString("AtomFeedPackageRepo_InvalidFeedSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Circular dependency detected &apos;{0}&apos;.
         /// </summary>
         internal static string CircularDependencyDetected {

@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AtomFeedPackageRepo_InvalidFeedContent" xml:space="preserve">
+    <value>Unable to read feed contents. Verify that the feed conforms to the Atom Syndication format.</value>
+  </data>
+  <data name="AtomFeedPackageRepo_InvalidFeedSource" xml:space="preserve">
+    <value>Unable to read feed. Verify that a feed is hosted at the remote server and is available.</value>
+  </data>
   <data name="CircularDependencyDetected" xml:space="preserve">
     <value>Circular dependency detected '{0}'</value>
   </data>
