@@ -169,7 +169,7 @@ namespace NuPack {
             }
         }
 
-        private void CreatePart(Opc.Package package, string packagePath, Stream sourceStream) {
+        private static void CreatePart(Opc.Package package, string packagePath, Stream sourceStream) {
             Uri uri = UriHelper.CreatePartUri(packagePath);
 
             // Create the part

@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Diagnostics.CodeAnalysis;
 
     public abstract class Package {
         // REVIEW: Should these be public
@@ -57,6 +58,7 @@
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call might be expensive")]
         public abstract IEnumerable<IPackageFile> GetFiles();
 
         public abstract IEnumerable<IPackageAssemblyReference> AssemblyReferences {

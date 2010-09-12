@@ -16,11 +16,20 @@
             { ".transform", new XmlTransfomer() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot, string packageFileRoot = "")
+        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot)
+            : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot: String.Empty) {
+        }
+
+        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot, string packageFileRoot)
             : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot) {
         }
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project, string packageFileRoot = "") {
+        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project) 
+                : this(sourceRepository, assemblyPathResolver, project, packageFileRoot: String.Empty) {
+        }
+        
+
+        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project, string packageFileRoot) {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
@@ -57,7 +66,15 @@
             }
         }
 
-        public virtual void AddPackageReference(string packageId, Version version = null, bool ignoreDependencies = false) {
+        public virtual void AddPackageReference(string packageId) {
+            AddPackageReference(packageId, version: null, ignoreDependencies: false);
+        }
+
+        public virtual void AddPackageReference(string packageId, Version version) {
+            AddPackageReference(packageId, version: version, ignoreDependencies: false);
+        }
+
+        public virtual void AddPackageReference(string packageId, Version version, bool ignoreDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -199,7 +216,15 @@
             }
         }
 
-        public void RemovePackageReference(string packageId, bool force = false, bool removeDependencies = false) {
+        public void RemovePackageReference(string packageId) {
+            RemovePackageReference(packageId, forceRemove: false, removeDependencies: false);
+        }
+
+        public void RemovePackageReference(string packageId, bool forceRemove) {
+            RemovePackageReference(packageId, forceRemove: forceRemove, removeDependencies: false);
+        }
+
+        public void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -212,7 +237,7 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
-            RemovePackageReference(package, force, removeDependencies);
+            RemovePackageReference(package, forceRemove, removeDependencies);
         }
 
         protected virtual void RemovePackageReference(Package package, bool force, bool removeDependencies) {
@@ -270,7 +295,15 @@
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package, Project.ProjectName);
         }
 
-        public virtual void UpdatePackageReference(string packageId, Version version = null, bool updateDependencies = true) {
+        public void UpdatePackageReference(string packageId) {
+            UpdatePackageReference(packageId, version: null, updateDependencies: true);
+        }
+
+        public void UpdatePackageReference(string packageId, Version version) {
+            UpdatePackageReference(packageId, version: version, updateDependencies: true);
+        }
+
+        public virtual void UpdatePackageReference(string packageId, Version version, bool updateDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -294,8 +327,11 @@
             }
         }
 
+        protected void UpdatePackageReference(Package package) {
+            UpdatePackageReference(package, updateDependencies: true);
+        }
 
-        protected void UpdatePackageReference(Package package, bool updateDependencies = true) {
+        protected void UpdatePackageReference(Package package, bool updateDependencies) {
             Debug.Assert(package != null, "package should not be null");
 
             // If the most up-to-date version is already installed then do nothing

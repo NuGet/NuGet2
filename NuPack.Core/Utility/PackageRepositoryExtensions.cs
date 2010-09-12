@@ -10,8 +10,20 @@
         internal static bool IsPackageInstalled(this IPackageRepository repository, string packageId, Version version = null) {
             return repository.FindPackage(packageId, null, null, version) != null;
         }
+
+        public static Package FindPackage(this IPackageRepository repository, string packageId) {
+            return FindPackage(repository, packageId, exactVersion: null, minVersion: null, maxVersion: null);
+        }
+
+        public static Package FindPackage(this IPackageRepository repository, string packageId, Version exactVersion) {
+            return FindPackage(repository, packageId, exactVersion: exactVersion, minVersion: null, maxVersion: null);
+        }
+
+        public static Package FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion) {
+            return FindPackage(repository, packageId, minVersion: minVersion, maxVersion: maxVersion, exactVersion: null);
+        }
       
-        public static Package FindPackage(this IPackageRepository repository, string packageId, Version minVersion = null, Version maxVersion = null, Version exactVersion = null) {
+        public static Package FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion, Version exactVersion) {
             if (exactVersion != null) {
                 return repository.FindPackage(packageId, exactVersion);
             }

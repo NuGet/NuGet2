@@ -96,7 +96,7 @@
         private static string GetHash(Stream stream) {
             using (var hashAlgorithm = SHA512.Create()) {
                 return String.Join(String.Empty, hashAlgorithm.ComputeHash(stream)
-                                                              .Select(b => b.ToString("x2")));
+                                                              .Select(b => b.ToString("x2", CultureInfo.InvariantCulture)));
             }
         }
     }

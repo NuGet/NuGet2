@@ -31,16 +31,11 @@ namespace NuPack {
         }
 
         public override bool Equals(object obj) {
-            if (obj == null) {
-                return base.Equals(obj);
+            var source = obj as PackageSource;
+            if (obj != null) {
+                return Equals(source);
             }
-
-            if (obj is PackageSource) {
-                return Equals(obj as PackageSource);
-            }
-            else {
-                return false;
-            }
+            return (obj == null) && base.Equals(obj);
         }
 
         public override string ToString() {

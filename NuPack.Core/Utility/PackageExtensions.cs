@@ -5,7 +5,7 @@
     using System.Linq;
 
     public static class PackageExtensions {
-        private static readonly string ContentDir = "content";
+        private const string ContentDir = "content";
 
         public static Package FindByVersion(this IQueryable<Package> source, Version minVersion, Version maxVersion, Version exactVersion) {
             IEnumerable<Package> packages = from p in source

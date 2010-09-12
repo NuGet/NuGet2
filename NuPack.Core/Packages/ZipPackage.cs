@@ -153,7 +153,7 @@
             return _files;
         }
         
-        private bool IsAssemblyReference(Opc.PackagePart part) {
+        private static bool IsAssemblyReference(Opc.PackagePart part) {
             // Assembly references are in lib/ and have a .dll extension
             var path = UriHelper.GetPath(part.Uri);
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&

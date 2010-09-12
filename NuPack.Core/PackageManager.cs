@@ -39,8 +39,6 @@
             private set;
         }
 
-        public string ReferencesDirectory { get; private set; }
-
         public PackageEventListener Listener {
             get {
                 return _listener ?? PackageEventListener.Default;
@@ -51,7 +49,15 @@
             }
         }
 
-        public virtual void InstallPackage(string packageId, Version version = null, bool ignoreDependencies = false) {
+        public void InstallPackage(string packageId) {
+            InstallPackage(packageId, version: null, ignoreDependencies: true);
+        }
+
+        public void InstallPackage(string packageId, Version version) {
+            InstallPackage(packageId, version, ignoreDependencies: true);
+        }
+
+        public virtual void InstallPackage(string packageId, Version version, bool ignoreDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -118,7 +124,19 @@
             FileSystem.AddFiles(package.GetFiles(), packageDirectory, Listener);
         }
 
-        public virtual void UninstallPackage(string packageId, Version version = null, bool force = false, bool removeDependencies = false) {
+        public void UninstallPackage(string packageId) {
+            UninstallPackage(packageId, version: null, forceRemove: false, removeDependencies: false);
+        }
+
+        public void UninstallPackage(string packageId, Version version) {
+            UninstallPackage(packageId, version: version, forceRemove: false, removeDependencies: false);
+        }
+
+        public void UninstallPackage(string packageId, Version version, bool forceRemove) {
+            UninstallPackage(packageId, version: version, forceRemove: forceRemove, removeDependencies: false);
+        }
+
+        public virtual void UninstallPackage(string packageId, Version version, bool forceRemove, bool removeDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -133,11 +151,19 @@
 
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_AttemptingToUninstall, package);
 
-            UninstallPackage(package, force, removeDependencies);
+            UninstallPackage(package, forceRemove, removeDependencies);
         }
 
-        public virtual void UninstallPackage(Package package, bool force = false, bool removeDependencies = false) {
-            IEnumerable<Package> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, force, removeDependencies, Listener);
+        public void UninstallPackage(Package package) {
+            UninstallPackage(package, forceRemove: false, removeDependencies: false);
+        }
+
+        public void UninstallPackage(Package package, bool forceRemove) {
+            UninstallPackage(package, forceRemove: forceRemove, removeDependencies: false);
+        }
+
+        public virtual void UninstallPackage(Package package, bool forceRemove, bool removeDependencies) {
+            IEnumerable<Package> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, forceRemove, removeDependencies, Listener);
 
             RemovePackages(packages);
         }

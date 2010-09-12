@@ -129,17 +129,23 @@ namespace NuPack {
 
             var versionString = dependency.GetOptionalAttributeValue("version");
             if (!String.IsNullOrEmpty(versionString)) {
-                Version.TryParse(versionString, out version);
+                if (!Version.TryParse(versionString, out version)) {
+                    version = null;
+                }
             }
 
             versionString = dependency.GetOptionalAttributeValue("minversion");
             if (!String.IsNullOrEmpty(versionString)) {
-                Version.TryParse(versionString, out minVersion);
+                if (!Version.TryParse(versionString, out minVersion)) {
+                    minVersion = null;
+                }
             }
 
             versionString = dependency.GetOptionalAttributeValue("maxversion");
             if (!String.IsNullOrEmpty(versionString)) {
-                Version.TryParse(versionString, out maxVersion);
+                if (!Version.TryParse(versionString, out maxVersion)) {
+                    maxVersion = null;
+                }
             }
 
             return PackageDependency.CreateDependency(id, minVersion, maxVersion, version);

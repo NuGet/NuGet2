@@ -69,7 +69,11 @@
             }
         }
 
-        public override void DeleteDirectory(string path, bool recursive = false) {
+        public void DeleteDirectory(string path) {
+            DeleteDirectory(path, recursive: false);
+        }
+
+        public override void DeleteDirectory(string path, bool recursive) {
             try {
                 path = GetFullPath(path);
                 Directory.Delete(path, recursive);

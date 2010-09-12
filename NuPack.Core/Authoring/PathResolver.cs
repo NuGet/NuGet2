@@ -19,7 +19,7 @@ namespace NuPack {
         }
 
         private static PathSearchFilter GetPathSearchFilter(string path) {
-            int recursiveSearchIndex = path.IndexOf("**");
+            int recursiveSearchIndex = path.IndexOf("**", StringComparison.OrdinalIgnoreCase);
             if (recursiveSearchIndex != -1) {
                 // Recursive searches are of the format /foo/bar/**/*[.abc]
                 string searchPattern = path.Substring(recursiveSearchIndex + 2).TrimStart(Path.DirectorySeparatorChar);
@@ -27,7 +27,6 @@ namespace NuPack {
                 return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern), SearchOption.AllDirectories);
             }
             else {
-                int wildCardIndex = path.IndexOf('*');
                 string searchDirectory;
                 searchDirectory = Path.GetDirectoryName(path);
                 if (String.IsNullOrEmpty(searchDirectory)) {
@@ -59,7 +58,7 @@ namespace NuPack {
             basePath = Path.GetFullPath(basePath);
             actualPath = Path.GetFullPath(actualPath);
             string packagePath = null;
-            if (actualPath.StartsWith(basePath)) {
+            if (actualPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase)) {
                 packagePath = actualPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
             }
             else{
