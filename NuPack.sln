@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{3A1A3132-B33
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Dialog", "NuPack.Dialog\NuPack.Dialog.csproj", "{05497432-8899-4ED4-BB97-7B5EA3E911DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.TeamFoundationServer", "NuPack.TeamFoundationServer\NuPack.TeamFoundationServer.csproj", "{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
@@ -180,6 +182,21 @@ Global
 		{05497432-8899-4ED4-BB97-7B5EA3E911DB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{05497432-8899-4ED4-BB97-7B5EA3E911DB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{05497432-8899-4ED4-BB97-7B5EA3E911DB}.Release|x86.ActiveCfg = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Coverage|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Coverage|Mixed Platforms.Build.0 = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Coverage|x86.ActiveCfg = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
