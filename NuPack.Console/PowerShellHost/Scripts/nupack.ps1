@@ -38,7 +38,7 @@ function global:New-Package {
         $builder = [NuPack.PackageBuilder]::ReadFrom($SpecFilePath)
         $builder.Created = [System.DateTime]::Now
         $builder.Modified = $builder.Created
-        $builder.Files.RemoveAll( { param($file) (".nupack", ".nuspec") -contains [System.IO.Path]::GetExtension($file.Path) } ) | out-null
+        $builder.Files.RemoveAll( { param($file) (".nupack", ".nuspec") -contains [System.IO.Path]::GetExtension($file.SourcePath) } ) | out-null
         
         if (!$TargetFile){
             $TargetFile = Join-Path (Split-Path $ProjectIns.FullName) ($builder.Id + '.' + $builder.Version + '.nupack')
