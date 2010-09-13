@@ -59,6 +59,7 @@ namespace NuPackConsole.Implementation
                 mcs.AddCommand( menuToolWin );
             }
         }
+
         #endregion
     }
 }

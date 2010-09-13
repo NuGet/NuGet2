@@ -200,6 +200,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\SourceSettings.png" />
     <Content Include="Resources\Toolbar.png" />
     <None Include="Key.snk" />
   </ItemGroup>

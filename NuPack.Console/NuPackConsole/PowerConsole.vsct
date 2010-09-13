@@ -19,6 +19,9 @@
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" priority="0x1000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
       </Group>
+      <Group guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" priority="0x1500">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
+      </Group>
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup" priority="0x2000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
       </Group>
@@ -32,9 +35,18 @@
           <ButtonText>NuPack Console</ButtonText>
         </Strings>
       </Button>
+
+      <Button guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0x1020" type="Button">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup"/>
+        <Icon guid="guidToolbarImages2" id="bmpSourceSettings" />
+        <Strings>
+          <ButtonText>&amp;Manage package sources</ButtonText>
+        </Strings>
+      </Button>
+      
       <Button guid="guidPowerConsoleCmdSet" id="cmdidClearHost" priority="0x1010" type="Button">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup"/>
-        <Icon guid="guidToolbarImages" id="bmpClearConsole"/>
+        <Icon guid="guidToolbarImages" id="bmpClearConsole" />
         <Strings>
           <ButtonText>&amp;Clear Console</ButtonText>
         </Strings>
@@ -42,7 +54,7 @@
     </Buttons>
 
     <Combos>
-        <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="300" priority="0x1005">
+        <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="270" priority="0x1005">
             <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
             <CommandFlag>IconAndText</CommandFlag>
             <Strings>
@@ -51,7 +63,7 @@
         </Combo>
 
         <Combo guid="guidPowerConsoleCmdSet" id="cmdidProjects" idCommandList="cmdidProjectsList" type="IndexCombo" defaultWidth="200" priority="0x1010">
-            <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
+            <Parent guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" />
             <CommandFlag>IconAndText</CommandFlag>
             <Strings>
                 <ButtonText>Default &amp;project:</ButtonText>
@@ -61,6 +73,7 @@
    
     <Bitmaps>
       <Bitmap guid="guidToolbarImages" href="Resources\Toolbar.png"/>
+      <Bitmap guid="guidToolbarImages2" href="Resources\SourceSettings.png" />
     </Bitmaps>
   </Commands>
 
@@ -74,8 +87,10 @@
     <GuidSymbol name="guidPowerConsoleCmdSet" value="{85e8bbe8-ea86-4f38-bd91-619e90f52bc8}">
       <IDSymbol name="idToolbar" value="0x1010"/>
       <IDSymbol name="idToolbarHostsGroup" value="0x2000"/>
+      <IDSymbol name="idToolbarProjectGroup" value="0x2005"/>
       <IDSymbol name="idToolbarCommandsGroup" value="0x2010"/>
       <IDSymbol name="cmdidPowerConsole" value="0x0100" />
+      <IDSymbol name="cmdidSourceSettings" value="0x0200" />
       <IDSymbol name="cmdidClearHost" value="0x0300" />
       <IDSymbol name="cmdidSources" value="0x0400" />
       <IDSymbol name="cmdidSourcesList" value="0x0410" />
@@ -85,6 +100,9 @@
     <GuidSymbol name="guidToolbarImages" value="{8124159b-5cc6-40b8-b330-db13a86b57c2}" >
       <IDSymbol name="bmpPowerConsole" value="1" />
       <IDSymbol name="bmpClearConsole" value="2" />
+    </GuidSymbol>
+    <GuidSymbol name="guidToolbarImages2" value="{049D6D94-B408-4171-B5F7-FB98EC753135}">
+      <IDSymbol name="bmpSourceSettings" value="1" />
     </GuidSymbol>
   </Symbols>
 
