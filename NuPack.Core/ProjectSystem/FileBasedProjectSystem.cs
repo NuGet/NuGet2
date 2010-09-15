@@ -14,7 +14,7 @@
             if (String.IsNullOrEmpty(root)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "root");
             }
-            _root = EnsureTrailingSlash(root);
+            _root = root;
         }
 
         public override string Root {
@@ -112,7 +112,7 @@
                 return Enumerable.Empty<string>();
             }
             return Directory.EnumerateFiles(path, filter)
-                            .Select(file => file.Substring(Root.Length));
+                            .Select(MakeRelativePath);
         }
 
         public override IEnumerable<string> GetDirectories(string path) {
@@ -121,7 +121,7 @@
                 return Enumerable.Empty<string>();
             }
             return Directory.EnumerateDirectories(path)
-                            .Select(dir => dir.Substring(Root.Length));
+                            .Select(MakeRelativePath);
         }
 
         public override bool FileExists(string path) {
@@ -137,6 +137,10 @@
         public override Stream OpenFile(string path) {
             path = GetFullPath(path);
             return File.OpenRead(path);
+        }
+        
+        protected string MakeRelativePath(string fullPath) {
+            return fullPath.Substring(Root.Length).TrimStart(Path.DirectorySeparatorChar);
         }
 
         private void EnsureDirectory(string path) {
