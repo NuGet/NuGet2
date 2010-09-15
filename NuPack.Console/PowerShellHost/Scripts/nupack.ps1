@@ -265,34 +265,6 @@ function global:List-Package {
     return $repository.GetPackages() | Select-Object Id, Version, Description
 }
 
-function global:Update-PackageSource {
-    [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
-        [string]$Name,
-        [parameter(Mandatory = $true)]
-        [string]$Source
-    )
-
-    $PackageSourceStore.TryAddAndSetActivePackageSource($Name, $Source)
-}
-
-function global:Update-DefaultProject {
-    [CmdletBinding()]
-    param (
-        [parameter(Mandatory = $true)]
-        [string]$Project
-    )
-    
-    $AllProjects = GetProjectNames
-    if ($Project -eq $null -or $AllProjects -contains $Project) {
-       _SetDefaultProjectInternal $Project
-    }
-    else {
-       Write-Error "Project '$Project' could not be found in the current solution."
-    }
-}
-
 # This is called directly by the combobox in VS.NET
 # When I tried calling Change-DefaultProject directly from NuPack Console, I got an cryptic COM exception
 function global:_SetDefaultProjectInternal($Project) {
