@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 
@@ -12,16 +11,20 @@ namespace NuPack.VisualStudio {
         private HashSet<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
-        public VSPackageSourceProvider(IServiceProvider serviceProvider) {
+        private static readonly ConcurrentDictionary<_DTE, VSPackageSourceProvider> _cache = new ConcurrentDictionary<_DTE, VSPackageSourceProvider>();
+
+        private VSPackageSourceProvider(IServiceProvider serviceProvider) {
             _settingsManager = new PackageSourceSettingsManager(serviceProvider);
 
             DeserializePackageSources();
             DeserializeActivePackageSource();
         }
 
-        public VSPackageSourceProvider(_DTE dte) : 
-            this(new ServiceProvider(dte as Microsoft.VisualStudio.OLE.Interop.IServiceProvider))
-        {
+        public static VSPackageSourceProvider Create(_DTE dte) {
+            return _cache.GetOrAdd(
+                dte, 
+                x => new VSPackageSourceProvider(new ServiceProvider(x as Microsoft.VisualStudio.OLE.Interop.IServiceProvider))
+            );
         }
 
         private void DeserializePackageSources() {
@@ -76,6 +79,9 @@ namespace NuPack.VisualStudio {
             bool result = _packageSources.Remove(source);
             if (result) {
                 PersistPackageSources();
+                if (source.Equals(ActivePackageSource)) {
+                    ActivePackageSource = null;
+                }
             }
 
             return result;

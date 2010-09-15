@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuPack.Dialog.ToolsOptionsUI {
     [Guid("2819C3B6-FC75-4CD5-8C77-877903DE864C")]
@@ -26,21 +25,12 @@ namespace NuPack.Dialog.ToolsOptionsUI {
                 return this.OptionsControl;
             }
         }
-        public override void ResetSettings() {
-            Settings.RepositoryServiceUri = Settings.RepositoryServiceUriDefault;
-        }
 
         protected override void OnActivate(CancelEventArgs e) {
             base.OnActivate(e);
 
             this.OptionsControl.Font = VsShellUtilities.GetEnvironmentFont(this);
-            this.OptionsControl.RepositoryURITextBox.Text = Settings.RepositoryServiceUri;
-        }
-
-        protected override void OnApply(DialogPage.PageApplyEventArgs e) {
-            Settings.RepositoryServiceUri = this.OptionsControl.RepositoryURITextBox.Text;
-
-            base.OnApply(e);
+            this.OptionsControl.InitializeOnActivated();
         }
 
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

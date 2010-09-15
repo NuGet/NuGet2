@@ -8,6 +8,10 @@ namespace NuPack.VisualStudio {
     internal static class SerializationHelper {
         
         public static string Serialize<T>(T objectGraph) where T : class {
+            if (objectGraph == null) {
+                return String.Empty;
+            }
+
             using (MemoryStream stream = new MemoryStream()) {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(T));
                 serializer.WriteObject(stream, objectGraph);

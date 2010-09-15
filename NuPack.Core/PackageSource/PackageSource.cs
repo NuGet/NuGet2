@@ -26,6 +26,10 @@ namespace NuPack {
         }
 
         public bool Equals(PackageSource other) {
+            if (other == null) {
+                return false;
+            }
+
             return Name.Equals(other.Name, StringComparison.CurrentCultureIgnoreCase) &&
                 Source.Equals(other.Source, StringComparison.OrdinalIgnoreCase);
         }
