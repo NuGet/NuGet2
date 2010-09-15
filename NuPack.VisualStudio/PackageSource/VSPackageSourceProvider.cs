@@ -81,15 +81,6 @@ namespace NuPack.VisualStudio {
             return result;
         }
 
-        public void TryAddAndSetActivePackageSource(string name, string source) {
-            PackageSource packageSource = new PackageSource(name, source);
-            if (!_packageSources.Contains(packageSource)) {
-                _packageSources.Add(packageSource);
-            }
-
-            ActivePackageSource = packageSource;
-        }
-
         private void PersistPackageSources() {
             _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources);
         }

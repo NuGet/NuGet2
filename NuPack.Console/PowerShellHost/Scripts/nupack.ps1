@@ -38,7 +38,7 @@ function global:New-Package {
         $builder = [NuPack.PackageBuilder]::ReadFrom($SpecFilePath)
         $builder.Created = [System.DateTime]::Now
         $builder.Modified = $builder.Created
-        $builder.Files.RemoveAll( { param($file) (".nupack", ".nuspec") -contains [System.IO.Path]::GetExtension($file.Path) } ) | out-null
+        $builder.Files.RemoveAll( { param($file) (".nupack", ".nuspec") -contains [System.IO.Path]::GetExtension($file.SourcePath) } ) | out-null
         
         if (!$TargetFile){
             $TargetFile = Join-Path (Split-Path $ProjectIns.FullName) ($builder.Id + '.' + $builder.Version + '.nupack')
@@ -263,34 +263,6 @@ function global:List-Package {
     }
 
     return $repository.GetPackages() | Select-Object Id, Version, Description
-}
-
-function global:Update-PackageSource {
-    [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
-        [string]$Name,
-        [parameter(Mandatory = $true)]
-        [string]$Source
-    )
-
-    $PackageSourceStore.TryAddAndSetActivePackageSource($Name, $Source)
-}
-
-function global:Update-DefaultProject {
-    [CmdletBinding()]
-    param (
-        [parameter(Mandatory = $true)]
-        [string]$Project
-    )
-    
-    $AllProjects = GetProjectNames
-    if ($Project -eq $null -or $AllProjects -contains $Project) {
-       _SetDefaultProjectInternal $Project
-    }
-    else {
-       Write-Error "Project '$Project' could not be found in the current solution."
-    }
 }
 
 # This is called directly by the combobox in VS.NET

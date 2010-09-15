@@ -8,7 +8,7 @@ namespace NuPack.Dialog.Providers {
     /// <summary>
     /// IVsExtensionsProvider implementation responsible for gathering
     /// a list of extensions from the extension repository
-    /// which will be shown in the Add NuPack dialog.
+    /// which will be shown in the Add Package dialog.
     /// </summary>
     internal class InstalledPackagesProvider : OnlinePackagesProvider {
         public InstalledPackagesProvider(ResourceDictionary resources)

@@ -70,7 +70,7 @@ namespace NuPackConsole {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuPack Console failed to start. Please check if you have lastest PowerShell installed..
+        ///   Looks up a localized string similar to Package Manager Console failed to start. Please check if you have lastest PowerShell installed..
         /// </summary>
         internal static string Error_MEF {
             get {
@@ -79,7 +79,7 @@ namespace NuPackConsole {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuPack Console.
+        ///   Looks up a localized string similar to Package Manager Console.
         /// </summary>
         internal static string ToolWindowTitle {
             get {
