@@ -177,13 +177,25 @@
                 }
 
                 if (binding != null) {                    
-                    fileSystem = providers.Select(provider => provider.GetFileSystem(path, binding))
+                    fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
                                           .Where(fs => fs != null)
                                           .FirstOrDefault();
                 }
             }
 
             return fileSystem ?? new FileBasedProjectSystem(path);
+        }
+
+        private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
+            try {
+                return provider.GetFileSystem(path, binding);
+            }
+            catch {
+                // Ignore exceptions that can happen when some binaries are missing. e.g. TfsSourceControlFileSystemProvider
+                // would throw a jitting error if TFS is not installed
+            }
+
+            return null;
         }
 
         private ProjectManager CreateProjectManager(Project project) {
