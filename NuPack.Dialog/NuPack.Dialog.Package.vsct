@@ -70,7 +70,7 @@
         <!--<Icon guid="guidImages" id="bmpPic1" />-->
         <Strings>
           <CommandName>cmdidASPNETPackages</CommandName>
-          <ButtonText>Add NuPack Reference...</ButtonText>
+          <ButtonText>Add Package Reference...</ButtonText>
         </Strings>
       </Button>
 

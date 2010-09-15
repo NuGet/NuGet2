@@ -26,8 +26,8 @@ namespace NuPack.Dialog {
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 12)]
-    [ProvideOptionPage(typeof(ToolsOptionsPage), "NuPack", "General", 101, 102, true)]
-    [ProvideProfile(typeof(ToolsOptionsPage), "NuPack", "General", 101, 102, true)]
+    [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
+    [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [Guid(GuidList.guidNuPack_Dialog_PackagePkgString)]
     public sealed class NuPackPackage : Microsoft.VisualStudio.Shell.Package {
         /// <summary>

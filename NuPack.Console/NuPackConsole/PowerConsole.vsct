@@ -10,7 +10,7 @@
       <Menu guid="guidPowerConsoleCmdSet" id="idToolbar" type="ToolWindowToolbar">
         <CommandFlag>DefaultDocked</CommandFlag>
         <Strings>
-          <ButtonText>NuPack Console</ButtonText>
+          <ButtonText>Package Manager Console</ButtonText>
         </Strings>
       </Menu>
     </Menus>
@@ -32,7 +32,7 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
         <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
         <Strings>
-          <ButtonText>NuPack Console</ButtonText>
+          <ButtonText>Package Manager Console</ButtonText>
         </Strings>
       </Button>
 
