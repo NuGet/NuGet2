@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>
+      <author>Velio Ivanov</author>
+    </authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+  </metadata>
+</package>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>MVCTurbine</id>
+    <version>2.1</version>
+    <authors>
+      <author>Javier Lozano</author>
+    </authors>
+    <description>MVC Turbine is a plugin for ASP.NET MVC that has IoC baked in and auto-wires controllers, binders, view engines, http modules, etc. that reside within your application. Thus you worry more about what your application should do, rather than how it should do it.</description>
+    <language>en-US</language>
+  </metadata>
+</package>

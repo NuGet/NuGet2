@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>jQuery</id>
+    <version>1.4.1</version>
+    <authors>
+      <author>John Resig</author>
+    </authors>
+    <description>jQuery is a fast and concise JavaScript Library that simplifies HTML document traversing, event handling, animating, and Ajax interactions for rapid web development</description>
+    <language>en-US</language>
+  </metadata>
+</package>

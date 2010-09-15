@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Castle.Components.Validator</id>
+    <version>1.1.0</version>
+    <authors>
+      <author>G. Richard Bellamy</author>
+    </authors>
+    <description>The Validator component is used to validate your objects. It uses an attribute driven syntax making it easy to start adding validation to your classes.</description>
+    <language>en-US</language>
+  </metadata>
+</package>

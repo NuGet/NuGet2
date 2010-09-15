@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>EFCTP4</id>
+    <version>1.0</version>
+    <authors>
+      <author>Microsoft</author>
+    </authors>
+    <description>This CTP is a an early preview of the Code First Programming Model and Productivity Improvements for Entity Framework 4 (included in .NET Framework 4).</description>
+    <language>en-US</language>
+  </metadata>
+</package>
