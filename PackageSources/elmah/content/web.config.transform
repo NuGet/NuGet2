@@ -1,0 +1,19 @@
+<configuration>
+    <system.web>
+        <httpModules>
+            <add name="ErrorLog" type="Elmah.ErrorLogModule, Elmah" />
+        </httpModules>
+        <httpHandlers>
+            <add verb="POST,GET,HEAD" path="elmah.axd" type="Elmah.ErrorLogPageFactory, Elmah" />
+        </httpHandlers>
+    </system.web>
+    <system.webServer>
+        <validation validateIntegratedModeConfiguration="false" />
+        <modules>
+            <add name="ErrorLog" type="Elmah.ErrorLogModule, Elmah" />
+        </modules>
+        <handlers>
+            <add name="Elmah" verb="POST,GET,HEAD" path="elmah.axd" type="Elmah.ErrorLogPageFactory, Elmah" />
+        </handlers>
+    </system.webServer>
+</configuration>
