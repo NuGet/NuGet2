@@ -17,6 +17,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost", "NuPack.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack", "NuPack\NuPack.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{733A0BFB-51E2-4247-A077-F720DC1B69D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Moq.3.1.416.3", "Moq.3.1.416.3", "{44A09399-704B-4270-9BC8-3860925CE07C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{3A1A3132-B336-4AA2-8CCE-119452099511}"
+	ProjectSection(SolutionItems) = preProject
+		packages\Moq.3.1.416.3\lib\Moq.dll = packages\Moq.3.1.416.3\lib\Moq.dll
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Dialog", "NuPack.Dialog\NuPack.Dialog.csproj", "{05497432-8899-4ED4-BB97-7B5EA3E911DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.TeamFoundationServer", "NuPack.TeamFoundationServer\NuPack.TeamFoundationServer.csproj", "{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}"
@@ -188,5 +197,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{44A09399-704B-4270-9BC8-3860925CE07C} = {733A0BFB-51E2-4247-A077-F720DC1B69D4}
+		{3A1A3132-B336-4AA2-8CCE-119452099511} = {44A09399-704B-4270-9BC8-3860925CE07C}
 	EndGlobalSection
 EndGlobal

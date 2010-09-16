@@ -25,6 +25,10 @@
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup" priority="0x2000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
       </Group>
+
+        <Group guid="guidNuPack_Dialog_PackageCmdSet" id="MyMenuGroup" priority="0x0600">
+            <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCEROOT"/>
+        </Group>
     </Groups>
     
     <Buttons>
@@ -51,6 +55,15 @@
           <ButtonText>&amp;Clear Console</ButtonText>
         </Strings>
       </Button>
+
+        <Button guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0x0100" type="Button">
+            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFERENCE" />
+            <!--<Icon guid="guidImages" id="bmpPic1" />-->
+            <Strings>
+                <CommandName>cmdidASPNETPackages</CommandName>
+                <ButtonText>Add Package Reference...</ButtonText>
+            </Strings>
+        </Button>
     </Buttons>
 
     <Combos>
@@ -74,8 +87,30 @@
     <Bitmaps>
       <Bitmap guid="guidToolbarImages" href="Resources\Toolbar.png"/>
       <Bitmap guid="guidToolbarImages2" href="Resources\SourceSettings.png" />
+      <Bitmap guid="guidImages" href="Resources\Images_32bit.bmp" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows"/>
     </Bitmaps>
   </Commands>
+
+    <CommandPlacements>
+        <!--<CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+            <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCE"/>
+        </CommandPlacement> -->
+        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
+        </CommandPlacement>
+        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
+        </CommandPlacement>
+        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+            <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
+        </CommandPlacement>
+        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+            <Parent guid="guidVenusCmdId" id="IDG_VENUS_CTX_REFERENCE"/>
+        </CommandPlacement>
+        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+            <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
+        </CommandPlacement>
+    </CommandPlacements>
 
   <KeyBindings>
     <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" key2="V" />
@@ -96,13 +131,31 @@
       <IDSymbol name="cmdidSourcesList" value="0x0410" />
       <IDSymbol name="cmdidProjects" value="0x0500" />
       <IDSymbol name="cmdidProjectsList" value="0x0510" />
-    </GuidSymbol>    
+    </GuidSymbol>
     <GuidSymbol name="guidToolbarImages" value="{8124159b-5cc6-40b8-b330-db13a86b57c2}" >
       <IDSymbol name="bmpPowerConsole" value="1" />
       <IDSymbol name="bmpClearConsole" value="2" />
     </GuidSymbol>
     <GuidSymbol name="guidToolbarImages2" value="{049D6D94-B408-4171-B5F7-FB98EC753135}">
       <IDSymbol name="bmpSourceSettings" value="1" />
+    </GuidSymbol>
+
+    <!-- This is the guid used to group the menu commands together -->
+    <GuidSymbol name="guidNuPack_Dialog_PackageCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
+        <IDSymbol name="MyMenuGroup" value="0x1020" />
+        <IDSymbol name="cmdidASPNETPackages" value="0x0100" />
+    </GuidSymbol>
+    <GuidSymbol name="guidVenusCmdId" value="{C7547851-4E3A-4E5B-9173-FA6E9C8BD82C}" >
+        <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />
+        <IDSymbol name="IDG_CTX_REFERENCE" value="0x102" />
+    </GuidSymbol>
+
+    <GuidSymbol name="guidImages" value="{c19a241c-dde4-4ee1-93ff-4077d346ead6}" >
+        <IDSymbol name="bmpPic1" value="1" />
+        <IDSymbol name="bmpPic2" value="2" />
+        <IDSymbol name="bmpPicSearch" value="3" />
+        <IDSymbol name="bmpPicX" value="4" />
+        <IDSymbol name="bmpPicArrows" value="5" />
     </GuidSymbol>
   </Symbols>
 

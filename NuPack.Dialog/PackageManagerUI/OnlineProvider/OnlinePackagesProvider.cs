@@ -38,7 +38,7 @@ namespace NuPack.Dialog.Providers {
             get {
                 if (_packagesRepository == null) {
                     _feed = Settings.RepositoryServiceUri;
-                    _dte = NuPackPackage.GetGlobalService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
                     _project = GetActiveProject(_dte);
 
                     if (String.IsNullOrEmpty(_feed)) {

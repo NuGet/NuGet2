@@ -18,9 +18,10 @@
     </SccProvider>
     <CreateVsixContainer>False</CreateVsixContainer>
     <DeployExtension>False</DeployExtension>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
-    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Choose>
     <When Condition="Exists($(VsSdkTargets))">
@@ -200,9 +201,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Images_32bit.bmp" />
     <Content Include="Resources\SourceSettings.png" />
     <Content Include="Resources\Toolbar.png" />
-    <None Include="Key.snk" />
   </ItemGroup>
   <Choose>
     <When Condition="Exists($(VsSdkTargets))">
@@ -227,6 +228,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\NuPack.Dialog\NuPack.Dialog.csproj">
+      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
+      <Name>NuPack.Dialog</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />

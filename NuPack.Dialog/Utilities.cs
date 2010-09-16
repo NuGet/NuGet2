@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace NuPack.Dialog {
-    internal class Utilities {
+    public class Utilities {
         public static IServiceProvider ServiceProvider {
             get;
             set;

@@ -4,6 +4,9 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
+using NuPack.Dialog.ToolsOptionsUI;
+using NuPack.Dialog.PackageManagerUI;
+using NuPack.Dialog;
 
 namespace NuPackConsole.Implementation
 {
@@ -17,6 +20,8 @@ namespace NuPackConsole.Implementation
         Style=VsDockStyle.Tabbed,
         Window = "28836128-FC2C-11D2-A433-00C04F72D18A",
         Orientation=ToolWindowOrientation.Right)]
+    [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
+    [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [Guid(GuidList.guidPowerConsolePkgString)]
     public sealed class PowerConsolePackage : Package
@@ -39,6 +44,16 @@ namespace NuPackConsole.Implementation
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
 
+        /// <summary>
+        /// This function is the callback used to execute a command when the a menu item is clicked.
+        /// See the Initialize method to see how the menu item is associated to this function using
+        /// the OleMenuCommandService service and the MenuCommand class.
+        /// </summary>
+        private void MenuItemCallback(object sender, EventArgs e) {
+            var window = new PackageManagerWindow();
+            window.ShowModal();
+        }
+
         #region Package Members
 
         /// <summary>
@@ -49,6 +64,8 @@ namespace NuPackConsole.Implementation
         {
             base.Initialize();
 
+            Utilities.ServiceProvider = this;
+
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if ( null != mcs )
@@ -57,6 +74,11 @@ namespace NuPackConsole.Implementation
                 CommandID toolwndCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand( menuToolWin );
+
+                // Create the command for the menu item.
+                CommandID menuCommandID = new CommandID(GuidList.guidNuPack_Dialog_PackageCmdSet, (int)PkgCmdIDList.cmdidASPNETPackages);
+                MenuCommand menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
+                mcs.AddCommand(menuItem);
             }
         }
 

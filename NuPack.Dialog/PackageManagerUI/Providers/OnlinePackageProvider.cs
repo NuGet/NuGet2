@@ -17,7 +17,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers {
         /// <param name="resources"></param>
         public OnlinePackageProvider(ResourceDictionary resources, IVsProgressPane progressPane)
             : base(resources, progressPane, "Packages", "All") {
-            _dte = NuPackPackage.GetGlobalService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+            _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
             _project = GetActiveProject(_dte);
 
             _vsPackageManager = NuPack.VisualStudio.VSPackageManager.GetPackageManager(_feed, _dte);

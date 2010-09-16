@@ -111,8 +111,6 @@
     <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
       <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
     </CommandPlacement>
-
-
   </CommandPlacements>
 
 
@@ -131,9 +129,6 @@
       <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />
       <IDSymbol name="IDG_CTX_REFERENCE" value="0x102" />
     </GuidSymbol>
-
-
-
 
     <GuidSymbol name="guidImages" value="{c19a241c-dde4-4ee1-93ff-4077d346ead6}" >
       <IDSymbol name="bmpPic1" value="1" />

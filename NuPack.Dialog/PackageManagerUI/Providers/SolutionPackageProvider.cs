@@ -25,7 +25,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         {
             string feed = Settings.RepositoryServiceUri;
             if (!String.IsNullOrEmpty(feed)) {
-                EnvDTE.DTE dte = NuPackPackage.GetGlobalService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+                EnvDTE.DTE dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 
                 NuPack.VisualStudio.VSPackageManager vsPackageManager = NuPack.VisualStudio.VSPackageManager.GetPackageManager(feed, dte);
                 foreach (NuPack.Package package in vsPackageManager.SolutionRepository.GetPackages()) {

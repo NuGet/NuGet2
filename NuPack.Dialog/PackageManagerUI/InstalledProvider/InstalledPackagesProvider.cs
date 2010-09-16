@@ -30,7 +30,7 @@ namespace NuPack.Dialog.Providers {
                         return EmptyPackageRepository.Default;
                     }
 
-                    _dte = NuPackPackage.GetGlobalService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
                     _project = GetActiveProject(_dte);
 
                     _vsPackageManager = VSPackageManager.GetPackageManager(_feed, _dte);
