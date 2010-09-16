@@ -58,7 +58,7 @@
             <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
             <CommandFlag>IconAndText</CommandFlag>
             <Strings>
-                <ButtonText>Package &amp;feed:</ButtonText>
+                <ButtonText>Package &amp;source:</ButtonText>
             </Strings>
         </Combo>
 
