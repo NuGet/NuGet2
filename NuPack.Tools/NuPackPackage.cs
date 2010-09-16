@@ -7,8 +7,9 @@ using Microsoft.VisualStudio;
 using NuPack.Dialog.ToolsOptionsUI;
 using NuPack.Dialog.PackageManagerUI;
 using NuPack.Dialog;
+using NuPackConsole.Implementation;
 
-namespace NuPackConsole.Implementation
+namespace NuPack.Tools
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -23,10 +24,10 @@ namespace NuPackConsole.Implementation
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
-    [Guid(GuidList.guidPowerConsolePkgString)]
-    public sealed class PowerConsolePackage : Package
+    [Guid(GuidList.guidNuPackPkgString)]
+    public sealed class NuPackPackage : Microsoft.VisualStudio.Shell.Package
     {
-        public PowerConsolePackage()
+        public NuPackPackage()
         {
         }
 
@@ -71,12 +72,12 @@ namespace NuPackConsole.Implementation
             if ( null != mcs )
             {
                 // Create the command for the tool window
-                CommandID toolwndCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
+                CommandID toolwndCommandID = new CommandID(GuidList.guidNuPackConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand( menuToolWin );
 
                 // Create the command for the menu item.
-                CommandID menuCommandID = new CommandID(GuidList.guidNuPack_Dialog_PackageCmdSet, (int)PkgCmdIDList.cmdidASPNETPackages);
+                CommandID menuCommandID = new CommandID(GuidList.guidNuPackDialogCmdSet, (int)PkgCmdIDList.cmdidASPNETPackages);
                 MenuCommand menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
                 mcs.AddCommand(menuItem);
             }

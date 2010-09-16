@@ -4,7 +4,6 @@
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
-    <VsSdkTargets>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets</VsSdkTargets>
     <RootNamespace>NuPackConsole</RootNamespace>
     <AssemblyName>NuPack.Console</AssemblyName>
     <ProjectGuid>{50E33DA2-AF14-486D-81B8-BD8409744A38}</ProjectGuid>
@@ -18,24 +17,7 @@
     </SccProvider>
     <CreateVsixContainer>False</CreateVsixContainer>
     <DeployExtension>False</DeployExtension>
-    <SignAssembly>false</SignAssembly>
-    <DelaySign>false</DelaySign>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <Choose>
-    <When Condition="Exists($(VsSdkTargets))">
-      <PropertyGroup>
-        <!--
-                To specify a different registry root to register your package, uncomment the TargetRegistryRoot
-                tag and specify a registry root in it.
-                <TargetRegistryRoot></TargetRegistryRoot>
-                -->
-        <RegisterOutputPackage>true</RegisterOutputPackage>
-        <RegisterWithCodebase>true</RegisterWithCodebase>
-      </PropertyGroup>
-    </When>
-  </Choose>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <Private>False</Private>
@@ -67,6 +49,7 @@
       <HintPath>$(ProgramFiles)\Microsoft Visual Studio 10.0\Common7\IDE\CommonExtensions\Microsoft\Editor\Microsoft.VisualStudio.Platform.VSEditor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop">
       <Private>False</Private>
     </Reference>
@@ -103,9 +86,6 @@
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop">
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Shell.10.0">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0">
       <Private>False</Private>
     </Reference>
@@ -134,7 +114,8 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="ProvideBindingPath.cs" />
+    <Compile Include="Guids.cs" />
+    <Compile Include="PkgCmdID.cs" />
     <Compile Include="Utils\CommonExtensionMethods.cs" />
     <Compile Include="Utils\ExtensionMethods.cs" />
     <Compile Include="Utils\Marshaler.cs" />
@@ -150,7 +131,6 @@
     <Compile Include="Console\WpfConsole.cs" />
     <Compile Include="Console\WpfConsoleClassifier.cs" />
     <Compile Include="Console\WpfConsoleService.cs" />
-    <Compile Include="Guids.cs" />
     <Compile Include="Console\WpfConsoleCompletionSource.cs" />
     <Compile Include="Console\WpfConsoleKeyProcessor.cs" />
     <Compile Include="PowerConsoleToolWindow.cs" />
@@ -168,9 +148,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="PowerConsolePackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PkgCmdID.cs" />
     <Compile Include="Types\DisplayNameAttribute.cs" />
     <Compile Include="Types\HostNameAttribute.cs" />
     <Compile Include="Types\ICommandExpansion.cs" />
@@ -194,49 +172,12 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="VSPackage.resx">
-      <MergeWithCTO>true</MergeWithCTO>
-      <ManifestResourceName>VSPackage</ManifestResourceName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images_32bit.bmp" />
-    <Content Include="Resources\SourceSettings.png" />
-    <Content Include="Resources\Toolbar.png" />
   </ItemGroup>
   <Choose>
-    <When Condition="Exists($(VsSdkTargets))">
-      <ItemGroup>
-        <VSCTCompile Include="PowerConsole.vsct">
-          <ResourceName>Menus.ctmenu</ResourceName>
-          <SubType>Designer</SubType>
-        </VSCTCompile>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <None Include="PowerConsole.vsct" />
-      </ItemGroup>
-    </Otherwise>
+    <When Condition="Exists($(VsSdkTargets))" />
+    <Otherwise />
   </Choose>
-  <ItemGroup>
-    <None Include="Resources\Images_24bit.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\Package.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\NuPack.Dialog\NuPack.Dialog.csproj">
-      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
-      <Name>NuPack.Dialog</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

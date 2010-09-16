@@ -7,6 +7,7 @@
   <Commands package="guidPowerConsolePkg">
 
     <Menus>
+      <!-- This is the toolbar in the console -->
       <Menu guid="guidPowerConsoleCmdSet" id="idToolbar" type="ToolWindowToolbar">
         <CommandFlag>DefaultDocked</CommandFlag>
         <Strings>
@@ -25,10 +26,9 @@
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup" priority="0x2000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
       </Group>
-
-        <Group guid="guidNuPack_Dialog_PackageCmdSet" id="MyMenuGroup" priority="0x0600">
-            <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCEROOT"/>
-        </Group>
+      <Group guid="guidNuPack_Dialog_PackageCmdSet" id="MyMenuGroup" priority="0x0600">
+          <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCEROOT"/>
+      </Group>
     </Groups>
     
     <Buttons>
@@ -56,32 +56,32 @@
         </Strings>
       </Button>
 
-        <Button guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0x0100" type="Button">
-            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFERENCE" />
-            <!--<Icon guid="guidImages" id="bmpPic1" />-->
-            <Strings>
-                <CommandName>cmdidASPNETPackages</CommandName>
-                <ButtonText>Add Package Reference...</ButtonText>
-            </Strings>
-        </Button>
+      <Button guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0x0100" type="Button">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFERENCE" />
+          <!--<Icon guid="guidImages" id="bmpPic1" />-->
+          <Strings>
+              <CommandName>cmdidASPNETPackages</CommandName>
+              <ButtonText>Add Package Reference...</ButtonText>
+          </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
-        <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="270" priority="0x1005">
-            <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
-            <CommandFlag>IconAndText</CommandFlag>
-            <Strings>
-                <ButtonText>Package &amp;source:</ButtonText>
-            </Strings>
-        </Combo>
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="270" priority="0x1005">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+            <ButtonText>Package &amp;source:</ButtonText>
+        </Strings>
+      </Combo>
 
-        <Combo guid="guidPowerConsoleCmdSet" id="cmdidProjects" idCommandList="cmdidProjectsList" type="IndexCombo" defaultWidth="200" priority="0x1010">
-            <Parent guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" />
-            <CommandFlag>IconAndText</CommandFlag>
-            <Strings>
-                <ButtonText>Default &amp;project:</ButtonText>
-            </Strings>
-        </Combo>
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidProjects" idCommandList="cmdidProjectsList" type="IndexCombo" defaultWidth="200" priority="0x1010">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" />
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+            <ButtonText>Default &amp;project:</ButtonText>
+        </Strings>
+      </Combo>
     </Combos>
    
     <Bitmaps>
@@ -91,26 +91,26 @@
     </Bitmaps>
   </Commands>
 
-    <CommandPlacements>
-        <!--<CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
-            <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCE"/>
-        </CommandPlacement> -->
-        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
-            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
-        </CommandPlacement>
-        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
-            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
-        </CommandPlacement>
-        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
-            <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
-        </CommandPlacement>
-        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
-            <Parent guid="guidVenusCmdId" id="IDG_VENUS_CTX_REFERENCE"/>
-        </CommandPlacement>
-        <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
-            <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
-        </CommandPlacement>
-    </CommandPlacements>
+  <CommandPlacements>
+      <!--<CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCE"/>
+      </CommandPlacement> -->
+      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+          <Parent guid="guidVenusCmdId" id="IDG_VENUS_CTX_REFERENCE"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+          <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
+      </CommandPlacement>
+  </CommandPlacements>
 
   <KeyBindings>
     <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" key2="V" />

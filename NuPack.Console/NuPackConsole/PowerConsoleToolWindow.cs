@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.PlatformUI;
-using NuPackConsole.Implementation.Console;
-using NuPackConsole.Implementation.PowerConsole;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio;
+using NuPackConsole.Implementation.Console;
+using NuPackConsole.Implementation.PowerConsole;
 
 namespace NuPackConsole.Implementation
 {

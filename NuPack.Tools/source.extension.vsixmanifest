@@ -22,6 +22,6 @@
     <MefComponent>|PowerShellHost|</MefComponent>
     <MefComponent>|NuPack.Console|</MefComponent>
     <MefComponent>|NuPack.TeamFoundationServer|</MefComponent>
-    <VsPackage>|NuPack.Console;PkgdefProjectOutputGroup|</VsPackage>
+    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
   </Content>
 </Vsix>

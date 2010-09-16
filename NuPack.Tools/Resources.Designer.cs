@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuPackConsole {
+namespace NuPack.Tools {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuPackConsole {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPackConsole.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPack.Tools.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,11 @@ namespace NuPackConsole {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package Manager Console.
+        ///   Looks up a localized string similar to Can not create tool window..
         /// </summary>
-        internal static string ToolWindowTitle {
+        internal static string CanNotCreateWindow {
             get {
-                return ResourceManager.GetString("ToolWindowTitle", resourceCulture);
+                return ResourceManager.GetString("CanNotCreateWindow", resourceCulture);
             }
         }
     }
