@@ -50,11 +50,11 @@
         }
 
         public void InstallPackage(string packageId) {
-            InstallPackage(packageId, version: null, ignoreDependencies: true);
+            InstallPackage(packageId, version: null, ignoreDependencies: false);
         }
 
         public void InstallPackage(string packageId, Version version) {
-            InstallPackage(packageId, version, ignoreDependencies: true);
+            InstallPackage(packageId, version, ignoreDependencies: false);
         }
 
         public virtual void InstallPackage(string packageId, Version version, bool ignoreDependencies) {

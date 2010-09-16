@@ -25,7 +25,7 @@
             sourceRepository.AddPackage(packageC);
 
             // Act
-            packageManager.InstallPackage("A", ignoreDependencies: true);
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: true);
 
             // Assert
             Assert.IsTrue(localRepository.IsPackageInstalled(packageA));

@@ -416,7 +416,7 @@
             sourceRepository.AddPackage(packageB20);
 
             // Act
-            projectManager.UpdatePackageReference("A", updateDependencies: false);
+            projectManager.UpdatePackageReference("A", version: null, updateDependencies: false);
 
             // Assert
             Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA20));
