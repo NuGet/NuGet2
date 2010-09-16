@@ -41,10 +41,15 @@
         public abstract void DeleteDirectory(string path, bool recursive);
         public abstract bool DirectoryExists(string path);
         public abstract bool FileExists(string path);
+
+        public virtual dynamic GetPropertyValue(string propertyName) {
+            return null;
+        }
+
         public abstract IEnumerable<string> GetFiles(string path, string filter);
         public abstract IEnumerable<string> GetFiles(string path);
         public abstract IEnumerable<string> GetDirectories(string path);
         public abstract Stream OpenFile(string path);
-        public abstract void RemoveReference(string name);
+        public abstract void RemoveReference(string name);        
     }
 }

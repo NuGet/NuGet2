@@ -148,6 +148,14 @@
                    select p.Name;
         }
 
+        public override dynamic GetPropertyValue(string propertyName) {
+            Property property = Project.Properties.Item(propertyName);
+            if (property != null) {
+                return property.Value;
+            }
+            return null;
+        }
+
         private void EnsureCheckedOutIfExists(string path) {
             string fullPath = GetFullPath(path);
             if (FileExists(path) &&

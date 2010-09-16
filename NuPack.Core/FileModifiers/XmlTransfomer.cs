@@ -5,9 +5,7 @@ using System.Xml.Linq;
 
 namespace NuPack {
     internal class XmlTransfomer : IPackageFileModifier {
-        public void Modify(IPackageFile file, ProjectSystem projectSystem) {
-            string targetPath = Path.GetFileNameWithoutExtension(file.Path);
-
+        public void Modify(IPackageFile file, string targetPath, ProjectSystem projectSystem) {            
             // Get the xml fragment
             XElement xmlFragment = GetXml(file);
 
@@ -20,9 +18,7 @@ namespace NuPack {
             projectSystem.AddFile(targetPath, transformDocument.Save);
         }
 
-        public void Revert(IPackageFile file, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem) {
-            string targetPath = Path.GetFileNameWithoutExtension(file.Path);
-
+        public void Revert(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem) {            
             // Get the xml snippet
             XElement xmlFragment = GetXml(file);
 

@@ -14,6 +14,8 @@
  * ***************************************************************************/
 
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 
 namespace NuPack {
     internal class Crc32 {
@@ -113,6 +115,22 @@ namespace NuPack {
 
             crc32 ^= 0xffffffffU;
             return crc32;
+        }
+
+        internal static uint Calculate(Stream stream) {
+            // Copy the stream to a memory steam and get get the CRC32 of the bytes
+            using (var memoryStream = new MemoryStream()) {
+                stream.CopyTo(memoryStream);
+                return Crc32.Calculate(memoryStream.ToArray());
+            }
+        }
+
+        internal static uint Calculate(string content) {
+            return Calculate(content, Encoding.Default);
+        }
+
+        internal static uint Calculate(string content, Encoding encoding) {
+            return Calculate(encoding.GetBytes(content));
         }
     }
 }

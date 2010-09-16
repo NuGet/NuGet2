@@ -9,7 +9,7 @@
         internal static void AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
                                       PackageEventListener listener,
-                                      Func<IPackageFile, bool> addFileCallback = null,
+                                      Func<IPackageFile, string, bool> addFileCallback = null,
                                       Func<string, string> pathResolver = null) {
             AddFiles(fileSystem, files, String.Empty, listener, addFileCallback, pathResolver);
         }
@@ -18,14 +18,15 @@
                                       IEnumerable<IPackageFile> files,
                                       string rootDir,
                                       PackageEventListener listener,
-                                      Func<IPackageFile, bool> addFileCallback = null,
+                                      Func<IPackageFile, string, bool> addFileCallback = null,
                                       Func<string, string> pathResolver = null) {
-            foreach (IPackageFile file in files) {
-                if (addFileCallback != null && addFileCallback(file)) {
+            foreach (IPackageFile file in files) {                
+                string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
+
+                if (addFileCallback != null && addFileCallback(file, path)) {
                     continue;
                 }
 
-                string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
                 // Don't overwrite file if it exists if force wasn't set to true
                 if (fileSystem.FileExists(path)) {
                     listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
@@ -41,7 +42,7 @@
         internal static void DeleteFiles(this IFileSystem fileSystem,
                                          IEnumerable<IPackageFile> files,
                                          PackageEventListener listener,
-                                         Action<IPackageFile> deleteFileCallback = null,
+                                         Action<IPackageFile, string> deleteFileCallback = null,
                                          Func<string, string> pathResolver = null) {
             DeleteFiles(fileSystem, files, String.Empty, listener, deleteFileCallback, pathResolver);
         }
@@ -50,7 +51,7 @@
                                          IEnumerable<IPackageFile> files,
                                          string rootDir,
                                          PackageEventListener listener,
-                                         Action<IPackageFile> deleteFileCallback = null,
+                                         Action<IPackageFile, string> deleteFileCallback = null,
                                          Func<string, string> pathResolver = null) {
 
             // First get all directories that contain files
@@ -66,11 +67,13 @@
             // Remove files from every directory
             foreach (var directory in directories) {
                 var directoryFiles = directoryLookup.Contains(directory) ? directoryLookup[directory] : Enumerable.Empty<IPackageFile>();
-                foreach (var file in directoryFiles) {
-                    if (deleteFileCallback != null) {
-                        deleteFileCallback(file);
-                    }
+                foreach (var file in directoryFiles) {                    
                     string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
+
+                    if (deleteFileCallback != null) {
+                        deleteFileCallback(file, path);
+                    }
+
                     // Only delete the file if it exists and the checksum is the same
                     if (fileSystem.FileExists(path)) {
                         if (ChecksumEqual(fileSystem, file, path)) {
@@ -114,15 +117,7 @@
         private static bool ChecksumEqual(IFileSystem fileSystem, IPackageFile file, string path) {
             using (Stream projectFileStream = fileSystem.OpenFile(path),
                           packageFileStream = file.Open()) {
-                return GetChecksum(projectFileStream) == GetChecksum(packageFileStream);
-            }
-        }
-
-        private static int GetChecksum(Stream stream) {
-            // Copy the stream to a memory steam and get get the CRC32 of the bytes
-            using (MemoryStream memoryStream = new MemoryStream()) {
-                stream.CopyTo(memoryStream);
-                return (int)Crc32.Calculate(memoryStream.ToArray());
+                return Crc32.Calculate(projectFileStream) == Crc32.Calculate(packageFileStream);
             }
         }
 

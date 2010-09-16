@@ -47,6 +47,7 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

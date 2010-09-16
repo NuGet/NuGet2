@@ -13,7 +13,8 @@
     public class ProjectManager {
         private PackageEventListener _listener;
         private IDictionary<string, IPackageFileModifier> _modifiers = new Dictionary<string, IPackageFileModifier>(StringComparer.OrdinalIgnoreCase) {
-            { ".transform", new XmlTransfomer() }
+            { ".transform", new XmlTransfomer() },
+            { ".pp", new Preprocessor() }
         };
 
         public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot)
@@ -166,7 +167,7 @@
             }
         }
 
-        protected void AddPackageReferenceToProject(Package package) {            
+        protected void AddPackageReferenceToProject(Package package) {
             // Resolve assembly references
             var assemblyReferences = ResolveAssemblyReferences(package);
 
@@ -198,21 +199,25 @@
             return path.Substring(@"content\".Length);
         }
 
-        private bool ExecuteModify(IPackageFile file) {
+        private string GetTargetPath(string targetPath) {
+            return Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileNameWithoutExtension(targetPath));
+        }
+
+        private bool ExecuteModify(IPackageFile file, string path) {
             string extension = Path.GetExtension(file.Path);
             IPackageFileModifier modifier;
             if (_modifiers.TryGetValue(extension, out modifier)) {
-                modifier.Modify(file, Project);
+                modifier.Modify(file, GetTargetPath(path), Project);
                 return true;
             }
             return false;
         }
 
-        private void ExecuteRevert(IPackageFile file, IEnumerable<IPackageFile> matchingFiles) {
+        private void ExecuteRevert(IPackageFile file, string path, IEnumerable<IPackageFile> matchingFiles) {
             string extension = Path.GetExtension(file.Path);
             IPackageFileModifier modifier;
             if (_modifiers.TryGetValue(extension, out modifier)) {
-                modifier.Revert(file, matchingFiles, Project);
+                modifier.Revert(file, GetTargetPath(path), matchingFiles, Project);
             }
         }
 
@@ -278,10 +283,10 @@
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete,
                                 Listener,
-                                file => ExecuteRevert(file, from p in otherPackages
-                                                            from otherFile in p.GetContentFiles()
-                                                            where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
-                                                            select otherFile),
+                                (file, path) => ExecuteRevert(file, path, from p in otherPackages
+                                                                          from otherFile in p.GetContentFiles()
+                                                                          where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
+                                                                          select otherFile),
                                 ResolvePath);
 
             // Remove references
