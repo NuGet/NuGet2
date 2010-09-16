@@ -48,6 +48,7 @@
     <Compile Include="DependencyManagerTest.cs" />
     <Compile Include="PackageRepositoryFactoryTest.cs" />
     <Compile Include="PathResolverTest.cs" />
+    <Compile Include="PreprocessorTest.cs" />
     <Compile Include="ProjectManagerTest.cs" />
     <Compile Include="FileSystemExtensionsTest.cs" />
     <Compile Include="Mocks\MockPackageRepository.cs" />

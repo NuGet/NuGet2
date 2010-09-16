@@ -12,7 +12,8 @@
 
     public class ProjectManager {
         private PackageEventListener _listener;
-        private IDictionary<string, IPackageFileModifier> _modifiers = new Dictionary<string, IPackageFileModifier>(StringComparer.OrdinalIgnoreCase) {
+        // REVIEW: These should be externally pluggable
+        private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
             { ".transform", new XmlTransfomer() },
             { ".pp", new Preprocessor() }
         };
@@ -172,10 +173,7 @@
             var assemblyReferences = ResolveAssemblyReferences(package);
 
             // Add content files
-            Project.AddFiles(package.GetContentFiles(),
-                             Listener,
-                             ExecuteModify,
-                             ResolvePath);
+            Project.AddFiles(package.GetContentFiles(), _fileTransformers, Listener);
 
             // Add the references to the reference path
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
@@ -189,36 +187,6 @@
             LocalRepository.AddPackage(package);
 
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package, Project.ProjectName);
-        }
-
-        private string ResolvePath(string path) {
-            // Return empty string for the content directory
-            if (path.Equals("content", StringComparison.OrdinalIgnoreCase)) {
-                return String.Empty;
-            }
-            return path.Substring(@"content\".Length);
-        }
-
-        private string GetTargetPath(string targetPath) {
-            return Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileNameWithoutExtension(targetPath));
-        }
-
-        private bool ExecuteModify(IPackageFile file, string path) {
-            string extension = Path.GetExtension(file.Path);
-            IPackageFileModifier modifier;
-            if (_modifiers.TryGetValue(extension, out modifier)) {
-                modifier.Modify(file, GetTargetPath(path), Project);
-                return true;
-            }
-            return false;
-        }
-
-        private void ExecuteRevert(IPackageFile file, string path, IEnumerable<IPackageFile> matchingFiles) {
-            string extension = Path.GetExtension(file.Path);
-            IPackageFileModifier modifier;
-            if (_modifiers.TryGetValue(extension, out modifier)) {
-                modifier.Revert(file, GetTargetPath(path), matchingFiles, Project);
-            }
         }
 
         public void RemovePackageReference(string packageId) {
@@ -281,13 +249,7 @@
             var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
-            Project.DeleteFiles(contentFilesToDelete,
-                                Listener,
-                                (file, path) => ExecuteRevert(file, path, from p in otherPackages
-                                                                          from otherFile in p.GetContentFiles()
-                                                                          where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
-                                                                          select otherFile),
-                                ResolvePath);
+            Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers, Listener);
 
             // Remove references
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {

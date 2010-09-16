@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace NuPack {
-    internal class XmlTransfomer : IPackageFileModifier {
-        public void Modify(IPackageFile file, string targetPath, ProjectSystem projectSystem) {            
+    internal class XmlTransfomer : IPackageFileTransformer {
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
+        public void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem, PackageEventListener listener) {
             // Get the xml fragment
             XElement xmlFragment = GetXml(file);
 
@@ -14,16 +16,17 @@ namespace NuPack {
             // Do a merge
             transformDocument.Root.MergeWith(xmlFragment);
 
-            // Save the new file
+
             projectSystem.AddFile(targetPath, transformDocument.Save);
         }
 
-        public void Revert(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem) {            
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
+        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem, PackageEventListener listener) {
             // Get the xml snippet
             XElement xmlFragment = GetXml(file);
 
             XDocument document = XmlUtility.GetOrCreateDocument(xmlFragment.Name, projectSystem, targetPath);
-            
+
             // Merge the other xml elements into one element within this xml hierarchy (matching the config file path)
             var mergedFragments = matchingFiles.Select(GetXml)
                                                .Aggregate(new XElement(xmlFragment.Name), (left, right) => left.MergeWith(right));
@@ -31,7 +34,8 @@ namespace NuPack {
             // Take the difference of the xml and remove it from the main xml file
             document.Root.Except(xmlFragment.Except(mergedFragments));
 
-            projectSystem.AddFile(targetPath, document.Save);
+            // Save the new content to the file system
+            projectSystem.AddFile(targetPath, document.Save);            
         }
 
         private static XElement GetXml(IPackageFile file) {

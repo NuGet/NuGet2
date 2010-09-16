@@ -60,6 +60,23 @@
         }
 
         [TestMethod]
+        public void AddingPackageReferenceAddsPreprocessedFileToTargetPathWithRemovedExtension() {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), projectSystem);
+            Package packageA = PackageUtility.CreatePackage("A", "1.0", new[] { @"foo\bar\file.pp" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.IsFalse(projectSystem.FileExists(@"foo\bar\file.pp"));
+            Assert.IsTrue(projectSystem.FileExists(@"foo\bar\file"));
+        }
+
+        [TestMethod]
         public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();

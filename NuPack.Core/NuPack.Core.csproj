@@ -79,7 +79,7 @@
     <Compile Include="PackageWalker\ProjectUpdateUninstallWalker.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="PackageWalker\DependencyManager.cs" />
-    <Compile Include="FileModifiers\IPackageFileModifier.cs" />
+    <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
@@ -106,6 +106,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NuPackResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Utility\ProjectSystemExtensions.cs" />
+    <Compile Include="Utility\StreamExtensions.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="Repositories\AtomFeedPackageRepository.cs" />
     <Compile Include="ProjectSystem\ProjectSystem.cs" />

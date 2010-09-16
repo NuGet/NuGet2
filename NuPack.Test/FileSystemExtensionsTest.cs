@@ -35,20 +35,5 @@
             // Assert
             mockFileSystem.Verify(m => m.AddFile("A", It.IsAny<Stream>()), Times.Never());
         }
-
-        [TestMethod]
-        public void AddFilesWithAddFileCallbackSkipsFileWhenFileHandledByCallback() {
-            // Arrange
-            var fileSystem = new MockProjectSystem();
-            var files = PackageUtility.CreateFiles(new[] { "A", "B", "C" });
-
-            // Act
-            fileSystem.AddFiles(files, PackageEventListener.Default, (file, path) => file.Path.Equals("A"));
-
-            // Assert
-            Assert.IsFalse(fileSystem.FileExists("A"));
-            Assert.IsTrue(fileSystem.FileExists("B"));
-            Assert.IsTrue(fileSystem.FileExists("C"));
-        }
     }
 }

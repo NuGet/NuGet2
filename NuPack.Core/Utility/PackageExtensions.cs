@@ -4,9 +4,7 @@
     using System.Diagnostics;
     using System.Linq;
 
-    public static class PackageExtensions {
-        private const string ContentDir = "content";
-
+    public static class PackageExtensions {        
         public static Package FindByVersion(this IQueryable<Package> source, Version minVersion, Version maxVersion, Version exactVersion) {
             IEnumerable<Package> packages = from p in source
                                              orderby p.Version descending
@@ -67,7 +65,7 @@
         }
 
         internal static IEnumerable<IPackageFile> GetContentFiles(this Package package) {
-            return package.GetFiles().Where(file => file.Path.StartsWith(ContentDir, StringComparison.OrdinalIgnoreCase));
+            return package.GetFiles().Where(file => file.Path.StartsWith(Package.ContentDirectory, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

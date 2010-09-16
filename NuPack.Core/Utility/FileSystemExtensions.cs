@@ -1,58 +1,37 @@
-﻿namespace NuPack {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using NuPack.Resources;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using NuPack.Resources;
 
+namespace NuPack {
     internal static class FileSystemExtensions {
         internal static void AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
-                                      PackageEventListener listener,
-                                      Func<IPackageFile, string, bool> addFileCallback = null,
-                                      Func<string, string> pathResolver = null) {
-            AddFiles(fileSystem, files, String.Empty, listener, addFileCallback, pathResolver);
+                                      PackageEventListener listener) {
+            AddFiles(fileSystem, files, String.Empty, listener);
         }
 
         internal static void AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
                                       string rootDir,
-                                      PackageEventListener listener,
-                                      Func<IPackageFile, string, bool> addFileCallback = null,
-                                      Func<string, string> pathResolver = null) {
-            foreach (IPackageFile file in files) {                
-                string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
-
-                if (addFileCallback != null && addFileCallback(file, path)) {
-                    continue;
-                }
-
-                // Don't overwrite file if it exists if force wasn't set to true
-                if (fileSystem.FileExists(path)) {
-                    listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
-                    continue;
-                }
-
-                using (Stream packageFileStream = file.Open()) {
-                    fileSystem.AddFile(path, packageFileStream);
-                }
+                                      PackageEventListener listener) {
+            foreach (IPackageFile file in files) {
+                string path = Path.Combine(rootDir, file.Path);
+                AddFile(fileSystem, path, file.Open, listener);
             }
         }
-
+        
         internal static void DeleteFiles(this IFileSystem fileSystem,
                                          IEnumerable<IPackageFile> files,
-                                         PackageEventListener listener,
-                                         Action<IPackageFile, string> deleteFileCallback = null,
-                                         Func<string, string> pathResolver = null) {
-            DeleteFiles(fileSystem, files, String.Empty, listener, deleteFileCallback, pathResolver);
+                                         PackageEventListener listener) {
+            DeleteFiles(fileSystem, files, String.Empty, listener);
         }
 
         internal static void DeleteFiles(this IFileSystem fileSystem,
                                          IEnumerable<IPackageFile> files,
                                          string rootDir,
-                                         PackageEventListener listener,
-                                         Action<IPackageFile, string> deleteFileCallback = null,
-                                         Func<string, string> pathResolver = null) {
+                                         PackageEventListener listener) {
 
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
@@ -67,26 +46,13 @@
             // Remove files from every directory
             foreach (var directory in directories) {
                 var directoryFiles = directoryLookup.Contains(directory) ? directoryLookup[directory] : Enumerable.Empty<IPackageFile>();
-                foreach (var file in directoryFiles) {                    
-                    string path = Path.Combine(rootDir, ResolvePath(file.Path, pathResolver));
+                foreach (var file in directoryFiles) {
+                    string path = Path.Combine(rootDir, file.Path);
 
-                    if (deleteFileCallback != null) {
-                        deleteFileCallback(file, path);
-                    }
-
-                    // Only delete the file if it exists and the checksum is the same
-                    if (fileSystem.FileExists(path)) {
-                        if (ChecksumEqual(fileSystem, file, path)) {
-                            fileSystem.DeleteFile(path);
-                        }
-                        else {
-                            // This package installed a file that was modified so warn the user
-                            listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileModified, path);
-                        }
-                    }
+                    DeleteFile(fileSystem, path, file.Open, listener);
                 }
 
-                string dirPath = Path.Combine(rootDir, ResolvePath(directory, pathResolver));
+                string dirPath = Path.Combine(rootDir, directory);
 
                 // If the directory is empty then delete it
                 if (!fileSystem.GetFiles(dirPath).Any() &&
@@ -96,7 +62,38 @@
             }
         }
 
-        private static IEnumerable<string> GetDirectories(string path) {
+        internal static void DeleteFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, PackageEventListener listener) {
+            // Only delete the file if it exists and the checksum is the same
+            if (fileSystem.FileExists(path)) {
+                bool contentEqual;
+                using (Stream stream = streamFactory(),
+                              fileStream = fileSystem.OpenFile(path)) {
+                    contentEqual = stream.ContentEquals(fileStream);
+                }
+
+                if (contentEqual) {
+                    fileSystem.DeleteFile(path);
+                }
+                else {
+                    // This package installed a file that was modified so warn the user
+                    listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileModified, path);
+                }
+            }
+        }
+
+        internal static void AddFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, PackageEventListener listener) {
+            // Don't overwrite file if it exists if force wasn't set to true
+            if (fileSystem.FileExists(path)) {
+                listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
+            }
+            else {
+                using (Stream stream = streamFactory()) {
+                    fileSystem.AddFile(path, stream);
+                }
+            }
+        }
+
+        internal static IEnumerable<string> GetDirectories(string path) {
             foreach (var index in IndexOfAll(path, Path.DirectorySeparatorChar)) {
                 yield return path.Substring(0, index);
             }
@@ -114,27 +111,12 @@
             while (index >= 0);
         }
 
-        private static bool ChecksumEqual(IFileSystem fileSystem, IPackageFile file, string path) {
-            using (Stream projectFileStream = fileSystem.OpenFile(path),
-                          packageFileStream = file.Open()) {
-                return Crc32.Calculate(projectFileStream) == Crc32.Calculate(packageFileStream);
-            }
-        }
-
         internal static void AddFile(this IFileSystem fileSystem, string path, Action<Stream> write) {
             using (var stream = new MemoryStream()) {
                 write(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 fileSystem.AddFile(path, stream);
             }
-        }
-
-        private static string ResolvePath(string path, Func<string, string> pathSelector) {
-            string filePath = path;
-            if (pathSelector != null) {
-                filePath = pathSelector(path);
-            }
-            return filePath;
         }
     }
 }

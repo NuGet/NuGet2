@@ -11,6 +11,7 @@
         internal const string ManifestExtension = ".nuspec";
         internal const string SchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/";
         internal const string ManifestSchemaNamespace = SchemaNamespace + "nuspec.xsd";
+        internal const string ContentDirectory = "content";
 
         public abstract string Id {
             get;

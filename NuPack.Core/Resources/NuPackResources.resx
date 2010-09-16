@@ -243,6 +243,9 @@
   <data name="ReferenceDoesNotExist" xml:space="preserve">
     <value>Unable to add a assembly reference to '{0}'. The file does not exist</value>
   </data>
+  <data name="TokenHasNoValue" xml:space="preserve">
+    <value>The replacement token '{0}' has no value.</value>
+  </data>
   <data name="UnableToFindCompatibleReference" xml:space="preserve">
     <value>Unable to find assembly references that are compatible with the target framework '{0}'</value>
   </data>

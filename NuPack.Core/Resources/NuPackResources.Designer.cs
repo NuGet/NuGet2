@@ -439,6 +439,15 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The replacement token &apos;{0}&apos; has no value..
+        /// </summary>
+        internal static string TokenHasNoValue {
+            get {
+                return ResourceManager.GetString("TokenHasNoValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to find assembly references that are compatible with the target framework &apos;{0}&apos;.
         /// </summary>
         internal static string UnableToFindCompatibleReference {
