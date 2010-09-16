@@ -39,11 +39,11 @@
 
             _files = (from part in package.GetParts()
                       where IsPackageFile(part)
-                      select new PackageFile(part)).ToList();
+                      select new ZipPackageFile(part)).ToList();
 
             _references = (from part in package.GetParts()                           
                            where IsAssemblyReference(part)
-                           select new PackageAssemblyReference(part)).ToList();
+                           select new ZipPackageAssemblyReference(part)).ToList();
 
             var relationshipType = package.GetRelationshipsByType(Package.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
 

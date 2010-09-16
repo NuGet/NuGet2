@@ -86,7 +86,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Packages\FeedPackage.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
-    <Compile Include="Packages\PackageAssemblyReference.cs" />
+    <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="PackageWalker\BasicPackageWalker.cs" />
     <Compile Include="PackageWalker\DependentLookup.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
@@ -126,7 +126,7 @@
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="Utility\Utility.cs" />
     <Compile Include="Utility\XElementExtensions.cs" />
-    <Compile Include="Packages\PackageFile.cs" />
+    <Compile Include="Packages\ZipPackageFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Authoring\nuspec.xsd">

@@ -5,10 +5,10 @@
     using System.Runtime.Versioning;
     using System.Text;
 
-    internal class PackageAssemblyReference : PackageFile, IPackageAssemblyReference {
+    internal class ZipPackageAssemblyReference : ZipPackageFile, IPackageAssemblyReference {
         private FrameworkName _targetFramework;
 
-        public PackageAssemblyReference(PackagePart part)
+        public ZipPackageAssemblyReference(PackagePart part)
             : base(part) {
             // The path for a reference might look like this for assembly foo.dll:
             // lib\{FrameworkName}{Version}\foo.dll

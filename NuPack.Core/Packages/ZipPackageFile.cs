@@ -4,11 +4,11 @@
     using System.IO;
     using System.IO.Packaging;
     
-    internal class PackageFile : IPackageFile {
+    internal class ZipPackageFile : IPackageFile {
         private readonly Func<MemoryStream> _streamFactory;
         private readonly string _path;
 
-        public PackageFile(PackagePart part) {           
+        public ZipPackageFile(PackagePart part) {           
             Debug.Assert(part != null, "part should not be null");
 
             byte[] buffer;
