@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>SQLCE</id>
+    <version>4.0.8402.1</version>
+    <authors>
+      <author>Microsoft</author>
+    </authors>
+    <description>Embedded SQL database.</description>
+    <language>en-US</language>
+  </metadata>
+</package>

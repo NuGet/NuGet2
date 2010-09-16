@@ -121,9 +121,9 @@
     <value>Can not create tool window.</value>
   </data>
   <data name="Error_MEF" xml:space="preserve">
-    <value>NuPack Console failed to start. Please check if you have lastest PowerShell installed.</value>
+    <value>Package Manager Console failed to start. Please check if you have lastest PowerShell installed.</value>
   </data>
   <data name="ToolWindowTitle" xml:space="preserve">
-    <value>NuPack Console</value>
+    <value>Package Manager Console</value>
   </data>
 </root>

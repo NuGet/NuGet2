@@ -1,45 +1,27 @@
-﻿using Microsoft.VisualStudio.Settings;
-using Microsoft.VisualStudio.Shell.Settings;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.ToolsOptionsUI {
     internal static class Settings {
-        public const string SettingsRoot = "NuPack";
-        public const string RepositoryServiceUriSetting = "RepositoryServiceURI";
-        public const string RepositoryServiceUriDefault = "";
-        private static SettingsStore configurationSettingsStore;
-        private static WritableSettingsStore userSettingsStore;
+        private static VSPackageSourceProvider _packageSourceProvider;
 
-        private static WritableSettingsStore UserSettingsStore {
+        public static VSPackageSourceProvider PackageSourceProvider {
             get {
-                if (userSettingsStore == null) {
-                    SettingsManager settingsManager = new ShellSettingsManager(Utilities.ServiceProvider);
-                    userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
-
-                    //Ensure that the package collection exists before any callers attempt to use it.
-                    if (!userSettingsStore.CollectionExists(SettingsRoot)) {
-                        userSettingsStore.CreateCollection(SettingsRoot);
-                    }
+                if (_packageSourceProvider == null) {
+                    var serviceProvider = Utilities.ServiceProvider;
+                    DTE dte = (DTE)serviceProvider.GetService(typeof(SDTE));
+                    _packageSourceProvider = VSPackageSourceProvider.Create(dte);
                 }
-                return userSettingsStore;
-            }
-        }
 
-        private static SettingsStore ConfigurationSettingsStore {
-            get {
-                if (configurationSettingsStore == null) {
-                    SettingsManager settingsManager = new ShellSettingsManager(Utilities.ServiceProvider);
-                    configurationSettingsStore = settingsManager.GetReadOnlySettingsStore(SettingsScope.Configuration);
-                }
-                return configurationSettingsStore;
+                return _packageSourceProvider;
             }
         }
 
         public static string RepositoryServiceUri {
             get {
-                return UserSettingsStore.GetString(SettingsRoot, RepositoryServiceUriSetting, RepositoryServiceUriDefault);
-            }
-            set {
-                UserSettingsStore.SetString(SettingsRoot, RepositoryServiceUriSetting, value);
+                PackageSource activePackageSource = PackageSourceProvider.ActivePackageSource;
+                return (activePackageSource != null) ? activePackageSource.Source : string.Empty;
             }
         }
     }

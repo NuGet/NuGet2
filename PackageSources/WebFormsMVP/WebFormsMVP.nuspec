@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>WebFormsMVP</id>
+    <version>0.9.7.2</version>
+    <authors>
+      <author>Damian Edwards</author>
+    </authors>
+    <description>A simple Model-View-Presenter framework for ASP.NET Web Forms to aid in building testable and maintainable ASP.NET projects. Features support for normal server controls, data-binding and async pages.</description>
+    <language>en-US</language>
+  </metadata>
+</package>

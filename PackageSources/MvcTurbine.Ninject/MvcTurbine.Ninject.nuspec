@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>MvcTurbine.Ninject</id>
+    <version>2.1</version>
+    <authors>
+      <author>Javier Lozano</author>
+    </authors>
+    <description>Ninject support for MVC turbine.</description>
+    <language>en-US</language>
+  </metadata>
+  <dependencies>
+    <dependency id="MVCTurbine" version="2.1" />
+    <dependency id="Ninject" version="2.0" />
+  </dependencies>
+</package>

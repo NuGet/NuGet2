@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>MvcScaffold</id>
+    <version>1.0</version>
+    <authors>
+      <author>Microsoft</author>
+    </authors>
+    <description>Awesome scaffolding script</description>
+    <language>en-US</language>
+  </metadata>
+</package>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Castle.Core</id>
+    <version>1.2.0</version>
+    <authors>
+      <author>Jonathon Rossi &amp; Krzysztof Kozmic</author>
+    </authors>
+    <description>Core of the castle project</description>
+    <language>en-US</language>
+  </metadata>
+  <dependencies>
+    <dependency id="log4net" />
+    <dependency id="NLog" minversion="1.0" />
+  </dependencies>
+</package>

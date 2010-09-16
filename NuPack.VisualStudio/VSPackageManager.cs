@@ -2,12 +2,13 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
+    using System.IO;
     using System.Linq;
     using EnvDTE;
-    using Microsoft.Internal.Web.Utils;
-    using NuPack.VisualStudio.Resources;
+    using EnvDTE80;
+    using Microsoft.VisualStudio.ComponentModelHost;
 
     public class VSPackageManager : PackageManager {
         private static ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager>();
@@ -134,12 +135,12 @@
             // we need to create an entry that is based on the soltuion and the repository source
             var solutionEntry = Tuple.Create(dte.Solution, source);
             VSPackageManager packageManager;
-            if (!_packageManagerCache.TryGetValue(solutionEntry, out packageManager)) {
+            if (!_packageManagerCache.TryGetValue(solutionEntry, out packageManager)) {                
                 // Create a repository for this source
                 IPackageRepository repository = PackageRepositoryFactory.CreateRepository(source);
 
                 // Get the file system for the solution folder
-                var solutionFileSystem = new SolutionFolderProjectSystem(dte.Solution, "packages");
+                IFileSystem solutionFileSystem = GetFileSystem(dte);
 
                 // Create a new vs package manager
                 packageManager = new VSPackageManager(dte, repository, solutionFileSystem);
@@ -148,6 +149,53 @@
                 _packageManagerCache.TryAdd(solutionEntry, packageManager);
             }
             return packageManager;
+        }
+
+        private static IFileSystem GetFileSystem(DTE dte) {
+            // Get the component model service from dte                               
+            var componentModel = dte.GetService<IComponentModel>(typeof(SComponentModel));
+
+            Debug.Assert(componentModel != null, "Component model service is null");
+            
+            // Get the source control providers
+            var providers = componentModel.GetExtensions<ISourceControlFileSystemProvider>();
+
+            // Get the packages path
+            string path = Path.Combine(Path.GetDirectoryName(dte.Solution.FullName), "packages");
+            IFileSystem fileSystem = null;
+
+            var sourceControl = (SourceControl2)dte.SourceControl;
+            if (providers.Any() && sourceControl != null) {
+                SourceControlBindings binding = null;
+                try {
+                    // Get the binding for this solution
+                    binding = sourceControl.GetBindings(dte.Solution.FullName);
+                }
+                catch (NotImplementedException) {
+                    // Some source control providers don't bother to implement this.
+                    // TFS might be the only one using it
+                }
+
+                if (binding != null) {                    
+                    fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
+                                          .Where(fs => fs != null)
+                                          .FirstOrDefault();
+                }
+            }
+
+            return fileSystem ?? new FileBasedProjectSystem(path);
+        }
+
+        private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
+            try {
+                return provider.GetFileSystem(path, binding);
+            }
+            catch {
+                // Ignore exceptions that can happen when some binaries are missing. e.g. TfsSourceControlFileSystemProvider
+                // would throw a jitting error if TFS is not installed
+            }
+
+            return null;
         }
 
         private ProjectManager CreateProjectManager(Project project) {

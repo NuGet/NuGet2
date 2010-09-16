@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>FbConnectAuth</id>
+    <version>0.9</version>
+    <authors>
+      <author>Adam Creeger</author>
+    </authors>
+    <description>Facebook Connect Authentication for ASP.NET is a component that allows ASP.NET web developers to identify and validate users accessing their website or web services using Facebook Connect.</description>
+    <language>en-US</language>
+  </metadata>
+</package>

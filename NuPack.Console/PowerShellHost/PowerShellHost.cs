@@ -34,7 +34,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             this.Console = console;
             this.IsAsync = isAsync;
 
-            _packageSourceProvider = new VSPackageSourceProvider(dte);
+            _packageSourceProvider = VSPackageSourceProvider.Create(dte);
 
             _solutionHelper = new SolutionProjectsHelper(dte, this);
             _name = name;
@@ -261,11 +261,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
                 return (string)InvokeResult("get-variable DefaultProjectName");
             }
             set {
-                if (string.IsNullOrEmpty(value)) {
-                    throw new ArgumentNullException();
-                }
-
-                Invoke("_SetDefaultProjectInternal '" + value + "'", null, false);
+                Invoke("_SetDefaultProjectInternal '" + (value ?? String.Empty) + "'", null, false);
             }
         }
 

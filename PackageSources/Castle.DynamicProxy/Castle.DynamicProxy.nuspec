@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Castle.DynamicProxy</id>
+    <version>2.2.0</version>
+    <authors>
+      <author>Jonathon Rossi &amp; Krzysztof Kozmic</author>
+    </authors>
+    <description>Castle DynamicProxy is a library for generating lightweight .NET proxies on the fly at runtime. Proxy objects allow calls to members of an object to be intercepted without modifying the code of the class.</description>
+    <language>en-US</language>
+  </metadata>
+  <dependencies>
+    <dependency id="Castle.Core" version="1.2.0" />
+  </dependencies>
+</package>

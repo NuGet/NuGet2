@@ -11,7 +11,7 @@
     mc:Ignorable="d"
     x:Class="NuPack.Dialog.PackageManagerUI.PackageManagerWindow"
     Background="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundGradientKey}}"
-    Title="Add NuPack Reference"
+    Title="Add Package Reference"
     WindowStartupLocation="Manual"
     HasHelpButton="True" HasMaximizeButton="False" HasMinimizeButton="False"
     ResizeMode="CanResize" ShowInTaskbar="False" SnapsToDevicePixels="True"

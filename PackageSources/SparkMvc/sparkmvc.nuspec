@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>sparkmvc</id>
+    <version>1.0</version>
+    <authors>
+      <author>Louis DeJardin</author>
+    </authors>
+    <description>Spark view engine for ASP.NET MVC.</description>
+    <language>en-US</language>
+  </metadata>
+  <dependencies>
+    <dependency id="spark" minversion="1.0" />
+  </dependencies>
+</package>

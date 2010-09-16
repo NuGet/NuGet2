@@ -19,6 +19,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
 
         public SolutionProjectsHelper(DTE2 dte, IHost host) {
             UtilityMethods.ThrowIfArgumentNull(dte);
+            UtilityMethods.ThrowIfArgumentNull(host);
 
             _dte = dte;
             _host = host;
@@ -27,6 +28,10 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         public void RegisterSolutionEvents() {
             var events = _dte.Events.SolutionEvents;
             events.Opened += new _dispSolutionEvents_OpenedEventHandler(OnNewSolutionOpened);
+            events.ProjectAdded += new _dispSolutionEvents_ProjectAddedEventHandler(OnProjectAdded);
+            events.ProjectRemoved += new _dispSolutionEvents_ProjectRemovedEventHandler(OnProjectRemoved);
+            events.ProjectRenamed += new _dispSolutionEvents_ProjectRenamedEventHandler(OnProjectRenamed);
+
             if (_dte.Solution.IsOpen) {
                 OnNewSolutionOpened();
             }
@@ -35,11 +40,34 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             _solutionEvents = events;
         }
 
+        private void OnProjectRenamed(Project project, string oldName) {
+            if (oldName != null) {
+                // oldName is the full path to the project file. Need to convert it to simple project name. 
+                // No need to worry about Website project here, because there is no option to rename Website project.
+                oldName = System.IO.Path.GetFileNameWithoutExtension(oldName);
+                if (oldName.Equals(_host.DefaultProject, StringComparison.OrdinalIgnoreCase)) {
+                    _host.DefaultProject = project.Name;
+                }
+            }
+        }
+
+        private void OnProjectRemoved(Project project) {
+            if (project.Name.Equals(_host.DefaultProject, StringComparison.OrdinalIgnoreCase)) {
+                _host.DefaultProject = String.Empty;
+            }
+        }
+
+        private void OnProjectAdded(Project project) {
+            if (String.IsNullOrEmpty(_host.DefaultProject)) {
+                _host.DefaultProject = project.Name;
+            }
+        }
+
         private void OnNewSolutionOpened() {
             // when a new solution opens, we set its startup project as the default project in NuPack Console
             SolutionBuild2 sb = (SolutionBuild2)_dte.Solution.SolutionBuild;
             Array projects = (Array)sb.StartupProjects;
-            if (projects.Length > 0) {
+            if (projects != null && projects.Length > 0) {
                 string startupProject = null;
                 foreach (string item in projects)
                 {
