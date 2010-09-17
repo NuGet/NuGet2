@@ -24,8 +24,13 @@
 
         internal IEnumerable<PackageSyndicationItem> GetFeedItems() {
             try {
-                using (var feedReader = XmlTextReader.Create(_feedUri.OriginalString)) {
-                    return GetFeedItems(feedReader);
+                var request = WebRequest.Create(_feedUri);
+                using (var response = request.GetResponse()) {
+                    using (var stream = response.GetResponseStream()) {
+                        using (var feedReader = XmlTextReader.Create(stream)) {
+                            return GetFeedItems(feedReader);
+                        }
+                    }
                 }
             }
             catch (WebException exception) {
