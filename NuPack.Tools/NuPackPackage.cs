@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio;
-using NuPack.Dialog.ToolsOptionsUI;
-using NuPack.Dialog.PackageManagerUI;
 using NuPack.Dialog;
+using NuPack.Dialog.PackageManagerUI;
+using NuPack.Dialog.ToolsOptionsUI;
 using NuPackConsole.Implementation;
 
 namespace NuPack.Tools

@@ -3,10 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
     public class VSPackageSourceProvider {
-        
+
+        internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=199193";
+
         private PackageSourceSettingsManager _settingsManager;
         private HashSet<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
@@ -40,7 +43,18 @@ namespace NuPack.VisualStudio {
         }
 
         private void DeserializeActivePackageSource() {
-            ActivePackageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
+            var packageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
+            if (packageSource != null) {
+                // this is to guard against corrupted VS user settings store
+                AddPackageSource(packageSource);
+
+                ActivePackageSource = packageSource;
+            }
+            else if (_settingsManager.IsFirstRunning) {
+                packageSource = new PackageSource("NuPack official package source", DefaultPackageSource);
+                AddPackageSource(packageSource);
+                _settingsManager.IsFirstRunning = false;
+            }
         }
         
         public PackageSource ActivePackageSource {
@@ -48,6 +62,10 @@ namespace NuPack.VisualStudio {
                 return _activePackageSource;
             }
             set {
+                if (value != null && !_packageSources.Contains(value)) {
+                    throw new ArgumentException(VsResources.PackageSource_Invalid);
+                }
+
                 _activePackageSource = value;
 
                 // persist the value into VS settings store
@@ -67,6 +85,12 @@ namespace NuPack.VisualStudio {
 
             if (!_packageSources.Contains(source)) {
                 _packageSources.Add(source);
+                
+                // if the package source that we just added is the only one, make it the default
+                if (ActivePackageSource == null && _packageSources.Count == 1) {
+                    ActivePackageSource = source;
+                }
+
                 PersistPackageSources();
             }
         }

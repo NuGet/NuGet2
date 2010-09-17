@@ -141,4 +141,7 @@
   <data name="Debug_AddedFileToProject" xml:space="preserve">
     <value>Added file '{0}' to project '{1}'</value>
   </data>
+  <data name="PackageSource_Invalid" xml:space="preserve">
+    <value>The package source does not belong to the collection of available sources.</value>
+  </data>
 </root>

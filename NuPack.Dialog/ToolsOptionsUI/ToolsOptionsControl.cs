@@ -6,6 +6,13 @@ using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.ToolsOptionsUI
 {
+    /// <summary>
+    /// Represents the Tools - Options - Package Manager dialog
+    /// </summary>
+    /// <remarks>
+    /// The code in this class assumes that while the dialog is open, noone is modifying the VSPackageSourceProvider directly.
+    /// Otherwise, we have a problem with synchronization with the package source provider.
+    /// </remarks>
     public partial class ToolsOptionsControl : UserControl
     {
         private VSPackageSourceProvider _packageSourceProvider = Settings.PackageSourceProvider;
@@ -19,6 +26,7 @@ namespace NuPack.Dialog.ToolsOptionsUI
         internal void InitializeOnActivated() {
             _allPackageSources = new BindingSource(_packageSourceProvider.GetPackageSources().ToList(), null);
             PackageSourcesListBox.DataSource = _allPackageSources;
+            NewPackageSource.Text = String.Empty;
         }
 
         private void removeButton_Click(object sender, EventArgs e) {
@@ -40,6 +48,7 @@ namespace NuPack.Dialog.ToolsOptionsUI
         private void addButton_Click(object sender, EventArgs e) {
             string source = NewPackageSource.Text;
             if (!String.IsNullOrWhiteSpace(source)) {
+                source = source.Trim();
 
                 // TODO: Provide another textbox for PackageSource name
                 PackageSource newPackageSource = new PackageSource("New", source);

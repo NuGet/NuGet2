@@ -12,6 +12,7 @@ namespace NuPack.VisualStudio {
         private const string SettingsRoot = "NuPack";
         private const string PackageSourcesSettingProperty = "PackageSources";
         private const string ActivePackageSourceSettingProperty = "ActivePackageSource";
+        private const string IsFirstTimeSettingsProperty = "FirstTime";
 
         private WritableSettingsStore _userSettingsStore;
         private IServiceProvider _serviceProvider;
@@ -22,6 +23,15 @@ namespace NuPack.VisualStudio {
             }
 
             _serviceProvider = serviceProvider;
+        }
+
+        public bool IsFirstRunning {
+            get {
+                return UserSettingsStore.GetBoolean(SettingsRoot, IsFirstTimeSettingsProperty, true);
+            }
+            set {
+                UserSettingsStore.SetBoolean(SettingsRoot, IsFirstTimeSettingsProperty, value);
+            }
         }
 
         /// <summary>

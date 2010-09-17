@@ -131,5 +131,14 @@ namespace NuPack.VisualStudio.Resources {
                 return ResourceManager.GetString("DTE_ProjectUnsupported", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The package source does not belong to the collection of available sources..
+        /// </summary>
+        internal static string PackageSource_Invalid {
+            get {
+                return ResourceManager.GetString("PackageSource_Invalid", resourceCulture);
+            }
+        }
     }
 }

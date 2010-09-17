@@ -53,15 +53,15 @@
             this.NewPackageSource.Location = new System.Drawing.Point(7, 167);
             this.NewPackageSource.Margin = new System.Windows.Forms.Padding(4);
             this.NewPackageSource.Name = "NewPackageSource";
-            this.NewPackageSource.Size = new System.Drawing.Size(410, 22);
-            this.NewPackageSource.TabIndex = 2;
+            this.NewPackageSource.Size = new System.Drawing.Size(401, 22);
+            this.NewPackageSource.TabIndex = 4;
             // 
             // addButton
             // 
             this.addButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.addButton.Location = new System.Drawing.Point(424, 167);
+            this.addButton.Location = new System.Drawing.Point(415, 164);
             this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(94, 23);
+            this.addButton.Size = new System.Drawing.Size(105, 28);
             this.addButton.TabIndex = 5;
             this.addButton.Text = "&Add";
             this.addButton.UseVisualStyleBackColor = true;
@@ -77,17 +77,17 @@
             this.PackageSourcesListBox.ItemHeight = 20;
             this.PackageSourcesListBox.Location = new System.Drawing.Point(7, 36);
             this.PackageSourcesListBox.Name = "PackageSourcesListBox";
-            this.PackageSourcesListBox.Size = new System.Drawing.Size(410, 124);
+            this.PackageSourcesListBox.Size = new System.Drawing.Size(401, 124);
             this.PackageSourcesListBox.TabIndex = 1;
             this.PackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.AllPackageSourcesList_DrawItem);
             // 
             // removeButton
             // 
             this.removeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.removeButton.Location = new System.Drawing.Point(424, 65);
+            this.removeButton.Location = new System.Drawing.Point(415, 70);
             this.removeButton.Name = "removeButton";
-            this.removeButton.Size = new System.Drawing.Size(94, 23);
-            this.removeButton.TabIndex = 4;
+            this.removeButton.Size = new System.Drawing.Size(106, 28);
+            this.removeButton.TabIndex = 3;
             this.removeButton.Text = "&Remove";
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
@@ -95,10 +95,10 @@
             // defaultButton
             // 
             this.defaultButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.defaultButton.Location = new System.Drawing.Point(424, 36);
+            this.defaultButton.Location = new System.Drawing.Point(414, 36);
             this.defaultButton.Name = "defaultButton";
-            this.defaultButton.Size = new System.Drawing.Size(94, 23);
-            this.defaultButton.TabIndex = 3;
+            this.defaultButton.Size = new System.Drawing.Size(106, 28);
+            this.defaultButton.TabIndex = 2;
             this.defaultButton.Text = "&Set Default";
             this.defaultButton.UseVisualStyleBackColor = true;
             this.defaultButton.Click += new System.EventHandler(this.defaultButton_Click);
@@ -115,7 +115,7 @@
             this.Controls.Add(this.NewPackageSource);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ToolsOptionsControl";
-            this.Size = new System.Drawing.Size(527, 214);
+            this.Size = new System.Drawing.Size(529, 214);
             this.ResumeLayout(false);
             this.PerformLayout();
 
