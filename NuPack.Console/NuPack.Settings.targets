@@ -23,17 +23,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants>
   </PropertyGroup>
-  
-  <!-- Settings only for Coverage builds -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'Coverage' ">
-    <OutputPath>bin\Coverage\</OutputPath>
-    <Coverage>true</Coverage>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Coverage)' == 'true' ">
-    <DefineConstants>$(DefineConstants);CODE_COVERAGE</DefineConstants>
-  </PropertyGroup>
-  
+    
   <!-- Settings only for Release builds -->
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
@@ -41,8 +31,4 @@
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
 
-  <!-- Settings for CI Builds -->
-  <PropertyGroup Condition=" '$(CIBuild)' == 'true' ">
-    <DefineConstants>$(DefineConstants);CI_BUILD</DefineConstants>
-  </PropertyGroup>
 </Project>

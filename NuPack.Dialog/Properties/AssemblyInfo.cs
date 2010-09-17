@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("NuPack.Dialog")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("CodePlex Foundation")]
 [assembly: AssemblyProduct("NuPack.Dialog")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
