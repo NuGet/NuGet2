@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Ninject.MVC3</id>
+    <version>0.1</version>
+    <authors>
+      <author>Microsoft</author>
+    </authors>
+    <description>An MVC3 IMvcServiceLocator wrapper for Ninject.</description>
+    <language>en-US</language>
+  </metadata>
+  <dependencies>
+    <dependency id="Ninject" minversion="2.0.0.0" />
+  </dependencies>
+</package>
