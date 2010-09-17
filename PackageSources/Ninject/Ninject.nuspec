@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Ninject</id>
-    <version>2.0</version>
+    <version>2.0.1.0</version>
     <authors>
       <author>Nate Kohari</author>
     </authors>
