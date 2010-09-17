@@ -111,6 +111,19 @@ namespace NuPack.VisualStudio {
             return result;
         }
 
+        public void SetPackageSources(IEnumerable<PackageSource> sources) {
+            _packageSources.Clear();
+            ActivePackageSource = null;
+
+            if (sources != null) {
+                foreach (var s in sources) {
+                    _packageSources.Add(s);
+                }
+            }
+
+            PersistPackageSources();
+        }
+
         private void PersistPackageSources() {
             _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources);
         }

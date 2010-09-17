@@ -28,9 +28,18 @@ namespace NuPack.Dialog.ToolsOptionsUI {
 
         protected override void OnActivate(CancelEventArgs e) {
             base.OnActivate(e);
-
             this.OptionsControl.Font = VsShellUtilities.GetEnvironmentFont(this);
             this.OptionsControl.InitializeOnActivated();
+        }
+
+        protected override void OnApply(PageApplyEventArgs e) {
+            // Do not need to call base.OnApply() here.
+            this.OptionsControl.ApplyChangedSettings();
+        }
+
+        protected override void OnClosed(EventArgs e) {
+            base.OnClosed(e);
+            this.OptionsControl.ClearSettings();
         }
 
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

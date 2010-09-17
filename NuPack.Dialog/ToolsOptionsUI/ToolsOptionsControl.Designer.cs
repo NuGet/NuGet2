@@ -65,7 +65,7 @@
             this.addButton.TabIndex = 5;
             this.addButton.Text = "&Add";
             this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.addButton_Click);
+            this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
             // 
             // PackageSourcesListBox
             // 
@@ -90,7 +90,7 @@
             this.removeButton.TabIndex = 3;
             this.removeButton.Text = "&Remove";
             this.removeButton.UseVisualStyleBackColor = true;
-            this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
+            this.removeButton.Click += new System.EventHandler(this.OnRemoveButtonClick);
             // 
             // defaultButton
             // 
@@ -101,7 +101,7 @@
             this.defaultButton.TabIndex = 2;
             this.defaultButton.Text = "&Set Default";
             this.defaultButton.UseVisualStyleBackColor = true;
-            this.defaultButton.Click += new System.EventHandler(this.defaultButton_Click);
+            this.defaultButton.Click += new System.EventHandler(this.OnDefaultPackageSourceButtonClick);
             // 
             // ToolsOptionsControl
             // 
