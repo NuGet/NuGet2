@@ -98,6 +98,7 @@ function global:Add-MvcView {
                         
             # Try to find the type for the type name
             $mvcHost.ViewDataType = $type
+            $mvcHost.ViewDataTypeName = $type.get_FullName()
 
             # Add the assembly path to the list of paths in the t4 references
             $mvcHost.AssemblyPath.Add($mvcHost.ViewDataType.Assembly.Location)
