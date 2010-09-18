@@ -55,7 +55,7 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        public virtual IQueryable<Package> GetQuery() {
+        public virtual IQueryable<IPackage> GetQuery() {
             return PackagesRepository.GetPackages();
         }
 

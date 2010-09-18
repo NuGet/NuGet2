@@ -84,18 +84,18 @@
         }
 
         internal static bool IsManifest(string path) {
-            return Path.GetExtension(path).Equals(Package.ManifestExtension, StringComparison.OrdinalIgnoreCase);
+            return Path.GetExtension(path).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         internal static FrameworkName GetDefaultTargetFramework() {
             return new FrameworkName(NetFrameworkIdentifier, GetDefaultTargetFrameworkVersion());
         }
 
-        internal static string GetPackageFileName(Package package) {
-            return package.Id + "." + package.Version + Package.PackageExtension;
+        internal static string GetPackageFileName(IPackage package) {
+            return package.Id + "." + package.Version + Constants.PackageExtension;
         }
 
-        internal static string GetPackageDirectory(Package package) {
+        internal static string GetPackageDirectory(IPackage package) {
             return package.Id + "." + package.Version;
         }
     }

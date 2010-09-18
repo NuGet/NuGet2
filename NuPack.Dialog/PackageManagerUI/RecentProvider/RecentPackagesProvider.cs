@@ -46,9 +46,9 @@ namespace NuPack.Dialog.Providers {
         /// Returns a fake list of packages for now
         /// </summary>
         /// <returns></returns>
-        public override IQueryable<Package> GetQuery() {
+        public override IQueryable<IPackage> GetQuery() {
             if (String.IsNullOrEmpty(_feed)) {
-                return Enumerable.Empty<Package>().AsQueryable();
+                return Enumerable.Empty<IPackage>().AsQueryable();
             }
             List<string> recent = new List<String>() { "elmah", "Antlr" };
 

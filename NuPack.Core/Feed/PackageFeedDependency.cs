@@ -5,7 +5,7 @@
     /// <summary>
     /// This type is used to serialize a package dependency into the atom feed.
     /// </summary>
-    [DataContract(Name = "dependency", Namespace = Package.SchemaNamespace)]
+    [DataContract(Name = "dependency", Namespace = Constants.SchemaNamespace)]
     public class PackageFeedDependency {
         // Need parameterless ctor for serializer
         public PackageFeedDependency() {

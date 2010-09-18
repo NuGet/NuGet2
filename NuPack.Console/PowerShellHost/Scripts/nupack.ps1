@@ -1,4 +1,4 @@
-	# make sure we stop on exceptions
+    # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null
@@ -593,7 +593,7 @@ function global:_IsSolutionOnlyPackage($packageManager, $id, $version) {
     $repository = $packageManager.ExternalRepository
     $package = [NuPack.PackageRepositoryExtensions]::FindPackage($repository, $id, $null, $null, $version)
 
-    return $package -and !$package.HasProjectContent
+    return $package -and ![NuPack.PackageExtensions]::HasProjectContent($package)
 }
 
 function global:_LookForSpecFile($projectIns, $spec) {

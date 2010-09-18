@@ -33,8 +33,8 @@ namespace NuPack.Dialog.PackageManagerUI.Providers {
         /// </summary>
         void PopulatePackages(object data) {
             //foreach (NuPack.Package package in _vsProjectManager.SourceRepository.GetPackages())
-            IQueryable<Package> query = _vsPackageManager.ExternalRepository.GetPackages();
-            foreach (NuPack.Package package in query.Take(10)) {
+            IQueryable<IPackage> query = _vsPackageManager.ExternalRepository.GetPackages();
+            foreach (NuPack.IPackage package in query.Take(10)) {
                 PackageRecords.Add(package);
             }
         }

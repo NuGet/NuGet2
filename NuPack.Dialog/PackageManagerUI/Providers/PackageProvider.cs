@@ -16,7 +16,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         private string _category;
         private PackageTreeNode _searchNode;
         private PackageTreeNode _packagesTree;
-        private ObservableCollection<NuPack.Package> _packageRecords = new ObservableCollection<NuPack.Package>();
+        private ObservableCollection<NuPack.IPackage> _packageRecords = new ObservableCollection<NuPack.IPackage>();
         private ConcurrentDictionary<string, PackageTreeNode> _treeNode = new ConcurrentDictionary<string, PackageTreeNode>(StringComparer.OrdinalIgnoreCase);
         private ResourceDictionary _resources;
         private IVsProgressPane _progressPane;
@@ -49,7 +49,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// <summary>
         /// The set of package records that the dialog will data bind to
         /// </summary>
-        public ObservableCollection<NuPack.Package> PackageRecords
+        public ObservableCollection<NuPack.IPackage> PackageRecords
         {
             get { return _packageRecords; }
         }
@@ -113,7 +113,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
                     _packagesTree.Nodes.Add(categoryNode);
                     _treeNode[Category] = categoryNode;
 
-                    foreach (NuPack.Package rec in _packageRecords)
+                    foreach (NuPack.IPackage rec in _packageRecords)
                     {
                         AddRecordToCategoryNode(rec);
                     }
@@ -156,7 +156,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// Add the package record to the category
         /// </summary>
         /// <param name="rec"></param>
-        private void RemoveRecordFromCategoryNode(NuPack.Package rec)
+        private void RemoveRecordFromCategoryNode(NuPack.IPackage rec)
         {
             PackageTreeNode subCategoryNode;
 
@@ -175,7 +175,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// Add the package record to the category
         /// </summary>
         /// <param name="rec"></param>
-        private void AddRecordToCategoryNode(NuPack.Package rec)
+        private void AddRecordToCategoryNode(NuPack.IPackage rec)
         {
             PackageTreeNode subCategoryNode;
             string category = _category;  //rec.Category
@@ -204,7 +204,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
                 // Add new items to the extension records tree
                 if (e.NewItems != null)
                 {
-                    foreach (NuPack.Package rec in e.NewItems)
+                    foreach (NuPack.IPackage rec in e.NewItems)
                     {
                         AddRecordToCategoryNode(rec);
                     }
@@ -213,7 +213,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
                 // Remove old items from the extension records tree
                 if (e.OldItems != null)
                 {
-                    foreach (NuPack.Package rec in e.OldItems)
+                    foreach (NuPack.IPackage rec in e.OldItems)
                     {
                         RemoveRecordFromCategoryNode(rec);
                     }
@@ -301,7 +301,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// <summary>
         /// Check if all terms are found somewhere in a record.
         /// </summary>
-        private static bool IsMatch(NuPack.Package record, string[] terms)
+        private static bool IsMatch(NuPack.IPackage record, string[] terms)
         {
             foreach (var _term in terms)
             {
@@ -317,7 +317,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// <summary>
         /// Check if a given term is found somewhere in a record.
         /// </summary>
-        private static bool IsMatch(NuPack.Package record, string term)
+        private static bool IsMatch(NuPack.IPackage record, string term)
         {
             return IsMatch(record.Id, term)
                 || IsMatch(record.Description, term)

@@ -3,26 +3,26 @@
     using System.Linq;
 
     internal class DependentLookup {
-        IDictionary<Package, HashSet<Package>> _dependentsLookup;
+        IDictionary<IPackage, HashSet<IPackage>> _dependentsLookup;
 
-        public DependentLookup(IDictionary<Package, HashSet<Package>> dependentsLookup) {
+        public DependentLookup(IDictionary<IPackage, HashSet<IPackage>> dependentsLookup) {
             _dependentsLookup = dependentsLookup;
         }
 
         public static DependentLookup Create(IPackageRepository repository) {
             var walker = new ReverseDependencyWalker(repository);
-            foreach (Package package in repository.GetPackages()) {
+            foreach (IPackage package in repository.GetPackages()) {
                 walker.Walk(package);
             }
             return new DependentLookup(walker.Dependents);
         }
 
-        public IEnumerable<Package> GetDependents(Package package) {
-            HashSet<Package> dependents;
+        public IEnumerable<IPackage> GetDependents(IPackage package) {
+            HashSet<IPackage> dependents;
             if (_dependentsLookup.TryGetValue(package, out dependents)) {
                 return dependents;
             }
-            return Enumerable.Empty<Package>();
+            return Enumerable.Empty<IPackage>();
         }
     }
 }

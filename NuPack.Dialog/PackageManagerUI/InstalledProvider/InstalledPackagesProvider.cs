@@ -42,9 +42,9 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        public override IQueryable<Package> GetQuery() {
+        public override IQueryable<IPackage> GetQuery() {
             if (String.IsNullOrEmpty(_feed)) {
-                return Enumerable.Empty<Package>().AsQueryable();
+                return Enumerable.Empty<IPackage>().AsQueryable();
             }
             return _vsProjectManager.GetPackageReferences().AsQueryable();
         }

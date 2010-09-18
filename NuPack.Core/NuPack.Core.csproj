@@ -80,6 +80,7 @@
     <Compile Include="Authoring\XmlManifestReader.cs" />
     <Compile Include="PackageSource\PackageSource.cs" />
     <Compile Include="Packages\DefaultPackageAssemblyPathResolver.cs" />
+    <Compile Include="Packages\IPackage.cs" />
     <Compile Include="Packages\IPackageAssemblyPathResolver.cs" />
     <Compile Include="PackageWalker\ProjectUninstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectUpdateInstallWalker.cs" />
@@ -124,7 +125,7 @@
     <Compile Include="ProjectSystem\FileBasedProjectSystem.cs" />
     <Compile Include="Packages\LazyPackage.cs" />
     <Compile Include="Repositories\IPackageRepository.cs" />
-    <Compile Include="Packages\Package.cs" />
+    <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\IPackageFile.cs" />
     <Compile Include="Packages\PackageDependency.cs" />
     <Compile Include="Utility\Crc32.cs" />

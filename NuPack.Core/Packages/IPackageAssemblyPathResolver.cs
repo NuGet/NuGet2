@@ -1,5 +1,5 @@
 ﻿namespace NuPack {
     public interface IPackageAssemblyPathResolver {
-        string GetAssemblyPath(Package package, IPackageAssemblyReference assemblyReference);
+        string GetAssemblyPath(IPackage package, IPackageAssemblyReference assemblyReference);
     }
 }

@@ -5,17 +5,17 @@
     using System.Text;
 
     internal class PackagePlan {        
-        public PackagePlan(IEnumerable<Package> packagesToInstall, IEnumerable<Package> packagesToUninstall) {
+        public PackagePlan(IEnumerable<IPackage> packagesToInstall, IEnumerable<IPackage> packagesToUninstall) {
             PackagesToInstall = packagesToInstall;
             PackagesToUninstall = packagesToUninstall;
         }
 
-        public IEnumerable<Package> PackagesToInstall {
+        public IEnumerable<IPackage> PackagesToInstall {
             get;
             private set;
         }
 
-        public IEnumerable<Package> PackagesToUninstall {
+        public IEnumerable<IPackage> PackagesToUninstall {
             get;
             private set;
         }

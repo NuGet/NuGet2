@@ -5,7 +5,7 @@
     using NuPack.Resources;
 
     internal static class DependencyManager {
-        internal static IEnumerable<Package> ResolveDependenciesForInstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForInstall(IPackage package,
                                                                             IPackageRepository localRepository,
                                                                             IPackageRepository sourceRepository,
                                                                             PackageEventListener listener = null) {
@@ -19,7 +19,7 @@
             return walker.Output;
         }
 
-        internal static IEnumerable<Package> ResolveDependenciesForProjectInstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForProjectInstall(IPackage package,
                                                                                    IPackageRepository localRepository,
                                                                                    IPackageRepository sourceRepository,
                                                                                    PackageEventListener listener = null) {
@@ -30,7 +30,7 @@
             return walker.Output;
         }
 
-        internal static IEnumerable<Package> ResolveDependenciesForProjectUninstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForProjectUninstall(IPackage package,
                                                                                     IPackageRepository localRepository,
                                                                                     bool ignoreDepents = false,
                                                                                     bool removeDependencies = false,
@@ -47,7 +47,7 @@
             return walker.Output;
         }
 
-        internal static IEnumerable<Package> ResolveDependenciesForUninstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForUninstall(IPackage package,
                                                                              IPackageRepository localRepository,
                                                                              bool force = false,
                                                                              bool removeDependencies = false,
@@ -69,13 +69,13 @@
                 if (!walker.Output.Contains(pair.Key, PackageComparer.IdAndVersionComparer)) {
                     listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
                                 pair.Key,
-                                String.Join(", ", pair.Value.Select(p => p.ToString())));
+                                String.Join(", ", pair.Value.Select(p => p.GetFullName())));
                 }
             }
         }
 
-        internal static PackagePlan ResolveDependenciesForUpdate(Package oldPackage,
-                                                                 Package newPackage,
+        internal static PackagePlan ResolveDependenciesForUpdate(IPackage oldPackage,
+                                                                 IPackage newPackage,
                                                                  IPackageRepository localRepository,
                                                                  IPackageRepository sourceRepository,
                                                                  PackageEventListener listener,

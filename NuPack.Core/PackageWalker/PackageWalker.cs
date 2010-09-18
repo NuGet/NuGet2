@@ -33,12 +33,12 @@
             return new PackageMarker();
         }
 
-        public void Walk(Package package) {
+        public void Walk(IPackage package) {
             BeforeWalk(package);
             WalkInternal(package);
         }
 
-        private void WalkInternal(Package package) {
+        private void WalkInternal(IPackage package) {
             // Do nothing if we saw this package already
             if (Marker.IsVisited(package)) {
                 return;
@@ -55,7 +55,7 @@
                     }
 
                     // Resolve the dependency
-                    Package resolvedDependency = ResolveDependency(dependency);
+                    IPackage resolvedDependency = ResolveDependency(dependency);
 
                     if (resolvedDependency == null) {
                         RaiseDependencyResolveError(dependency);
@@ -71,7 +71,7 @@
 
                     if (Marker.IsCycle(resolvedDependency)) {
                         if (RaiseErrorOnCycle) {
-                            List<Package> packages = Marker.Packages.ToList();
+                            List<IPackage> packages = Marker.Packages.ToList();
                             packages.Add(resolvedDependency);
                             RaiseCycleError(packages);
                             return;
@@ -89,29 +89,29 @@
             Process(package);
         }
 
-        protected virtual bool SkipResolvedDependency(Package package, PackageDependency dependency, Package resolvedDependency) {
+        protected virtual bool SkipResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
             return false;
         }
 
-        protected virtual void RaiseCycleError(IEnumerable<Package> packages) {
+        protected virtual void RaiseCycleError(IEnumerable<IPackage> packages) {
         }
 
         protected virtual bool SkipDependency(PackageDependency dependency) {
             return false;
         }
 
-        protected virtual void ProcessResolvedDependency(Package package, PackageDependency dependency, Package resolvedDependency) {
+        protected virtual void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
         }
 
-        protected virtual void Process(Package package) {
+        protected virtual void Process(IPackage package) {
         }
 
         protected virtual void RaiseDependencyResolveError(PackageDependency dependency) {
         }
 
-        protected abstract Package ResolveDependency(PackageDependency dependency);
+        protected abstract IPackage ResolveDependency(PackageDependency dependency);
 
-        protected virtual void BeforeWalk(Package package) {
+        protected virtual void BeforeWalk(IPackage package) {
         }
     }
 }

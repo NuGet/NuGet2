@@ -16,7 +16,7 @@
             _fileSystem = fileSystem;
         }
 
-        public string GetAssemblyPath(Package package, IPackageAssemblyReference assemblyReference) {
+        public string GetAssemblyPath(IPackage package, IPackageAssemblyReference assemblyReference) {
             return Path.Combine(_fileSystem.Root, Utility.GetPackageDirectory(package), assemblyReference.Path);
         }
     }

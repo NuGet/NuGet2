@@ -20,7 +20,7 @@
 
         public string PackageId {
             get {
-                return ElementExtensions.ReadElementExtensions<string>("packageId", Package.SchemaNamespace).Single();
+                return ElementExtensions.ReadElementExtensions<string>("packageId", Constants.SchemaNamespace).Single();
             }
         }
 
@@ -38,7 +38,7 @@
             get {
                 if (_version == null) {
                     // Get the version string then parse it
-                    string versionString = ElementExtensions.ReadElementExtensions<string>("version", Package.SchemaNamespace).Single();
+                    string versionString = ElementExtensions.ReadElementExtensions<string>("version", Constants.SchemaNamespace).Single();
                     _version = new Version(versionString);
                 }
                 return _version;
@@ -48,7 +48,7 @@
         public IEnumerable<string> Keywords {
             get {
                 if (_keywords == null) {
-                    _keywords = ElementExtensions.ReadElementExtensions<string[]>("keywords", Package.SchemaNamespace).SingleOrDefault()
+                    _keywords = ElementExtensions.ReadElementExtensions<string[]>("keywords", Constants.SchemaNamespace).SingleOrDefault()
                                 ?? Enumerable.Empty<string>();
                 }
                 return _keywords;
@@ -57,20 +57,20 @@
 
         public string Language {
             get {
-                return ElementExtensions.ReadElementExtensions<string>("language", Package.SchemaNamespace).SingleOrDefault();
+                return ElementExtensions.ReadElementExtensions<string>("language", Constants.SchemaNamespace).SingleOrDefault();
             }
         }
 
         public string LastModifiedBy {
             get {
-                return ElementExtensions.ReadElementExtensions<string>("lastModifiedBy", Package.SchemaNamespace).SingleOrDefault();
+                return ElementExtensions.ReadElementExtensions<string>("lastModifiedBy", Constants.SchemaNamespace).SingleOrDefault();
             }
         }
 
         public IEnumerable<PackageDependency> Dependencies {
             get {
                 if (_dependencies == null) {
-                    var dependencies = ElementExtensions.ReadElementExtensions<PackageFeedDependency[]>("dependencies", Package.SchemaNamespace).SingleOrDefault();
+                    var dependencies = ElementExtensions.ReadElementExtensions<PackageFeedDependency[]>("dependencies", Constants.SchemaNamespace).SingleOrDefault();
                     if (dependencies != null) {
                         _dependencies = dependencies.Select(d => d.ToPackageDependency());
                     }

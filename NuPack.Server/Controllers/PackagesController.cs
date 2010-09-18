@@ -38,7 +38,7 @@ namespace NuPack.Server.Controllers {
                                              "application/atom+xml");
         }
 
-        private string GetPackageDownloadUrl(Package package) {
+        private string GetPackageDownloadUrl(IPackage package) {
             string appRoot = Request.ApplicationPath;
             if (!appRoot.EndsWith("/")) {
                 appRoot += "/";
@@ -47,7 +47,7 @@ namespace NuPack.Server.Controllers {
             return String.Format(appRoot + "packages/download?packageFile={0}", GetPackageFileName(package));
         }
 
-        public static string GetPackageFileName(Package package) {
+        public static string GetPackageFileName(IPackage package) {
             return package.Id + "." + package.Version + ".nupack";
         }
     }

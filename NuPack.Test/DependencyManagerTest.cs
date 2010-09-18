@@ -12,20 +12,20 @@
         public void ReverseDependencyWalkerUsersVersionAndIdToDetermineVisited() {            
             // Arrange
             // A 1.0 -> B 1.0
-            Package packageA1 = PackageUtility.CreatePackage("A",
+            IPackage packageA1 = PackageUtility.CreatePackage("A",
                                                             "1.0",
                                                              dependencies: new List<PackageDependency> {
                                                                  PackageDependency.CreateDependency("B", version:new Version("1.0"))
                                                              });
             // A 2.0 -> B 2.0
-            Package packageA2 = PackageUtility.CreatePackage("A",
+            IPackage packageA2 = PackageUtility.CreatePackage("A",
                                                             "2.0",
                                                              dependencies: new List<PackageDependency> {
                                                                  PackageDependency.CreateDependency("B", version:new Version("2.0"))
                                                              });
 
-            Package packageB1 = PackageUtility.CreatePackage("B", "1.0");
-            Package packageB2 = PackageUtility.CreatePackage("B", "2.0");
+            IPackage packageB1 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB2 = PackageUtility.CreatePackage("B", "2.0");
 
             var mockRepository = new MockPackageRepository();
             mockRepository.AddPackage(packageA1);
@@ -46,7 +46,7 @@
         [TestMethod]
         public void ResolveDependenciesForInstallPackageWithUnknownDependencyThrows() {
             // Arrange            
-            Package package = PackageUtility.CreatePackage("A",
+            IPackage package = PackageUtility.CreatePackage("A",
                                                             "1.0",
                                                              dependencies: new List<PackageDependency> {
                                                                  PackageDependency.CreateDependency("B")
@@ -64,13 +64,13 @@
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("A")
                                                                 });
@@ -96,24 +96,24 @@
             //   \ /
             //    D 
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B"),
                                                                     PackageDependency.CreateDependency("C")
                                                                 });
 
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("D")
                                                                 });
 
-            Package packageC = PackageUtility.CreatePackage("C", "1.0",
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("D")
                                                                 });
 
-            Package packageD = PackageUtility.CreatePackage("D", "1.0");
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0");
 
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB);
@@ -145,24 +145,24 @@
             //   \ /
             //    D 
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B"),
                                                                     PackageDependency.CreateDependency("C")
                                                                 });
 
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("D")
                                                                 });
 
-            Package packageC = PackageUtility.CreatePackage("C", "1.0",
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("D")
                                                                 });
 
-            Package packageD = PackageUtility.CreatePackage("D", "1.0");
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0");
 
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
@@ -188,18 +188,18 @@
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
 
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
-            Package packageA15 = PackageUtility.CreatePackage("A", "1.5",
+            IPackage packageA15 = PackageUtility.CreatePackage("A", "1.5",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
 
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("A", version: Version.Parse("1.5"))
                                                                 });
@@ -217,12 +217,12 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B", minVersion: Version.Parse( "1.5"))
                                                                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.4");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.4");
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB);
 
@@ -236,14 +236,14 @@
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B", version: Version.Parse( "1.5"))
                                                                 });
 
             sourceRepository.AddPackage(packageA);
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.4");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.4");
             sourceRepository.AddPackage(packageB);
 
             // Act & Assert
@@ -255,12 +255,12 @@
             // Arrange            
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
@@ -280,12 +280,12 @@
             // Arrange
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             localRepository.AddPackage(packageA);
 
@@ -298,12 +298,12 @@
             // Arrange
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
@@ -317,12 +317,12 @@
             // Arrange
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
@@ -336,12 +336,12 @@
             // Arrange
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B")
                                                                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
@@ -360,15 +360,15 @@
             // Arrange
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("B"),
                                                                 PackageDependency.CreateDependency("C")
                                                             });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
-            Package packageC = PackageUtility.CreatePackage("C", "1.0");
-            Package packageD = PackageUtility.CreatePackage("D", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("C"),
                                                             });
@@ -393,15 +393,15 @@
             // Arrange
             var localRepository = new MockPackageRepository();
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B"),
                                                                     PackageDependency.CreateDependency("C")
                                                             });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
-            Package packageC = PackageUtility.CreatePackage("C", "1.0");
-            Package packageD = PackageUtility.CreatePackage("D", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("C"),
                                                             });

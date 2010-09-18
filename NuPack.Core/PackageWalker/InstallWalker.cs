@@ -29,22 +29,22 @@
 
         // List of packages to install after the walk
         // If this is null, then there were errors
-        public IList<Package> Output {
+        public IList<IPackage> Output {
             get;
             private set;
         }
 
-        protected override void Process(Package package) {
+        protected override void Process(IPackage package) {
             if (Output == null) {
-                Output = new List<Package>();
+                Output = new List<IPackage>();
             }
 
             Output.Add(package);
         }
 
-        protected override Package ResolveDependency(PackageDependency dependency) {
+        protected override IPackage ResolveDependency(PackageDependency dependency) {
             // See if we have a local copy
-            Package package = base.ResolveDependency(dependency);
+            IPackage package = base.ResolveDependency(dependency);
 
             if (package != null) {
                 // We have it installed locally
@@ -74,11 +74,11 @@
         }
 
         protected override bool SkipDependency(PackageDependency dependency) {
-            IQueryable<Package> packages = (from p in Marker.Packages
+            IQueryable<IPackage> packages = (from p in Marker.Packages
                                             where p.Id.Equals(dependency.Id, StringComparison.OrdinalIgnoreCase)
                                             select p).AsQueryable();
 
-            Package package = packages.FindByVersion(dependency.MinVersion, dependency.MaxVersion, dependency.Version);
+            IPackage package = packages.FindByVersion(dependency.MinVersion, dependency.MaxVersion, dependency.Version);
             return package != null && Marker.IsVisited(package);
         }
     }

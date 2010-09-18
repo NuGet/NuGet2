@@ -17,14 +17,14 @@
             base.AddPackageReference(packageId, version, ignoreDependencies);
         }
 
-        protected override void RemovePackageReference(Package package, bool force, bool removeDependencies) {
+        protected override void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
             base.RemovePackageReference(package, force, removeDependencies);
 
             _vsPackageManager.OnPackageReferenceRemoved(package, force, removeDependencies);            
         }
 
         public override void UpdatePackageReference(string packageId, Version version = null, bool updateDependencies = true) {
-            Package oldPackage = GetPackageReference(packageId);
+            IPackage oldPackage = GetPackageReference(packageId);
             // Only install the package to the solution if the project has a reference to it.
             if (oldPackage != null) {
                 _vsPackageManager.InstallPackage(packageId, version, !updateDependencies);

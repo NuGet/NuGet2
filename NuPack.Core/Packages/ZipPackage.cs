@@ -6,7 +6,7 @@
     using NuPack.Resources;
     using Opc = System.IO.Packaging;
 
-    public class ZipPackage : Package {
+    public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
         private const string AssemblyReferencesExtension = ".dll";
 
@@ -45,7 +45,7 @@
                            where IsAssemblyReference(part)
                            select new ZipPackageAssemblyReference(part)).ToList();
 
-            var relationshipType = package.GetRelationshipsByType(Package.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
+            var relationshipType = package.GetRelationshipsByType(Constants.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
 
             if (relationshipType == null) {
                 throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
@@ -77,79 +77,79 @@
             }
         }
         
-        public override DateTime Created {
+        public DateTime Created {
             get {
                 return _created.Value;
             }
         }
 
-        public override IEnumerable<string> Authors {
+        public IEnumerable<string> Authors {
             get {
                 return _authors;
             }
         }
 
-        public override string Category {
+        public string Category {
             get {
                 return _category;
             }
         }
 
-        public override string Id {
+        public string Id {
             get {
                 return _id;
             }
         }
 
-        public override Version Version {
+        public Version Version {
             get {
                 return _version;
             }
         }
 
-        public override string Description {
+        public string Description {
             get {
                 return _description;
             }
         }
 
-        public override IEnumerable<string> Keywords {
+        public IEnumerable<string> Keywords {
             get {
                 return _keywords;
             }
         }
 
-        public override string Language {
+        public string Language {
             get {
                 return _language;
             }
         }
 
-        public override DateTime Modified {
+        public DateTime Modified {
             get {
                 return _modified.Value;
             }
         }
 
-        public override string LastModifiedBy {
+        public string LastModifiedBy {
             get {
                 return _lastModifiedBy;
             }
         }
 
-        public override IEnumerable<PackageDependency> Dependencies {
+        public IEnumerable<PackageDependency> Dependencies {
             get {
                 return _dependencies;
             }
         }
 
-        public override IEnumerable<IPackageAssemblyReference> AssemblyReferences {
+        public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
                 return _references;
             }
         }
 
-        public override IEnumerable<IPackageFile> GetFiles() {
+        public IEnumerable<IPackageFile> GetFiles() {
             return _files;
         }
         

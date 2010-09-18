@@ -2,25 +2,25 @@
     using System;
     using System.Collections.Generic;
 
-    internal class PackageComparer : IEqualityComparer<Package> {
+    internal class PackageComparer : IEqualityComparer<IPackage> {
         internal static PackageComparer IdAndVersionComparer = new PackageComparer((x, y) => x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase) && x.Version.Equals(y.Version),
                                                                       x => x.Id.GetHashCode() ^ x.Version.GetHashCode());
 
         internal static PackageComparer IdComparer = new PackageComparer((x, y) => x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase), x => x.Id.GetHashCode());
 
-        private Func<Package, Package, bool> _equals;
-        private Func<Package, int> _getHashCode;
+        private Func<IPackage, IPackage, bool> _equals;
+        private Func<IPackage, int> _getHashCode;
 
-        public PackageComparer(Func<Package, Package, bool> equals, Func<Package, int> getHashCode) {
+        public PackageComparer(Func<IPackage, IPackage, bool> equals, Func<IPackage, int> getHashCode) {
             _equals = equals;
             _getHashCode = getHashCode;
         }
 
-        public bool Equals(Package x, Package y) {
+        public bool Equals(IPackage x, IPackage y) {
             return _equals(x, y);
         }
 
-        public int GetHashCode(Package obj) {
+        public int GetHashCode(IPackage obj) {
             return _getHashCode(obj);
         }
     }

@@ -52,12 +52,12 @@
             return null;
         }
 
-        public override IQueryable<Package> GetPackages() {
-            IEnumerable<Package> packages;
+        public override IQueryable<IPackage> GetPackages() {
+            IEnumerable<IPackage> packages;
 
             XDocument document = GetDocument();
             if (document == null) {
-                packages = Enumerable.Empty<Package>();
+                packages = Enumerable.Empty<IPackage>();
             }
             else {
                 packages = from packageElement in document.Root.Elements("package")
@@ -70,7 +70,7 @@
             return packages.AsQueryable();
         }
 
-        public override void AddPackage(Package package) {
+        public override void AddPackage(IPackage package) {
             XDocument document = GetDocument(createIfNotExists: true);
 
             document.Root.Add(new XElement("package",
@@ -82,7 +82,7 @@
             base.AddPackage(package);
         }
 
-        public override void RemovePackage(Package package) {
+        public override void RemovePackage(IPackage package) {
             base.RemovePackage(package);
 
             XDocument document = GetDocument();

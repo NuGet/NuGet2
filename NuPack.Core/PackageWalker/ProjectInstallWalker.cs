@@ -24,7 +24,7 @@
             }
         }
 
-        protected virtual IEnumerable<Package> GetDependents(Package package) {
+        protected virtual IEnumerable<IPackage> GetDependents(IPackage package) {
             // Get all dependents for this package that we don't want to skip
             return DependentsLookup.GetDependents(package);
         }
@@ -37,15 +37,15 @@
             Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
         }
 
-        protected override void ProcessResolvedDependency(Package package, PackageDependency dependency, Package resolvedDependency) {
-            Package installedPackage = Repository.FindPackage(dependency.Id);
+        protected override void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
+            IPackage installedPackage = Repository.FindPackage(dependency.Id);
 
             if (installedPackage != null) {
                 CheckConflict(resolvedDependency, installedPackage);
             }
         }
 
-        protected void CheckConflict(Package resolvedDependency, Package installedPackage) {
+        protected void CheckConflict(IPackage resolvedDependency, IPackage installedPackage) {
             // First we get a list of dependents for the installed package.
             // Then we find the dependency in the foreach dependent that this installed package used to satisfy.
             // We then check if the resolved package also meets that dependency and if it doesn't it's added to the list
@@ -62,15 +62,15 @@
             }
         }
 
-        private static InvalidOperationException CreatePackageConflictException(Package resolvedPackage, Package package, IEnumerable<Package> dependents) {
+        private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents) {
             if (dependents.Count() == 1) {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                       NuPackResources.ConflictErrorWithDependent, package, resolvedPackage, dependents.Single()));
+                       NuPackResources.ConflictErrorWithDependent, package.GetFullName(), resolvedPackage.GetFullName(), dependents.Single().GetFullName()));
             }
 
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                        NuPackResources.ConflictErrorWithDependents, package, resolvedPackage, String.Join(", ",
-                        dependents.Select(d => d.ToString()))));
+                        NuPackResources.ConflictErrorWithDependents, package.GetFullName(), resolvedPackage.GetFullName(), String.Join(", ",
+                        dependents.Select(d => d.GetFullName()))));
 
         }
     }

@@ -33,7 +33,7 @@ namespace NuPack {
 
         public static void DeleteFiles(this ProjectSystem project,
                                        IEnumerable<IPackageFile> files,
-                                       IEnumerable<Package> otherPackages,
+                                       IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers,
                                        PackageEventListener listener) {
 
@@ -83,9 +83,9 @@ namespace NuPack {
         }
 
         private static string RemoveContentDirectory(string path) {
-            Debug.Assert(path.StartsWith(Package.ContentDirectory, StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
 
-            return path.Substring(Package.ContentDirectory.Length).TrimStart('\\');
+            return path.Substring(Constants.ContentDirectory.Length).TrimStart('\\');
         }
 
         private static string RemoveExtension(string path) {

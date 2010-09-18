@@ -4,14 +4,14 @@
     using System.Linq;
 
     public abstract class PackageRepositoryBase : IPackageRepository {
-        private Dictionary<Tuple<string, Version>, Package> _packageCache = new Dictionary<Tuple<string, Version>, Package>(PackageIdAndVersionComparer.Default);
+        private Dictionary<Tuple<string, Version>, IPackage> _packageCache = new Dictionary<Tuple<string, Version>, IPackage>(PackageIdAndVersionComparer.Default);
 
-        public abstract IQueryable<Package> GetPackages();
+        public abstract IQueryable<IPackage> GetPackages();
 
-        public virtual Package FindPackage(string packageId, Version version) {
+        public virtual IPackage FindPackage(string packageId, Version version) {
             var key = Tuple.Create(packageId, version);
 
-            Package package;
+            IPackage package;
             if (!_packageCache.TryGetValue(key, out package)) {
                 package = GetPackages().FirstOrDefault(p => p.Id == packageId && p.Version == version);
 
@@ -23,13 +23,13 @@
             return package;
         }
 
-        public virtual void AddPackage(Package package) {
+        public virtual void AddPackage(IPackage package) {
             var key = Tuple.Create(package.Id, package.Version);
 
             _packageCache[key] = package;
         }
 
-        public virtual void RemovePackage(Package package) {
+        public virtual void RemovePackage(IPackage package) {
             var key = Tuple.Create(package.Id, package.Version);
 
             _packageCache.Remove(key);

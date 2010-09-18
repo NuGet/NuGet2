@@ -10,19 +10,19 @@
             : base(repository, listener) {
         }
 
-        protected override void WarnRemovingPackageBreaksDependents(Package package, IEnumerable<Package> dependents) {
-            Listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_RemovingPackageReferenceWillBreakDependents, package, String.Join(", ", dependents.Select(d => d.ToString())));
+        protected override void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
+            Listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_RemovingPackageReferenceWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
         }
 
-        protected override InvalidOperationException CreatePackageHasDependentsException(Package package, IEnumerable<Package> dependents) {
+        protected override InvalidOperationException CreatePackageHasDependentsException(IPackage package, IEnumerable<IPackage> dependents) {
             if (dependents.Count() == 1) {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                       NuPackResources.PackageHasDependentReference, package, dependents.Single()));
+                       NuPackResources.PackageHasDependentReference, package.GetFullName(), dependents.Single().GetFullName()));
             }
 
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                        NuPackResources.PackageHasMultipleDependentsReferenced, package, String.Join(", ",
-                        dependents.Select(d => d.ToString()))));
+                        NuPackResources.PackageHasMultipleDependentsReferenced, package.GetFullName(), String.Join(", ",
+                        dependents.Select(d => d.GetFullName()))));
         }        
     }
 }

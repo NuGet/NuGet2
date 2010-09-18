@@ -6,35 +6,35 @@
             : this(PackageComparer.IdComparer) {
         }
 
-        public PackageMarker(IEqualityComparer<Package> comparer) {
-            Visited = new Dictionary<Package, VisitedState>(comparer);
+        public PackageMarker(IEqualityComparer<IPackage> comparer) {
+            Visited = new Dictionary<IPackage, VisitedState>(comparer);
         }
 
-        private IDictionary<Package, VisitedState> Visited {
+        private IDictionary<IPackage, VisitedState> Visited {
             get;
             set;
         }
 
-        public IEnumerable<Package> Packages {
+        public IEnumerable<IPackage> Packages {
             get {
                 return Visited.Keys;
             }
         }
 
-        public void MarkProcessing(Package package) {
+        public void MarkProcessing(IPackage package) {
             Visited[package] = VisitedState.Processing;
         }
 
-        public void MarkVisited(Package package) {
+        public void MarkVisited(IPackage package) {
             Visited[package] = VisitedState.Completed;
         }
 
-        public bool IsVisited(Package package) {
+        public bool IsVisited(IPackage package) {
             VisitedState packageVisitedState;
             return Visited.TryGetValue(package, out packageVisitedState) && packageVisitedState == VisitedState.Completed;
         }
 
-        public bool IsCycle(Package package) {
+        public bool IsCycle(IPackage package) {
             VisitedState packageVisitedState;
             return Visited.TryGetValue(package, out packageVisitedState) && packageVisitedState == VisitedState.Processing;
         }

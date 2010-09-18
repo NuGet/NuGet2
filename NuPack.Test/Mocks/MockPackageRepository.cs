@@ -4,24 +4,24 @@
 
     public class MockPackageRepository : PackageRepositoryBase {
         public MockPackageRepository() {
-            Packages = new Dictionary<string, List<Package>>();
+            Packages = new Dictionary<string, List<IPackage>>();
         }
 
-        internal Dictionary<string, List<Package>> Packages {
+        internal Dictionary<string, List<IPackage>> Packages {
             get;
             set;
         }
 
-        public override void AddPackage(Package package) {
+        public override void AddPackage(IPackage package) {
             AddPackage(package.Id, package);
         }
 
-        public override IQueryable<Package> GetPackages() {
+        public override IQueryable<IPackage> GetPackages() {
             return Packages.Values.SelectMany(p => p).AsQueryable();
         }        
 
-        public override void RemovePackage(Package package) {
-            List<Package> packages;
+        public override void RemovePackage(IPackage package) {
+            List<IPackage> packages;
             if (Packages.TryGetValue(package.Id, out packages)) {
                 packages.Remove(package);
             }
@@ -31,10 +31,10 @@
             }
         }
 
-        private void AddPackage(string id, Package package) {
-            List<Package> packages;
+        private void AddPackage(string id, IPackage package) {
+            List<IPackage> packages;
             if (!Packages.TryGetValue(id, out packages)) {
-                packages = new List<Package>();
+                packages = new List<IPackage>();
                 Packages.Add(id, packages);
             }
             packages.Add(package);

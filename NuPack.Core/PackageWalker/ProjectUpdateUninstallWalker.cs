@@ -4,11 +4,11 @@
             : base(repository, listener) {
         }
 
-        protected override bool SkipResolvedDependency(Package package, PackageDependency dependency, Package resolvedDependency) {
+        protected override bool SkipResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
             return false;
         }
 
-        protected override void BeforeWalk(Package package) {
+        protected override void BeforeWalk(IPackage package) {
         }
     }
 }

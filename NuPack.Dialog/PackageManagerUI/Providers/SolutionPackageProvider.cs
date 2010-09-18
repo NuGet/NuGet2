@@ -28,7 +28,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
                 EnvDTE.DTE dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 
                 NuPack.VisualStudio.VSPackageManager vsPackageManager = NuPack.VisualStudio.VSPackageManager.GetPackageManager(feed, dte);
-                foreach (NuPack.Package package in vsPackageManager.SolutionRepository.GetPackages()) {
+                foreach (NuPack.IPackage package in vsPackageManager.SolutionRepository.GetPackages()) {
                     PackageRecords.Add(package);
                 }
             }

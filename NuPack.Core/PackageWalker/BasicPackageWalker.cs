@@ -15,7 +15,7 @@
 
         protected IPackageRepository Repository { get; private set; }
 
-        protected override Package ResolveDependency(PackageDependency dependency) {
+        protected override IPackage ResolveDependency(PackageDependency dependency) {
             return Repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
         }
 
@@ -25,11 +25,11 @@
                 NuPackResources.UnableToResolveDependency, dependency));
         }
 
-        protected override void RaiseCycleError(IEnumerable<Package> packages) {
+        protected override void RaiseCycleError(IEnumerable<IPackage> packages) {
             throw new InvalidOperationException(
                                 String.Format(CultureInfo.CurrentCulture,
                                 NuPackResources.CircularDependencyDetected, String.Join(" => ",
-                                packages.Select(p => p.ToString()))));
+                                packages.Select(p => p.GetFullName()))));
         }
     }
 }

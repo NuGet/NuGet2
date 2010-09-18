@@ -34,7 +34,7 @@
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
-            Package packageA = PackageUtility.CreatePackage("A", "1.0");
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0");
             sourceRepository.AddPackage(packageA);
 
             // Act & Assert
@@ -49,7 +49,7 @@
             projectSystem.Setup(m => m.AddFile("file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), projectSystem.Object);
-            Package packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
             sourceRepository.AddPackage(packageA);
 
             // Act
@@ -65,7 +65,7 @@
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), projectSystem);
-            Package packageA = PackageUtility.CreatePackage("A", "1.0", new[] { @"foo\bar\file.pp" });
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { @"foo\bar\file.pp" });
             sourceRepository.AddPackage(packageA);
 
             // Act
@@ -81,15 +81,15 @@
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B")
                                                                 }, content: new[] { "foo" });
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B")
                                                                 }, content: new[] { "foo" });
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
             projectManager.LocalRepository.AddPackage(packageA20);
             projectManager.LocalRepository.AddPackage(packageB10);
 
@@ -192,11 +192,11 @@
             MockPackageRepository mockRepository = new MockPackageRepository();
 
             ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem);
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { "fileA", "commonFile" },
                                                              new[] { "referenceA.dll", "commonReference.dll" });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             new[] { "fileB", "commonFile" },
                                                             new[] { "referenceB.dll", "commonReference.dll" });
 
@@ -223,7 +223,7 @@
             MockPackageRepository mockRepository = new MockPackageRepository();
 
             ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem);
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
 
             mockRepository.AddPackage(packageA);
@@ -243,19 +243,19 @@
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version:new Version("1.0"))
                                                                 },
                                                                 content: new[] { "foo" });
 
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version:new Version("2.0"))
                                                                 },
                                                                 content: new[] { "bar" });
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
-            Package packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "foo" });
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "foo" });
 
             projectManager.LocalRepository.AddPackage(packageA10);
             projectManager.LocalRepository.AddPackage(packageB10);
@@ -292,15 +292,15 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [B 1.0, C 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A",
+            IPackage packageA10 = PackageUtility.CreatePackage("A",
                                                                "1.0",
                                                                dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                     PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
                                                                 });
 
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
-            Package packageC10 = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0");
 
             sourceRepository.AddPackage(packageA10);
             sourceRepository.AddPackage(packageB10);
@@ -309,15 +309,15 @@
             projectManager.LocalRepository.AddPackage(packageB10);
             projectManager.LocalRepository.AddPackage(packageC10);
 
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                dependencies: new List<PackageDependency> { 
                                                                                     PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                                     PackageDependency.CreateDependency("C", version: Version.Parse( "2.0")),
                                                                                     PackageDependency.CreateDependency("D", version: Version.Parse( "1.0"))
                                                                });
 
-            Package packageC20 = PackageUtility.CreatePackage("C", "2.0");
-            Package packageD10 = PackageUtility.CreatePackage("D", "1.0");
+            IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0");
+            IPackage packageD10 = PackageUtility.CreatePackage("D", "1.0");
 
             // A 2.0 -> [B 1.0, C 2.0, D 1.0]
             sourceRepository.AddPackage(packageA10);
@@ -356,9 +356,9 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [B 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0");
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0");
-            Package packageA30 = PackageUtility.CreatePackage("A", "3.0");
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0");
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0");
+            IPackage packageA30 = PackageUtility.CreatePackage("A", "3.0");
 
             sourceRepository.AddPackage(packageA10);
             sourceRepository.AddPackage(packageA20);
@@ -377,12 +377,12 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [B 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                dependencies: new List<PackageDependency> { 
                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                });
 
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
 
             projectManager.LocalRepository.AddPackage(packageA10);
             projectManager.LocalRepository.AddPackage(packageB10);
@@ -390,7 +390,7 @@
             sourceRepository.AddPackage(packageB10);
 
             // A 2.0 -> [B 2.0]
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version: Version.Parse( "2.0"))
                                                             });
@@ -408,13 +408,13 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [B 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                dependencies: new List<PackageDependency> { 
                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                });
 
 
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
 
             projectManager.LocalRepository.AddPackage(packageA10);
             projectManager.LocalRepository.AddPackage(packageB10);
@@ -422,12 +422,12 @@
             sourceRepository.AddPackage(packageB10);
 
             // A 2.0 -> [B 2.0]
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version: Version.Parse( "2.0")),
                                                                 });
 
-            Package packageB20 = PackageUtility.CreatePackage("B", "2.0");
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0");
 
             sourceRepository.AddPackage(packageA20);
             sourceRepository.AddPackage(packageB20);
@@ -449,18 +449,18 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [C >= 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> {                                                                         
                                                                         PackageDependency.CreateDependency("C", minVersion: Version.Parse( "1.0"))
                                                                     });
 
             // B 1.0 -> [C <= 2.0]
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0",
                                                                 dependencies: new List<PackageDependency> {                                                                         
                                                                         PackageDependency.CreateDependency("C", maxVersion: Version.Parse("2.0"))
                                                                     });
 
-            Package packageC10 = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0");
 
             projectManager.LocalRepository.AddPackage(packageA10);
             projectManager.LocalRepository.AddPackage(packageB10);
@@ -469,7 +469,7 @@
             sourceRepository.AddPackage(packageB10);
             sourceRepository.AddPackage(packageC10);
 
-            Package packageC20 = PackageUtility.CreatePackage("C", "2.0");
+            IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0");
 
             // A 2.0 -> [B 1.0, C 2.0, D 1.0]
             sourceRepository.AddPackage(packageA10);
@@ -494,17 +494,17 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [B 1.0, C 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                         PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
                                                                     });
 
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
-            Package packageC10 = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0");
 
             // G 1.0 -> [C (>= 1.0)]
-            Package packageG10 = PackageUtility.CreatePackage("G", "1.0",
+            IPackage packageG10 = PackageUtility.CreatePackage("G", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("C", minVersion: Version.Parse("1.0"))
                                                                     });
@@ -518,15 +518,15 @@
             sourceRepository.AddPackage(packageC10);
             sourceRepository.AddPackage(packageG10);
 
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                         PackageDependency.CreateDependency("C", version: Version.Parse( "2.0")),
                                                                         PackageDependency.CreateDependency("D", version: Version.Parse( "1.0"))
                                                                     });
 
-            Package packageC20 = PackageUtility.CreatePackage("C", "2.0");
-            Package packageD10 = PackageUtility.CreatePackage("D", "1.0");
+            IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0");
+            IPackage packageD10 = PackageUtility.CreatePackage("D", "1.0");
 
             // A 2.0 -> [B 1.0, C 2.0, D 1.0]
             sourceRepository.AddPackage(packageA10);
@@ -557,17 +557,17 @@
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
             // A 1.0 -> [B 1.0, C 1.0]
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                         PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
                                                                     });
 
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
-            Package packageC10 = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0");
 
             // G 1.0 -> [C 1.0]
-            Package packageG10 = PackageUtility.CreatePackage("G", "1.0",
+            IPackage packageG10 = PackageUtility.CreatePackage("G", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("C", version: Version.Parse("1.0"))
                                                                     });
@@ -581,15 +581,15 @@
             sourceRepository.AddPackage(packageC10);
             sourceRepository.AddPackage(packageG10);
 
-            Package packageA20 = PackageUtility.CreatePackage("A", "2.0",
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                         PackageDependency.CreateDependency("C", version: Version.Parse( "2.0")),
                                                                         PackageDependency.CreateDependency("D", version: Version.Parse( "1.0"))
                                                                     });
 
-            Package packageC20 = PackageUtility.CreatePackage("C", "2.0");
-            Package packageD10 = PackageUtility.CreatePackage("D", "1.0");
+            IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0");
+            IPackage packageD10 = PackageUtility.CreatePackage("D", "1.0");
 
             // A 2.0 -> [B 1.0, C 2.0, D 1.0]
             sourceRepository.AddPackage(packageA10);
@@ -608,12 +608,12 @@
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
-            Package packageA10 = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version:new Version("1.0"))
                                                                     });
-            Package packageB10 = PackageUtility.CreatePackage("B", "1.0");
-            Package packageB20 = PackageUtility.CreatePackage("B", "2.0");
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0");
             projectManager.LocalRepository.AddPackage(packageA10);
             projectManager.LocalRepository.AddPackage(packageB10);
             sourceRepository.AddPackage(packageA10);
@@ -629,17 +629,17 @@
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
-            Package package10 = PackageUtility.CreatePackage("NetFramework", "1.0");
+            IPackage package10 = PackageUtility.CreatePackage("NetFramework", "1.0");
             projectManager.LocalRepository.AddPackage(package10);
             sourceRepository.AddPackage(package10);
 
-            Package package11 = PackageUtility.CreatePackage("NetFramework", "1.1");
+            IPackage package11 = PackageUtility.CreatePackage("NetFramework", "1.1");
             sourceRepository.AddPackage(package11);
 
-            Package package20 = PackageUtility.CreatePackage("NetFramework", "2.0");
+            IPackage package20 = PackageUtility.CreatePackage("NetFramework", "2.0");
             sourceRepository.AddPackage(package20);
 
-            Package package35 = PackageUtility.CreatePackage("NetFramework", "3.5");
+            IPackage package35 = PackageUtility.CreatePackage("NetFramework", "3.5");
             sourceRepository.AddPackage(package35);
 
             // Act
@@ -679,12 +679,12 @@
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("B")
                                                             });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             projectManager.LocalRepository.AddPackage(packageA);
             projectManager.LocalRepository.AddPackage(packageB);
@@ -705,13 +705,13 @@
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
                     PackageDependency.CreateDependency("B")
                 },
                 content: new[] { "foo" });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("C")
                                                             },
@@ -742,7 +742,7 @@
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem.Object);
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
-            var mockPackage = new Mock<Package>();
+            var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
             mockPackage.Setup(m => m.Version).Returns(new Version("1.0"));
             var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));

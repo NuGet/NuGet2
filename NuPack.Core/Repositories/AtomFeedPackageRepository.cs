@@ -17,7 +17,7 @@
             _feedUri = feedUri;
         }
 
-        public override IQueryable<Package> GetPackages() {
+        public override IQueryable<IPackage> GetPackages() {
             return (from item in GetFeedItems()
                     select new FeedPackage(item)).AsQueryable();
         }
@@ -45,11 +45,11 @@
          }
 
 
-        public override void AddPackage(Package package) {
+        public override void AddPackage(IPackage package) {
             throw new NotSupportedException();
         }
 
-        public override void RemovePackage(Package package) {
+        public override void RemovePackage(IPackage package) {
             throw new NotSupportedException();
         }
     }

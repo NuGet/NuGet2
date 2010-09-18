@@ -5,7 +5,7 @@
     using System.Linq;
 
     public class LocalPackageRepository : PackageRepositoryBase {
-        private Dictionary<string, Package> _packageCache = new Dictionary<string, Package>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, IPackage> _packageCache = new Dictionary<string, IPackage>(StringComparer.OrdinalIgnoreCase);
 
         public LocalPackageRepository(string physicalPath)
             : this(new FileBasedProjectSystem(physicalPath)) {
@@ -24,11 +24,11 @@
             private set;
         }
 
-        public override IQueryable<Package> GetPackages() {
-            var packages = new List<Package>();
+        public override IQueryable<IPackage> GetPackages() {
+            var packages = new List<IPackage>();
             foreach (var path in GetPackageFiles()) {
                 try {
-                    Package package;
+                    IPackage package;
                     if (!_packageCache.TryGetValue(path, out package)) {
                         using (Stream stream = FileSystem.OpenFile(path)) {
                             package = new ZipPackage(stream);
@@ -52,18 +52,18 @@
             // to determine the set of installed packages. Installed packages are copied to 
             // {id}.{version}\{packagefile}.nupack.
             foreach (var dir in FileSystem.GetDirectories(String.Empty)) {
-                foreach (var path in FileSystem.GetFiles(dir, "*" + Package.PackageExtension)) {
+                foreach (var path in FileSystem.GetFiles(dir, "*" + Constants.PackageExtension)) {
                     yield return path;
                 }
             }
 
             // Check top level directory
-            foreach (var path in FileSystem.GetFiles(String.Empty, "*" + Package.PackageExtension)) {
+            foreach (var path in FileSystem.GetFiles(String.Empty, "*" + Constants.PackageExtension)) {
                 yield return path;
             }
         }
 
-        public override void AddPackage(Package package) {
+        public override void AddPackage(IPackage package) {
             string packageFilePath = GetPackageFilePath(package);
 
             FileSystem.AddFile(packageFilePath, stream => PackageBuilder.Save(package, stream));
@@ -71,7 +71,7 @@
             base.AddPackage(package);
         }
 
-        public override void RemovePackage(Package package) {
+        public override void RemovePackage(IPackage package) {
             base.RemovePackage(package);
 
             // Delete the package file
@@ -88,7 +88,7 @@
             }
         }
 
-        private static string GetPackageFilePath(Package package) {
+        private static string GetPackageFilePath(IPackage package) {
             return Path.Combine(Utility.GetPackageDirectory(package), Utility.GetPackageFileName(package));
         }
     }

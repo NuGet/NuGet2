@@ -85,7 +85,7 @@
             }
         }
 
-        protected override Package CreatePackage() {
+        protected override IPackage CreatePackage() {
             // REVIEW: Should we be using WebClient?
             using (var client = new WebClient()) {
                 // TODO: Verify package hash and length

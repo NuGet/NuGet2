@@ -98,7 +98,7 @@
             }
         }
 
-        public override void UninstallPackage(Package package, bool force = false, bool removeDependencies = false) {
+        public override void UninstallPackage(IPackage package, bool force = false, bool removeDependencies = false) {
             // Remove reference from projects that reference this package
             var projectManagers = GetProjectsWithPackage(package.Id, package.Version);
             if (projectManagers.Any()) {
@@ -113,14 +113,14 @@
             }
         }
 
-        internal void OnPackageReferenceRemoved(Package removedPackage, bool force = false, bool removeDependencies = false) {
+        internal void OnPackageReferenceRemoved(IPackage removedPackage, bool force = false, bool removeDependencies = false) {
             if (!IsPackageReferenced(removedPackage)) {
                 // There are no packages that depend on this one so just uninstall it
                 base.UninstallPackage(removedPackage.Id, removedPackage.Version, force, removeDependencies);
             }
         }
 
-        private bool IsPackageReferenced(Package package) {
+        private bool IsPackageReferenced(IPackage package) {
             return GetProjectsWithPackage(package.Id, package.Version).Any();
         }
 

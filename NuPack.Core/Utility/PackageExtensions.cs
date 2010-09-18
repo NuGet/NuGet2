@@ -5,8 +5,8 @@
     using System.Linq;
 
     public static class PackageExtensions {        
-        public static Package FindByVersion(this IQueryable<Package> source, Version minVersion, Version maxVersion, Version exactVersion) {
-            IEnumerable<Package> packages = from p in source
+        public static IPackage FindByVersion(this IQueryable<IPackage> source, Version minVersion, Version maxVersion, Version exactVersion) {
+            IEnumerable<IPackage> packages = from p in source
                                              orderby p.Version descending
                                              select p;
 
@@ -29,7 +29,7 @@
             return packages.FirstOrDefault();
         }
 
-        internal static bool IsDependencySatisfied(this Package package, Package targetPackage) {
+        internal static bool IsDependencySatisfied(this IPackage package, IPackage targetPackage) {
             PackageDependency dependency = (from d in package.Dependencies
                                             where d.Id.Equals(targetPackage.Id, StringComparison.OrdinalIgnoreCase)
                                             select d).FirstOrDefault();
@@ -64,8 +64,16 @@
             return isSatisfied;
         }
 
-        internal static IEnumerable<IPackageFile> GetContentFiles(this Package package) {
-            return package.GetFiles().Where(file => file.Path.StartsWith(Package.ContentDirectory, StringComparison.OrdinalIgnoreCase));
+        public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
+            return package.GetFiles().Where(file => file.Path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasProjectContent(this IPackage package) {
+            return package.AssemblyReferences.Any() || package.GetContentFiles().Any();
+        }
+
+        public static string GetFullName(this IPackage package) {
+            return package.Id + " " + package.Version;
         }
     }
 }
