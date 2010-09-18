@@ -1,3 +1,3 @@
 msbuild NuPack.sln
-msbuild PackageSources\PackageBuild.msbuild
+msbuild PackageSources\PackageBuild.proj
 mstest /testcontainer:NuPack.Test\bin\Debug\NuPack.Test.dll
