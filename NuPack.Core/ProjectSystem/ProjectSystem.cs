@@ -5,11 +5,11 @@
 
     public abstract class ProjectSystem : IFileSystem {
         private FrameworkName _targetFramework;
-        private PackageEventListener _listener;
+        private IPackageEventListener _listener;
 
-        public PackageEventListener Listener {
+        public IPackageEventListener Listener {
             get {
-                return _listener ?? PackageEventListener.Default;
+                return _listener ?? DefaultPackageEventListener.Instance;
             }
             set {
                 _listener = value;
@@ -41,6 +41,7 @@
         public abstract void DeleteDirectory(string path, bool recursive);
         public abstract bool DirectoryExists(string path);
         public abstract bool FileExists(string path);
+        public abstract bool ReferenceExists(string name);
 
         public virtual dynamic GetPropertyValue(string propertyName) {
             return null;

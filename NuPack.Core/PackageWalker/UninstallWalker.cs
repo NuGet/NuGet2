@@ -8,7 +8,7 @@
     internal class UninstallWalker : BasicPackageWalker {
         private DependentLookup _dependentsLookup;
 
-        public UninstallWalker(IPackageRepository repository, PackageEventListener listener)
+        public UninstallWalker(IPackageRepository repository, IPackageEventListener listener)
             : base(repository, listener) {
             SkippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
         }

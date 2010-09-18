@@ -8,7 +8,7 @@
         private bool _ignoreDependencies;
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
-                             PackageEventListener listener,
+                             IPackageEventListener listener,
                              bool ignoreDependencies = false) :
             base(localRepository, listener) {
 

@@ -5,7 +5,7 @@
 
     internal class VSProjectManager : ProjectManager {
         private VSPackageManager _vsPackageManager;
-        public VSProjectManager(VSPackageManager vsPackageManager, IPackageAssemblyPathResolver assemblyPathResolver, Project project)
+        public VSProjectManager(VSPackageManager vsPackageManager, IPackagePathResolver assemblyPathResolver, Project project)
             : base(vsPackageManager.SolutionRepository, assemblyPathResolver, ProjectSystemFactory.CreateProjectSystem(project)) {
             _vsPackageManager = vsPackageManager;
         }

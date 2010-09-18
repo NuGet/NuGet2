@@ -10,7 +10,7 @@ namespace NuPack {
         public static void AddFiles(this ProjectSystem project,
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                    PackageEventListener listener) {
+                                    IPackageEventListener listener) {
             foreach (IPackageFile file in files) {
                 // Remove the redundant folder from the path
                 string path = RemoveContentDirectory(file.Path);
@@ -35,7 +35,7 @@ namespace NuPack {
                                        IEnumerable<IPackageFile> files,
                                        IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                       PackageEventListener listener) {
+                                       IPackageEventListener listener) {
 
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));

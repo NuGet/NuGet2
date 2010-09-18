@@ -89,7 +89,7 @@
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         public override void RemoveReference(string name) {
-            try {
+            try {                
                 // Get the reference name without extension
                 string referenceName = Path.GetFileNameWithoutExtension(name);
 
@@ -146,6 +146,18 @@
             // Get all physical folders
             return from p in Project.GetChildItems(path, "*.*", VSConstants.VsProjectItemKindPhysicalFolder)
                    select p.Name;
+        }
+
+        public override bool ReferenceExists(string name) {
+            try {
+                // Get the reference name without extension
+                string referenceName = Path.GetFileNameWithoutExtension(name);
+
+                return Project.Object.References.Item(referenceName) != null;
+            }
+            catch {
+            }
+            return false;
         }
 
         public override dynamic GetPropertyValue(string propertyName) {

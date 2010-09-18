@@ -11,32 +11,32 @@
     using NuPack.Resources;
 
     public class ProjectManager {
-        private PackageEventListener _listener;
+        private IPackageEventListener _listener;
         // REVIEW: These should be externally pluggable
         private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
             { ".transform", new XmlTransfomer() },
             { ".pp", new Preprocessor() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot)
-            : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot: String.Empty) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, string projectRoot)
+            : this(sourceRepository, pathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot: String.Empty) {
         }
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot, string packageFileRoot)
-            : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, string projectRoot, string packageFileRoot)
+            : this(sourceRepository, pathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot) {
         }
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project) 
-                : this(sourceRepository, assemblyPathResolver, project, packageFileRoot: String.Empty) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project)
+            : this(sourceRepository, pathResolver, project, packageFileRoot: String.Empty) {
         }
-        
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project, string packageFileRoot) {
+
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project, string packageFileRoot) {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
-            if (assemblyPathResolver == null) {
-                throw new ArgumentNullException("assemblyPathResolver");
+            if (pathResolver == null) {
+                throw new ArgumentNullException("packagePathResolver");
             }
             if (project == null) {
                 throw new ArgumentNullException("project");
@@ -44,23 +44,36 @@
 
             SourceRepository = sourceRepository;
             Project = project;
-            AssemblyPathResolver = assemblyPathResolver;
+            PathResolver = pathResolver;
 
             // REVIEW: We need a better abstraction for a package reference
             string packageFilePath = Path.Combine(packageFileRoot, PackageReferenceRepository.PackageFile);
             LocalRepository = new PackageReferenceRepository(Project, packageFilePath, SourceRepository);
         }
 
-        private IPackageAssemblyPathResolver AssemblyPathResolver { get; set; }
-        // REVIEW: Should we expose this?
-        internal IPackageRepository LocalRepository { get; set; }
+        private IPackagePathResolver PathResolver {
+            get;
+            set;
+        }
 
-        public IPackageRepository SourceRepository { get; private set; }
-        public ProjectSystem Project { get; private set; }
+        public IPackageRepository LocalRepository {
+            get;
+            internal set;
+        }
 
-        public PackageEventListener Listener {
+        public IPackageRepository SourceRepository {
+            get;
+            private set;
+        }
+
+        public ProjectSystem Project {
+            get;
+            private set;
+        }
+
+        public IPackageEventListener Listener {
             get {
-                return _listener ?? PackageEventListener.Default;
+                return _listener ?? DefaultPackageEventListener.Instance;
             }
             set {
                 _listener = value;
@@ -164,29 +177,38 @@
                     continue;
                 }
 
-                AddPackageReferenceToProject(package);
+                AddPackageReferenceToProject(CreateOperationContext(package));
             }
         }
 
-        protected void AddPackageReferenceToProject(IPackage package) {
+        protected void AddPackageReferenceToProject(OperationContext context) {
+            Listener.OnBeforeInstall(context);
+
             // Resolve assembly references
-            var assemblyReferences = ResolveAssemblyReferences(package);
+            var assemblyReferences = ResolveAssemblyReferences(context.Package);
 
             // Add content files
-            Project.AddFiles(package.GetContentFiles(), _fileTransformers, Listener);
+            Project.AddFiles(context.Package.GetContentFiles(), _fileTransformers, Listener);
 
             // Add the references to the reference path
-            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
+            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {                
                 // Get teh physical path of the assembly reference
-                string referencePath = AssemblyPathResolver.GetAssemblyPath(package, assemblyReference);
+                string referencePath = Path.Combine(context.InstallPath, assemblyReference.Path);
+
+                // If this assembly is already referenced by the project then skip it
+                if (Project.ReferenceExists(assemblyReference.Name)) {
+                    Listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
+                    continue;
+                }
 
                 Project.AddReference(referencePath);
             }
 
             // Add package to local repository
-            LocalRepository.AddPackage(package);
+            LocalRepository.AddPackage(context.Package);
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
+            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, context.Package.GetFullName(), Project.ProjectName);
+            Listener.OnAfterInstall(context);
         }
 
         public void RemovePackageReference(string packageId) {
@@ -223,14 +245,16 @@
             Debug.Assert(packages != null, "packages should not be null");
 
             foreach (var package in packages) {
-                RemovePackageReferenceFromProject(package);
+                RemovePackageReferenceFromProject(CreateOperationContext(package));
             }
         }
 
-        private void RemovePackageReferenceFromProject(IPackage package) {
+        private void RemovePackageReferenceFromProject(OperationContext context) {
+            Listener.OnBeforeUninstall(context);
+
             // Get other packages
             var otherPackages = from p in LocalRepository.GetPackages()
-                                where p.Id != package.Id
+                                where p.Id != context.Package.Id
                                 select p;
 
             // Get other references
@@ -245,8 +269,8 @@
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
-            var assemblyReferencesToDelete = package.AssemblyReferences.Except(otherAssemblyReferences, PackageFileComparer.Default);
-            var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
+            var assemblyReferencesToDelete = context.Package.AssemblyReferences.Except(otherAssemblyReferences, PackageFileComparer.Default);
+            var contentFilesToDelete = context.Package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers, Listener);
@@ -257,9 +281,10 @@
             }
 
             // Remove package to the repository
-            LocalRepository.RemovePackage(package);
+            LocalRepository.RemovePackage(context.Package);
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
+            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, context.Package.GetFullName(), Project.ProjectName);
+            Listener.OnAfterUninstall(context);
         }
 
         public void UpdatePackageReference(string packageId) {
@@ -335,11 +360,11 @@
 
         private void Execute(PackagePlan plan) {
             foreach (var package in plan.PackagesToUninstall) {
-                RemovePackageReferenceFromProject(package);
+                RemovePackageReferenceFromProject(CreateOperationContext(package));
             }
 
             foreach (var package in plan.PackagesToInstall) {
-                AddPackageReferenceToProject(package);
+                AddPackageReferenceToProject(CreateOperationContext(package));
             }
         }
 
@@ -365,6 +390,10 @@
                     }
                 }
             }
+        }
+
+        private OperationContext CreateOperationContext(IPackage package) {
+            return new OperationContext(package, Project.Root, PathResolver.GetInstallPath(package));
         }
 
         private IEnumerable<IPackageAssemblyReference> ResolveAssemblyReferences(IPackage package) {

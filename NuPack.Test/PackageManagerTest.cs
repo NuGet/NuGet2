@@ -13,7 +13,8 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
@@ -56,7 +57,8 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             var package = PackageUtility.CreatePackage("foo", "1.2.33");
             localRepository.AddPackage(package);
 
@@ -90,9 +92,9 @@
         [TestMethod]
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
-            MockProjectSystem projectSystem = new MockProjectSystem();
+            var projectSystem = new MockProjectSystem();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, projectSystem);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { "contentFile", @"sub\contentFile" },
@@ -119,7 +121,8 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            PackageManager packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
@@ -144,7 +147,8 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            PackageManager packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
@@ -182,21 +186,22 @@
             var projectSystem = new Mock<ProjectSystem>();
             projectSystem.Setup(m => m.AddFile(@"A.1.0\content\file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
-            PackageManager packageManager = new PackageManager(sourceRepository, projectSystem.Object, localRepository);
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
 
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });            
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
             sourceRepository.AddPackage(packageA);
 
             // Act
             ExceptionAssert.Throws<UnauthorizedAccessException>(() => packageManager.InstallPackage("A"));
-            
+
 
             // Assert
             Assert.IsFalse(packageManager.IsPackageInstalled(packageA));
         }
 
         private PackageManager CreatePackageManager() {
-            return new PackageManager(new MockPackageRepository(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            return new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem);
         }
 
     }

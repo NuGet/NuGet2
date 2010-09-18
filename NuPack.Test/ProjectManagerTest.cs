@@ -33,7 +33,8 @@
         public void AddingPackageReferenceWithoutProjectContentThrows() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), new MockProjectSystem());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0");
             sourceRepository.AddPackage(packageA);
 
@@ -48,7 +49,7 @@
             var projectSystem = new Mock<ProjectSystem>();
             projectSystem.Setup(m => m.AddFile("file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), projectSystem.Object);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
             sourceRepository.AddPackage(packageA);
 
@@ -64,7 +65,7 @@
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { @"foo\bar\file.pp" });
             sourceRepository.AddPackage(packageA);
 
@@ -80,7 +81,8 @@
         public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B")
@@ -116,7 +118,8 @@
         public void RemovingPackageReferenceWithOtherProjectWithReferencesThatWereNotCopiedToProject() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             var packageA = PackageUtility.CreatePackage("A", "1.0");
             var packageB = PackageUtility.CreatePackage("B", "1.0",
                                                         content: null,
@@ -149,7 +152,8 @@
         public void RemovingPackageReferenceWithNoDependents() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             var package = PackageUtility.CreatePackage("foo", "1.2.33");
             projectManager.LocalRepository.AddPackage(package);
             sourceRepository.AddPackage(package);
@@ -166,7 +170,7 @@
             // Arrange
             MockProjectSystem projectSystem = new MockProjectSystem();
             MockPackageRepository mockRepository = new MockPackageRepository();
-            ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), projectSystem);
+            ProjectManager projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             var packageA = PackageUtility.CreatePackage("A", "1.0",
                                                         new[] { "contentFile" },
                                                         new[] { "reference.dll" },
@@ -180,25 +184,95 @@
             // Assert
             Assert.AreEqual(2, projectSystem.Paths.Count);
             Assert.AreEqual(1, projectSystem.References.Count);
-            Assert.IsTrue(projectSystem.References.Contains(@"FullPath\reference.dll"));
+            Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
             Assert.IsTrue(projectSystem.FileExists(@"contentFile"));
             Assert.IsTrue(projectSystem.FileExists(@"packages.xml"));
         }
 
         [TestMethod]
+        public void AddPackageReferenceAddingPackageWithDuplicateReferenceSkipsReference() {
+            // Arrange
+            MockProjectSystem projectSystem = new MockProjectSystem();
+            MockPackageRepository mockRepository = new MockPackageRepository();
+            ProjectManager projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                        assemblyReferences: new[] { "reference.dll" });
+            var packageB = PackageUtility.CreatePackage("B", "1.0",
+                                                        assemblyReferences: new[] { "reference.dll" });
+
+            mockRepository.AddPackage(packageA);
+            mockRepository.AddPackage(packageB);
+
+            // Act
+            projectManager.AddPackageReference("A");
+            projectManager.AddPackageReference("B");
+
+            // Assert
+            Assert.AreEqual(1, projectSystem.Paths.Count);
+            Assert.AreEqual(1, projectSystem.References.Count);
+            Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
+            Assert.IsTrue(projectSystem.References.ContainsValue(@"C:\MockFileSystem\A.1.0\reference.dll"));
+            Assert.IsTrue(projectSystem.FileExists(@"packages.xml"));
+        }
+
+        [TestMethod]
+        public void AddPackageReferenceRaisesOnBeforeInstallAndOnAfterInstall() {
+            // Arrange
+            var projectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            var mockListener = new Mock<IPackageEventListener>();
+            mockListener.Setup(m => m.OnBeforeInstall(It.IsAny<OperationContext>())).Verifiable();
+            mockListener.Setup(m => m.OnAfterInstall(It.IsAny<OperationContext>())).Verifiable();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            projectManager.Listener = mockListener.Object;
+            var packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                        new[] { "contentFile" },
+                                                        new[] { "reference.dll" },
+                                                        new[] { "tool" });
+
+            mockRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            mockListener.VerifyAll();
+        }
+
+        [TestMethod]
+        public void RemovePackageReferenceRaisesOnBeforeUninstallAndOnAfterUninstall() {
+            // Arrange
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            var mockListener = new Mock<IPackageEventListener>();
+            mockListener.Setup(m => m.OnBeforeUninstall(It.IsAny<OperationContext>())).Verifiable();
+            mockListener.Setup(m => m.OnAfterUninstall(It.IsAny<OperationContext>())).Verifiable();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            projectManager.Listener = mockListener.Object;
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                             new[] { @"sub\file1", @"sub\file2" });
+
+            mockRepository.AddPackage(packageA);
+            projectManager.AddPackageReference("A");
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            mockListener.VerifyAll();
+        }
+
+        [TestMethod]
         public void RemovePackageReferenceExcludesFileIfAnotherPackageUsesThem() {
             // Arrange
-            MockProjectSystem mockProjectSystem = new MockProjectSystem();
-            MockPackageRepository mockRepository = new MockPackageRepository();
-
-            ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem);
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                             new[] { "fileA", "commonFile" },
-                                                             new[] { "referenceA.dll", "commonReference.dll" });
+                                                             new[] { "fileA", "commonFile" });
 
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
-                                                            new[] { "fileB", "commonFile" },
-                                                            new[] { "referenceB.dll", "commonReference.dll" });
+                                                            new[] { "fileB", "commonFile" });
 
             mockRepository.AddPackage(packageA);
             mockRepository.AddPackage(packageB);
@@ -211,18 +285,15 @@
 
             // Assert
             Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"fileA"));
-            Assert.IsTrue(mockProjectSystem.Deleted.Contains("referenceA.dll"));
             Assert.IsTrue(mockProjectSystem.FileExists(@"commonFile"));
-            Assert.IsTrue(mockProjectSystem.References.Contains(@"FullPath\commonReference.dll"));
         }
 
         [TestMethod]
         public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty() {
             // Arrange
-            MockProjectSystem mockProjectSystem = new MockProjectSystem();
-            MockPackageRepository mockRepository = new MockPackageRepository();
-
-            ProjectManager projectManager = new ProjectManager(mockRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem);
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
 
@@ -242,7 +313,8 @@
         public void AddPackageReferenceWhenOlderVersionOfPackageInstalledDoesAnUpgrade() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version:new Version("1.0"))
@@ -289,7 +361,8 @@
         public void UpdatePackageReferenceWithMixedDependenciesUpdatesPackageAndDependenciesIfUnused() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A",
@@ -343,7 +416,8 @@
         public void UpdatePackageReferenceIfPackageNotReferencedThrows() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), @"C:\MockFileSystem\ does not reference 'A'.");
@@ -353,7 +427,8 @@
         public void UpdatePackageReferenceToOlderVersionThrows() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0");
@@ -374,7 +449,8 @@
         public void UpdatePackageReferenceWithUnresolvedDependencyThrows() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -405,7 +481,8 @@
         public void UpdatePackageReferenceWithUpdateDependenciesSetToFalseIgnoresDependencies() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -446,7 +523,8 @@
         public void UpdateDependencyDependentsHaveSatisfyableDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [C >= 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -491,7 +569,8 @@
         public void UpdatePackageReferenceWithSatisfyableDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -554,7 +633,8 @@
         public void UpdatePackageReferenceWithDependenciesInUseThrowsConflictError() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -607,7 +687,8 @@
         public void UpdatePackageReferenceFromRepositoryThrowsIfPackageHasDependents() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version:new Version("1.0"))
@@ -628,7 +709,8 @@
         public void UpdatePackageReferenceNoVersionSpecifiedShouldUpdateToLatest() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             IPackage package10 = PackageUtility.CreatePackage("NetFramework", "1.0");
             projectManager.LocalRepository.AddPackage(package10);
             sourceRepository.AddPackage(package10);
@@ -654,7 +736,8 @@
         public void UpdatePackageReferenceVersionSpeciedShouldUpdateToSpecifiedVersion() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
             var package10 = PackageUtility.CreatePackage("NetFramework", "1.0");
             projectManager.LocalRepository.AddPackage(package10);
             sourceRepository.AddPackage(package10);
@@ -677,7 +760,8 @@
         public void RemovingPackageReferenceRemovesPackageButNotDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
@@ -703,7 +787,8 @@
         public void ReAddingAPackageReferenceAfterRemovingADependencyShouldReReferenceAllDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
@@ -738,9 +823,9 @@
         [TestMethod]
         public void AddPackageReferenceWithAnyNonCompatibleReferenceThrows() {
             // Arrange
-            Mock<MockProjectSystem> mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, PackageUtility.CreateAssemblyResolver(), mockProjectSystem.Object);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
@@ -819,7 +904,8 @@
         }
 
         private ProjectManager CreateProjectManager() {
-            return new ProjectManager(new MockPackageRepository(), PackageUtility.CreateAssemblyResolver(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem);
         }
     }
 }

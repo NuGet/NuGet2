@@ -10,7 +10,7 @@
 
         public ProjectInstallWalker(IPackageRepository localRepository,
                                     IPackageRepository sourceRepository,
-                                    PackageEventListener listener,
+                                    IPackageEventListener listener,
                                     bool ignoreDependencies = false)
             : base(localRepository, sourceRepository, listener, ignoreDependencies) {
         }

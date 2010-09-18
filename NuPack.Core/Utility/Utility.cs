@@ -90,13 +90,5 @@
         internal static FrameworkName GetDefaultTargetFramework() {
             return new FrameworkName(NetFrameworkIdentifier, GetDefaultTargetFrameworkVersion());
         }
-
-        internal static string GetPackageFileName(IPackage package) {
-            return package.Id + "." + package.Version + Constants.PackageExtension;
-        }
-
-        internal static string GetPackageDirectory(IPackage package) {
-            return package.Id + "." + package.Version;
-        }
     }
 }

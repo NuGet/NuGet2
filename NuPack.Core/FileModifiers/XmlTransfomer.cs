@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace NuPack {
     internal class XmlTransfomer : IPackageFileTransformer {
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem, PackageEventListener listener) {
+        public void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem, IPackageEventListener listener) {
             // Get the xml fragment
             XElement xmlFragment = GetXml(file);
 
@@ -21,7 +21,7 @@ namespace NuPack {
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem, PackageEventListener listener) {
+        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem, IPackageEventListener listener) {
             // Get the xml snippet
             XElement xmlFragment = GetXml(file);
 

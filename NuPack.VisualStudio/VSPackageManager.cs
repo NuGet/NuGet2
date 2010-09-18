@@ -25,8 +25,8 @@
         private readonly SolutionEvents _solutionEvents;
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public VSPackageManager(DTE dte, IPackageRepository sourceRepository, IFileSystem fileSystem)
-            : base(sourceRepository, fileSystem) {
+        public VSPackageManager(DTE dte, IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem)
+            : base(sourceRepository, pathResolver, fileSystem) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
             }
@@ -143,7 +143,7 @@
                 IFileSystem solutionFileSystem = GetFileSystem(dte);
 
                 // Create a new vs package manager
-                packageManager = new VSPackageManager(dte, repository, solutionFileSystem);
+                packageManager = new VSPackageManager(dte, repository, new DefaultPackagePathResolver(solutionFileSystem), solutionFileSystem);
 
                 // Add it to the cache
                 _packageManagerCache.TryAdd(solutionEntry, packageManager);
@@ -198,11 +198,8 @@
             return null;
         }
 
-        private ProjectManager CreateProjectManager(Project project) {
-            var assemblyPathResolver = new DefaultPackageAssemblyPathResolver(FileSystem);
-            var projectManager = new VSProjectManager(this, assemblyPathResolver, project);
-            projectManager.Listener = Listener;
-            return projectManager;
+        private ProjectManager CreateProjectManager(Project project) {            
+            return new VSProjectManager(this, PathResolver, project);
         }
 
         private IEnumerable<ProjectManager> GetProjectsWithPackage(string packageId, Version version) {

@@ -160,13 +160,5 @@
             }
             return files;
         }
-
-        internal static IPackageAssemblyPathResolver CreateAssemblyResolver() {
-            var mockAssemblyResolver = new Mock<IPackageAssemblyPathResolver>();
-            mockAssemblyResolver.Setup(m => m.GetAssemblyPath(It.IsAny<IPackage>(),
-                                                              It.IsAny<IPackageAssemblyReference>()))
-                                .Returns<IPackage, IPackageAssemblyReference>((_, reference) => Path.Combine("FullPath", reference.Path));
-            return mockAssemblyResolver.Object;
-        }
     }
 }

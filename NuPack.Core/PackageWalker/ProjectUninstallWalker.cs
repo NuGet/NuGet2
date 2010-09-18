@@ -6,7 +6,7 @@
     using NuPack.Resources;
 
     internal class ProjectUninstallWalker : UninstallWalker {        
-        public ProjectUninstallWalker(IPackageRepository repository, PackageEventListener listener)
+        public ProjectUninstallWalker(IPackageRepository repository, IPackageEventListener listener)
             : base(repository, listener) {
         }
 

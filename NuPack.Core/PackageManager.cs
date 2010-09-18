@@ -3,23 +3,35 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
-    using System.IO;
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
     public class PackageManager {
-        private PackageEventListener _listener;
+        private IPackageEventListener _listener;
 
-        public PackageManager(IPackageRepository sourceRepository, string path)
-            : this(sourceRepository, new FileBasedProjectSystem(path)) {
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, string path)
+            : this(sourceRepository, pathResolver, new FileBasedProjectSystem(path)) {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem) :
-            this(sourceRepository, fileSystem, new LocalPackageRepository(fileSystem)) {
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem) :
+            this(sourceRepository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem)) {
         }
 
-        internal PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem, IPackageRepository localRepository) {
+        internal PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository) {
+            if (sourceRepository == null) {
+                throw new ArgumentNullException("sourceRepository");
+            }
+            if (pathResolver == null) {
+                throw new ArgumentNullException("pathResolver");
+            }
+            if (fileSystem == null) {
+                throw new ArgumentNullException("fileSystem");
+            }
+            if (localRepository == null) {
+                throw new ArgumentNullException("localRepository");
+            }
             SourceRepository = sourceRepository;
+            PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
         }
@@ -39,9 +51,14 @@
             private set;
         }
 
-        public PackageEventListener Listener {
+        public IPackagePathResolver PathResolver {
+            get;
+            private set;
+        }
+
+        public IPackageEventListener Listener {
             get {
-                return _listener ?? PackageEventListener.Default;
+                return _listener ?? DefaultPackageEventListener.Instance;
             }
             set {
                 _listener = value;
@@ -99,26 +116,25 @@
                     continue;
                 }
 
-                ExecuteInstall(package);
+                ExecuteInstall(CreateOperationContext(package));
             }
         }
 
-        private void ExecuteInstall(IPackage package) {
-            // notify listener before installing
-            var context = new OperationContext(package, GetPackagePath(package));
+        private void ExecuteInstall(OperationContext context) {
+            // Notify listener before installing
             Listener.OnBeforeInstall(context);
-            
-            ExpandFiles(package);
 
-            LocalRepository.AddPackage(package);
+            ExpandFiles(context.Package);
+
+            LocalRepository.AddPackage(context.Package);
 
             // notify listener after installing
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, context.Package.GetFullName());
             Listener.OnAfterInstall(context);
         }
 
         private void ExpandFiles(IPackage package) {
-            string packageDirectory = Utility.GetPackageDirectory(package);
+            string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Add files files
             FileSystem.AddFiles(package.GetFiles(), packageDirectory, Listener);
@@ -172,39 +188,35 @@
             Debug.Assert(packages != null, "packages should not be null");
 
             foreach (var package in packages) {
-                ExecuteUninstall(package);
+                ExecuteUninstall(CreateOperationContext(package));
             }
         }
 
-        private void ExecuteUninstall(IPackage package) {
-            var context = new OperationContext(package, GetPackagePath(package));
+        private void ExecuteUninstall(OperationContext context) {
             Listener.OnBeforeUninstall(context);
 
-            RemoveFiles(package);
+            RemoveFiles(context.Package);
 
             // Remove package to the repository
-            LocalRepository.RemovePackage(package);
+            LocalRepository.RemovePackage(context.Package);
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
+            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, context.Package.GetFullName());
             Listener.OnAfterUninstall(context);
         }
 
         private void RemoveFiles(IPackage package) {
-            string packageDirectory = Utility.GetPackageDirectory(package);
+            string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Remove resource files
-            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Listener);            
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Listener);
         }
 
         public bool IsPackageInstalled(IPackage package) {
             return LocalRepository.FindPackage(package.Id, exactVersion: package.Version) != null;
         }
 
-        public string GetPackagePath(IPackage package) {
-            if (package == null) {
-                throw new ArgumentNullException("package");
-            }
-            return Path.Combine(FileSystem.Root, Utility.GetPackageDirectory(package));
+        private OperationContext CreateOperationContext(IPackage package) {
+            return new OperationContext(package, PathResolver.GetInstallPath(package));
         }
     }
 }

@@ -8,20 +8,31 @@
         private Dictionary<string, IPackage> _packageCache = new Dictionary<string, IPackage>(StringComparer.OrdinalIgnoreCase);
 
         public LocalPackageRepository(string physicalPath)
-            : this(new FileBasedProjectSystem(physicalPath)) {
+            : this(new DefaultPackagePathResolver(physicalPath), 
+                   new FileBasedProjectSystem(physicalPath)) {
         }
 
-        public LocalPackageRepository(IFileSystem fileSystem) {
+        public LocalPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem) {
+            if (pathResolver == null) {
+                throw new ArgumentNullException("pathResolver");
+            }
+
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }
 
             FileSystem = fileSystem;
+            PathResolver = pathResolver;
         }
 
         protected IFileSystem FileSystem {
             get;
             private set;
+        }
+
+        private IPackagePathResolver PathResolver {
+            get;
+            set;
         }
 
         public override IQueryable<IPackage> GetPackages() {
@@ -79,7 +90,7 @@
             FileSystem.DeleteFile(packageFilePath);
 
             // Delete the package directory if any
-            FileSystem.DeleteDirectory(Utility.GetPackageDirectory(package), true);
+            FileSystem.DeleteDirectory(PathResolver.GetPackageDirectory(package), true);
 
             // If this is the last package delete the package directory
             if (!FileSystem.GetFiles(String.Empty).Any() &&
@@ -88,8 +99,9 @@
             }
         }
 
-        private static string GetPackageFilePath(IPackage package) {
-            return Path.Combine(Utility.GetPackageDirectory(package), Utility.GetPackageFileName(package));
+        private string GetPackageFilePath(IPackage package) {
+            return Path.Combine(PathResolver.GetPackageDirectory(package), 
+                                PathResolver.GetPackageFileName(package));
         }
     }
 }

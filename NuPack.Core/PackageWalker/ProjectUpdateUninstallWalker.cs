@@ -1,6 +1,6 @@
 ﻿namespace NuPack {
     internal class ProjectUpdateUninstallWalker : UninstallWalker {
-        public ProjectUpdateUninstallWalker(IPackageRepository repository, PackageEventListener listener)
+        public ProjectUpdateUninstallWalker(IPackageRepository repository, IPackageEventListener listener)
             : base(repository, listener) {
         }
 

@@ -142,6 +142,11 @@
             path = GetFullPath(path);
             return File.OpenRead(path);
         }
+
+        public override bool ReferenceExists(string name) {
+            string path = GetReferencePath(name);
+            return FileExists(path);
+        }
         
         protected string MakeRelativePath(string fullPath) {
             return fullPath.Substring(Root.Length).TrimStart(Path.DirectorySeparatorChar);

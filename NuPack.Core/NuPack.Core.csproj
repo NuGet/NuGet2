@@ -70,7 +70,8 @@
     <Compile Include="Authoring\XmlManifestWriter.cs" />
     <Compile Include="Feed\PackageFeedDependency.cs" />
     <Compile Include="Logging\CallbackListener.cs" />
-    <Compile Include="Logging\PackageEventListener.cs" />
+    <Compile Include="Logging\DefaultPackageEventListener.cs" />
+    <Compile Include="Logging\IPackageEventListener.cs" />
     <Compile Include="Logging\OperationContext.cs" />
     <Compile Include="Logging\StatusLevel.cs" />
     <Compile Include="PackageManager.cs" />
@@ -79,9 +80,9 @@
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\XmlManifestReader.cs" />
     <Compile Include="PackageSource\PackageSource.cs" />
-    <Compile Include="Packages\DefaultPackageAssemblyPathResolver.cs" />
+    <Compile Include="Packages\DefaultPackagePathResolver.cs" />
     <Compile Include="Packages\IPackage.cs" />
-    <Compile Include="Packages\IPackageAssemblyPathResolver.cs" />
+    <Compile Include="Packages\IPackagePathResolver.cs" />
     <Compile Include="PackageWalker\ProjectUninstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectUpdateInstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectUpdateUninstallWalker.cs" />

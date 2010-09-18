@@ -8,8 +8,8 @@
         internal static IEnumerable<IPackage> ResolveDependenciesForInstall(IPackage package,
                                                                             IPackageRepository localRepository,
                                                                             IPackageRepository sourceRepository,
-                                                                            PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                            IPackageEventListener listener = null) {
+            listener = listener ?? DefaultPackageEventListener.Instance;
             var walker = new InstallWalker(localRepository,
                                            sourceRepository,
                                            listener);
@@ -22,8 +22,8 @@
         internal static IEnumerable<IPackage> ResolveDependenciesForProjectInstall(IPackage package,
                                                                                    IPackageRepository localRepository,
                                                                                    IPackageRepository sourceRepository,
-                                                                                   PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                                   IPackageEventListener listener = null) {
+            listener = listener ?? DefaultPackageEventListener.Instance;
             var walker = new ProjectInstallWalker(localRepository, sourceRepository, listener);
 
             walker.Walk(package);
@@ -34,8 +34,8 @@
                                                                                     IPackageRepository localRepository,
                                                                                     bool ignoreDepents = false,
                                                                                     bool removeDependencies = false,
-                                                                                    PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                                    IPackageEventListener listener = null) {
+            listener = listener ?? DefaultPackageEventListener.Instance;
             var walker = new ProjectUninstallWalker(localRepository, listener);
             walker.Force = ignoreDepents;
             walker.RemoveDependencies = removeDependencies;
@@ -51,8 +51,8 @@
                                                                              IPackageRepository localRepository,
                                                                              bool force = false,
                                                                              bool removeDependencies = false,
-                                                                             PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                             IPackageEventListener listener = null) {
+            listener = listener ?? DefaultPackageEventListener.Instance;
             var walker = new UninstallWalker(localRepository, listener);
             walker.Force = force;
             walker.RemoveDependencies = removeDependencies;
@@ -64,7 +64,7 @@
             return walker.Output;
         }
 
-        private static void LogSkippedPackages(PackageEventListener listener, UninstallWalker walker) {
+        private static void LogSkippedPackages(IPackageEventListener listener, UninstallWalker walker) {
             foreach (var pair in walker.SkippedPackages) {
                 if (!walker.Output.Contains(pair.Key, PackageComparer.IdAndVersionComparer)) {
                     listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
@@ -78,9 +78,9 @@
                                                                  IPackage newPackage,
                                                                  IPackageRepository localRepository,
                                                                  IPackageRepository sourceRepository,
-                                                                 PackageEventListener listener,
+                                                                 IPackageEventListener listener,
                                                                  bool updateDependencies) {
-            listener = listener ?? PackageEventListener.Default;
+            listener = listener ?? DefaultPackageEventListener.Instance;
             var uninstallWalker = new ProjectUpdateUninstallWalker(localRepository, listener);
             uninstallWalker.RemoveDependencies = updateDependencies;
 
