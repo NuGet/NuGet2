@@ -8,7 +8,7 @@
     internal class UninstallWalker : BasicPackageWalker {
         private DependentLookup _dependentsLookup;
 
-        public UninstallWalker(IPackageRepository repository, IPackageEventListener listener)
+        public UninstallWalker(IPackageRepository repository, ILogger listener)
             : base(repository, listener) {
             SkippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
         }
@@ -77,7 +77,7 @@
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
-            Listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
+            Listener.Log(MessageLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
         }
 
         protected virtual InvalidOperationException CreatePackageHasDependentsException(IPackage package, IEnumerable<IPackage> dependents) {

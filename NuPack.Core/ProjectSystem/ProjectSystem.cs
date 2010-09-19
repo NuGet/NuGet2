@@ -5,14 +5,14 @@
 
     public abstract class ProjectSystem : IFileSystem {
         private FrameworkName _targetFramework;
-        private IPackageEventListener _listener;
+        private ILogger _logger;
 
-        public IPackageEventListener Listener {
+        public ILogger Logger {
             get {
-                return _listener ?? DefaultPackageEventListener.Instance;
+                return _logger ?? NullLogger.Instance;
             }
             set {
-                _listener = value;
+                _logger = value;
             }
         }
 

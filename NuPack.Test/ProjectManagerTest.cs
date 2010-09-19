@@ -220,23 +220,27 @@
             // Arrange
             var projectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
-            var mockListener = new Mock<IPackageEventListener>();
-            mockListener.Setup(m => m.OnBeforeInstall(It.IsAny<OperationContext>())).Verifiable();
-            mockListener.Setup(m => m.OnAfterInstall(It.IsAny<OperationContext>())).Verifiable();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
-            projectManager.Listener = mockListener.Object;
             var packageA = PackageUtility.CreatePackage("A", "1.0",
                                                         new[] { "contentFile" },
                                                         new[] { "reference.dll" },
                                                         new[] { "tool" });
+            projectManager.PackageReferenceAdding += (sender, e) => {
+                // Assert
+                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.AreSame(e.Package, packageA);
+            };
+
+            projectManager.PackageReferenceAdded += (sender, e) => {
+                // Assert
+                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.AreSame(e.Package, packageA);
+            };
 
             mockRepository.AddPackage(packageA);
 
             // Act
             projectManager.AddPackageReference("A");
-
-            // Assert
-            mockListener.VerifyAll();
         }
 
         [TestMethod]
@@ -244,22 +248,26 @@
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
-            var mockListener = new Mock<IPackageEventListener>();
-            mockListener.Setup(m => m.OnBeforeUninstall(It.IsAny<OperationContext>())).Verifiable();
-            mockListener.Setup(m => m.OnAfterUninstall(It.IsAny<OperationContext>())).Verifiable();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
-            projectManager.Listener = mockListener.Object;
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
+            projectManager.PackageReferenceRemoving += (sender, e) => {
+                // Assert
+                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.AreSame(e.Package, packageA);
+            };
+
+            projectManager.PackageReferenceRemoved += (sender, e) => {
+                // Assert
+                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.AreSame(e.Package, packageA);
+            };
 
             mockRepository.AddPackage(packageA);
             projectManager.AddPackageReference("A");
 
             // Act
             projectManager.RemovePackageReference("A");
-
-            // Assert
-            mockListener.VerifyAll();
         }
 
         [TestMethod]

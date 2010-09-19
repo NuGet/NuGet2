@@ -46,7 +46,7 @@ namespace NuPack.Dialog.Providers {
             if (String.IsNullOrEmpty(_feed)) {
                 return Enumerable.Empty<IPackage>().AsQueryable();
             }
-            return _vsProjectManager.GetPackageReferences().AsQueryable();
+            return _vsProjectManager.LocalRepository.GetPackages();
         }
 
     }

@@ -1,9 +1,9 @@
-param([string]$ToolsDir)
+param($installPath, $toolsPath, $package, $project)
 
-. (Join-Path $ToolsDir "GetSqlCEPostBuildCmd.ps1")
+. (Join-Path $toolsPath "GetSqlCEPostBuildCmd.ps1")
 
 # Get the current Post Build Event cmd
-$currentPostBuildCmd = $proj.Properties.Item("PostBuildEvent").Value
+$currentPostBuildCmd = $project.Properties.Item("PostBuildEvent").Value
 
 # Remove our post build command from it (if it's there)
-$proj.Properties.Item("PostBuildEvent").Value = $currentPostBuildCmd.Replace($SqlCEPostBuildCmd, "")
+$project.Properties.Item("PostBuildEvent").Value = $currentPostBuildCmd.Replace($SqlCEPostBuildCmd, "")

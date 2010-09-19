@@ -69,11 +69,11 @@
     <Compile Include="Authoring\PathSearchFilter.cs" />
     <Compile Include="Authoring\XmlManifestWriter.cs" />
     <Compile Include="Feed\PackageFeedDependency.cs" />
-    <Compile Include="Logging\CallbackListener.cs" />
-    <Compile Include="Logging\DefaultPackageEventListener.cs" />
-    <Compile Include="Logging\IPackageEventListener.cs" />
-    <Compile Include="Logging\OperationContext.cs" />
-    <Compile Include="Logging\StatusLevel.cs" />
+    <Compile Include="Logging\CallbackLogger.cs" />
+    <Compile Include="Logging\NullLogger.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\PackageOperationEventArgs.cs" />
+    <Compile Include="Logging\MessageLevel.cs" />
     <Compile Include="PackageManager.cs" />
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
     <Compile Include="Authoring\PackageBuilder.cs" />

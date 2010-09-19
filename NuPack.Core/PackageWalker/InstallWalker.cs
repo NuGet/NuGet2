@@ -8,7 +8,7 @@
         private bool _ignoreDependencies;
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
-                             IPackageEventListener listener,
+                             ILogger listener,
                              bool ignoreDependencies = false) :
             base(localRepository, listener) {
 
@@ -57,7 +57,7 @@
                 package = SourceRepository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
 
                 if (package != null) {
-                    Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageRetrieveSuccessfully);
+                    Listener.Log(MessageLevel.Info, NuPackResources.Log_PackageRetrieveSuccessfully);
                 }
             }
 
@@ -65,12 +65,12 @@
         }
 
         protected virtual void LogDependencyExists(PackageDependency dependency) {
-            Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
+            Listener.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
         }
 
         protected virtual void LogRetrieveDependenyFromSource(PackageDependency dependency) {
             // We didn't resolve the dependency so try to retrieve it from the source
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
+            Listener.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
         }
 
         protected override bool SkipDependency(PackageDependency dependency) {

@@ -205,7 +205,7 @@
 
 
             // Assert
-            Assert.IsFalse(packageManager.IsPackageInstalled(packageA));
+            Assert.IsFalse(packageManager.LocalRepository.IsPackageInstalled(packageA));
         }
 
         private PackageManager CreatePackageManager() {

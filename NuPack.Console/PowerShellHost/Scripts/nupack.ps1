@@ -95,8 +95,7 @@ function global:Add-Package {
                 }
                 
                 if ($Project) {
-                    $projectIns = Get-Project $Project
-                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
                 }
                 else {
@@ -204,8 +203,7 @@ function global:Update-Package {
                 }
             
                 if ($Project) {
-                    $projectIns = Get-Project $Project
-                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
                 }
                 else {
@@ -273,8 +271,7 @@ function global:_SetDefaultProjectInternal($Project) {
 
 # Package Manager functions
 function global:DoRemovePackageReference($packageManager, $projectName, $Id, $Force, $RemoveDependencies) {
-    $project = Get-Project $projectName
-    $projectManager = $packageManager.GetProjectManager($project)
+    $projectManager = _GetProjectManager $packageManager $projectName
     $projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
 }
 
@@ -297,10 +294,10 @@ $global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler
     $localPackages = $repository.GetPackages()
 
     $localPackages | ForEach-Object {
-        $path = $packageManager.GetPackagePath($_)
+        $path = $packageManager.PathResolver.GetInstallPath($_)
 
         _AddToolsFolderToEnv $path
-        _ExecuteScript $path "tools\init.ps1"
+        _ExecuteScript $path "tools\init.ps1" $_
     }
 })
 
@@ -502,6 +499,31 @@ function global:_WriteError($exception) {
     Write-Error $message
 }
 
+function global:_GetProjectManager($packageManager, $projectName) {
+    $project = Get-Project $projectName
+    $projectManager = $packageManager.GetProjectManager($project)
+
+    # TODO: Don't create a new logger everytime
+    $projectManager.Logger = _CreateLogger
+
+    # REVIEW: We really want to do this once per project manager instance
+    $projectManager.add_PackageReferenceAdded({ 
+        param($sender, $e)
+        
+        Write-Verbose "Executing install script after installing package $context.Package.Id..."
+        _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project        
+    }.GetNewClosure());
+
+    $projectManager.add_PackageReferenceRemoving({
+        param($sender, $e)
+
+        Write-Verbose "Executing uninstall script before uninstalling package $context.Package.Id..."
+        _ExecuteScript $e.InstallPath "tools\uninstall.ps1" $e.Package $project
+    }.GetNewClosure());
+
+    return $projectManager;
+}
+
 function global:_GetPackageManager($Source) {
     if(!$dte) {
         throw "DTE isn't loaded"
@@ -515,56 +537,49 @@ function global:_GetPackageManager($Source) {
     # Create a visual studio package manager
     $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager($Source, [System.Object]$dte)
 
-    $packageManager.Listener = _CreateLogger
+    # Add an event for when packages are installed
+    # REVIEW: We really want to do this once per package manager instance
+    $packageManager.add_PackageInstalled($function:_OnPackageInstalled);
+    $packageManager.add_PackageUninstalling($function:_OnPackageUninstalling);
+
     return $packageManager
 }
 
+function global:_OnPackageInstalled($sender, $e) {
+    $path = $e.TargetPath
+
+    _AddToolsFolderToEnv $path
+    
+    Write-Verbose "Executing init script after installing package $context.Package.Id..."
+    _ExecuteScript $path "tools\init.ps1"
+}
+
+function global:_OnPackageUninstalling($sender, $e) {    
+    # TODO: remove tools path from the environment varible
+}
+
 function global:_CreateLogger {
-    function ReportStatus($level, $statusMessage) {
+    function Log($level, $statusMessage) {
         if ($level -eq 'Info') {
             Write-Host $statusMessage
         }
         elseif ($level -eq 'Debug') {
-            Write-Debug $statusMessage
+            Write-Verbose $statusMessage
         }
         elseif ($level -eq 'Warning') {
             Write-Warning $statusMessage
         }
     }
 
-    return New-Object NuPack.CallbackListener(
-        $null, $function:_OnAfterInstall, $function:_OnBeforeUninstall, $null, $function:ReportStatus, $null)
+    return New-Object NuPack.CallbackLogger($function:Log)
 }
 
-function global:_OnAfterInstall($context) {
-    $path = $context.TargetPath
-
-    _AddToolsFolderToEnv $path
-
-    # execute install script 
-    Write-Debug "Executing install script after installing package $context.Package.Id..."
-    _ExecuteScript $path "tools\install.ps1"
-
-    Write-Debug "Executing init script after installing package $context.Package.Id..."
-    _ExecuteScript $path "tools\init.ps1"
-}
-
-function global:_OnBeforeUninstall($context) {
-    $path = $context.TargetPath
-
-    # TODO: remove tools path from the environment varible
-
-    # execution the uninstall script
-    # Write-Debug "Executing uninstall script before uninstalling package $context.Package.Id..."
-    _ExecuteScript $path "tools\uninstall.ps1"
-}
-
-function global:_ExecuteScript([string]$rootPath, [string]$scriptFile) {
+function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package, $project) {
     $fullPath = (Join-Path $rootPath $scriptFile)
-    
+        
     if (Test-Path $fullPath) {
         $folder = Split-Path $fullPath
-        & $fullPath $folder
+        & $fullPath $rootPath $folder $package $project
     }
 }
 

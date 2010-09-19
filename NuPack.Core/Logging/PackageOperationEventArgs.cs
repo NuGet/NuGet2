@@ -1,10 +1,13 @@
 ﻿namespace NuPack {
-    public class OperationContext {
-        public OperationContext(IPackage package, string targetPath)
+    using System;
+    using System.ComponentModel;
+
+    public class PackageOperationEventArgs : CancelEventArgs {
+        public PackageOperationEventArgs(IPackage package, string targetPath)
             : this(package, targetPath, targetPath) {
         }
 
-        public OperationContext(IPackage package, string targetPath, string installPath) {
+        public PackageOperationEventArgs(IPackage package, string targetPath, string installPath) {
             Package = package;
             TargetPath = targetPath;
             InstallPath = installPath;

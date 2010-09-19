@@ -10,7 +10,7 @@
             _vsPackageManager = vsPackageManager;
         }
 
-        public override void AddPackageReference(string packageId, Version version = null, bool ignoreDependencies = false) {
+        public override void AddPackageReference(string packageId, Version version, bool ignoreDependencies) {
             // Make sure the package is installed before we add a reference to it
             _vsPackageManager.InstallPackage(packageId, version, ignoreDependencies);
 
@@ -23,8 +23,8 @@
             _vsPackageManager.OnPackageReferenceRemoved(package, force, removeDependencies);            
         }
 
-        public override void UpdatePackageReference(string packageId, Version version = null, bool updateDependencies = true) {
-            IPackage oldPackage = GetPackageReference(packageId);
+        public override void UpdatePackageReference(string packageId, Version version, bool updateDependencies) {
+            IPackage oldPackage = LocalRepository.FindPackage(packageId);
             // Only install the package to the solution if the project has a reference to it.
             if (oldPackage != null) {
                 _vsPackageManager.InstallPackage(packageId, version, !updateDependencies);

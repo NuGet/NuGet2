@@ -6,12 +6,12 @@
     using NuPack.Resources;
 
     internal abstract class BasicPackageWalker : PackageWalker {
-        public BasicPackageWalker(IPackageRepository repository, IPackageEventListener listener) {
+        public BasicPackageWalker(IPackageRepository repository, ILogger listener) {
             Repository = repository;
             Listener = listener;
         }
 
-        protected IPackageEventListener Listener { get; private set; }
+        protected ILogger Listener { get; private set; }
 
         protected IPackageRepository Repository { get; private set; }
 

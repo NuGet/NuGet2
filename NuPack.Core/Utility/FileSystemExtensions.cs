@@ -8,14 +8,14 @@ namespace NuPack {
     internal static class FileSystemExtensions {
         internal static void AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
-                                      IPackageEventListener listener) {
+                                      ILogger listener) {
             AddFiles(fileSystem, files, String.Empty, listener);
         }
 
         internal static void AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
                                       string rootDir,
-                                      IPackageEventListener listener) {
+                                      ILogger listener) {
             foreach (IPackageFile file in files) {
                 string path = Path.Combine(rootDir, file.Path);
                 AddFile(fileSystem, path, file.Open, listener);
@@ -24,14 +24,14 @@ namespace NuPack {
         
         internal static void DeleteFiles(this IFileSystem fileSystem,
                                          IEnumerable<IPackageFile> files,
-                                         IPackageEventListener listener) {
+                                         ILogger listener) {
             DeleteFiles(fileSystem, files, String.Empty, listener);
         }
 
         internal static void DeleteFiles(this IFileSystem fileSystem,
                                          IEnumerable<IPackageFile> files,
                                          string rootDir,
-                                         IPackageEventListener listener) {
+                                         ILogger listener) {
 
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
@@ -62,7 +62,7 @@ namespace NuPack {
             }
         }
 
-        internal static void DeleteFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, IPackageEventListener listener) {
+        internal static void DeleteFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger listener) {
             // Only delete the file if it exists and the checksum is the same
             if (fileSystem.FileExists(path)) {
                 bool contentEqual;
@@ -76,15 +76,15 @@ namespace NuPack {
                 }
                 else {
                     // This package installed a file that was modified so warn the user
-                    listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileModified, path);
+                    listener.Log(MessageLevel.Warning, NuPackResources.Warning_FileModified, path);
                 }
             }
         }
 
-        internal static void AddFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, IPackageEventListener listener) {
+        internal static void AddFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger listener) {
             // Don't overwrite file if it exists if force wasn't set to true
             if (fileSystem.FileExists(path)) {
-                listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
+                listener.Log(MessageLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
             }
             else {
                 using (Stream stream = streamFactory()) {

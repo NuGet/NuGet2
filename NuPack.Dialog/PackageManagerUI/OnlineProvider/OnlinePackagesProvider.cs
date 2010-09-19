@@ -204,7 +204,7 @@ namespace NuPack.Dialog.Providers {
         }
 
         public bool IsInstalled(string id) {
-            return (_vsProjectManager.GetPackageReference(id) != null);
+            return (_vsProjectManager.LocalRepository.FindPackage(id) != null);
         }
     }
 }

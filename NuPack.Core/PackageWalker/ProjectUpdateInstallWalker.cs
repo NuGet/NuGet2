@@ -6,7 +6,7 @@
         public ProjectUpdateInstallWalker(IEnumerable<IPackage> dependentsToExclude,
                                           IPackageRepository localRepository,
                                           IPackageRepository sourceRepository,
-                                          IPackageEventListener listener,
+                                          ILogger listener,
                                           bool ignoreDependencies)
             : base(localRepository, sourceRepository, listener, ignoreDependencies) {
             DependentsToExclude = dependentsToExclude;

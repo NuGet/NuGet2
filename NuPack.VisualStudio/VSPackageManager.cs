@@ -204,7 +204,7 @@
 
         private IEnumerable<ProjectManager> GetProjectsWithPackage(string packageId, Version version) {
             return from projectManager in ProjectManagers
-                   let package = projectManager.GetPackageReference(packageId)
+                   let package = projectManager.LocalRepository.FindPackage(packageId)
                    where package != null && (version == null || (version != null && package.Version.Equals(version)))
                    select projectManager;
         }

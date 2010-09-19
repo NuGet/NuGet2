@@ -10,7 +10,7 @@
 
         public ProjectInstallWalker(IPackageRepository localRepository,
                                     IPackageRepository sourceRepository,
-                                    IPackageEventListener listener,
+                                    ILogger listener,
                                     bool ignoreDependencies = false)
             : base(localRepository, sourceRepository, listener, ignoreDependencies) {
         }
@@ -30,11 +30,11 @@
         }
 
         protected override void LogDependencyExists(PackageDependency dependency) {
-            Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_DependencyAlreadyReferenced, dependency);
+            Listener.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyReferenced, dependency);
         }
 
         protected override void LogRetrieveDependenyFromSource(PackageDependency dependency) {
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
+            Listener.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
         }
 
         protected override void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {

@@ -23,7 +23,7 @@
                 // Add a reference to the project
                 Project.Object.References.AddFromFile(referencePath);
 
-                Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
             catch {
 
