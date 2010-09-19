@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <DebugOrRelease>Debug</DebugOrRelease>
+    <NuPackRoot>$(MSBuildProjectDirectory)\..</NuPackRoot>
+    <DropDirectory>$(NuPackRoot)\bin</DropDirectory>
+    <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
+    <NuPackDropDirectory>$(DropDirectory)\NuPack</NuPackDropDirectory>
+    <ExeBuildDirectory>$(NuPackRoot)\NuPack\bin\$(DebugOrRelease)</ExeBuildDirectory>
+    <ExeDropDirectory>$(NuPackDropDirectory)\Console</ExeDropDirectory>
+    <VisualStudioAddInBuildDirectory>$(NuPackRoot)\NuPack.Tools\bin\$(DebugOrRelease)</VisualStudioAddInBuildDirectory>
+    <VisualStudioAddInDropDirectory>$(NuPackDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
+    <ServerBuildDirectory>$(NuPackRoot)\NuPack.Server</ServerBuildDirectory>
+    <ServerDropDirectory>$(NuPackDropDirectory)\Server</ServerDropDirectory>
+    <ILMergeExe>$(NuPackRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
+    <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
+    <ILMergeFileFinalName>NuPack.exe</ILMergeFileFinalName>
+    <ILMergeInternalizeIgnoreFile>$(NuPackRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
+    <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <LicenseFileItems Include="$(MSBuildProjectDirectory)\..\LICENSE.txt" />
+    <ExeOutputItems Include="$(ExeBuildDirectory)\**\*.*" />
+    <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
+    <ServerOutputItems Include="$(ServerBuildDirectory)\**\*.*" />
+    <ILMergeItems Include="$(MergeDirectory)\*.dll" />
+  </ItemGroup> 
+
+  <Target Name="Go"
+    DependsOnTargets="
+      CreateDropDirectories;
+      CopyExecutableOutputToDropDirectory;
+      CopyVisualStudioAddInOutputToDropDirectory;
+      CopyServerOutputToDropDirectory;
+      CopyLicenseToAllDirectories;
+      ILMergeTheExecutable;
+      "
+    >
+  </Target>
+  
+  <Target Name="CreateDropDirectories">
+    <Message Text="Making the output directories for the compiled output at '$(DropDirectory)'." />
+    <RemoveDir
+      Directories="$(DropDirectory)"
+      Condition="Exists('$(DropDirectory)')" />
+    <MakeDir
+      Directories="$(DropDirectory)"
+      Condition="!Exists('$(DropDirectory)')" />
+    <MakeDir
+      Directories="$(ArtifactDropDirectory)"
+      Condition="!Exists('$(ArtifactDropDirectory)')" />
+    <MakeDir
+      Directories="$(NuPackDropDirectory)"
+      Condition="!Exists('$(NuPackDropDirectory)')" />
+    <MakeDir
+      Directories="$(ExeDropDirectory)"
+      Condition="!Exists('$(ExeDropDirectory)')" />
+    <MakeDir
+      Directories="$(VisualStudioAddInDropDirectory)"
+      Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
+    <MakeDir
+      Directories="$(ServerDropDirectory)"
+      Condition="!Exists('$(ServerDropDirectory)')" />
+  </Target>
+  
+  <Target Name="CopyExecutableOutputToDropDirectory">
+    <Message Text="Copying the NuPack Console output to $(ExeDropDirectory)" />
+    <Copy ContinueOnError="false"
+          SourceFiles="@(ExeOutputItems)"
+          DestinationFiles="@(ExeOutputItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+  </Target>
+
+  <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
+    <Message Text="Copying the NuPack Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
+    <Copy ContinueOnError="false"
+          SourceFiles="@(VisualStudioAddInOutputItems)"
+          DestinationFiles="@(VisualStudioAddInOutputItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+  </Target>
+  
+  <Target Name="CopyServerOutputToDropDirectory">
+    <Message Text="Copying the NuPack Server output to $(ServerDropDirectory)" />
+    <Copy ContinueOnError="false"
+          SourceFiles="@(ServerOutputItems)"
+          DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+  </Target> 
+  
+  <Target Name="CopyLicenseToAllDirectories">
+    <Message Text="Copying the License to all drop directories" />
+    <Copy ContinueOnError="false"
+          SourceFiles="@(LicenseFileItems)"
+          DestinationFiles="@(LicenseFileItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+    <Copy ContinueOnError="false"
+        SourceFiles="@(LicenseFileItems)"
+        DestinationFiles="@(LicenseFileItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+    <Copy ContinueOnError="false"
+        SourceFiles="@(LicenseFileItems)"
+        DestinationFiles="@(LicenseFileItems ->'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+  </Target>
+
+  <Target Name="ILMergeTheExecutable">
+    <Message Text="ILMerging the executable contents in $(ExeDropDirectory)" />
+    <MakeDir
+      Directories="$(ILMergeArtifactDirectory)"
+      Condition="!Exists('$(ILMergeArtifactDirectory)')" />
+    <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html -->
+    <Exec 
+      Command='$(ILMergeExe) /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /internalize:$(ILMergeInternalizeIgnoreFile) /target:exe /out:$(ILMergeFileFinalName) /log:$(ILMergeArtifactDirectory)\ilmerge.log /xmldocs /ndebug /allowDup $(ILMergeFileFinalName) %(ILMergeItems.FileName)%(ILMergeItems.Extension)'
+      WorkingDirectory="$(MergeDirectory)"/>
+  </Target>
+
+</Project>
