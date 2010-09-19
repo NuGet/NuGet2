@@ -72,7 +72,7 @@
     <Compile Include="Logging\CallbackLogger.cs" />
     <Compile Include="Logging\NullLogger.cs" />
     <Compile Include="Logging\ILogger.cs" />
-    <Compile Include="Logging\PackageOperationEventArgs.cs" />
+    <Compile Include="PackageOperationEventArgs.cs" />
     <Compile Include="Logging\MessageLevel.cs" />
     <Compile Include="PackageManager.cs" />
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
