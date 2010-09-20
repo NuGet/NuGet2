@@ -143,8 +143,6 @@ namespace NuPack.Dialog.Providers {
 
         #endregion
 
-        private string urlNeedingCredentials;
-
         private void CreateExtensionsTree() {
             this.m_CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new ThreadStart(delegate() {
                 if (this.ProgressPane != null && this.ProgressPane.Show(null, false)) {
