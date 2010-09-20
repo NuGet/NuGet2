@@ -5,9 +5,9 @@
 
     public interface IPackageRepository {
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call might be expensive")]
-        IQueryable<Package> GetPackages();
-        Package FindPackage(string packageId, Version version);
-        void AddPackage(Package package);
-        void RemovePackage(Package package);
+        IQueryable<IPackage> GetPackages();
+        IPackage FindPackage(string packageId, Version version);
+        void AddPackage(IPackage package);
+        void RemovePackage(IPackage package);
     }
 }

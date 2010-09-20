@@ -66,7 +66,7 @@ namespace NuPack {
                 XmlSchemaSet schemaSet = new XmlSchemaSet();
                 using (var stringReader = new StringReader(reader.ReadToEnd())) {
                     XmlReader schemaReader = XmlReader.Create(stringReader);
-                    schemaSet.Add(Package.ManifestSchemaNamespace, schemaReader);
+                    schemaSet.Add(Constants.ManifestSchemaNamespace, schemaReader);
                     document.Validate(schemaSet, OnValidate);
                 }
             }
@@ -93,17 +93,17 @@ namespace NuPack {
                                      select e.Value);
 
             DateTime created;
-            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("created", Package.ManifestSchemaNamespace), out created)) {
+            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("created", Constants.ManifestSchemaNamespace), out created)) {
                 builder.Created = created;
             }
             DateTime modified;
-            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("modified", Package.ManifestSchemaNamespace), out modified)) {
+            if (DateTime.TryParse(metadataElement.GetOptionalElementValue("modified", Constants.ManifestSchemaNamespace), out modified)) {
                 builder.Modified = modified;
             }
-            builder.Language = metadataElement.GetOptionalElementValue("language", Package.ManifestSchemaNamespace);
-            builder.LastModifiedBy = metadataElement.GetOptionalElementValue("lastmodifiedby", Package.ManifestSchemaNamespace);
-            builder.Category = metadataElement.GetOptionalElementValue("category", Package.ManifestSchemaNamespace);
-            string keywords = metadataElement.GetOptionalElementValue("keywords", Package.ManifestSchemaNamespace);
+            builder.Language = metadataElement.GetOptionalElementValue("language", Constants.ManifestSchemaNamespace);
+            builder.LastModifiedBy = metadataElement.GetOptionalElementValue("lastmodifiedby", Constants.ManifestSchemaNamespace);
+            builder.Category = metadataElement.GetOptionalElementValue("category", Constants.ManifestSchemaNamespace);
+            string keywords = metadataElement.GetOptionalElementValue("keywords", Constants.ManifestSchemaNamespace);
 
             if (!String.IsNullOrWhiteSpace(keywords)) {
                 builder.Keywords.AddRange(keywords.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
@@ -111,7 +111,7 @@ namespace NuPack {
         }
 
         private static XName MakeName(string name) {
-            return XName.Get(name, Package.ManifestSchemaNamespace);
+            return XName.Get(name, Constants.ManifestSchemaNamespace);
         }
 
         private void ReadDependencies(PackageBuilder builder) {

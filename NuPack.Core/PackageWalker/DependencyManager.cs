@@ -5,11 +5,11 @@
     using NuPack.Resources;
 
     internal static class DependencyManager {
-        internal static IEnumerable<Package> ResolveDependenciesForInstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForInstall(IPackage package,
                                                                             IPackageRepository localRepository,
                                                                             IPackageRepository sourceRepository,
-                                                                            PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                            ILogger listener = null) {
+            listener = listener ?? NullLogger.Instance;
             var walker = new InstallWalker(localRepository,
                                            sourceRepository,
                                            listener);
@@ -19,23 +19,23 @@
             return walker.Output;
         }
 
-        internal static IEnumerable<Package> ResolveDependenciesForProjectInstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForProjectInstall(IPackage package,
                                                                                    IPackageRepository localRepository,
                                                                                    IPackageRepository sourceRepository,
-                                                                                   PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                                   ILogger listener = null) {
+            listener = listener ?? NullLogger.Instance;
             var walker = new ProjectInstallWalker(localRepository, sourceRepository, listener);
 
             walker.Walk(package);
             return walker.Output;
         }
 
-        internal static IEnumerable<Package> ResolveDependenciesForProjectUninstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForProjectUninstall(IPackage package,
                                                                                     IPackageRepository localRepository,
                                                                                     bool ignoreDepents = false,
                                                                                     bool removeDependencies = false,
-                                                                                    PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                                    ILogger listener = null) {
+            listener = listener ?? NullLogger.Instance;
             var walker = new ProjectUninstallWalker(localRepository, listener);
             walker.Force = ignoreDepents;
             walker.RemoveDependencies = removeDependencies;
@@ -47,12 +47,12 @@
             return walker.Output;
         }
 
-        internal static IEnumerable<Package> ResolveDependenciesForUninstall(Package package,
+        internal static IEnumerable<IPackage> ResolveDependenciesForUninstall(IPackage package,
                                                                              IPackageRepository localRepository,
                                                                              bool force = false,
                                                                              bool removeDependencies = false,
-                                                                             PackageEventListener listener = null) {
-            listener = listener ?? PackageEventListener.Default;
+                                                                             ILogger listener = null) {
+            listener = listener ?? NullLogger.Instance;
             var walker = new UninstallWalker(localRepository, listener);
             walker.Force = force;
             walker.RemoveDependencies = removeDependencies;
@@ -64,23 +64,23 @@
             return walker.Output;
         }
 
-        private static void LogSkippedPackages(PackageEventListener listener, UninstallWalker walker) {
+        private static void LogSkippedPackages(ILogger listener, UninstallWalker walker) {
             foreach (var pair in walker.SkippedPackages) {
                 if (!walker.Output.Contains(pair.Key, PackageComparer.IdAndVersionComparer)) {
-                    listener.OnReportStatus(StatusLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
+                    listener.Log(MessageLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
                                 pair.Key,
-                                String.Join(", ", pair.Value.Select(p => p.ToString())));
+                                String.Join(", ", pair.Value.Select(p => p.GetFullName())));
                 }
             }
         }
 
-        internal static PackagePlan ResolveDependenciesForUpdate(Package oldPackage,
-                                                                 Package newPackage,
+        internal static PackagePlan ResolveDependenciesForUpdate(IPackage oldPackage,
+                                                                 IPackage newPackage,
                                                                  IPackageRepository localRepository,
                                                                  IPackageRepository sourceRepository,
-                                                                 PackageEventListener listener,
+                                                                 ILogger listener,
                                                                  bool updateDependencies) {
-            listener = listener ?? PackageEventListener.Default;
+            listener = listener ?? NullLogger.Instance;
             var uninstallWalker = new ProjectUpdateUninstallWalker(localRepository, listener);
             uninstallWalker.RemoveDependencies = updateDependencies;
 

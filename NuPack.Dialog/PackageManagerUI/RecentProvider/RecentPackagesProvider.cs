@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using NuPack.Dialog.ToolsOptionsUI;
-using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -21,38 +18,14 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected override IPackageRepository PackagesRepository {
-            get {
-                if (_packagesRepository == null) {
-                    _feed = Settings.RepositoryServiceUri;
-
-                    if (String.IsNullOrEmpty(_feed)) {
-                        return EmptyPackageRepository.Default;
-                    }
-
-                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-                    _project = GetActiveProject(_dte);
-
-                    _vsPackageManager = VSPackageManager.GetPackageManager(_feed, _dte);
-                    _vsProjectManager = _vsPackageManager.GetProjectManager(_project);
-
-                    _packagesRepository = _vsPackageManager.ExternalRepository;
-                }
-                return _packagesRepository;
-            }
-        }
-
         /// <summary>
         /// Returns a fake list of packages for now
         /// </summary>
         /// <returns></returns>
-        public override IQueryable<Package> GetQuery() {
-            if (String.IsNullOrEmpty(_feed)) {
-                return Enumerable.Empty<Package>().AsQueryable();
-            }
-            List<string> recent = new List<String>() { "elmah", "Antlr" };
+        public override IQueryable<IPackage> GetQuery() {            
+            var recent = new List<string>() { "elmah", "Antlr" };
 
-            return _packagesRepository.GetPackages().Join(recent, p => p.Id, r => r, (p, r) => p).Distinct();
+            return PackagesRepository.GetPackages().Join(recent, p => p.Id, r => r, (p, r) => p).Distinct();
         }
 
     }

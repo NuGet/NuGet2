@@ -85,7 +85,7 @@
             return dependencyElement;
         }
 
-        internal static Package CreatePackage(string id,
+        internal static IPackage CreatePackage(string id,
                                               string version,
                                               IEnumerable<string> content = null,
                                               IEnumerable<string> assemblyReferences = null,
@@ -100,7 +100,7 @@
                                  dependencies);
         }
 
-        internal static Package CreatePackage(string id,
+        internal static IPackage CreatePackage(string id,
                                               string version,
                                               IEnumerable<string> content,
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
@@ -116,7 +116,7 @@
             allFiles.AddRange(CreateFiles(resources, "resources"));
             allFiles.AddRange(assemblyReferences);
 
-            var mockPackage = new Mock<Package>() { CallBase = true };
+            var mockPackage = new Mock<IPackage>() { CallBase = true };
             mockPackage.Setup(m => m.Id).Returns(id);
             mockPackage.Setup(m => m.Version).Returns(new Version(version));
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
@@ -159,14 +159,6 @@
                 files.Add(mockFile.Object);
             }
             return files;
-        }
-
-        internal static IPackageAssemblyPathResolver CreateAssemblyResolver() {
-            var mockAssemblyResolver = new Mock<IPackageAssemblyPathResolver>();
-            mockAssemblyResolver.Setup(m => m.GetAssemblyPath(It.IsAny<Package>(),
-                                                              It.IsAny<IPackageAssemblyReference>()))
-                                .Returns<Package, IPackageAssemblyReference>((_, reference) => Path.Combine("FullPath", reference.Path));
-            return mockAssemblyResolver.Object;
         }
     }
 }

@@ -8,7 +8,7 @@
     internal class ReverseDependencyWalker : PackageWalker {
         public ReverseDependencyWalker(IPackageRepository repository) {
             Repository = repository;
-            Dependents = new Dictionary<Package, HashSet<Package>>(PackageComparer.IdAndVersionComparer);
+            Dependents = new Dictionary<IPackage, HashSet<IPackage>>(PackageComparer.IdAndVersionComparer);
         }
 
         protected override bool RaiseErrorOnCycle {
@@ -19,20 +19,20 @@
 
         private IPackageRepository Repository { get; set; }
 
-        public IDictionary<Package, HashSet<Package>> Dependents { get; set; }
+        public IDictionary<IPackage, HashSet<IPackage>> Dependents { get; set; }
 
         protected override PackageMarker CreateMarker() {
             return new PackageMarker(PackageComparer.IdAndVersionComparer);
         }
 
-        protected override Package ResolveDependency(PackageDependency dependency) {
+        protected override IPackage ResolveDependency(PackageDependency dependency) {
             return Repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
         }
 
-        protected override void ProcessResolvedDependency(Package package, PackageDependency dependency, Package resolvedDependency) {
-            HashSet<Package> values;
+        protected override void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
+            HashSet<IPackage> values;
             if (!Dependents.TryGetValue(resolvedDependency, out values)) {
-                values = new HashSet<Package>(PackageComparer.IdAndVersionComparer);
+                values = new HashSet<IPackage>(PackageComparer.IdAndVersionComparer);
                 Dependents[resolvedDependency] = values;
             }
 

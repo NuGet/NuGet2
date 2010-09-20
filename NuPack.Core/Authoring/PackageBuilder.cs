@@ -77,7 +77,7 @@ namespace NuPack {
             private set;
         }
         
-        public static void Save(Package package, Stream stream) {
+        public static void Save(IPackage package, Stream stream) {
             ReadFrom(package).Save(stream);
         }
 
@@ -114,7 +114,7 @@ namespace NuPack {
             return builder;
         }
 
-        public static PackageBuilder ReadFrom(Package package) {
+        public static PackageBuilder ReadFrom(IPackage package) {
             PackageBuilder packageBuilder = new PackageBuilder();
 
             // Copy meta data
@@ -142,10 +142,10 @@ namespace NuPack {
         }
 
         private void WriteManifest(Opc.Package package) {
-            Uri uri = UriHelper.CreatePartUri(Id + Package.ManifestExtension);
+            Uri uri = UriHelper.CreatePartUri(Id + Constants.ManifestExtension);
 
             // Create the manifest relationship
-            package.CreateRelationship(uri, Opc.TargetMode.Internal, Package.SchemaNamespace + ManifestRelationType);
+            package.CreateRelationship(uri, Opc.TargetMode.Internal, Constants.SchemaNamespace + ManifestRelationType);
 
             // Create the part
             Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);

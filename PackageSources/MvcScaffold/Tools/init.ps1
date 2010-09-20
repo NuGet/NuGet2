@@ -1,11 +1,11 @@
-param([string]$ToolsDir)
+param($installPath, $toolsPath, $package, $project)
 
-$requiredAssemblies = Get-ChildItem $ToolsDir -Filter *.dll
+$requiredAssemblies = Get-ChildItem $toolsPath -Filter *.dll
 
 # Add a reference to the required assemblies
 $requiredAssemblies | ForEach-Object { Add-Type -Path $_.FullName }
 
-$global:mvcScaffoldToolsPath = $ToolsDir
+$global:mvcScaffoldToolsPath = $toolsPath
 $global:mvcViewTemplatesPath = Join-Path $env:VS100COMNTOOLS "..\IDE\ItemTemplates\CSharp\Web\MVC 2\CodeTemplates\AddView"
 
 function global:Add-MvcView {

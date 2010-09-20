@@ -1,6 +1,5 @@
-﻿
-namespace NuPack {
-    public enum StatusLevel {
+﻿namespace NuPack {
+    public enum MessageLevel {
         Info,
         Warning,
         Debug

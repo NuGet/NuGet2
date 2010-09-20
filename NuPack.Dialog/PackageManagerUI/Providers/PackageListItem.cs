@@ -11,7 +11,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         private BitmapSource _previewImage;
         private FileVersionInfo _fileVersionInfo;
         private string _moreInfoUrl;
-        private NuPack.Package _packageIdentity;
+        private NuPack.IPackage _packageIdentity;
 
         private static ConcurrentDictionary<string, BitmapSource> s_previewImageDefault = new ConcurrentDictionary<string, BitmapSource>();
 
@@ -19,7 +19,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// The reference item is used within the extension manager dialog that we're using for Add Reference
         /// It will "house" the actual reference item that we'll use for the act of adding references
         /// </summary>
-        public PackageListItem(NuPack.Package referenceRecord, bool isSelected, BitmapSource previewImage, float priority, BitmapSource thumbnail)
+        public PackageListItem(NuPack.IPackage referenceRecord, bool isSelected, BitmapSource previewImage, float priority, BitmapSource thumbnail)
         {
             _packageIdentity = referenceRecord;
 
@@ -34,7 +34,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers
         /// <summary>
         /// The embedded reference record that will be used to interface with the dialog list
         /// </summary>
-        public NuPack.Package ExtensionRecord
+        public NuPack.IPackage ExtensionRecord
         {
             get { return _packageIdentity; }
         }

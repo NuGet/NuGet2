@@ -1,4 +1,4 @@
-	# make sure we stop on exceptions
+    # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null
@@ -67,26 +67,26 @@ function global:Add-Package {
         [string]$Project,
         
         [Version]$Version,
-        
-        [string]$Source,
-
+      
         [switch]$IgnoreDependencies
     )
     Begin {
-        $packageManager = _GetPackageManager $Source
+        $packageManager = _GetPackageManager
     }
     Process {
         try {
             $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
         
             if ($isSolutionLevel) {
-            
                 if ($Project) {
                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
                     return
                 }
-                else  {
+                else {
+                    # Only set the logger for solution level packages
+                    $packageManager.Logger = _CreateLogger
                     $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
+                    $packageManager.Logger = $null
                 }
             }
             else {
@@ -95,8 +95,7 @@ function global:Add-Package {
                 }
                 
                 if ($Project) {
-                    $projectIns = Get-Project $Project
-                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
                 }
                 else {
@@ -136,13 +135,15 @@ function global:Remove-Package {
             $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
              
             if ($isSolutionLevel) {
-                
                 if ($Project -or $AllProjects) {
                      Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project or the -AllProjects parameter."
                      return
                 }
                 else {
+                     # Only set the logger for solution level packages
+                     $packageManager.Logger = _CreateLogger
                      $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                     $packageManager.Logger = $null
                 }
             } 
             else {
@@ -204,8 +205,7 @@ function global:Update-Package {
                 }
             
                 if ($Project) {
-                    $projectIns = Get-Project $Project
-                    $projectManager = $packageManager.GetProjectManager($projectIns)
+                    $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
                 }
                 else {
@@ -273,14 +273,14 @@ function global:_SetDefaultProjectInternal($Project) {
 
 # Package Manager functions
 function global:DoRemovePackageReference($packageManager, $projectName, $Id, $Force, $RemoveDependencies) {
-    $project = Get-Project $projectName
-    $projectManager = $packageManager.GetProjectManager($project)
+    $projectManager = _GetProjectManager $packageManager $projectName
     $projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
 }
 
 # Helper functions
 
 # Get the solution events
+$global:packageManagerInitialized = $false
 $global:solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
 
 # Clear the cache when the solution is closed
@@ -288,19 +288,19 @@ $global:solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._disp
 $global:solutionEvents.add_BeforeClosing([EnvDTE._dispSolutionEvents_BeforeClosingEventHandler]{
     $global:projectCache = $null
     $global:DefaultProjectName = $null
+    $global:packageManagerInitialized = $false
 })
 
 $global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
-    
     $packageManager = _GetPackageManager
     $repository = $packageManager.SolutionRepository
     $localPackages = $repository.GetPackages()
 
     $localPackages | ForEach-Object {
-        $path = $packageManager.GetPackagePath($_)
+        $path = $packageManager.PathResolver.GetInstallPath($_)
 
         _AddToolsFolderToEnv $path
-        _ExecuteScript $path "tools\init.ps1"
+        _ExecuteScript $path "tools\init.ps1" $_
     }
 })
 
@@ -502,69 +502,87 @@ function global:_WriteError($exception) {
     Write-Error $message
 }
 
-function global:_GetPackageManager($Source) {
+function global:_GetProjectManager($packageManager, $projectName) {
+    $project = Get-Project $projectName
+    $projectManager = $packageManager.GetProjectManager($project)
+
+    if(!$projectManager.Logger) {
+        # Initialize the project manager properties if they are set
+        $projectManager.Logger = _CreateLogger
+
+        # REVIEW: We really want to do this once per project manager instance
+        $projectManager.add_PackageReferenceAdded({ 
+            param($sender, $e)
+        
+            Write-Verbose "Executing install script after adding package $($e.Package.Id)..."
+            _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project
+        }.GetNewClosure());
+
+        $projectManager.add_PackageReferenceRemoving({
+            param($sender, $e)
+
+            Write-Verbose "Executing uninstall script before removing package $($e.Package.Id)..."
+            _ExecuteScript $e.InstallPath "tools\uninstall.ps1" $e.Package $project
+        }.GetNewClosure());
+    }
+
+    return $projectManager;
+}
+
+function global:_GetPackageManager {
     if(!$dte) {
         throw "DTE isn't loaded"
     }
 
-    # Use default feed if one wasn't specified
-    if (!$Source) {
-        $Source = _GetDefaultPackageSource
-    }
-    
     # Create a visual studio package manager
-    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager($Source, [System.Object]$dte)
+    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager([object]$dte)
 
-    $packageManager.Listener = _CreateLogger
+    if(!$global:packageManagerInitialized) {
+        # Add an event for when packages are installed
+        $packageManager.add_PackageInstalled($function:_OnPackageInstalled)
+        $packageManager.add_PackageUninstalling($function:_OnPackageUninstalling)
+
+        $global:packageManagerInitialized = $true
+    }
+
     return $packageManager
 }
 
+function global:_OnPackageInstalled($sender, $e) {
+    $path = $e.TargetPath
+
+    _AddToolsFolderToEnv $path
+    
+    Write-Verbose "Executing init script after installing package $($e.Package.Id)..."
+    _ExecuteScript $path "tools\init.ps1"
+}
+
+function global:_OnPackageUninstalling($sender, $e) {    
+    # TODO: remove tools path from the environment varible
+}
+
 function global:_CreateLogger {
-    function ReportStatus($level, $statusMessage) {
+    function Log($level, $statusMessage) {
         if ($level -eq 'Info') {
             Write-Host $statusMessage
         }
         elseif ($level -eq 'Debug') {
-            Write-Debug $statusMessage
+            Write-Verbose $statusMessage
         }
         elseif ($level -eq 'Warning') {
             Write-Warning $statusMessage
         }
     }
 
-    return New-Object NuPack.CallbackListener(
-        $null, $function:_OnAfterInstall, $function:_OnBeforeUninstall, $null, $function:ReportStatus, $null)
+    return New-Object NuPack.CallbackLogger($function:Log)
 }
 
-function global:_OnAfterInstall($context) {
-    $path = $context.TargetPath
-
-    _AddToolsFolderToEnv $path
-
-    # execute install script 
-    Write-Debug "Executing install script after installing package $context.Package.Id..."
-    _ExecuteScript $path "tools\install.ps1"
-
-    Write-Debug "Executing init script after installing package $context.Package.Id..."
-    _ExecuteScript $path "tools\init.ps1"
-}
-
-function global:_OnBeforeUninstall($context) {
-    $path = $context.TargetPath
-
-    # TODO: remove tools path from the environment varible
-
-    # execution the uninstall script
-    # Write-Debug "Executing uninstall script before uninstalling package $context.Package.Id..."
-    _ExecuteScript $path "tools\uninstall.ps1"
-}
-
-function global:_ExecuteScript([string]$rootPath, [string]$scriptFile) {
+function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package, $project) {
     $fullPath = (Join-Path $rootPath $scriptFile)
-    
+        
     if (Test-Path $fullPath) {
         $folder = Split-Path $fullPath
-        & $fullPath $folder
+        & $fullPath $rootPath $folder $package $project
     }
 }
 
@@ -593,7 +611,7 @@ function global:_IsSolutionOnlyPackage($packageManager, $id, $version) {
     $repository = $packageManager.ExternalRepository
     $package = [NuPack.PackageRepositoryExtensions]::FindPackage($repository, $id, $null, $null, $version)
 
-    return $package -and !$package.HasProjectContent
+    return $package -and ![NuPack.PackageExtensions]::HasProjectContent($package)
 }
 
 function global:_LookForSpecFile($projectIns, $spec) {

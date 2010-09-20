@@ -258,6 +258,9 @@
   <data name="UnknownPackage" xml:space="preserve">
     <value>Unable to find package '{0}'</value>
   </data>
+  <data name="Warning_AssemblyAlreadyReferenced" xml:space="preserve">
+    <value>'{0}' already has an assembly reference to '{1}'</value>
+  </data>
   <data name="Warning_FileAlreadyExists" xml:space="preserve">
     <value>'{0}' already exists. Skipping...</value>
   </data>

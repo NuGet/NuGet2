@@ -5,18 +5,24 @@
     using System.Linq;
 
     public class LocalPackageRepository : PackageRepositoryBase {
-        private Dictionary<string, Package> _packageCache = new Dictionary<string, Package>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, IPackage> _packageCache = new Dictionary<string, IPackage>(StringComparer.OrdinalIgnoreCase);
 
         public LocalPackageRepository(string physicalPath)
-            : this(new FileBasedProjectSystem(physicalPath)) {
+            : this(new DefaultPackagePathResolver(physicalPath), 
+                   new FileBasedProjectSystem(physicalPath)) {
         }
 
-        public LocalPackageRepository(IFileSystem fileSystem) {
+        public LocalPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem) {
+            if (pathResolver == null) {
+                throw new ArgumentNullException("pathResolver");
+            }
+
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }
 
             FileSystem = fileSystem;
+            PathResolver = pathResolver;
         }
 
         protected IFileSystem FileSystem {
@@ -24,11 +30,16 @@
             private set;
         }
 
-        public override IQueryable<Package> GetPackages() {
-            var packages = new List<Package>();
+        private IPackagePathResolver PathResolver {
+            get;
+            set;
+        }
+
+        public override IQueryable<IPackage> GetPackages() {
+            var packages = new List<IPackage>();
             foreach (var path in GetPackageFiles()) {
                 try {
-                    Package package;
+                    IPackage package;
                     if (!_packageCache.TryGetValue(path, out package)) {
                         using (Stream stream = FileSystem.OpenFile(path)) {
                             package = new ZipPackage(stream);
@@ -52,18 +63,18 @@
             // to determine the set of installed packages. Installed packages are copied to 
             // {id}.{version}\{packagefile}.nupack.
             foreach (var dir in FileSystem.GetDirectories(String.Empty)) {
-                foreach (var path in FileSystem.GetFiles(dir, "*" + Package.PackageExtension)) {
+                foreach (var path in FileSystem.GetFiles(dir, "*" + Constants.PackageExtension)) {
                     yield return path;
                 }
             }
 
             // Check top level directory
-            foreach (var path in FileSystem.GetFiles(String.Empty, "*" + Package.PackageExtension)) {
+            foreach (var path in FileSystem.GetFiles(String.Empty, "*" + Constants.PackageExtension)) {
                 yield return path;
             }
         }
 
-        public override void AddPackage(Package package) {
+        public override void AddPackage(IPackage package) {
             string packageFilePath = GetPackageFilePath(package);
 
             FileSystem.AddFile(packageFilePath, stream => PackageBuilder.Save(package, stream));
@@ -71,7 +82,7 @@
             base.AddPackage(package);
         }
 
-        public override void RemovePackage(Package package) {
+        public override void RemovePackage(IPackage package) {
             base.RemovePackage(package);
 
             // Delete the package file
@@ -79,7 +90,7 @@
             FileSystem.DeleteFile(packageFilePath);
 
             // Delete the package directory if any
-            FileSystem.DeleteDirectory(Utility.GetPackageDirectory(package), true);
+            FileSystem.DeleteDirectory(PathResolver.GetPackageDirectory(package), true);
 
             // If this is the last package delete the package directory
             if (!FileSystem.GetFiles(String.Empty).Any() &&
@@ -88,8 +99,9 @@
             }
         }
 
-        private static string GetPackageFilePath(Package package) {
-            return Path.Combine(Utility.GetPackageDirectory(package), Utility.GetPackageFileName(package));
+        private string GetPackageFilePath(IPackage package) {
+            return Path.Combine(PathResolver.GetPackageDirectory(package), 
+                                PathResolver.GetPackageFileName(package));
         }
     }
 }

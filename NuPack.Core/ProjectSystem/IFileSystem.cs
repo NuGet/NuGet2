@@ -3,7 +3,7 @@
     using System.IO;
 
     public interface IFileSystem {
-        PackageEventListener Listener { get; set; }
+        ILogger Logger { get; set; }
         string Root { get; }
         void DeleteDirectory(string path, bool recursive);
         IEnumerable<string> GetFiles(string path);

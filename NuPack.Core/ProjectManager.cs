@@ -2,7 +2,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -11,60 +10,115 @@
     using NuPack.Resources;
 
     public class ProjectManager {
-        private PackageEventListener _listener;
+        private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
+        private event EventHandler<PackageOperationEventArgs> _packageReferenceAdded;
+        private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoving;
+        private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoved;
+
+        private ILogger _logger;
+
         // REVIEW: These should be externally pluggable
         private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
             { ".transform", new XmlTransfomer() },
             { ".pp", new Preprocessor() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot)
-            : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot: String.Empty) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project) :
+            this(sourceRepository, 
+                 pathResolver, 
+                 project, 
+                 new PackageReferenceRepository(project, sourceRepository)) {
         }
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, string projectRoot, string packageFileRoot)
-            : this(sourceRepository, assemblyPathResolver, new FileBasedProjectSystem(projectRoot), packageFileRoot) {
-        }
-
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project) 
-                : this(sourceRepository, assemblyPathResolver, project, packageFileRoot: String.Empty) {
-        }
-        
-
-        public ProjectManager(IPackageRepository sourceRepository, IPackageAssemblyPathResolver assemblyPathResolver, ProjectSystem project, string packageFileRoot) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project, IPackageRepository localRepository) {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
-            if (assemblyPathResolver == null) {
-                throw new ArgumentNullException("assemblyPathResolver");
+            if (pathResolver == null) {
+                throw new ArgumentNullException("packagePathResolver");
             }
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
+            if (localRepository == null) {
+                throw new ArgumentNullException("localRepository");
+            }
 
             SourceRepository = sourceRepository;
             Project = project;
-            AssemblyPathResolver = assemblyPathResolver;
-
-            // REVIEW: We need a better abstraction for a package reference
-            string packageFilePath = Path.Combine(packageFileRoot, PackageReferenceRepository.PackageFile);
-            LocalRepository = new PackageReferenceRepository(Project, packageFilePath, SourceRepository);
+            PathResolver = pathResolver;
+            LocalRepository = localRepository;
         }
 
-        private IPackageAssemblyPathResolver AssemblyPathResolver { get; set; }
-        // REVIEW: Should we expose this?
-        internal IPackageRepository LocalRepository { get; set; }
+        public IPackagePathResolver PathResolver {
+            get;
+            private set;
+        }
 
-        public IPackageRepository SourceRepository { get; private set; }
-        public ProjectSystem Project { get; private set; }
+        public IPackageRepository LocalRepository {
+            get;
+            private set;
+        }
 
-        public PackageEventListener Listener {
+        public IPackageRepository SourceRepository {
+            get;
+            private set;
+        }
+
+        public ProjectSystem Project {
+            get;
+            private set;
+        }
+
+        public ILogger Logger {
             get {
-                return _listener ?? PackageEventListener.Default;
+                return _logger;
             }
             set {
-                _listener = value;
-                Project.Listener = value;
+                _logger = value;
+                Project.Logger = value;
+            }
+        }
+
+        private ILogger LoggerInternal {
+            get {
+                return Logger ?? NullLogger.Instance;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdding {
+            add {
+                _packageReferenceAdding += value;
+            }
+            remove {
+                _packageReferenceAdding -= value;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded {
+            add {
+                _packageReferenceAdded += value;
+            }
+            remove {
+                _packageReferenceAdded -= value;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving {
+            add {
+                _packageReferenceRemoving += value;
+            }
+            remove {
+                _packageReferenceRemoving -= value;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved {
+            add {
+                _packageReferenceRemoved += value;
+            }
+            remove {
+                _packageReferenceRemoved -= value;
             }
         }
 
@@ -81,7 +135,7 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            Package package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
 
             if (package == null) {
                 throw new InvalidOperationException(
@@ -89,28 +143,28 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
-            if (!package.HasProjectContent) {
+            if (!package.HasProjectContent()) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
-                    NuPackResources.PackageHasNoProjectContent, package));
+                    NuPackResources.PackageHasNoProjectContent, package.GetFullName()));
             }
 
             AddPackageReference(package, ignoreDependencies);
         }
 
-        private void AddPackageReference(Package package, bool ignoreDependencies) {
+        private void AddPackageReference(IPackage package, bool ignoreDependencies) {
             // If there is a package with this id already referenced attempt an update
             if (LocalRepository.IsPackageInstalled(package.Id) && TryUpdate(package)) {
                 return;
             }
 
-            IEnumerable<Package> packages = null;
+            IEnumerable<IPackage> packages = null;
 
             if (ignoreDependencies) {
                 packages = new[] { package };
             }
             else {
-                packages = DependencyManager.ResolveDependenciesForProjectInstall(package, LocalRepository, SourceRepository, Listener);
+                packages = DependencyManager.ResolveDependenciesForProjectInstall(package, LocalRepository, SourceRepository, LoggerInternal);
             }
 
             VerifyInstall(packages);
@@ -118,9 +172,9 @@
             AddPackageReferencesToProject(packages);
         }
 
-        private bool TryUpdate(Package package) {
+        private bool TryUpdate(IPackage package) {
             // Get the currently referenced package
-            Package referencedPackage = LocalRepository.FindPackage(package.Id);
+            IPackage referencedPackage = LocalRepository.FindPackage(package.Id);
 
             // If it's a lower version then throw raise an error
             if (package.Version < referencedPackage.Version) {
@@ -130,10 +184,10 @@
             }
 
             // If the package is installed (i.e the package an all of it's dependencies)
-            IEnumerable<Package> referencedPackageWithDependencies = DependencyManager.ResolveDependenciesForInstall(referencedPackage,
+            IEnumerable<IPackage> referencedPackageWithDependencies = DependencyManager.ResolveDependenciesForInstall(referencedPackage,
                                                                                                                      LocalRepository,
                                                                                                                      SourceRepository,
-                                                                                                                     Listener);
+                                                                                                                     LoggerInternal);
             VerifyInstall(referencedPackageWithDependencies);
 
             // Everything is installed
@@ -144,7 +198,7 @@
                     UpdatePackageReference(package);
                 }
                 else {
-                    Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package);
+                    LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package.GetFullName());
                 }
 
                 return true;
@@ -153,14 +207,14 @@
             return false;
         }
 
-        private void AddPackageReferencesToProject(IEnumerable<Package> packages) {
+        private void AddPackageReferencesToProject(IEnumerable<IPackage> packages) {
             Debug.Assert(packages != null, "packages shouldn't be null");
 
-            foreach (Package package in packages) {
+            foreach (IPackage package in packages) {
                 // If the package is already installed, then skip it
                 if (LocalRepository.IsPackageInstalled(package)) {
                     // TODO: Change messages
-                    Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package);
+                    LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package.GetFullName());
                     continue;
                 }
 
@@ -168,17 +222,30 @@
             }
         }
 
-        protected void AddPackageReferenceToProject(Package package) {
+        protected void AddPackageReferenceToProject(IPackage package) {
+            PackageOperationEventArgs args = CreateOperation(package);
+            OnPackageReferenceAdding(args);
+
+            if (args.Cancel) {
+                return;
+            }
+
             // Resolve assembly references
             var assemblyReferences = ResolveAssemblyReferences(package);
 
             // Add content files
-            Project.AddFiles(package.GetContentFiles(), _fileTransformers, Listener);
+            Project.AddFiles(package.GetContentFiles(), _fileTransformers, LoggerInternal);
 
             // Add the references to the reference path
-            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
+            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {                
                 // Get teh physical path of the assembly reference
-                string referencePath = AssemblyPathResolver.GetAssemblyPath(package, assemblyReference);
+                string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
+
+                // If this assembly is already referenced by the project then skip it
+                if (Project.ReferenceExists(assemblyReference.Name)) {
+                    LoggerInternal.Log(MessageLevel.Warning, NuPackResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
+                    continue;
+                }
 
                 Project.AddReference(referencePath);
             }
@@ -186,9 +253,10 @@
             // Add package to local repository
             LocalRepository.AddPackage(package);
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package, Project.ProjectName);
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
+            OnPackageReferenceAdded(args);
         }
-
+        
         public void RemovePackageReference(string packageId) {
             RemovePackageReference(packageId, forceRemove: false, removeDependencies: false);
         }
@@ -202,7 +270,7 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            Package package = LocalRepository.FindPackage(packageId);
+            IPackage package = LocalRepository.FindPackage(packageId);
 
             if (package == null) {
                 throw new InvalidOperationException(String.Format(
@@ -213,13 +281,13 @@
             RemovePackageReference(package, forceRemove, removeDependencies);
         }
 
-        protected virtual void RemovePackageReference(Package package, bool force, bool removeDependencies) {
-            IEnumerable<Package> packages = DependencyManager.ResolveDependenciesForProjectUninstall(package, LocalRepository, force, removeDependencies, Listener);
+        protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
+            IEnumerable<IPackage> packages = DependencyManager.ResolveDependenciesForProjectUninstall(package, LocalRepository, force, removeDependencies, LoggerInternal);
 
             RemovePackageReferencesFromProject(packages);
         }
 
-        private void RemovePackageReferencesFromProject(IEnumerable<Package> packages) {
+        private void RemovePackageReferencesFromProject(IEnumerable<IPackage> packages) {
             Debug.Assert(packages != null, "packages should not be null");
 
             foreach (var package in packages) {
@@ -227,7 +295,14 @@
             }
         }
 
-        private void RemovePackageReferenceFromProject(Package package) {
+        private void RemovePackageReferenceFromProject(IPackage package) {
+            PackageOperationEventArgs args = CreateOperation(package);
+            OnPackageReferenceRemoving(args);
+
+            if (args.Cancel) {
+                return;
+            }
+
             // Get other packages
             var otherPackages = from p in LocalRepository.GetPackages()
                                 where p.Id != package.Id
@@ -249,17 +324,18 @@
             var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
-            Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers, Listener);
+            Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers, LoggerInternal);
 
             // Remove references
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {
                 Project.RemoveReference(assemblyReference.Name);
             }
-
+            
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package, Project.ProjectName);
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
+            OnPackageReferenceRemoved(args);
         }
 
         public void UpdatePackageReference(string packageId) {
@@ -282,40 +358,40 @@
                     NuPackResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
             }
 
-            Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_LookingForUpdates, packageId);
+            LoggerInternal.Log(MessageLevel.Debug, NuPackResources.Debug_LookingForUpdates, packageId);
 
-            Package package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
 
             if (package == null) {
-                Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_NoUpdatesAvailable, packageId);
+                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_NoUpdatesAvailable, packageId);
             }
             else {
                 UpdatePackageReference(package, updateDependencies);
             }
         }
 
-        protected void UpdatePackageReference(Package package) {
+        protected void UpdatePackageReference(IPackage package) {
             UpdatePackageReference(package, updateDependencies: true);
         }
 
-        protected void UpdatePackageReference(Package package, bool updateDependencies) {
+        protected void UpdatePackageReference(IPackage package, bool updateDependencies) {
             Debug.Assert(package != null, "package should not be null");
 
             // If the most up-to-date version is already installed then do nothing
             if (LocalRepository.IsPackageInstalled(package)) {
-                Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageUpToDate, package.Id);
+                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageUpToDate, package.Id);
                 return;
             }
 
             // Get the installed package
-            Package oldPackage = LocalRepository.FindPackage(package.Id);
+            IPackage oldPackage = LocalRepository.FindPackage(package.Id);
 
             if (package.Version < oldPackage.Version) {
                 throw new InvalidOperationException(
                             String.Format(CultureInfo.CurrentCulture, NuPackResources.NewerVersionAlreadyReferenced, Project.ProjectName, package.Id));
             }
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_UpdatingToSpecificVersion, oldPackage, package.Version);
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_UpdatingToSpecificVersion, oldPackage.GetFullName(), package.Version);
 
             // When we go to update a package to a newer version, we get the install and uninstall plans then do a diff to see
             // what really needs to be uninstalled and installed.
@@ -327,7 +403,7 @@
                                                                               package,
                                                                               LocalRepository,
                                                                               SourceRepository,
-                                                                              Listener,
+                                                                              LoggerInternal,
                                                                               updateDependencies);
 
             Execute(plan);
@@ -343,21 +419,12 @@
             }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
-        public IEnumerable<Package> GetPackageReferences() {
-            return LocalRepository.GetPackages();
-        }
-
-        public Package GetPackageReference(string packageId) {
-            return LocalRepository.FindPackage(packageId);
-        }
-
-        private void VerifyInstall(IEnumerable<Package> packages) {
+        private void VerifyInstall(IEnumerable<IPackage> packages) {
             Debug.Assert(packages != null, "packages should not be null");
 
-            foreach (Package package in packages) {
+            foreach (IPackage package in packages) {
                 // Check for installed packages with the same Id
-                Package installedPackage = LocalRepository.FindPackage(package.Id);
+                IPackage installedPackage = LocalRepository.FindPackage(package.Id);
                 if (installedPackage != null) {
                     if (package.Version < installedPackage.Version) {
                         throw new InvalidOperationException(
@@ -367,7 +434,35 @@
             }
         }
 
-        private IEnumerable<IPackageAssemblyReference> ResolveAssemblyReferences(Package package) {
+        private void OnPackageReferenceAdding(PackageOperationEventArgs e) {
+            if (_packageReferenceAdding != null) {
+                _packageReferenceAdding(this, e);
+            }
+        }
+
+        private void OnPackageReferenceAdded(PackageOperationEventArgs e) {
+            if (_packageReferenceAdded != null) {
+                _packageReferenceAdded(this, e);
+            }
+        }
+
+        private void OnPackageReferenceRemoved(PackageOperationEventArgs e) {
+            if (_packageReferenceRemoved != null) {
+                _packageReferenceRemoved(this, e);
+            }
+        }
+
+        private void OnPackageReferenceRemoving(PackageOperationEventArgs e) {
+            if (_packageReferenceRemoving != null) {
+                _packageReferenceRemoving(this, e);
+            }
+        }
+
+        private PackageOperationEventArgs CreateOperation(IPackage package) {
+            return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
+        }
+
+        private IEnumerable<IPackageAssemblyReference> ResolveAssemblyReferences(IPackage package) {
             // A package might have references that target a specific version of the framework (.net/silverlight etc)
             // so we try to get the highest version that satifies the target framework i.e.
             // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.

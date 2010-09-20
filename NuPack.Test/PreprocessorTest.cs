@@ -20,7 +20,7 @@ namespace NuPack.Test {
             mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
 
             // Act
-            processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object, PackageEventListener.Default);
+            processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object, NullLogger.Instance);
 
             // Assert
             Assert.IsTrue(mockProjectSystem.Object.FileExists("foo.bar"));
@@ -39,7 +39,7 @@ namespace NuPack.Test {
             mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
 
             // Act
-            processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object, PackageEventListener.Default);
+            processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object, NullLogger.Instance);
 
             // Assert            
             Assert.AreEqual("hello", mockProjectSystem.Object.OpenFile("foo.bar").ReadToEnd());
@@ -55,7 +55,7 @@ namespace NuPack.Test {
             mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object, PackageEventListener.Default), "The replacement token 'token' has no value.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object, NullLogger.Instance), "The replacement token 'token' has no value.");
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace NuPack.Test {
             mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
 
             // Act
-            processor.RevertFile(mockFile.Object, "foo.bar", Enumerable.Empty<IPackageFile>(), mockProjectSystem.Object, PackageEventListener.Default);
+            processor.RevertFile(mockFile.Object, "foo.bar", Enumerable.Empty<IPackageFile>(), mockProjectSystem.Object, NullLogger.Instance);
 
             // Assert            
             Assert.IsTrue(mockProjectSystem.Object.Deleted.Contains("foo.bar"));

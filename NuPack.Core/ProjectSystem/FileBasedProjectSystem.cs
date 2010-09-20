@@ -45,10 +45,10 @@
             string folderPath = Path.GetDirectoryName(path);
 
             if (!String.IsNullOrEmpty(folderPath)) {
-                Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_AddedFileToFolder, Path.GetFileName(path), folderPath);
+                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_AddedFileToFolder, Path.GetFileName(path), folderPath);
             }
             else {
-                Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_AddedFile, Path.GetFileName(path));
+                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_AddedFile, Path.GetFileName(path));
             }
         }
 
@@ -58,10 +58,10 @@
                 File.Delete(path);
                 string folderPath = Path.GetDirectoryName(path);
                 if (!String.IsNullOrEmpty(folderPath)) {
-                    Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
+                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
                 }
                 else {
-                    Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
+                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
             catch (FileNotFoundException) {
@@ -77,7 +77,7 @@
             try {
                 path = GetFullPath(path);
                 Directory.Delete(path, recursive);
-                Listener.OnReportStatus(StatusLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
+                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
             }
             catch (DirectoryNotFoundException) {
 
@@ -141,6 +141,11 @@
         public override Stream OpenFile(string path) {
             path = GetFullPath(path);
             return File.OpenRead(path);
+        }
+
+        public override bool ReferenceExists(string name) {
+            string path = GetReferencePath(name);
+            return FileExists(path);
         }
         
         protected string MakeRelativePath(string fullPath) {

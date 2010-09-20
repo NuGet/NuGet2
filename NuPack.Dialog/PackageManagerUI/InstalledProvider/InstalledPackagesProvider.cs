@@ -1,13 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
-using NuPack.Dialog.ToolsOptionsUI;
-using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
     /// IVsExtensionsProvider implementation responsible for gathering
-    /// a list of extensions from the extension repository
+    /// a list of extensions from the extension respository
     /// which will be shown in the Add Package dialog.
     /// </summary>
     internal class InstalledPackagesProvider : OnlinePackagesProvider {
@@ -21,33 +18,8 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected override IPackageRepository PackagesRepository {
-            get {
-                if (_packagesRepository == null) {
-                    _feed = Settings.RepositoryServiceUri;
-
-                    if (String.IsNullOrEmpty(_feed)) {
-                        return EmptyPackageRepository.Default;
-                    }
-
-                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-                    _project = GetActiveProject(_dte);
-
-                    _vsPackageManager = VSPackageManager.GetPackageManager(_feed, _dte);
-                    _vsProjectManager = _vsPackageManager.GetProjectManager(_project);
-
-                    _packagesRepository = _vsPackageManager.ExternalRepository;
-                }
-                return _packagesRepository;
-            }
+        public override IQueryable<IPackage> GetQuery() {           
+            return ProjectManager.LocalRepository.GetPackages();
         }
-
-        public override IQueryable<Package> GetQuery() {
-            if (String.IsNullOrEmpty(_feed)) {
-                return Enumerable.Empty<Package>().AsQueryable();
-            }
-            return _vsProjectManager.GetPackageReferences().AsQueryable();
-        }
-
     }
 }

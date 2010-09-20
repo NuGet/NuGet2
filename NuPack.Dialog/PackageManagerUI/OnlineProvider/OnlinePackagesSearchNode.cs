@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuPack.Dialog.Providers {
+
     internal class OnlinePackagesSearchNode : OnlinePackagesTreeBase {
         #region Private Members
         private string SearchText { get; set; }
@@ -31,7 +32,8 @@ namespace NuPack.Dialog.Providers {
         }
 
         protected override IQueryable<Package> PreviewQuery(IQueryable<Package> query) {
-            query = query.Where(p => (p.Description != null && p.Description.Contains(SearchText)) || (p.Id != null && p.Id.Contains(SearchText)));
+            query = query.Where(p => (p.Description != null && p.Description.ToUpper().Contains(SearchText.ToUpper())) 
+                || (p.Id != null && p.Id.ToUpper().Contains(SearchText.ToUpper())));
             return query;
         }
 

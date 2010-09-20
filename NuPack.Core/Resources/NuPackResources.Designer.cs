@@ -484,6 +484,15 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; already has an assembly reference to &apos;{1}&apos;.
+        /// </summary>
+        internal static string Warning_AssemblyAlreadyReferenced {
+            get {
+                return ResourceManager.GetString("Warning_AssemblyAlreadyReferenced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already exists. Skipping....
         /// </summary>
         internal static string Warning_FileAlreadyExists {

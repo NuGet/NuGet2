@@ -35,7 +35,7 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected override IQueryable<Package> PreviewQuery(IQueryable<Package> query) {
+        protected override IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query) {
             return query;
         }
 

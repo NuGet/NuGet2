@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
-using NuPack.Dialog.ToolsOptionsUI;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -19,13 +19,8 @@ namespace NuPack.Dialog.Providers {
         private bool m_OnlineDisabled;
         private Dispatcher m_CurrentDispatcher;
         private ResourceDictionary _resources;
-        protected NuPack.VisualStudio.VSPackageManager _vsPackageManager;
-        protected EnvDTE.DTE _dte;
-        protected EnvDTE.Project _project;
-        protected NuPack.ProjectManager _vsProjectManager;
-        protected string _feed;
-        protected IPackageRepository _packagesRepository;
-
+        private EnvDTE.DTE _dte;
+       
         public OnlinePackagesProvider(ResourceDictionary resources, bool onlineDisabled) {
             _resources = resources;
             m_OnlineDisabled = onlineDisabled;
@@ -34,45 +29,42 @@ namespace NuPack.Dialog.Providers {
 
         private IVsProgressPane ProgressPane { get; set; }
 
+        private EnvDTE.DTE DTE {
+            get {
+                // REVIEW: Is it safe to cache this?
+                if (_dte == null) {
+                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+                }
+                return _dte;
+            }
+        }
+
+        protected VSPackageManager PackageManager {
+            get {
+                return VSPackageManager.GetPackageManager(DTE);
+            }
+        }
+
+        protected EnvDTE.Project Project {
+            get {
+                return Utilities.GetActiveProject(DTE);
+            }
+        }
+
+        protected ProjectManager ProjectManager {
+            get {
+                return PackageManager.GetProjectManager(Project);
+            }
+        }
+
         protected virtual IPackageRepository PackagesRepository {
             get {
-                if (_packagesRepository == null) {
-                    _feed = Settings.RepositoryServiceUri;
-                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-                    _project = GetActiveProject(_dte);
-
-                    if (String.IsNullOrEmpty(_feed)) {
-                        return EmptyPackageRepository.Default;
-                    }
-
-                    _vsPackageManager = NuPack.VisualStudio.VSPackageManager.GetPackageManager(_feed, _dte);
-                    _vsProjectManager = _vsPackageManager.GetProjectManager(_project);
-
-                    _packagesRepository = _vsPackageManager.ExternalRepository;
-
-                }
-                return _packagesRepository;
+                return PackageManager.SourceRepository;
             }
         }
 
-        public virtual IQueryable<Package> GetQuery() {
+        public virtual IQueryable<IPackage> GetQuery() {
             return PackagesRepository.GetPackages();
-        }
-
-        internal static EnvDTE.Project GetActiveProject(EnvDTE._DTE dte) {
-            EnvDTE.Project activeProject = null;
-
-            if (dte != null) {
-                Object obj = dte.ActiveSolutionProjects;
-                if (obj != null && obj is Array && ((Array)obj).Length > 0) {
-                    Object proj = ((Array)obj).GetValue(0);
-
-                    if (proj != null && proj is EnvDTE.Project) {
-                        activeProject = (EnvDTE.Project)proj;
-                    }
-                }
-            }
-            return activeProject;
         }
 
         /// <summary>
@@ -168,27 +160,27 @@ namespace NuPack.Dialog.Providers {
             if (this.m_CurrentDispatcher != null) {
                 this.m_CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal,
                     new ThreadStart(delegate() {
-                        //The user may have done a search before we finished getting the category list.
-                        //temporarily remove it
-                        if (m_SearchNode != null) {
-                            RootNode.Nodes.Remove(m_SearchNode);
-                        }
-
-                        //Add the special "All" node which doesn't filter by category.
-                        RootNode.Nodes.Add(new OnlinePackagesTree(this, PackagesRepository, "All", RootNode));
-
-                        rootNodes.ForEach(node => RootNode.Nodes.Add(node));
-
-                        if (m_SearchNode != null) {
-                            //Re-add the search node and select it if the user was doing a search
-                            RootNode.Nodes.Add(m_SearchNode);
-                            m_SearchNode.IsSelected = true;
-                        }
-                        else {
-                            //If they weren't doing a search, select the first category.
-                            RootNode.Nodes.First().IsSelected = true;
-                        }
+                    //The user may have done a search before we finished getting the category list.
+                    //temporarily remove it
+                    if (m_SearchNode != null) {
+                        RootNode.Nodes.Remove(m_SearchNode);
                     }
+
+                    //Add the special "All" node which doesn't filter by category.
+                    RootNode.Nodes.Add(new OnlinePackagesTree(this, PackagesRepository, "All", RootNode));
+
+                    rootNodes.ForEach(node => RootNode.Nodes.Add(node));
+
+                    if (m_SearchNode != null) {
+                        //Re-add the search node and select it if the user was doing a search
+                        RootNode.Nodes.Add(m_SearchNode);
+                        m_SearchNode.IsSelected = true;
+                    }
+                    else {
+                        //If they weren't doing a search, select the first category.
+                        RootNode.Nodes.First().IsSelected = true;
+                    }
+                }
                 ));
             }
         }
@@ -200,11 +192,11 @@ namespace NuPack.Dialog.Providers {
         }
 
         public void Install(string id, Version version) {
-            _vsProjectManager.AddPackageReference(id, version);
+            ProjectManager.AddPackageReference(id, version);
         }
 
         public bool IsInstalled(string id) {
-            return (_vsProjectManager.GetPackageReference(id) != null);
+            return (ProjectManager.LocalRepository.FindPackage(id) != null);
         }
     }
 }

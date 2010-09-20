@@ -217,11 +217,11 @@ namespace NuPack.Dialog.Providers {
             worker.BeginInvoke(query, pageNumber, ItemsPerPage, async, null, null);
         }
 
-        private delegate void ExecuteDelegate(IQueryable<Package> query, int pageNumber, int itemsPerPage, AsyncOperation async);
+        private delegate void ExecuteDelegate(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async);
 
         // Temporary method for async
-        void ExecuteAsync(IQueryable<Package> query, int pageNumber, int itemsPerPage, AsyncOperation async) {
-            IEnumerable<Package> packages = null;
+        void ExecuteAsync(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async) {
+            IEnumerable<IPackage> packages = null;
             int totalCount = 0;
 
             try {
@@ -229,7 +229,7 @@ namespace NuPack.Dialog.Providers {
                 // This should execute the query
                 totalCount = query.Count();
 
-                IQueryable<Package> pageQuery = query.Skip((pageNumber - 1) * itemsPerPage).Take(itemsPerPage);
+                IQueryable<IPackage> pageQuery = query.Skip((pageNumber - 1) * itemsPerPage).Take(itemsPerPage);
 
                 packages = pageQuery;
                 int resultCount = packages.Count();
@@ -244,11 +244,11 @@ namespace NuPack.Dialog.Providers {
         }
 
 
-        protected abstract IQueryable<Package> PreviewQuery(IQueryable<Package> query);
+        protected abstract IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query);
 
         protected abstract void FillNodes(IList<IVsExtensionsTreeNode> nodes);
 
-        private IQueryable<Package> GetQuery() {
+        private IQueryable<IPackage> GetQuery() {
             var query = this.PreviewQuery(this.Provider.GetQuery());
 
             System.Diagnostics.Trace.WriteLine("Query Created: " + query.ToString());
@@ -257,7 +257,7 @@ namespace NuPack.Dialog.Providers {
 
         void QueryExecutionCompleted(object data) {
             ExecuteCompletedEventArgs e = (ExecuteCompletedEventArgs)data;
-            IEnumerable<Package> packages = e.Results;
+            IEnumerable<IPackage> packages = e.Results;
 
             lock (m_ActiveQueryStateLock) {
                 //Reset the currently active query.
@@ -270,7 +270,7 @@ namespace NuPack.Dialog.Providers {
 
             //Safe to access e.Results since we've already checked for 
             //e.Cancelled and e.Error
-            foreach (Package package in packages) {
+            foreach (IPackage package in packages) {
                 m_Extensions.Add(new OnlinePackagesItem(this.Provider, package, false, null, 0, null));
             }
             if (m_Extensions.Count > 0) {
@@ -309,15 +309,15 @@ namespace NuPack.Dialog.Providers {
     }
 
     public class ExecuteCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        public ExecuteCompletedEventArgs(System.Exception exception, bool canceled, object userState, IEnumerable<Package> results, int pageNumber, int totalCount) :
+        public ExecuteCompletedEventArgs(System.Exception exception, bool canceled, object userState, IEnumerable<IPackage> results, int pageNumber, int totalCount) :
             base(exception, canceled, userState) {
             this.results = results;
             this.pageNumber = pageNumber;
             this.totalCount = totalCount;
         }
 
-        private IEnumerable<Package> results;
-        public IEnumerable<Package> Results {
+        private IEnumerable<IPackage> results;
+        public IEnumerable<IPackage> Results {
             get {
                 this.RaiseExceptionIfNecessary();
                 return results;

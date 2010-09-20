@@ -3,25 +3,79 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
-    using System.IO;
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
     public class PackageManager {
-        private PackageEventListener _listener;
+        private ILogger _logger;
 
-        public PackageManager(IPackageRepository sourceRepository, string path)
-            : this(sourceRepository, new FileBasedProjectSystem(path)) {
+        private event EventHandler<PackageOperationEventArgs> _packageInstalling;
+        private event EventHandler<PackageOperationEventArgs> _packageInstalled;
+        private event EventHandler<PackageOperationEventArgs> _packageUninstalling;
+        private event EventHandler<PackageOperationEventArgs> _packageUninstalled;
+
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, string path)
+            : this(sourceRepository, pathResolver, new FileBasedProjectSystem(path)) {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem) :
-            this(sourceRepository, fileSystem, new LocalPackageRepository(fileSystem)) {
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem) :
+            this(sourceRepository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem)) {
         }
 
-        internal PackageManager(IPackageRepository sourceRepository, IFileSystem fileSystem, IPackageRepository localRepository) {
+        internal PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository) {
+            if (sourceRepository == null) {
+                throw new ArgumentNullException("sourceRepository");
+            }
+            if (pathResolver == null) {
+                throw new ArgumentNullException("pathResolver");
+            }
+            if (fileSystem == null) {
+                throw new ArgumentNullException("fileSystem");
+            }
+            if (localRepository == null) {
+                throw new ArgumentNullException("localRepository");
+            }
+
             SourceRepository = sourceRepository;
+            PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
+        }
+        
+        public event EventHandler<PackageOperationEventArgs> PackageInstalled {
+            add {
+                _packageInstalled += value;
+            }
+            remove {
+                _packageInstalled -= value;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageInstalling {
+            add {
+                _packageInstalling += value;
+            }
+            remove {
+                _packageInstalling -= value;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageUninstalling {
+            add {
+                _packageUninstalling += value;
+            }
+            remove {
+                _packageUninstalling -= value;
+            }
+        }
+
+        public event EventHandler<PackageOperationEventArgs> PackageUninstalled {
+            add {
+                _packageUninstalled += value;
+            }
+            remove {
+                _packageUninstalled -= value;
+            }
         }
 
         protected IFileSystem FileSystem {
@@ -39,13 +93,24 @@
             private set;
         }
 
-        public PackageEventListener Listener {
+        public IPackagePathResolver PathResolver {
+            get;
+            private set;
+        }
+
+        public ILogger Logger {
             get {
-                return _listener ?? PackageEventListener.Default;
+                return _logger;
             }
             set {
-                _listener = value;
-                FileSystem.Listener = value;
+                _logger = value;
+                FileSystem.Logger = value;
+            }
+        }
+
+        private ILogger LoggerInternal {
+            get {
+                return Logger ?? NullLogger.Instance;
             }
         }
 
@@ -62,7 +127,7 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            Package package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
 
             if (package == null) {
                 throw new InvalidOperationException(
@@ -70,32 +135,32 @@
                     NuPackResources.UnknownPackage, packageId));
             }
             else {
-                Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_AttemptingToInstallPackage, package);
+                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToInstallPackage, package.GetFullName());
 
                 InstallPackage(package, ignoreDependencies);
             }
         }
 
-        public virtual void InstallPackage(Package package, bool ignoreDependencies) {
-            IEnumerable<Package> packages = null;
+        public virtual void InstallPackage(IPackage package, bool ignoreDependencies) {
+            IEnumerable<IPackage> packages = null;
 
             if (ignoreDependencies) {
                 packages = new[] { package };
             }
             else {
-                packages = DependencyManager.ResolveDependenciesForInstall(package, LocalRepository, SourceRepository, Listener);
+                packages = DependencyManager.ResolveDependenciesForInstall(package, LocalRepository, SourceRepository, LoggerInternal);
             }
 
             ApplyPackages(packages);
         }
 
-        private void ApplyPackages(IEnumerable<Package> packages) {
+        private void ApplyPackages(IEnumerable<IPackage> packages) {
             Debug.Assert(packages != null, "packages shouldn't be null");
 
-            foreach (Package package in packages) {
+            foreach (IPackage package in packages) {
                 // If the package is already installed, then skip it
                 if (LocalRepository.IsPackageInstalled(package)) {
-                    Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, package);
+                    LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, package.GetFullName());
                     continue;
                 }
 
@@ -103,25 +168,28 @@
             }
         }
 
-        private void ExecuteInstall(Package package) {
-            // notify listener before installing
-            var context = new OperationContext(package, GetPackagePath(package));
-            Listener.OnBeforeInstall(context);
-            
+        private void ExecuteInstall(IPackage package) {
+            PackageOperationEventArgs args = CreateOperation(package);
+            OnInstalling(args);
+
+            if (args.Cancel) {
+                return;
+            }
+
             ExpandFiles(package);
 
             LocalRepository.AddPackage(package);
 
-            // notify listener after installing
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package);
-            Listener.OnAfterInstall(context);
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+
+            OnInstalled(args);
         }
 
-        private void ExpandFiles(Package package) {
-            string packageDirectory = Utility.GetPackageDirectory(package);
+        private void ExpandFiles(IPackage package) {
+            string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Add files files
-            FileSystem.AddFiles(package.GetFiles(), packageDirectory, Listener);
+            FileSystem.AddFiles(package.GetFiles(), packageDirectory, LoggerInternal);
         }
 
         public void UninstallPackage(string packageId) {
@@ -141,7 +209,7 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            Package package = LocalRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = LocalRepository.FindPackage(packageId, exactVersion: version);
 
             if (package == null) {
                 throw new InvalidOperationException(String.Format(
@@ -149,26 +217,26 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_AttemptingToUninstall, package);
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToUninstall, package.GetFullName());
 
             UninstallPackage(package, forceRemove, removeDependencies);
         }
 
-        public void UninstallPackage(Package package) {
+        public void UninstallPackage(IPackage package) {
             UninstallPackage(package, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(Package package, bool forceRemove) {
+        public void UninstallPackage(IPackage package, bool forceRemove) {
             UninstallPackage(package, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public virtual void UninstallPackage(Package package, bool forceRemove, bool removeDependencies) {
-            IEnumerable<Package> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, forceRemove, removeDependencies, Listener);
+        public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
+            IEnumerable<IPackage> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, forceRemove, removeDependencies, LoggerInternal);
 
             RemovePackages(packages);
         }
 
-        private void RemovePackages(IEnumerable<Package> packages) {
+        private void RemovePackages(IEnumerable<IPackage> packages) {
             Debug.Assert(packages != null, "packages should not be null");
 
             foreach (var package in packages) {
@@ -176,35 +244,57 @@
             }
         }
 
-        private void ExecuteUninstall(Package package) {
-            var context = new OperationContext(package, GetPackagePath(package));
-            Listener.OnBeforeUninstall(context);
+        private void ExecuteUninstall(IPackage package) {
+            PackageOperationEventArgs args = CreateOperation(package);
+            OnUninstalling(args);
+
+            if (args.Cancel) {
+                return;
+            }
 
             RemoveFiles(package);
 
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            Listener.OnReportStatus(StatusLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package);
-            Listener.OnAfterUninstall(context);
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
+
+            OnUninstalled(args);
         }
 
-        private void RemoveFiles(Package package) {
-            string packageDirectory = Utility.GetPackageDirectory(package);
+        private void RemoveFiles(IPackage package) {
+            string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Remove resource files
-            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Listener);            
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, LoggerInternal);
         }
 
-        public bool IsPackageInstalled(Package package) {
-            return LocalRepository.FindPackage(package.Id, exactVersion: package.Version) != null;
-        }
-
-        public string GetPackagePath(Package package) {
-            if (package == null) {
-                throw new ArgumentNullException("package");
+        private void OnInstalling(PackageOperationEventArgs e) {
+            if (_packageInstalling != null) {
+                _packageInstalling(this, e);
             }
-            return Path.Combine(FileSystem.Root, Utility.GetPackageDirectory(package));
+        }
+
+        private void OnInstalled(PackageOperationEventArgs e) {
+            if (_packageInstalled != null) {
+                _packageInstalled(this, e);
+            }
+        }
+
+        private void OnUninstalled(PackageOperationEventArgs e) {
+            if (_packageUninstalled != null) {
+                _packageUninstalled(this, e);
+            }
+        }
+
+        private void OnUninstalling(PackageOperationEventArgs e) {
+            if (_packageUninstalling != null) {
+                _packageUninstalling(this, e);
+            }
+        }
+
+        private PackageOperationEventArgs CreateOperation(IPackage package) {
+            return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
         }
     }
 }

@@ -16,11 +16,11 @@
             return new PackageSyndicationItem();
         }
 
-        public static SyndicationFeed Create(string physicalPath, Func<Package, Uri> uriSelector) {
+        public static SyndicationFeed Create(string physicalPath, Func<IPackage, Uri> uriSelector) {
             return Create(new LocalPackageRepository(physicalPath), uriSelector);
         }
 
-        public static SyndicationFeed Create(IPackageRepository repository, Func<Package, Uri> uriSelector) {
+        public static SyndicationFeed Create(IPackageRepository repository, Func<IPackage, Uri> uriSelector) {
             var items = new List<SyndicationItem>();
             foreach (var package in repository.GetPackages()) {
                 // REVIEW: We should to change this format to a valid URI                
@@ -39,13 +39,19 @@
                 // Setup the link for the download
                 SyndicationLink downloadLink = item.Links[0];
                 downloadLink.RelationshipType = "enclosure";
-
-                // TODO: Move this code outside of auto feed generation
-                using (var stream = new MemoryStream()) {
-                    PackageBuilder.Save(package, stream);
-                    downloadLink.Length = stream.Length;
-                    var hashAttributeName = new XmlQualifiedName("hash");
-                    downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);
+                try {
+                    // TODO: Move this code outside of auto feed generation
+                    using (var stream = new MemoryStream()) {
+                        PackageBuilder.Save(package, stream);
+                        downloadLink.Length = stream.Length;
+                        var hashAttributeName = new XmlQualifiedName("hash");
+                        downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);
+                    }
+                }
+                catch {
+                    // Skip this package if it we failed to save the stream for some reason 
+                    // (most likely caused by a package that won't validate).
+                    continue;
                 }
 
                 foreach (var author in package.Authors) {
@@ -62,26 +68,26 @@
                 item.PublishDate = package.Created;
 
                 // Add our custom extensions with our namespace
-                item.ElementExtensions.Add("packageId", Package.SchemaNamespace, package.Id);
-                item.ElementExtensions.Add("version", Package.SchemaNamespace, package.Version.ToString());
+                item.ElementExtensions.Add("packageId", Constants.SchemaNamespace, package.Id);
+                item.ElementExtensions.Add("version", Constants.SchemaNamespace, package.Version.ToString());
 
                 if (!String.IsNullOrEmpty(package.Language)) {
-                    item.ElementExtensions.Add("language", Package.SchemaNamespace, package.Language);
+                    item.ElementExtensions.Add("language", Constants.SchemaNamespace, package.Language);
                 }
 
                 if (!String.IsNullOrEmpty(package.LastModifiedBy)) {
-                    item.ElementExtensions.Add("lastModifiedBy", Package.SchemaNamespace, package.LastModifiedBy);
+                    item.ElementExtensions.Add("lastModifiedBy", Constants.SchemaNamespace, package.LastModifiedBy);
                 }
 
                 if (package.Keywords.Any()) {
-                    item.ElementExtensions.Add("keywords", Package.SchemaNamespace, package.Keywords.ToArray());
+                    item.ElementExtensions.Add("keywords", Constants.SchemaNamespace, package.Keywords.ToArray());
                 }
 
                 if (package.Dependencies.Any()) {
                     var dependencies = from dependency in package.Dependencies
                                        select new PackageFeedDependency(dependency);
 
-                    item.ElementExtensions.Add("dependencies", Package.SchemaNamespace, dependencies.ToArray());
+                    item.ElementExtensions.Add("dependencies", Constants.SchemaNamespace, dependencies.ToArray());
                 }
 
                 items.Add(item);
@@ -89,7 +95,7 @@
 
             var feed = new SyndicationFeed(items);
             // Add package as a top level namespace in the feed
-            feed.AttributeExtensions.Add(new XmlQualifiedName(PackageXmlNamespace, XNamespace.Xmlns.NamespaceName), Package.SchemaNamespace);
+            feed.AttributeExtensions.Add(new XmlQualifiedName(PackageXmlNamespace, XNamespace.Xmlns.NamespaceName), Constants.SchemaNamespace);
             return feed;
         }
 

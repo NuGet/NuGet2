@@ -56,7 +56,7 @@
 
         public override void DeleteDirectory(string path, bool recursive = false) {
             if (Project.DeleteProjectItem(path)) {
-                Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_RemovedFolder, path);
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFolder, path);
             }
         }
 
@@ -64,10 +64,10 @@
             if (Project.DeleteProjectItem(path)) {
                 string folderPath = Path.GetDirectoryName(path);
                 if (!String.IsNullOrEmpty(folderPath)) {
-                    Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
                 }
                 else {
-                    Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
         }
@@ -80,7 +80,7 @@
                 // Add a reference to the project
                 Project.Object.References.Add(referencePath);
 
-                Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
             catch {
 
@@ -89,7 +89,7 @@
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         public override void RemoveReference(string name) {
-            try {
+            try {                
                 // Get the reference name without extension
                 string referenceName = Path.GetFileNameWithoutExtension(name);
 
@@ -97,7 +97,7 @@
                 var reference = Project.Object.References.Item(referenceName);
                 if (reference != null) {
                     reference.Remove();
-                    Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
                 }
             }
             catch {
@@ -129,7 +129,7 @@
                 string fullPath = GetFullPath(path);
                 container.AddFromFileCopy(fullPath);
 
-                Listener.OnReportStatus(StatusLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
             }
             catch {
 
@@ -146,6 +146,18 @@
             // Get all physical folders
             return from p in Project.GetChildItems(path, "*.*", VSConstants.VsProjectItemKindPhysicalFolder)
                    select p.Name;
+        }
+
+        public override bool ReferenceExists(string name) {
+            try {
+                // Get the reference name without extension
+                string referenceName = Path.GetFileNameWithoutExtension(name);
+
+                return Project.Object.References.Item(referenceName) != null;
+            }
+            catch {
+            }
+            return false;
         }
 
         public override dynamic GetPropertyValue(string propertyName) {

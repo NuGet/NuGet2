@@ -7,12 +7,12 @@
 
     public class MockProjectSystem : ProjectSystem {
         public MockProjectSystem() {
-            References = new HashSet<string>();
+            References = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Paths = new Dictionary<string, Func<Stream>>(StringComparer.OrdinalIgnoreCase);
             Deleted = new HashSet<string>();
         }
 
-        public HashSet<string> References {
+        public Dictionary<string, string> References {
             get;
             private set;
         }
@@ -44,7 +44,7 @@
             return Paths.Select(f => f.Key).Where(f => f.StartsWith(path));
         }
 
-        public override IEnumerable<string> GetFiles(string path, string filter) {            
+        public override IEnumerable<string> GetFiles(string path, string filter) {
             Regex matcher = GetFilterRegex(filter);
 
             return GetFiles(path).Where(f => matcher.IsMatch(f));
@@ -89,7 +89,7 @@
         }
 
         public override void AddReference(string referencePath) {
-            References.Add(referencePath);
+            References.Add(Path.GetFileName(referencePath), referencePath);
         }
 
         public override void RemoveReference(string name) {
@@ -101,6 +101,10 @@
             get {
                 return @"C:\MockFileSystem\";
             }
+        }
+
+        public override bool ReferenceExists(string name) {
+            return References.ContainsKey(name);
         }
     }
 }

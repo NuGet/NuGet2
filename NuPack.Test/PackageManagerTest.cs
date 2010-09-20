@@ -9,18 +9,28 @@
     [TestClass]
     public class PackageManagerTest {
         [TestMethod]
+        public void CtorThrowsIfDependenciesAreNull() {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(null, new DefaultPackagePathResolver("foo"), new MockProjectSystem(), new MockPackageRepository()), "sourceRepository");
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), null, new MockProjectSystem(), new MockPackageRepository()), "pathResolver");
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), null, new MockPackageRepository()), "fileSystem");
+            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), new MockProjectSystem(), null), "localRepository");
+        }
+
+        [TestMethod]
         public void InstallingPackageWithUnknownDependencyAndIgnoreDepencenciesInstallsPackageWithoutDependencies() {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                  new PackageDependency("C")
                                                              });
 
-            Package packageC = PackageUtility.CreatePackage("C", "1.0");
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0");
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageC);
 
@@ -56,7 +66,8 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             var package = PackageUtility.CreatePackage("foo", "1.2.33");
             localRepository.AddPackage(package);
 
@@ -90,11 +101,11 @@
         [TestMethod]
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
-            MockProjectSystem projectSystem = new MockProjectSystem();
+            var projectSystem = new MockProjectSystem();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, projectSystem);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { "contentFile", @"sub\contentFile" },
                                                              new[] { @"lib\reference.dll" },
                                                              new[] { @"readme.txt" });
@@ -119,14 +130,15 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            PackageManager packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 new PackageDependency("B")
                                                             });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
 
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
@@ -144,14 +156,15 @@
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            PackageManager packageManager = new PackageManager(sourceRepository, new MockProjectSystem(), localRepository);
+            var projectSystem = new MockProjectSystem();
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
                     new PackageDependency("B")
                 });
 
-            Package packageB = PackageUtility.CreatePackage("B", "1.0",
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 new PackageDependency("C")
                                                             });
@@ -182,21 +195,22 @@
             var projectSystem = new Mock<ProjectSystem>();
             projectSystem.Setup(m => m.AddFile(@"A.1.0\content\file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
-            PackageManager packageManager = new PackageManager(sourceRepository, projectSystem.Object, localRepository);
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
 
-            Package packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });            
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
             sourceRepository.AddPackage(packageA);
 
             // Act
             ExceptionAssert.Throws<UnauthorizedAccessException>(() => packageManager.InstallPackage("A"));
-            
+
 
             // Assert
-            Assert.IsFalse(packageManager.IsPackageInstalled(packageA));
+            Assert.IsFalse(packageManager.LocalRepository.IsPackageInstalled(packageA));
         }
 
         private PackageManager CreatePackageManager() {
-            return new PackageManager(new MockPackageRepository(), new MockProjectSystem());
+            var projectSystem = new MockProjectSystem();
+            return new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem);
         }
 
     }

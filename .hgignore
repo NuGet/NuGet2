@@ -1,3 +1,4 @@
+glob:_ReSharper*
 glob:bin
 glob:Bin
 glob:obj
