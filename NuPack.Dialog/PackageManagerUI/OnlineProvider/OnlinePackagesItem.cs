@@ -10,8 +10,6 @@ namespace NuPack.Dialog.Providers {
     internal class OnlinePackagesItem : IVsExtension, INotifyPropertyChanged {
         private OnlinePackagesProvider _provider;
         private BitmapSource _previewImage;
-        private FileVersionInfo _fileVersionInfo;
-        private string _moreInfoUrl;
         private NuPack.IPackage _packageIdentity;
 
         private static ConcurrentDictionary<string, BitmapSource> s_previewImageDefault = new ConcurrentDictionary<string, BitmapSource>();

@@ -26,7 +26,6 @@ namespace NuPack.Dialog.Providers {
         private int m_TotalPages = 1, m_CurrentPage = 1;
         private Dispatcher m_CurrentDispatcher;
         private bool m_ProgressPaneActive = false;
-        private bool m_MessagePaneActive = false;
 
         private QueryState m_ActiveQueryState;
         private object m_ActiveQueryStateLock = new object();

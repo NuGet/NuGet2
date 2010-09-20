@@ -1,27 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-//using System.ComponentModel.Composition.Hosting;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media.Effects;
-//using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.ExtensionsExplorer;
+
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
-//using Microsoft.VisualStudio.Settings;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell.Settings;
-using Microsoft.Internal.Performance;
-using NuPack.Dialog.PackageManagerUI.Providers;
+
 using NuPack.Dialog.Providers;
 using NuPack.Dialog.ToolsOptionsUI;
-using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.PackageManagerUI
 {
@@ -30,16 +16,8 @@ namespace NuPack.Dialog.PackageManagerUI
     /// </summary>
     public partial class PackageManagerWindow : DialogWindow, INotifyPropertyChanged
     {
-        
-        //private CompositionContainer container;
         private const string F1Keyword = "vs.ExtensionManager";
 
-        //private InstalledVsExtensionsProvider installedProvider;
-        private OnlinePackageProvider _onlinePackageProvider;
-        private OnlinePackagesProvider _onlinePackagesProvider;
-        private InstalledPackagesProvider _installedPackagesProvider;
-        private RecentPackagesProvider _recentPackagesProvider;
-            
         ///// <summary>
         ///// Constructor for the Extension Manager Window
         ///// </summary>
@@ -186,6 +164,9 @@ namespace NuPack.Dialog.PackageManagerUI
 
         protected void OnNotifyPropertyChanged(string propertyName)
         {
+            if (PropertyChanged != null) {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }
