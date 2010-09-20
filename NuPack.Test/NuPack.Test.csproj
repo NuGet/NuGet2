@@ -54,6 +54,7 @@
     <Compile Include="AtomFeedPackageRepositoryTest.cs" />
     <Compile Include="DependencyManagerTest.cs" />
     <Compile Include="PackageRepositoryFactoryTest.cs" />
+    <Compile Include="PackageSyndicationFeedTest.cs" />
     <Compile Include="PathResolverTest.cs" />
     <Compile Include="PreprocessorTest.cs" />
     <Compile Include="ProjectManagerTest.cs" />
