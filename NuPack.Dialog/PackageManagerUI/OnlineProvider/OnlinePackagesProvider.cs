@@ -19,7 +19,6 @@ namespace NuPack.Dialog.Providers {
         private bool m_OnlineDisabled;
         private Dispatcher m_CurrentDispatcher;
         private ResourceDictionary _resources;
-        private EnvDTE.Project _project;
         private EnvDTE.DTE _dte;
        
         public OnlinePackagesProvider(ResourceDictionary resources, bool onlineDisabled) {
@@ -48,10 +47,7 @@ namespace NuPack.Dialog.Providers {
 
         protected EnvDTE.Project Project {
             get {
-                if (_project == null) {
-                    _project = Utilities.GetActiveProject(DTE);
-                }
-                return _project;
+                return Utilities.GetActiveProject(DTE);
             }
         }
 

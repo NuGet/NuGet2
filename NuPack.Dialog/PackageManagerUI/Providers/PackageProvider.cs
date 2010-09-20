@@ -21,8 +21,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers {
         private IVsProgressPane _progressPane;
 
         private EnvDTE.DTE _dte;
-        private EnvDTE.Project _project;
-
+       
         public PackageProvider(ResourceDictionary resources, IVsProgressPane progressPane, string providerName, string category) {
             _providerName = providerName;
             _category = category;
@@ -48,10 +47,7 @@ namespace NuPack.Dialog.PackageManagerUI.Providers {
 
         private EnvDTE.Project Project {
             get {
-                if (_project == null) {
-                    _project = Utilities.GetActiveProject(DTE);
-                }
-                return _project;
+                return Utilities.GetActiveProject(DTE);
             }
         }
 
