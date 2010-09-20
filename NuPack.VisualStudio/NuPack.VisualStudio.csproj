@@ -74,6 +74,7 @@
     <Compile Include="ISourceControlFileSystemProvider.cs" />
     <Compile Include="PackageSource\PackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\SerializationHelper.cs" />
+    <Compile Include="PackageSource\VSPackageSourceRepository.cs" />
     <Compile Include="PackageSource\VSPackageSourceProvider.cs" />
     <Compile Include="VSProjectManager.cs" />
     <Compile Include="ProjectExtensions.cs" />

@@ -8,26 +8,26 @@
 
     /// <summary>
     /// This repository implementation keeps track of packages that are referenced in a project but
-    /// it also has a reference to the repository that actually contains the packages.
+    /// it also has a reference to the repository that actually contains the packages. It keeps track
+    /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase {
-        internal const string PackageFile = "packages.xml";
+        private const string PackageFile = "packages.xml";
 
-        private readonly string _packageFilePath;
-
-        public PackageReferenceRepository(ProjectSystem project, IPackageRepository sourceRepository)
-            : this(project, PackageFile, sourceRepository) {
-        }
-
-        internal PackageReferenceRepository(ProjectSystem project, string packageFilePath, IPackageRepository sourceRepository) {
+        public PackageReferenceRepository(ProjectSystem project, IPackageRepository sourceRepository) {
+            if (project == null) {
+                throw new ArgumentNullException("project");
+            }
+            if (sourceRepository == null) {
+                throw new ArgumentNullException("sourceRepository");
+            }
             Project = project;
-            _packageFilePath = packageFilePath;
             SourceRepository = sourceRepository;
         }
 
-        public ProjectSystem Project {
+        private ProjectSystem Project {
             get;
-            private set;
+            set;
         }
 
         private IPackageRepository SourceRepository {
@@ -37,8 +37,8 @@
 
         private XDocument GetDocument(bool createIfNotExists = false) {
             // If the file exists then open and return it
-            if (Project.FileExists(_packageFilePath)) {
-                using (Stream stream = Project.OpenFile(_packageFilePath)) {
+            if (Project.FileExists(PackageFile)) {
+                using (Stream stream = Project.OpenFile(PackageFile)) {
                     return XDocument.Load(stream);
                 }
             }
@@ -106,7 +106,7 @@
 
             // Remove the file if there are no more elements
             if (!document.Root.HasElements) {
-                Project.DeleteFile(_packageFilePath);
+                Project.DeleteFile(PackageFile);
             }
             else {
                 // Otherwise save the updated document
@@ -115,7 +115,7 @@
         }
 
         private void SaveDocument(XDocument document) {
-            Project.AddFile(_packageFilePath, document.Save);
+            Project.AddFile(PackageFile, document.Save);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace NuPack.VisualStudio {
         private HashSet<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
-        private static readonly ConcurrentDictionary<_DTE, VSPackageSourceProvider> _cache = new ConcurrentDictionary<_DTE, VSPackageSourceProvider>();
+        private static readonly ConcurrentDictionary<_DTE, VsPackageSourceCacheItem> _cache = new ConcurrentDictionary<_DTE, VsPackageSourceCacheItem>();
 
         private VSPackageSourceProvider(IServiceProvider serviceProvider) {
             _settingsManager = new PackageSourceSettingsManager(serviceProvider);
@@ -23,10 +23,22 @@ namespace NuPack.VisualStudio {
             DeserializeActivePackageSource();
         }
 
-        public static VSPackageSourceProvider Create(_DTE dte) {
+        public static VSPackageSourceProvider GetSourceProvider(_DTE dte) {
+            return GetCacheItem(dte).Provider;
+        }
+
+        public static IPackageRepository GetRepository(_DTE dte) {
+            return GetCacheItem(dte).Repository;
+        }
+
+        private static VsPackageSourceCacheItem GetCacheItem(_DTE dte) {
             return _cache.GetOrAdd(
-                dte, 
-                x => new VSPackageSourceProvider(new ServiceProvider(x as Microsoft.VisualStudio.OLE.Interop.IServiceProvider))
+                dte,
+                dteValue => {
+                    IServiceProvider serviceProvider = dteValue.GetServiceProvider();
+                    var provider = new VSPackageSourceProvider(serviceProvider);
+                    return new VsPackageSourceCacheItem(provider, new VSPackageSourceRepository(provider));
+                }
             );
         }
 
@@ -126,6 +138,15 @@ namespace NuPack.VisualStudio {
 
         private void PersistPackageSources() {
             _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources);
+        }
+
+        private class VsPackageSourceCacheItem {
+            public VsPackageSourceCacheItem(VSPackageSourceProvider provider, IPackageRepository repository) {
+                Provider = provider;
+                Repository = repository;
+            }
+            public VSPackageSourceProvider Provider { get; private set; }
+            public IPackageRepository Repository { get; private set; }
         }
     }
 }

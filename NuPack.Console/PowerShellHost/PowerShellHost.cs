@@ -34,7 +34,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             this.Console = console;
             this.IsAsync = isAsync;
 
-            _packageSourceProvider = VSPackageSourceProvider.Create(dte);
+            _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(dte);
 
             _solutionHelper = new SolutionProjectsHelper(dte, this);
             _name = name;

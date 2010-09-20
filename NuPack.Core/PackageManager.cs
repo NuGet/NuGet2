@@ -35,6 +35,7 @@
             if (localRepository == null) {
                 throw new ArgumentNullException("localRepository");
             }
+
             SourceRepository = sourceRepository;
             PathResolver = pathResolver;
             FileSystem = fileSystem;
@@ -99,11 +100,17 @@
 
         public ILogger Logger {
             get {
-                return _logger ?? NullLogger.Instance;
+                return _logger;
             }
             set {
                 _logger = value;
                 FileSystem.Logger = value;
+            }
+        }
+
+        private ILogger LoggerInternal {
+            get {
+                return Logger ?? NullLogger.Instance;
             }
         }
 
@@ -128,7 +135,7 @@
                     NuPackResources.UnknownPackage, packageId));
             }
             else {
-                Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToInstallPackage, package.GetFullName());
+                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToInstallPackage, package.GetFullName());
 
                 InstallPackage(package, ignoreDependencies);
             }
@@ -141,7 +148,7 @@
                 packages = new[] { package };
             }
             else {
-                packages = DependencyManager.ResolveDependenciesForInstall(package, LocalRepository, SourceRepository, Logger);
+                packages = DependencyManager.ResolveDependenciesForInstall(package, LocalRepository, SourceRepository, LoggerInternal);
             }
 
             ApplyPackages(packages);
@@ -153,7 +160,7 @@
             foreach (IPackage package in packages) {
                 // If the package is already installed, then skip it
                 if (LocalRepository.IsPackageInstalled(package)) {
-                    Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, package.GetFullName());
+                    LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, package.GetFullName());
                     continue;
                 }
 
@@ -173,7 +180,7 @@
 
             LocalRepository.AddPackage(package);
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
 
             OnInstalled(args);
         }
@@ -182,7 +189,7 @@
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Add files files
-            FileSystem.AddFiles(package.GetFiles(), packageDirectory, Logger);
+            FileSystem.AddFiles(package.GetFiles(), packageDirectory, LoggerInternal);
         }
 
         public void UninstallPackage(string packageId) {
@@ -210,7 +217,7 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToUninstall, package.GetFullName());
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToUninstall, package.GetFullName());
 
             UninstallPackage(package, forceRemove, removeDependencies);
         }
@@ -224,7 +231,7 @@
         }
 
         public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
-            IEnumerable<IPackage> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, forceRemove, removeDependencies, Logger);
+            IEnumerable<IPackage> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, forceRemove, removeDependencies, LoggerInternal);
 
             RemovePackages(packages);
         }
@@ -250,11 +257,18 @@
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
 
             OnUninstalled(args);
         }
-        
+
+        private void RemoveFiles(IPackage package) {
+            string packageDirectory = PathResolver.GetPackageDirectory(package);
+
+            // Remove resource files
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, LoggerInternal);
+        }
+
         private void OnInstalling(PackageOperationEventArgs e) {
             if (_packageInstalling != null) {
                 _packageInstalling(this, e);
@@ -281,13 +295,6 @@
 
         private PackageOperationEventArgs CreateOperation(IPackage package) {
             return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
-        }
-
-        private void RemoveFiles(IPackage package) {
-            string packageDirectory = PathResolver.GetPackageDirectory(package);
-
-            // Remove resource files
-            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, Logger);
         }
     }
 }

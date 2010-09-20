@@ -11,9 +11,9 @@
     using Microsoft.VisualStudio.ComponentModelHost;
 
     public class VSPackageManager : PackageManager {
-        private static ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Tuple<Solution, string>, VSPackageManager>();
-
-        // List of prokect types
+        private static readonly ConcurrentDictionary<Solution, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Solution, VSPackageManager>();
+        
+        // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
         private static readonly string[] _supportedProjectTypes = new[] { VSConstants.WebSiteProjectKind, 
                                                                           VSConstants.CsharpProjectKind, 
@@ -23,7 +23,7 @@
 
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;
-
+        
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
         public VSPackageManager(DTE dte, IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem)
             : base(sourceRepository, pathResolver, fileSystem) {
@@ -126,27 +126,25 @@
 
         // Need object overloads so that the powershell script can call into it
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public static VSPackageManager GetPackageManager(string source, object dte) {
-            return GetPackageManager(source, (DTE)dte);
+        public static VSPackageManager GetPackageManager(object dte) {
+            return GetPackageManager((DTE)dte);
         }
 
-        private static VSPackageManager GetPackageManager(string source, DTE dte) {
+        public static VSPackageManager GetPackageManager(DTE dte) {
             // Since we can't change the repository of an existing package manager
-            // we need to create an entry that is based on the soltuion and the repository source
-            var solutionEntry = Tuple.Create(dte.Solution, source);
+            // we need to create an entry that is based on the soltuion and the repository source            
             VSPackageManager packageManager;
-            if (!_packageManagerCache.TryGetValue(solutionEntry, out packageManager)) {                
-                // Create a repository for this source
-                IPackageRepository repository = PackageRepositoryFactory.CreateRepository(source);
-
+            if (!_packageManagerCache.TryGetValue(dte.Solution, out packageManager)) {
                 // Get the file system for the solution folder
                 IFileSystem solutionFileSystem = GetFileSystem(dte);
 
                 // Create a new vs package manager
-                packageManager = new VSPackageManager(dte, repository, new DefaultPackagePathResolver(solutionFileSystem), solutionFileSystem);
+                packageManager = new VSPackageManager(dte, 
+                                                      VSPackageSourceProvider.GetRepository(dte), 
+                                                      new DefaultPackagePathResolver(solutionFileSystem), solutionFileSystem);
 
                 // Add it to the cache
-                _packageManagerCache.TryAdd(solutionEntry, packageManager);
+                _packageManagerCache.TryAdd(dte.Solution, packageManager);
             }
             return packageManager;
         }
@@ -156,7 +154,7 @@
             var componentModel = dte.GetService<IComponentModel>(typeof(SComponentModel));
 
             Debug.Assert(componentModel != null, "Component model service is null");
-            
+
             // Get the source control providers
             var providers = componentModel.GetExtensions<ISourceControlFileSystemProvider>();
 
@@ -176,7 +174,7 @@
                     // TFS might be the only one using it
                 }
 
-                if (binding != null) {                    
+                if (binding != null) {
                     fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
                                           .Where(fs => fs != null)
                                           .FirstOrDefault();
@@ -198,7 +196,7 @@
             return null;
         }
 
-        private ProjectManager CreateProjectManager(Project project) {            
+        private ProjectManager CreateProjectManager(Project project) {
             return new VSProjectManager(this, PathResolver, project);
         }
 
@@ -213,13 +211,9 @@
             // Invalidate our cache on closing
             _projectManagers = null;
 
-            // Remove all of the entries that have this package manager as the value
-            foreach (var entry in _packageManagerCache.ToList()) {
-                if (entry.Value == this) {
-                    VSPackageManager removed;
-                    _packageManagerCache.TryRemove(entry.Key, out removed);
-                }
-            }
+            // Remove this item from the cache
+            VSPackageManager removed;
+            _packageManagerCache.TryRemove(_dte.Solution, out removed);
         }
 
         private void OnProjectRemoved(Project project) {

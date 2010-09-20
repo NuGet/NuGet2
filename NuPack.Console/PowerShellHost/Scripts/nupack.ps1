@@ -67,26 +67,26 @@ function global:Add-Package {
         [string]$Project,
         
         [Version]$Version,
-        
-        [string]$Source,
-
+      
         [switch]$IgnoreDependencies
     )
     Begin {
-        $packageManager = _GetPackageManager $Source
+        $packageManager = _GetPackageManager
     }
     Process {
         try {
             $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
         
             if ($isSolutionLevel) {
-            
                 if ($Project) {
                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
                     return
                 }
-                else  {
+                else {
+                    # Only set the logger for solution level packages
+                    $packageManager.Logger = _CreateLogger
                     $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
+                    $packageManager.Logger = $null
                 }
             }
             else {
@@ -135,13 +135,15 @@ function global:Remove-Package {
             $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
              
             if ($isSolutionLevel) {
-                
                 if ($Project -or $AllProjects) {
                      Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project or the -AllProjects parameter."
                      return
                 }
                 else {
+                     # Only set the logger for solution level packages
+                     $packageManager.Logger = _CreateLogger
                      $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                     $packageManager.Logger = $null
                 }
             } 
             else {
@@ -278,6 +280,7 @@ function global:DoRemovePackageReference($packageManager, $projectName, $Id, $Fo
 # Helper functions
 
 # Get the solution events
+$global:packageManagerInitialized = $false
 $global:solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
 
 # Clear the cache when the solution is closed
@@ -285,10 +288,10 @@ $global:solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._disp
 $global:solutionEvents.add_BeforeClosing([EnvDTE._dispSolutionEvents_BeforeClosingEventHandler]{
     $global:projectCache = $null
     $global:DefaultProjectName = $null
+    $global:packageManagerInitialized = $false
 })
 
 $global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
-    
     $packageManager = _GetPackageManager
     $repository = $packageManager.SolutionRepository
     $localPackages = $repository.GetPackages()
@@ -503,44 +506,44 @@ function global:_GetProjectManager($packageManager, $projectName) {
     $project = Get-Project $projectName
     $projectManager = $packageManager.GetProjectManager($project)
 
-    # TODO: Don't create a new logger everytime
-    $projectManager.Logger = _CreateLogger
+    if(!$projectManager.Logger) {
+        # Initialize the project manager properties if they are set
+        $projectManager.Logger = _CreateLogger
 
-    # REVIEW: We really want to do this once per project manager instance
-    $projectManager.add_PackageReferenceAdded({ 
-        param($sender, $e)
+        # REVIEW: We really want to do this once per project manager instance
+        $projectManager.add_PackageReferenceAdded({ 
+            param($sender, $e)
         
-        Write-Verbose "Executing install script after installing package $context.Package.Id..."
-        _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project        
-    }.GetNewClosure());
+            Write-Verbose "Executing install script after adding package $($e.Package.Id)..."
+            _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project
+        }.GetNewClosure());
 
-    $projectManager.add_PackageReferenceRemoving({
-        param($sender, $e)
+        $projectManager.add_PackageReferenceRemoving({
+            param($sender, $e)
 
-        Write-Verbose "Executing uninstall script before uninstalling package $context.Package.Id..."
-        _ExecuteScript $e.InstallPath "tools\uninstall.ps1" $e.Package $project
-    }.GetNewClosure());
+            Write-Verbose "Executing uninstall script before removing package $($e.Package.Id)..."
+            _ExecuteScript $e.InstallPath "tools\uninstall.ps1" $e.Package $project
+        }.GetNewClosure());
+    }
 
     return $projectManager;
 }
 
-function global:_GetPackageManager($Source) {
+function global:_GetPackageManager {
     if(!$dte) {
         throw "DTE isn't loaded"
     }
 
-    # Use default feed if one wasn't specified
-    if (!$Source) {
-        $Source = _GetDefaultPackageSource
-    }
-    
     # Create a visual studio package manager
-    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager($Source, [System.Object]$dte)
+    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager([object]$dte)
 
-    # Add an event for when packages are installed
-    # REVIEW: We really want to do this once per package manager instance
-    $packageManager.add_PackageInstalled($function:_OnPackageInstalled);
-    $packageManager.add_PackageUninstalling($function:_OnPackageUninstalling);
+    if(!$global:packageManagerInitialized) {
+        # Add an event for when packages are installed
+        $packageManager.add_PackageInstalled($function:_OnPackageInstalled)
+        $packageManager.add_PackageUninstalling($function:_OnPackageUninstalling)
+
+        $global:packageManagerInitialized = $true
+    }
 
     return $packageManager
 }
@@ -550,7 +553,7 @@ function global:_OnPackageInstalled($sender, $e) {
 
     _AddToolsFolderToEnv $path
     
-    Write-Verbose "Executing init script after installing package $context.Package.Id..."
+    Write-Verbose "Executing init script after installing package $($e.Package.Id)..."
     _ExecuteScript $path "tools\init.ps1"
 }
 
