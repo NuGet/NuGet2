@@ -30,7 +30,7 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected override IQueryable<Package> PreviewQuery(IQueryable<Package> query) {
+        protected override IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query) {
             query = query.Where(p => (p.Description != null && p.Description.ToUpper().Contains(SearchText.ToUpper())) 
                 || (p.Id != null && p.Id.ToUpper().Contains(SearchText.ToUpper())));
             return query;
