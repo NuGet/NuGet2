@@ -65,6 +65,7 @@
     </Content>
     <Content Include="Resources\Package.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Resources\PreviewImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
