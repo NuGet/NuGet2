@@ -117,7 +117,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             Runspace.DefaultRunspace = _myRunSpace;
         }
 
-        private static void LoadProfilesIntoRunspace(Runspace _myRunSpace)
+        private void LoadProfilesIntoRunspace(Runspace _myRunSpace)
         {
             var powerShell = System.Management.Automation.PowerShell.Create();
             powerShell.Runspace = _myRunSpace;
@@ -125,9 +125,20 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuPack");
             foreach (PSCommand command in profileCommands)
             {
-                powerShell.Commands = command;
-                powerShell.AddCommand("out-default");
-                powerShell.Invoke();
+                try
+                {
+                    powerShell.Commands = command;
+                    powerShell.AddCommand("out-default");
+                    powerShell.Invoke();
+                }
+                catch (RuntimeException ex)
+                {
+                    _myHost.UI.WriteLine(
+                        "An exception occured while loading one of the profile files. " +
+                        "This may happen if the profile calls scripts that require a different environment than the Package Manager Console.");
+
+                    _myHost.UI.WriteErrorLine(ex.Message);
+                }
             }
         }
 
