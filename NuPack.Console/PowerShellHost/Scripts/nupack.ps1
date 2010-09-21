@@ -1,4 +1,4 @@
-    # make sure we stop on exceptions
+# make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null

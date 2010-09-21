@@ -9,6 +9,7 @@
     <MoreInfoUrl>http://nupack.codeplex.com/documentation</MoreInfoUrl>
     <License>LICENSE.txt</License>
     <GettingStartedGuide>http://nupack.codeplex.com</GettingStartedGuide>
+    <PreviewImage>Resources\PreviewImage.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
         <Edition>Pro</Edition>
