@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Data;
-//using Microsoft.VisualStudio.ExtensionManager.Implementation;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuPack.Dialog.PackageManagerUI {
     public class RestartReasonToStringConverter : IValueConverter {

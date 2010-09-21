@@ -5,11 +5,13 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary x:Uid="ResourceDictionary_2" Source="TemplateStyles.xaml" />
     </ResourceDictionary.MergedDictionaries>
+    
     <DataTemplate x:Uid="DataTemplate_OnlineTileTemplate" x:Key="OnlineTileTemplate">
         <DataTemplate.Resources>
             <BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_1" x:Key="boolToVis" />
             <BitmapImage x:Uid="BitmapImage_AlreadyInstalled" x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
         </DataTemplate.Resources>
+        
         <Grid x:Uid="Grid_6" Style="{StaticResource TileTemplateGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Uid="ColumnDefinition_9" Width="38" />
@@ -82,13 +84,16 @@
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
+    
     <DataTemplate x:Uid="DataTemplate_OnlineDetailTemplate" x:Key="OnlineDetailTemplate">
         <DataTemplate.Resources>
             <self:SizeInBytesConverter x:Uid="self:SizeInBytesConverter" x:Key="sizeInBytesConverter" />
             <BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_2" x:Key="boolToVis" />
             <self:BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_3" WhenTrue="Collapsed" WhenFalse="Visible" x:Key="refLinkSizeBoolToVis" />
             <self:DownloadCountToVisibilityConverter x:Uid="self:DownloadCountToVisibilityConverter" x:Key="downloadCountToVisibilityConverter" />
+            <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
         </DataTemplate.Resources>
+        
         <ScrollViewer x:Uid="ScrollViewer_1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
             <Grid x:Uid="Grid_11" Margin="8">
                 <Grid.RowDefinitions>
@@ -97,19 +102,23 @@
                     <!-- Image -->
                     <RowDefinition x:Uid="RowDefinition_14" Height="*" />
                 </Grid.RowDefinitions>
+                
                 <StackPanel x:Uid="StackPanel_14">
                     <StackPanel x:Uid="StackPanel_8" Style="{StaticResource DetailMetadataStyle}">
                         <self:TextBlockControl x:Uid="TextBlock_DetailCreatedByOnline" AutomationProperties.AutomationId="TextBlock_DetailCreatedByOnline" Text="Created by:" Style="{StaticResource DetailMetadataLabelStyle}" />
-                        <self:TextBlockControl x:Uid="TextBlock_DetailCreatedByValueOnline" AutomationProperties.AutomationId="TextBlock_DetailCreatedByValueOnline" Text="{Binding Author}" Style="{StaticResource DetailMetadataValueStyle}" />
+                        <self:TextBlockControl x:Uid="TextBlock_DetailCreatedByValueOnline" AutomationProperties.AutomationId="TextBlock_DetailCreatedByValueOnline" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" />
                     </StackPanel>
+                    
                     <StackPanel x:Uid="StackPanel_15" Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding IsReferenceLink, Converter={StaticResource refLinkSizeBoolToVis}}">
                         <self:TextBlockControl x:Uid="TextBlock_DetailVersionOnline" AutomationProperties.AutomationId="TextBlock_DetailVersionOnline" Text="Version:" Style="{StaticResource DetailMetadataLabelStyle}" />
                         <self:TextBlockControl x:Uid="TextBlock_DetailVersionValueOnline" AutomationProperties.AutomationId="TextBlock_DetailVersionValueOnline" Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                     </StackPanel>
+                    
                     <StackPanel x:Uid="StackPanel_12" Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding DownloadCount, Converter={StaticResource downloadCountToVisibilityConverter}}">
                         <self:TextBlockControl x:Uid="TextBlock_DetailDownloadsOnline" AutomationProperties.AutomationId="TextBlock_DetailDownloadsOnline" Text="Downloads:" Style="{StaticResource DetailMetadataLabelStyle}" />
                         <self:TextBlockControl x:Uid="TextBlock_DetailDownloadsValueOnline" AutomationProperties.AutomationId="TextBlock_DetailDownloadsValueOnline" Text="{Binding DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
                     </StackPanel>
+                    
                     <StackPanel x:Uid="StackPanel_11" Style="{StaticResource DetailMetadataStyle}">
                         <self:TextBlockControl x:Uid="TextBlock_DetailRatingOnline" x:Name="TextBlock_DetailRatingOnline" AutomationProperties.AutomationId="TextBlock_DetailRatingOnline" Text="Rating:" Style="{StaticResource DetailMetadataLabelStyle}" />
                         <self:MultiStarControl Height="12" x:Uid="MultiStar_DetailRatingOnline" AutomationProperties.AutomationId="MultiStar_DetailRatingOnline" Value="{Binding Rating}" Margin="3,0,0,0">
@@ -119,18 +128,10 @@
                         </self:MultiStarControl>
                         <self:TextBlockControl x:Uid="TextBlock_DetailRatingOnlineCount" AutomationProperties.AutomationId="TextBlock_DetailRatingOnlineCount" Style="{StaticResource DetailMetadataValueStyle}" Text="{Binding RatingsCountFormatted}" />
                     </StackPanel>
-                    <self:TextBlockControl x:Uid="TextBlock_DetailMoreInfoLinkOnline" AutomationProperties.AutomationId="TextBlock_DetailMoreInfoLinkOnline" Style="{StaticResource DetailHyperlinkTextBlockStyle}">
-                        <Hyperlink x:Uid="Hyperlink_DetailMoreInfoLinkOnline" AutomationProperties.AutomationId="Hyperlink_DetailMoreInfoLinkOnline" NavigateUri="{Binding MoreInfoURL}" Style="{StaticResource {x:Type Hyperlink}}">
-                            <Run x:Uid="Run_DetailMoreInfoLinkOnline" AutomationProperties.AutomationId="Run_DetailMoreInfoLinkOnline" Text="More Information" />
-                        </Hyperlink>
-                    </self:TextBlockControl>
-                    <self:TextBlockControl x:Uid="TextBlock_ReportExtensionOnline" AutomationProperties.AutomationId="TextBlock_ReportExtensionOnline" Style="{StaticResource DetailHyperlinkTextBlockStyle}">
-                        <Hyperlink x:Uid="Hyperlink_ReportExtensionOnline" AutomationProperties.AutomationId="Hyperlink_ReportExtensionOnline" NavigateUri="{Binding ReportAbuseUrl}" Style="{StaticResource {x:Type Hyperlink}}">
-                            <Run x:Uid="Run_ReportExtensionOnline" AutomationProperties.AutomationId="Run_ReportExtensionOnline" Text="Report Package to Microsoft" />
-                        </Hyperlink>
-                    </self:TextBlockControl>
+                    
                     <self:TextBlockControl x:Uid="TextBlock_PackageDescription" Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
                     </self:TextBlockControl>
+                    
                     <self:TextBlockControl x:Uid="TextBlock_PackageDependencies" Style="{StaticResource DetailDependenciesTextBoxStyle}" Text="{Binding Dependencies}" >
                     </self:TextBlockControl>
                 </StackPanel>

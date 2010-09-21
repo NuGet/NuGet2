@@ -46,7 +46,6 @@
         <Setter x:Uid="Setter_50" Property="Visibility" Value="Collapsed" />
     </Style>
     <Style x:Uid="Style_3" x:Key="DetailButtonStyle" TargetType="{x:Type Button}">
-        <!-- 75 x 23 is the standard button size : http://vsuiguide/rootFolder/05%20Dialogs/5.02%20Designing%20Dialogs/05.02.08%20Spacing%20Guidelines.html-->
         <Setter x:Uid="Setter_6" Property="MinWidth" Value="75" />
         <Setter x:Uid="Setter_29" Property="MinHeight" Value="23" />
         <Setter x:Uid="Setter_25" Property="Margin" Value="6,3" />
@@ -118,5 +117,5 @@
     <shared:UriToBitmapImageConverter x:Uid="shared:UriToBitmapImageConverter_2" x:Key="uriToIconConverter" />
 
     <BitmapImage x:Uid="BitmapImage_DefaultIcon" x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/Icon.png" />
-    <BitmapImage x:Uid="BitmapImage_DefaultPreviewImage" x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/PreviewImage.png" />
+    <BitmapImage x:Uid="BitmapImage_DefaultPreviewImage" x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
 </ResourceDictionary>

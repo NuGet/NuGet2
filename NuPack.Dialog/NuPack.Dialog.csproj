@@ -134,16 +134,17 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PackageManagerUI\BooleanToVisibilityConverter.cs">
+    <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PackageManagerUI\DownloadCountToVisibilityConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\DownloadCountToVisibilityConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
     <Compile Include="PackageManagerUI\EmptyPackageRepository.cs" />
     <Compile Include="PackageManagerUI\ExtensionManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PackageManagerUI\InstalledProvider\InstalledPackagesProvider.cs" />
-    <Compile Include="PackageManagerUI\MultiStarControl.cs" />
+    <Compile Include="PackageManagerUI\Controls\MultiStarControl.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\BasePackagesTree.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesItem.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesProvider.cs" />
@@ -155,16 +156,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PackageManagerUI\RecentProvider\RecentPackagesProvider.cs" />
-    <Compile Include="PackageManagerUI\RestartReasonToStringConverter.cs">
+    <Compile Include="PackageManagerUI\Converters\RestartReasonToStringConverter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PackageManagerUI\SizeInBytesConverter.cs" />
-    <Compile Include="PackageManagerUI\StarControl.cs" />
-    <Compile Include="PackageManagerUI\TextBlockControl.cs">
+    <Compile Include="PackageManagerUI\Converters\SizeInBytesConverter.cs" />
+    <Compile Include="PackageManagerUI\Controls\StarControl.cs" />
+    <Compile Include="PackageManagerUI\Controls\TextBlockControl.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Project\PackageProject.cs" />
-    <Compile Include="Project\PackageProjectFactory.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolsOptionsUI\Settings.cs" />
@@ -185,9 +184,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="PackageManagerUI\PreviewImage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="PackageManagerUI\CommonStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -205,7 +201,11 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="..\NuPack.Tools\Resources\PreviewImage.png">
+      <Link>PackageManagerUI\PreviewImage.png</Link>
+    </Resource>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>

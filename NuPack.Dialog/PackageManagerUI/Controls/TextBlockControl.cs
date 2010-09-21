@@ -1,6 +1,5 @@
-﻿using System.Windows.Controls;
-using System.Windows.Automation.Peers;
-
+﻿using System.Windows.Automation.Peers;
+using System.Windows.Controls;
 
 namespace NuPack.Dialog.PackageManagerUI {
     /// <summary>
