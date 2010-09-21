@@ -110,17 +110,13 @@ function global:Add-Package {
 }
 
 function global:Remove-Package {
-    [CmdletBinding(DefaultParameterSetName = "SingleProject")]
+    [CmdletBinding()]
     param(
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, Position=0)]
         [string]$Id,
         
-        [parameter(ParameterSetName = "SingleProject", Position = 1)]
         [string]$Project,
         
-        [parameter(ParameterSetname = "AllProjects", Position = 1)]
-        [switch]$AllProjects,
-
         [Version]$Version,
 
         [switch]$Force,
@@ -135,8 +131,8 @@ function global:Remove-Package {
             $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
              
             if ($isSolutionLevel) {
-                if ($Project -or $AllProjects) {
-                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project or the -AllProjects parameter."
+                if ($Project) {
+                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
                      return
                 }
                 else {
@@ -152,11 +148,9 @@ function global:Remove-Package {
                     $Project = $DefaultProjectName
                 }
         
-                if ($AllProjects) {
-                    GetProjectNames | ForEach-Object { DoRemovePackageReference $packageManager $_ $Id $Force $RemoveDependencies }
-                }
-                elseif ($Project) {
-                    DoRemovePackageReference $packageManager $Project $Id $Force $RemoveDependencies
+                if ($Project) {
+					$projectManager = _GetProjectManager $packageManager $Project
+					$projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
                 }
                 else {
                     Write-Error "Missing project parameter and the default project is not set."
@@ -269,12 +263,6 @@ function global:List-Package {
 # When I tried calling Change-DefaultProject directly from NuPack Console, I got an cryptic COM exception
 function global:_SetDefaultProjectInternal($Project) {
     $global:DefaultProjectName = $Project
-}
-
-# Package Manager functions
-function global:DoRemovePackageReference($packageManager, $projectName, $Id, $Force, $RemoveDependencies) {
-    $projectManager = _GetProjectManager $packageManager $projectName
-    $projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
 }
 
 # Helper functions
