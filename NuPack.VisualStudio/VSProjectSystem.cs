@@ -9,12 +9,12 @@
     using NuPack.VisualStudio.Resources;
 
     internal class VSProjectSystem : FileBasedProjectSystem {
-        private const string BinDir = "bin";        
+        private const string BinDir = "bin";
 
         private FrameworkName _targetFramework;
 
         public VSProjectSystem(Project project)
-            : base(Path.GetDirectoryName(project.FullName)) {
+            : base(project.GetPropertyValue<string>("FullPath")) {
             Project = project;
         }
 
@@ -25,7 +25,7 @@
 
         public override string ProjectName {
             get {
-                return Project.Name;                
+                return Project.Name;
             }
         }
 
@@ -39,9 +39,9 @@
         }
 
         private FrameworkName GetTargetFramework() {
-            Property targetFrameworkMoniker = Project.Properties.Item("TargetFrameworkMoniker");
+            string targetFrameworkMoniker = Project.GetPropertyValue<string>("TargetFrameworkMoniker");
             if (targetFrameworkMoniker != null) {
-                return new FrameworkName(targetFrameworkMoniker.Value);
+                return new FrameworkName(targetFrameworkMoniker);
             }
 
             return null;
@@ -89,7 +89,7 @@
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         public override void RemoveReference(string name) {
-            try {                
+            try {
                 // Get the reference name without extension
                 string referenceName = Path.GetFileNameWithoutExtension(name);
 

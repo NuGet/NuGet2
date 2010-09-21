@@ -63,6 +63,14 @@
                    select p;
         }
 
+        internal static T GetPropertyValue<T>(this Project project, string propertyName) {
+            Property property = project.Properties.Item(propertyName);
+            if (property != null) {
+                return (T)property.Value;
+            }
+            return default(T);
+        }
+
         private static Regex GetFilterRegex(string wildcard) {
             string pattern = String.Join(String.Empty, wildcard.Split('.').Select(GetPattern));
             return new Regex(pattern, RegexOptions.IgnoreCase);
