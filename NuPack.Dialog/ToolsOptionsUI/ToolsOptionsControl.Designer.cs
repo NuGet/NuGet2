@@ -79,7 +79,9 @@
             this.PackageSourcesListBox.Name = "PackageSourcesListBox";
             this.PackageSourcesListBox.Size = new System.Drawing.Size(401, 124);
             this.PackageSourcesListBox.TabIndex = 1;
+            this.PackageSourcesListBox.ValueMember = "Source";
             this.PackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.AllPackageSourcesList_DrawItem);
+            this.PackageSourcesListBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyDown);
             // 
             // removeButton
             // 

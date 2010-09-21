@@ -161,5 +161,16 @@ namespace NuPack.Dialog.ToolsOptionsUI
             // If the ListBox has focus, draw a focus rectangle around the selected item.
             e.DrawFocusRectangle();
         }
+
+        private void PackageSourcesListBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.C && e.Control)
+            {
+                if (PackageSourcesListBox.SelectedValue != null)
+                {
+                    Clipboard.SetText((string)PackageSourcesListBox.SelectedValue);
+                }
+            }
+        }
     }
 }
