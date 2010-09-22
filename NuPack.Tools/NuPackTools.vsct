@@ -113,8 +113,8 @@
   </CommandPlacements>
 
   <KeyBindings>
-    <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" key2="V" />
-    <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" mod2="Control" key2="V" />
+    <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" key2="Z" />
+    <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" mod2="Control" key2="Z" />
   </KeyBindings>
   
   <Symbols>
