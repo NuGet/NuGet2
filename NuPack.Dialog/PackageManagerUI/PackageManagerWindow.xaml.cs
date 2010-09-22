@@ -27,16 +27,15 @@ namespace NuPack.Dialog.PackageManagerUI
 
             InitializeComponent();
 
-            InstalledPackagesProvider _installedPackagesProvider = new InstalledPackagesProvider(Resources);
-            this.explorer.Providers.Add(_installedPackagesProvider);
+            InstalledPackagesProvider installedPackagesProvider = new InstalledPackagesProvider(Resources);
+            this.explorer.Providers.Add(installedPackagesProvider);
 
-            RecentPackagesProvider _recentPackagesProvider = new RecentPackagesProvider(Resources);
-            this.explorer.Providers.Add(_recentPackagesProvider);
+            UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(Resources);
+            this.explorer.Providers.Add(updatePackagesProvider);
 
-            OnlinePackagesProvider _onlinePackagesProvider = new OnlinePackagesProvider(Resources, false);
-            this.explorer.Providers.Add(_onlinePackagesProvider);
-            this.explorer.SelectedProvider = _onlinePackagesProvider;
-
+            OnlinePackagesProvider onlinePackagesProvider = new OnlinePackagesProvider(Resources, false);
+            this.explorer.Providers.Add(onlinePackagesProvider);
+            this.explorer.SelectedProvider = onlinePackagesProvider;
         }
 
         protected void Window_Loaded(object sender, EventArgs e)
