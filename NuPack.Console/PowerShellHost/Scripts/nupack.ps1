@@ -116,8 +116,6 @@ function global:Remove-Package {
         [string]$Id,
         
         [string]$Project,
-        
-        [Version]$Version,
 
         [switch]$Force,
 
@@ -138,7 +136,7 @@ function global:Remove-Package {
                 else {
                      # Only set the logger for solution level packages
                      $packageManager.Logger = _CreateLogger
-                     $packageManager.UninstallPackage($Id, $Version, $Force, $RemoveDependencies)
+                     $packageManager.UninstallPackage($Id, $null, $Force, $RemoveDependencies)
                      $packageManager.Logger = $null
                 }
             } 
