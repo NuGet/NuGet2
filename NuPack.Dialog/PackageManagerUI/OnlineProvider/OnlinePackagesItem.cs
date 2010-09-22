@@ -168,5 +168,11 @@ namespace NuPack.Dialog.Providers {
                 return _provider.IsInstalled(_packageIdentity.Id);
             }
         }
+
+        public bool IsUpdated {
+            get {
+                return !_provider.CanBeUpdated(_packageIdentity);
+            }
+        }
     }
 }

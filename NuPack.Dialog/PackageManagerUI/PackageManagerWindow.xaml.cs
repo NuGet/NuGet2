@@ -64,14 +64,40 @@ namespace NuPack.Dialog.PackageManagerUI
         {
         }
 
-
         private void ExecutedUpdateExtension(object sender, ExecutedRoutedEventArgs e)
         {
+            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
+            if (control == null) {
+                return;
+            }
+
+            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            if (selectedItem == null) {
+                return;
+            }
+
+            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
+            if (provider == null) {
+                return;
+            }
+
+            provider.Update(selectedItem.Id, new Version(selectedItem.Version));
         }
 
         private void CanExecuteUpdateExtension(object sender, CanExecuteRoutedEventArgs e)
         {
-        
+            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
+            if (control == null) {
+                e.CanExecute = false;
+                return;
+            }
+            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            if (selectedItem == null) {
+                e.CanExecute = false;
+                return;
+            }
+
+            e.CanExecute = !selectedItem.IsUpdated;
         }
 
         
@@ -151,7 +177,6 @@ namespace NuPack.Dialog.PackageManagerUI
             }
 
             e.CanExecute = true;
-            return;
         }
 
         private void ExecutedFocusOnSearchBox(object sender, ExecutedRoutedEventArgs e)

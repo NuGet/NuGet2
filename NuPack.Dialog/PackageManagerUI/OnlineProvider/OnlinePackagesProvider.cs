@@ -196,5 +196,19 @@ namespace NuPack.Dialog.Providers {
         public bool IsInstalled(string id) {
             return (ProjectManager.LocalRepository.FindPackage(id) != null);
         }
+
+        public void Update(string id, Version version) {
+            ProjectManager.UpdatePackageReference(id, version);
+        }
+
+        public bool CanBeUpdated(IPackage package) {
+            if (package == null) {
+                return false;
+            }
+
+            // the specified package can be updated if the local repository contains a package 
+            // with matching id and smaller version number.
+            return ProjectManager.LocalRepository.GetPackages().Any(p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
+        }
     }
 }

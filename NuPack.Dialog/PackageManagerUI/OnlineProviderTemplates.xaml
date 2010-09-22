@@ -84,7 +84,85 @@
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
-    
+
+    <DataTemplate x:Uid="DataTemplate_OnlineUpdateTileTemplate" x:Key="OnlineUpdateTileTemplate">
+        <DataTemplate.Resources>
+            <BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_1" x:Key="boolToVis" />
+            <BitmapImage x:Uid="BitmapImage_AlreadyInstalled" x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
+        </DataTemplate.Resources>
+        <Grid x:Uid="Grid_6" Style="{StaticResource TileTemplateGridStyle}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Uid="ColumnDefinition_9" Width="38" />
+                <ColumnDefinition x:Uid="ColumnDefinition_10" Width="*" />
+                <ColumnDefinition x:Uid="ColumnDefinition_11" Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Image x:Uid="Image_TileIconOnline"
+                   AutomationProperties.AutomationId="Image_TileIconOnline"
+                   Style="{StaticResource TileImageStyle}">
+                <Image.Source>
+                    <Binding x:Uid="Image_TileIconOnlineBinding" Path="IconNonNull" FallbackValue="{StaticResource BitmapImage_DefaultIcon}" Converter="{StaticResource uriToIconConverter}" />
+                </Image.Source>
+            </Image>
+            <StackPanel x:Uid="StackPanel_6" Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
+                <self:TextBlockControl x:Uid="TextBlock_TileNameOnline" 
+                                       AutomationProperties.AutomationId="TextBlock_TileNameOnline" 
+                                       Text="{Binding Name}" 
+                                       Style="{StaticResource TileTitleTextBoxStyle}">
+                    <TextBlock.ToolTip>
+                        <TextBlock x:Uid="TextBlock_2" Text="{Binding Name}" Style="{StaticResource TileToolTipStyle}"/>
+                    </TextBlock.ToolTip>
+                </self:TextBlockControl>
+                <self:TextBlockControl x:Uid="TextBlock_TileDescriptionOnline"
+                                       AutomationProperties.AutomationId="TextBlock_TileDescriptionOnline" 
+                                       Text="{Binding Description}" 
+                                       Style="{StaticResource TileDescriptionTextBoxStyle}">
+                    <TextBlock.ToolTip>
+                        <TextBlock x:Uid="TextBlock_1" Text="{Binding Description}" Style="{StaticResource TileToolTipStyle}"/>
+                    </TextBlock.ToolTip>
+                </self:TextBlockControl>
+            </StackPanel>
+            <StackPanel x:Uid="DownloadButtonsStackPanel"
+                        x:Name="DownloadButtonsStackPanel" 
+                        Grid.Column="2"
+                        Style="{StaticResource TileRightStackPanelStyle}"
+                        Visibility="Visible">
+                <DockPanel x:Uid="DockPanel_1">
+                    <Image
+                       x:Uid="Image_AlreadyUpdated"
+                       DockPanel.Dock="Right"
+                       Source="{StaticResource BitmapImage_AlreadyInstalled}"
+                       Visibility="{Binding IsUpdated, Mode=OneWay, Converter={StaticResource boolToVis}}"
+                       HorizontalAlignment="Right">
+                        <Image.ToolTip>
+                            <TextBlock x:Uid="TextBlock_AlreadyUpdatedTooltip"
+                                   Text="This extension is already updated."
+                                   Style="{StaticResource TileToolTipStyle}"/>
+                        </Image.ToolTip>
+                    </Image>
+                    <Button x:Uid="Button_Update"
+                        x:Name="Button_Update"
+                        DockPanel.Dock="Left"
+                        AutomationProperties.AutomationId="Button_Update"
+                        Command="{x:Static self:ExtensionManagerWindowCommands.UpdateExtension}"
+                        Content="_Update"
+                        IsDefault="True"
+                        Visibility="Collapsed"
+                        Style="{StaticResource DetailButtonStyle}" />
+                </DockPanel>
+            </StackPanel>
+        </Grid>
+        <DataTemplate.Triggers>
+            <MultiDataTrigger x:Uid="MultiDataTrigger_1">
+                <MultiDataTrigger.Conditions>
+                    <Condition x:Uid="Condition_1" Binding="{Binding IsSelected}" Value="True" />
+                    <Condition x:Uid="Condition_2" Binding="{Binding IsUpdated}" Value="False" />
+                </MultiDataTrigger.Conditions>
+                <Setter x:Uid="Setter_1" TargetName="Button_Update" Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
     <DataTemplate x:Uid="DataTemplate_OnlineDetailTemplate" x:Key="OnlineDetailTemplate">
         <DataTemplate.Resources>
             <self:SizeInBytesConverter x:Uid="self:SizeInBytesConverter" x:Key="sizeInBytesConverter" />
