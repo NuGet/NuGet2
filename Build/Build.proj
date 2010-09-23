@@ -28,6 +28,19 @@
     <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable">
     </Target>
 
+    <Target Name="Build">
+        <MSBuild Projects="$(NuPackRoot)\NuPack.sln" Targets="Build" />
+    </Target>
+
+    <Target Name="RunTests">
+        <MSBuild Projects="$(NuPackRoot)\NuPack.Test\NuPack.Test.csproj" Targets="RunTests">
+        </MSBuild>
+    </Target>
+
+    <Target Name="BuildPackages">
+        <MSBuild Projects="$(NuPackRoot)\Build\PackageBuild.proj" Targets="BuildPackages" />
+    </Target>
+
     <Target Name="CreateDropDirectories">
         <Message Text="Making the output directories for the compiled output at '$(DropDirectory)'." />
         <RemoveDir Directories="$(DropDirectory)" Condition="Exists('$(DropDirectory)')" ContinueOnError="True" />
@@ -48,19 +61,16 @@
         <Message Text="Copying the NuPack Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
-
     <Target Name="CopyServerOutputToDropDirectory">
         <Message Text="Copying the NuPack Server output to $(ServerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
-
     <Target Name="CopyLicenseToAllDirectories">
         <Message Text="Copying the License to all drop directories" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
-
     <Target Name="ILMergeTheExecutable">
         <Message Text="ILMerging the executable contents in $(ExeDropDirectory)" />
         <ItemGroup>
@@ -71,15 +81,5 @@
         <Exec Command="$(ILMergeExe) /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:$(ILMergeInternalizeIgnoreFile) /target:exe /out:$(ILMergeFileFinalName) /log:$(ILMergeArtifactDirectory)\ilmerge.log /ndebug /allowDup $(ILMergeFileFinalName) %(ILMergeItems.FileName)%(ILMergeItems.Extension)" WorkingDirectory="$(MergeDirectory)" />
         <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
         <Delete Files="@(ILMergeItems)" />
-    </Target>
-    <Target Name="Build">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.sln" Targets="Build" />
-    </Target>
-    <Target Name="BuildPackages">
-        <MSBuild Projects="$(NuPackRoot)\Build\PackageBuild.proj" Targets="BuildPackages" />
-    </Target>
-    <Target Name="RunTests">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.Test\NuPack.Test.csproj" Targets="RunTests">
-        </MSBuild>
     </Target>
 </Project>
