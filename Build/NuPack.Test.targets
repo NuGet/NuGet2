@@ -1,0 +1,12 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<PropertyGroup>
+    <ProgramFilesDir>$(ProgramFiles)</ProgramFilesDir>
+    <ProgramFilesDir Condition="Exists('$(ProgramFiles) %28x86%29')">$(ProgramFiles) (x86)</ProgramFilesDir>
+    <VsDir>$(ProgramFilesDir)\Microsoft Visual Studio 10.0</VsDir>
+    <DevEnvDir>$(VsDir)\Common7\IDE</DevEnvDir>
+</PropertyGroup>
+
+<Target Name="RunTests">
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="true" />
+</Target>
+</Project>

@@ -1,0 +1,43 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- Common Build Settings and Configurations -->
+    <PropertyGroup>
+        <NuPackRoot Condition=" '$(NuPackRoot)' == '' ">$(MSBuildProjectDirectory)\..</NuPackRoot>
+        <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == 'CI' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProductVersion>8.0.30703</ProductVersion>
+        <SchemaVersion>2.0</SchemaVersion>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <TargetFrameworkProfile />
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
+        <AdditionalSettingsImport>$(NuPackRoot)\Extended.Settings.targets</AdditionalSettingsImport>
+    </PropertyGroup>
+
+    <!-- Common settings for Debug and Coverage builds -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage'">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants>
+    </PropertyGroup>
+
+    <!-- Settings only for Release builds -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+    </PropertyGroup>
+
+    <!-- Settings only for Coverage builds -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Coverage' ">
+        <OutputPath>bin\Coverage\</OutputPath>
+        <Coverage>true</Coverage>
+    </PropertyGroup>
+
+    <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
+</Project>
