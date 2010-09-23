@@ -192,21 +192,6 @@
                         <self:TextBlockControl x:Uid="TextBlock_DetailVersionValueOnline" AutomationProperties.AutomationId="TextBlock_DetailVersionValueOnline" Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                     </StackPanel>
                     
-                    <StackPanel x:Uid="StackPanel_12" Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding DownloadCount, Converter={StaticResource downloadCountToVisibilityConverter}}">
-                        <self:TextBlockControl x:Uid="TextBlock_DetailDownloadsOnline" AutomationProperties.AutomationId="TextBlock_DetailDownloadsOnline" Text="Downloads:" Style="{StaticResource DetailMetadataLabelStyle}" />
-                        <self:TextBlockControl x:Uid="TextBlock_DetailDownloadsValueOnline" AutomationProperties.AutomationId="TextBlock_DetailDownloadsValueOnline" Text="{Binding DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
-                    </StackPanel>
-                    
-                    <StackPanel x:Uid="StackPanel_11" Style="{StaticResource DetailMetadataStyle}">
-                        <self:TextBlockControl x:Uid="TextBlock_DetailRatingOnline" x:Name="TextBlock_DetailRatingOnline" AutomationProperties.AutomationId="TextBlock_DetailRatingOnline" Text="Rating:" Style="{StaticResource DetailMetadataLabelStyle}" />
-                        <self:MultiStarControl Height="12" x:Uid="MultiStar_DetailRatingOnline" AutomationProperties.AutomationId="MultiStar_DetailRatingOnline" Value="{Binding Rating}" Margin="3,0,0,0">
-                            <FrameworkElement.ToolTip>
-                                <TextBlock x:Uid="TextBlock_3" Text="{Binding RatingToolTip}" Style="{StaticResource TileToolTipStyle}"/>
-                            </FrameworkElement.ToolTip>
-                        </self:MultiStarControl>
-                        <self:TextBlockControl x:Uid="TextBlock_DetailRatingOnlineCount" AutomationProperties.AutomationId="TextBlock_DetailRatingOnlineCount" Style="{StaticResource DetailMetadataValueStyle}" Text="{Binding RatingsCountFormatted}" />
-                    </StackPanel>
-                    
                     <self:TextBlockControl x:Uid="TextBlock_PackageDescription" Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
                     </self:TextBlockControl>
                     
