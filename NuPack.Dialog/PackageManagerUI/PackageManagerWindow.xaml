@@ -18,7 +18,8 @@
     Width="955" Height="660" MinWidth="800" MinHeight="450"
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
     Hyperlink.RequestNavigate="HandleRequestNavigate"
-    Loaded="Window_Loaded">
+    Loaded="Window_Loaded"
+    Closed="DialogWindow_Closed">
     <Window.Resources>
       <ResourceDictionary x:Uid="ResourceDictionary_1">
         <ResourceDictionary.MergedDictionaries>

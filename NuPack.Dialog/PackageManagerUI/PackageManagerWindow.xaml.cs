@@ -192,5 +192,11 @@ namespace NuPack.Dialog.PackageManagerUI
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        private void DialogWindow_Closed(object sender, EventArgs e)
+        {
+            // TODO: investigate to see if there is a better fix in CTP2
+            this.explorer.Providers.Clear();
+        }
     }
 }
