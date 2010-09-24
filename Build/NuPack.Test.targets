@@ -7,6 +7,6 @@
 </PropertyGroup>
 
 <Target Name="RunTests">
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="true" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
 </Target>
 </Project>

@@ -12,8 +12,6 @@
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase {
-        private const string PackageFile = "packages.xml";
-
         public PackageReferenceRepository(ProjectSystem project, IPackageRepository sourceRepository) {
             if (project == null) {
                 throw new ArgumentNullException("project");
@@ -37,8 +35,8 @@
 
         private XDocument GetDocument(bool createIfNotExists = false) {
             // If the file exists then open and return it
-            if (Project.FileExists(PackageFile)) {
-                using (Stream stream = Project.OpenFile(PackageFile)) {
+            if (Project.FileExists(Constants.PackageReferenceFile)) {
+                using (Stream stream = Project.OpenFile(Constants.PackageReferenceFile)) {
                     return XDocument.Load(stream);
                 }
             }
@@ -106,7 +104,7 @@
 
             // Remove the file if there are no more elements
             if (!document.Root.HasElements) {
-                Project.DeleteFile(PackageFile);
+                Project.DeleteFile(Constants.PackageReferenceFile);
             }
             else {
                 // Otherwise save the updated document
@@ -115,7 +113,7 @@
         }
 
         private void SaveDocument(XDocument document) {
-            Project.AddFile(PackageFile, document.Save);
+            Project.AddFile(Constants.PackageReferenceFile, document.Save);
         }
     }
 }
