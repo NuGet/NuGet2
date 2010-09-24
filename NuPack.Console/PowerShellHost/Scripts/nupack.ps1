@@ -214,7 +214,7 @@ function global:Update-Package {
 function global:List-Package {
     [CmdletBinding()]
     param(
-        [switch]$Local,
+        [switch]$Installed,
         
         [switch]$Updates
     )
@@ -231,7 +231,7 @@ function global:List-Package {
                                                                                                 $packages.Count -gt 0
                                                                                               }}
         }
-        elseif($Local) {            
+        elseif($Installed) {            
             $repository = $packageManager.SolutionRepository
         }
         else {
