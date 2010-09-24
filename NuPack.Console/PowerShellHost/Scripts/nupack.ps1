@@ -75,7 +75,7 @@ function global:Add-Package {
     }
     Process {
         try {
-            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager.SourceRepository $Id $Version
         
             if ($isSolutionLevel) {
                 if ($Project) {
@@ -126,7 +126,7 @@ function global:Remove-Package {
     }
     Process {
         try {
-            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager.LocalRepository $Id $Version
              
             if ($isSolutionLevel) {
                 if ($Project) {
@@ -178,7 +178,7 @@ function global:Update-Package {
     }
     Process {
         try {
-            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager $Id $Version
+            $isSolutionLevel = _IsSolutionOnlyPackage $packageManager.LocalRepository $Id $Version
              
             if ($isSolutionLevel) {
                 
@@ -224,18 +224,18 @@ function global:List-Package {
         $packageManager = _GetPackageManager
 
         if($Updates) {
-            $solutionPackages = $packageManager.SolutionRepository.GetPackages()
-            $externalPackages = $packageManager.ExternalRepository.GetPackages()
+            $solutionPackages = $packageManager.LocalRepository.GetPackages()
+            $externalPackages = $packageManager.SourceRepository.GetPackages()
             return  $solutionPackages | Select-Object Id, Version, @{Name="UpdateAvailable";E={ $packageId = $_.Id; $version = $_.Version;
                                                                                                 $packages = @($externalPackages | Where-Object { $packageId -eq $_.Id -and $_.Version -gt $version }) ;
                                                                                                 $packages.Count -gt 0
                                                                                               }}
         }
         elseif($Installed) {            
-            $repository = $packageManager.SolutionRepository
+            $repository = $packageManager.LocalRepository
         }
         else {
-            $repository = $packageManager.ExternalRepository
+            $repository = $packageManager.SourceRepository
         }
     }
     else {
@@ -279,7 +279,7 @@ $global:solutionEvents.add_BeforeClosing([EnvDTE._dispSolutionEvents_BeforeClosi
 
 $global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
     $packageManager = _GetPackageManager
-    $repository = $packageManager.SolutionRepository
+    $repository = $packageManager.LocalRepository
     $localPackages = $repository.GetPackages()
 
     $localPackages | ForEach-Object {
@@ -593,8 +593,7 @@ function global:_IsSupportedProject($project) {
     return $project.Kind -and $supportedProjectTypes -contains $project.Kind
 }	
 
-function global:_IsSolutionOnlyPackage($packageManager, $id, $version) {    
-    $repository = $packageManager.ExternalRepository
+function global:_IsSolutionOnlyPackage($repository, $id, $version) {
     $package = [NuPack.PackageRepositoryExtensions]::FindPackage($repository, $id, $null, $null, $version)
 
     return $package -and ![NuPack.PackageExtensions]::HasProjectContent($package)

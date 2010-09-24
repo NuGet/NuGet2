@@ -41,18 +41,6 @@
             _solutionEvents.BeforeClosing += OnBeforeClosing;
         }
 
-        public IPackageRepository SolutionRepository {
-            get {
-                return LocalRepository;
-            }
-        }
-
-        public IPackageRepository ExternalRepository {
-            get {
-                return SourceRepository;
-            }
-        }
-
         private IEnumerable<ProjectManager> ProjectManagers {
             get {
                 EnsureProjectManagers();

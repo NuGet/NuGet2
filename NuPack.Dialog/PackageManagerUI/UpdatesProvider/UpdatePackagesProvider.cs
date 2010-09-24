@@ -30,7 +30,7 @@ namespace NuPack.Dialog.Providers {
         }
 
         public override IQueryable<IPackage> GetQuery() {
-            var localPackages = PackageManager.SolutionRepository.GetPackages();
+            var localPackages = PackageManager.LocalRepository.GetPackages();
 
             return from p in PackageManager.SourceRepository.GetPackages()
                    where localPackages.Any(q => p.Id.Equals(q.Id, StringComparison.OrdinalIgnoreCase) && q.Version < p.Version)
