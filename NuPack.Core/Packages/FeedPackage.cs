@@ -88,6 +88,8 @@
         protected override IPackage CreatePackage() {
             // REVIEW: Should we be using WebClient?
             using (var client = new WebClient()) {
+                // Make sure we use the default credentials for this request
+                client.UseDefaultCredentials = true;
                 // TODO: Verify package hash and length
                 byte[] rawPackage = client.DownloadData(_item.DownloadLink.Uri);
                 using (var stream = new MemoryStream(rawPackage)) {
