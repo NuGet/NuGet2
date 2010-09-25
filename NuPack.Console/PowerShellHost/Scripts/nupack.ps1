@@ -239,7 +239,7 @@ function global:List-Package {
         }
     }
     else {
-        if ($Local -or $Updates) {
+        if ($Installed -or $Updates) {
             Write-Error "No solution is found in the current environment."
             return
         }
