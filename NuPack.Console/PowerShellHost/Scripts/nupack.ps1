@@ -430,7 +430,7 @@ function _TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (List-Package -local) | Group-Object ID | ForEach-Object { $_.Name }
+        (List-Package -Installed) | Group-Object ID | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
