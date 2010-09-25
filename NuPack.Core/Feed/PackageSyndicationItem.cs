@@ -18,6 +18,12 @@
             }
         }
 
+        public SyndicationLink LicenseLink {
+            get {
+                return Links.SingleOrDefault(l => l.RelationshipType == "license");
+            }
+        }
+
         public string PackageId {
             get {
                 return ElementExtensions.ReadElementExtensions<string>("packageId", Constants.SchemaNamespace).Single();

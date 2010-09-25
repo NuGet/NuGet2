@@ -85,6 +85,16 @@
             }
         }
 
+
+        public override Uri LicenseUrl {
+            get {
+                if (_item.LicenseLink != null) {
+                    return _item.LicenseLink.Uri;
+                }
+                return null;
+            }
+        }
+
         protected override IPackage CreatePackage() {
             // REVIEW: Should we be using WebClient?
             using (var client = new WebClient()) {

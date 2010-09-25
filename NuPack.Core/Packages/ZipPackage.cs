@@ -13,21 +13,11 @@
         // paths to exclude
         private static readonly string[] _excludePaths = new[] { "_rels", "package" };
 
-        private Version _version;
-        private string _id;
-        private string _description;
-        private IEnumerable<string> _authors;
-        private string _category;
-        private DateTime? _created;
-        private DateTime? _modified;
-        private string _lastModifiedBy;
-        private IEnumerable<string> _keywords;
-        private string _language;
+        private PackageBuilder _packageBuilder;
 
         private IEnumerable<IPackageAssemblyReference> _references;
-        private IEnumerable<PackageDependency> _dependencies;
-
         private IEnumerable<IPackageFile> _files;
+
 
         public ZipPackage(Stream stream) {
             var package = Opc.Package.Open(stream);
@@ -41,7 +31,7 @@
                       where IsPackageFile(part)
                       select new ZipPackageFile(part)).ToList();
 
-            _references = (from part in package.GetParts()                           
+            _references = (from part in package.GetParts()
                            where IsAssemblyReference(part)
                            select new ZipPackageAssemblyReference(part)).ToList();
 
@@ -58,88 +48,80 @@
             }
 
             using (Stream stream = specPart.GetStream()) {
-                PackageBuilder builder = PackageBuilder.ReadFrom(stream);
-
                 // Get the metadata properties
-                _id = builder.Id;
-                _description = builder.Description;
-                _authors = builder.Authors;
-                _category = builder.Category;
-                _created = builder.Created;
-                _version = builder.Version;
-                _language = builder.Language;
-                _lastModifiedBy = builder.LastModifiedBy;
-                _modified = builder.Modified;
-                _keywords = builder.Keywords;
-
-                // Get dependencies
-                _dependencies = builder.Dependencies;
+                _packageBuilder = PackageBuilder.ReadFrom(stream);
             }
         }
-        
+
         public DateTime Created {
             get {
-                return _created.Value;
+                return _packageBuilder.Created;
             }
         }
 
         public IEnumerable<string> Authors {
             get {
-                return _authors;
+                return _packageBuilder.Authors;
             }
         }
 
         public string Category {
             get {
-                return _category;
+                return _packageBuilder.Category;
             }
         }
 
         public string Id {
             get {
-                return _id;
+                return _packageBuilder.Id;
+            }
+        }
+
+        public Uri LicenseUrl {
+            get {
+                return _packageBuilder.LicenseUrl;
             }
         }
 
         public Version Version {
             get {
-                return _version;
+                return _packageBuilder.Version;
             }
         }
 
         public string Description {
             get {
-                return _description;
+                return _packageBuilder.Description;
             }
         }
 
         public IEnumerable<string> Keywords {
             get {
-                return _keywords;
+                return _packageBuilder.Keywords;
             }
         }
 
         public string Language {
             get {
-                return _language;
+                return _packageBuilder.Language;
             }
         }
 
         public DateTime Modified {
             get {
-                return _modified.Value;
+                return _packageBuilder.Modified;
             }
         }
 
         public string LastModifiedBy {
             get {
-                return _lastModifiedBy;
+                return _packageBuilder.LastModifiedBy;
             }
         }
 
         public IEnumerable<PackageDependency> Dependencies {
             get {
-                return _dependencies;
+                return _packageBuilder.Dependencies;
             }
         }
 
@@ -152,7 +134,7 @@
         public IEnumerable<IPackageFile> GetFiles() {
             return _files;
         }
-        
+
         private static bool IsAssemblyReference(Opc.PackagePart part) {
             // Assembly references are in lib/ and have a .dll extension
             var path = UriHelper.GetPath(part.Uri);

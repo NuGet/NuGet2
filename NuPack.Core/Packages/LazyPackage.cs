@@ -44,6 +44,10 @@
             get;
         }
 
+        public abstract Uri LicenseUrl {
+            get;
+        }
+
         public abstract DateTime Modified {
             get;
         }

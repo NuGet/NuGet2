@@ -49,9 +49,17 @@
                     }
                 }
                 catch {
+                    // REVIEW: Is this correct?
                     // Skip this package if it we failed to save the stream for some reason 
                     // (most likely caused by a package that won't validate).
                     continue;
+                }
+
+                // Add the license url link if the package specifies one
+                if (package.LicenseUrl != null) {
+                    item.Links.Add(new SyndicationLink(package.LicenseUrl) { 
+                         RelationshipType = "license"
+                    });
                 }
 
                 foreach (var author in package.Authors) {

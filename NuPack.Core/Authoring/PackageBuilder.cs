@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml.Linq;
-using NuPack.Resources;
-using Opc = System.IO.Packaging;
+﻿namespace NuPack {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Xml.Linq;
+    using Opc = System.IO.Packaging;
 
-namespace NuPack {
     public class PackageBuilder {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
@@ -57,6 +56,11 @@ namespace NuPack {
             set;
         }
 
+        public Uri LicenseUrl {
+            get;
+            set;
+        }
+
         public DateTime Modified {
             get;
             set;
@@ -76,7 +80,7 @@ namespace NuPack {
             get;
             private set;
         }
-        
+
         public static void Save(IPackage package, Stream stream) {
             ReadFrom(package).Save(stream);
         }
@@ -128,6 +132,7 @@ namespace NuPack {
             packageBuilder.LastModifiedBy = package.LastModifiedBy;
             packageBuilder.Language = package.Language;
             packageBuilder.Modified = package.Modified;
+            packageBuilder.LicenseUrl = package.LicenseUrl;
 
             // Copy dependencies
             packageBuilder.Dependencies.AddRange(package.Dependencies);
@@ -152,11 +157,11 @@ namespace NuPack {
 
             using (Stream stream = packagePart.GetStream()) {
                 var writer = new XmlManifestWriter(this);
-                writer.Save(stream);                
+                writer.Save(stream);
             }
 
             // We need to reopen the stream after we've written the manifest so we can validate it
-            using (Stream stream = packagePart.GetStream()) {                
+            using (Stream stream = packagePart.GetStream()) {
                 XmlManifestReader.ValidateSchema(XDocument.Load(stream));
             }
         }

@@ -8,6 +8,7 @@
         string Description { get; }
         string Language { get; }
         string LastModifiedBy { get; }
+        Uri LicenseUrl { get; }
         IEnumerable<string> Keywords { get; }
         IEnumerable<string> Authors { get; }
         DateTime Created { get; }

@@ -31,6 +31,9 @@ namespace NuPack {
                                     from author in _builder.Authors
                                     select new XElement("author", author)));
             }
+            if (_builder.LicenseUrl != null) {
+                metadataElement.Add(new XElement("licenseUrl", _builder.LicenseUrl));
+            }
             if (!String.IsNullOrEmpty(_builder.Language)) {
                 metadataElement.Add(new XElement("language", _builder.Language));
             }

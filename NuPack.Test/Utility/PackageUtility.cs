@@ -125,6 +125,7 @@
             mockPackage.Setup(m => m.Description).Returns("Mock package " + id);
             mockPackage.Setup(m => m.Language).Returns("en-US");
             mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
+            mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
             return mockPackage.Object;
         }
 
