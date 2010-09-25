@@ -38,6 +38,7 @@ namespace NuPack.Test {
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
   </metadata>
 </package>";
 
@@ -52,6 +53,7 @@ namespace NuPack.Test {
             Assert.AreEqual("en-US", builder.Language);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
+            Assert.IsTrue(builder.RequireLicenseAcceptance);
         }
     }
 }

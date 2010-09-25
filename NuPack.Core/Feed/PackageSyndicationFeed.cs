@@ -67,10 +67,14 @@
                         Name = author
                     });
                 }
-
+                
                 if (!String.IsNullOrEmpty(package.Category)) {
                     item.Categories.Add(new SyndicationCategory(package.Category));
                 }
+
+
+                // Add the RequireLicenseAcceptance bit
+                item.ElementExtensions.Add("requireLicenseAcceptance", Constants.SchemaNamespace, package.RequireLicenseAcceptance);
 
                 // Set the publish date
                 item.PublishDate = package.Created;

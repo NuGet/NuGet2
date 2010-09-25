@@ -44,6 +44,10 @@
             get;
         }
 
+        public abstract bool RequireLicenseAcceptance {
+            get;
+        }
+
         public abstract Uri LicenseUrl {
             get;
         }

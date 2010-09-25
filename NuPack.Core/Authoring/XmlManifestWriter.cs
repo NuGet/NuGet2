@@ -47,6 +47,7 @@ namespace NuPack {
                 metadataElement.Add(new XElement("keywords", String.Join(", ", _builder.Keywords)));
             }
 
+            metadataElement.Add(new XElement("requireLicenseAcceptance", _builder.RequireLicenseAcceptance));
             metadataElement.Add(new XElement("created", _builder.Created));
             metadataElement.Add(new XElement("modified", _builder.Modified));
 

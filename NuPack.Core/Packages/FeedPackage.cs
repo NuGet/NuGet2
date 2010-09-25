@@ -85,6 +85,11 @@
             }
         }
 
+        public override bool RequireLicenseAcceptance {
+            get {
+                return _item.RequireLicenseAcceptance;
+            }
+        }
 
         public override Uri LicenseUrl {
             get {

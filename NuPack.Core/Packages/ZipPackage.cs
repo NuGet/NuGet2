@@ -77,6 +77,12 @@
             }
         }
 
+        public bool RequireLicenseAcceptance {
+            get {
+                return _packageBuilder.RequireLicenseAcceptance;
+            }
+        }
+
         public Uri LicenseUrl {
             get {
                 return _packageBuilder.LicenseUrl;

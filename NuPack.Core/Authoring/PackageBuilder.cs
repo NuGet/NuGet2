@@ -61,6 +61,11 @@
             set;
         }
 
+        public bool RequireLicenseAcceptance {
+            get;
+            set;
+        }
+
         public DateTime Modified {
             get;
             set;

@@ -103,7 +103,11 @@ namespace NuPack {
             string licenseUrl = metadataElement.GetOptionalElementValue("licenseUrl", Constants.ManifestSchemaNamespace);
             if (!String.IsNullOrEmpty(licenseUrl)) {
                 builder.LicenseUrl = new Uri(licenseUrl);
-            } 
+            }
+            bool requireLicenseAcceptance;
+            if (Boolean.TryParse(metadataElement.GetOptionalElementValue("requireLicenseAcceptance", Constants.ManifestSchemaNamespace), out requireLicenseAcceptance)) {
+                builder.RequireLicenseAcceptance = requireLicenseAcceptance;
+            }
             builder.Language = metadataElement.GetOptionalElementValue("language", Constants.ManifestSchemaNamespace);
             builder.LastModifiedBy = metadataElement.GetOptionalElementValue("lastmodifiedby", Constants.ManifestSchemaNamespace);
             builder.Category = metadataElement.GetOptionalElementValue("category", Constants.ManifestSchemaNamespace);

@@ -44,11 +44,12 @@ namespace NuPack.Test {
             Assert.AreEqual("A", item.Title.Text);
             Assert.AreEqual("1.0", item.ElementExtensions.ReadElementExtensions<string>("version", Constants.SchemaNamespace).Single());
             Assert.AreEqual("en-US", item.ElementExtensions.ReadElementExtensions<string>("language", Constants.SchemaNamespace).Single());
+            Assert.IsFalse(item.ElementExtensions.ReadElementExtensions<bool>("requireLicenseAcceptance", Constants.SchemaNamespace).Single());
             Assert.AreEqual("Tester", item.Authors[0].Name);
             Assert.AreEqual("enclosure", item.Links[0].RelationshipType);
             Assert.AreEqual("license", item.Links[1].RelationshipType);
             Assert.AreEqual(new Uri("ftp://test/somelicense.txts"), item.Links[1].Uri);
-            Assert.AreEqual("Mock package A", ((TextSyndicationContent)item.Content).Text);          
+            Assert.AreEqual("Mock package A", ((TextSyndicationContent)item.Content).Text);
         }
     }
 }

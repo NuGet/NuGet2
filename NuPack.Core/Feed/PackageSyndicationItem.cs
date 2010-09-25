@@ -8,7 +8,7 @@
     public class PackageSyndicationItem : SyndicationItem {
         private Version _version;
         private IEnumerable<PackageDependency> _dependencies;
-        private IEnumerable<string> _keywords;
+        private IEnumerable<string> _keywords;        
 
         public SyndicationLink DownloadLink {
             get {
@@ -64,6 +64,12 @@
         public string Language {
             get {
                 return ElementExtensions.ReadElementExtensions<string>("language", Constants.SchemaNamespace).SingleOrDefault();
+            }
+        }
+
+        public bool RequireLicenseAcceptance {
+            get {
+                return ElementExtensions.ReadElementExtensions<bool>("requireLicenseAcceptance", Constants.SchemaNamespace).SingleOrDefault();
             }
         }
 

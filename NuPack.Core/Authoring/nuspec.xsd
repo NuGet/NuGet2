@@ -23,6 +23,7 @@
                                 </xs:complexType>
                             </xs:element>
                             <xs:element name="licenseUrl" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
+                            <xs:element name="requireLicenseAcceptance" maxOccurs="1" minOccurs="0" type="xs:boolean" />
                             <xs:element name="description" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="language" maxOccurs="1" minOccurs="1" type="xs:string" default="en-US" />
                             <xs:element name="keywords" maxOccurs="1" minOccurs="0" type="xs:string" />                            

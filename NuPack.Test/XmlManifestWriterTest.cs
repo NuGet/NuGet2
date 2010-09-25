@@ -44,6 +44,7 @@ namespace NuPack.Test {
     <lastmodifiedby>John</lastmodifiedby>
     <category>Category</category>
     <keywords>KW1, KW2</keywords>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <created>0001-01-01T00:00:00</created>
     <modified>0001-01-01T00:00:00</modified>
   </metadata>
