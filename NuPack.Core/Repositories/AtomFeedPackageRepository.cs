@@ -9,7 +9,7 @@
 
     public class AtomFeedPackageRepository : PackageRepositoryBase {
         private Uri _feedUri;
-        
+
         public AtomFeedPackageRepository(Uri feedUri) {
             if (feedUri == null) {
                 throw new ArgumentNullException("feedUri");
@@ -24,7 +24,13 @@
 
         internal IEnumerable<PackageSyndicationItem> GetFeedItems() {
             try {
-                using (var feedReader = XmlTextReader.Create(_feedUri.OriginalString)) {
+                // Manually create the request to the feed so we can
+                // set the default credentials
+                var request = WebRequest.Create(_feedUri);
+                request.UseDefaultCredentials = true;
+                WebResponse response = request.GetResponse();
+
+                using (var feedReader = XmlTextReader.Create(response.GetResponseStream())) {
                     return GetFeedItems(feedReader);
                 }
             }
@@ -41,8 +47,8 @@
             }
             catch (XmlException exception) {
                 throw new InvalidOperationException(NuPackResources.AtomFeedPackageRepo_InvalidFeedContent, exception);
-             }
-         }
+            }
+        }
 
 
         public override void AddPackage(IPackage package) {
