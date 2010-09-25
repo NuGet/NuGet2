@@ -112,7 +112,7 @@ function global:Add-Package {
 function global:Remove-Package {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, Position=0)]
+        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Id,
         
         [string]$Project,
