@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -67,6 +68,20 @@ namespace NuPack.Dialog.Providers {
         public IEnumerable<string> Authors {
             get {
                 return _packageIdentity.Authors;
+            }
+        }
+
+        public bool RequireLicenseAcceptance {
+            get {
+                return _packageIdentity.RequireLicenseAcceptance;
+            }
+        }
+
+        public Uri LicenseUrl
+        {
+            get
+            {
+                return _packageIdentity.LicenseUrl;
             }
         }
 

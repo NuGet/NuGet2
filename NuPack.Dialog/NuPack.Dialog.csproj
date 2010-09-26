@@ -111,6 +111,9 @@
     </Compile>
     <Compile Include="PackageManagerUI\InstalledProvider\InstalledPackagesProvider.cs" />
     <Compile Include="PackageManagerUI\Controls\MultiStarControl.cs" />
+    <Compile Include="PackageManagerUI\LicenseAcceptanceWindow.xaml.cs">
+      <DependentUpon>LicenseAcceptanceWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PackageManagerUI\OnlineProvider\BasePackagesTree.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesItem.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesProvider.cs" />
@@ -151,6 +154,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="PackageManagerUI\CommonStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\LicenseAcceptanceWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

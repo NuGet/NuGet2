@@ -81,7 +81,11 @@ namespace NuPack.Dialog.PackageManagerUI
                 return;
             }
 
-            provider.Update(selectedItem.Id, new Version(selectedItem.Version));
+            bool accepted = ShowLicenseWindowIfRequired(selectedItem);
+            if (accepted)
+            {
+                provider.Update(selectedItem.Id, new Version(selectedItem.Version));
+            }
         }
 
         private void CanExecuteUpdateExtension(object sender, CanExecuteRoutedEventArgs e)
@@ -151,7 +155,11 @@ namespace NuPack.Dialog.PackageManagerUI
                 return;
             }
 
-            provider.Install(selectedItem.Id, new Version(selectedItem.Version));
+            bool accepted = ShowLicenseWindowIfRequired(selectedItem);
+            if (accepted)
+            {
+                provider.Install(selectedItem.Id, new Version(selectedItem.Version));
+            }
         }
 
         private void CanExecuteDownloadExtension(object sender, CanExecuteRoutedEventArgs e)
@@ -183,7 +191,6 @@ namespace NuPack.Dialog.PackageManagerUI
         {
         }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnNotifyPropertyChanged(string propertyName)
@@ -197,6 +204,25 @@ namespace NuPack.Dialog.PackageManagerUI
         {
             // TODO: investigate to see if there is a better fix in CTP2
             this.explorer.Providers.Clear();
+        }
+
+        private bool ShowLicenseWindowIfRequired(OnlinePackagesItem selectedItem)
+        {
+            if (selectedItem.RequireLicenseAcceptance)
+            {
+                var licenseWidow = new LicenseAcceptanceWindow()
+                {
+                    Owner = this,
+                    DataContext = selectedItem
+                };
+
+                bool? dialogResult = licenseWidow.ShowDialog();
+                return dialogResult ?? false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }
