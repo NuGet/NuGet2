@@ -10,6 +10,7 @@ using System.Reflection;
 using EnvDTE80;
 using NuPack;
 using NuPack.VisualStudio;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPackConsole.Host.PowerShell.Implementation
 {
@@ -51,11 +52,18 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
             LoadStartupScripts();
 
+            DisplayDisclaimerText();
+
             LoadProfilesIntoRunspace(_myRunSpace);
 
             // IMPORTANT: should only register for DTE solution event after we have setup the Runspace. 
             // Otherwise, some weird COM exceptions will occur.
             _solutionHelper.RegisterSolutionEvents();
+        }
+
+        private void DisplayDisclaimerText() {
+            // use WriteWarningLine() method to display the message in pink
+            _myHost.UI.WriteWarningLine(VsResources.DisclaimerText);
         }
 
         private void LoadStartupScripts() {

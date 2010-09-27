@@ -144,4 +144,7 @@
   <data name="PackageSource_Invalid" xml:space="preserve">
     <value>The package source does not belong to the collection of available sources.</value>
   </data>
+  <data name="DisclaimerText" xml:space="preserve">
+    <value>Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular feed, or purport to grant rights to them. Please verify the package owners and the license terms by following the feed URL.</value>
+  </data>
 </root>

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:self="clr-namespace:NuPack.Dialog.PackageManagerUI"
+    xmlns:resx="clr-namespace:NuPack.VisualStudio.Resources;assembly=NuPack.VisualStudio"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:ExtensionsExplorer="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer;assembly=Microsoft.VisualStudio.ExtensionsExplorer"
@@ -138,7 +139,7 @@
             <RowDefinition x:Uid="RowDefinition_12" Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock 
-            Text="Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular feed, or purport to grant rights to them. Please verify the package owners and the license terms by following the feed URL." 
+            Text="{x:Static resx:VsResources.DisclaimerText}" 
             TextWrapping="Wrap" 
             Margin="8"
             Foreground="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}" />

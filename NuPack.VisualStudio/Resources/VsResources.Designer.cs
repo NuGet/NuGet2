@@ -22,7 +22,7 @@ namespace NuPack.VisualStudio.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class VsResources {
+    public class VsResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace NuPack.VisualStudio.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPack.VisualStudio.Resources.VsResources", typeof(VsResources).Assembly);
@@ -51,7 +51,7 @@ namespace NuPack.VisualStudio.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Added file &apos;{0}&apos; to project &apos;{1}&apos;.
         /// </summary>
-        internal static string Debug_AddedFileToProject {
+        public static string Debug_AddedFileToProject {
             get {
                 return ResourceManager.GetString("Debug_AddedFileToProject", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Added reference &apos;{0}&apos; to project &apos;{1}&apos;.
         /// </summary>
-        internal static string Debug_AddReference {
+        public static string Debug_AddReference {
             get {
                 return ResourceManager.GetString("Debug_AddReference", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Removed file &apos;{0}&apos;.
         /// </summary>
-        internal static string Debug_RemovedFile {
+        public static string Debug_RemovedFile {
             get {
                 return ResourceManager.GetString("Debug_RemovedFile", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Removed file &apos;{0}&apos; from folder &apos;{1}&apos;.
         /// </summary>
-        internal static string Debug_RemovedFileFromFolder {
+        public static string Debug_RemovedFileFromFolder {
             get {
                 return ResourceManager.GetString("Debug_RemovedFileFromFolder", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Removed folder &apos;{0}&apos;.
         /// </summary>
-        internal static string Debug_RemovedFolder {
+        public static string Debug_RemovedFolder {
             get {
                 return ResourceManager.GetString("Debug_RemovedFolder", resourceCulture);
             }
@@ -108,16 +108,25 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Removed reference &apos;{0}&apos; from project &apos;{1}&apos;.
         /// </summary>
-        internal static string Debug_RemoveReference {
+        public static string Debug_RemoveReference {
             get {
                 return ResourceManager.GetString("Debug_RemoveReference", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular feed, or purport to grant rights to them. Please verify the package owners and the license terms by following the feed URL..
+        /// </summary>
+        public static string DisclaimerText {
+            get {
+                return ResourceManager.GetString("DisclaimerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The project is invalid.
         /// </summary>
-        internal static string DTE_InvalidProject {
+        public static string DTE_InvalidProject {
             get {
                 return ResourceManager.GetString("DTE_InvalidProject", resourceCulture);
             }
@@ -126,7 +135,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The project &apos;{0}&apos; is unsupported.
         /// </summary>
-        internal static string DTE_ProjectUnsupported {
+        public static string DTE_ProjectUnsupported {
             get {
                 return ResourceManager.GetString("DTE_ProjectUnsupported", resourceCulture);
             }
@@ -135,7 +144,7 @@ namespace NuPack.VisualStudio.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The package source does not belong to the collection of available sources..
         /// </summary>
-        internal static string PackageSource_Invalid {
+        public static string PackageSource_Invalid {
             get {
                 return ResourceManager.GetString("PackageSource_Invalid", resourceCulture);
             }

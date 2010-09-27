@@ -72,7 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\VsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>VsResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
