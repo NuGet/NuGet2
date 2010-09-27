@@ -87,6 +87,8 @@ function global:Add-Package {
                     $packageManager.Logger = _CreateLogger
                     $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
                     $packageManager.Logger = $null
+                    
+                    Write-Warning $NuPackDisclaimerText
                 }
             }
             else {
@@ -97,6 +99,8 @@ function global:Add-Package {
                 if ($Project) {
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
+                    
+                    Write-Warning $NuPackDisclaimerText
                 }
                 else {
                     Write-Error "Missing project parameter and the default project is not set."
@@ -188,6 +192,7 @@ function global:Update-Package {
                 }
                 else {
                      $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
+                     Write-Warning $NuPackDisclaimerText
                 }
             }
             else {
@@ -199,6 +204,7 @@ function global:Update-Package {
                 if ($Project) {
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
+                    Write-Warning $NuPackDisclaimerText
                 }
                 else {
                     $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)

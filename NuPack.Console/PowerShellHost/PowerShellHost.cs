@@ -96,6 +96,13 @@ namespace NuPackConsole.Host.PowerShell.Implementation
                     null, 
                     ScopedItemOptions.ReadOnly));
 
+            initialSessionState.Variables.Add(
+                new SessionStateVariableEntry(
+                    "NuPackDisclaimerText",
+                    VsResources.DisclaimerText,
+                    null,
+                    ScopedItemOptions.ReadOnly));
+
             // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
             // will reveal syntax error information if there is any.
             //
