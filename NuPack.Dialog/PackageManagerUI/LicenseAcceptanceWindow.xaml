@@ -30,7 +30,7 @@
         </Grid.RowDefinitions>
         
         <TextBlock Grid.Row="0" Margin="0,3,0,3" Text="The following package will be installed:" />
-        <Border Grid.Row="1" Margin="0,0,0,3" MinHeight="130" Padding="3" BorderThickness="1" CornerRadius="1" BorderBrush="DarkGray" Background="White">
+        <Border Grid.Row="1" Margin="0,0,0,3" MinHeight="130" Padding="3" BorderThickness="1" CornerRadius="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
             <StackPanel>
                 <TextBlock TextWrapping="Wrap">
                     <Run Text="{Binding Id, Mode=OneTime}" FontWeight="Bold" />
@@ -42,7 +42,7 @@
                 </TextBlock>
             </StackPanel>
         </Border>
-        <TextBlock Grid.Row="2" Margin="0,0,0,3" TextWrapping="Wrap" Text="By clicking I Accept, you agree to the license terms for the product or component listed above. You are responsible for and must separately locate, read and accept each of the license terms. If you do not agree to the license terms, click I Decline." />
+        <TextBlock Grid.Row="2" Margin="0,0,0,3" TextWrapping="Wrap" Text="By clicking &quot;I Accept,&quot; you agree to the license terms for the product or component listed above. You are responsible for and must separately locate, read and accept each of the license terms. If you do not agree to the license terms, click &quot;I Decline&quot;." />
         <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal"  HorizontalAlignment="Right">
             <Button Content="I _Decline" Click="OnDeclineButtonClick" IsCancel="True" />
             <Button Content="I _Accept" Click="OnAcceptButtonClick" />

@@ -77,10 +77,8 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        public Uri LicenseUrl
-        {
-            get
-            {
+        public Uri LicenseUrl {
+            get {
                 return _packageIdentity.LicenseUrl;
             }
         }
