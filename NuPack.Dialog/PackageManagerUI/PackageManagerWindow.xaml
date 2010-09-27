@@ -133,10 +133,16 @@
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition x:Uid="RowDefinition_10" Height="*" />
+            <RowDefinition x:Uid="RowDefinition_10" Height="Auto"/>
+            <RowDefinition x:Uid="RowDefinition_11" Height="*" />
             <RowDefinition x:Uid="RowDefinition_12" Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid x:Uid="sharedControlGrid" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
+        <TextBlock 
+            Text="Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular feed, or purport to grant rights to them. Please verify the package owners and the license terms by following the feed URL." 
+            TextWrapping="Wrap" 
+            Margin="8"
+            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}" />
+        <Grid x:Uid="sharedControlGrid" Grid.Row="1" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
             <Grid.RowDefinitions>
                 <RowDefinition x:Uid="RowDefinition_13" />
                 <RowDefinition x:Uid="RowDefinition_14" Height="Auto" />
@@ -158,7 +164,7 @@
             <StackPanel x:Uid="StackPanel_2" Grid.Row="1" Margin="0,2">
             </StackPanel>
         </Grid>
-        <Grid x:Uid="Grid_5" x:Name="FooterGrid" Grid.Row="1" MinHeight="50">
+        <Grid x:Uid="Grid_5" x:Name="FooterGrid" Grid.Row="2" MinHeight="50">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Uid="ColumnDefinition_6" x:Name="FooterGridCol1"/>
                 <ColumnDefinition x:Uid="ColumnDefinition_7" x:Name="FooterGridCol2" Width="Auto"/>
