@@ -2,6 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null
+$global:packageInstalled = $false
 
 function global:New-Package {
     [CmdletBinding()]
@@ -83,12 +84,16 @@ function global:Add-Package {
                     return
                 }
                 else {
+                    $packageInstalled = $false
+                
                     # Only set the logger for solution level packages
                     $packageManager.Logger = _CreateLogger
                     $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
                     $packageManager.Logger = $null
                     
-                    Write-Warning $NuPackDisclaimerText
+                    if ($packageInstalled) {
+                        Write-Warning $NuPackDisclaimerText
+                    }
                 }
             }
             else {
@@ -97,10 +102,14 @@ function global:Add-Package {
                 }
                 
                 if ($Project) {
+                    $packageInstalled = $false
+                
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
                     
-                    Write-Warning $NuPackDisclaimerText
+                    if ($packageInstalled) {
+                        Write-Warning $NuPackDisclaimerText
+                    }
                 }
                 else {
                     Write-Error "Missing project parameter and the default project is not set."
@@ -191,8 +200,13 @@ function global:Update-Package {
                      return
                 }
                 else {
+                     $packageInstalled = $false
+                
                      $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
-                     Write-Warning $NuPackDisclaimerText
+                     
+                     if ($packageInstalled) {
+                        Write-Warning $NuPackDisclaimerText
+                     }
                 }
             }
             else {
@@ -202,9 +216,14 @@ function global:Update-Package {
                 }
             
                 if ($Project) {
+                    $packageInstalled = $false
+                
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
-                    Write-Warning $NuPackDisclaimerText
+                    
+                    if ($packageInstalled) {
+                        Write-Warning $NuPackDisclaimerText
+                    }
                 }
                 else {
                     $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
@@ -505,7 +524,8 @@ function global:_GetProjectManager($packageManager, $projectName) {
         # REVIEW: We really want to do this once per project manager instance
         $projectManager.add_PackageReferenceAdded({ 
             param($sender, $e)
-        
+            
+            $packageInstalled = $true
             Write-Verbose "Executing install script after adding package $($e.Package.Id)..."
             _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project
         }.GetNewClosure());
@@ -541,6 +561,8 @@ function global:_GetPackageManager {
 }
 
 function global:_OnPackageInstalled($sender, $e) {
+    $packageInstalled = $true
+
     $path = $e.TargetPath
 
     _AddToolsFolderToEnv $path
@@ -550,7 +572,7 @@ function global:_OnPackageInstalled($sender, $e) {
 }
 
 function global:_OnPackageUninstalling($sender, $e) {    
-    # TODO: remove tools path from the environment varible
+    # TODO: remove tools path from the environment variable
 }
 
 function global:_CreateLogger {
