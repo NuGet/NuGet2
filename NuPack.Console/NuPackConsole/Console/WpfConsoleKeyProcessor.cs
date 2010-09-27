@@ -138,11 +138,6 @@ namespace NuPackConsole.Implementation.Console
                                 }
                             }
                         }
-                        else
-                        {
-                            WpfTextView.Caret.MoveTo(new SnapshotPoint(WpfTextView.TextBuffer.CurrentSnapshot, WpfTextView.TextBuffer.CurrentSnapshot.Length));
-
-                        }
                         break;
 
                     case VSConstants.VSStd2KCmdID.LEFT:
