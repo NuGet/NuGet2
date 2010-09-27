@@ -1,6 +1,7 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.ServiceModel.Syndication;
@@ -23,20 +24,28 @@
         }
 
         internal IEnumerable<PackageSyndicationItem> GetFeedItems() {
-            try {
-                // Manually create the request to the feed so we can
-                // set the default credentials
-                var request = WebRequest.Create(_feedUri);
-                request.UseDefaultCredentials = true;
-                WebResponse response = request.GetResponse();
+            return GetFeedItems(GetFeedStream);
+        }
 
-                using (var feedReader = XmlTextReader.Create(response.GetResponseStream())) {
+        internal IEnumerable<PackageSyndicationItem> GetFeedItems(Func<Stream> getStream) {
+            try {
+                using (var feedReader = XmlTextReader.Create(getStream())) {
                     return GetFeedItems(feedReader);
                 }
             }
             catch (WebException exception) {
                 throw new InvalidOperationException(NuPackResources.AtomFeedPackageRepo_InvalidFeedSource, exception);
             }
+        }
+
+        private Stream GetFeedStream() {
+            // Manually create the request to the feed so we can
+            // set the default credentials
+            var request = WebRequest.Create(_feedUri);
+            request.UseDefaultCredentials = true;
+            WebResponse response = request.GetResponse();
+
+            return response.GetResponseStream();
         }
 
         internal static IEnumerable<PackageSyndicationItem> GetFeedItems(XmlReader xmlReader) {
