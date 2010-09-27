@@ -134,16 +134,12 @@
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition x:Uid="RowDefinition_10" Height="Auto"/>
+            <!--<RowDefinition x:Uid="RowDefinition_10" Height="Auto"/>-->
             <RowDefinition x:Uid="RowDefinition_11" Height="*" />
             <RowDefinition x:Uid="RowDefinition_12" Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock 
-            Text="{x:Static resx:VsResources.DisclaimerText}" 
-            TextWrapping="Wrap" 
-            Margin="8"
-            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.HighlightTextKey}}" />
-        <Grid x:Uid="sharedControlGrid" Grid.Row="1" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
+        
+        <Grid x:Uid="sharedControlGrid" Grid.Row="0" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
             <Grid.RowDefinitions>
                 <RowDefinition x:Uid="RowDefinition_13" />
                 <RowDefinition x:Uid="RowDefinition_14" Height="Auto" />
@@ -152,20 +148,33 @@
                 <DropShadowEffect x:Uid="DropShadowEffect_1" Direction="270" Opacity="0.25" ShadowDepth="3" />
             </Grid.Effect>
             <shared:VSExtensionsExplorerCtl
-            x:Uid="_explorer"
-            x:Name="explorer"
-            ActiveView="MediumIcons"
-            HorizontalAlignment="Stretch"
-            SnapsToDevicePixels="True"
-            ListViewIsVirtualizing="True"
-            IsFxComboVisible="False"
-            IsMediumIconsViewButtonVisible="True"
-            IsSmallIconsViewButtonVisible="True"
-            IsLargeIconsViewButtonVisible="False"/>
+                x:Uid="_explorer"
+                x:Name="explorer"
+                ActiveView="MediumIcons"
+                HorizontalAlignment="Stretch"
+                SnapsToDevicePixels="True"
+                ListViewIsVirtualizing="True"
+                IsFxComboVisible="False"
+                IsMediumIconsViewButtonVisible="True"
+                IsSmallIconsViewButtonVisible="True"
+                IsLargeIconsViewButtonVisible="False"/>
             <StackPanel x:Uid="StackPanel_2" Grid.Row="1" Margin="0,2">
             </StackPanel>
         </Grid>
-        <Grid x:Uid="Grid_5" x:Name="FooterGrid" Grid.Row="2" MinHeight="50">
+
+        <Border Grid.Row="0"
+                Width="220"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" 
+                BorderThickness="0,2,0,0"
+                Padding="8">
+            <TextBlock 
+                Text="{x:Static resx:VsResources.DisclaimerText}" 
+                TextWrapping="Wrap" />
+        </Border>
+
+        <Grid x:Uid="Grid_5" x:Name="FooterGrid" Grid.Row="1" MinHeight="50">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Uid="ColumnDefinition_6" x:Name="FooterGridCol1"/>
                 <ColumnDefinition x:Uid="ColumnDefinition_7" x:Name="FooterGridCol2" Width="Auto"/>
