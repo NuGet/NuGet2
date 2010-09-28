@@ -122,7 +122,7 @@
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\sub\contentFile"));
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\lib\reference.dll"));
             Assert.IsTrue(projectSystem.FileExists(@"A.1.0\resources\readme.txt"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\A.1.0.nupack"));
+            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\A.1.0.nupkg"));
         }
 
         [TestMethod]

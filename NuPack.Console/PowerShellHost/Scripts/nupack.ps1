@@ -38,10 +38,10 @@ function global:New-Package {
         $builder = [NuPack.PackageBuilder]::ReadFrom($SpecFilePath)
         $builder.Created = [System.DateTime]::Now
         $builder.Modified = $builder.Created
-        $builder.Files.RemoveAll( { param($file) (".nupack", ".nuspec") -contains [System.IO.Path]::GetExtension($file.SourcePath) } ) | out-null
+        $builder.Files.RemoveAll( { param($file) ([NuPack.Constants]::PackageExtension, [NuPack.Constants]::ManifestExtension) -contains [System.IO.Path]::GetExtension($file.SourcePath) } ) | out-null
         
         if (!$TargetFile){
-            $TargetFile = Join-Path (Split-Path $ProjectIns.FullName) ($builder.Id + '.' + $builder.Version + '.nupack')
+            $TargetFile = Join-Path (Split-Path $ProjectIns.FullName) ($builder.Id + '.' + $builder.Version + [NuPack.Constants]::PackageExtension)
         }
         
         Write-Output "Creating package at '$TargetFile'..."
@@ -147,8 +147,8 @@ function global:Remove-Package {
                 }
         
                 if ($Project) {
-					$projectManager = _GetProjectManager $packageManager $Project
-					$projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
+                    $projectManager = _GetProjectManager $packageManager $Project
+                    $projectManager.RemovePackageReference($Id, $Force, $RemoveDependencies)
                 }
                 else {
                     Write-Error "Missing project parameter and the default project is not set."

@@ -61,7 +61,7 @@
         internal IEnumerable<string> GetPackageFiles() {
             // Check for package files one level deep. We use this at package install time
             // to determine the set of installed packages. Installed packages are copied to 
-            // {id}.{version}\{packagefile}.nupack.
+            // {id}.{version}\{packagefile}.{extension}.
             foreach (var dir in FileSystem.GetDirectories(String.Empty)) {
                 foreach (var path in FileSystem.GetFiles(dir, "*" + Constants.PackageExtension)) {
                     yield return path;

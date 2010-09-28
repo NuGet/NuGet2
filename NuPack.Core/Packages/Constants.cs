@@ -1,6 +1,6 @@
 ﻿namespace NuPack {
     public sealed class Constants {
-        public static readonly string PackageExtension = ".nupack";
+        public static readonly string PackageExtension = ".nupkg";
         public static readonly string ManifestExtension = ".nuspec";        
         public static readonly string ManifestSchemaNamespace = SchemaNamespace + "nuspec.xsd";
         public static readonly string ContentDirectory = "content";

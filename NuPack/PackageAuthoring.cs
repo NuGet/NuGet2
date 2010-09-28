@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NuPack {
     public class PackageAuthoring {
-        private static readonly HashSet<string> _exclude = new HashSet<string>(new[] { ".nupack", ".nuspec" },
+        private static readonly HashSet<string> _exclude = new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension },
                                                                               StringComparer.OrdinalIgnoreCase);
 
         public static void Main(string[] args) {
@@ -25,7 +25,7 @@ namespace NuPack {
                 PackageBuilder builder = PackageBuilder.ReadFrom(manifestFile);
                 builder.Created = DateTime.Now;
                 builder.Modified = DateTime.Now;
-                var outputFile = String.Join(".", builder.Id, builder.Version, "nupack");
+                var outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
 
                 // Remove the output file or the package spec might try to include it (which is default behavior)
                 builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));

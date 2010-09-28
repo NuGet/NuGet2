@@ -48,7 +48,7 @@ namespace NuPack.Server.Controllers {
         }
 
         public static string GetPackageFileName(IPackage package) {
-            return package.Id + "." + package.Version + ".nupack";
+            return package.Id + "." + package.Version + Constants.PackageExtension;
         }
     }
 }
