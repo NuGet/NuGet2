@@ -43,6 +43,8 @@
             // set the default credentials
             var request = WebRequest.Create(_feedUri);
             request.UseDefaultCredentials = true;
+            Utility.ConfigureProxy(request.Proxy, _feedUri);
+
             WebResponse response = request.GetResponse();
 
             return response.GetResponseStream();

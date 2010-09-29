@@ -4,11 +4,12 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Reflection;
     using System.Runtime.Versioning;
     using System.Text.RegularExpressions;
 
-    internal static class Utility {                
+    internal static class Utility {
         private const string NetFrameworkIdentifier = ".NETFramework";
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -19,6 +20,14 @@
             { "SL", "Silverlight" },
             { "Silverlight", "Silverlight" },
         };
+
+        internal static void ConfigureProxy(IWebProxy proxy, Uri uri) {
+            // REVIEW: Can this ever be null?
+            if (proxy != null && proxy.GetProxy(uri) != uri) {
+                // If we are going through a proxy then just set the default credentials
+                proxy.Credentials = CredentialCache.DefaultCredentials;
+            }
+        }
 
         internal static Version ParseOptionalVersion(string versionString) {
             Version version;
