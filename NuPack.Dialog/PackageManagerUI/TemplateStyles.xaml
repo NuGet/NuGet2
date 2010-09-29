@@ -116,6 +116,6 @@
     <shared:UriToBitmapImageConverter x:Uid="shared:UriToBitmapImageConverter_1" x:Key="uriToPreviewImageConverter" />
     <shared:UriToBitmapImageConverter x:Uid="shared:UriToBitmapImageConverter_2" x:Key="uriToIconConverter" />
 
-    <BitmapImage x:Uid="BitmapImage_DefaultIcon" x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/Icon.png" />
+    <BitmapImage x:Uid="BitmapImage_DefaultIcon" x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
     <BitmapImage x:Uid="BitmapImage_DefaultPreviewImage" x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
 </ResourceDictionary>
