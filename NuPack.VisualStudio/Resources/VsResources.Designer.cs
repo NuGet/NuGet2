@@ -115,7 +115,7 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular feed, or purport to grant rights to them. Please verify the package owners and the license terms by following the feed URL..
+        ///   Looks up a localized string similar to Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular package source (feed), or purport to grant rights to them. Please verify the package owners and the license terms by following the package source (feed) URL..
         /// </summary>
         public static string DisclaimerText {
             get {
@@ -138,6 +138,15 @@ namespace NuPack.VisualStudio.Resources {
         public static string DTE_ProjectUnsupported {
             get {
                 return ResourceManager.GetString("DTE_ProjectUnsupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The package &quot;{0}&quot; by the author &quot;{1}&quot; requires that you accept a license agreement ({2}). You are responsible for and must separately locate, read and accept each of the license terms. If you do not agree to the license terms, use the Remove-Package command to remove the package from your project..
+        /// </summary>
+        public static string InstallSuccessDisclaimerText {
+            get {
+                return ResourceManager.GetString("InstallSuccessDisclaimerText", resourceCulture);
             }
         }
         

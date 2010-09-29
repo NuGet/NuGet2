@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null
-$global:packageInstalled = $false
+$global:installedPackage = $null
 
 function global:New-Package {
     [CmdletBinding()]
@@ -84,15 +84,15 @@ function global:Add-Package {
                     return
                 }
                 else {
-                    $packageInstalled = $false
+                    $installedPackage = $null
                 
                     # Only set the logger for solution level packages
                     $packageManager.Logger = _CreateLogger
                     $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
                     $packageManager.Logger = $null
                     
-                    if ($packageInstalled) {
-                        Write-Warning $NuPackDisclaimerText
+                    if ($installedPackage) {
+                        _WriteDisclaimer $installedPackage
                     }
                 }
             }
@@ -102,13 +102,13 @@ function global:Add-Package {
                 }
                 
                 if ($Project) {
-                    $packageInstalled = $false
+                    $installedPackage = $null
                 
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
                     
-                    if ($packageInstalled) {
-                        Write-Warning $NuPackDisclaimerText
+                    if ($installedPackage) {
+                        _WriteDisclaimer $installedPackage
                     }
                 }
                 else {
@@ -200,12 +200,12 @@ function global:Update-Package {
                      return
                 }
                 else {
-                     $packageInstalled = $false
+                     $installedPackage = $null
                 
                      $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
                      
-                     if ($packageInstalled) {
-                        Write-Warning $NuPackDisclaimerText
+                     if ($installedPackage) {
+                        _WriteDisclaimer $installedPackage
                      }
                 }
             }
@@ -216,13 +216,13 @@ function global:Update-Package {
                 }
             
                 if ($Project) {
-                    $packageInstalled = $false
+                    $installedPackage = $null
                 
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
                     
-                    if ($packageInstalled) {
-                        Write-Warning $NuPackDisclaimerText
+                    if ($installedPackage) {
+                        _WriteDisclaimer $installedPackage
                     }
                 }
                 else {
@@ -525,7 +525,7 @@ function global:_GetProjectManager($packageManager, $projectName) {
         $projectManager.add_PackageReferenceAdded({ 
             param($sender, $e)
             
-            $packageInstalled = $true
+            $installedPackage = $e.Package
             Write-Verbose "Executing install script after adding package $($e.Package.Id)..."
             _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project
         }.GetNewClosure());
@@ -561,7 +561,7 @@ function global:_GetPackageManager {
 }
 
 function global:_OnPackageInstalled($sender, $e) {
-    $packageInstalled = $true
+    $installedPackage = $e.Package
 
     $path = $e.TargetPath
 
@@ -643,6 +643,15 @@ function global:_GetDefaultPackageSource() {
     $ActivePackageSource = $PackageSourceStore.ActivePackageSource
     if ($ActivePackageSource) {
         $ActivePackageSource.Source
+    }
+}
+
+function global:_WriteDisclaimer($package) {
+    if ($package.RequireLicenseAcceptance) {
+        $authorString = [string]::Join(", ", $package.Authors)
+        $message = $NuPackDisclaimerText -f ($package.Id, $authorString, $package.LicenseUrl)
+        
+        Write-Host "`r`n$message`r`n"
     }
 }
 
