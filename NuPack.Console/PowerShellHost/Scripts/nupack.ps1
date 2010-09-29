@@ -2,7 +2,6 @@
 $ErrorActionPreference = "Stop"
 
 $global:DefaultProjectName = $null
-$global:installedPackage = $null
 
 function global:New-Package {
     [CmdletBinding()]
@@ -83,17 +82,11 @@ function global:Add-Package {
                     Write-Error "The package '$Id' only applies to the solution and not to a project. Remove the -Project parameter."
                     return
                 }
-                else {
-                    $installedPackage = $null
-                
+                else {                
                     # Only set the logger for solution level packages
                     $packageManager.Logger = _CreateLogger
                     $packageManager.InstallPackage($Id, $Version, $IgnoreDependencies)
                     $packageManager.Logger = $null
-                    
-                    if ($installedPackage) {
-                        _WriteDisclaimer $installedPackage
-                    }
                 }
             }
             else {
@@ -102,14 +95,8 @@ function global:Add-Package {
                 }
                 
                 if ($Project) {
-                    $installedPackage = $null
-                
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.AddPackageReference($Id, $Version, $IgnoreDependencies)
-                    
-                    if ($installedPackage) {
-                        _WriteDisclaimer $installedPackage
-                    }
                 }
                 else {
                     Write-Error "Missing project parameter and the default project is not set."
@@ -200,13 +187,7 @@ function global:Update-Package {
                      return
                 }
                 else {
-                     $installedPackage = $null
-                
                      $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
-                     
-                     if ($installedPackage) {
-                        _WriteDisclaimer $installedPackage
-                     }
                 }
             }
             else {
@@ -216,14 +197,8 @@ function global:Update-Package {
                 }
             
                 if ($Project) {
-                    $installedPackage = $null
-                
                     $projectManager = _GetProjectManager $packageManager $Project
                     $projectManager.UpdatePackageReference($Id, $Version, $IgnoreDependencies)
-                    
-                    if ($installedPackage) {
-                        _WriteDisclaimer $installedPackage
-                    }
                 }
                 else {
                     $packageManager.UpdatePackage($Id, $Version, $UpdateDependencies)
@@ -525,7 +500,6 @@ function global:_GetProjectManager($packageManager, $projectName) {
         $projectManager.add_PackageReferenceAdded({ 
             param($sender, $e)
             
-            $installedPackage = $e.Package
             Write-Verbose "Executing install script after adding package $($e.Package.Id)..."
             _ExecuteScript $e.InstallPath "tools\install.ps1" $e.Package $project
         }.GetNewClosure());
@@ -551,6 +525,7 @@ function global:_GetPackageManager {
 
     if(!$global:packageManagerInitialized) {
         # Add an event for when packages are installed
+        $packageManager.add_PackageInstalling($function:_OnPackageInstalling)
         $packageManager.add_PackageInstalled($function:_OnPackageInstalled)
         $packageManager.add_PackageUninstalling($function:_OnPackageUninstalling)
 
@@ -560,8 +535,11 @@ function global:_GetPackageManager {
     return $packageManager
 }
 
+function global:_OnPackageInstalling($sender, $e) {
+    _WriteDisclaimer $e.Package
+}
+
 function global:_OnPackageInstalled($sender, $e) {
-    $installedPackage = $e.Package
 
     $path = $e.TargetPath
 

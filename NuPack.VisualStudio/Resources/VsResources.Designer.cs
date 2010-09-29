@@ -115,7 +115,7 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular package source (feed), or purport to grant rights to them. Please verify the package owners and the license terms by following the package source (feed) URL..
+        ///   Looks up a localized string similar to Each package is licensed to you by its owner, not necessarily NuPack. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are govened by additional licenses. Follow the package source (feed) URL to determine any dependencies..
         /// </summary>
         public static string DisclaimerText {
             get {
@@ -142,7 +142,7 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The package &quot;{0}&quot; by the author &quot;{1}&quot; requires that you accept a license agreement ({2}). You are responsible for and must separately locate, read and accept each of the license terms. If you do not agree to the license terms, use the Remove-Package command to remove the package from your project..
+        ///   Looks up a localized string similar to You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device..
         /// </summary>
         public static string InstallSuccessDisclaimerText {
             get {

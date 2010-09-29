@@ -145,9 +145,9 @@
     <value>The package source does not belong to the collection of available sources.</value>
   </data>
   <data name="DisclaimerText" xml:space="preserve">
-    <value>Each package is licensed to you under a license agreement by its owner, not necessarily NuPack. NuPack does not guarantee the package or a particular package source (feed), or purport to grant rights to them. Please verify the package owners and the license terms by following the package source (feed) URL.</value>
+    <value>Each package is licensed to you by its owner, not necessarily NuPack. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are govened by additional licenses. Follow the package source (feed) URL to determine any dependencies.</value>
   </data>
   <data name="InstallSuccessDisclaimerText" xml:space="preserve">
-    <value>The package "{0}" by the author "{1}" requires that you accept a license agreement ({2}). You are responsible for and must separately locate, read and accept each of the license terms. If you do not agree to the license terms, use the Remove-Package command to remove the package from your project.</value>
+    <value>You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device.</value>
   </data>
 </root>
