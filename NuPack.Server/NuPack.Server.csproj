@@ -8,6 +8,7 @@
         <RootNamespace>NuPack.Server</RootNamespace>
         <AssemblyName>NuPack.Server</AssemblyName>
         <MvcBuildViews>false</MvcBuildViews>
+        <OutputPath>bin</OutputPath>
     </PropertyGroup>   
     <ItemGroup>
         <Reference Include="Microsoft.CSharp" />
