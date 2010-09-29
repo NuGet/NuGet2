@@ -50,7 +50,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             // tab expansion right from the beginning
             SetupRunspace();
 
-            //LoadStartupScripts();
+            LoadStartupScripts();
 
             DisplayDisclaimerText();
 
@@ -107,10 +107,10 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
             // will reveal syntax error information if there is any.
             //
-            string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
-            string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
-            initialSessionState.ImportPSModule(new string[] { profilePath, npackPath });
+            //string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
+            //string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
+            //string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
+            //initialSessionState.ImportPSModule(new string[] { profilePath, npackPath });
 
             _myHost = new MyHost(this, _name, _privateData);
             _myRunSpace = RunspaceFactory.CreateRunspace(_myHost, initialSessionState);
