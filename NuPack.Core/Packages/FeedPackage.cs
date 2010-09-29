@@ -105,7 +105,7 @@
             using (var client = new WebClient()) {
                 // Make sure we use the default credentials for this request
                 client.UseDefaultCredentials = true;
-                Utility.ConfigureProxy(client.Proxy, _item.DownloadLink.Uri);
+                Utility.ConfigureProxy(client.Proxy);
                 // TODO: Verify package hash and length
                 byte[] rawPackage = client.DownloadData(_item.DownloadLink.Uri);
                 using (var stream = new MemoryStream(rawPackage)) {

@@ -21,9 +21,9 @@
             { "Silverlight", "Silverlight" },
         };
 
-        internal static void ConfigureProxy(IWebProxy proxy, Uri uri) {
+        internal static void ConfigureProxy(IWebProxy proxy) {
             // REVIEW: Can this ever be null?
-            if (proxy != null && proxy.GetProxy(uri) != uri) {
+            if (proxy != null) {
                 // If we are going through a proxy then just set the default credentials
                 proxy.Credentials = CredentialCache.DefaultCredentials;
             }
