@@ -186,7 +186,7 @@
             Assert.AreEqual(1, projectSystem.References.Count);
             Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
             Assert.IsTrue(projectSystem.FileExists(@"contentFile"));
-            Assert.IsTrue(projectSystem.FileExists(@"nupack.config"));
+            Assert.IsTrue(projectSystem.FileExists(@"packages.config"));
         }
 
         [TestMethod]
@@ -212,7 +212,7 @@
             Assert.AreEqual(1, projectSystem.References.Count);
             Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
             Assert.IsTrue(projectSystem.References.ContainsValue(@"C:\MockFileSystem\A.1.0\reference.dll"));
-            Assert.IsTrue(projectSystem.FileExists(@"nupack.config"));
+            Assert.IsTrue(projectSystem.FileExists(@"packages.config"));
         }
 
         [TestMethod]
