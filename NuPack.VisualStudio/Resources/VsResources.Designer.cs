@@ -61,6 +61,15 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies..
+        /// </summary>
+        public static string Console_DisclaimerText {
+            get {
+                return ResourceManager.GetString("Console_DisclaimerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added file &apos;{0}&apos; to project &apos;{1}&apos;.
         /// </summary>
         public static string Debug_AddedFileToProject {
@@ -115,11 +124,11 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Each package is licensed to you by its owner, not necessarily NuPack. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are govened by additional licenses. Follow the package source (feed) URL to determine any dependencies..
+        ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages..
         /// </summary>
-        public static string DisclaimerText {
+        public static string Dialog_DisclaimerText {
             get {
-                return ResourceManager.GetString("DisclaimerText", resourceCulture);
+                return ResourceManager.GetString("Dialog_DisclaimerText", resourceCulture);
             }
         }
         

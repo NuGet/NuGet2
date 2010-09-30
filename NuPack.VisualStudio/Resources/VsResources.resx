@@ -144,10 +144,13 @@
   <data name="PackageSource_Invalid" xml:space="preserve">
     <value>The package source does not belong to the collection of available sources.</value>
   </data>
-  <data name="DisclaimerText" xml:space="preserve">
-    <value>Each package is licensed to you by its owner, not necessarily NuPack. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are govened by additional licenses. Follow the package source (feed) URL to determine any dependencies.</value>
+  <data name="Console_DisclaimerText" xml:space="preserve">
+    <value>Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies.</value>
   </data>
   <data name="InstallSuccessDisclaimerText" xml:space="preserve">
     <value>You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device.</value>
+  </data>
+  <data name="Dialog_DisclaimerText" xml:space="preserve">
+    <value>Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages.</value>
   </data>
 </root>

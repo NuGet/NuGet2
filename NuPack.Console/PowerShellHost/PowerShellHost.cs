@@ -63,7 +63,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
         private void DisplayDisclaimerText() {
             // use WriteWarningLine() method to display the message in pink
-            _myHost.UI.WriteLine(VsResources.DisclaimerText);
+            _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
             _myHost.UI.WriteLine();
         }
 
