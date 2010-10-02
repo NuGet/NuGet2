@@ -1,12 +1,10 @@
-using System;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
-using System.Security;
 
-[assembly: AssemblyCompany("CodePlex Foundation")]
+[assembly: AssemblyCompany("Outercurve Foundation")]
 [assembly: AssemblyProduct("NuPack")]
-[assembly: AssemblyCopyright("\x00a9 CodePlex Foundation. All rights reserved.")]
+[assembly: AssemblyCopyright("\x00a9 Outercurve Foundation. All rights reserved.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 

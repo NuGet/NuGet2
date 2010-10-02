@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("NuPack.Core")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Core API for NuPack")]
 [assembly: CLSCompliant(true)]
 
 [assembly: InternalsVisibleTo("NuPack.Test")]
