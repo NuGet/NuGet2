@@ -2,9 +2,10 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.IO.Packaging;
     using System.Linq;
+    using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
-    using Opc = System.IO.Packaging;
 
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
@@ -13,142 +14,163 @@
         // paths to exclude
         private static readonly string[] _excludePaths = new[] { "_rels", "package" };
 
-        private PackageBuilder _packageBuilder;
+        private PackageBuilder _metadata;
+        // We don't store the steam itself, just a way to open the stream on demand
+        // so we don't have to hold on to that resource
+        private Func<Stream> _streamFactory;
 
-        private IEnumerable<IPackageAssemblyReference> _references;
-        private IEnumerable<IPackageFile> _files;
-
-
-        public ZipPackage(Stream stream) {
-            var package = Opc.Package.Open(stream);
-            ReadContents(package);
+        public ZipPackage(string fileName) {
+            if (String.IsNullOrEmpty(fileName)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "fileName");
+            }
+            _streamFactory = () => File.OpenRead(fileName);
         }
 
-        private void ReadContents(Opc.Package package) {
-            // REVIEW: Should we include the manifest?
-
-            _files = (from part in package.GetParts()
-                      where IsPackageFile(part)
-                      select new ZipPackageFile(part)).ToList();
-
-            _references = (from part in package.GetParts()
-                           where IsAssemblyReference(part)
-                           select new ZipPackageAssemblyReference(part)).ToList();
-
-            var relationshipType = package.GetRelationshipsByType(Constants.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
-
-            if (relationshipType == null) {
-                throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
+        public ZipPackage(Func<Stream> streamFactory) {
+            if (streamFactory == null) {
+                throw new ArgumentNullException("streamFactory");
             }
+            _streamFactory = streamFactory;
+        }
 
-            Opc.PackagePart specPart = package.GetPart(relationshipType.TargetUri);
-
-            if (specPart == null) {
-                throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
-            }
-
-            using (Stream stream = specPart.GetStream()) {
-                // Get the metadata properties
-                _packageBuilder = PackageBuilder.ReadFrom(stream);
+        private PackageBuilder Metadata {
+            get {
+                if (_metadata == null) {
+                    _metadata = GetMetadata();
+                }
+                return _metadata;
             }
         }
 
         public DateTime Created {
             get {
-                return _packageBuilder.Created;
+                return Metadata.Created;
             }
         }
 
         public IEnumerable<string> Authors {
             get {
-                return _packageBuilder.Authors;
+                return Metadata.Authors;
             }
         }
 
         public string Category {
             get {
-                return _packageBuilder.Category;
+                return Metadata.Category;
             }
         }
 
         public string Id {
             get {
-                return _packageBuilder.Id;
+                return Metadata.Id;
             }
         }
 
         public bool RequireLicenseAcceptance {
             get {
-                return _packageBuilder.RequireLicenseAcceptance;
+                return Metadata.RequireLicenseAcceptance;
             }
         }
 
         public Uri LicenseUrl {
             get {
-                return _packageBuilder.LicenseUrl;
+                return Metadata.LicenseUrl;
             }
         }
 
         public Version Version {
             get {
-                return _packageBuilder.Version;
+                return Metadata.Version;
             }
         }
 
         public string Description {
             get {
-                return _packageBuilder.Description;
+                return Metadata.Description;
             }
         }
 
         public IEnumerable<string> Keywords {
             get {
-                return _packageBuilder.Keywords;
+                return Metadata.Keywords;
             }
         }
 
         public string Language {
             get {
-                return _packageBuilder.Language;
+                return Metadata.Language;
             }
         }
 
         public DateTime Modified {
             get {
-                return _packageBuilder.Modified;
+                return Metadata.Modified;
             }
         }
 
         public string LastModifiedBy {
             get {
-                return _packageBuilder.LastModifiedBy;
+                return Metadata.LastModifiedBy;
             }
         }
 
         public IEnumerable<PackageDependency> Dependencies {
             get {
-                return _packageBuilder.Dependencies;
+                return Metadata.Dependencies;
             }
         }
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return _references;
+                using (Stream stream = _streamFactory()) {
+                    Package package = Package.Open(stream);
+                    return (from part in package.GetParts()
+                            where IsAssemblyReference(part)
+                            select new ZipPackageAssemblyReference(part)).ToList();
+                }
             }
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
-            return _files;
+            using (Stream stream = _streamFactory()) {
+                Package package = Package.Open(stream);
+
+                return (from part in package.GetParts()
+                        where IsPackageFile(part)
+                        select new ZipPackageFile(part)).ToList();
+            }
         }
 
-        private static bool IsAssemblyReference(Opc.PackagePart part) {
+        private PackageBuilder GetMetadata() {
+            using (Stream stream = _streamFactory()) {
+                Package package = Package.Open(stream);
+
+                PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
+
+                if (relationshipType == null) {
+                    throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
+                }
+
+                PackagePart manifest = package.GetPart(relationshipType.TargetUri);
+
+                if (manifest == null) {
+                    throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
+                }
+
+                using (Stream manifestStream = manifest.GetStream()) {
+                    return PackageBuilder.ReadFrom(manifestStream);
+                }
+            }
+        }
+
+        private static bool IsAssemblyReference(PackagePart part) {
             // Assembly references are in lib/ and have a .dll extension
             var path = UriHelper.GetPath(part.Uri);
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
                    Path.GetExtension(path).Equals(AssemblyReferencesExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool IsPackageFile(Opc.PackagePart part) {
+        private static bool IsPackageFile(PackagePart part) {
             string path = UriHelper.GetPath(part.Uri);
             // We exclude any opc files and the manifest file (.nuspec)
             return !_excludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&

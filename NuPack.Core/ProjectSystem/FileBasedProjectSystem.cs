@@ -128,6 +128,10 @@
                             .Select(MakeRelativePath);
         }
 
+        public override DateTime GetLastModified(string path) {
+            return new FileInfo(GetFullPath(path)).LastWriteTime;
+        }
+
         public override bool FileExists(string path) {
             path = GetFullPath(path);
             return File.Exists(path);

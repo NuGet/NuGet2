@@ -1,4 +1,5 @@
 ﻿namespace NuPack {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
@@ -14,5 +15,6 @@
         bool DirectoryExists(string path);
         void AddFile(string path, Stream stream);
         Stream OpenFile(string path);
+        DateTime GetLastModified(string path);
     }
 }

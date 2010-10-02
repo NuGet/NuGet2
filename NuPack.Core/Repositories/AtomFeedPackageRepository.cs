@@ -60,14 +60,5 @@
                 throw new InvalidOperationException(NuPackResources.AtomFeedPackageRepo_InvalidFeedContent, exception);
             }
         }
-
-
-        public override void AddPackage(IPackage package) {
-            throw new NotSupportedException();
-        }
-
-        public override void RemovePackage(IPackage package) {
-            throw new NotSupportedException();
-        }
     }
 }

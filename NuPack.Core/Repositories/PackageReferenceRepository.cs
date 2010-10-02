@@ -76,13 +76,9 @@
                                             new XAttribute("version", package.Version)));
 
             SaveDocument(document);
-
-            base.AddPackage(package);
         }
 
         public override void RemovePackage(IPackage package) {
-            base.RemovePackage(package);
-
             XDocument document = GetDocument();
 
             // If there is no document then do nothing

@@ -106,5 +106,9 @@
         public override bool ReferenceExists(string name) {
             return References.ContainsKey(name);
         }
+
+        public override DateTime GetLastModified(string path) {
+            return DateTime.Now;
+        }
     }
 }

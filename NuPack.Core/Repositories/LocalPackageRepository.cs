@@ -5,10 +5,10 @@
     using System.Linq;
 
     public class LocalPackageRepository : PackageRepositoryBase {
-        private Dictionary<string, IPackage> _packageCache = new Dictionary<string, IPackage>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
 
         public LocalPackageRepository(string physicalPath)
-            : this(new DefaultPackagePathResolver(physicalPath), 
+            : this(new DefaultPackagePathResolver(physicalPath),
                    new FileBasedProjectSystem(physicalPath)) {
         }
 
@@ -39,22 +39,31 @@
             var packages = new List<IPackage>();
             foreach (var path in GetPackageFiles()) {
                 try {
-                    IPackage package;
-                    if (!_packageCache.TryGetValue(path, out package)) {
-                        using (Stream stream = FileSystem.OpenFile(path)) {
-                            package = new ZipPackage(stream);
-                        }
-                        // We're basing this assumption on the fact that packages won't change fron version to version
-                        // and the package name and version are in the file name
-                        _packageCache[path] = package;
+                    PackageCacheEntry cacheEntry;
+                    DateTime lastModified = FileSystem.GetLastModified(path);
+                    // If we never cached this file or we did and it's current last modified time is newer
+                    // create a new entry
+                    if (!_packageCache.TryGetValue(path, out cacheEntry) ||
+                        (cacheEntry != null && lastModified > cacheEntry.LastModifiedTime)) {
+                        // We need to do this so we capture the correct loop variable
+                        string packagePath = path;
+
+                        // Create the package
+                        var package = new ZipPackage(() => FileSystem.OpenFile(packagePath));
+
+                        // create a cache entry with the last modified time
+                        cacheEntry = new PackageCacheEntry(package, lastModified);
+
+                        // Store the entry
+                        _packageCache[packagePath] = cacheEntry;
                     }
 
-                    packages.Add(package);
+                    packages.Add(cacheEntry.Package);
                 }
                 catch (NotSupportedException) {
                     // If this is an unsupported package then skip it
                 }
-            }            
+            }
             return packages.AsQueryable();
         }
 
@@ -78,13 +87,9 @@
             string packageFilePath = GetPackageFilePath(package);
 
             FileSystem.AddFile(packageFilePath, stream => PackageBuilder.Save(package, stream));
-
-            base.AddPackage(package);
         }
 
         public override void RemovePackage(IPackage package) {
-            base.RemovePackage(package);
-
             // Delete the package file
             string packageFilePath = GetPackageFilePath(package);
             FileSystem.DeleteFile(packageFilePath);
@@ -100,8 +105,18 @@
         }
 
         private string GetPackageFilePath(IPackage package) {
-            return Path.Combine(PathResolver.GetPackageDirectory(package), 
+            return Path.Combine(PathResolver.GetPackageDirectory(package),
                                 PathResolver.GetPackageFileName(package));
+        }
+
+        private class PackageCacheEntry {
+            public PackageCacheEntry(IPackage package, DateTime lastModifiedTime) {
+                Package = package;
+                LastModifiedTime = lastModifiedTime;
+            }
+
+            public IPackage Package { get; private set; }
+            public DateTime LastModifiedTime { get; private set; }
         }
     }
 }
