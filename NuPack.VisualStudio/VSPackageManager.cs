@@ -49,9 +49,9 @@
         }
 
         // Need object overloads so that the powershell script can call into it
-        public ProjectManager GetProjectManager(object project) {
-            return GetProjectManager((Project)project);
-        }
+        //public ProjectManager GetProjectManager(object project) {
+        //    return GetProjectManager((Project)project);
+        //}
 
         public ProjectManager GetProjectManager(Project project) {
             EnsureProjectManagers();
@@ -112,11 +112,11 @@
             return GetProjectsWithPackage(package.Id, package.Version).Any();
         }
 
-        // Need object overloads so that the powershell script can call into it
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public static VSPackageManager GetPackageManager(object dte) {
-            return GetPackageManager((DTE)dte);
-        }
+        //// Need object overloads so that the powershell script can call into it
+        //[SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
+        //public static VSPackageManager GetPackageManager(object dte) {
+        //    return GetPackageManager((DTE)dte);
+        //}
 
         public static VSPackageManager GetPackageManager(DTE dte) {
             // Since we can't change the repository of an existing package manager

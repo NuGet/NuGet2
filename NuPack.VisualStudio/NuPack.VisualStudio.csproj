@@ -45,10 +45,21 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\v1.0\System.Management.Automation.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cmdlets\AddPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\CmdletHelper.cs" />
+    <Compile Include="Cmdlets\GetPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\NewPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\NuPackBaseCmdlet.cs" />
+    <Compile Include="Cmdlets\RemovePackageCmdlet.cs" />
+    <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ISourceControlFileSystemProvider.cs" />
@@ -56,6 +67,7 @@
     <Compile Include="PackageSource\SerializationHelper.cs" />
     <Compile Include="PackageSource\VSPackageSourceRepository.cs" />
     <Compile Include="PackageSource\VSPackageSourceProvider.cs" />
+    <Compile Include="SolutionProjectsHelper.cs" />
     <Compile Include="VSProjectManager.cs" />
     <Compile Include="ProjectExtensions.cs" />
     <Compile Include="ProjectSystemFactory.cs" />

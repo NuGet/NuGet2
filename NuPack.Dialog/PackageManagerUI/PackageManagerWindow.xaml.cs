@@ -114,7 +114,7 @@ namespace NuPack.Dialog.PackageManagerUI {
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
-            (Utilities.ServiceProvider as Microsoft.VisualStudio.Shell.Package).ShowOptionPage(typeof(ToolsOptionsPage));
+            //(Utilities.ServiceProvider as Microsoft.VisualStudio.Shell.Package).ShowOptionPage(typeof(ToolsOptionsPage));
         }
 
         private void ExecutedDownloadExtension(object sender, ExecutedRoutedEventArgs e) {

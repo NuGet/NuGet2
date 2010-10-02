@@ -36,8 +36,6 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             this.IsAsync = isAsync;
 
             _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(dte);
-
-            _solutionHelper = new SolutionProjectsHelper(dte, this);
             _name = name;
             _init = init;
             _privateData = privateData;
@@ -56,13 +54,20 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
             LoadProfilesIntoRunspace(_myRunSpace);
 
-            // IMPORTANT: should only register for DTE solution event after we have setup the Runspace. 
-            // Otherwise, some weird COM exceptions will occur.
-            _solutionHelper.RegisterSolutionEvents();
+            SetupSolutionHelper();
+        }
+
+        private void SetupSolutionHelper() {
+            _solutionHelper = SolutionProjectsHelper.Instance;
+            _solutionHelper.PropertyChanged += (o, e) => {
+                if (e.PropertyName == "DefaultProjectName") {
+                    this.DefaultProject = _solutionHelper.DefaultProjectName;
+                }
+            };
         }
 
         private void DisplayDisclaimerText() {
-            // use WriteWarningLine() method to display the message in pink
+            
             _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
             _myHost.UI.WriteLine();
         }
@@ -71,10 +76,12 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
             string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
+            string vsPath = Path.Combine(extensionLocation, @"NuPack.VisualStudio.dll");
 
             Invoke("Set-ExecutionPolicy RemoteSigned -Scope Process -Force", null, false);
             Invoke("Import-Module '" + profilePath + "'", null, false);
-            Invoke("Import-Module '" + npackPath + "'", null, false);
+            //Invoke("Import-Module '" + npackPath + "'", null, false);
+            Invoke("Import-Module '" + vsPath + "'", null, false);
         }
 
         private void SetupRunspace()
@@ -104,10 +111,10 @@ namespace NuPackConsole.Host.PowerShell.Implementation
                     null,
                     ScopedItemOptions.ReadOnly));
 
-            // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
-            // will reveal syntax error information if there is any.
-            //
-            //string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
+            //// For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
+            //// will reveal syntax error information if there is any.
+            ////
+            ////string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             //string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
             //string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
             //initialSessionState.ImportPSModule(new string[] { profilePath, npackPath });
@@ -285,16 +292,23 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
         public string DefaultProject {
             get {
-                return (string)InvokeResult("get-variable DefaultProjectName");
+                return (_solutionHelper != null) ? _solutionHelper.DefaultProjectName : null;
             }
             set {
-                Invoke("_SetDefaultProjectInternal '" + (value ?? String.Empty) + "'", null, false);
+                if (_solutionHelper != null) {
+                    _solutionHelper.DefaultProjectName = value;
+                }
             }
         }
 
         public string[] AvailableProjects {
             get {
-                return _solutionHelper.GetCurrentProjectNames();
+                if (_solutionHelper != null) {
+                    return _solutionHelper.GetCurrentProjectNames();
+                }
+                else {
+                    return new string[0];
+                }
             }
         }
 

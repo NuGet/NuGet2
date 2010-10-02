@@ -42,7 +42,6 @@
       <Link>Utils\UtilityMethods.cs</Link>
     </Compile>
     <Compile Include="CommandTokenizer.cs" />
-    <Compile Include="SolutionProjectsHelper.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="Utils\ComplexCommand.cs" />
     <Compile Include="Utils\IPathExpansion.cs" />

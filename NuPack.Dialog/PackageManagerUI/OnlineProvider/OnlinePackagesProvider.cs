@@ -33,7 +33,7 @@ namespace NuPack.Dialog.Providers {
             get {
                 // REVIEW: Is it safe to cache this?
                 if (_dte == null) {
-                    _dte = Utilities.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+                    _dte = DTEExtensions.DTE;
                 }
                 return _dte;
             }
@@ -47,7 +47,7 @@ namespace NuPack.Dialog.Providers {
 
         protected EnvDTE.Project Project {
             get {
-                return Utilities.GetActiveProject(DTE);
+                return DTE.GetActiveProject();
             }
         }
 

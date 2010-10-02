@@ -8,6 +8,8 @@ using NuPack.Dialog;
 using NuPack.Dialog.PackageManagerUI;
 using NuPack.Dialog.ToolsOptionsUI;
 using NuPackConsole.Implementation;
+using NuPack.VisualStudio;
+using EnvDTE;
 
 namespace NuPack.Tools
 {
@@ -65,7 +67,7 @@ namespace NuPack.Tools
         {
             base.Initialize();
 
-            Utilities.ServiceProvider = this;
+            DTEExtensions.DTE = (DTE)GetService(typeof(SDTE));
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;

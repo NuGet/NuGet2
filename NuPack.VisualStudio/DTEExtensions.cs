@@ -5,10 +5,15 @@ using Microsoft.VisualStudio.Shell;
 
 namespace NuPack.VisualStudio {
     public static class DTEExtensions {
-        public static T GetService<T>(this _DTE dte, Type serviceType)
+
+        public static DTE DTE { 
+            get; set; 
+        }
+
+        public static T GetService<T>(this _DTE dte, Type serviceType) 
             where T : class {
             // Get the service provider from dte            
-            return dte.GetServiceProvider().GetService<T>(serviceType);
+            return (T)dte.GetServiceProvider().GetService(serviceType);
         }
 
         public static IServiceProvider GetServiceProvider(this _DTE dte) {
@@ -17,9 +22,20 @@ namespace NuPack.VisualStudio {
             return serviceProvider;
         }
 
-        public static T GetService<T>(this IServiceProvider serviceProvider, Type serviceType)
-            where T : class {
-            return (T)serviceProvider.GetService(serviceType);
+        public static EnvDTE.Project GetActiveProject(this EnvDTE._DTE dte) {
+            EnvDTE.Project activeProject = null;
+
+            if (dte != null) {
+                Object obj = dte.ActiveSolutionProjects;
+                if (obj != null && obj is Array && ((Array)obj).Length > 0) {
+                    Object proj = ((Array)obj).GetValue(0);
+
+                    if (proj != null && proj is EnvDTE.Project) {
+                        activeProject = (EnvDTE.Project)proj;
+                    }
+                }
+            }
+            return activeProject;
         }
     }
 }

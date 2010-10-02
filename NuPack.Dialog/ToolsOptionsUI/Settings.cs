@@ -9,9 +9,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         public static VSPackageSourceProvider PackageSourceProvider {
             get {
                 if (_packageSourceProvider == null) {
-                    var serviceProvider = Utilities.ServiceProvider;
-                    DTE dte = (DTE)serviceProvider.GetService(typeof(SDTE));
-                    _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(dte);
+                    _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
                 }
 
                 return _packageSourceProvider;

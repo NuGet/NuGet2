@@ -23,26 +23,30 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         public override Dictionary<string, PSObject> Prompt(
             string caption, string message, Collection<FieldDescription> descriptions)
         {
-            throw new NotImplementedException();
+            return null;
+            //throw new NotImplementedException();
         }
 
         public override int PromptForChoice(
             string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
         {
-            throw new NotImplementedException();
+            return -1;
+            //throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(
             string caption, string message, string userName, string targetName,
             PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
         {
-            throw new NotImplementedException();
+            return null;
+            //throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(
             string caption, string message, string userName, string targetName)
         {
-            throw new NotImplementedException();
+            return null;
+            //throw new NotImplementedException();
         }
 
         PSHostRawUserInterface _rawUI;
@@ -60,12 +64,14 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
         public override string ReadLine()
         {
-            throw new NotImplementedException();
+            return null;
+            //throw new NotImplementedException();
         }
 
         public override SecureString ReadLineAsSecureString()
         {
-            throw new NotImplementedException();
+            return null;
+            //throw new NotImplementedException();
         }
 
         static Color[] _consoleColors;
