@@ -5,17 +5,17 @@ using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
-    [Cmdlet(VerbsData.Update, "Package")]
-    public class UpdatePackageCmdlet : ProcessPackageBaseCmdlet {
-        private const string ErrorId = "Update-Package";
+    [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
+    public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
+        private const string ErrorId = "Uninstall-Package";
 
         #region Parameters
 
         [Parameter(Position = 2)]
-        public Version Version { get; set; }
+        public SwitchParameter Force { get; set; }
 
         [Parameter(Position = 3)]
-        public SwitchParameter UpdateDependencies { get; set; }
+        public SwitchParameter RemoveDependencies { get; set; }
 
         #endregion
 
@@ -26,26 +26,25 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             var packageManager = PackageManager;
-            bool isSolutionLevelPackage = IsSolutionOnlyPackage(packageManager.LocalRepository, Id, Version);
-
-            if (isSolutionLevelPackage) {
+            
+            bool isSolutionLevel = IsSolutionOnlyPackage(packageManager.LocalRepository, Id);
+            if (isSolutionLevel) {
                 if (!String.IsNullOrEmpty(Project)) {
                     WriteError(
                         String.Format(CultureInfo.CurrentCulture, "The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.", Id),
-                        "Update-Package");
+                        "Remove-Package");
                 }
                 else {
-                    packageManager.UpdatePackage(Id, Version, UpdateDependencies.IsPresent);
+                    packageManager.UninstallPackage(Id, null, Force.IsPresent, RemoveDependencies.IsPresent);
                 }
             }
             else {
                 var projectManager = ProjectManager;
                 if (projectManager != null) {
-                    projectManager.UpdatePackageReference(Id, Version, UpdateDependencies.IsPresent);
+                    projectManager.RemovePackageReference(Id, Force.IsPresent, RemoveDependencies.IsPresent);
                 }
                 else {
-                    // if there is no project specified, update at the solution level
-                    packageManager.UpdatePackage(Id, Version, UpdateDependencies);
+                    WriteError("Missing project parameter or invalid project name.", ErrorId);
                 }
             }
         }

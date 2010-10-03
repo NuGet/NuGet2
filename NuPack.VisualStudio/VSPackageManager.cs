@@ -48,11 +48,6 @@
             }
         }
 
-        // Need object overloads so that the powershell script can call into it
-        //public ProjectManager GetProjectManager(object project) {
-        //    return GetProjectManager((Project)project);
-        //}
-
         public ProjectManager GetProjectManager(Project project) {
             EnsureProjectManagers();
             ProjectManager projectManager;

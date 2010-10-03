@@ -19,21 +19,15 @@ namespace NuPack.VisualStudio.Cmdlets {
         #endregion
 
         protected override void ProcessRecordCore() {
-            base.ProcessRecord();
-
-            IPackageRepository repository = null;
-
-            DTE dte = DTEExtensions.DTE;
-            if (dte != null && dte.Solution != null && dte.Solution.IsOpen) {
+            if (IsSolutionOpen) {
                 if (Updates.IsPresent) {
                     ShowUpdatePackages();
-                    return;
                 }
                 else if (Installed.IsPresent) {
-                    repository = PackageManager.LocalRepository;
+                    GetPackagesFromRepository(PackageManager.LocalRepository);
                 }
                 else {
-                    repository = PackageManager.SourceRepository;
+                    GetPackagesFromRepository(PackageManager.SourceRepository);
                 }
             }
             else {
@@ -44,29 +38,23 @@ namespace NuPack.VisualStudio.Cmdlets {
 
                 var packageSource = ActivePackageSource;
                 if (!String.IsNullOrEmpty(packageSource)) {
-                    repository = PackageRepositoryFactory.CreateRepository(packageSource);
-                }
-                else {
-                    return;
+                    GetPackagesFromRepository(PackageRepositoryFactory.CreateRepository(packageSource));
                 }
             }
+        }
 
-            if (repository != null) {
-                var q = from p in repository.GetPackages()
-                        select new { Id = p.Id, Version = p.Version, Description = p.Description };
-                if (q.Any()) {
-                    WriteObject(q);
-                }
-                else {
-                    WriteLine("There is no package found.");
-                }
-            }
+        private void GetPackagesFromRepository(IPackageRepository repository) {
+            var q = from p in repository.GetPackages()
+                    select new { Id = p.Id, Version = p.Version, Description = p.Description };
+
+            WriteObject(q);
         }
 
         private void ShowUpdatePackages() {
             var solutionPackages = PackageManager.LocalRepository.GetPackages();
             var externalPackages = PackageManager.SourceRepository.GetPackages();
 
+            // inner join
             var q = from s in solutionPackages
                     join e in externalPackages on true equals true
                     where s.Id.Equals(e.Id, StringComparison.OrdinalIgnoreCase) && s.Version < e.Version
@@ -76,12 +64,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                         NewVersion = e.Version
                     };
 
-            if (q.Any()) {
-                WriteObject(q);
-            }
-            else {
-                WriteLine("There is no updates found.");
-            }
+            WriteObject(q);
         }
 
         private string ActivePackageSource {

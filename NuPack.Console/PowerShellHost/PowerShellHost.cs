@@ -47,14 +47,10 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             // load user profile scripts before the command prompt shows up. It also helps with 
             // tab expansion right from the beginning
             SetupRunspace();
-
-            LoadStartupScripts();
-
-            DisplayDisclaimerText();
-
-            LoadProfilesIntoRunspace(_myRunSpace);
-
             SetupSolutionHelper();
+            LoadStartupScripts();
+            DisplayDisclaimerText();
+            LoadProfilesIntoRunspace(_myRunSpace);
         }
 
         private void SetupSolutionHelper() {
@@ -80,7 +76,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
             Invoke("Set-ExecutionPolicy RemoteSigned -Scope Process -Force", null, false);
             Invoke("Import-Module '" + profilePath + "'", null, false);
-            //Invoke("Import-Module '" + npackPath + "'", null, false);
+            Invoke("Import-Module '" + npackPath + "'", null, false);
             Invoke("Import-Module '" + vsPath + "'", null, false);
         }
 
@@ -197,9 +193,9 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         public string Prompt
         {
             get 
-			{ 
-				return ComplexCommand.IsComplete ? "PM>" : ">> "; 
-			}
+            { 
+                return ComplexCommand.IsComplete ? "PM>" : ">> "; 
+            }
         }
 
         public bool Execute(string command)

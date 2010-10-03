@@ -68,13 +68,13 @@ namespace NuPack.VisualStudio.Cmdlets {
                 outputFile = Path.Combine(folder, outputFile);
             }
 
-            WriteObject("Creating package at " + outputFile + "...");
+            WriteLine("Creating package at " + outputFile + "...");
 
             using (Stream stream = File.Create(outputFile)) {
                 builder.Save(stream);
             }
 
-            WriteObject("Package file successfully created...");
+            WriteLine("Package file successfully created...");
         }
 
         private ProjectItem FindSpecFile(EnvDTE.Project projectIns, string specFile) {
@@ -82,10 +82,13 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return projectIns.ProjectItems.Item(specFile);
             }
             else {
+                // Verify if the project has eaxtly one file with the .nuspec extension. 
+                // If found, use it as the manifest file for package creation.
                 int count = 0;
                 ProjectItem foundItem = null;
+
                 foreach (ProjectItem item in projectIns.ProjectItems) {
-                    if (item.Name.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase)) {
+                    if (item.Name.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
                         foundItem = item;
                         count++;
                         if (count > 1) {

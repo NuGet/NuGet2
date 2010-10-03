@@ -53,12 +53,13 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cmdlets\AddPackageCmdlet.cs" />
-    <Compile Include="Cmdlets\CmdletHelper.cs" />
+    <Compile Include="Cmdlets\GetProjectCmdlet.cs" />
+    <Compile Include="Cmdlets\InstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\GetPackageCmdlet.cs" />
     <Compile Include="Cmdlets\NewPackageCmdlet.cs" />
     <Compile Include="Cmdlets\NuPackBaseCmdlet.cs" />
-    <Compile Include="Cmdlets\RemovePackageCmdlet.cs" />
+    <Compile Include="Cmdlets\ProcessPackageBaseCmdlet.cs" />
+    <Compile Include="Cmdlets\UninstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
