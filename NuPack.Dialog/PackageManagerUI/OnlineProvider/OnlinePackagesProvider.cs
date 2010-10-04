@@ -19,7 +19,6 @@ namespace NuPack.Dialog.Providers {
         private bool m_OnlineDisabled;
         private Dispatcher m_CurrentDispatcher;
         private ResourceDictionary _resources;
-        private EnvDTE.DTE _dte;
        
         public OnlinePackagesProvider(ResourceDictionary resources, bool onlineDisabled) {
             _resources = resources;
@@ -31,11 +30,7 @@ namespace NuPack.Dialog.Providers {
 
         private EnvDTE.DTE DTE {
             get {
-                // REVIEW: Is it safe to cache this?
-                if (_dte == null) {
-                    _dte = DTEExtensions.DTE;
-                }
-                return _dte;
+                return DTEExtensions.DTE;
             }
         }
 

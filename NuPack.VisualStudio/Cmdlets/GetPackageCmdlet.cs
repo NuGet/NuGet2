@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Management.Automation;
-using EnvDTE;
 
 namespace NuPack.VisualStudio.Cmdlets {
 

@@ -3,7 +3,8 @@
 namespace NuPack.VisualStudio.Cmdlets {
 
     /// <summary>
-    /// This cmdlet returns the list of project names in the current solution, which is used for tab expansion.
+    /// This cmdlet returns the list of project names in the current solution, 
+    /// which is used for tab expansion.
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "Projects")]
     public class GetProjectCmdlet : Cmdlet {

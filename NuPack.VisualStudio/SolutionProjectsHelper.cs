@@ -155,7 +155,7 @@ namespace NuPack.VisualStudio {
         /// <returns></returns>
         public string[] GetCurrentProjectNames() {
             if (_dte.Solution.IsOpen) {
-                return (from p in _projectCache.Values select p.Name).ToArray();
+                return _projectCache.Keys.ToArray();
             }
             else {
                 return new string[0];
@@ -178,20 +178,20 @@ namespace NuPack.VisualStudio {
                 yield break;
             }
 
-            Queue<Project> ps = new Queue<Project>();
+            Stack<Project> ps = new Stack<Project>();
             foreach (Project project in _dte.Solution.Projects) {
-                ps.Enqueue(project);
+                ps.Push(project);
             }
 
             while (ps.Count > 0) {
-                Project project = ps.Dequeue();
+                Project project = ps.Pop();
                 if (IsProjectSupported(project)) {
                     yield return project;
                 }
 
                 foreach (ProjectItem pi in project.ProjectItems) {
                     if (pi.SubProject != null) {
-                        ps.Enqueue(pi.SubProject);
+                        ps.Push(pi.SubProject);
                     }
                 }
             }

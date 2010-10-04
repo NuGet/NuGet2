@@ -8,6 +8,9 @@ using Microsoft.VisualStudio.PlatformUI;
 
 using NuPack.Dialog.Providers;
 using NuPack.Dialog.ToolsOptionsUI;
+using System.ComponentModel.Design;
+using Microsoft.VisualStudio;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.PackageManagerUI {
     /// <summary>
@@ -114,7 +117,18 @@ namespace NuPack.Dialog.PackageManagerUI {
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
-            //(Utilities.ServiceProvider as Microsoft.VisualStudio.Shell.Package).ShowOptionPage(typeof(ToolsOptionsPage));
+            OpenOptionsPage();
+        }
+
+        private void OpenOptionsPage() {
+            // TODO: Move the Options UI to NuPack.VisualStudio project and declare this GUID as a constant.
+            string targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
+            var command = new CommandID(
+                VSConstants.GUID_VSStandardCommandSet97,
+                VSConstants.cmdidToolsOptions);
+
+            MenuCommandService mcs = DTEExtensions.DTE.GetService<MenuCommandService>(typeof(IMenuCommandService));
+            mcs.GlobalInvoke(command, targetGUID);
         }
 
         private void ExecutedDownloadExtension(object sender, ExecutedRoutedEventArgs e) {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Management.Automation;
-using EnvDTE;
-using System.IO;
 
 namespace NuPack.VisualStudio.Cmdlets
 {

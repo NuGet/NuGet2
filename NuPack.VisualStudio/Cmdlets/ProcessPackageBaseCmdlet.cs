@@ -7,9 +7,12 @@ using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
+    /// <summary>
+    /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
+    /// </summary>
     public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
+        
         private ProjectManager _projectManager;
-
         protected ProjectManager ProjectManager {
             get {
                 if (_projectManager == null) {
@@ -32,16 +35,20 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         protected override void BeginProcessing() {
             base.BeginProcessing();
-            
-            PackageManager.PackageInstalling += OnPackageInstalling;
-            PackageManager.PackageInstalled += OnPackageInstalled;
+
+            if (PackageManager != null) {
+                PackageManager.PackageInstalling += OnPackageInstalling;
+                PackageManager.PackageInstalled += OnPackageInstalled;
+            }
         }
 
         protected override void EndProcessing() {
             base.EndProcessing();
 
-            PackageManager.PackageInstalling -= OnPackageInstalling;
-            PackageManager.PackageInstalled -= OnPackageInstalled;
+            if (PackageManager != null) {
+                PackageManager.PackageInstalling -= OnPackageInstalling;
+                PackageManager.PackageInstalled -= OnPackageInstalled;
+            }
 
             if (_projectManager != null) {
                 _projectManager.Logger = null;
@@ -53,6 +60,11 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         private ProjectManager GetProjectManager(string projectName) {
+
+            if (PackageManager == null) {
+                return null;
+            }
+
             if (String.IsNullOrEmpty(projectName)) {
                 projectName = DefaultProjectName;
             }

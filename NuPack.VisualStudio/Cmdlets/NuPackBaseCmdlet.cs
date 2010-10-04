@@ -2,16 +2,20 @@
 using System.Globalization;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
-using System.IO;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
 
-        protected VSPackageManager PackageManager {
-            get;
-            private set;
+        private VSPackageManager _packageManager;
+        public VSPackageManager PackageManager {
+            get {
+                if (_packageManager == null) {
+                    _packageManager = GetPackageManager();
+                }
+
+                return _packageManager;
+            }
         }
 
         protected string DefaultProjectName {
@@ -29,20 +33,6 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         #region Processing methods
 
-        protected override void BeginProcessing() {
-            // prepare a PackageManager instance for use throughout the command execution lifetime
-
-            DTE dte = DTEExtensions.DTE;
-            if (dte == null) {
-                throw new InvalidOperationException("DTE isn't loaded.");
-            }
-
-            var packageManager = VSPackageManager.GetPackageManager(dte);
-            packageManager.Logger = this;
-
-            PackageManager = packageManager;
-        }
-
         protected sealed override void ProcessRecord() {
             try {
                 ProcessRecordCore();
@@ -54,9 +44,14 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         protected override void EndProcessing() {
-            PackageManager.Logger = null;
+            if (_packageManager != null) {
+                _packageManager.Logger = null;
+            }
         }
 
+        /// <summary>
+        /// Derived classess must implement this method instead of ProcessRecord(), which is now sealed.
+        /// </summary>
         protected abstract void ProcessRecordCore();
 
         #endregion
@@ -87,6 +82,23 @@ namespace NuPack.VisualStudio.Cmdlets {
         #endregion
 
         #region Helper functions
+
+        private VSPackageManager GetPackageManager() {
+            if (!IsSolutionOpen) {
+                return null;
+            }
+
+            // prepare a PackageManager instance for use throughout the command execution lifetime
+            DTE dte = DTEExtensions.DTE;
+            if (dte == null) {
+                throw new InvalidOperationException("DTE isn't loaded.");
+            }
+
+            var packageManager = VSPackageManager.GetPackageManager(dte);
+            packageManager.Logger = this;
+
+            return packageManager;
+        }
 
         protected Project GetProjectFromName(string projectName) {
             return SolutionProjectsHelper.Instance.GetProjectFromName(projectName);
