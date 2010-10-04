@@ -53,7 +53,7 @@ namespace NuPack.Tools
         /// the OleMenuCommandService service and the MenuCommand class.
         /// </summary>
         private void MenuItemCallback(object sender, EventArgs e) {
-            var window = new PackageManagerWindow();
+            var window = new PackageManagerWindow(this);
             window.ShowModal();
         }
 
@@ -67,6 +67,7 @@ namespace NuPack.Tools
         {
             base.Initialize();
 
+            // set it here so that the rest of the extension can access the DTE
             DTEExtensions.DTE = (DTE)GetService(typeof(SDTE));
 
             // Add our command handlers for menu (commands must exist in the .vsct file)

@@ -21,14 +21,13 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         public IConsole Console { get; private set; }
         
         private string _name;
-        private Action<InitialSessionState> _init;
         private object _privateData;
         private Runspace _myRunSpace;
         private MyHost _myHost;
         private SolutionProjectsHelper _solutionHelper;
         private VSPackageSourceProvider _packageSourceProvider;
 
-        protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, Action<InitialSessionState> init, object privateData)
+        protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, object privateData)
         {
             UtilityMethods.ThrowIfArgumentNull(console);
 
@@ -37,7 +36,6 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
             _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(dte);
             _name = name;
-            _init = init;
             _privateData = privateData;
         }
 
@@ -88,24 +86,9 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             }
             
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
-            if (_init != null)
-            {
-                _init(initialSessionState);
-            }
-
             initialSessionState.Variables.Add(
-                new SessionStateVariableEntry(
-                    "PackageSourceStore", 
-                    _packageSourceProvider, 
-                    null, 
-                    ScopedItemOptions.ReadOnly));
-
-            initialSessionState.Variables.Add(
-                new SessionStateVariableEntry(
-                    "NuPackDisclaimerText",
-                    VsResources.InstallSuccessDisclaimerText,
-                    null,
-                    ScopedItemOptions.ReadOnly));
+                new SessionStateVariableEntry("DTE", (DTE2)DTEExtensions.DTE, "Visual Studio DTE automation object",
+                    ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
             //// For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
             //// will reveal syntax error information if there is any.
@@ -424,8 +407,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation
 
     class SyncPowerShellHost : PowerShellHost
     {
-        public SyncPowerShellHost(IConsole console, DTE2 dte, string name, Action<InitialSessionState> init, object privateData)
-            : base(console, dte, name, false, init, privateData)
+        public SyncPowerShellHost(IConsole console, DTE2 dte, string name, object privateData)
+            : base(console, dte, name, false, privateData)
         {
         }
 
@@ -456,8 +439,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation
     {
         public event EventHandler ExecuteEnd;
 
-        public AsyncPowerShellHost(IConsole console, DTE2 dte, string name, Action<InitialSessionState> init, object privateData)
-            : base(console, dte, name, true, init, privateData)
+        public AsyncPowerShellHost(IConsole console, DTE2 dte, string name, object privateData)
+            : base(console, dte, name, true, privateData)
         {
         }
 

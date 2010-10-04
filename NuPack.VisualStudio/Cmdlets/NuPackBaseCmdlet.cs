@@ -5,9 +5,17 @@ using EnvDTE;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
+    /// <summary>
+    /// This is the base class for all NuPack cmdlets.
+    /// </summary>
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
 
         private VSPackageManager _packageManager;
+
+        /// <summary>
+        /// Gets an instance of VSPackageManager to be used throughout the execution of this command.
+        /// </summary>
+        /// <value>The package manager.</value>
         public VSPackageManager PackageManager {
             get {
                 if (_packageManager == null) {
@@ -18,12 +26,19 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
+        /// <summary>
+        /// Gets the default project name if a -Project parameter is not supplied.
+        /// </summary>
+        /// <value>The default project name.</value>
         protected string DefaultProjectName {
             get {
                 return SolutionProjectsHelper.Instance.DefaultProjectName;
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether there is a solution open in the IDE.
+        /// </summary>
         protected bool IsSolutionOpen {
             get {
                 var dte = DTEExtensions.DTE;
@@ -38,8 +53,16 @@ namespace NuPack.VisualStudio.Cmdlets {
                 ProcessRecordCore();
             }
             catch (Exception ex) {
-                // IMPORTANT: we need to swallow exception here so that the EndProcessing() method is called.
-                WriteError(new ErrorRecord(ex, null, ErrorCategory.NotSpecified, null));
+                // Swallowing exception here has two purposes: 
+                // + display friendly error message to the console without the stack trace.
+                // + allows EndProcessing() to get called, so that we can unsubscribe the Logger.
+
+                if (ex.InnerException != null) {
+                    WriteError(ex.InnerException.Message);
+                }
+                else {
+                    WriteError(ex.Message);
+                }
             }
         }
 
@@ -50,7 +73,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         /// <summary>
-        /// Derived classess must implement this method instead of ProcessRecord(), which is now sealed.
+        /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuPackBaseCmdlet.
         /// </summary>
         protected abstract void ProcessRecordCore();
 
@@ -104,8 +127,10 @@ namespace NuPack.VisualStudio.Cmdlets {
             return SolutionProjectsHelper.Instance.GetProjectFromName(projectName);
         }
 
-        protected void WriteError(string message, string errorId) {
-            WriteError(new ErrorRecord(new Exception(message), errorId, ErrorCategory.NotSpecified, null));
+        protected void WriteError(string message) {
+            if (!String.IsNullOrEmpty(message)) {
+                Host.UI.WriteErrorLine(message);
+            }
         }
 
         protected void WriteLine(string message = null) {

@@ -11,7 +11,7 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
     public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
-        
+
         private ProjectManager _projectManager;
         protected ProjectManager ProjectManager {
             get {
@@ -55,7 +55,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 _projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
                 _projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
             }
-            
+
             WriteLine();
         }
 
@@ -87,12 +87,26 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         private void OnPackageInstalling(object sender, PackageOperationEventArgs e) {
+            // write disclaimer text before a package is installed
             WriteDisclaimerText(e.Package);
         }
 
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {
-            // TODO: add Tools folder to env variable
-            ExecuteScript(e.InstallPath, Path.Combine(e.InstallPath, "tools"), "init.ps1", e.Package, null);
+            AddToolsFolderToEnvironmentPath(e.InstallPath);
+            ExecuteScript(e.InstallPath, "init.ps1", e.Package, null);
+        }
+
+        private void AddToolsFolderToEnvironmentPath(string installPath) {
+            string toolsPath = Path.Combine(installPath, "tools");
+            if (Directory.Exists(toolsPath)) {
+                var envPath = (string)GetVariableValue("env:path");
+                if (!envPath.EndsWith(";", StringComparison.OrdinalIgnoreCase)) {
+                    envPath = envPath + ";";
+                }
+                envPath += toolsPath;
+
+                SessionState.PSVariable.Set("env:path", envPath);
+            }
         }
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
@@ -100,7 +114,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             string projectName = manager.Project.ProjectName;
             EnvDTE.Project projectIns = GetProjectFromName(projectName);
 
-            ExecuteScript(e.InstallPath, Path.Combine(e.InstallPath, "tools"), "install.ps1", e.Package, projectIns);
+            ExecuteScript(e.InstallPath, "install.ps1", e.Package, projectIns);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
@@ -108,35 +122,30 @@ namespace NuPack.VisualStudio.Cmdlets {
             string projectName = manager.Project.ProjectName;
             EnvDTE.Project projectIns = GetProjectFromName(projectName);
 
-            ExecuteScript(e.InstallPath, Path.Combine(e.InstallPath, "tools"), "uninstall.ps1", e.Package, projectIns);
+            ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, projectIns);
         }
 
-        protected void ExecuteScript(string rootPath, string toolsPath, string scriptFileName, IPackage package, Project project) {
-            try {
-                string fullPath = Path.Combine(toolsPath, scriptFileName);
-                if (File.Exists(fullPath)) {
-                    var psVariable = SessionState.PSVariable;
+        protected void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project) {
+            string toolsPath = Path.Combine(rootPath, "tools");
+            string fullPath = Path.Combine(toolsPath, scriptFileName);
+            if (File.Exists(fullPath)) {
+                var psVariable = SessionState.PSVariable;
 
-                    // set temp variables to pass to the script
-                    psVariable.Set("__rootPath", rootPath);
-                    psVariable.Set("__toolsPath", toolsPath);
-                    psVariable.Set("__package", package);
-                    psVariable.Set("__project", project);
+                // set temp variables to pass to the script
+                psVariable.Set("__rootPath", rootPath);
+                psVariable.Set("__toolsPath", toolsPath);
+                psVariable.Set("__package", package);
+                psVariable.Set("__project", project);
 
-                    string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
-                    WriteDebug("Executing command: " + command);
-                    InvokeCommand.InvokeScript(command);
+                string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
+                WriteVerbose("Executing script file: " + fullPath);
+                InvokeCommand.InvokeScript(command);
 
-                    // clear temp variables
-                    psVariable.Remove("__rootPath");
-                    psVariable.Remove("__toolsPath");
-                    psVariable.Remove("__package");
-                    psVariable.Remove("__project");
-                }
-            }
-            catch (Exception ex) {
-                // we don't want tool script's error to bubble up
-                WriteError(new ErrorRecord(ex, null, ErrorCategory.NotSpecified, null));
+                // clear temp variables
+                psVariable.Remove("__rootPath");
+                psVariable.Remove("__toolsPath");
+                psVariable.Remove("__package");
+                psVariable.Remove("__project");
             }
         }
 

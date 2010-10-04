@@ -7,6 +7,9 @@ using EnvDTE;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
+    /// <summary>
+    /// This command creates new package file.
+    /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
     public class NewPackageCmdlet : NuPackBaseCmdlet {
 
@@ -15,14 +18,14 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         #region Parameters
 
-        [Parameter(Position=0)]
+        [Parameter(Position = 0)]
         public string Project { get; set; }
 
-        [Parameter(Position=1)]
+        [Parameter(Position = 1)]
         [Alias("Spec")]
         public string SpecFile { get; set; }
 
-        [Parameter(Position=2)]
+        [Parameter(Position = 2)]
         public string TargetFile { get; set; }
 
         #endregion
@@ -35,19 +38,19 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             if (String.IsNullOrEmpty(projectName)) {
-                WriteError("Missing -Project parameter and the default project is not set.", "New-Package");
+                WriteError("Missing -Project parameter and the default project is not set.");
                 return;
             }
 
             var projectIns = GetProjectFromName(projectName);
             if (projectIns == null) {
-                WriteError(String.Format(CultureInfo.CurrentCulture, "Project '{0}' is not found."), "New-Package");
+                WriteError(String.Format(CultureInfo.CurrentCulture, "Project '{0}' is not found.", projectName));
                 return;
             }
 
             var specItem = FindSpecFile(projectIns, SpecFile);
             if (specItem == null) {
-                WriteError("Unable to locate the nuspec file", "New-Package");
+                WriteError("Unable to locate a .nuspec file in the specified project.");
                 return;
             }
 

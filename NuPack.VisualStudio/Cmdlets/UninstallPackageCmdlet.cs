@@ -4,10 +4,11 @@ using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
+    /// <summary>
+    /// This command uninstalls the specified package from the specified project.
+    /// </summary>
     [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
     public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
-        private const string ErrorId = "Uninstall-Package";
-
         #region Parameters
 
         [Parameter(Position = 2)]
@@ -20,18 +21,19 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {
-                WriteError("There is no active solution.", ErrorId);
+                WriteError("There is no active solution in the current environment.");
                 return;
             }
 
             var packageManager = PackageManager;
-            
+
             bool isSolutionLevel = IsSolutionOnlyPackage(packageManager.LocalRepository, Id);
             if (isSolutionLevel) {
                 if (!String.IsNullOrEmpty(Project)) {
-                    WriteError(
-                        String.Format(CultureInfo.CurrentCulture, "The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.", Id),
-                        "Remove-Package");
+                    WriteError(String.Format(
+                        CultureInfo.CurrentCulture,
+                        "The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.",
+                        Id));
                 }
                 else {
                     packageManager.UninstallPackage(Id, null, Force.IsPresent, RemoveDependencies.IsPresent);
@@ -43,7 +45,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                     projectManager.RemovePackageReference(Id, Force.IsPresent, RemoveDependencies.IsPresent);
                 }
                 else {
-                    WriteError("Missing project parameter or invalid project name.", ErrorId);
+                    WriteError("Missing project parameter or invalid project name.");
                 }
             }
         }

@@ -100,6 +100,14 @@ $global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler
     }
 })
 
+function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
+    $fullPath = (Join-Path $rootPath $scriptFile)
+    if (Test-Path $fullPath) {
+        $folder = Split-Path $fullPath
+        & $fullPath $rootPath $folder $package
+    }
+}
+
 function global:_AddToolsFolderToEnv([string]$rootPath) {
     # add tools path to the environment
     $toolsPath = (Join-Path $rootPath 'tools')

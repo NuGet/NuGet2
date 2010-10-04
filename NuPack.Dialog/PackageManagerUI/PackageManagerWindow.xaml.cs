@@ -1,16 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Windows;
 using System.Windows.Input;
 
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 
 using NuPack.Dialog.Providers;
-using NuPack.Dialog.ToolsOptionsUI;
-using System.ComponentModel.Design;
-using Microsoft.VisualStudio;
 using NuPack.VisualStudio;
+
+using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuPack.Dialog.PackageManagerUI {
     /// <summary>
@@ -18,14 +19,18 @@ namespace NuPack.Dialog.PackageManagerUI {
     /// </summary>
     public partial class PackageManagerWindow : DialogWindow, INotifyPropertyChanged {
         private const string F1Keyword = "vs.ExtensionManager";
+        private DTEPackage _ownerPackage;
 
         ///// <summary>
         ///// Constructor for the Extension Manager Window
         ///// </summary>
-        public PackageManagerWindow()
+        public PackageManagerWindow(DTEPackage package)
             : base(F1Keyword) {
 
             InitializeComponent();
+
+            System.Diagnostics.Debug.Assert(package != null);
+            _ownerPackage = package;
 
             InstalledPackagesProvider installedPackagesProvider = new InstalledPackagesProvider(Resources);
             this.explorer.Providers.Add(installedPackagesProvider);
@@ -121,14 +126,7 @@ namespace NuPack.Dialog.PackageManagerUI {
         }
 
         private void OpenOptionsPage() {
-            // TODO: Move the Options UI to NuPack.VisualStudio project and declare this GUID as a constant.
-            string targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
-            var command = new CommandID(
-                VSConstants.GUID_VSStandardCommandSet97,
-                VSConstants.cmdidToolsOptions);
-
-            MenuCommandService mcs = DTEExtensions.DTE.GetService<MenuCommandService>(typeof(IMenuCommandService));
-            mcs.GlobalInvoke(command, targetGUID);
+            _ownerPackage.ShowOptionPage(typeof(ToolsOptionsUI.ToolsOptionsPage));
         }
 
         private void ExecutedDownloadExtension(object sender, ExecutedRoutedEventArgs e) {

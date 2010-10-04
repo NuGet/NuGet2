@@ -42,13 +42,6 @@ namespace NuPackConsole.Host.PowerShell.Implementation
                 dte,
                 PowerConsoleHostName, 
                 /*isAsync*/false,
-                (initialSessionState) =>
-                {
-                    
-                    initialSessionState.Variables.Add(
-                        new SessionStateVariableEntry("DTE", dte, "Visual Studio DTE automation object",
-                            ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
-                },
                 new Commander(console));
 
 			console.Dispatcher.BeforeStart += (sender, e) =>

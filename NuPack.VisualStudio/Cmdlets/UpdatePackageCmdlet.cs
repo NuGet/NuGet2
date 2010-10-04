@@ -4,9 +4,11 @@ using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
+    /// <summary>
+    /// This project updates the specfied package to the specfied project.
+    /// </summary>
     [Cmdlet(VerbsData.Update, "Package")]
     public class UpdatePackageCmdlet : ProcessPackageBaseCmdlet {
-        private const string ErrorId = "Update-Package";
 
         #region Parameters
 
@@ -20,7 +22,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {
-                WriteError("There is no active solution.", ErrorId);
+                WriteError("There is no active solution.");
                 return;
             }
 
@@ -29,9 +31,10 @@ namespace NuPack.VisualStudio.Cmdlets {
 
             if (isSolutionLevelPackage) {
                 if (!String.IsNullOrEmpty(Project)) {
-                    WriteError(
-                        String.Format(CultureInfo.CurrentCulture, "The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.", Id),
-                        "Update-Package");
+                    WriteError(String.Format(
+                        CultureInfo.CurrentCulture,
+                        "The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.",
+                        Id));
                 }
                 else {
                     packageManager.UpdatePackage(Id, Version, UpdateDependencies.IsPresent);

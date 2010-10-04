@@ -4,11 +4,14 @@ using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
+    /// <summary>
+    /// This command lists the available packages which are either from a package source or installed in the current solution.
+    /// </summary>
     [Cmdlet(VerbsCommon.Get, "Package")]
     public class GetPackageCmdlet : NuPackBaseCmdlet {
 
         #region Parameters
-        
+
         [Parameter]
         public SwitchParameter Installed { get; set; }
 
@@ -31,7 +34,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
             else {
                 if (Installed.IsPresent || Updates.IsPresent) {
-                    WriteError("The current environment doesn't have a solution open.", "Get-Package");
+                    WriteError("The current environment doesn't have a solution open.");
                     return;
                 }
 

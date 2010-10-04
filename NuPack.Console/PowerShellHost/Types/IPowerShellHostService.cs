@@ -6,6 +6,6 @@ namespace NuPackConsole.Host.PowerShell
 {
     public interface IPowerShellHostService
     {
-        IHost CreateHost(IConsole console, DTE2 dte, string name = null, bool isAsync = false, Action<InitialSessionState> init = null, object privateData = null);
+        IHost CreateHost(IConsole console, DTE2 dte, string name = null, bool isAsync = false, object privateData = null);
     }
 }
