@@ -4,6 +4,7 @@
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Net.Cache;
     using System.ServiceModel.Syndication;
     using System.Xml;
     using NuPack.Resources;
@@ -41,7 +42,8 @@
         private Stream GetFeedStream() {
             // Manually create the request to the feed so we can
             // set the default credentials
-            var request = WebRequest.Create(_feedUri);
+            WebRequest request = WebRequest.Create(_feedUri);
+            request.CachePolicy = new HttpRequestCachePolicy();
             request.UseDefaultCredentials = true;
             Utility.ConfigureProxy(request.Proxy);
 

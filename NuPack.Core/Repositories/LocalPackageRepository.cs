@@ -6,7 +6,7 @@
 
     public class LocalPackageRepository : PackageRepositoryBase {
         private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
-
+        
         public LocalPackageRepository(string physicalPath)
             : this(new DefaultPackagePathResolver(physicalPath),
                    new FileBasedProjectSystem(physicalPath)) {
@@ -35,36 +35,33 @@
             set;
         }
 
-        public override IQueryable<IPackage> GetPackages() {
-            var packages = new List<IPackage>();
+        public override IQueryable<IPackage> GetPackages() {            
+            return GetPackagesInternal().AsQueryable();
+        }
+
+        private IEnumerable<IPackage> GetPackagesInternal() {
             foreach (var path in GetPackageFiles()) {
-                try {
-                    PackageCacheEntry cacheEntry;
-                    DateTime lastModified = FileSystem.GetLastModified(path);
-                    // If we never cached this file or we did and it's current last modified time is newer
-                    // create a new entry
-                    if (!_packageCache.TryGetValue(path, out cacheEntry) ||
-                        (cacheEntry != null && lastModified > cacheEntry.LastModifiedTime)) {
-                        // We need to do this so we capture the correct loop variable
-                        string packagePath = path;
+                PackageCacheEntry cacheEntry;
+                DateTime lastModified = FileSystem.GetLastModified(path);
+                // If we never cached this file or we did and it's current last modified time is newer
+                // create a new entry
+                if (!_packageCache.TryGetValue(path, out cacheEntry) ||
+                    (cacheEntry != null && lastModified > cacheEntry.LastModifiedTime)) {
+                    // We need to do this so we capture the correct loop variable
+                    string packagePath = path;
 
-                        // Create the package
-                        var package = new ZipPackage(() => FileSystem.OpenFile(packagePath));
+                    // Create the package
+                    var package = new ZipPackage(() => FileSystem.OpenFile(packagePath));
 
-                        // create a cache entry with the last modified time
-                        cacheEntry = new PackageCacheEntry(package, lastModified);
+                    // create a cache entry with the last modified time
+                    cacheEntry = new PackageCacheEntry(package, lastModified);
 
-                        // Store the entry
-                        _packageCache[packagePath] = cacheEntry;
-                    }
-
-                    packages.Add(cacheEntry.Package);
+                    // Store the entry
+                    _packageCache[packagePath] = cacheEntry;
                 }
-                catch (NotSupportedException) {
-                    // If this is an unsupported package then skip it
-                }
+
+                yield return cacheEntry.Package;
             }
-            return packages.AsQueryable();
         }
 
         internal IEnumerable<string> GetPackageFiles() {

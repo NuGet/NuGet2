@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Net.Cache;
 
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Our implementation of PackageProperties has nothing to dispose")]
     internal class FeedPackage : LazyPackage {
@@ -102,14 +103,20 @@
 
         protected override IPackage CreatePackage() {
             return new ZipPackage(() => {
-                // TODO: Change this to WebRequest
-                using (var client = new WebClient()) {
-                    // Make sure we use the default credentials for this request
-                    client.UseDefaultCredentials = true;
-                    Utility.ConfigureProxy(client.Proxy);
+                WebRequest request = WebRequest.Create(_item.DownloadLink.Uri);
+                request.CachePolicy = new HttpRequestCachePolicy();
+                request.UseDefaultCredentials = true;
+                Utility.ConfigureProxy(request.Proxy);
 
-                    // TODO: Verify package hash and length                
-                    return new MemoryStream(client.DownloadData(_item.DownloadLink.Uri));
+                WebResponse response = request.GetResponse();
+                using (Stream responseStream = response.GetResponseStream()) {
+                    // ZipPackages require a seekable stream
+                    var memoryStream = new MemoryStream((int)response.ContentLength);
+                    // Copy the stream
+                    responseStream.CopyTo(memoryStream);
+                    // Move it back to the beginning
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+                    return memoryStream;
                 }
             });
         }

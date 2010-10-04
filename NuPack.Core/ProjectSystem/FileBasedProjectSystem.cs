@@ -129,6 +129,9 @@
         }
 
         public override DateTime GetLastModified(string path) {
+            if (DirectoryExists(path)) {
+                return new DirectoryInfo(GetFullPath(path)).LastWriteTime;
+            }
             return new FileInfo(GetFullPath(path)).LastWriteTime;
         }
 

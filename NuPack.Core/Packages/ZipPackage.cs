@@ -26,7 +26,7 @@
             _streamFactory = () => File.OpenRead(fileName);
         }
 
-        public ZipPackage(Func<Stream> streamFactory) {
+        internal ZipPackage(Func<Stream> streamFactory) {
             if (streamFactory == null) {
                 throw new ArgumentNullException("streamFactory");
             }
