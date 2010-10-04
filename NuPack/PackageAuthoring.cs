@@ -4,22 +4,49 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace NuPack {
-    public class PackageAuthoring {
+namespace NuPack
+{
+    public class PackageAuthoring
+    {
         private static readonly HashSet<string> _exclude = new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension },
                                                                               StringComparer.OrdinalIgnoreCase);
 
-        public static void Main(string[] args) {
+        public static void Main(string[] args)
+        {
             // Review: Need to use a command-line parsing library instead of parsing it this way.
             string executable = Path.GetFileName(Environment.GetCommandLineArgs().First());
-            string Usage = String.Format(CultureInfo.InvariantCulture,
-                "Usage: {0} <manifest-file>", executable);
-            if (!args.Any()) {
-                Console.Error.WriteLine(Usage);
-                return;
+
+            if (!args.Any())
+            {
+                bool showUsage = true;
+                string usage = String.Format(CultureInfo.InvariantCulture, "Usage: {0} <manifest-file>", executable);
+                string[] nuspecFiles = GetNuSpecFilesInDirectory();
+                if (nuspecFiles != null)
+                {
+                    switch (nuspecFiles.Length)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            showUsage = false;
+                            args = nuspecFiles;
+                            break;
+                        default:
+                            usage = "Specify which nuspec file to use because this folder has more than one.";
+                            break;
+                    }
+
+                }
+
+                if (showUsage)
+                {
+                    Console.Error.WriteLine(usage);
+                    Environment.Exit(1);
+                }
             }
 
-            try {
+            try
+            {
                 var manifestFile = args.First();
                 string outputDirectory = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
                 PackageBuilder builder = PackageBuilder.ReadFrom(manifestFile);
@@ -32,15 +59,22 @@ namespace NuPack {
 
                 string outputPath = Path.Combine(outputDirectory, outputFile);
 
-                using (Stream stream = File.Create(outputPath)) {
+                using (Stream stream = File.Create(outputPath))
+                {
                     builder.Save(stream);
                 }
 
                 Console.WriteLine("{0} created successfully", outputPath);
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 Console.Error.WriteLine(exception.Message);
             }
+        }
+
+        private static string[] GetNuSpecFilesInDirectory()
+        {
+            return Directory.GetFiles(Directory.GetCurrentDirectory(), "*.nuspec");
         }
     }
 }
