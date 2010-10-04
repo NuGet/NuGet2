@@ -20,12 +20,6 @@ namespace NuPack.Server.Controllers {
             string fullPath = Path.Combine(physicalPath, p);
 
             DateTime lastModified = new FileInfo(fullPath).LastAccessTimeUtc;
-            DateTime ifModifiedSince;
-            if (DateTime.TryParse(Request.Headers["If-Modified-Since"], out ifModifiedSince) &&
-                lastModified > ifModifiedSince) {
-                Response.StatusCode = 304;
-                return new EmptyResult();
-            }
 
             HttpCachePolicyBase cachePolicy = Response.Cache;
             cachePolicy.SetCacheability(HttpCacheability.Public);
@@ -44,12 +38,6 @@ namespace NuPack.Server.Controllers {
 
             // Get the last modified of the package directory
             DateTime lastModified = new DirectoryInfo(fullPath).LastWriteTimeUtc;
-            DateTime ifModifiedSince;
-            if (DateTime.TryParse(Request.Headers["If-Modified-Since"], out ifModifiedSince) &&
-                lastModified > ifModifiedSince) {
-                Response.StatusCode = 304;
-                return new EmptyResult();
-            }
 
             SyndicationFeed packageFeed = PackageSyndicationFeed.Create(
                 fullPath,
