@@ -55,7 +55,7 @@ function _TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount, [
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 2 -and !$secondLastWord.StartsWith('-'))) {
-        Get-Projects
+        GetProjectNames
     }
 }
 
@@ -68,7 +68,7 @@ function _TabExpansionForAddPackage([string]$secondLastWord, [int]$tokenCount, [
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        Get-Projects
+        GetProjectNames
     }
 }
 
@@ -81,8 +81,12 @@ function _TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        Get-Projects
+        GetProjectNames
     }
+}
+
+function global:GetProjectNames() {
+    Get-Project | ForEach-Object { $_.Name }
 }
 
 # hook up Solution Opened even to execute init.ps1 script files when a new solution is opened.

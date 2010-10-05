@@ -85,7 +85,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return projectIns.ProjectItems.Item(specFile);
             }
             else {
-                // Verify if the project has eaxtly one file with the .nuspec extension. 
+                // Verify if the project has exactly one file with the .nuspec extension. 
                 // If found, use it as the manifest file for package creation.
                 int count = 0;
                 ProjectItem foundItem = null;

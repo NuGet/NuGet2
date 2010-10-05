@@ -66,12 +66,6 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected override void EndProcessing() {
-            if (_packageManager != null) {
-                _packageManager.Logger = null;
-            }
-        }
-
         /// <summary>
         /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuPackBaseCmdlet.
         /// </summary>
@@ -117,10 +111,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
 
-            var packageManager = VSPackageManager.GetPackageManager(dte);
-            packageManager.Logger = this;
-
-            return packageManager;
+            return VSPackageManager.GetPackageManager(dte);
         }
 
         protected Project GetProjectFromName(string projectName) {

@@ -35,13 +35,17 @@ namespace NuPack.VisualStudio.Cmdlets {
                         Id));
                 }
                 else {
-                    packageManager.InstallPackage(Id, Version, IgnoreDependencies.IsPresent);
+                    using (new LoggerDisposer(packageManager, this)) {
+                        packageManager.InstallPackage(Id, Version, IgnoreDependencies.IsPresent);
+                    }
                 }
             }
             else {
                 var projectManager = ProjectManager;
                 if (projectManager != null) {
-                    projectManager.AddPackageReference(Id, Version, IgnoreDependencies.IsPresent);
+                    using (new LoggerDisposer(projectManager, this)) {
+                        projectManager.AddPackageReference(Id, Version, IgnoreDependencies.IsPresent);
+                    }
                 }
                 else {
                     WriteError("Missing project parameter or invalid project name.");

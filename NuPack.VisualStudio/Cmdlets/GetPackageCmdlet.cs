@@ -49,7 +49,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             var q = from p in repository.GetPackages()
                     select new { Id = p.Id, Version = p.Version, Description = p.Description };
 
-            WriteObject(q);
+            WriteObject(q, enumerateCollection: true);
         }
 
         private void ShowUpdatePackages() {
@@ -66,7 +66,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                         NewVersion = e.Version
                     };
 
-            WriteObject(q);
+            WriteObject(q, enumerateCollection: true);
         }
 
         private string ActivePackageSource {

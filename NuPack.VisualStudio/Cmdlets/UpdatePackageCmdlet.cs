@@ -37,17 +37,23 @@ namespace NuPack.VisualStudio.Cmdlets {
                         Id));
                 }
                 else {
-                    packageManager.UpdatePackage(Id, Version, UpdateDependencies.IsPresent);
+                    using (new LoggerDisposer(packageManager, this)) {
+                        packageManager.UpdatePackage(Id, Version, UpdateDependencies.IsPresent);
+                    }
                 }
             }
             else {
                 var projectManager = ProjectManager;
                 if (projectManager != null) {
-                    projectManager.UpdatePackageReference(Id, Version, UpdateDependencies.IsPresent);
+                    using (new LoggerDisposer(projectManager, this)) {
+                        projectManager.UpdatePackageReference(Id, Version, UpdateDependencies.IsPresent);
+                    }
                 }
                 else {
-                    // if there is no project specified, update at the solution level
-                    packageManager.UpdatePackage(Id, Version, UpdateDependencies);
+                    using (new LoggerDisposer(packageManager, this)) {
+                        // if there is no project specified, update at the solution level
+                        packageManager.UpdatePackage(Id, Version, UpdateDependencies);
+                    }
                 }
             }
         }

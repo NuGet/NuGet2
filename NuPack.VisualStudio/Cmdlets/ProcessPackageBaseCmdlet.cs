@@ -25,7 +25,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         #region Parameters
 
-        [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 0)]
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public string Id { get; set; }
 
         [Parameter(Position = 1)]
@@ -51,7 +51,6 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             if (_projectManager != null) {
-                _projectManager.Logger = null;
                 _projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
                 _projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
             }
@@ -79,7 +78,6 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             ProjectManager projectManager = PackageManager.GetProjectManager(project);
-            projectManager.Logger = this;
             projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
             projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
 
