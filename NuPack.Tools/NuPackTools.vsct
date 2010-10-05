@@ -61,7 +61,7 @@
           <CommandFlag>DefaultInvisible</CommandFlag>
           <Strings>
               <CommandName>cmdidASPNETPackages</CommandName>
-              <ButtonText>Add Package Reference...</ButtonText>
+              <ButtonText>Add Pac&amp;kage Reference...</ButtonText>
           </Strings>
       </Button>
     </Buttons>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -20,13 +21,13 @@ namespace NuPack.Dialog.PackageManagerUI {
         ///// <summary>
         ///// Constructor for the Package Manager Window
         ///// </summary>
-        public PackageManagerWindow(DTEPackage package)
+        public PackageManagerWindow(DTEPackage ownerPackage)
             : base(F1Keyword) {
 
             InitializeComponent();
 
-            System.Diagnostics.Debug.Assert(package != null);
-            _ownerPackage = package;
+            System.Diagnostics.Debug.Assert(ownerPackage != null);
+            _ownerPackage = ownerPackage;
 
             _installedPackagesProvider = new InstalledPackagesProvider(Resources);
             this.explorer.Providers.Add(_installedPackagesProvider);
@@ -34,9 +35,9 @@ namespace NuPack.Dialog.PackageManagerUI {
             UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(Resources);
             this.explorer.Providers.Add(updatePackagesProvider);
 
-            OnlinePackagesProvider onlinePackagesProvider = new OnlinePackagesProvider(Resources, false);
-            this.explorer.Providers.Add(onlinePackagesProvider);
-            this.explorer.SelectedProvider = onlinePackagesProvider;
+            _onlinePackagesProvider = new OnlinePackagesProvider(Resources, false);
+            this.explorer.Providers.Add(_onlinePackagesProvider);
+            this.explorer.SelectedProvider = _onlinePackagesProvider;
         }
 
         protected void Window_Loaded(object sender, EventArgs e) {
@@ -207,10 +208,13 @@ namespace NuPack.Dialog.PackageManagerUI {
         }
 
         private bool ShowLicenseWindowIfRequired(OnlinePackagesItem selectedItem) {
-            if (selectedItem.RequireLicenseAcceptance) {
+            IEnumerable<IPackage> packageGraph = _onlinePackagesProvider.GetPackageDependencyGraph(selectedItem.ExtensionRecord);
+            IEnumerable<IPackage> packagesRequireLicense = packageGraph.Where(p => p.RequireLicenseAcceptance);
+
+            if (packagesRequireLicense.Any()) {
                 var licenseWidow = new LicenseAcceptanceWindow() {
                     Owner = this,
-                    DataContext = selectedItem
+                    DataContext = packagesRequireLicense
                 };
 
                 bool? dialogResult = licenseWidow.ShowDialog();

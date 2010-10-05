@@ -24,7 +24,6 @@ namespace NuPack.Dialog.Providers {
             m_OnlineDisabled = onlineDisabled;
         }
 
-
         private IVsProgressPane ProgressPane { get; set; }
 
         private EnvDTE.DTE DTE {
@@ -207,6 +206,19 @@ namespace NuPack.Dialog.Providers {
             // the specified package can be updated if the local repository contains a package 
             // with matching id and smaller version number.
             return ProjectManager.LocalRepository.GetPackages().Any(p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
+        }
+
+        public IEnumerable<IPackage> GetPackageDependencyGraph(IPackage rootPackage) {
+            HashSet<IPackage> packageGraph = new HashSet<IPackage>();
+            if (DTE.Solution.IsOpen) {
+                PackageManager.PackageInstalling += (s, o) => {
+                    o.Cancel = true;
+                    packageGraph.Add(o.Package);
+                };
+
+                PackageManager.InstallPackage(rootPackage, ignoreDependencies: false);
+            }
+            return packageGraph;
         }
     }
 }
