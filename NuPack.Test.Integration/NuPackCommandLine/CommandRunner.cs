@@ -6,12 +6,12 @@
 
     public class CommandRunner {
 
-        public static string Run(string process, string working_directory, string arguments, bool wait_for_exit) {
+        public static string Run(string process, string workingDirectory, string arguments, bool waitForExit) {
 
             string result = string.Empty;
 
             ProcessStartInfo psi = new ProcessStartInfo(Path.GetFullPath(process), arguments) {
-                                           WorkingDirectory = Path.GetFullPath(working_directory),
+                                           WorkingDirectory = Path.GetFullPath(workingDirectory),
                                            UseShellExecute = false,
                                            CreateNoWindow = true,
                                            RedirectStandardOutput = true,
@@ -28,7 +28,7 @@
                 standardOutput = p.StandardOutput;
                 errorOutput = p.StandardError;
 
-                if (wait_for_exit) {
+                if (waitForExit) {
                     p.WaitForExit();
                 }
             }
