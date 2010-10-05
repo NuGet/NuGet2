@@ -68,7 +68,8 @@
     <Compile Include="PackageSource\SerializationHelper.cs" />
     <Compile Include="PackageSource\VSPackageSourceRepository.cs" />
     <Compile Include="PackageSource\VSPackageSourceProvider.cs" />
-    <Compile Include="SolutionProjectsHelper.cs" />
+    <Compile Include="SolutionExtensions.cs" />
+    <Compile Include="SolutionManager.cs" />
     <Compile Include="VSProjectManager.cs" />
     <Compile Include="ProjectExtensions.cs" />
     <Compile Include="ProjectSystemFactory.cs" />

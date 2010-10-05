@@ -1,6 +1,6 @@
-﻿using System.Management.Automation;
-
-namespace NuPack.VisualStudio.Cmdlets {
+﻿namespace NuPack.VisualStudio.Cmdlets {
+    using System.Management.Automation;
+    using System.Linq;
 
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
@@ -10,7 +10,8 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class GetProjectCmdlet : Cmdlet {
 
         protected override void ProcessRecord() {
-            WriteObject(SolutionProjectsHelper.Current.GetCurrentProjectNames());
+            WriteObject(from p in SolutionManager.Current.GetProjects()
+                        select p.Name);
         }
 
     }

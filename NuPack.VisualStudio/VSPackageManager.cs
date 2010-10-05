@@ -11,14 +11,7 @@
     using Microsoft.VisualStudio.ComponentModelHost;
 
     public class VSPackageManager : PackageManager {
-        private static readonly ConcurrentDictionary<Solution, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Solution, VSPackageManager>();
-        
-        // List of project types
-        // http://www.mztools.com/articles/2008/MZ2008017.aspx
-        private static readonly string[] _supportedProjectTypes = new[] { VSConstants.WebSiteProjectKind, 
-                                                                          VSConstants.CsharpProjectKind, 
-                                                                          VSConstants.VbProjectKind };
-
+        private static readonly ConcurrentDictionary<Solution, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Solution, VSPackageManager>();        
         private Dictionary<Project, ProjectManager> _projectManagers = null;
 
         private readonly DTE _dte;
@@ -60,7 +53,7 @@
             if (_projectManagers == null) {
                 _projectManagers = new Dictionary<Project, ProjectManager>();
 
-                foreach (Project project in GetAllProjects()) {
+                foreach (Project project in _dte.Solution.GetAllProjects()) {
                     // Create a project manager for each of the projects
                     var projectManager = CreateProjectManager(project);
 
@@ -207,7 +200,7 @@
 
         private void OnProjectAdded(Project project) {
             // Only add supported projects
-            if (IsSupportedProject(project)) {
+            if (project.IsSupported()) {
                 EnsureProjectManagers();
                 // If _projectManagers was null then EnsureProjectManagers would have populated 
                 // the cache with this project already.
@@ -215,34 +208,6 @@
                     _projectManagers.Add(project, CreateProjectManager(project));
                 }
             }
-        }
-
-        // We build a cache of all projects recrusively. We need to do this since solution folders
-        // are seen by the dte object model as projects and the actual projects are normally within them.
-        private IEnumerable<Project> GetAllProjects() {
-            var projects = new Stack<Project>();
-            foreach (Project project in _dte.Solution.Projects) {
-                projects.Push(project);
-            }
-
-            while (projects.Any()) {
-                Project project = projects.Pop();
-
-                if (IsSupportedProject(project)) {
-                    yield return project;
-                }
-
-                foreach (ProjectItem projectItem in project.ProjectItems) {
-                    if (projectItem.SubProject != null) {
-                        projects.Push(projectItem.SubProject);
-                    }
-                }
-            }
-        }
-
-        private static bool IsSupportedProject(Project project) {
-            return project.Kind != null &&
-                   _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

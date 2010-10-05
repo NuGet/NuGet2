@@ -8,15 +8,21 @@
     using EnvDTE;
 
     internal static class ProjectExtensions {
+        // List of project types
+        // http://www.mztools.com/articles/2008/MZ2008017.aspx
+        private static readonly string[] _supportedProjectTypes = new[] { VSConstants.WebSiteProjectKind, 
+                                                                          VSConstants.CsharpProjectKind, 
+                                                                          VSConstants.VbProjectKind };
+
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
         // Get the ProjectItems for a folder path
-        internal static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false) {
+        public static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false) {
             // Traverse the path to get at the directory
             string[] pathParts = folderPath.Split(PathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
             return pathParts.Aggregate(project.ProjectItems, (projectItems, folderName) => GetOrCreateFolder(projectItems, folderName, createIfNotExists));
         }
 
-        internal static ProjectItem GetProjectItem(this Project project, string path) {
+        public static ProjectItem GetProjectItem(this Project project, string path) {
             string folderPath = Path.GetDirectoryName(path);
             string fileName = Path.GetFileName(path);
 
@@ -31,7 +37,7 @@
             return projectItem;
         }
 
-        internal static bool DeleteProjectItem(this Project project, string path) {
+        public static bool DeleteProjectItem(this Project project, string path) {
             ProjectItem projectItem = GetProjectItem(project, path);
             if (projectItem == null) {
                 return false;
@@ -41,7 +47,7 @@
             return true;
         }
 
-        internal static bool TryGetProjectItem(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
+        public static bool TryGetProjectItem(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
             projectItem = (from ProjectItem p in projectItems
                            where p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
                            select p).FirstOrDefault();
@@ -49,7 +55,7 @@
             return projectItem != null;
         }
 
-        internal static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, params string[] kinds) {
+        public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, params string[] kinds) {
             ProjectItems projectItems = GetProjectItems(project, path);
 
             if (projectItems == null) {
@@ -63,7 +69,7 @@
                    select p;
         }
 
-        internal static T GetPropertyValue<T>(this Project project, string propertyName) {
+        public static T GetPropertyValue<T>(this Project project, string propertyName) {
             Property property = project.Properties.Item(propertyName);
             if (property != null) {
                 return (T)property.Value;
@@ -102,5 +108,15 @@
 
             return null;
         }
+
+        public static bool IsSupported(this Project project) {
+            return project.Kind != null &&
+                   _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static bool IsWebSite(this Project project) {
+            return project.Kind != null && project.Kind.Equals(VSConstants.WebSiteProjectKind, StringComparison.OrdinalIgnoreCase);
+        }
+
     }
 }

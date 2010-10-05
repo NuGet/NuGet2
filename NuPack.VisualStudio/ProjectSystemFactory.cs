@@ -4,16 +4,10 @@
     using EnvDTE;
     using NuPack.VisualStudio.Resources;
 
-    internal static class ProjectSystemFactory {        
-        private static bool IsWebSite(Project project) {
-            return project.Kind != null && project.Kind.Equals(VSConstants.WebSiteProjectKind, StringComparison.OrdinalIgnoreCase);
-        }
-
-        internal static VSProjectSystem CreateProjectSystem(object projectInstance) {
-            Project project = projectInstance as Project;
-
+    internal static class ProjectSystemFactory {                
+        internal static VSProjectSystem CreateProjectSystem(Project project) {            
             if (project == null) {
-                throw new InvalidOperationException(VsResources.DTE_InvalidProject);
+                throw new ArgumentNullException("project");
             }
 
             if (String.IsNullOrEmpty(project.FullName)) {
@@ -23,7 +17,7 @@
             }
             
             // Pick a project system based on the type of project
-            if (IsWebSite(project)) {
+            if (project.IsWebSite()) {
                 return new WebSiteProjectSystem(project);
             }
 
