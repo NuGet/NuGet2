@@ -1,9 +1,9 @@
-﻿namespace NuPack.Test.NuPackCommandLine
-{
-    public class NuSpecFileContext
-    {
-
-        public static string FileContents =@"<?xml version=""1.0"" encoding=""utf-8""?>
+﻿namespace NuPack.Test.Integration.NuPackCommandLine {
+    
+    public class NuSpecFileContext {
+    
+        public static string FileContents =
+            @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>Antlr</id>
@@ -15,6 +15,5 @@
     <language>en-US</language>
   </metadata>
 </package>";
-
     }
 }

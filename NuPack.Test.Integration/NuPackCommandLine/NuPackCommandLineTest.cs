@@ -1,18 +1,15 @@
-namespace NuPack.Test.Integration.NuPackCommandLine
-{
+namespace NuPack.Test.Integration.NuPackCommandLine {
+
     using System.IO;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Test.NuPackCommandLine;
 
     [TestClass]
-    public class NuPackCommandLineTest
-    {
+    public class NuPackCommandLineTest {
 
         private const string nupackExePath = @".\NuPack.exe";
 
         [TestMethod]
-        public void WhenNotPassingArgumentsAndThereAreNoNuSpecFilesItShouldError()
-        {
+        public void WhenNotPassingArgumentsAndThereAreNoNuSpecFilesItShouldError() {
             const string folder = @".\nospecs\";
 
             //Arrange
@@ -27,17 +24,22 @@ namespace NuPack.Test.Integration.NuPackCommandLine
         }
 
         [TestMethod]
-        public void WhenNotPassingArgumentsThereAreTwoNuSpecFilesItShouldError()
-        {
+        public void WhenNotPassingArgumentsThereAreTwoNuSpecFilesItShouldError() {
             const string folder = @".\twospecs\";
 
             //Arrange
-            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+            if (!Directory.Exists(folder)) {
+                Directory.CreateDirectory(folder);
+            }
             string nuspecFile = Path.Combine(folder, "antlr.nuspec");
-            if (File.Exists(nuspecFile)) File.Delete(nuspecFile);
+            if (File.Exists(nuspecFile)) {
+                File.Delete(nuspecFile);
+            }
             File.AppendAllText(nuspecFile, NuSpecFileContext.FileContents);
             string nuspecFile2 = Path.Combine(folder, "antlr2.nuspec");
-            if (File.Exists(nuspecFile2)) File.Delete(nuspecFile2);
+            if (File.Exists(nuspecFile2)) {
+                File.Delete(nuspecFile2);
+            }
             File.AppendAllText(nuspecFile2, NuSpecFileContext.FileContents);
 
             //Act
@@ -48,8 +50,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine
         }
 
         [TestMethod]
-        public void WhenNotPassingArgumentsAndThereIsOneNuSpecFileItShouldExecuteTheFile()
-        {
+        public void WhenNotPassingArgumentsAndThereIsOneNuSpecFileItShouldExecuteTheFile() {
             const string folder = @".\onespec\";
 
             //Arrange
@@ -66,6 +67,5 @@ namespace NuPack.Test.Integration.NuPackCommandLine
             Assert.AreNotEqual("Specify which nuspec file to use because this folder has more than one.", result.Trim());
             Assert.AreEqual(true, result.Contains("successfully"));
         }
-
     }
 }
