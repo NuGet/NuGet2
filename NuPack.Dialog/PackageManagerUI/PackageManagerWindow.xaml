@@ -94,9 +94,9 @@
         </ResourceDictionary>
     </Window.Resources>
     <Window.CommandBindings>
-        <CommandBinding x:Uid="CommandBinding_UninstallExtension" Command="{x:Static self:ExtensionManagerWindowCommands.UninstallExtension}"
-                    CanExecute="CanExecuteUninstallExtension"
-                    Executed="ExecutedUninstallExtension" />
+        <CommandBinding x:Uid="CommandBinding_UninstallExtension" Command="{x:Static self:ExtensionManagerWindowCommands.UninstallPackage}"
+                    CanExecute="CanExecuteUninstallPackage"
+                    Executed="ExecutedUninstallPackage" />
         <CommandBinding x:Uid="CommandBinding_ToggleExtensionEnabledState" Command="{x:Static self:ExtensionManagerWindowCommands.ToggleExtensionEnabledState}"
                     CanExecute="CanExecuteToggleExtensionEnabledState"
                     Executed="ExecutedToggleExtensionEnabledState" />

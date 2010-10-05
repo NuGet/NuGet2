@@ -1,16 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.Design;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
-
 using NuPack.Dialog.Providers;
-using NuPack.VisualStudio;
-
 using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuPack.Dialog.PackageManagerUI {
@@ -19,7 +14,8 @@ namespace NuPack.Dialog.PackageManagerUI {
     /// </summary>
     public partial class PackageManagerWindow : DialogWindow, INotifyPropertyChanged {
         private const string F1Keyword = "vs.ExtensionManager";
-        private DTEPackage _ownerPackage;
+        private readonly DTEPackage _ownerPackage;
+        private readonly OnlinePackagesProvider _installedPackagesProvider;
 
         ///// <summary>
         ///// Constructor for the Extension Manager Window
@@ -32,8 +28,8 @@ namespace NuPack.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(package != null);
             _ownerPackage = package;
 
-            InstalledPackagesProvider installedPackagesProvider = new InstalledPackagesProvider(Resources);
-            this.explorer.Providers.Add(installedPackagesProvider);
+            _installedPackagesProvider = new InstalledPackagesProvider(Resources);
+            this.explorer.Providers.Add(_installedPackagesProvider);
 
             UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(Resources);
             this.explorer.Providers.Add(updatePackagesProvider);
@@ -50,10 +46,50 @@ namespace NuPack.Dialog.PackageManagerUI {
         void HandleRequestNavigate(object sender, RoutedEventArgs e) {
         }
 
-        private void ExecutedUninstallExtension(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecutedUninstallPackage(object sender, ExecutedRoutedEventArgs e) {
+            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
+
+            if (control == null) {
+                return;
+            }
+
+            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+
+            if (selectedItem == null) {
+                return;
+            }
+
+            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
+            if (provider == null) {
+                return;
+            }
+
+            provider.Uninstall(selectedItem.Id);
+
+
+            // Remove the item from the "All" tree of installed packages
+            var allTree = _installedPackagesProvider.ExtensionsTree.Nodes.First();
+            var uninstalledItem = allTree.Extensions.FirstOrDefault(c => c.Id.Equals(selectedItem.Id, StringComparison.OrdinalIgnoreCase));
+
+            if (uninstalledItem != null) {
+                allTree.Extensions.Remove(uninstalledItem);
+            }
         }
 
-        private void CanExecuteUninstallExtension(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanExecuteUninstallPackage(object sender, CanExecuteRoutedEventArgs e) {
+            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
+            if (control == null) {
+                e.CanExecute = false;
+                return;
+            }
+            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            if (selectedItem == null) {
+                e.CanExecute = false;
+                return;
+            }
+
+            // Allow the download command on extensions that are already installed.
+            e.CanExecute = selectedItem.IsInstalled;
         }
 
         private void ExecutedToggleExtensionEnabledState(object sender, ExecutedRoutedEventArgs e) {

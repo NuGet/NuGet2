@@ -50,18 +50,14 @@
                         Style="{StaticResource TileRightStackPanelStyle}"
                         Visibility="Visible">
                 <DockPanel x:Uid="DockPanel_1">
-                    <Image
-                       x:Uid="Image_AlreadyInstalled"
-                       DockPanel.Dock="Right"
-                       Source="{StaticResource BitmapImage_AlreadyInstalled}"
-                       Visibility="{Binding IsInstalled, Mode=OneWay, Converter={StaticResource boolToVis}}"
-                       HorizontalAlignment="Right">
-                        <Image.ToolTip>
-                            <TextBlock x:Uid="TextBlock_AlreadyInstalledTooltip"
-                                   Text="This extension is already installed."
-                                   Style="{StaticResource TileToolTipStyle}"/>
-                        </Image.ToolTip>
-                    </Image>
+                    <Button x:Uid="Button_Uninstall"
+                        x:Name="Button_Uninstall"
+                        AutomationProperties.AutomationId="Button_Uninstall"
+                        Command="{x:Static self:ExtensionManagerWindowCommands.UninstallPackage}"
+                        Content="_Uninstall"
+                        IsDefault="True"
+                        Visibility="Collapsed"
+                        Style="{StaticResource DetailButtonStyle}" />
                     <Button x:Uid="Button_Download"
                         x:Name="Button_Download"
                         DockPanel.Dock="Left"
@@ -81,6 +77,13 @@
                     <Condition x:Uid="Condition_2" Binding="{Binding IsInstalled}" Value="False" />
                 </MultiDataTrigger.Conditions>
                 <Setter x:Uid="Setter_1" TargetName="Button_Download" Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger x:Uid="MultiDataTrigger_2">
+                <MultiDataTrigger.Conditions>
+                    <Condition x:Uid="Condition_3" Binding="{Binding IsSelected}" Value="True" />
+                    <Condition x:Uid="Condition_4" Binding="{Binding IsInstalled}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter x:Uid="Setter_2" TargetName="Button_Uninstall" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>

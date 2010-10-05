@@ -3,7 +3,7 @@
 namespace NuPack.Dialog.PackageManagerUI {
     public class ExtensionManagerWindowCommands {
         //Custom commands for AddPackage UI
-        public static RoutedCommand UninstallExtension = new RoutedCommand();
+        public static RoutedCommand UninstallPackage = new RoutedCommand();
         public static RoutedCommand ToggleExtensionEnabledState = new RoutedCommand();
         public static RoutedCommand UpdateExtension = new RoutedCommand();
         public static RoutedCommand RestartVisualStudio = new RoutedCommand();
