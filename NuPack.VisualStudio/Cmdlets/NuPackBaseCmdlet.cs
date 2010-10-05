@@ -32,7 +32,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// <value>The default project name.</value>
         protected string DefaultProjectName {
             get {
-                return SolutionProjectsHelper.Instance.DefaultProjectName;
+                return SolutionProjectsHelper.Current.DefaultProjectName;
             }
         }
 
@@ -124,7 +124,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         protected Project GetProjectFromName(string projectName) {
-            return SolutionProjectsHelper.Instance.GetProjectFromName(projectName);
+            return SolutionProjectsHelper.Current.GetProjectFromName(projectName);
         }
 
         protected void WriteError(string message) {

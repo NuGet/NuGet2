@@ -8,16 +8,15 @@ using EnvDTE80;
 
 namespace NuPack.VisualStudio {
 
-    public class SolutionProjectsHelper : INotifyPropertyChanged {
+    public class SolutionProjectsHelper {
         private static SolutionProjectsHelper _instance;
         private static readonly object _lock = new object();
 
         private Dictionary<string, Project> _projectCache = new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase);
         private DTE2 _dte;
         private SolutionEvents _solutionEvents;
-        private string _defaultProjectName;
 
-        public static SolutionProjectsHelper Instance {
+        public static SolutionProjectsHelper Current {
             get {
                 if (_instance == null) {
                     lock (_lock) {
@@ -31,7 +30,7 @@ namespace NuPack.VisualStudio {
             }
         }
 
-        private SolutionProjectsHelper(DTE2 dte) {
+        internal SolutionProjectsHelper(DTE2 dte) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
             }
@@ -41,15 +40,8 @@ namespace NuPack.VisualStudio {
         }
 
         public string DefaultProjectName {
-            get {
-                return _defaultProjectName;
-            }
-            set {
-                if (_defaultProjectName != value) {
-                    _defaultProjectName = value;
-                    NotifyPropertyChange("DefaultProjectName");
-                }
-            }
+            get;
+            set; 
         }
 
         private void RegisterSolutionEvents() {
@@ -74,15 +66,16 @@ namespace NuPack.VisualStudio {
         }
 
         private void OnProjectRenamed(Project project, string oldName) {
-            if (IsProjectSupported(project)) {
-                _projectCache[project.Name] = project;
-                _projectCache.Remove(oldName);
-            }
-
             if (oldName != null) {
                 // oldName is the full path to the project file. Need to convert it to simple project name. 
                 // No need to worry about Website project here, because there is no option to rename Website project.
                 oldName = System.IO.Path.GetFileNameWithoutExtension(oldName);
+
+                if (IsProjectSupported(project)) {
+                    _projectCache[project.Name] = project;
+                    _projectCache.Remove(oldName);
+                }
+
                 if (oldName.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
                     DefaultProjectName = project.Name;
                 }
@@ -153,9 +146,9 @@ namespace NuPack.VisualStudio {
         /// Gets the list of names of all supported projects currently loaded in the solution
         /// </summary>
         /// <returns></returns>
-        public string[] GetCurrentProjectNames() {
+        public IEnumerable<string> GetCurrentProjectNames() {
             if (_dte.Solution.IsOpen) {
-                return _projectCache.Keys.ToArray();
+                return _projectCache.Keys;
             }
             else {
                 return new string[0];
@@ -205,15 +198,6 @@ namespace NuPack.VisualStudio {
 
         private static bool IsProjectSupported(Project project) {
             return SupportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void NotifyPropertyChange(string propertyName) {
-            var handler = PropertyChanged;
-            if (handler != null) {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
         }
     }
 }

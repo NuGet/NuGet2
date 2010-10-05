@@ -52,12 +52,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         }
 
         private void SetupSolutionHelper() {
-            _solutionHelper = SolutionProjectsHelper.Instance;
-            _solutionHelper.PropertyChanged += (o, e) => {
-                if (e.PropertyName == "DefaultProjectName") {
-                    this.DefaultProject = _solutionHelper.DefaultProjectName;
-                }
-            };
+            _solutionHelper = SolutionProjectsHelper.Current;
         }
 
         private void DisplayDisclaimerText() {
@@ -283,7 +278,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         public string[] AvailableProjects {
             get {
                 if (_solutionHelper != null) {
-                    return _solutionHelper.GetCurrentProjectNames();
+                    return _solutionHelper.GetCurrentProjectNames().ToArray();
                 }
                 else {
                     return new string[0];

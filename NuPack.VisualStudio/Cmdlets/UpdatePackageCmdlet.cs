@@ -22,7 +22,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {
-                WriteError("There is no active solution.");
+                WriteError("There is no active solution in the current environment.");
                 return;
             }
 

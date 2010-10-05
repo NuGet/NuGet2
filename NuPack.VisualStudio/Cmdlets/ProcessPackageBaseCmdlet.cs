@@ -155,7 +155,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                     CultureInfo.CurrentCulture,
                     VsResources.InstallSuccessDisclaimerText,
                     package.Id,
-                    package.GetAuthorsDisplayString(),
+                    String.Join(", ", package.Authors),
                     package.LicenseUrl);
 
                 WriteLine(message);

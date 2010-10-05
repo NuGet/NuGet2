@@ -10,7 +10,7 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class GetProjectCmdlet : Cmdlet {
 
         protected override void ProcessRecord() {
-            WriteObject(SolutionProjectsHelper.Instance.GetCurrentProjectNames());
+            WriteObject(SolutionProjectsHelper.Current.GetCurrentProjectNames());
         }
 
     }

@@ -75,9 +75,5 @@
         public static string GetFullName(this IPackage package) {
             return package.Id + " " + package.Version;
         }
-
-        public static string GetAuthorsDisplayString(this IPackage package) {
-            return String.Join(", ", package.Authors);
-        }
     }
 }

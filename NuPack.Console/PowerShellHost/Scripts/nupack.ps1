@@ -85,28 +85,13 @@ function _TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount
     }
 }
 
+# hook up Solution Opened even to execute init.ps1 script files when a new solution is opened.
+
 $global:solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
 
 $global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
-    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager([object]$dte)
-    $repository = $packageManager.LocalRepository
-    $localPackages = $repository.GetPackages()
-
-    $localPackages | ForEach-Object {
-        $path = $packageManager.PathResolver.GetInstallPath($_)
-
-        _AddToolsFolderToEnv $path
-        _ExecuteScript $path "tools\init.ps1" $_
-    }
+    _ExecuteInitScripts
 })
-
-function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
-    $fullPath = (Join-Path $rootPath $scriptFile)
-    if (Test-Path $fullPath) {
-        $folder = Split-Path $fullPath
-        & $fullPath $rootPath $folder $package
-    }
-}
 
 function global:_AddToolsFolderToEnv([string]$rootPath) {
     # add tools path to the environment
@@ -118,6 +103,31 @@ function global:_AddToolsFolderToEnv([string]$rootPath) {
         # add the tools folder to the environment path
         $env:path = $env:path + $toolsPath
     }
+}
+
+function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
+    $fullPath = (Join-Path $rootPath $scriptFile)
+    if (Test-Path $fullPath) {
+        $folder = Split-Path $fullPath
+        & $fullPath $rootPath $folder $package
+    }
+}
+
+function global:_ExecuteInitScripts() {
+    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager([object]$dte)
+    $repository = $packageManager.LocalRepository
+    $localPackages = $repository.GetPackages()
+
+    $localPackages | ForEach-Object {
+        $path = $packageManager.PathResolver.GetInstallPath($_)
+
+        _AddToolsFolderToEnv $path
+        _ExecuteScript $path "tools\init.ps1" $_
+    }
+}
+
+if ($dte -and $dte.Solution -and $dte.Solution.IsOpen) {
+    _ExecuteInitScripts
 }
 
 # assign aliases to package cmdlets
