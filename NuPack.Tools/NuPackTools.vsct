@@ -118,8 +118,8 @@
   </KeyBindings>
   
   <Symbols>
-    <GuidSymbol name="guidPowerConsolePkg" value="{c0dc615b-6157-4f7f-83fd-90101c4d07d5}" />    
-    <GuidSymbol name="guidPowerConsoleCmdSet" value="{85e8bbe8-ea86-4f38-bd91-619e90f52bc8}">
+    <GuidSymbol name="guidPowerConsolePkg" value="{F7D0E7A3-C60B-422A-BFAE-CEED36ADE7D2}" />    
+    <GuidSymbol name="guidPowerConsoleCmdSet" value="{1E8A55F6-C18D-407F-91C8-94B02AE1CED6}">
       <IDSymbol name="idToolbar" value="0x1010"/>
       <IDSymbol name="idToolbarHostsGroup" value="0x2000"/>
       <IDSymbol name="idToolbarProjectGroup" value="0x2005"/>

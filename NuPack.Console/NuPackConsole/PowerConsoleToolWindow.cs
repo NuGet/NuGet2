@@ -20,7 +20,7 @@ namespace NuPackConsole.Implementation
     /// <summary>
     /// This class implements the tool window.
     /// </summary>
-    [Guid("bcefcbd7-7f08-4701-875b-0083cb834db5")]
+    [Guid("0AD07096-BBA9-4900-A651-0598D26F6D24")]
     public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget
     {
         /// <summary>
@@ -62,7 +62,7 @@ namespace NuPackConsole.Implementation
             this.Caption = Resources.ToolWindowTitle;
             this.BitmapResourceID = 301;
             this.BitmapIndex = 0;
-            this.ToolBar = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.idToolbar);
+            this.ToolBar = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.idToolbar);
         }
 
         protected override void Initialize()
@@ -72,27 +72,27 @@ namespace NuPackConsole.Implementation
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (mcs != null)
             {
-                CommandID sourceSettingsCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.cmdidSourceSettings);
+                CommandID sourceSettingsCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSourceSettings);
                 mcs.AddCommand(new OleMenuCommand(SourceSettings_Exec, sourceSettingsCommandID));
 
                 // Get list command for the Feed combo
-                CommandID sourcesListCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.cmdidSourcesList);
+                CommandID sourcesListCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSourcesList);
                 mcs.AddCommand(new OleMenuCommand(SourcesList_Exec, sourcesListCommandID));
 
                 // invoke command for the Feed combo
-                CommandID sourcesCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.cmdidSources);
+                CommandID sourcesCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSources);
                 mcs.AddCommand(new OleMenuCommand(Sources_Exec, sourcesCommandID));
 
                 // get default project command
-                CommandID projectsListCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.cmdidProjectsList);
+                CommandID projectsListCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidProjectsList);
                 mcs.AddCommand(new OleMenuCommand(ProjectsList_Exec, projectsListCommandID));
 
                 // invoke command for the Default project combo
-                CommandID projectsCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.cmdidProjects);
+                CommandID projectsCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidProjects);
                 mcs.AddCommand(new OleMenuCommand(Projects_Exec, projectsCommandID));
 
                 // clear console command
-                CommandID clearHostCommandID = new CommandID(GuidList.guidPowerConsoleCmdSet, PkgCmdIDList.cmdidClearHost);
+                CommandID clearHostCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidClearHost);
                 mcs.AddCommand(new OleMenuCommand(ClearHost_Exec, clearHostCommandID));
             }
         }
