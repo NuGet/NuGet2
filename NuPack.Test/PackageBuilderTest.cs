@@ -55,5 +55,49 @@ namespace NuPack.Test {
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.IsTrue(builder.RequireLicenseAcceptance);
         }
+
+        [TestMethod]
+        public void PackageBuilderThrowsWhenLicenseUrlIsPresentButEmpty() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>
+      <author>Velio Ivanov</author>
+    </authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+    <licenseUrl></licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+  </metadata>
+</package>";
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+        }
+
+        [TestMethod]
+        public void PackageBuilderThrowsWhenLicenseUrlIsWhiteSpace() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>
+      <author>Velio Ivanov</author>
+    </authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+    <licenseUrl>    </licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+  </metadata>
+</package>";
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+        }
     }
 }
