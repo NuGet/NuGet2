@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Console", "NuPack.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost", "NuPack.Console\PowerShellHost\PowerShellHost.csproj", "{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack", "NuPack\NuPack.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack", "nupack\NuPack.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Dialog", "NuPack.Dialog\NuPack.Dialog.csproj", "{05497432-8899-4ED4-BB97-7B5EA3E911DB}"
 EndProject
@@ -24,6 +24,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7B39EAD-EA32-4011-845A-C949A336389A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Test.Integration", "NuPack.Test.Integration\NuPack.Test.Integration.csproj", "{135A5956-39CD-495C-8FB2-06678A90488D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notices", "notices", "{E8BEECAD-4A51-48A6-9602-6D8C6F41841E}"
+	ProjectSection(SolutionItems) = preProject
+		COPYRIGHT.txt = COPYRIGHT.txt
+		CREDITS.txt = CREDITS.txt
+		LICENSE.txt = LICENSE.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
