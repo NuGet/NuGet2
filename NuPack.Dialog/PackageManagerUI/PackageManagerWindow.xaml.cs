@@ -17,6 +17,7 @@ namespace NuPack.Dialog.PackageManagerUI {
         private const string F1Keyword = "vs.ExtensionManager";
         private readonly DTEPackage _ownerPackage;
         private readonly OnlinePackagesProvider _installedPackagesProvider;
+        private readonly OnlinePackagesProvider _onlinePackagesProvider;
 
         ///// <summary>
         ///// Constructor for the Package Manager Window
