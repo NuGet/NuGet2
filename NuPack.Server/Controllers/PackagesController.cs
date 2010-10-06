@@ -19,12 +19,17 @@ namespace NuPack.Server.Controllers {
             string physicalPath = Server.MapPath(PackageVirtualPath);
             string fullPath = Path.Combine(physicalPath, p);
 
-            DateTime lastModified = new FileInfo(fullPath).LastAccessTimeUtc;
+            DateTime lastModified = System.IO.File.GetLastWriteTimeUtc(fullPath);
+            DateTime ifModifiedSince;
+            if (DateTime.TryParse(Request.Headers["If-Modified-Since"], out ifModifiedSince) &&
+                lastModified > ifModifiedSince) {
+                Response.StatusCode = 304;
+                return new EmptyResult();
+            }
 
             HttpCachePolicyBase cachePolicy = Response.Cache;
             cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetExpires(DateTime.Now.AddMinutes(30));
-            cachePolicy.SetValidUntilExpires(true);
+            cachePolicy.SetExpires(DateTime.Now.AddSeconds(30));
             cachePolicy.SetLastModified(lastModified);
 
             return File(fullPath, "application/zip", p);

@@ -24,9 +24,9 @@ namespace NuPack.Server.Controllers {
         public override void ExecuteResult(ControllerContext context) {
             context.RequestContext.HttpContext.Response.ContentType = _contentType;
 
+            // Output caching for 30 minutes
             HttpCachePolicyBase cachePolicy = context.RequestContext.HttpContext.Response.Cache;
-            cachePolicy.SetCacheability(HttpCacheability.Public);
-            // Cache the feed for 30 minutes
+            cachePolicy.SetCacheability(HttpCacheability.Public);            
             cachePolicy.SetExpires(DateTime.Now.AddMinutes(30));
             cachePolicy.SetValidUntilExpires(true);
             cachePolicy.SetLastModified(_lastModified);
