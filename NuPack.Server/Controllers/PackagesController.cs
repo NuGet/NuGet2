@@ -25,8 +25,6 @@ namespace NuPack.Server.Controllers {
             cachePolicy.SetCacheability(HttpCacheability.Public);
             cachePolicy.SetExpires(DateTime.Now.AddMinutes(30));
             cachePolicy.SetValidUntilExpires(true);
-            // Vary by package file
-            cachePolicy.VaryByParams["p"] = true;
             cachePolicy.SetLastModified(lastModified);
 
             return File(fullPath, "application/zip", p);
