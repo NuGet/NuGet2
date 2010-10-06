@@ -211,12 +211,19 @@ namespace NuPack.Dialog.Providers {
         public IEnumerable<IPackage> GetPackageDependencyGraph(IPackage rootPackage) {
             HashSet<IPackage> packageGraph = new HashSet<IPackage>();
             if (DTE.Solution.IsOpen) {
-                PackageManager.PackageInstalling += (s, o) => {
+
+                EventHandler<PackageOperationEventArgs> handler = (s, o) => {
                     o.Cancel = true;
                     packageGraph.Add(o.Package);
                 };
 
-                PackageManager.InstallPackage(rootPackage, ignoreDependencies: false);
+                try {
+                    PackageManager.PackageInstalling += handler;
+                    PackageManager.InstallPackage(rootPackage, ignoreDependencies: false);
+                }
+                finally {
+                    PackageManager.PackageInstalling -= handler;
+                }
             }
             return packageGraph;
         }
