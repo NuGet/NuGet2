@@ -37,6 +37,10 @@ function global:TabExpansion($line, $lastWord) {
         { $_ -eq 'Update-Package' -or $_ -eq 'npp' } {
             $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
+        
+        'Get-Project' {
+            $choices = _TabExpansionForGetProject $secondLastToken $tokens.length $filter
+        }
     }
     
     if($choices) {
@@ -85,8 +89,17 @@ function _TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount
     }
 }
 
+function _TabExpansionForGetProject([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+    if ($filter.StartsWith('-')) {
+       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
+    }
+    elseif (($secondLastWord -eq '-name') -or ($secondLastWord -eq '')) {
+        GetProjectNames
+    }
+}
+
 function global:GetProjectNames() {
-    Get-Project | ForEach-Object { $_.Name }
+    (Get-Project -All) | ForEach-Object { $_.Name }
 }
 
 # hook up Solution Opened even to execute init.ps1 script files when a new solution is opened.
