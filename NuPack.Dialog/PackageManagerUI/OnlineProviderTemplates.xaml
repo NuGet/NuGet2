@@ -50,19 +50,23 @@
                         Style="{StaticResource TileRightStackPanelStyle}"
                         Visibility="Visible">
                 <DockPanel x:Uid="DockPanel_1">
-                    <Button x:Uid="Button_Uninstall"
-                        x:Name="Button_Uninstall"
-                        AutomationProperties.AutomationId="Button_Uninstall"
-                        Command="{x:Static self:ExtensionManagerWindowCommands.UninstallPackage}"
-                        Content="_Uninstall"
-                        IsDefault="True"
-                        Visibility="Collapsed"
-                        Style="{StaticResource DetailButtonStyle}" />
+                    <Image
+                       x:Uid="Image_AlreadyInstalled"
+                       DockPanel.Dock="Right"
+                       Source="{StaticResource BitmapImage_AlreadyInstalled}"
+                       Visibility="{Binding IsInstalled, Mode=OneWay, Converter={StaticResource boolToVis}}"
+                       HorizontalAlignment="Right">
+                        <Image.ToolTip>
+                            <TextBlock x:Uid="TextBlock_AlreadyInstalledTooltip"
+                                   Text="This package is already installed."
+                                   Style="{StaticResource TileToolTipStyle}"/>
+                        </Image.ToolTip>
+                    </Image>
                     <Button x:Uid="Button_Download"
                         x:Name="Button_Download"
                         DockPanel.Dock="Left"
                         AutomationProperties.AutomationId="Button_Download"
-                        Command="{x:Static self:ExtensionManagerWindowCommands.DownloadExtension}"
+                        Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
                         Content="_Install"
                         IsDefault="True"
                         Visibility="Collapsed"
@@ -77,13 +81,6 @@
                     <Condition x:Uid="Condition_2" Binding="{Binding IsInstalled}" Value="False" />
                 </MultiDataTrigger.Conditions>
                 <Setter x:Uid="Setter_1" TargetName="Button_Download" Property="Visibility" Value="Visible" />
-            </MultiDataTrigger>
-            <MultiDataTrigger x:Uid="MultiDataTrigger_2">
-                <MultiDataTrigger.Conditions>
-                    <Condition x:Uid="Condition_3" Binding="{Binding IsSelected}" Value="True" />
-                    <Condition x:Uid="Condition_4" Binding="{Binding IsInstalled}" Value="True" />
-                </MultiDataTrigger.Conditions>
-                <Setter x:Uid="Setter_2" TargetName="Button_Uninstall" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
@@ -139,7 +136,7 @@
                        HorizontalAlignment="Right">
                         <Image.ToolTip>
                             <TextBlock x:Uid="TextBlock_AlreadyUpdatedTooltip"
-                                   Text="This extension is already updated."
+                                   Text="This package is already updated."
                                    Style="{StaticResource TileToolTipStyle}"/>
                         </Image.ToolTip>
                     </Image>
@@ -147,7 +144,7 @@
                         x:Name="Button_Update"
                         DockPanel.Dock="Left"
                         AutomationProperties.AutomationId="Button_Update"
-                        Command="{x:Static self:ExtensionManagerWindowCommands.UpdateExtension}"
+                        Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
                         Content="_Update"
                         IsDefault="True"
                         Visibility="Collapsed"
@@ -162,6 +159,70 @@
                     <Condition x:Uid="Condition_2" Binding="{Binding IsUpdated}" Value="False" />
                 </MultiDataTrigger.Conditions>
                 <Setter x:Uid="Setter_1" TargetName="Button_Update" Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Uid="DataTemplate_InstalledPackagesTileTemplate" x:Key="InstalledPackagesTileTemplate">
+        <DataTemplate.Resources>
+            <BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_1" x:Key="boolToVis" />
+        </DataTemplate.Resources>
+        <Grid x:Uid="Grid_6" Style="{StaticResource TileTemplateGridStyle}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Uid="ColumnDefinition_9" Width="38" />
+                <ColumnDefinition x:Uid="ColumnDefinition_10" Width="*" />
+                <ColumnDefinition x:Uid="ColumnDefinition_11" Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Image x:Uid="Image_TileIconOnline"
+                   AutomationProperties.AutomationId="Image_TileIconOnline"
+                   Style="{StaticResource TileImageStyle}">
+                <Image.Source>
+                    <Binding x:Uid="Image_TileIconOnlineBinding" Path="IconNonNull" FallbackValue="{StaticResource BitmapImage_DefaultIcon}" Converter="{StaticResource uriToIconConverter}" />
+                </Image.Source>
+            </Image>
+            <StackPanel x:Uid="StackPanel_6" Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
+                <self:TextBlockControl x:Uid="TextBlock_TileNameOnline" 
+                                       AutomationProperties.AutomationId="TextBlock_TileNameOnline" 
+                                       Text="{Binding Name}" 
+                                       Style="{StaticResource TileTitleTextBoxStyle}">
+                    <TextBlock.ToolTip>
+                        <TextBlock x:Uid="TextBlock_2" Text="{Binding Name}" Style="{StaticResource TileToolTipStyle}"/>
+                    </TextBlock.ToolTip>
+                </self:TextBlockControl>
+                <self:TextBlockControl x:Uid="TextBlock_TileDescriptionOnline"
+                                       AutomationProperties.AutomationId="TextBlock_TileDescriptionOnline" 
+                                       Text="{Binding Description}" 
+                                       Style="{StaticResource TileDescriptionTextBoxStyle}">
+                    <TextBlock.ToolTip>
+                        <TextBlock x:Uid="TextBlock_1" Text="{Binding Description}" Style="{StaticResource TileToolTipStyle}"/>
+                    </TextBlock.ToolTip>
+                </self:TextBlockControl>
+            </StackPanel>
+            <StackPanel x:Uid="UninstallButtonsStackPanel"
+                        x:Name="UninstallButtonsStackPanel" 
+                        Grid.Column="2"
+                        Style="{StaticResource TileRightStackPanelStyle}"
+                        Visibility="Visible">
+                <DockPanel x:Uid="DockPanel_1">
+                    <Button x:Uid="Button_Uninstall"
+                        x:Name="Button_Uninstall"
+                        AutomationProperties.AutomationId="Button_Uninstall"
+                        Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
+                        Content="_Uninstall"
+                        IsDefault="True"
+                        Visibility="Collapsed"
+                        Style="{StaticResource DetailButtonStyle}" />
+                </DockPanel>
+            </StackPanel>
+        </Grid>
+        <DataTemplate.Triggers>
+            <MultiDataTrigger x:Uid="MultiDataTrigger_1">
+                <MultiDataTrigger.Conditions>
+                    <Condition x:Uid="Condition_1" Binding="{Binding IsSelected}" Value="True" />
+                    <Condition x:Uid="Condition_2" Binding="{Binding IsInstalled}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter x:Uid="Setter_1" TargetName="Button_Uninstall" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>

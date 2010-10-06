@@ -5,8 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using NuPack.VisualStudio;
 
-namespace NuPack.Dialog.ToolsOptionsUI
-{
+namespace NuPack.Dialog.ToolsOptionsUI {
     /// <summary>
     /// Represents the Tools - Options - Package Manager dialog
     /// </summary>
@@ -14,15 +13,14 @@ namespace NuPack.Dialog.ToolsOptionsUI
     /// The code in this class assumes that while the dialog is open, noone is modifying the VSPackageSourceProvider directly.
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
-    public partial class ToolsOptionsControl : UserControl
-    {
+    public partial class ToolsOptionsControl : UserControl {
         private VSPackageSourceProvider _packageSourceProvider = Settings.PackageSourceProvider;
         private BindingSource _allPackageSources;
         private PackageSource _activePackageSource;
         private bool _initialized;
+        private string _currentSelectedSource;
 
-        public ToolsOptionsControl()
-        {
+        public ToolsOptionsControl() {
             InitializeComponent();
             SetupDataBindings();
         }
@@ -143,8 +141,8 @@ namespace NuPack.Dialog.ToolsOptionsUI
             var currentItem = PackageSourcesListBox.Items[e.Index];
 
             // if the item is the active package source, draw it in bold
-            Font newFont = (_activePackageSource != null && _activePackageSource.Equals(currentItem)) ? 
-                new Font(e.Font, FontStyle.Bold) : 
+            Font newFont = (_activePackageSource != null && _activePackageSource.Equals(currentItem)) ?
+                new Font(e.Font, FontStyle.Bold) :
                 e.Font;
 
             StringFormat drawFormat = new StringFormat {
@@ -157,18 +155,33 @@ namespace NuPack.Dialog.ToolsOptionsUI
             // and the custom brush settings.
             e.Graphics.DrawString(PackageSourcesListBox.GetItemText(currentItem),
                 newFont, new SolidBrush(e.ForeColor), e.Bounds, drawFormat);
-            
+
             // If the ListBox has focus, draw a focus rectangle around the selected item.
             e.DrawFocusRectangle();
         }
 
-        private void PackageSourcesListBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.C && e.Control)
-            {
-                if (PackageSourcesListBox.SelectedValue != null)
-                {
+        private void PackageSourcesListBox_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.C && e.Control) {
+                if (PackageSourcesListBox.SelectedValue != null) {
                     Clipboard.SetText((string)PackageSourcesListBox.SelectedValue);
+                }
+            }
+        }
+
+        private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
+            if (e.ClickedItem == CopyPackageSourceStripMenuItem && _currentSelectedSource != null) {
+                Clipboard.SetText(_currentSelectedSource);
+            }
+        }
+
+        private void PackageSourcesListBox_MouseDown(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Right) {
+                var index = PackageSourcesListBox.IndexFromPoint(e.Location);
+                if (index == ListBox.NoMatches) {
+                    _currentSelectedSource = null;
+                }
+                else {
+                    _currentSelectedSource = ((PackageSource)PackageSourcesListBox.Items[index]).Source;
                 }
             }
         }

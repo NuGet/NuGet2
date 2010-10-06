@@ -1,7 +1,6 @@
-﻿namespace NuPack.Dialog.ToolsOptionsUI
-{
-    partial class ToolsOptionsControl
-    {
+﻿using System.Windows.Forms;
+namespace NuPack.Dialog.ToolsOptionsUI {
+    partial class ToolsOptionsControl {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -11,10 +10,8 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
+        protected override void Dispose(bool disposing) {
+            if (disposing && (components != null)) {
                 components.Dispose();
             }
             base.Dispose(disposing);
@@ -26,25 +23,27 @@
         /// Required method for Designer support - do not modify 
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.NPackURILabel = new System.Windows.Forms.Label();
             this.NewPackageSource = new System.Windows.Forms.TextBox();
             this.addButton = new System.Windows.Forms.Button();
             this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
+            this.PackageSourcesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.CopyPackageSourceStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeButton = new System.Windows.Forms.Button();
             this.defaultButton = new System.Windows.Forms.Button();
+            this.PackageSourcesContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // NPackURILabel
             // 
             this.NPackURILabel.AutoSize = true;
-            this.NPackURILabel.Location = new System.Drawing.Point(4, 16);
-            this.NPackURILabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.NPackURILabel.Location = new System.Drawing.Point(3, 9);
             this.NPackURILabel.Name = "NPackURILabel";
             this.NPackURILabel.Size = new System.Drawing.Size(177, 17);
             this.NPackURILabel.TabIndex = 0;
-            this.NPackURILabel.Text = "Available package sources";
+            this.NPackURILabel.Text = "Available package sources:";
             // 
             // NewPackageSource
             // 
@@ -71,6 +70,7 @@
             // 
             this.PackageSourcesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.PackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
             this.PackageSourcesListBox.DisplayMember = "Source";
             this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.PackageSourcesListBox.FormattingEnabled = true;
@@ -82,6 +82,21 @@
             this.PackageSourcesListBox.ValueMember = "Source";
             this.PackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.AllPackageSourcesList_DrawItem);
             this.PackageSourcesListBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyDown);
+            this.PackageSourcesListBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseDown);
+            // 
+            // PackageSourcesContextMenu
+            // 
+            this.PackageSourcesContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.CopyPackageSourceStripMenuItem});
+            this.PackageSourcesContextMenu.Name = "contextMenuStrip1";
+            this.PackageSourcesContextMenu.Size = new System.Drawing.Size(153, 48);
+            this.PackageSourcesContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.PackageSourcesContextMenu_ItemClicked);
+            // 
+            // CopyPackageSourceStripMenuItem
+            // 
+            this.CopyPackageSourceStripMenuItem.Name = "CopyPackageSourceStripMenuItem";
+            this.CopyPackageSourceStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.CopyPackageSourceStripMenuItem.Text = "Copy";
             // 
             // removeButton
             // 
@@ -131,5 +146,7 @@
         private System.Windows.Forms.ListBox PackageSourcesListBox;
         private System.Windows.Forms.Button removeButton;
         private System.Windows.Forms.Button defaultButton;
+        private ContextMenuStrip PackageSourcesContextMenu;
+        private ToolStripMenuItem CopyPackageSourceStripMenuItem;
     }
 }

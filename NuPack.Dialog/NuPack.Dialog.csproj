@@ -106,7 +106,7 @@
     <Compile Include="PackageManagerUI\Converters\DownloadCountToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
     <Compile Include="PackageManagerUI\EmptyPackageRepository.cs" />
-    <Compile Include="PackageManagerUI\ExtensionManagerWindowCommands.cs">
+    <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PackageManagerUI\InstalledProvider\InstalledPackagesProvider.cs" />

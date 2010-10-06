@@ -18,7 +18,7 @@ namespace NuPack.Dialog.PackageManagerUI {
         private readonly OnlinePackagesProvider _installedPackagesProvider;
 
         ///// <summary>
-        ///// Constructor for the Extension Manager Window
+        ///// Constructor for the Package Manager Window
         ///// </summary>
         public PackageManagerWindow(DTEPackage package)
             : base(F1Keyword) {
@@ -88,18 +88,11 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            // Allow the download command on extensions that are already installed.
+            // Only allow the download command on packages that are already installed.
             e.CanExecute = selectedItem.IsInstalled;
         }
 
-        private void ExecutedToggleExtensionEnabledState(object sender, ExecutedRoutedEventArgs e) {
-
-        }
-
-        private void CanExecuteToggleExtensionEnabledState(object sender, CanExecuteRoutedEventArgs e) {
-        }
-
-        private void ExecutedUpdateExtension(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecutedUpdatePackage(object sender, ExecutedRoutedEventArgs e) {
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 return;
@@ -121,7 +114,7 @@ namespace NuPack.Dialog.PackageManagerUI {
             }
         }
 
-        private void CanExecuteUpdateExtension(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanExecuteUpdatePackage(object sender, CanExecuteRoutedEventArgs e) {
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 e.CanExecute = false;
@@ -137,23 +130,12 @@ namespace NuPack.Dialog.PackageManagerUI {
         }
 
 
-        private void ExecutedRestartVisualStudio(object sender, ExecutedRoutedEventArgs e) {
-        }
-
-        private void CanExecuteRestartVisualStudio(object sender, CanExecuteRoutedEventArgs e) {
-        }
-
-
         private void ExecutedClose(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
         }
 
         private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = true;
-        }
-
-
-        private void ExecutedSelectOnlineProvider(object sender, ExecutedRoutedEventArgs e) {
         }
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
@@ -165,7 +147,7 @@ namespace NuPack.Dialog.PackageManagerUI {
             _ownerPackage.ShowOptionPage(typeof(ToolsOptionsUI.ToolsOptionsPage));
         }
 
-        private void ExecutedDownloadExtension(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecutedInstallPackage(object sender, ExecutedRoutedEventArgs e) {
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 return;
@@ -187,7 +169,7 @@ namespace NuPack.Dialog.PackageManagerUI {
             }
         }
 
-        private void CanExecuteDownloadExtension(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanExecuteInstallPackage(object sender, CanExecuteRoutedEventArgs e) {
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 e.CanExecute = false;
@@ -200,7 +182,7 @@ namespace NuPack.Dialog.PackageManagerUI {
             }
 
             if (selectedItem.IsInstalled) {
-                //Don't allow the download command on extensions that are already installed.
+                //Don't allow the download command on packages that are already installed.
                 e.CanExecute = false;
                 return;
             }

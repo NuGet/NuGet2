@@ -94,33 +94,23 @@
         </ResourceDictionary>
     </Window.Resources>
     <Window.CommandBindings>
-        <CommandBinding x:Uid="CommandBinding_UninstallExtension" Command="{x:Static self:ExtensionManagerWindowCommands.UninstallPackage}"
+        <CommandBinding x:Uid="CommandBinding_UninstallPackage" Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
                     CanExecute="CanExecuteUninstallPackage"
                     Executed="ExecutedUninstallPackage" />
-        <CommandBinding x:Uid="CommandBinding_ToggleExtensionEnabledState" Command="{x:Static self:ExtensionManagerWindowCommands.ToggleExtensionEnabledState}"
-                    CanExecute="CanExecuteToggleExtensionEnabledState"
-                    Executed="ExecutedToggleExtensionEnabledState" />
-        <CommandBinding x:Uid="CommandBinding_UpdateExtension" Command="{x:Static self:ExtensionManagerWindowCommands.UpdateExtension}"
-                    CanExecute="CanExecuteUpdateExtension"
-                    Executed="ExecutedUpdateExtension" />
-        <CommandBinding x:Uid="CommandBinding_RestartVisualStudio" Command="{x:Static self:ExtensionManagerWindowCommands.RestartVisualStudio}"
-                    CanExecute="CanExecuteRestartVisualStudio"
-                    Executed="ExecutedRestartVisualStudio" />
+        <CommandBinding x:Uid="CommandBinding_UpdatePackage" Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
+                    CanExecute="CanExecuteUpdatePackage"
+                    Executed="ExecutedUpdatePackage" />
         <CommandBinding x:Uid="CommandBinding_Close" Command="ApplicationCommands.Close"
                     CanExecute="CanExecuteClose"
                     Executed="ExecutedClose" />
-        <CommandBinding x:Uid="CommandBinding_DownloadExtension" Command="{x:Static self:ExtensionManagerWindowCommands.DownloadExtension}"
-                    CanExecute="CanExecuteDownloadExtension"
-                    Executed="ExecutedDownloadExtension" />
-        <CommandBinding x:Uid="CommandBinding_SelectOnlineProvider" Command="{x:Static self:ExtensionManagerWindowCommands.SelectOnlineProvider}"
-                    Executed="ExecutedSelectOnlineProvider" />
-        <CommandBinding x:Uid="CommandBinding_ShowOptionsPage" Command="{x:Static self:ExtensionManagerWindowCommands.ShowOptionsPage}"
+        <CommandBinding x:Uid="CommandBinding_InstallPackage" Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
+                    CanExecute="CanExecuteInstallPackage"
+                    Executed="ExecutedInstallPackage" />
+        <CommandBinding x:Uid="CommandBinding_ShowOptionsPage" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
                     Executed="ExecutedShowOptionsPage" />
-      <CommandBinding x:Uid="CommandBinding_FocusOnSearchBox" Command="{x:Static self:ExtensionManagerWindowCommands.FocusOnSearchBox}"
-                    Executed="ExecutedFocusOnSearchBox" />
     </Window.CommandBindings>
     <Window.InputBindings>
-      <KeyBinding x:Uid="KeyBinding_1" Command="{x:Static self:ExtensionManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
+      <KeyBinding x:Uid="KeyBinding_1" Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
     </Window.InputBindings>
     
     <Grid x:Uid="mainGrid" x:Name="mainGrid" >
@@ -190,7 +180,7 @@
             </Border>
             <Grid x:Uid="Grid_7" Grid.Column="0" x:Name="FooterButtonGridL" Margin="12,12,12,12">
                 <StackPanel x:Uid="StackPanel_2" x:Name="FooterButtonLeftPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Button x:Uid="Button_Settings" MinWidth="75" MinHeight="23" Command="{x:Static self:ExtensionManagerWindowCommands.ShowOptionsPage}" Content="Settings..."/>
+                    <Button x:Uid="Button_Settings" MinWidth="75" MinHeight="23" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" Content="Settings..."/>
                 </StackPanel>
             </Grid>
             <Grid x:Uid="Grid_6" Grid.Column="1" x:Name="FooterButtonGrid" Margin="0,12,12,12">

@@ -11,8 +11,7 @@ using NuPack.VisualStudio;
 namespace NuPack.Dialog.Providers {
     /// <summary>
     /// IVsExtensionsProvider implementation responsible for gathering
-    /// a list of extensions from the extension repository
-    /// which will be shown in the Add NuPack dialog.
+    /// a list of packages from a package feed which will be shown in the Add NuPack dialog.
     /// </summary>
     internal class OnlinePackagesProvider : VsExtensionsProvider, IVsProgressPaneConsumer {
         private IVsExtensionsTreeNode m_SearchNode = null;

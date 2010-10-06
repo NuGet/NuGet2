@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Windows;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -11,8 +13,7 @@ using NuPackConsole.Implementation;
 using NuPack.VisualStudio;
 using EnvDTE;
 
-namespace NuPack.Tools
-{
+namespace NuPack.Tools {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
     /// </summary>
@@ -20,27 +21,23 @@ namespace NuPack.Tools
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(PowerConsoleToolWindow),
-        Style=VsDockStyle.Tabbed,
+        Style = VsDockStyle.Tabbed,
         Window = "28836128-FC2C-11D2-A433-00C04F72D18A",
-        Orientation=ToolWindowOrientation.Right)]
+        Orientation = ToolWindowOrientation.Right)]
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [Guid(GuidList.guidNuPackPkgString)]
-    public sealed class NuPackPackage : Microsoft.VisualStudio.Shell.Package
-    {
-        public NuPackPackage()
-        {
+    public sealed class NuPackPackage : Microsoft.VisualStudio.Shell.Package {
+        public NuPackPackage() {
         }
 
-        private void ShowToolWindow(object sender, EventArgs e)
-        {
+        private void ShowToolWindow(object sender, EventArgs e) {
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
             ToolWindowPane window = this.FindToolWindow(typeof(PowerConsoleToolWindow), 0, true);
-            if ((null == window) || (null == window.Frame))
-            {
+            if ((null == window) || (null == window.Frame)) {
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
@@ -54,7 +51,12 @@ namespace NuPack.Tools
         /// </summary>
         private void MenuItemCallback(object sender, EventArgs e) {
             var window = new PackageManagerWindow(this);
-            window.ShowModal();
+            try {
+                window.ShowModal();
+            }
+            catch (TargetInvocationException exception) {
+                MessageBox.Show((exception.InnerException ?? exception).Message);
+            }
         }
 
         #region Package Members
