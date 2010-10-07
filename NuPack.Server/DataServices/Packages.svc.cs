@@ -5,6 +5,7 @@ using System.Data.Services.Providers;
 using System.IO;
 using System.ServiceModel;
 using System.Web.Hosting;
+using System.Web;
 
 namespace NuPack.Server.DataServices {
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
@@ -23,6 +24,14 @@ namespace NuPack.Server.DataServices {
                 _repository = new LocalPackageRepository(HostingEnvironment.MapPath("~/Packages"));
             }
             return new PackageContext(_repository);
+        }
+
+        protected override void OnStartProcessingRequest(ProcessRequestArgs args) {
+            base.OnStartProcessingRequest(args);
+
+            var context = new HttpContextWrapper(HttpContext.Current);
+            context.EnableOutputCache(TimeSpan.FromMinutes(30));
+            
         }
 
         public void DeleteStream(object entity, DataServiceOperationContext operationContext) {

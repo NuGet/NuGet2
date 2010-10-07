@@ -57,6 +57,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="HttpContextExtensions.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="DataServices\Packages.svc.cs">
       <DependentUpon>Packages.svc</DependentUpon>

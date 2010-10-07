@@ -57,6 +57,9 @@ namespace NuPack.Server.Controllers {
             packageFeed.Language = "en-us";
             packageFeed.LastUpdatedTime = DateTime.Now;
 
+            // Cache the feed for 30 minutes
+            ControllerContext.HttpContext.EnableOutputCache(TimeSpan.FromMinutes(30));
+
             return new SyndicationFeedResult(packageFeed,
                                              feed => new Atom10FeedFormatter(feed),
                                              lastModified,
