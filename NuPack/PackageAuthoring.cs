@@ -7,8 +7,8 @@
     using System.Linq;
 
     public class PackageAuthoring {
-    
-        private static readonly HashSet<string> _exclude = new HashSet<string>(new[] {Constants.PackageExtension, Constants.ManifestExtension}, StringComparer.OrdinalIgnoreCase);
+
+        private static readonly HashSet<string> _exclude = new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
         public static void Main(string[] args) {
             // Review: Need to use a command-line parsing library instead of parsing it this way.
@@ -64,7 +64,7 @@
         }
 
         private static string[] GetNuSpecFilesInDirectory() {
-            return Directory.GetFiles(Directory.GetCurrentDirectory(), "*.nuspec");
+            return Directory.GetFiles(Directory.GetCurrentDirectory(), "*" + Constants.ManifestExtension);
         }
     }
 }

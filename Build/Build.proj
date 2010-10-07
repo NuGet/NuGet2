@@ -25,7 +25,7 @@
         <ServerOutputItems Exclude="$(ServerBuildDirectory)\obj\*.*;$(ServerBuildDirectory)\**\*.cs;$(ServerBuildDirectory)\**\*.csproj" Include="$(ServerBuildDirectory)\**\*.*" />
     </ItemGroup>
 
-    <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable">
+    <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; RunIntegrationTests">
     </Target>
 
     <Target Name="Build">
@@ -81,5 +81,10 @@
         <Exec Command="$(ILMergeExe) /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:$(ILMergeInternalizeIgnoreFile) /target:exe /out:$(ILMergeFileFinalName) /log:$(ILMergeArtifactDirectory)\ilmerge.log /ndebug /allowDup $(ILMergeFileFinalName) %(ILMergeItems.FileName)%(ILMergeItems.Extension)" WorkingDirectory="$(MergeDirectory)" />
         <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
         <Delete Files="@(ILMergeItems)" />
+    </Target>
+    
+    <Target Name="RunIntegrationTests">
+	<MSBuild Projects="$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.csproj" Targets="RunIntegrationTests">
+        </MSBuild>
     </Target>
 </Project>

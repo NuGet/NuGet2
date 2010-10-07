@@ -32,6 +32,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notices", "notices", "{E8BE
 		LICENSE.txt = LICENSE.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2E61590-0069-4746-A44D-4B2B805EDD91}"
+	ProjectSection(SolutionItems) = preProject
+		NuPack.Test.Integration\NuPack.Test.Integration.testsettings = NuPack.Test.Integration\NuPack.Test.Integration.testsettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = NuPack.vsmdi

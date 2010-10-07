@@ -9,4 +9,8 @@
 <Target Name="RunTests">
     <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
 </Target>
+
+<Target Name="RunIntegrationTests">
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot; /testsettings:&quot;$(MSBuildProjectDirectory)\NuPack.Test.Integration.testsettings&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+</Target>
 </Project>
