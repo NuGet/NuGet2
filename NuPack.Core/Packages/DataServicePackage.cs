@@ -14,7 +14,7 @@
     [EntityPropertyMappingAttribute("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
-        private Uri _downloadUri;
+        private Lazy<IPackage> _retrievedPackage;
 
         public string Id {
             get;
@@ -65,23 +65,7 @@
             get;
             set;
         }
-
-        // REVIEW: This isn't clean but there is no other way to get the stream uri
-        // since it isn't in the feed
-        public DataServiceContext ServiceContext {
-            get;
-            internal set;
-        }
-
-        public Uri DownloadUrl {
-            get {
-                if (_downloadUri == null) {
-                    _downloadUri = ServiceContext.GetReadStreamUri(this);
-                }
-                return _downloadUri;
-            }
-        }
-
+        
         IEnumerable<string> IPackage.Keywords {
             get {
                 return Keywords.Split(',');
@@ -129,12 +113,16 @@
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return HttpWebRequestor.DownloadPackage(DownloadUrl).AssemblyReferences;
+                return _retrievedPackage.Value.AssemblyReferences;
             }
         }
-
+       
         public IEnumerable<IPackageFile> GetFiles() {
-            return HttpWebRequestor.DownloadPackage(DownloadUrl).GetFiles();
+            return _retrievedPackage.Value.GetFiles();
+        }
+
+        internal void InitializeDownloader(Func<IPackage> downloader) {
+            _retrievedPackage = new Lazy<IPackage>(downloader, isThreadSafe: false);
         }
     }
 }

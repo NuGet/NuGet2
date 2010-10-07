@@ -47,15 +47,15 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         private void GetPackagesFromRepository(IPackageRepository repository) {
-            var q = from p in repository.GetPackages()
+            var q = from p in repository.GetPackages().AsEnumerable()
                     select new { Id = p.Id, Version = p.Version, Description = p.Description };
 
             WriteObject(q, enumerateCollection: true);
         }
 
         private void ShowUpdatePackages() {
-            var solutionPackages = PackageManager.LocalRepository.GetPackages();
-            var externalPackages = PackageManager.SourceRepository.GetPackages();
+            var solutionPackages = PackageManager.LocalRepository.GetPackages().AsEnumerable();
+            var externalPackages = PackageManager.SourceRepository.GetPackages().AsEnumerable();
 
             // inner join
             var q = from s in solutionPackages

@@ -98,7 +98,7 @@ namespace NuPack.Server.DataServices {
         }
 
         private string ConvertDependency(PackageDependency dependency) {
-            return String.Format("{0}:{1}:{2}:{3}", dependency.Id, dependency.Version, dependency.MinVersion, dependency.MaxVersion);
+             return String.Format("{0}:{1}:{2}:{3}", dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
         }
     }
 }

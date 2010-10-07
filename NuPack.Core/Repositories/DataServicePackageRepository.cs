@@ -2,11 +2,10 @@
     using System;
     using System.Data.Services.Client;
     using System.Linq;
-    using System.Net.Cache;
 
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly DataServiceContext _context;
-        
+
         public DataServicePackageRepository(Uri serviceRoot) {
             _context = new DataServiceContext(serviceRoot);
 
@@ -17,13 +16,13 @@
         private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {
             var package = (DataServicePackage)e.Entity;
 
-            // Set the context so the package can get the download uri later
-            package.ServiceContext = _context;
+            // REVIEW: This is the only way (I know) to download the package on demand
+            package.InitializeDownloader(() => HttpWebRequestor.DownloadPackage(_context.GetReadStreamUri(package)));
         }
-        
+
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             // Initialize the request
-            HttpWebRequestor.InitializeRequest(e.Request);            
+            HttpWebRequestor.InitializeRequest(e.Request);
         }
 
         public override IQueryable<IPackage> GetPackages() {

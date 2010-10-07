@@ -4,8 +4,8 @@
     using System.Diagnostics;
     using System.Linq;
 
-    public static class PackageExtensions {        
-        public static IPackage FindByVersion(this IQueryable<IPackage> source, Version minVersion, Version maxVersion, Version exactVersion) {
+    public static class PackageExtensions {
+        public static IPackage FindByVersion(this IEnumerable<IPackage> source, Version minVersion, Version maxVersion, Version exactVersion) {
             IEnumerable<IPackage> packages = from p in source
                                              orderby p.Version descending
                                              select p;

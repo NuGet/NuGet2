@@ -29,7 +29,7 @@
 
         private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
             return from p in repository.GetPackages()
-                   where p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
+                   where p.Id.ToLower() == packageId.ToLower()
                    select p;
         }        
     }
