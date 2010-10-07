@@ -56,6 +56,7 @@
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\XmlManifestReader.cs" />
     <Compile Include="PackageSource\PackageSource.cs" />
+    <Compile Include="Packages\DataServicePackage.cs" />
     <Compile Include="Packages\DefaultPackagePathResolver.cs" />
     <Compile Include="Packages\IPackage.cs" />
     <Compile Include="Packages\IPackagePathResolver.cs" />

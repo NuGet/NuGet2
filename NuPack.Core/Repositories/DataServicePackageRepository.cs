@@ -1,4 +1,4 @@
-﻿namespace NuPack.Repositories {
+﻿namespace NuPack {
     using System;
     using System.Data.Services.Client;
     using System.Linq;
@@ -6,15 +6,21 @@
 
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly DataServiceContext _context;
-        private readonly string _packagesEntitySet;
-
-        public DataServicePackageRepository(Uri serviceRoot, string packagesEntitySet) {
+        
+        public DataServicePackageRepository(Uri serviceRoot) {
             _context = new DataServiceContext(serviceRoot);
-            _packagesEntitySet = packagesEntitySet;
 
             _context.SendingRequest += OnSendingRequest;
+            _context.ReadingEntity += OnReadingEntity;
         }
 
+        private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {
+            var package = (DataServicePackage)e.Entity;
+
+            // Set the context so the package can get the download uri later
+            package.ServiceContext = _context;
+        }
+        
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             // Use default credentials, configure the proxy
             e.Request.UseDefaultCredentials = true;
@@ -24,7 +30,8 @@
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return _context.CreateQuery<IPackage>(_packagesEntitySet);
+            // REVIEW: Is it ok to assume that the package entity set is called packages?
+            return _context.CreateQuery<DataServicePackage>("Packages");
         }
     }
 }
