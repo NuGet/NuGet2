@@ -25,7 +25,7 @@
         }
 
         internal IEnumerable<PackageSyndicationItem> GetFeedItems() {
-            return GetFeedItems(GetFeedStream);
+            return GetFeedItems(() => HttpWebRequestor.GetResponseStream(_feedUri));
         }
 
         internal IEnumerable<PackageSyndicationItem> GetFeedItems(Func<Stream> getStream) {
@@ -37,19 +37,6 @@
             catch (WebException exception) {
                 throw new InvalidOperationException(NuPackResources.AtomFeedPackageRepo_InvalidFeedSource, exception);
             }
-        }
-
-        private Stream GetFeedStream() {
-            // Manually create the request to the feed so we can
-            // set the default credentials
-            WebRequest request = WebRequest.Create(_feedUri);
-            request.CachePolicy = new HttpRequestCachePolicy();
-            request.UseDefaultCredentials = true;
-            Utility.ConfigureProxy(request.Proxy);
-
-            WebResponse response = request.GetResponse();
-
-            return response.GetResponseStream();
         }
 
         internal static IEnumerable<PackageSyndicationItem> GetFeedItems(XmlReader xmlReader) {

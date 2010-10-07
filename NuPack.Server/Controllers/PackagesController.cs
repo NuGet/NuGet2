@@ -44,7 +44,7 @@ namespace NuPack.Server.Controllers {
 
             SyndicationFeed packageFeed = PackageSyndicationFeed.Create(
                 fullPath,
-                package => new Uri(Request.Url, GetPackageDownloadUrl(package)));
+                package => PackageUtility.GetPackageUrl(package.Id, package.Version.ToString(), Request.Url));
 
 
 
@@ -61,19 +61,6 @@ namespace NuPack.Server.Controllers {
                                              feed => new Atom10FeedFormatter(feed),
                                              lastModified,
                                              "application/atom+xml");
-        }
-
-        private string GetPackageDownloadUrl(IPackage package) {
-            string appRoot = Request.ApplicationPath;
-            if (!appRoot.EndsWith("/")) {
-                appRoot += "/";
-            }
-
-            return String.Format(appRoot + "packages/download?p={0}", GetPackageFileName(package));
-        }
-
-        public static string GetPackageFileName(IPackage package) {
-            return package.Id + "." + package.Version + Constants.PackageExtension;
         }
     }
 }

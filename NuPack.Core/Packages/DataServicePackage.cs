@@ -66,6 +66,8 @@
             set;
         }
 
+        // REVIEW: This isn't clean but there is no other way to get the stream uri
+        // since it isn't in the feed
         public DataServiceContext ServiceContext {
             get;
             internal set;
@@ -117,6 +119,7 @@
             get {
                 return from d in Dependencies.Split(',')
                        let parts = d.Split(':')
+                       where parts.Length == 4
                        select PackageDependency.CreateDependency(parts[0],
                                                                  Utility.ParseOptionalVersion(parts[1]),
                                                                  Utility.ParseOptionalVersion(parts[2]),
@@ -126,26 +129,12 @@
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return DownloadPackage(DownloadUrl).AssemblyReferences;
+                return HttpWebRequestor.DownloadPackage(DownloadUrl).AssemblyReferences;
             }
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
-            return DownloadPackage(DownloadUrl).GetFiles();
-        }
-
-        public static IPackage DownloadPackage(Uri uri) {
-            // REVIEW: Should we be using WebClient?
-            using (var client = new WebClient()) {
-                // Make sure we use the default credentials for this request
-                client.UseDefaultCredentials = true;
-                Utility.ConfigureProxy(client.Proxy);
-                // TODO: Verify package hash and length
-                byte[] rawPackage = client.DownloadData(uri);
-                using (var stream = new MemoryStream(rawPackage)) {
-                    return new ZipPackage(stream);
-                }
-            }
+            return HttpWebRequestor.DownloadPackage(DownloadUrl).GetFiles();
         }
     }
 }

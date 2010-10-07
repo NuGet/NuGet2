@@ -102,23 +102,7 @@
         }
 
         protected override IPackage CreatePackage() {
-            return new ZipPackage(() => {
-                WebRequest request = WebRequest.Create(_item.DownloadLink.Uri);
-                request.CachePolicy = new HttpRequestCachePolicy();
-                request.UseDefaultCredentials = true;
-                Utility.ConfigureProxy(request.Proxy);
-
-                WebResponse response = request.GetResponse();
-                using (Stream responseStream = response.GetResponseStream()) {
-                    // ZipPackages require a seekable stream
-                    var memoryStream = new MemoryStream((int)response.ContentLength);
-                    // Copy the stream
-                    responseStream.CopyTo(memoryStream);
-                    // Move it back to the beginning
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-                    return memoryStream;
-                }
-            });
+            return HttpWebRequestor.DownloadPackage(_item.DownloadLink.Uri);
         }
     }
 }

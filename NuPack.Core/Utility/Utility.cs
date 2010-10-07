@@ -21,14 +21,6 @@
             { "Silverlight", "Silverlight" },
         };
 
-        internal static void ConfigureProxy(IWebProxy proxy) {
-            // REVIEW: Can this ever be null?
-            if (proxy != null) {
-                // If we are going through a proxy then just set the default credentials
-                proxy.Credentials = CredentialCache.DefaultCredentials;
-            }
-        }
-
         internal static Version ParseOptionalVersion(string versionString) {
             Version version;
             if (!String.IsNullOrEmpty(versionString) && Version.TryParse(versionString, out version)) {

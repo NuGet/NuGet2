@@ -22,11 +22,8 @@
         }
         
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
-            // Use default credentials, configure the proxy
-            e.Request.UseDefaultCredentials = true;
-            Utility.ConfigureProxy(e.Request.Proxy);
-            // Use the default http cache policy
-            e.Request.CachePolicy = new HttpRequestCachePolicy();
+            // Initialize the request
+            HttpWebRequestor.InitializeRequest(e.Request);            
         }
 
         public override IQueryable<IPackage> GetPackages() {

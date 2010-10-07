@@ -15,7 +15,7 @@ namespace NuPack.Server {
                 appRoot += "/";
             }
 
-            return appRoot + "packages/download?packageFile=" + GetPackageFileName(id, version);
+            return appRoot + "packages/download?p=" + GetPackageFileName(id, version);
         }
 
         public static string GetPackageFileName(string id, string version) {
