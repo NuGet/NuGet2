@@ -54,6 +54,12 @@
     <Compile Include="NuPackCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\nupack\NuPack.csproj">
+      <Project>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</Project>
+      <Name>NuPack</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\Build\NuPack.Test.targets" />
 </Project>

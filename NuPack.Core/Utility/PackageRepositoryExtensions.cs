@@ -24,9 +24,6 @@
         }
       
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion, Version exactVersion) {
-            if (exactVersion != null) {
-                return repository.FindPackage(packageId, exactVersion);
-            }
             return repository.FindPackagesById(packageId).FindByVersion(minVersion, maxVersion, exactVersion);
         }
 
