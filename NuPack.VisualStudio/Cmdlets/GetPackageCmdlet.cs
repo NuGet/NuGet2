@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Management.Automation;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
@@ -34,7 +35,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
             else {
                 if (Installed.IsPresent || Updates.IsPresent) {
-                    WriteError("The current environment doesn't have a solution open.");
+                    WriteError(VsResources.Cmdlet_NoSolution);
                     return;
                 }
 
@@ -69,7 +70,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             WriteObject(q, enumerateCollection: true);
         }
 
-        private string ActivePackageSource {
+        private static string ActivePackageSource {
             get {
                 var packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
 

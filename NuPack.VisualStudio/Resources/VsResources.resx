@@ -153,4 +153,28 @@
   <data name="Dialog_DisclaimerText" xml:space="preserve">
     <value>Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages.</value>
   </data>
+  <data name="Cmdlet_MissingProjectParameter" xml:space="preserve">
+    <value>Missing Project parameter or invalid project name.</value>
+  </data>
+  <data name="Cmdlet_NoSolution" xml:space="preserve">
+    <value>The current environment doesn't have a solution open.</value>
+  </data>
+  <data name="Cmdlet_NuspecFileNotFound" xml:space="preserve">
+    <value>Unable to locate a .nuspec file in the specified project.</value>
+  </data>
+  <data name="Cmdlet_CreatingPackage" xml:space="preserve">
+    <value>Creating package at {0}...</value>
+  </data>
+  <data name="Cmdlet_PackageCreated" xml:space="preserve">
+    <value>Package file successfully created...</value>
+  </data>
+  <data name="Cmdlet_PackageForSolutionOnly" xml:space="preserve">
+    <value>The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.</value>
+  </data>
+  <data name="Cmdlet_ProjectNotFound" xml:space="preserve">
+    <value>Project '{0}' is not found.</value>
+  </data>
+  <data name="Cmdlet_ExecutingScript" xml:space="preserve">
+    <value>Executing script file {0}.</value>
+  </data>
 </root>

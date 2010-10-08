@@ -148,6 +148,7 @@
                    select p.Name;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override bool ReferenceExists(string name) {
             try {
                 // Get the reference name without extension

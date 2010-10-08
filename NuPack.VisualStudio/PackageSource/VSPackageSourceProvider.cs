@@ -85,6 +85,10 @@ namespace NuPack.VisualStudio {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification="This method is potentially expensive because we are retrieving data from VS settings store.")]
         public IEnumerable<PackageSource> GetPackageSources() {
             return _packageSources;
         }

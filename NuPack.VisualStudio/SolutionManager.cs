@@ -49,6 +49,10 @@
         /// Gets a list of supported projects currently loaded in the solution
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification="This method is potentially expensive if the cache is not constructed yet.")]
         public IEnumerable<Project> GetProjects() {
             EnsureProjectCache();
             return _projectCache.Values;

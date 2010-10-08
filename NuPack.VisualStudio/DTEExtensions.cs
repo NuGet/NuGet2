@@ -16,6 +16,10 @@ namespace NuPack.VisualStudio {
             return (T)dte.GetServiceProvider().GetService(serviceType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability", 
+            "CA2000:Dispose objects before losing scope",
+            Justification="We can't dispose an object if we want to return it.")]
         public static IServiceProvider GetServiceProvider(this _DTE dte) {
             IServiceProvider serviceProvider = new ServiceProvider(dte as Microsoft.VisualStudio.OLE.Interop.IServiceProvider);
             Debug.Assert(serviceProvider != null, "Service provider is null");
@@ -26,12 +30,12 @@ namespace NuPack.VisualStudio {
             EnvDTE.Project activeProject = null;
 
             if (dte != null) {
-                Object obj = dte.ActiveSolutionProjects;
-                if (obj != null && obj is Array && ((Array)obj).Length > 0) {
-                    Object proj = ((Array)obj).GetValue(0);
-
-                    if (proj != null && proj is EnvDTE.Project) {
-                        activeProject = (EnvDTE.Project)proj;
+                Array activeProjects = dte.ActiveSolutionProjects as Array;
+                if (activeProjects != null && activeProjects.Length > 0) {
+                    Object projectValue = activeProjects.GetValue(0);
+                    Project project = projectValue as Project;
+                    if (project != null) {
+                        return project;
                     }
                 }
             }

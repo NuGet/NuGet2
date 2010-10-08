@@ -74,18 +74,18 @@
             }
         }
 
-        public override void UninstallPackage(IPackage package, bool force = false, bool removeDependencies = false) {
+        public override void UninstallPackage(IPackage package, bool forceRemove = false, bool removeDependencies = false) {
             // Remove reference from projects that reference this package
             var projectManagers = GetProjectsWithPackage(package.Id, package.Version);
             if (projectManagers.Any()) {
                 // We don't need to actually call uninstall since uninstalling it from all the projects
                 // already has a side effect of removing it from the package manager
                 foreach (ProjectManager projectManager in projectManagers) {
-                    projectManager.RemovePackageReference(package.Id, force, removeDependencies);
+                    projectManager.RemovePackageReference(package.Id, forceRemove, removeDependencies);
                 }
             }
             else {
-                base.UninstallPackage(package, force, removeDependencies);
+                base.UninstallPackage(package, forceRemove, removeDependencies);
             }
         }
 
@@ -160,6 +160,7 @@
             return fileSystem ?? new FileBasedProjectSystem(path);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
             try {
                 return provider.GetFileSystem(path, binding);

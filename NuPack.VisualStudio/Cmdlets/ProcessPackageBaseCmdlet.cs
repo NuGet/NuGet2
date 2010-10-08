@@ -136,7 +136,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 psVariable.Set("__project", project);
 
                 string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
-                WriteVerbose("Executing script file: " + fullPath);
+                WriteVerbose(VsResources.Cmdlet_ExecutingScript);
                 InvokeCommand.InvokeScript(command);
 
                 // clear temp variables
@@ -160,7 +160,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected bool IsSolutionOnlyPackage(IPackageRepository repository, string id, Version version = null) {
+        protected static bool IsSolutionOnlyPackage(IPackageRepository repository, string id, Version version = null) {
             var package = repository.FindPackage(id, null, null, version);
             return package != null && !package.HasProjectContent();
         }

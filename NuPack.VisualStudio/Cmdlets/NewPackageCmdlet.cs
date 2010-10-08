@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using EnvDTE;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
@@ -38,19 +39,19 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             if (String.IsNullOrEmpty(projectName)) {
-                WriteError("Missing -Project parameter and the default project is not set.");
+                WriteError(VsResources.Cmdlet_MissingProjectParameter);
                 return;
             }
 
             var projectIns = GetProjectFromName(projectName);
             if (projectIns == null) {
-                WriteError(String.Format(CultureInfo.CurrentCulture, "Project '{0}' is not found.", projectName));
+                WriteError(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ProjectNotFound, projectName));
                 return;
             }
 
             var specItem = FindSpecFile(projectIns, SpecFile);
             if (specItem == null) {
-                WriteError("Unable to locate a .nuspec file in the specified project.");
+                WriteError(VsResources.Cmdlet_NuspecFileNotFound);
                 return;
             }
 
@@ -71,16 +72,16 @@ namespace NuPack.VisualStudio.Cmdlets {
                 outputFile = Path.Combine(folder, outputFile);
             }
 
-            WriteLine("Creating package at " + outputFile + "...");
+            WriteLine(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_CreatingPackage, outputFile));
 
             using (Stream stream = File.Create(outputFile)) {
                 builder.Save(stream);
             }
 
-            WriteLine("Package file successfully created...");
+            WriteLine(VsResources.Cmdlet_PackageCreated);
         }
 
-        private ProjectItem FindSpecFile(EnvDTE.Project projectIns, string specFile) {
+        private static ProjectItem FindSpecFile(EnvDTE.Project projectIns, string specFile) {
             if (!String.IsNullOrEmpty(specFile)) {
                 return projectIns.ProjectItems.Item(specFile);
             }

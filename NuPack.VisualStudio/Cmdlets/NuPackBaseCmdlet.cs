@@ -30,7 +30,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// Gets the default project name if a -Project parameter is not supplied.
         /// </summary>
         /// <value>The default project name.</value>
-        protected string DefaultProjectName {
+        protected static string DefaultProjectName {
             get {
                 return SolutionManager.Current.DefaultProjectName;
             }
@@ -39,7 +39,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// <summary>
         /// Gets a value indicating whether there is a solution open in the IDE.
         /// </summary>
-        protected bool IsSolutionOpen {
+        protected static bool IsSolutionOpen {
             get {
                 var dte = DTEExtensions.DTE;
                 return dte != null && dte.Solution != null && dte.Solution.IsOpen;
@@ -48,6 +48,10 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         #region Processing methods
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We want to display friendly message to the console.")]
         protected sealed override void ProcessRecord() {
             try {
                 ProcessRecordCore();
@@ -100,7 +104,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         #region Helper functions
 
-        private VSPackageManager GetPackageManager() {
+        private static VSPackageManager GetPackageManager() {
             if (!IsSolutionOpen) {
                 return null;
             }
@@ -114,7 +118,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             return VSPackageManager.GetPackageManager(dte);
         }
 
-        protected Project GetProjectFromName(string projectName) {
+        protected static Project GetProjectFromName(string projectName) {
             return SolutionManager.Current.GetProject(projectName);
         }
 

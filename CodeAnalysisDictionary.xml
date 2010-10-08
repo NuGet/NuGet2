@@ -10,6 +10,7 @@
       <Word>dte</Word>
       <Word>param</Word>
       <Word>Infos</Word>
+      <Word>nuspec</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Management.Automation;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
 
@@ -22,7 +23,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {
-                WriteError("There is no active solution in the current environment.");
+                WriteError(VsResources.Cmdlet_NoSolution);
                 return;
             }
 
@@ -33,7 +34,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 if (!String.IsNullOrEmpty(Project)) {
                     WriteError(String.Format(
                         CultureInfo.CurrentCulture,
-                        "The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.",
+                        VsResources.Cmdlet_PackageForSolutionOnly,
                         Id));
                 }
                 else {
