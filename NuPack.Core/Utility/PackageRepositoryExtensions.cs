@@ -22,7 +22,7 @@
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion) {
             return FindPackage(repository, packageId, minVersion: minVersion, maxVersion: maxVersion, exactVersion: null);
         }
-      
+
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion, Version exactVersion) {
             return repository.FindPackagesById(packageId).FindByVersion(minVersion, maxVersion, exactVersion);
         }
@@ -31,6 +31,6 @@
             return from p in repository.GetPackages()
                    where p.Id.ToLower() == packageId.ToLower()
                    select p;
-        }        
+        }
     }
 }
