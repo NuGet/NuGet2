@@ -1,4 +1,5 @@
-﻿namespace NuPackConsole
+﻿using System.Collections.Generic;
+namespace NuPackConsole
 {
     /// <summary>
     /// Simple command expansion result.
@@ -18,7 +19,7 @@
         /// <summary>
         /// Get the expansion candidates for intellisense.
         /// </summary>
-        public string[] Expansions { get; private set; }
+        public IList<string> Expansions { get; private set; }
         
         /// <summary>
         /// Create a simple command expansion result.
@@ -26,7 +27,7 @@
         /// <param name="start">The start position for the expansion.</param>
         /// <param name="length">The length from start position for expansion.</param>
         /// <param name="expansions">Expansion candidates.</param>
-        public SimpleExpansion(int start, int length, string[] expansions)
+        public SimpleExpansion(int start, int length, IList<string> expansions)
         {
             this.Start = start;
             this.Length = length;

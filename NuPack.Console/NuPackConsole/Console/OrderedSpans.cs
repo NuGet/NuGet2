@@ -217,22 +217,5 @@ namespace NuPackConsole.Implementation.Console
                 }
             }
         }
-
-        public Span? CurrentCommandStart
-        {
-            get
-            {
-                // If the last command line is incomplete
-                if (Count > 0 && !this[Count - 1].Item2)
-                {
-                    int i = FindCommandStart(Count - 1);
-                    if (i >= 0)
-                    {
-                        return this[i].Item1;
-                    }
-                }
-                return null;
-            }
-        }
     }
 }

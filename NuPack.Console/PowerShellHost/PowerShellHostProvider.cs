@@ -44,7 +44,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
                 /*isAsync*/false,
                 new Commander(console));
 
-			console.Dispatcher.BeforeStart += (sender, e) =>
+			console.Dispatcher.Starting += (sender, e) =>
 			{
                 IPowerShellHost psHost = host as IPowerShellHost;
                 if (psHost != null)

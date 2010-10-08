@@ -2,13 +2,13 @@
 
 namespace NuPackConsole
 {
-    class UtilityMethods
+    internal static class UtilityMethods
     {
         public static void ThrowIfArgumentNull<T>(T arg)
         {
             if (arg == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("arg");
             }
         }
 
@@ -16,7 +16,7 @@ namespace NuPackConsole
         {
             if (string.IsNullOrEmpty(arg))
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Invalid argument", "arg");
             }
         }
     }

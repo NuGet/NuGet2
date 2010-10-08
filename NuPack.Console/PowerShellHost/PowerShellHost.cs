@@ -216,10 +216,8 @@
             }
         }
 
-        public string[] AvailableSettings {
-            get {
-                return _packageSourceProvider.GetPackageSources().Select(ps => ps.Source).ToArray();
-            }
+        public string[] GetAvailableSettings() {
+            return _packageSourceProvider.GetPackageSources().Select(ps => ps.Source).ToArray();
         }
 
         public string DefaultProject {
@@ -233,13 +231,11 @@
             }
         }
 
-        public string[] AvailableProjects {
-            get {
-                Debug.Assert(SolutionManager.Current != null);
+        public string[] GetAvailableProjects() {
+            Debug.Assert(SolutionManager.Current != null);
 
-                return (from p in SolutionManager.Current.GetProjects()
-                        select p.Name).ToArray();
-            }
+            return (from p in SolutionManager.Current.GetProjects()
+                    select p.Name).ToArray();
         }
 
         private object InvokeResult(string command) {
@@ -323,7 +319,7 @@
                 outputResults: false).FirstOrDefault();
             if (expansion != null) {
                 int replaceStart = (int)expansion.Properties["ReplaceStart"].Value;
-                string[] paths = ((IEnumerable<object>)expansion.Properties["Paths"].Value).Select(o => o.ToString()).ToArray();
+                IList<string> paths = ((IEnumerable<object>)expansion.Properties["Paths"].Value).Select(o => o.ToString()).ToList();
                 return new SimpleExpansion(replaceStart, line.Length - replaceStart, paths);
             }
 

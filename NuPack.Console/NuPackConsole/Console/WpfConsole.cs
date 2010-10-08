@@ -11,28 +11,24 @@ using EditorDefGuidList = Microsoft.VisualStudio.Editor.DefGuidList;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using IServiceProvider = System.IServiceProvider;
 
-namespace NuPackConsole.Implementation.Console
-{
-    interface IPrivateWpfConsole : IWpfConsole
-    {
+namespace NuPackConsole.Implementation.Console {
+    interface IPrivateWpfConsole : IWpfConsole {
         SnapshotPoint? InputLineStart { get; }
         void BeginInputLine();
         SnapshotSpan? EndInputLine(bool isEcho);
         InputHistory InputHistory { get; }
     }
 
-    class WpfConsole : ObjectWithFactory<WpfConsoleService>
-    {
+    class WpfConsole : ObjectWithFactory<WpfConsoleService> {
         IServiceProvider ServiceProvider { get; set; }
         public string ContentTypeName { get; private set; }
         public string HostName { get; private set; }
-       
+
         public event EventHandler<EventArgs<Tuple<SnapshotSpan, Color?, Color?>>> NewColorSpan;
         public event EventHandler ConsoleCleared;
 
         public WpfConsole(WpfConsoleService factory, IServiceProvider sp, string contentTypeName, string hostName)
-            : base(factory)
-        {
+            : base(factory) {
             UtilityMethods.ThrowIfArgumentNull(sp);
 
             this.ServiceProvider = sp;
@@ -41,36 +37,27 @@ namespace NuPackConsole.Implementation.Console
         }
 
         IPrivateConsoleDispatcher _dispatcher;
-        public IPrivateConsoleDispatcher Dispatcher
-        {
-            get
-            {
-                if (_dispatcher == null)
-                {
+        public IPrivateConsoleDispatcher Dispatcher {
+            get {
+                if (_dispatcher == null) {
                     _dispatcher = new ConsoleDispatcher(Marshaler);
                 }
                 return _dispatcher;
             }
         }
 
-        IOleServiceProvider OleServiceProvider
-        {
-            get
-            {
+        IOleServiceProvider OleServiceProvider {
+            get {
                 return ServiceProvider.GetService<IOleServiceProvider>(typeof(IOleServiceProvider));
             }
         }
 
         IContentType _contentType;
-        IContentType ContentType
-        {
-            get
-            {
-                if (_contentType == null)
-                {
+        IContentType ContentType {
+            get {
+                if (_contentType == null) {
                     _contentType = Factory.ContentTypeRegistryService.GetContentType(this.ContentTypeName);
-                    if (_contentType == null)
-                    {
+                    if (_contentType == null) {
                         _contentType = Factory.ContentTypeRegistryService.AddContentType(
                             this.ContentTypeName, new string[] { "text" });
                     }
@@ -81,12 +68,9 @@ namespace NuPackConsole.Implementation.Console
         }
 
         IVsTextBuffer _bufferAdapter;
-        IVsTextBuffer VsTextBuffer
-        {
-            get
-            {
-                if (_bufferAdapter == null)
-                {
+        IVsTextBuffer VsTextBuffer {
+            get {
+                if (_bufferAdapter == null) {
                     _bufferAdapter = Factory.VsEditorAdaptersFactoryService.CreateVsTextBufferAdapter(OleServiceProvider, ContentType);
                     _bufferAdapter.InitializeContent(string.Empty, 0);
                 }
@@ -96,12 +80,9 @@ namespace NuPackConsole.Implementation.Console
         }
 
         IWpfTextView _wpfTextView;
-        public IWpfTextView WpfTextView
-        {
-            get
-            {
-                if (_wpfTextView == null)
-                {
+        public IWpfTextView WpfTextView {
+            get {
+                if (_wpfTextView == null) {
                     _wpfTextView = Factory.VsEditorAdaptersFactoryService.GetWpfTextView(VsTextView);
                 }
 
@@ -109,10 +90,8 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        IWpfTextViewHost WpfTextViewHost
-        {
-            get
-            {
+        IWpfTextViewHost WpfTextViewHost {
+            get {
                 IVsUserData userData = VsTextView as IVsUserData;
                 object data;
                 Guid guidIWpfTextViewHost = Microsoft.VisualStudio.Editor.DefGuidList.guidIWpfTextViewHost;
@@ -124,8 +103,7 @@ namespace NuPackConsole.Implementation.Console
         }
 
 
-        enum ReadOnlyRegionType
-        {
+        enum ReadOnlyRegionType {
             /// <summary>
             /// No ReadOnly region. The whole text buffer allows edit.
             /// </summary>
@@ -145,42 +123,29 @@ namespace NuPackConsole.Implementation.Console
         IReadOnlyRegion _readOnlyRegionBegin;
         IReadOnlyRegion _readOnlyRegionBody;
 
-        ReadOnlyRegionType _readOnlyRegion;
-        ReadOnlyRegionType ReadOnlyRegion
-        {
-            get
-            {
-                return _readOnlyRegion;
-            }
-            set
-            {
-                ITextBuffer buffer = WpfTextView.TextBuffer;
-                ITextSnapshot snapshot = buffer.CurrentSnapshot;
 
-                using (IReadOnlyRegionEdit edit = buffer.CreateReadOnlyRegionEdit())
-                {
-                    edit.ClearReadOnlyRegion(ref _readOnlyRegionBegin);
-                    edit.ClearReadOnlyRegion(ref _readOnlyRegionBody);
+        private void SetReadOnlyRegionType(ReadOnlyRegionType value) {
+            ITextBuffer buffer = WpfTextView.TextBuffer;
+            ITextSnapshot snapshot = buffer.CurrentSnapshot;
 
-                    switch (value)
-                    {
-                        case ReadOnlyRegionType.BeginAndBody:
-                            if (snapshot.Length > 0)
-                            {
-                                _readOnlyRegionBegin = edit.CreateReadOnlyRegion(new Span(0, 0), SpanTrackingMode.EdgeExclusive, EdgeInsertionMode.Deny);
-                                _readOnlyRegionBody = edit.CreateReadOnlyRegion(new Span(0, snapshot.Length));
-                            }
-                            break;
+            using (IReadOnlyRegionEdit edit = buffer.CreateReadOnlyRegionEdit()) {
+                edit.ClearReadOnlyRegion(ref _readOnlyRegionBegin);
+                edit.ClearReadOnlyRegion(ref _readOnlyRegionBody);
 
-                        case ReadOnlyRegionType.All:
-                            _readOnlyRegionBody = edit.CreateReadOnlyRegion(new Span(0, snapshot.Length), SpanTrackingMode.EdgeExclusive, EdgeInsertionMode.Deny);
-                            break;
-                    }
+                switch (value) {
+                    case ReadOnlyRegionType.BeginAndBody:
+                        if (snapshot.Length > 0) {
+                            _readOnlyRegionBegin = edit.CreateReadOnlyRegion(new Span(0, 0), SpanTrackingMode.EdgeExclusive, EdgeInsertionMode.Deny);
+                            _readOnlyRegionBody = edit.CreateReadOnlyRegion(new Span(0, snapshot.Length));
+                        }
+                        break;
 
-                    edit.Apply();
+                    case ReadOnlyRegionType.All:
+                        _readOnlyRegionBody = edit.CreateReadOnlyRegion(new Span(0, snapshot.Length), SpanTrackingMode.EdgeExclusive, EdgeInsertionMode.Deny);
+                        break;
                 }
 
-                _readOnlyRegion = value;
+                edit.Apply();
             }
         }
 
@@ -189,15 +154,11 @@ namespace NuPackConsole.Implementation.Console
         /// <summary>
         /// Get current input line start point (updated to current WpfTextView's text snapshot).
         /// </summary>
-        public SnapshotPoint? InputLineStart
-        {
-            get
-            {
-                if (_inputLineStart != null)
-                {
+        public SnapshotPoint? InputLineStart {
+            get {
+                if (_inputLineStart != null) {
                     ITextSnapshot snapshot = WpfTextView.TextSnapshot;
-                    if (_inputLineStart.Value.Snapshot != snapshot)
-                    {
+                    if (_inputLineStart.Value.Snapshot != snapshot) {
                         _inputLineStart = _inputLineStart.Value.TranslateTo(snapshot, PointTrackingMode.Negative);
                     }
                 }
@@ -205,18 +166,7 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        public int InputLineStartColumn
-        {
-            get
-            {
-                Debug.Assert(_inputLineStart != null);
-                SnapshotPoint startPoint = _inputLineStart.Value;
-                return startPoint - startPoint.GetContainingLine().Start;
-            }
-        }
-
-        public SnapshotSpan GetInputLineExtent(int start = 0, int length = -1)
-        {
+        public SnapshotSpan GetInputLineExtent(int start = 0, int length = -1) {
             Debug.Assert(_inputLineStart != null);
 
             SnapshotPoint beginPoint = InputLineStart.Value + start;
@@ -225,10 +175,8 @@ namespace NuPackConsole.Implementation.Console
                 new SnapshotSpan(beginPoint, beginPoint.GetContainingLine().End);
         }
 
-        public SnapshotSpan InputLineExtent
-        {
-            get
-            {
+        public SnapshotSpan InputLineExtent {
+            get {
                 return GetInputLineExtent();
             }
         }
@@ -239,45 +187,36 @@ namespace NuPackConsole.Implementation.Console
         /// when a DTE event handler writes to the console. This scenario is not fully supported,
         /// but it is better to clean up nicely with ESC/ArrowUp/Return.
         /// </summary>
-        public SnapshotSpan AllInputExtent
-        {
-            get
-            {
+        public SnapshotSpan AllInputExtent {
+            get {
                 SnapshotPoint start = InputLineStart.Value;
                 return new SnapshotSpan(start, start.Snapshot.GetEnd());
             }
         }
 
-        public string InputLineText
-        {
-            get
-            {
+        public string InputLineText {
+            get {
                 return InputLineExtent.GetText();
             }
         }
-                
-        public void BeginInputLine()
-        {
-            if (_inputLineStart == null)
-            {
-                ReadOnlyRegion = ReadOnlyRegionType.BeginAndBody;
+
+        public void BeginInputLine() {
+            if (_inputLineStart == null) {
+                SetReadOnlyRegionType(ReadOnlyRegionType.BeginAndBody);
                 _inputLineStart = WpfTextView.TextSnapshot.GetEnd();
             }
         }
 
-        public SnapshotSpan? EndInputLine(bool isEcho = false)
-        {
+        public SnapshotSpan? EndInputLine(bool isEcho = false) {
             // Reset history navigation upon end of a command line
             ResetNavigateHistory();
 
-            if (_inputLineStart != null)
-            {
+            if (_inputLineStart != null) {
                 SnapshotSpan inputSpan = InputLineExtent;
 
                 _inputLineStart = null;
-                ReadOnlyRegion = ReadOnlyRegionType.All;
-                if (!isEcho)
-                {
+                SetReadOnlyRegionType(ReadOnlyRegionType.All);
+                if (!isEcho) {
                     Dispatcher.PostInputLine(new InputLine(inputSpan));
                 }
 
@@ -290,117 +229,94 @@ namespace NuPackConsole.Implementation.Console
         #region Marshaler
 
         _Marshaler _marshaler;
-        _Marshaler Marshaler
-        {
-            get
-            {
-                if (_marshaler == null)
-                {
+        _Marshaler Marshaler {
+            get {
+                if (_marshaler == null) {
                     _marshaler = new _Marshaler(this);
                 }
                 return _marshaler;
             }
         }
 
-        public IWpfConsole MarshalledConsole
-        {
+        public IWpfConsole MarshalledConsole {
             get { return this.Marshaler; }
         }
 
-        class _Marshaler : Marshaler<WpfConsole>, IWpfConsole, IPrivateWpfConsole
-        {
+        class _Marshaler : Marshaler<WpfConsole>, IWpfConsole, IPrivateWpfConsole {
             public _Marshaler(WpfConsole impl)
-                : base(impl)
-            {
+                : base(impl) {
             }
 
             #region IConsole
-            public IHost Host
-            {
+            public IHost Host {
                 get { return Invoke(() => _impl.Host); }
                 set { Invoke(() => { _impl.Host = value; }); }
             }
 
-            public IConsoleDispatcher Dispatcher
-            {
+            public IConsoleDispatcher Dispatcher {
                 get { return Invoke(() => _impl.Dispatcher); }
             }
 
-            public int ConsoleWidth
-            {
+            public int ConsoleWidth {
                 get { return Invoke(() => _impl.ConsoleWidth); }
             }
 
-            public void Write(string text)
-            {
+            public void Write(string text) {
                 Invoke(() => _impl.Write(text));
             }
 
-            public void WriteLine(string text)
-            {
+            public void WriteLine(string text) {
                 Invoke(() => _impl.WriteLine(text));
             }
 
-            public void Write(string text, Color? foreground, Color? background)
-            {
+            public void Write(string text, Color? foreground, Color? background) {
                 Invoke(() => _impl.Write(text, foreground, background));
             }
 
-            public void Clear()
-            {
+            public void Clear() {
                 Invoke(() => _impl.Clear());
             }
             #endregion
 
             #region IWpfConsole
-            public object Content
-            {
+            public object Content {
                 get { return Invoke(() => _impl.Content); }
             }
 
-            public object VsTextView
-            {
+            public object VsTextView {
                 get { return Invoke(() => _impl.VsTextView); }
             }
             #endregion
 
             #region IPrivateWpfConsole
-            public SnapshotPoint? InputLineStart
-            {
+            public SnapshotPoint? InputLineStart {
                 get { return Invoke(() => _impl.InputLineStart); }
             }
 
-            public void BeginInputLine()
-            {
+            public void BeginInputLine() {
                 Invoke(() => _impl.BeginInputLine());
             }
 
-            public SnapshotSpan? EndInputLine(bool isEcho)
-            {
+            public SnapshotSpan? EndInputLine(bool isEcho) {
                 return Invoke(() => _impl.EndInputLine(isEcho));
             }
 
-            public InputHistory InputHistory
-            {
+            public InputHistory InputHistory {
                 get { return Invoke(() => _impl.InputHistory); }
             }
-            #endregion       
+            #endregion
         }
 
         #endregion
 
         #region IConsole
         IHost _host;
-        public IHost Host
-        {
-            get
-            {
+        public IHost Host {
+            get {
                 return _host;
             }
-            set
-            {
-                if (_host != null)
-                {
+            set {
+                if (_host != null) {
                     throw new InvalidOperationException();
                 }
                 _host = value;
@@ -408,22 +324,17 @@ namespace NuPackConsole.Implementation.Console
         }
 
         int _consoleWidth = -1;
-        public int ConsoleWidth
-        {
-            get
-            {
-                if (_consoleWidth < 0)
-                {
+        public int ConsoleWidth {
+            get {
+                if (_consoleWidth < 0) {
                     ITextViewMargin leftMargin = WpfTextViewHost.GetTextViewMargin(PredefinedMarginNames.Left);
                     ITextViewMargin rightMargin = WpfTextViewHost.GetTextViewMargin(PredefinedMarginNames.Right);
 
                     double marginSize = 0.0;
-                    if (leftMargin != null && leftMargin.Enabled)
-                    {
+                    if (leftMargin != null && leftMargin.Enabled) {
                         marginSize += leftMargin.MarginSize;
                     }
-                    if (rightMargin != null && rightMargin.Enabled)
-                    {
+                    if (rightMargin != null && rightMargin.Enabled) {
                         marginSize += rightMargin.MarginSize;
                     }
 
@@ -434,16 +345,14 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        void ResetConsoleWidth()
-        {
+        void ResetConsoleWidth() {
             _consoleWidth = -1;
         }
 
-        public void Write(string text)
-        {
+        public void Write(string text) {
             if (_inputLineStart == null) // If not in input mode, need unlock to enable output
             {
-                this.ReadOnlyRegion = ReadOnlyRegionType.None;
+                SetReadOnlyRegionType(ReadOnlyRegionType.None);
             }
 
             // Append text to editor buffer
@@ -455,36 +364,30 @@ namespace NuPackConsole.Implementation.Console
 
             if (_inputLineStart == null) // If not in input mode, need lock again
             {
-                this.ReadOnlyRegion = ReadOnlyRegionType.All;
+                SetReadOnlyRegionType(ReadOnlyRegionType.All);
             }
         }
 
-        public void WriteLine(string text)
-        {
+        public void WriteLine(string text) {
             // If append \n only, text becomes 1 line when copied to notepad.
             Write(text + Environment.NewLine);
         }
 
-        public void Write(string text, Color? foreground, Color? background)
-        {
+        public void Write(string text, Color? foreground, Color? background) {
             int begin = WpfTextView.TextSnapshot.Length;
             Write(text);
             int end = WpfTextView.TextSnapshot.Length;
 
-            if (foreground != null || background != null)
-            {
+            if (foreground != null || background != null) {
                 SnapshotSpan span = new SnapshotSpan(WpfTextView.TextSnapshot, begin, end - begin);
                 NewColorSpan.Raise(this, Tuple.Create(span, foreground, background));
             }
         }
-        
+
         InputHistory _inputHistory;
-        InputHistory InputHistory
-        {
-            get
-            {
-                if (_inputHistory == null)
-                {
+        InputHistory InputHistory {
+            get {
+                if (_inputHistory == null) {
                     _inputHistory = new InputHistory();
                 }
                 return _inputHistory;
@@ -494,19 +397,15 @@ namespace NuPackConsole.Implementation.Console
         IList<string> _historyInputs;
         int _currentHistoryInputIndex;
 
-        void ResetNavigateHistory()
-        {
+        void ResetNavigateHistory() {
             _historyInputs = null;
             _currentHistoryInputIndex = -1;
         }
 
-        public void NavigateHistory(int offset)
-        {
-            if (_historyInputs == null)
-            {
+        public void NavigateHistory(int offset) {
+            if (_historyInputs == null) {
                 _historyInputs = InputHistory.History;
-                if (_historyInputs == null)
-                {
+                if (_historyInputs == null) {
                     _historyInputs = new string[] { };
                 }
 
@@ -514,8 +413,7 @@ namespace NuPackConsole.Implementation.Console
             }
 
             int index = _currentHistoryInputIndex + offset;
-            if (index >= -1 && index <= _historyInputs.Count)
-            {
+            if (index >= -1 && index <= _historyInputs.Count) {
                 _currentHistoryInputIndex = index;
                 string input = (index >= 0 && index < _historyInputs.Count) ? _historyInputs[_currentHistoryInputIndex] : string.Empty;
 
@@ -525,9 +423,8 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        public void Clear()
-        {
-            this.ReadOnlyRegion = ReadOnlyRegionType.None;
+        public void Clear() {
+            SetReadOnlyRegionType(ReadOnlyRegionType.None);
 
             ITextBuffer textBuffer = WpfTextView.TextBuffer;
             textBuffer.Delete(new Span(0, textBuffer.CurrentSnapshot.Length));
@@ -544,12 +441,9 @@ namespace NuPackConsole.Implementation.Console
         #region IWpfConsole
 
         IVsTextView _view;
-        public IVsTextView VsTextView
-        {
-            get
-            {
-                if (_view == null)
-                {
+        public IVsTextView VsTextView {
+            get {
+                if (_view == null) {
                     _view = Factory.VsEditorAdaptersFactoryService.CreateVsTextViewAdapter(OleServiceProvider);
                     _view.Initialize(
                         VsTextBuffer as IVsTextLines,
@@ -559,8 +453,7 @@ namespace NuPackConsole.Implementation.Console
 
                     // Set font and color
                     IVsTextEditorPropertyCategoryContainer propCategoryContainer = _view as IVsTextEditorPropertyCategoryContainer;
-                    if (propCategoryContainer != null)
-                    {
+                    if (propCategoryContainer != null) {
                         IVsTextEditorPropertyContainer propContainer;
                         Guid guidPropCategory = EditorDefGuidList.guidEditPropCategoryViewMasterSettings;
                         propCategoryContainer.GetPropertyCategory(ref guidPropCategory, out propContainer);
@@ -572,7 +465,7 @@ namespace NuPackConsole.Implementation.Console
                     WpfTextView.TextBuffer.Properties.AddProperty(typeof(IConsole), this);
 
                     // Initial mark readonly region. Must call Start() to start accepting inputs.
-                    this.ReadOnlyRegion = ReadOnlyRegionType.All;
+                    SetReadOnlyRegionType(ReadOnlyRegionType.All);
 
                     // Set some EditorOptions: -DragDropEditing, +WordWrap
                     IEditorOptions editorOptions = Factory.EditorOptionsFactoryService.GetOptions(WpfTextView);
@@ -591,10 +484,8 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        public object Content
-        {
-            get
-            {
+        public object Content {
+            get {
                 return WpfTextViewHost.HostControl;
             }
         }

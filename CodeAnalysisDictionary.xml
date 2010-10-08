@@ -1,0 +1,27 @@
+﻿<Dictionary>
+  <Words>
+    <Unrecognized>
+    </Unrecognized>
+    <Recognized>
+      <Word>Nu</Word>
+      <Word>NuPack</Word>
+      <Word>Tokenizer</Word>
+      
+    </Recognized>
+    <Deprecated>
+      <Term PreferredAlternate=""></Term>
+    </Deprecated>
+    <Compound>
+      <Term CompoundAlternate="NuPack">nupack</Term>
+      <Term CompoundAlternate="ConsoleDispatcher">ConsoleDispatcher</Term>
+    </Compound>
+    <DiscreteExceptions>
+      <Term></Term>
+    </DiscreteExceptions>
+  </Words>
+  <Acronyms>
+    <CasingExceptions>
+      <Acronym>Vs</Acronym>
+    </CasingExceptions>
+  </Acronyms>
+</Dictionary>

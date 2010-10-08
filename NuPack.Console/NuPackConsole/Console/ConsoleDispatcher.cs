@@ -34,7 +34,7 @@ namespace NuPackConsole.Implementation.Console
         }
 
         #region IConsoleDispatcher
-        public event EventHandler BeforeStart;
+        public event EventHandler Starting;
 
         public void Start()
         {
@@ -44,7 +44,7 @@ namespace NuPackConsole.Implementation.Console
                 IHost host = WpfConsole.Host;
                 if (host == null)
                 {
-                    throw new InvalidOperationException("Can't start ConsoleDispatcher. Host is null.");
+                    throw new InvalidOperationException("Can't start Console dispatcher. Host is null.");
                 }
                 else if (host is IAsyncHost)
                 {
@@ -55,7 +55,7 @@ namespace NuPackConsole.Implementation.Console
                     _dispatcher = new SyncHostConsoleDispatcher(this);
                 }
 
-                this.BeforeStart.Raise(this);
+                this.Starting.Raise(this);
                 _dispatcher.Start();
             }
         }
@@ -136,7 +136,7 @@ namespace NuPackConsole.Implementation.Console
 
             public void PromptNewLine()
             {
-                WpfConsole.Write(WpfConsole.Host.Prompt + " ");
+                WpfConsole.Write(WpfConsole.Host.Prompt + (char)32);    // 32 is the space
                 WpfConsole.BeginInputLine();
             }
 

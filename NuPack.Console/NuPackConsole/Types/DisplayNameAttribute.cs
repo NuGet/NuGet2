@@ -8,7 +8,7 @@ namespace NuPackConsole
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     [MetadataAttribute]
-    public class DisplayNameAttribute : Attribute
+    public sealed class DisplayNameAttribute : Attribute
     {
         /// <summary>
         /// The display name to be shown in UI.

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -12,6 +13,7 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
+
 using NuPackConsole.Implementation.Console;
 using NuPackConsole.Implementation.PowerConsole;
 
@@ -97,6 +99,7 @@ namespace NuPackConsole.Implementation
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override void OnClose()
         {
             // Save ActiveHost on close, ignore errors.
@@ -117,7 +120,7 @@ namespace NuPackConsole.Implementation
             // Register key bindings to use in the editor
             var windowFrame = (IVsWindowFrame)Frame;
             Guid cmdUi = VSConstants.GUID_TextEditorFactory;
-            int hr = windowFrame.SetGuidProperty((int)__VSFPROPID.VSFPROPID_InheritKeyBindings, ref cmdUi);
+            windowFrame.SetGuidProperty((int)__VSFPROPID.VSFPROPID_InheritKeyBindings, ref cmdUi);
 
             PowerConsoleWindow.ActiveHostChanged += PowerConsoleWindow_ActiveHostChanged;
             PowerConsoleWindow_ActiveHostChanged(PowerConsoleWindow, null);
@@ -204,7 +207,7 @@ namespace NuPackConsole.Implementation
             {
                 if (args.InValue != null || args.OutValue == IntPtr.Zero)
                 {
-                    throw new ArgumentException();
+                    throw new ArgumentException("Invalid argument", "e");
                 }
                 Marshal.GetNativeVariantForObject(PowerConsoleWindow.AvailableHostSettings, args.OutValue);
             }
@@ -238,7 +241,7 @@ namespace NuPackConsole.Implementation
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null) {
                 if (args.InValue != null || args.OutValue == IntPtr.Zero) {
-                    throw new ArgumentException();
+                    throw new ArgumentException("Invalid argument", "e");
                 }
 
                 // get project list here
@@ -366,6 +369,10 @@ namespace NuPackConsole.Implementation
             PendingFocusPane = null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We really don't want exceptions from the console to bring down VS")]
         void MoveFocus(FrameworkElement consolePane)
         {
             // TAB focus into editor (consolePane.Focus() does not work due to editor layouts)
@@ -391,6 +398,7 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Get the WpfConsole of the active host.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         IWpfConsole WpfConsole
         {
             get

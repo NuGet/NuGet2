@@ -23,12 +23,15 @@ namespace NuPackConsole.Implementation.Console
     [Export(typeof(ITextFormatClassifierProvider))]
     class TextFormatClassifierProvider : ITextFormatClassifierProvider
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import]
         internal IStandardClassificationService StandardClassificationService { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import]
         internal IClassificationTypeRegistryService ClassificationTypeRegistryService { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import]
         internal IClassificationFormatMapService ClassificationFormatMapService { get; set; }
 

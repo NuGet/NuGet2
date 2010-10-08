@@ -10,7 +10,7 @@ namespace NuPackConsole
         /// <summary>
         /// Occurs right before the console dispatcher starting dispatching inputs.
         /// </summary>
-        event EventHandler BeforeStart;
+        event EventHandler Starting;
 
         /// <summary>
         /// Start dispatching console command line inputs.

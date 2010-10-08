@@ -192,13 +192,13 @@ namespace NuPackConsole.Implementation.Console
             else
             {
                 List<ClassificationSpan> spans = new List<ClassificationSpan>();
-                var snapshotSpans = from s in cmdSpans select new SnapshotSpan(snapshot, s);
                 spans.AddRange(GetTokenizerClassifications(snapshot, cmdSpans));
                 SaveCachedCommandLineClassifications(snapshot, cmdSpans, spans);
                 return spans;
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public IList<ClassificationSpan> GetTokenizerClassifications(ITextSnapshot snapshot, IList<Span> spans)
         {
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();

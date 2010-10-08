@@ -14,7 +14,7 @@ namespace NuPackConsole
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     [MetadataAttribute]
-    public class HostNameAttribute : Attribute
+    public sealed class HostNameAttribute : Attribute
     {
         /// <summary>
         /// The unique name for a host.

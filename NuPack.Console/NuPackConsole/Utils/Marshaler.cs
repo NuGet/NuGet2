@@ -20,7 +20,7 @@ namespace NuPackConsole
         /// <summary>
         /// Invoke an action on the main UI thread.
         /// </summary>
-        protected void Invoke(Action action)
+        static protected void Invoke(Action action)
         {
             ThreadHelper.Invoke(action);
         }
@@ -28,7 +28,7 @@ namespace NuPackConsole
         /// <summary>
         /// Invoke a function on the main UI thread.
         /// </summary>
-        protected TResult Invoke<TResult>(Func<TResult> func)
+        static protected TResult Invoke<TResult>(Func<TResult> func)
         {
             return ThreadHelper.Invoke(func);
         }

@@ -2,13 +2,11 @@
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
 
-namespace NuPackConsole.Implementation.PowerConsole
-{
+namespace NuPackConsole.Implementation.PowerConsole {
     /// <summary>
     /// Managed some user settings.
     /// </summary>
-    class Settings
-    {
+    internal static class Settings {
         /// <summary>
         /// The user settings collection path used by this package.
         /// </summary>
@@ -27,28 +25,24 @@ namespace NuPackConsole.Implementation.PowerConsole
         /// <summary>
         /// Get default active host user settings.
         /// </summary>
-        public static void GetDefaultHost(IServiceProvider sp, out string defHost)
-        {
+        public static void GetDefaultHost(IServiceProvider sp, out string defHost) {
             defHost = null;
 
             IVsSettingsManager sm = sp.GetService<IVsSettingsManager>(typeof(SVsSettingsManager));
-            if (sm != null)
-            {
+            if (sm != null) {
                 IVsSettingsStore settingsStore;
                 ErrorHandler.ThrowOnFailure(sm.GetReadOnlySettingsStore(
                     (uint)__VsSettingsScope.SettingsScope_UserSettings, out settingsStore));
 
                 int fExists;
                 ErrorHandler.ThrowOnFailure(settingsStore.CollectionExists(CollectionPath, out fExists));
-                if (fExists != 0)
-                {
+                if (fExists != 0) {
                     ErrorHandler.ThrowOnFailure(settingsStore.GetStringOrDefault(
                         CollectionPath, ActiveHostPropertyName, DefActiveHost, out defHost));
                 }
             }
 
-            if (defHost == null)
-            {
+            if (defHost == null) {
                 defHost = DefActiveHost;
             }
         }
@@ -56,24 +50,20 @@ namespace NuPackConsole.Implementation.PowerConsole
         /// <summary>
         /// Set default active host in user settings.
         /// </summary>
-        public static void SetDefaultHost(IServiceProvider sp, string defHost)
-        {
-            if (string.IsNullOrEmpty(defHost))
-            {
+        public static void SetDefaultHost(IServiceProvider sp, string defHost) {
+            if (string.IsNullOrEmpty(defHost)) {
                 return;
             }
 
             IVsSettingsManager sm = sp.GetService<IVsSettingsManager>(typeof(SVsSettingsManager));
-            if (sm != null)
-            {
+            if (sm != null) {
                 IVsWritableSettingsStore settingsStore;
                 ErrorHandler.ThrowOnFailure(sm.GetWritableSettingsStore(
                     (uint)__VsSettingsScope.SettingsScope_UserSettings, out settingsStore));
 
                 int fExists;
                 ErrorHandler.ThrowOnFailure(settingsStore.CollectionExists(CollectionPath, out fExists));
-                if (fExists == 0)
-                {
+                if (fExists == 0) {
                     ErrorHandler.ThrowOnFailure(settingsStore.CreateCollection(CollectionPath));
                 }
 

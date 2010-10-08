@@ -8,6 +8,10 @@
         /// <summary>
         /// This token type.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Naming", 
+            "CA1721:PropertyNamesShouldNotMatchGetMethods",
+            Justification="Type is the most appropriate word here.")]
         public TokenType Type { get; private set; }
 
         /// <summary>
