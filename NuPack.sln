@@ -36,13 +36,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		CodeAnalysisDictionary.xml = CodeAnalysisDictionary.xml
 		NuPack.Test.Integration\NuPack.Test.Integration.testsettings = NuPack.Test.Integration\NuPack.Test.Integration.testsettings
-		NuPack.vsmdi = NuPack.vsmdi
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = NuPack.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
 		Debug|Any CPU = Debug|Any CPU
