@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <DebugOrRelease>Debug</DebugOrRelease>
+       <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
         <NuPackRoot>$(MSBuildProjectDirectory)\..</NuPackRoot>
         <DropDirectory>$(NuPackRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuPackDropDirectory>$(DropDirectory)\NuPack</NuPackDropDirectory>
-        <ExeBuildDirectory>$(NuPackRoot)\NuPack\bin\$(DebugOrRelease)</ExeBuildDirectory>
+        <ExeBuildDirectory>$(NuPackRoot)\NuPack\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuPackDropDirectory)\Console</ExeDropDirectory>
-        <VisualStudioAddInBuildDirectory>$(NuPackRoot)\NuPack.Tools\bin\$(DebugOrRelease)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuPackRoot)\NuPack.Tools\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuPackDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <ServerBuildDirectory>$(NuPackRoot)\NuPack.Server</ServerBuildDirectory>
         <ServerDropDirectory>$(NuPackDropDirectory)\Server</ServerDropDirectory>
@@ -29,7 +29,7 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.sln" Targets="Build" />
+        <MSBuild Projects="$(NuPackRoot)\NuPack.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
 
     <Target Name="RunTests">
