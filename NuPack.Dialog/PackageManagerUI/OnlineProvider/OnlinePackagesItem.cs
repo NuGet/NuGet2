@@ -172,7 +172,7 @@ namespace NuPack.Dialog.Providers {
                     dependencies.Append("\r\n\t");
                     dependencies.Append(dependency);
                 }
-                return "Dependencies:" + dependencies.ToString();
+                return dependencies.Length > 0 ? "Dependencies:" + dependencies.ToString() : String.Empty;
             }
         }
 
