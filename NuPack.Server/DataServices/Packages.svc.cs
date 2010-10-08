@@ -4,13 +4,33 @@ using System.Data.Services.Common;
 using System.Data.Services.Providers;
 using System.IO;
 using System.ServiceModel;
-using System.Web.Hosting;
 using System.Web;
 
 namespace NuPack.Server.DataServices {
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {
-        private IPackageRepository _repository;
+        private bool? _requiresUpdate;        
+        
+        private bool RequiresUpdate {
+            get {
+                if (_requiresUpdate == null) {
+                    var context = HttpContext.Current;
+
+                    // Enable client caching
+                    DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
+                    DateTime ifModifiedSince;
+                    if (DateTime.TryParse(context.Request.Headers["If-Modified-Since"], out ifModifiedSince) &&
+                        lastModified > ifModifiedSince) {
+                        _requiresUpdate = false;
+                    }
+                    else {
+                        _requiresUpdate = true;
+                    }
+                }
+                return _requiresUpdate.Value;
+            }
+        }
+
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config) {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);
@@ -19,19 +39,31 @@ namespace NuPack.Server.DataServices {
             config.UseVerboseErrors = true;
         }
 
-        protected override PackageContext CreateDataSource() {
-            if (_repository == null) {
-                _repository = new LocalPackageRepository(HostingEnvironment.MapPath("~/Packages"));
-            }
-            return new PackageContext(_repository);
+        protected override PackageContext CreateDataSource() {           
+            return new PackageContext(new LocalPackageRepository(PackageUtility.PackagePhysicalPath));
         }
 
         protected override void OnStartProcessingRequest(ProcessRequestArgs args) {
             base.OnStartProcessingRequest(args);
 
-            var context = new HttpContextWrapper(HttpContext.Current);
-            context.EnableOutputCache(TimeSpan.FromMinutes(30));
-            
+            // HACK: Exceptions for control flow yay! Only way to stop the request from completing
+            // right now
+            if (!RequiresUpdate) {
+                throw new DataServiceException(304, null);
+            }
+
+            // Stick the version header in the response
+            args.OperationContext.ResponseHeaders[PackageUtility.FeedVersionHeader] = PackageUtility.ODataFeedVersion;
+
+            // Try to determine if this is a request for the feed version
+            if(args.OperationContext.RequestHeaders[PackageUtility.FeedVersionHeader] != null) {
+                throw new DataServiceException(200, null);
+            }
+
+            HttpCachePolicy cachePolicy = HttpContext.Current.Response.Cache;
+            cachePolicy.SetCacheability(HttpCacheability.Public);
+            cachePolicy.SetExpires(DateTime.Now.AddSeconds(60));
+            cachePolicy.SetLastModified(Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath));
         }
 
         public void DeleteStream(object entity, DataServiceOperationContext operationContext) {
@@ -44,7 +76,7 @@ namespace NuPack.Server.DataServices {
 
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext) {
             var package = (Package)entity;
-            
+
             return PackageUtility.GetPackageUrl(package.Id, package.Version, operationContext.AbsoluteServiceUri);
         }
 
