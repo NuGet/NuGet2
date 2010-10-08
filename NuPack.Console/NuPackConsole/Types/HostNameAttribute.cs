@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 
-namespace NuPackConsole
-{
+namespace NuPackConsole {
     /// <summary>
     /// Specifies a MEF host name metadata to uniquely identify a host type. This is
     /// required for a host provider to be recognized by PowerConsole. PowerConsole
@@ -14,8 +13,7 @@ namespace NuPackConsole
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     [MetadataAttribute]
-    public sealed class HostNameAttribute : Attribute
-    {
+    public sealed class HostNameAttribute : Attribute {
         /// <summary>
         /// The unique name for a host.
         /// </summary>
@@ -24,8 +22,7 @@ namespace NuPackConsole
         /// <summary>
         /// Specifies a unique MEF host name metadata.
         /// </summary>
-        public HostNameAttribute(string hostName)
-        {
+        public HostNameAttribute(string hostName) {
             UtilityMethods.ThrowIfArgumentNull(hostName);
             this.HostName = hostName;
         }

@@ -1,12 +1,10 @@
 ﻿using System;
 
-namespace NuPackConsole
-{
+namespace NuPackConsole {
     /// <summary>
     /// IConsoleDispatcher dispatches and executes console command line inputs on the host.
     /// </summary>
-    public interface IConsoleDispatcher
-    {
+    public interface IConsoleDispatcher {
         /// <summary>
         /// Occurs right before the console dispatcher starting dispatching inputs.
         /// </summary>

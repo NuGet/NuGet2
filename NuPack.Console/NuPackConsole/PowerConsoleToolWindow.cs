@@ -17,21 +17,17 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using NuPackConsole.Implementation.Console;
 using NuPackConsole.Implementation.PowerConsole;
 
-namespace NuPackConsole.Implementation
-{
+namespace NuPackConsole.Implementation {
     /// <summary>
     /// This class implements the tool window.
     /// </summary>
     [Guid("0AD07096-BBA9-4900-A651-0598D26F6D24")]
-    public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget
-    {
+    public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget {
         /// <summary>
         /// Get VS IComponentModel service.
         /// </summary>
-        IComponentModel ComponentModel
-        {
-            get
-            {
+        IComponentModel ComponentModel {
+            get {
                 return this.GetService<IComponentModel>(typeof(SComponentModel));
             }
         }
@@ -39,18 +35,14 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Get IWpfConsoleService through MEF.
         /// </summary>
-        IWpfConsoleService WpfConsoleService
-        {
-            get
-            {
+        IWpfConsoleService WpfConsoleService {
+            get {
                 return ComponentModel.GetService<IWpfConsoleService>();
             }
         }
 
-        PowerConsoleWindow PowerConsoleWindow
-        {
-            get
-            {
+        PowerConsoleWindow PowerConsoleWindow {
+            get {
                 return ComponentModel.GetService<IPowerConsoleWindow>() as PowerConsoleWindow;
             }
         }
@@ -59,21 +51,18 @@ namespace NuPackConsole.Implementation
         /// Standard constructor for the tool window.
         /// </summary>
         public PowerConsoleToolWindow() :
-            base(null)
-        {
+            base(null) {
             this.Caption = Resources.ToolWindowTitle;
             this.BitmapResourceID = 301;
             this.BitmapIndex = 0;
             this.ToolBar = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.idToolbar);
         }
 
-        protected override void Initialize()
-        {
+        protected override void Initialize() {
             base.Initialize();
 
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (mcs != null)
-            {
+            if (mcs != null) {
                 CommandID sourceSettingsCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSourceSettings);
                 mcs.AddCommand(new OleMenuCommand(SourceSettings_Exec, sourceSettingsCommandID));
 
@@ -100,23 +89,19 @@ namespace NuPackConsole.Implementation
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override void OnClose()
-        {
+        protected override void OnClose() {
             // Save ActiveHost on close, ignore errors.
-            try
-            {
+            try {
                 Settings.SetDefaultHost(this, PowerConsoleWindow.ActiveHost);
             }
-            catch (Exception x)
-            {
+            catch (Exception x) {
                 Trace.TraceError(x.ToString());
             }
 
             base.OnClose();
         }
 
-        public override void OnToolWindowCreated()
-        {
+        public override void OnToolWindowCreated() {
             // Register key bindings to use in the editor
             var windowFrame = (IVsWindowFrame)Frame;
             Guid cmdUi = VSConstants.GUID_TextEditorFactory;
@@ -133,11 +118,9 @@ namespace NuPackConsole.Implementation
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
-        protected override bool PreProcessMessage(ref System.Windows.Forms.Message m)
-        {
+        protected override bool PreProcessMessage(ref System.Windows.Forms.Message m) {
             IVsWindowPane vsWindowPane = this.VsTextView as IVsWindowPane;
-            if (vsWindowPane != null)
-            {
+            if (vsWindowPane != null) {
                 MSG[] pMsg = new MSG[1];
                 pMsg[0].hwnd = m.HWnd;
                 pMsg[0].message = (uint)m.Msg;
@@ -153,21 +136,17 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
-        int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
-        {
+        int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;
 
-            if (this.VsTextView != null)
-            {
+            if (this.VsTextView != null) {
                 IOleCommandTarget cmdTarget = (IOleCommandTarget)VsTextView;
                 hr = cmdTarget.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
             }
 
-            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED)
-            {
+            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED) {
                 IOleCommandTarget target = this.GetService(typeof(IOleCommandTarget)) as IOleCommandTarget;
-                if (target != null)
-                {
+                if (target != null) {
                     hr = target.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
                 }
             }
@@ -178,21 +157,17 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
-        int IOleCommandTarget.Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
-        {
+        int IOleCommandTarget.Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;
 
-            if (this.VsTextView != null)
-            {
+            if (this.VsTextView != null) {
                 IOleCommandTarget cmdTarget = (IOleCommandTarget)VsTextView;
                 hr = cmdTarget.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             }
 
-            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED)
-            {
+            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED) {
                 IOleCommandTarget target = this.GetService(typeof(IOleCommandTarget)) as IOleCommandTarget;
-                if (target != null)
-                {
+                if (target != null) {
                     hr = target.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
                 }
             }
@@ -200,13 +175,10 @@ namespace NuPackConsole.Implementation
             return hr;
         }
 
-        void SourcesList_Exec(object sender, EventArgs e)
-        {
+        void SourcesList_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null)
-            {
-                if (args.InValue != null || args.OutValue == IntPtr.Zero)
-                {
+            if (args != null) {
+                if (args.InValue != null || args.OutValue == IntPtr.Zero) {
                     throw new ArgumentException("Invalid argument", "e");
                 }
                 Marshal.GetNativeVariantForObject(PowerConsoleWindow.AvailableHostSettings, args.OutValue);
@@ -216,16 +188,13 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Called to retrieve current combo item name or to select a new item.
         /// </summary>
-        void Sources_Exec(object sender, EventArgs e)
-        {
+        void Sources_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null)
-            {
+            if (args != null) {
                 if (args.InValue != null && args.InValue is int) // Selected a feed
                 {
                     int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.AvailableHostSettings.Length)
-                    {
+                    if (index >= 0 && index < PowerConsoleWindow.AvailableHostSettings.Length) {
                         PowerConsoleWindow.ActiveHostSetting = PowerConsoleWindow.AvailableHostSettings[index];
                     }
                 }
@@ -258,8 +227,7 @@ namespace NuPackConsole.Implementation
                 if (args.InValue != null && args.InValue is int) // Selected a default projects
                 {
                     int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.AvailableProjects.Length)
-                    {
+                    if (index >= 0 && index < PowerConsoleWindow.AvailableProjects.Length) {
                         PowerConsoleWindow.DefaultProject = PowerConsoleWindow.AvailableProjects[index];
                     }
                 }
@@ -274,10 +242,8 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// ClearHost command handler.
         /// </summary>
-        void ClearHost_Exec(object sender, EventArgs e)
-        {
-            if (WpfConsole != null)
-            {
+        void ClearHost_Exec(object sender, EventArgs e) {
+            if (WpfConsole != null) {
                 WpfConsole.Dispatcher.ClearConsole();
             }
         }
@@ -293,31 +259,26 @@ namespace NuPackConsole.Implementation
             mcs.GlobalInvoke(command, targetGUID);
         }
 
-        HostInfo ActiveHostInfo
-        {
-            get
-            {
+        HostInfo ActiveHostInfo {
+            get {
                 return PowerConsoleWindow.ActiveHostInfo;
             }
         }
 
-        void PowerConsoleWindow_ActiveHostChanged(object sender, EventArgs e)
-        {
+        void PowerConsoleWindow_ActiveHostChanged(object sender, EventArgs e) {
             // Reset local caching variables
             _wpfConsole = null;
             _vsTextView = null;
 
             // Switch to new WpfConsole if available
-            if (WpfConsole != null)
-            {
+            if (WpfConsole != null) {
                 FrameworkElement consolePane = WpfConsole.Content as FrameworkElement;
                 ConsoleParentPane.Child = consolePane;
 
                 // WPF doesn't handle input focus automatically in this scenario. We
                 // have to set the focus manually, otherwise the editor is displayed but
                 // not focused and not receiving keyboard inputs until clicked.
-                if (consolePane != null)
-                {
+                if (consolePane != null) {
                     PendingMoveFocus(consolePane);
                 }
             }
@@ -329,65 +290,52 @@ namespace NuPackConsole.Implementation
         /// In this case, we need to set focus in its Loaded event.
         /// </summary>
         /// <param name="consolePane"></param>
-        void PendingMoveFocus(FrameworkElement consolePane)
-        {
-            if (consolePane.IsLoaded && consolePane.IsConnectedToPresentationSource())
-            {
+        void PendingMoveFocus(FrameworkElement consolePane) {
+            if (consolePane.IsLoaded && consolePane.IsConnectedToPresentationSource()) {
                 PendingFocusPane = null;
                 MoveFocus(consolePane);
             }
-            else
-            {
+            else {
                 PendingFocusPane = consolePane;
             }
         }
 
         FrameworkElement _pendingFocusPane;
-        FrameworkElement PendingFocusPane
-        {
-            get
-            {
+        FrameworkElement PendingFocusPane {
+            get {
                 return _pendingFocusPane;
             }
-            set
-            {
-                if (_pendingFocusPane != null)
-                {
+            set {
+                if (_pendingFocusPane != null) {
                     _pendingFocusPane.Loaded -= PendingFocusPane_Loaded;
                 }
                 _pendingFocusPane = value;
-                if (_pendingFocusPane != null)
-                {
+                if (_pendingFocusPane != null) {
                     _pendingFocusPane.Loaded += PendingFocusPane_Loaded;
                 }
             }
         }
 
-        void PendingFocusPane_Loaded(object sender, RoutedEventArgs e)
-        {
+        void PendingFocusPane_Loaded(object sender, RoutedEventArgs e) {
             MoveFocus(PendingFocusPane);
             PendingFocusPane = null;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We really don't want exceptions from the console to bring down VS")]
-        void MoveFocus(FrameworkElement consolePane)
-        {
+            Justification = "We really don't want exceptions from the console to bring down VS")]
+        void MoveFocus(FrameworkElement consolePane) {
             // TAB focus into editor (consolePane.Focus() does not work due to editor layouts)
             consolePane.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
 
             // Try start the console session now. This needs to be after the console
             // pane getting focus to avoid incorrect initial editor layout.
-            if (WpfConsole != null && WpfConsole.Content == consolePane)
-            {
-                try
-                {
+            if (WpfConsole != null && WpfConsole.Content == consolePane) {
+                try {
                     WpfConsole.Dispatcher.Start();
                 }
-                catch (Exception x)
-                {
+                catch (Exception x) {
                     WpfConsole.WriteLine(x.ToString());
                 }
             }
@@ -399,26 +347,19 @@ namespace NuPackConsole.Implementation
         /// Get the WpfConsole of the active host.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        IWpfConsole WpfConsole
-        {
-            get
-            {
-                if (_wpfConsole == null)
-                {
-                    if (ActiveHostInfo != null)
-                    {
-                        try
-                        {
+        IWpfConsole WpfConsole {
+            get {
+                if (_wpfConsole == null) {
+                    if (ActiveHostInfo != null) {
+                        try {
                             _wpfConsole = ActiveHostInfo.WpfConsole;
                         }
-                        catch (Exception x)
-                        {
+                        catch (Exception x) {
                             _wpfConsole = ActiveHostInfo.WpfConsole;
                             _wpfConsole.Write(x.ToString());
                         }
                     }
-                    else
-                    {
+                    else {
                         // TODO: no host
                     }
                 }
@@ -432,12 +373,9 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Get the VsTextView of current WpfConsole if exists.
         /// </summary>
-        IVsTextView VsTextView
-        {
-            get
-            {
-                if (_vsTextView == null && WpfConsole != null)
-                {
+        IVsTextView VsTextView {
+            get {
+                if (_vsTextView == null && WpfConsole != null) {
                     _vsTextView = (IVsTextView)(WpfConsole.VsTextView);
                 }
                 return _vsTextView;
@@ -449,26 +387,20 @@ namespace NuPackConsole.Implementation
         /// <summary>
         /// Get the parent pane of console panes. This serves as the Content of this tool window.
         /// </summary>
-        Border ConsoleParentPane
-        {
-            get
-            {
-                if (_consoleParentPane == null)
-                {
+        Border ConsoleParentPane {
+            get {
+                if (_consoleParentPane == null) {
                     _consoleParentPane = new Border();
                 }
                 return _consoleParentPane;
             }
         }
 
-        public override object Content
-        {
-            get
-            {
+        public override object Content {
+            get {
                 return this.ConsoleParentPane;
             }
-            set
-            {
+            set {
                 base.Content = value;
             }
         }

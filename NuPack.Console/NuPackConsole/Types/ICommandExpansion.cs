@@ -1,10 +1,8 @@
-﻿namespace NuPackConsole
-{
+﻿namespace NuPackConsole {
     /// <summary>
     /// Interface for command line expansion (intellisense).
     /// </summary>
-    public interface ICommandExpansion
-    {
+    public interface ICommandExpansion {
         /// <summary>
         /// Get command line expansion candidates.
         /// </summary>

@@ -1,11 +1,9 @@
-﻿namespace NuPackConsole
-{
+﻿namespace NuPackConsole {
     /// <summary>
     /// MEF interface for host provider. PowerConsole host providers must export this
     /// interface implementation and decorate it with a HostName attribute.
     /// </summary>
-    public interface IHostProvider
-    {
+    public interface IHostProvider {
         /// <summary>
         /// Create a new host instance.
         /// </summary>

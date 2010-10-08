@@ -4,16 +4,13 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio;
 
-namespace NuPackConsole.Implementation.Console
-{
-    class OleCommandFilter : IOleCommandTarget
-    {
+namespace NuPackConsole.Implementation.Console {
+    class OleCommandFilter : IOleCommandTarget {
         public const int OLECMDERR_E_NOTSUPPORTED = (int)Constants.OLECMDERR_E_NOTSUPPORTED;
 
         protected IOleCommandTarget OldChain { get; private set; }
 
-        public OleCommandFilter(IVsTextView vsTextView)
-        {
+        public OleCommandFilter(IVsTextView vsTextView) {
             Debug.Assert(vsTextView != null);
 
             IOleCommandTarget _oldChain;
@@ -23,36 +20,30 @@ namespace NuPackConsole.Implementation.Console
             this.OldChain = _oldChain;
         }
 
-        protected virtual int InternalQueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
-        {
+        protected virtual int InternalQueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
             return OLECMDERR_E_NOTSUPPORTED;
         }
 
-        protected virtual int InternalExec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
-        {
+        protected virtual int InternalExec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
             return OLECMDERR_E_NOTSUPPORTED;
         }
 
         #region IOleCommandTarget
 
-        public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
-        {
+        public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
             int hr = InternalQueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
 
-            if (hr == OLECMDERR_E_NOTSUPPORTED)
-            {
+            if (hr == OLECMDERR_E_NOTSUPPORTED) {
                 hr = OldChain.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
             }
 
             return hr;
         }
 
-        public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
-        {
+        public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
             int hr = InternalExec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 
-            if (hr == OLECMDERR_E_NOTSUPPORTED)
-            {
+            if (hr == OLECMDERR_E_NOTSUPPORTED) {
                 hr = OldChain.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             }
 

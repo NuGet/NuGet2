@@ -6,31 +6,24 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 
-namespace NuPackConsole.Implementation.Console
-{
-    class WpfConsoleClassifier : ObjectWithFactory<WpfConsoleService>, IClassifier
-    {
+namespace NuPackConsole.Implementation.Console {
+    class WpfConsoleClassifier : ObjectWithFactory<WpfConsoleService>, IClassifier {
         ITextBuffer TextBuffer { get; set; }
         ComplexCommandSpans _commandLineSpans = new ComplexCommandSpans();
         OrderedTupleSpans<IClassificationType> _colorSpans = new OrderedTupleSpans<IClassificationType>();
 
         public WpfConsoleClassifier(WpfConsoleService factory, ITextBuffer textBuffer)
-            : base(factory)
-        {
+            : base(factory) {
             this.TextBuffer = textBuffer;
             TextBuffer.Changed += TextBuffer_Changed;
         }
 
-        void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)
-        {
+        void TextBuffer_Changed(object sender, TextContentChangedEventArgs e) {
             // When input line changes, raise ClassificationChanged event
-            if (HasConsole && Console.InputLineStart != null)
-            {
+            if (HasConsole && Console.InputLineStart != null) {
                 SnapshotSpan commandExtent = Console.InputLineExtent;
-                if (e.Changes.Any((c) => c.OldPosition >= commandExtent.Span.Start))
-                {
-                    if (_commandLineSpans.Count > 0)
-                    {
+                if (e.Changes.Any((c) => c.OldPosition >= commandExtent.Span.Start)) {
+                    if (_commandLineSpans.Count > 0) {
                         int i = _commandLineSpans.FindCommandStart(_commandLineSpans.Count - 1);
                         commandExtent = new SnapshotSpan(
                             new SnapshotPoint(commandExtent.Snapshot, _commandLineSpans[i].Item1.Start),
@@ -47,19 +40,14 @@ namespace NuPackConsole.Implementation.Console
         ICommandTokenizer CommandTokenizer { get; set; }
 
         WpfConsole _console;
-        WpfConsole Console
-        {
-            get
-            {
-                if (_console == null)
-                {
+        WpfConsole Console {
+            get {
+                if (_console == null) {
                     TextBuffer.Properties.TryGetProperty<WpfConsole>(typeof(IConsole), out _console);
-                    if (_console != null)
-                    {
+                    if (_console != null) {
                         // Only processing command lines when we have a CommandTokenizer
                         CommandTokenizer = Factory.GetCommandTokenizer(_console);
-                        if (CommandTokenizer != null)
-                        {
+                        if (CommandTokenizer != null) {
                             _console.Dispatcher.ExecuteInputLine += Console_ExecuteInputLine;
                         }
 
@@ -72,21 +60,17 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        void Console_ExecuteInputLine(object sender, EventArgs<Tuple<SnapshotSpan, bool>> e)
-        {
+        void Console_ExecuteInputLine(object sender, EventArgs<Tuple<SnapshotSpan, bool>> e) {
             // Don't add empty spans (e.g. executed "cls")
             SnapshotSpan snapshotSpan = e.Arg.Item1.TranslateTo(Console.WpfTextView.TextSnapshot, SpanTrackingMode.EdgePositive);
-            if (!snapshotSpan.IsEmpty)
-            {
+            if (!snapshotSpan.IsEmpty) {
                 _commandLineSpans.Add(snapshotSpan, e.Arg.Item2);
             }
         }
 
-        void Console_NewColorSpan(object sender, EventArgs<Tuple<SnapshotSpan, Color?, Color?>> e)
-        {
+        void Console_NewColorSpan(object sender, EventArgs<Tuple<SnapshotSpan, Color?, Color?>> e) {
             // At least one of foreground or background must be specified, otherwise we don't care.
-            if (e.Arg.Item2 != null || e.Arg.Item3 != null)
-            {
+            if (e.Arg.Item2 != null || e.Arg.Item3 != null) {
                 _colorSpans.Add(Tuple.Create(
                     e.Arg.Item1.Span,
                     TextFormatClassifier.GetClassificationType(e.Arg.Item2, e.Arg.Item3)));
@@ -95,20 +79,16 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        void Console_ConsoleCleared(object sender, EventArgs e)
-        {
+        void Console_ConsoleCleared(object sender, EventArgs e) {
             ClearCachedCommandLineClassifications();
             _commandLineSpans.Clear();
             _colorSpans.Clear();
         }
 
         ITextFormatClassifier _textFormatClassifier;
-        ITextFormatClassifier TextFormatClassifier
-        {
-            get
-            {
-                if (_textFormatClassifier == null)
-                {
+        ITextFormatClassifier TextFormatClassifier {
+            get {
+                if (_textFormatClassifier == null) {
                     _textFormatClassifier = Factory.TextFormatClassifierProvider.GetTextFormatClassifier(
                         Console.WpfTextView);
                 }
@@ -116,8 +96,7 @@ namespace NuPackConsole.Implementation.Console
             }
         }
 
-        bool HasConsole
-        {
+        bool HasConsole {
             get { return Console != null; }
         }
 
@@ -125,36 +104,27 @@ namespace NuPackConsole.Implementation.Console
 
         public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
-        public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
-        {
+        public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span) {
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();
-            if (HasConsole)
-            {
+            if (HasConsole) {
                 ITextSnapshot snapshot = span.Snapshot;
-                
+
                 // Check command line spans
-                if (CommandTokenizer != null)
-                {
+                if (CommandTokenizer != null) {
                     bool hasInputLine = Console.InputLineStart != null;
-                    if (hasInputLine)
-                    {
+                    if (hasInputLine) {
                         // Add current input line temporarily
                         _commandLineSpans.Add(Console.InputLineExtent, false);
                     }
-                    try
-                    {
-                        foreach (var cmdSpans in _commandLineSpans.Overlap(span))
-                        {
-                            if (cmdSpans.Count > 0)
-                            {
+                    try {
+                        foreach (var cmdSpans in _commandLineSpans.Overlap(span)) {
+                            if (cmdSpans.Count > 0) {
                                 classificationSpans.AddRange(GetCommandLineClassifications(snapshot, cmdSpans));
                             }
                         }
                     }
-                    finally
-                    {
-                        if (hasInputLine)
-                        {
+                    finally {
+                        if (hasInputLine) {
                             // Remove added current input line
                             _commandLineSpans.PopLast();
                         }
@@ -162,8 +132,7 @@ namespace NuPackConsole.Implementation.Console
                 }
 
                 // Check color spans
-                foreach (var t in _colorSpans.Overlap(span))
-                {
+                foreach (var t in _colorSpans.Overlap(span)) {
                     classificationSpans.Add(new ClassificationSpan(
                         new SnapshotSpan(snapshot, t.Item1), t.Item2));
                 }
@@ -182,15 +151,12 @@ namespace NuPackConsole.Implementation.Console
         /// called n times for the same command. This implementation caches one parsed results for the last
         /// command.
         /// </remarks>
-        IList<ClassificationSpan> GetCommandLineClassifications(ITextSnapshot snapshot, IList<Span> cmdSpans)
-        {
+        IList<ClassificationSpan> GetCommandLineClassifications(ITextSnapshot snapshot, IList<Span> cmdSpans) {
             IList<ClassificationSpan> cachedCommandLineClassifications;
-            if (TryGetCachedCommandLineClassifications(snapshot, cmdSpans, out cachedCommandLineClassifications))
-            {
+            if (TryGetCachedCommandLineClassifications(snapshot, cmdSpans, out cachedCommandLineClassifications)) {
                 return cachedCommandLineClassifications;
             }
-            else
-            {
+            else {
                 List<ClassificationSpan> spans = new List<ClassificationSpan>();
                 spans.AddRange(GetTokenizerClassifications(snapshot, cmdSpans));
                 SaveCachedCommandLineClassifications(snapshot, cmdSpans, spans);
@@ -199,22 +165,17 @@ namespace NuPackConsole.Implementation.Console
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public IList<ClassificationSpan> GetTokenizerClassifications(ITextSnapshot snapshot, IList<Span> spans)
-        {
+        public IList<ClassificationSpan> GetTokenizerClassifications(ITextSnapshot snapshot, IList<Span> spans) {
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();
 
             string[] lines = spans.Select((span) => snapshot.GetText(span)).ToArray();
-            try
-            {
+            try {
                 IEnumerable<Token> tokens = CommandTokenizer.Tokenize(lines);
-                foreach (Token token in tokens)
-                {
+                foreach (Token token in tokens) {
                     IClassificationType classificationType = Factory.GetTokenTypeClassification(token.Type);
-                    for (int i = token.StartLine; i <= token.EndLine; i++)
-                    {
+                    for (int i = token.StartLine; i <= token.EndLine; i++) {
                         // Tokenize() may append \r\n, resulting in more lines than spans lines
-                        if (i - 1 < spans.Count)
-                        {
+                        if (i - 1 < spans.Count) {
                             Span span = spans[i - 1];
                             int start = (i == token.StartLine) ? span.Start + (token.StartColumn - 1) : span.Start;
                             int end = (i == token.EndLine) ? span.Start + (token.EndColumn - 1) : span.End;
@@ -225,8 +186,7 @@ namespace NuPackConsole.Implementation.Console
                     }
                 }
             }
-            catch (Exception x)
-            {
+            catch (Exception x) {
                 // Don't care about parser run-time exceptions
                 Debug.Print(x.ToString());
             }
@@ -242,8 +202,7 @@ namespace NuPackConsole.Implementation.Console
         /// <summary>
         /// Clear cached command line classifications.
         /// </summary>
-        void ClearCachedCommandLineClassifications()
-        {
+        void ClearCachedCommandLineClassifications() {
             _cacheSnapshot = null;
             _cacheClassifications = null;
         }
@@ -254,8 +213,7 @@ namespace NuPackConsole.Implementation.Console
         /// <param name="snapshot">The snapshot for the command.</param>
         /// <param name="cmdSpans">The command spans.</param>
         /// <param name="spans">Classification results of the command.</param>
-        void SaveCachedCommandLineClassifications(ITextSnapshot snapshot, IList<Span> cmdSpans, IList<ClassificationSpan> spans)
-        {
+        void SaveCachedCommandLineClassifications(ITextSnapshot snapshot, IList<Span> cmdSpans, IList<ClassificationSpan> spans) {
             _cacheSnapshot = snapshot;
             _cacheCommandStartPosition = cmdSpans[0].Start;
             _cacheClassifications = new WeakReference(spans);
@@ -268,19 +226,15 @@ namespace NuPackConsole.Implementation.Console
         /// <param name="cmdSpans">The command spans.</param>
         /// <param name="cachedCommandLineClassifications">The cached classifications if found.</param>
         /// <returns>If cached results are found.</returns>
-        bool TryGetCachedCommandLineClassifications(ITextSnapshot snapshot, IList<Span> cmdSpans, out IList<ClassificationSpan> cachedCommandLineClassifications)
-        {
+        bool TryGetCachedCommandLineClassifications(ITextSnapshot snapshot, IList<Span> cmdSpans, out IList<ClassificationSpan> cachedCommandLineClassifications) {
             // The cached command is identified by text snapshot and command start position.
-            if (_cacheSnapshot == snapshot && _cacheCommandStartPosition == cmdSpans[0].Start)
-            {
+            if (_cacheSnapshot == snapshot && _cacheCommandStartPosition == cmdSpans[0].Start) {
                 IList<ClassificationSpan> spans = _cacheClassifications.Target as IList<ClassificationSpan>;
-                if (spans != null)
-                {
+                if (spans != null) {
                     cachedCommandLineClassifications = spans;
                     return true;
                 }
-                else
-                {
+                else {
                     ClearCachedCommandLineClassifications(); // weak reference is gone
                 }
             }

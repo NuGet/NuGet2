@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace NuPackConsole
-{
+namespace NuPackConsole {
     /// <summary>
     /// MEF interface to interact with the PowerConsole tool window.
     /// </summary>
-    public interface IPowerConsoleWindow
-    {
+    public interface IPowerConsoleWindow {
         /// <summary>
         /// Get all the host names available.
         /// </summary>

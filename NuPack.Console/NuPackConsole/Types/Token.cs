@@ -1,17 +1,15 @@
-﻿namespace NuPackConsole
-{
+﻿namespace NuPackConsole {
     /// <summary>
     /// A token type used by command tokenizer.
     /// </summary>
-    public class Token
-    {
+    public class Token {
         /// <summary>
         /// This token type.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Naming", 
+            "Microsoft.Naming",
             "CA1721:PropertyNamesShouldNotMatchGetMethods",
-            Justification="Type is the most appropriate word here.")]
+            Justification = "Type is the most appropriate word here.")]
         public TokenType Type { get; private set; }
 
         /// <summary>
@@ -42,8 +40,7 @@
         /// <param name="endLine">The token's end line.</param>
         /// <param name="startColumn">The token's start column.</param>
         /// <param name="endColumn">The token's end column.</param>
-        public Token(TokenType type, int startLine, int endLine, int startColumn, int endColumn)
-        {
+        public Token(TokenType type, int startLine, int endLine, int startColumn, int endColumn) {
             this.Type = type;
             this.StartLine = startLine;
             this.EndLine = endLine;

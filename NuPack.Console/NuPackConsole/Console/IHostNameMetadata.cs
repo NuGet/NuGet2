@@ -1,10 +1,8 @@
-﻿namespace NuPackConsole.Implementation.Console
-{
+﻿namespace NuPackConsole.Implementation.Console {
     /// <summary>
     /// HostName MEF metadata viewer.
     /// </summary>
-    public interface IHostNameMetadata
-    {
+    public interface IHostNameMetadata {
         string HostName { get; }
     }
 }

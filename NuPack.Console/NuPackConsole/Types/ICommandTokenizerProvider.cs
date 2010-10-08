@@ -1,13 +1,11 @@
-﻿namespace NuPackConsole
-{
+﻿namespace NuPackConsole {
     /// <summary>
     /// ICommandTokenizer provider (syntax highlighting).
     /// 
     /// To support syntax highlighting, export an implementation of this interface
     /// and apply a HostName attribute to associate it with the host.
     /// </summary>
-    public interface ICommandTokenizerProvider
-    {
+    public interface ICommandTokenizerProvider {
         /// <summary>
         /// Create a command line tokenizer for a host.
         /// </summary>

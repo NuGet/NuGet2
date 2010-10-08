@@ -1,12 +1,10 @@
 ﻿using System.Windows.Media;
 
-namespace NuPackConsole
-{
+namespace NuPackConsole {
     /// <summary>
     /// Represents a console (editor) which a user interacts with.
     /// </summary>
-    public interface IConsole
-    {
+    public interface IConsole {
         /// <summary>
         /// The host associated with this console. Each console is associated with 1 host
         /// to perform command interpretation. The console creator is responsible to

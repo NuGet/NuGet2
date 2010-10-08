@@ -10,11 +10,9 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace NuPackConsole.Implementation.Console
-{
+namespace NuPackConsole.Implementation.Console {
     [Export(typeof(IWpfConsoleService))]
-    class WpfConsoleService : IWpfConsoleService
-    {
+    class WpfConsoleService : IWpfConsoleService {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import]
         internal IContentTypeRegistryService ContentTypeRegistryService { get; set; }
@@ -48,23 +46,20 @@ namespace NuPackConsole.Implementation.Console
         public IStandardClassificationService StandardClassificationService { get; set; }
 
         #region IWpfConsoleService
-        public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName)
-        {
+        public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName) {
             return new WpfConsole(this, sp, contentTypeName, hostName).MarshalledConsole;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability", 
+            "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
-            Justification="We can't dispose an object if the objective is to return it.")]
-        public object TryCreateCompletionSource(object textBuffer)
-        {
+            Justification = "We can't dispose an object if the objective is to return it.")]
+        public object TryCreateCompletionSource(object textBuffer) {
             ITextBuffer buffer = (ITextBuffer)textBuffer;
             return new WpfConsoleCompletionSource(this, buffer);
         }
 
-        public object GetClassifier(object textBuffer)
-        {
+        public object GetClassifier(object textBuffer) {
             ITextBuffer buffer = (ITextBuffer)textBuffer;
             return buffer.Properties.GetOrCreateSingletonProperty<IClassifier>(
                 () => new WpfConsoleClassifier(this, buffer));
@@ -73,15 +68,12 @@ namespace NuPackConsole.Implementation.Console
 
         private static IService GetSingletonHostService<IService, IServiceFactory>(WpfConsole console,
             IEnumerable<Lazy<IServiceFactory, IHostNameMetadata>> providers, Func<IServiceFactory, IHost, IService> create, Func<IService> def)
-            where IService : class
-        {
-            return console.WpfTextView.Properties.GetOrCreateSingletonProperty<IService>(() =>
-            {
+            where IService : class {
+            return console.WpfTextView.Properties.GetOrCreateSingletonProperty<IService>(() => {
                 IService service = null;
 
                 var lazyProvider = providers.FirstOrDefault(f => string.Equals(f.Metadata.HostName, console.HostName));
-                if (lazyProvider != null)
-                {
+                if (lazyProvider != null) {
                     service = create(lazyProvider.Value, console.Host);
                 }
 
@@ -89,15 +81,13 @@ namespace NuPackConsole.Implementation.Console
             });
         }
 
-        public ICommandExpansion GetCommandExpansion(WpfConsole console)
-        {
+        public ICommandExpansion GetCommandExpansion(WpfConsole console) {
             return GetSingletonHostService<ICommandExpansion, ICommandExpansionProvider>(console, CommandExpansionProviders,
                 (factory, host) => factory.Create(host),
                 () => null);
         }
 
-        public ICommandTokenizer GetCommandTokenizer(WpfConsole console)
-        {
+        public ICommandTokenizer GetCommandTokenizer(WpfConsole console) {
             return GetSingletonHostService<ICommandTokenizer, ICommandTokenizerProvider>(console, CommandTokenizerProviders,
                 (factory, host) => factory.Create(host),
                 () => null);
@@ -105,10 +95,8 @@ namespace NuPackConsole.Implementation.Console
 
         IClassificationType[] _tokenClassifications;
 
-        public IClassificationType GetTokenTypeClassification(TokenType tokenType)
-        {
-            if (_tokenClassifications == null)
-            {
+        public IClassificationType GetTokenTypeClassification(TokenType tokenType) {
+            if (_tokenClassifications == null) {
                 _tokenClassifications = new IClassificationType[] {
                     StandardClassificationService.CharacterLiteral,
                     StandardClassificationService.Comment,
@@ -130,8 +118,7 @@ namespace NuPackConsole.Implementation.Console
             }
 
             int i = (int)tokenType;
-            if (i < 0 || i >= _tokenClassifications.Length)
-            {
+            if (i < 0 || i >= _tokenClassifications.Length) {
                 i = (int)TokenType.Other;
             }
 
@@ -139,8 +126,7 @@ namespace NuPackConsole.Implementation.Console
         }
     }
 
-    public interface INameMetadata
-    {
+    public interface INameMetadata {
         string Name { get; }
     }
 }

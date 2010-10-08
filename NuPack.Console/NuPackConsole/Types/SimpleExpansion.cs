@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-namespace NuPackConsole
-{
+namespace NuPackConsole {
     /// <summary>
     /// Simple command expansion result.
     /// </summary>
-    public class SimpleExpansion
-    {
+    public class SimpleExpansion {
         /// <summary>
         /// Get the Start position for the expansions.
         /// </summary>
@@ -20,15 +18,14 @@ namespace NuPackConsole
         /// Get the expansion candidates for intellisense.
         /// </summary>
         public IList<string> Expansions { get; private set; }
-        
+
         /// <summary>
         /// Create a simple command expansion result.
         /// </summary>
         /// <param name="start">The start position for the expansion.</param>
         /// <param name="length">The length from start position for expansion.</param>
         /// <param name="expansions">Expansion candidates.</param>
-        public SimpleExpansion(int start, int length, IList<string> expansions)
-        {
+        public SimpleExpansion(int start, int length, IList<string> expansions) {
             this.Start = start;
             this.Length = length;
             this.Expansions = expansions;

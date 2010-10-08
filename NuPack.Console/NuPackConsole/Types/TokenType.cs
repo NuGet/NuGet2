@@ -1,10 +1,8 @@
-﻿namespace NuPackConsole
-{
+﻿namespace NuPackConsole {
     /// <summary>
     /// General token types expected by PowerConsole.
     /// </summary>
-    public enum TokenType
-    {
+    public enum TokenType {
         /// <summary>
         /// A character literal.
         /// </summary>
