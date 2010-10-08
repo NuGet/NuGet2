@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NuPackConsole.Host
-{
+namespace NuPackConsole.Host {
     /// <summary>
     /// This class wraps an object so that it can only be accessed through an interface.
     /// This simulates COM QueryInterface (Get-Interface).
@@ -13,8 +12,7 @@ namespace NuPackConsole.Host
     /// and keeps a reference to this type wrapper object to find the wrapped object and other
     /// interface wrappers.</typeparam>
     public abstract class TypeWrapper<T>
-        where T : class
-    {
+        where T : class {
         /// <summary>
         /// The real target object to perform interface member calls.
         /// </summary>
@@ -28,26 +26,22 @@ namespace NuPackConsole.Host
         /// <summary>
         /// Create a new wrapper on an object.
         /// </summary>
-        /// <param name="wrappedObject">The real target object to be wrapped.</param>
-        protected TypeWrapper(object wrappedObject)
-        {
-            UtilityMethods.ThrowIfArgumentNull(wrappedObject);
-            WrappedObject = wrappedObject;
+        /// <param name="wrappedValue">The real target object to be wrapped.</param>
+        protected TypeWrapper(object wrappedValue) {
+            UtilityMethods.ThrowIfArgumentNull(wrappedValue);
+            WrappedObject = wrappedValue;
         }
 
         #region object overrides
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             return obj != null ? obj.Equals(WrappedObject) : false;
         }
 
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return WrappedObject.GetHashCode();
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return WrappedObject.ToString();
         }
         #endregion
@@ -61,18 +55,14 @@ namespace NuPackConsole.Host
         /// <param name="interfaceType">An interface type implemented by the wrapped object.</param>
         /// <returns>An interface wrapper for calling the interface members on the wrapped object.
         /// null if fails to get the interface.</returns>
-        protected T GetInterface(Type interfaceType)
-        {
-            if (!interfaceType.IsInstanceOfType(WrappedObject))
-            {
+        protected T GetInterface(Type interfaceType) {
+            if (!interfaceType.IsInstanceOfType(WrappedObject)) {
                 return default(T); // E_NOINTERFACE
             }
 
-            lock (_interfaceMapLock)
-            {
+            lock (_interfaceMapLock) {
                 T interfaceWrapper;
-                if (_interfaceMap.TryGetValue(interfaceType, out interfaceWrapper))
-                {
+                if (_interfaceMap.TryGetValue(interfaceType, out interfaceWrapper)) {
                     return interfaceWrapper;
                 }
 
@@ -94,21 +84,17 @@ namespace NuPackConsole.Host
         /// <summary>
         /// A type equivalence comparer.
         /// </summary>
-        class TypeEquivalenceComparer : IEqualityComparer<Type>
-        {
+        class TypeEquivalenceComparer : IEqualityComparer<Type> {
             public static readonly TypeEquivalenceComparer Instance = new TypeEquivalenceComparer();
 
-            TypeEquivalenceComparer()
-            {
+            TypeEquivalenceComparer() {
             }
 
-            public bool Equals(Type x, Type y)
-            {
+            public bool Equals(Type x, Type y) {
                 return x.IsEquivalentTo(y);
             }
 
-            public int GetHashCode(Type obj)
-            {
+            public int GetHashCode(Type obj) {
                 return obj.GUID.GetHashCode();
             }
         }
@@ -116,25 +102,23 @@ namespace NuPackConsole.Host
         /// <summary>
         /// Helper method for subclass to implement GetInterface.
         /// </summary>
-        /// <param name="scriptObject">The script object that the interface targets.</param>
+        /// <param name="scriptValue">The script object that the interface targets.</param>
         /// <param name="interfaceType">The interface type to obtain.</param>
         /// <param name="getTypeWrapper">A function to get the TypeWrapper from scriptObject,
         /// or create a new one to wrap the object if scriptObject was not wrapped in a TypeWrapper.</param>
         /// <returns>An object through which to invoke the interfaceType members on the scriptObject.</returns>
-        protected static T GetInterface(object scriptObject, Type interfaceType, Func<object, TypeWrapper<T>> getTypeWrapper)
-        {
-            if (scriptObject == null)
-            {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        protected static T GetInterface(object scriptValue, Type interfaceType, Func<object, TypeWrapper<T>> getTypeWrapper) {
+            if (scriptValue == null) {
                 return null;
             }
 
             UtilityMethods.ThrowIfArgumentNull(interfaceType);
-            if (!interfaceType.IsInterface)
-            {
-                throw new ArgumentException("interfaceType");
+            if (!interfaceType.IsInterface) {
+                throw new ArgumentException("Invalid argument", "interfaceType");
             }
 
-            TypeWrapper<T> wrapper = getTypeWrapper(scriptObject);
+            TypeWrapper<T> wrapper = getTypeWrapper(scriptValue);
             return wrapper.GetInterface(interfaceType);
         }
     }

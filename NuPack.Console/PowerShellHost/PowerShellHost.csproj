@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <CodeAnalysisRuleSet>..\..\NuPack.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <Import Project="..\..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}</ProjectGuid>
@@ -7,6 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuPackConsole.Host.PowerShell</RootNamespace>
     <AssemblyName>NuPackConsole.Host.PowerShell</AssemblyName>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -42,6 +46,7 @@
       <Link>Utils\UtilityMethods.cs</Link>
     </Compile>
     <Compile Include="CommandTokenizer.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="Utils\ComplexCommand.cs" />
     <Compile Include="Utils\IPathExpansion.cs" />
@@ -92,6 +97,11 @@
       <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
       <Name>NuPack.Console</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>Properties\CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,19 +1,14 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.IO;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 
-namespace NuPackConsole.Host.PowerShell.Implementation
-{
+namespace NuPackConsole.Host.PowerShell.Implementation {
     [Export(typeof(IHostProvider))]
     [HostName(PowerShellHostProvider.HostName)]
     [DisplayName("NuPack Provider")]
-    class PowerShellHostProvider : IHostProvider
-    {
+    class PowerShellHostProvider : IHostProvider {
         /// <summary>
         /// PowerConsole host name of PowerShell host.
         /// </summary>
@@ -27,47 +22,47 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         /// </summary>
         public const string PowerConsoleHostName = "NuPack";
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification="MEF")]
         [Import]
         internal IPowerShellHostService PowerShellHostService { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "MEF")]
         [Import(typeof(SVsServiceProvider))]
         internal IServiceProvider ServiceProvider { get; set; }
-      
-        public IHost CreateHost(IConsole console)
-        {
+
+        public IHost CreateHost(IConsole console) {
             DTE2 dte = ServiceProvider.GetService<DTE2>(typeof(DTE));
 
             IHost host = PowerShellHostService.CreateHost(
-                console, 
+                console,
                 dte,
-                PowerConsoleHostName, 
+                PowerConsoleHostName,
                 /*isAsync*/false,
                 new Commander(console));
 
-			console.Dispatcher.Starting += (sender, e) =>
-			{
+            console.Dispatcher.Starting += (sender, e) => {
                 IPowerShellHost psHost = host as IPowerShellHost;
-                if (psHost != null)
-                {
+                if (psHost != null) {
                     psHost.Initialize();
                 }
-			};
+            };
 
             return host;
         }
 
-        class Commander
-        {
-            IConsole Console { get; set; }
+        class Commander {
+            private readonly IConsole _console;
 
-            public Commander(IConsole console)
-            {
-                this.Console = console;
+            public Commander(IConsole console) {
+                _console = console;
             }
 
-            public void ClearHost()
-            {
-                Console.Clear();
+            [System.Diagnostics.CodeAnalysis.SuppressMessage(
+                "Microsoft.Performance", 
+                "CA1811:AvoidUncalledPrivateCode",
+                Justification="This method can be dynamically invoked from PS script.")]
+            public void ClearHost() {
+                _console.Clear();
             }
         }
     }

@@ -1,18 +1,18 @@
-﻿namespace NuPackConsole.Host.PowerShell.Implementation {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Management.Automation;
-    using System.Management.Automation.Runspaces;
-    using EnvDTE80;
-    using NuPack.VisualStudio;
-    using NuPack.VisualStudio.Resources;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using EnvDTE80;
+using NuPack.VisualStudio;
+using NuPack.VisualStudio.Resources;
+
+namespace NuPackConsole.Host.PowerShell.Implementation {
 
     internal abstract class PowerShellHost : IPowerShellHost, IPathExpansion, IDisposable, IHost {
-        private Pipeline CurrentPipeline { get; set; }
         public IConsole Console { get; private set; }
 
         private string _name;
@@ -98,23 +98,24 @@
             Runspace.DefaultRunspace = _myRunSpace;
         }
 
-        private void LoadProfilesIntoRunspace(Runspace _myRunSpace) {
-            var powerShell = System.Management.Automation.PowerShell.Create();
-            powerShell.Runspace = _myRunSpace;
+        private void LoadProfilesIntoRunspace(Runspace runspace) {
+            using (var powerShell = System.Management.Automation.PowerShell.Create()) {
+                powerShell.Runspace = runspace;
 
-            PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuPack");
-            foreach (PSCommand command in profileCommands) {
-                try {
-                    powerShell.Commands = command;
-                    powerShell.AddCommand("out-default");
-                    powerShell.Invoke();
-                }
-                catch (RuntimeException ex) {
-                    _myHost.UI.WriteLine(
-                        "An exception occured while loading one of the profile files. " +
-                        "This may happen if the profile calls scripts that require a different environment than the Package Manager Console.");
+                PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuPack");
+                foreach (PSCommand command in profileCommands) {
+                    try {
+                        powerShell.Commands = command;
+                        powerShell.AddCommand("out-default");
+                        powerShell.Invoke();
+                    }
+                    catch (RuntimeException ex) {
+                        _myHost.UI.WriteLine(
+                            "An exception occured while loading one of the profile files. " +
+                            "This may happen if the profile calls scripts that require a different environment than the Package Manager Console.");
 
-                    _myHost.UI.WriteErrorLine(ex.Message);
+                        _myHost.UI.WriteErrorLine(ex.Message);
+                    }
                 }
             }
         }
@@ -185,10 +186,11 @@
             pipeline.Commands.Add("out-string");
 
             Collection<PSObject> result;
-            PSDataCollection<object> inputCollection = new PSDataCollection<object>();
-            inputCollection.Add(record);
-            inputCollection.Complete();
-            result = pipeline.Invoke(inputCollection);
+            using (PSDataCollection<object> inputCollection = new PSDataCollection<object>()) {
+                inputCollection.Add(record);
+                inputCollection.Complete();
+                result = pipeline.Invoke(inputCollection);
+            }
 
             if (result.Count > 0) {
                 string str = result[0].BaseObject as string;
@@ -207,7 +209,7 @@
             }
             set {
                 if (string.IsNullOrEmpty(value)) {
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException("value");
                 }
 
                 _packageSourceProvider.ActivePackageSource =
@@ -236,17 +238,6 @@
 
             return (from p in SolutionManager.Current.GetProjects()
                     select p.Name).ToArray();
-        }
-
-        private object InvokeResult(string command) {
-            if (_myHost != null) {
-                Collection<PSObject> results = Invoke(command, null, false);
-                if (results != null && results.Count > 0) {
-                    return (string)results[0].Properties["Value"].Value;
-                }
-            }
-
-            return null;
         }
 
         #region IPowerShellHost
@@ -341,6 +332,7 @@
             : base(console, dte, name, false, privateData) {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override bool ExecuteHost(string fullCommand, string command) {
             DateTime startExecutionTime = DateTime.Now;
 
@@ -367,6 +359,7 @@
             : base(console, dte, name, true, privateData) {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override bool ExecuteHost(string fullCommand, string command) {
             DateTime startExecutionTime = DateTime.Now;
 
@@ -386,7 +379,7 @@
                 ReportError(e.ErrorRecord);
             }
             catch (Exception x) {
-                // If an exception pops up, my console becomes unusable. Eat it.
+                // If an exception pops up, console becomes unusable. Eat it.
                 Debug.Print(x.ToString());
             }
 

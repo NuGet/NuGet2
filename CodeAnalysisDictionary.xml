@@ -6,7 +6,10 @@
       <Word>Nu</Word>
       <Word>NuPack</Word>
       <Word>Tokenizer</Word>
-      
+      <Word>Info</Word>
+      <Word>dte</Word>
+      <Word>param</Word>
+      <Word>Infos</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>
@@ -22,6 +25,7 @@
   <Acronyms>
     <CasingExceptions>
       <Acronym>Vs</Acronym>
+      <Acronym>DTE</Acronym>
     </CasingExceptions>
   </Acronyms>
 </Dictionary>

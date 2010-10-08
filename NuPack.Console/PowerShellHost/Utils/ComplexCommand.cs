@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Text;
 
-namespace NuPackConsole.Host
-{
+namespace NuPackConsole.Host {
     /// <summary>
     /// Represents a complex (multi-line) command. This class builds a complex
     /// command and provides helpers to check command completeness.
     /// </summary>
-    class ComplexCommand
-    {
+    class ComplexCommand {
         StringBuilder _lines = new StringBuilder();
         Func<string, string, bool> _checkComplete;
 
@@ -17,8 +15,7 @@ namespace NuPackConsole.Host
         /// </summary>
         /// <param name="checkComplete">A delegate to check complex command completeness.
         /// Expected signature: bool (allLines, lastLine) </param>
-        public ComplexCommand(Func<string, string, bool> checkComplete)
-        {
+        public ComplexCommand(Func<string, string, bool> checkComplete) {
             UtilityMethods.ThrowIfArgumentNull(checkComplete);
             _checkComplete = checkComplete;
         }
@@ -26,10 +23,8 @@ namespace NuPackConsole.Host
         /// <summary>
         /// Get if currently this command is already completed.
         /// </summary>
-        public bool IsComplete
-        {
-            get
-            {
+        public bool IsComplete {
+            get {
                 return _lines.Length == 0;
             }
         }
@@ -41,8 +36,7 @@ namespace NuPackConsole.Host
         /// <param name="fullCommand">The completed full command if this complex command
         /// becomes complete after appending line.</param>
         /// <returns>true if the complex command is completed with appending line.</returns>
-        public bool AddLine(string line, out string fullCommand)
-        {
+        public bool AddLine(string line, out string fullCommand) {
             UtilityMethods.ThrowIfArgumentNull(line);
 
             // Some languages expect ending with \n.
@@ -55,14 +49,12 @@ namespace NuPackConsole.Host
             _lines.Append("\n");
             string allLines = _lines.ToString();
 
-            if (CheckComplete(allLines, line))
-            {
+            if (CheckComplete(allLines, line)) {
                 Clear();
                 fullCommand = allLines;
                 return true;
             }
-            else
-            {
+            else {
                 fullCommand = null;
                 return false;
             }
@@ -71,8 +63,7 @@ namespace NuPackConsole.Host
         /// <summary>
         /// Clear this command, discarding any previous incompleted lines if any.
         /// </summary>
-        public void Clear()
-        {
+        public void Clear() {
             _lines.Clear();
         }
 
@@ -86,17 +77,14 @@ namespace NuPackConsole.Host
         /// <param name="allLines">All lines of the command.</param>
         /// <param name="lastLine">The last line of the command.</param>
         /// <returns>true if the command is completed.</returns>
-        bool CheckComplete(string allLines, string lastLine)
-        {
-            if (!string.IsNullOrEmpty(allLines))
-            {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        bool CheckComplete(string allLines, string lastLine) {
+            if (!string.IsNullOrEmpty(allLines)) {
                 // Do not throw from this method.
-                try
-                {
+                try {
                     return _checkComplete(allLines, lastLine);
                 }
-                catch (Exception)
-                {
+                catch (Exception) {
                     // Ignore and fall through. Treat as invalid commands.
                 }
             }
