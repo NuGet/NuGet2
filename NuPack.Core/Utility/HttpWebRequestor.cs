@@ -7,6 +7,10 @@
     // REVIEW: This class isn't super clean. Maybe this object should be passed around instead
     // of being static
     public static class HttpWebRequestor {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability", 
+            "CA2000:Dispose objects before losing scope",
+            Justification="We can't dispose an object if we want to return it.")]
         public static ZipPackage DownloadPackage(Uri uri) {
             return new ZipPackage(() => {
                 using (Stream responseStream = GetResponseStream(uri)) {

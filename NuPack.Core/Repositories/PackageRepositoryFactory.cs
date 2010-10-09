@@ -19,6 +19,10 @@
             return CreateFeedRepository(new Uri(feedOrPath));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We don't care about handling exception in this case.")]
         private static IPackageRepository CreateFeedRepository(Uri uri) {
             // HACK: We need a better way the feed version and choose the right client impl
             FeedType feedType = FeedType.Atom;
