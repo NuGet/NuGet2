@@ -27,6 +27,9 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Guids.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="NuPackPackage.cs" />
