@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Data.Services;
+using System.ServiceModel.Activation;
 using System.Web.Mvc;
 using System.Web.Routing;
+using NuPack.Server.DataServices;
 
 namespace NuPack.Server {
     // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
@@ -13,12 +12,17 @@ namespace NuPack.Server {
         public static void RegisterRoutes(RouteCollection routes) {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Add odata route
+            DataServiceHostFactory factory = new DataServiceHostFactory();
+            routes.Add(new ServiceRoute("odata/v1", factory, typeof(Packages)));
+
+
             // Map a feed route at the root
-            routes.MapRoute("feed", 
-                            "feed", 
+            routes.MapRoute("feed",
+                            "feed",
                             new { controller = "Packages", action = "Feed" }
             );
-
+            
             routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
