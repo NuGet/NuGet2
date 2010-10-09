@@ -11,22 +11,22 @@ namespace NuPack.TeamFoundationServer {
             _workspace = workspace;
         }
 
-        public bool PendEdit(string path) {
-            return _workspace.PendEdit(path) > 0;
+        public bool PendEdit(string fullPath) {
+            return _workspace.PendEdit(fullPath) > 0;
         }
 
-        public bool PendAdd(string path) {
-            return _workspace.PendAdd(path) > 0;
+        public bool PendAdd(string fullPath) {
+            return _workspace.PendAdd(fullPath) > 0;
         }
 
-        public IEnumerable<string> GetItems(string path) {
-            return GetItems(path, ItemType.Any);
+        public IEnumerable<string> GetItems(string fullPath) {
+            return GetItems(fullPath, ItemType.Any);
         }
 
-        public IEnumerable<string> GetItems(string path, ItemType itemType) {
+        public IEnumerable<string> GetItems(string fullPath, ItemType itemType) {
             // REVIEW: We should pass the filter to this method so it happens on the server
             // REVIEW: Can we do some smart caching so we don't hit the server everytime this is called?
-            var itemSet = _workspace.VersionControlServer.GetItems(path, VersionSpec.Latest, RecursionType.OneLevel, DeletedState.NonDeleted, itemType);
+            var itemSet = _workspace.VersionControlServer.GetItems(fullPath, VersionSpec.Latest, RecursionType.OneLevel, DeletedState.NonDeleted, itemType);
             
             // Get the local files for the server files
             var items = new HashSet<string>(from item in itemSet.Items
@@ -35,19 +35,19 @@ namespace NuPack.TeamFoundationServer {
 
             // Remove the path from the list if we're looking for folders
             if (itemType == ItemType.Folder) {
-                items.Remove(path);
+                items.Remove(fullPath);
 
-                if (Directory.Exists(path)) {
+                if (Directory.Exists(fullPath)) {
                     // Files might have pending adds, but directories might not
                     // (even though they get added as a result of checking in those files).
-                    foreach (var directory in Directory.EnumerateDirectories(path)) {
+                    foreach (var directory in Directory.EnumerateDirectories(fullPath)) {
                         items.Add(directory);
                     }
                 }
             }
 
             // Remove pending deletes from the items collection
-            foreach (var change in GetPendingChanges(path, RecursionType.OneLevel)) {
+            foreach (var change in GetPendingChanges(fullPath, RecursionType.OneLevel)) {
                 if (change.IsDelete) {
                     // Remove all children of this path
                     items.RemoveWhere(item => item.StartsWith(change.LocalItem, StringComparison.OrdinalIgnoreCase));
@@ -60,12 +60,12 @@ namespace NuPack.TeamFoundationServer {
             return items;
         }
 
-        public IEnumerable<PendingChange> GetPendingChanges(string path) {
-            return _workspace.GetPendingChangesEnumerable(path);
+        public IEnumerable<PendingChange> GetPendingChanges(string fullPath) {
+            return _workspace.GetPendingChangesEnumerable(fullPath);
         }
 
-        public IEnumerable<PendingChange> GetPendingChanges(string path, RecursionType recursionType) {
-            return _workspace.GetPendingChangesEnumerable(path, recursionType);
+        public IEnumerable<PendingChange> GetPendingChanges(string fullPath, RecursionType recursionType) {
+            return _workspace.GetPendingChangesEnumerable(fullPath, recursionType);
         }
 
         public string GetLocalItemForServerItem(string path) {
@@ -78,8 +78,8 @@ namespace NuPack.TeamFoundationServer {
             }
         }
 
-        public bool PendDelete(string path, RecursionType recursionType) {
-            return _workspace.PendDelete(path, recursionType) > 0;
+        public bool PendDelete(string fullPath, RecursionType recursionType) {
+            return _workspace.PendDelete(fullPath, recursionType) > 0;
         }
 
 

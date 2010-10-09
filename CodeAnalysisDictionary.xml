@@ -11,6 +11,7 @@
       <Word>param</Word>
       <Word>Infos</Word>
       <Word>nuspec</Word>
+      <Word>tfs</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>
@@ -27,6 +28,7 @@
     <CasingExceptions>
       <Acronym>Vs</Acronym>
       <Acronym>DTE</Acronym>
+      <Acronym>TFS</Acronym>
     </CasingExceptions>
   </Acronyms>
 </Dictionary>

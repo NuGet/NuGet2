@@ -31,6 +31,7 @@ namespace NuPack {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static void DeleteFiles(this ProjectSystem project,
                                        IEnumerable<IPackageFile> files,
                                        IEnumerable<IPackage> otherPackages,

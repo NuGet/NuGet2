@@ -17,6 +17,10 @@
         Version Version { get; }
         IEnumerable<PackageDependency> Dependencies { get; }
         IEnumerable<IPackageAssemblyReference> AssemblyReferences { get; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification="This method is potentially expensive.")]
         IEnumerable<IPackageFile> GetFiles();
     }
 }

@@ -10,6 +10,4 @@
 // You do not need to add suppressions to this file manually.
 
 [assembly: SuppressMessage("Microsoft.Design", "CA1014:MarkAssembliesWithClsCompliant", Justification = "If we decide to move the DTE code into another assembly we will mark this assembly with CLSCompliant(true)")]
-[assembly: SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Nu", Justification = "NuPack is the project name")]
-[assembly: SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Nu", Scope = "namespace", Target = "NuPack", Justification = "NuPack is the project name")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "package", Justification = "The word 'package' is the most appropriate name for this parameter")]

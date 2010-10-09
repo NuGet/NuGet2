@@ -28,7 +28,7 @@
             return GetFeedItems(() => HttpWebRequestor.GetResponseStream(_feedUri));
         }
 
-        internal IEnumerable<PackageSyndicationItem> GetFeedItems(Func<Stream> getStream) {
+        internal static IEnumerable<PackageSyndicationItem> GetFeedItems(Func<Stream> getStream) {
             try {
                 using (var feedReader = XmlTextReader.Create(getStream())) {
                     return GetFeedItems(feedReader);

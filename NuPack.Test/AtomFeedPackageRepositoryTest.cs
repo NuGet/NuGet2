@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net;
 
 namespace NuPack.Test {
     [TestClass]
@@ -21,7 +21,7 @@ namespace NuPack.Test {
             Func<Stream> getStream = () => { throw new WebException(); };
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => repo.GetFeedItems(getStream), "Unable to read feed. Verify that a feed is hosted at the remote server and is available.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => AtomFeedPackageRepository.GetFeedItems(getStream), "Unable to read feed. Verify that a feed is hosted at the remote server and is available.");
         }
 
         [TestMethod]

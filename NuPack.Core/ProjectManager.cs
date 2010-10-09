@@ -35,7 +35,7 @@
                 throw new ArgumentNullException("sourceRepository");
             }
             if (pathResolver == null) {
-                throw new ArgumentNullException("packagePathResolver");
+                throw new ArgumentNullException("pathResolver");
             }
             if (project == null) {
                 throw new ArgumentNullException("project");

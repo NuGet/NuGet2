@@ -10,12 +10,12 @@ namespace NuPack.TeamFoundationServer {
         bool ItemExists(string path);
 
         // Change the type to something mockable
-        IEnumerable<string> GetItems(string path);
+        IEnumerable<string> GetItems(string fullPath);
         IEnumerable<string> GetItems(string fullPath, ItemType itemType);
 
         // Change this type to something mockable
         IEnumerable<PendingChange> GetPendingChanges(string fullPath, RecursionType recursionType);
-        IEnumerable<PendingChange> GetPendingChanges(string path);
-        void Undo(IEnumerable<PendingChange> pendingChange);
+        IEnumerable<PendingChange> GetPendingChanges(string fullPath);
+        void Undo(IEnumerable<PendingChange> pendingChanges);
     }
 }

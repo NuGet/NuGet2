@@ -20,6 +20,8 @@
             return Create(new LocalPackageRepository(physicalPath), uriSelector);
         }
 
+        // REVIEW: Is it right to have a general catch statement in the body of this method
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static SyndicationFeed Create(IPackageRepository repository, Func<IPackage, Uri> uriSelector) {
             var items = new List<SyndicationItem>();
             foreach (var package in repository.GetPackages()) {

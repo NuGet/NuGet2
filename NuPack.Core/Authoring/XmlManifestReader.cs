@@ -89,8 +89,8 @@ namespace NuPack {
             builder.Description = metadataElement.Element(MakeName("description")).Value;
 
             XElement authorsElement = metadataElement.Element(MakeName("authors"));
-            builder.Authors.AddRange(from e in authorsElement.Elements(MakeName("author"))
-                                     select e.Value);
+            builder.Authors.AddRange(from e in authorsElement.Elements(MakeName("author")) 
+                                            select e.Value);
 
             DateTime created;
             if (DateTime.TryParse(metadataElement.GetOptionalElementValue("created", Constants.ManifestSchemaNamespace), out created)) {

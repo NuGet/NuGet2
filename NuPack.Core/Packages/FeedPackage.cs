@@ -101,6 +101,10 @@
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability", 
+            "CA2000:Dispose objects before losing scope",
+            Justification="We can't dispose an object if we want to return it.")]
         protected override IPackage CreatePackage() {
             return HttpWebRequestor.DownloadPackage(_item.DownloadLink.Uri);
         }

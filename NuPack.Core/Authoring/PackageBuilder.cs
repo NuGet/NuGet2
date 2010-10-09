@@ -1,6 +1,6 @@
 ﻿namespace NuPack {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.IO;
     using System.IO.Packaging;
     using System.Xml.Linq;
@@ -10,10 +10,10 @@
         internal const string ManifestRelationType = "manifest";
 
         public PackageBuilder() {
-            Files = new List<IPackageFile>();
-            Dependencies = new List<PackageDependency>();
-            Keywords = new List<string>();
-            Authors = new List<string>();
+            Files = new Collection<IPackageFile>();
+            Dependencies = new Collection<PackageDependency>();
+            Keywords = new Collection<string>();
+            Authors = new Collection<string>();
         }
 
         public string Id {
@@ -26,12 +26,12 @@
             set;
         }
 
-        public List<string> Authors {
+        public Collection<string> Authors {
             get;
             private set;
         }
 
-        public List<string> Keywords {
+        public Collection<string> Keywords {
             get;
             private set;
         }
@@ -76,12 +76,12 @@
             set;
         }
 
-        public List<PackageDependency> Dependencies {
+        public Collection<PackageDependency> Dependencies {
             get;
             private set;
         }
 
-        public List<IPackageFile> Files {
+        public Collection<IPackageFile> Files {
             get;
             private set;
         }

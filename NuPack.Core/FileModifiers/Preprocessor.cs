@@ -25,12 +25,12 @@ namespace NuPack {
             FileSystemExtensions.DeleteFile(projectSystem, targetPath, streamFactory, listener);
         }
         
-        private string Process(IPackageFile file, ProjectSystem projectSystem) {
+        private static string Process(IPackageFile file, ProjectSystem projectSystem) {
             string text = file.Open().ReadToEnd();
             return _tokenRegex.Replace(text, match => ReplaceToken(match, projectSystem));
         }
 
-        private string ReplaceToken(Match match, ProjectSystem projectSystem) {
+        private static string ReplaceToken(Match match, ProjectSystem projectSystem) {
             string propertyName = match.Groups["propertyName"].Value;
             var value = projectSystem.GetPropertyValue(propertyName);
             if (value == null) {

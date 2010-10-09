@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using EnvDTE;
+using NuPack;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
