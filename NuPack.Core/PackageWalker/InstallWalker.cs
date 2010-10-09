@@ -52,7 +52,7 @@
             }
             else {
                 // We didn't resolve the dependency so try to retrieve it from the source
-                LogRetrieveDependenyFromSource(dependency);
+                LogRetrieveDependencyFromSource(dependency);
 
                 package = SourceRepository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
 
@@ -68,7 +68,7 @@
             Listener.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
         }
 
-        protected virtual void LogRetrieveDependenyFromSource(PackageDependency dependency) {
+        protected virtual void LogRetrieveDependencyFromSource(PackageDependency dependency) {
             // We didn't resolve the dependency so try to retrieve it from the source
             Listener.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
         }

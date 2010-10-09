@@ -33,7 +33,7 @@
             Listener.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyReferenced, dependency);
         }
 
-        protected override void LogRetrieveDependenyFromSource(PackageDependency dependency) {
+        protected override void LogRetrieveDependencyFromSource(PackageDependency dependency) {
             Listener.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
         }
 
