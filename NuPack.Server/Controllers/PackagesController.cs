@@ -18,7 +18,7 @@ namespace NuPack.Server.Controllers {
             return ConditionalGet(lastModified, () => File(fullPath, "application/zip", p));
         }
 
-        public ActionResult Feed() {            
+        public ActionResult Feed() {
             // Add the response header
             Response.AddHeader(PackageUtility.FeedVersionHeader, PackageUtility.AtomFeedVersion);
 
@@ -55,18 +55,14 @@ namespace NuPack.Server.Controllers {
         private ActionResult ConditionalGet(DateTime lastModified,
                                             Func<ActionResult> action,
                                             int cacheDuration = 30) {
-            DateTime ifModifiedSince;
-            if (DateTime.TryParse(Request.Headers["If-Modified-Since"], out ifModifiedSince) &&
-                lastModified > ifModifiedSince) {
+            HttpCachePolicyBase cachePolicy = Response.Cache;
+            cachePolicy.SetCacheability(HttpCacheability.Public);
+            cachePolicy.SetLastModified(lastModified);
+
+            if (Request.IsUnmodified(lastModified)) {
                 Response.StatusCode = 304;
                 return new EmptyResult();
             }
-
-            HttpCachePolicyBase cachePolicy = Response.Cache;
-            cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetExpires(DateTime.Now.AddSeconds(cacheDuration));
-            cachePolicy.SetLastModified(lastModified);
-
             return action();
         }
     }

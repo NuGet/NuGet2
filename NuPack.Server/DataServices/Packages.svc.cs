@@ -9,28 +9,6 @@ using System.Web;
 namespace NuPack.Server.DataServices {
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {
-        private bool? _requiresUpdate;        
-        
-        private bool RequiresUpdate {
-            get {
-                if (_requiresUpdate == null) {
-                    var context = HttpContext.Current;
-
-                    // Enable client caching
-                    DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
-                    DateTime ifModifiedSince;
-                    if (DateTime.TryParse(context.Request.Headers["If-Modified-Since"], out ifModifiedSince) &&
-                        lastModified > ifModifiedSince) {
-                        _requiresUpdate = false;
-                    }
-                    else {
-                        _requiresUpdate = true;
-                    }
-                }
-                return _requiresUpdate.Value;
-            }
-        }
-
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config) {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);
@@ -48,7 +26,9 @@ namespace NuPack.Server.DataServices {
 
             // HACK: Exceptions for control flow yay! Only way to stop the request from completing
             // right now
-            if (!RequiresUpdate) {
+            HttpRequestBase request = new HttpRequestWrapper(HttpContext.Current.Request);
+            DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
+            if (request.IsUnmodified(lastModified)) {
                 throw new DataServiceException(304, null);
             }
 
@@ -62,7 +42,6 @@ namespace NuPack.Server.DataServices {
 
             HttpCachePolicy cachePolicy = HttpContext.Current.Response.Cache;
             cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetExpires(DateTime.Now.AddSeconds(60));
             cachePolicy.SetLastModified(Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath));
         }
 
