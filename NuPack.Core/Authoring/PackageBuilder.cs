@@ -2,8 +2,8 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.IO.Packaging;
     using System.Xml.Linq;
-    using Opc = System.IO.Packaging;
 
     public class PackageBuilder {
         private const string DefaultContentType = "application/octet";
@@ -91,7 +91,7 @@
         }
 
         public void Save(Stream stream) {
-            using (Opc.Package package = Opc.Package.Open(stream, FileMode.Create)) {
+            using (Package package = Package.Open(stream, FileMode.Create)) {
                 WriteManifest(package);
                 WriteFiles(package);
 
@@ -151,14 +151,14 @@
             return packageBuilder;
         }
 
-        private void WriteManifest(Opc.Package package) {
+        private void WriteManifest(Package package) {
             Uri uri = UriHelper.CreatePartUri(Id + Constants.ManifestExtension);
 
             // Create the manifest relationship
-            package.CreateRelationship(uri, Opc.TargetMode.Internal, Constants.SchemaNamespace + ManifestRelationType);
+            package.CreateRelationship(uri, TargetMode.Internal, Constants.SchemaNamespace + ManifestRelationType);
 
             // Create the part
-            Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
+            PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
 
             using (Stream stream = packagePart.GetStream()) {
                 var writer = new XmlManifestWriter(this);
@@ -171,7 +171,7 @@
             }
         }
 
-        private void WriteFiles(Opc.Package package) {
+        private void WriteFiles(Package package) {
             foreach (var file in Files) {
                 using (Stream stream = file.Open()) {
                     CreatePart(package, file.Path, stream);
@@ -179,12 +179,11 @@
             }
         }
 
-        private static void CreatePart(Opc.Package package, string packagePath, Stream sourceStream) {
+        private static void CreatePart(Package package, string packagePath, Stream sourceStream) {
             Uri uri = UriHelper.CreatePartUri(packagePath);
 
             // Create the part
-            Opc.PackagePart packagePart = package.CreatePart(uri, DefaultContentType);
-
+            PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
             using (Stream stream = packagePart.GetStream()) {
                 sourceStream.CopyTo(stream);
             }
