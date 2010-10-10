@@ -22,7 +22,7 @@ namespace NuPack.Server.Controllers {
 
         // ?p=filename
         public ActionResult Download(string p) {
-            DateTime lastModified = _fileSystem.GetLastModified(p);
+            DateTimeOffset lastModified = _fileSystem.GetLastModified(p);
             return ConditionalGet(lastModified, () => File(Path.Combine(_fileSystem.Root, p), "application/zip", p));
         }
 
@@ -58,7 +58,7 @@ namespace NuPack.Server.Controllers {
             });
         }
 
-        private ActionResult ConditionalGet(DateTime lastModified,
+        private ActionResult ConditionalGet(DateTimeOffset lastModified,
                                             Func<ActionResult> action) {
 
             return new ConditionalGetResult(lastModified, action);

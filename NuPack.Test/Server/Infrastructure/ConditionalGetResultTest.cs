@@ -59,7 +59,7 @@ namespace NuPack.Test.Server.Infrastructure {
         [TestMethod]
         public void SetCacheSetCachePolicySetsLastModifiedCorrectly() {
             // Arrange
-            var dateLastModified = DateTime.Now;
+            var dateLastModified = DateTime.UtcNow;
             var context = new Mock<ControllerContext>();
             context.Setup(c => c.HttpContext.Response.Cache.SetLastModified(dateLastModified)).Verifiable();
             var conditionalResult = new ConditionalGetResult(dateLastModified, () => new EmptyResult());

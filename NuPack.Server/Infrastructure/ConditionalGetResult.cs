@@ -4,12 +4,12 @@ using System.Web.Mvc;
 
 namespace NuPack.Server.Infrastructure {
     public class ConditionalGetResult : ActionResult {
-        public ConditionalGetResult(DateTime lastModified, Func<ActionResult> actionResult) {
+        public ConditionalGetResult(DateTimeOffset lastModified, Func<ActionResult> actionResult) {
             LastModified = lastModified;
             ConditionalActionResult = actionResult;
         }
 
-        public DateTime LastModified { 
+        public DateTimeOffset LastModified { 
             get; 
             private set; 
         }
@@ -20,7 +20,7 @@ namespace NuPack.Server.Infrastructure {
         }
 
         public ActionResult GetActionResult(ControllerContext context) {
-            if (context.HttpContext.Request.IsUnmodified(LastModified)) {
+            if (context.HttpContext.Request.IsUnmodified(LastModified.ToUniversalTime())) {
                 return new HttpStatusCodeResult(304);
             }
             return ConditionalActionResult();
@@ -29,7 +29,7 @@ namespace NuPack.Server.Infrastructure {
         public void SetCachePolicy(ControllerContext context) {
             HttpCachePolicyBase cachePolicy = context.HttpContext.Response.Cache;
             cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetLastModified(LastModified);
+            cachePolicy.SetLastModified(LastModified.UtcDateTime);
         }
 
         public override void ExecuteResult(ControllerContext context) {

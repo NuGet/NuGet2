@@ -59,7 +59,7 @@ namespace NuPack.Server.Infrastructure {
             throw new NotImplementedException();
         }
 
-        public DateTime GetLastModified(string path) {
+        public DateTimeOffset GetLastModified(string path) {
             return File.GetLastWriteTimeUtc(GetFullPath(path));
         }
     }
