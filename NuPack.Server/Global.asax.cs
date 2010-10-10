@@ -3,6 +3,7 @@ using System.ServiceModel.Activation;
 using System.Web.Mvc;
 using System.Web.Routing;
 using NuPack.Server.DataServices;
+using NuPack.Server.Infrastructure;
 
 namespace NuPack.Server {
     // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
@@ -14,7 +15,7 @@ namespace NuPack.Server {
 
             // Add odata route
             DataServiceHostFactory factory = new DataServiceHostFactory();
-            routes.Add(new ServiceRoute("odata/v1", factory, typeof(Packages)));
+            routes.Add("odata", new ServiceRoute("odata/v1", factory, typeof(Packages)));
 
 
             // Map a feed route at the root
@@ -33,7 +34,7 @@ namespace NuPack.Server {
 
         protected void Application_Start() {
             AreaRegistration.RegisterAllAreas();
-
+            NinjectBootstrapper.RegisterNinjectControllerFactory();
             RegisterRoutes(RouteTable.Routes);
         }
     }

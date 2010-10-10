@@ -15,6 +15,9 @@
       <HintPath>..\packages\elmah.1.1\lib\Elmah.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Ninject.2.1.0.76\lib\40\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity" />
@@ -63,14 +66,19 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="HttpContextExtensions.cs" />
+    <Compile Include="Infrastructure\Bindings.cs" />
     <Compile Include="Infrastructure\ConditionalGetResult.cs" />
     <Compile Include="Infrastructure\FileBasedPackageStore.cs" />
     <Compile Include="Infrastructure\IPackageStore.cs" />
     <Compile Include="Infrastructure\HttpStatusCodeResult.cs" />
+    <Compile Include="Infrastructure\NinjectBootstrapper.cs" />
+    <Compile Include="Infrastructure\NinjectControllerFactory.cs" />
+    <Compile Include="Models\AccountMembershipProvider.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="DataServices\Packages.svc.cs">
       <DependentUpon>Packages.svc</DependentUpon>
     </Compile>
+    <Compile Include="Models\FormsAuthenticationService.cs" />
     <Compile Include="PackageUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -5,8 +5,8 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <h2><%: ViewData["Message"] %></h2>
+    <h2>NuPack Sample Feed</h2>
     <p>
-        To learn more about ASP.NET MVC visit <a href="http://asp.net/mvc" title="ASP.NET MVC Website">http://asp.net/mvc</a>.
+        This is a sample implementation of a NuPack gallery. Click on the OData tab to see the list of packages.
     </p>
 </asp:Content>

@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Principal;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.Routing;
 using System.Web.Security;
 using NuPack.Server.Models;
 
@@ -13,15 +7,20 @@ namespace NuPack.Server.Controllers {
 
     [HandleError]
     public class AccountController : Controller {
+        public AccountController(IFormsAuthenticationService formsService, IMembershipService membershipService) {
+            FormsService = formsService;
+            MembershipService = membershipService;
 
-        public IFormsAuthenticationService FormsService { get; set; }
-        public IMembershipService MembershipService { get; set; }
+        }
 
-        protected override void Initialize(RequestContext requestContext) {
-            if (FormsService == null) { FormsService = new FormsAuthenticationService(); }
-            if (MembershipService == null) { MembershipService = new AccountMembershipService(); }
-
-            base.Initialize(requestContext);
+        public IFormsAuthenticationService FormsService { 
+            get; 
+            private set; 
+        }
+        
+        public IMembershipService MembershipService { 
+            get; 
+            set; 
         }
 
         // **************************************
@@ -37,7 +36,8 @@ namespace NuPack.Server.Controllers {
             if (ModelState.IsValid) {
                 if (MembershipService.ValidateUser(model.UserName, model.Password)) {
                     FormsService.SignIn(model.UserName, model.RememberMe);
-                    if (!String.IsNullOrEmpty(returnUrl)) {
+                    if (!String.IsNullOrEmpty(returnUrl) && returnUrl.StartsWith("/")) {
+                        
                         return Redirect(returnUrl);
                     }
                     else {

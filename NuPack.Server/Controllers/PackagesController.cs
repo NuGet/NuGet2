@@ -8,10 +8,6 @@ namespace NuPack.Server.Controllers {
     public class PackagesController : Controller {
         IPackageStore _fileSystem;
 
-        //TODO: Remove this once we have DI setup.
-        public PackagesController() : this(new FileBasedPackageStore(PackageUtility.PackagePhysicalPath)) { 
-        }
-
         public PackagesController(IPackageStore fileSystem) {
             _fileSystem = fileSystem;
         }
