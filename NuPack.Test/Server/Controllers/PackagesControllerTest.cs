@@ -11,10 +11,10 @@ namespace NuPack.Test.Server.Controllers {
         [TestMethod]
         public void DownloadReturnsConditionalGetResultWithLastModifiedFromPackageFile() {
             // Arrange
-            var dateLastModified = DateTime.UtcNow;
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
-            var controller = new PackagesController(fileSystem.Object);
+            var dateLastModified = DateTimeOffset.Now;
+            var repository = new Mock<IPackageStore>();
+            repository.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
+            var controller = new PackagesController(repository.Object);
             var context = new Mock<ControllerContext>();
             controller.ControllerContext = context.Object;
 
@@ -29,9 +29,9 @@ namespace NuPack.Test.Server.Controllers {
         public void DownloadReturnsConditionalGetResultWithCorrectFileResult() {
             // Arrange
             var dateLastModified = DateTime.UtcNow;
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(f => f.Root).Returns(@"c:\packages");
-            var controller = new PackagesController(fileSystem.Object);
+            var repository = new Mock<IPackageStore>();
+            repository.Setup(f => f.GetFullPath("nupack.nupkg")).Returns(@"c:\packages\nupack.nupkg");
+            var controller = new PackagesController(repository.Object);
             var context = new Mock<ControllerContext>();
             controller.ControllerContext = context.Object;
 

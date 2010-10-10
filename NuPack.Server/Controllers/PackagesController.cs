@@ -6,13 +6,13 @@ using NuPack.Server.Infrastructure;
 
 namespace NuPack.Server.Controllers {
     public class PackagesController : Controller {
-        IFileSystem _fileSystem;
+        IPackageStore _fileSystem;
 
         //TODO: Remove this once we have DI setup.
-        public PackagesController() : this(new PackagesFileSystem(PackageUtility.PackagePhysicalPath)) { 
+        public PackagesController() : this(new FileBasedPackageStore(PackageUtility.PackagePhysicalPath)) { 
         }
 
-        public PackagesController(IFileSystem fileSystem) {
+        public PackagesController(IPackageStore fileSystem) {
             _fileSystem = fileSystem;
         }
 
@@ -23,7 +23,7 @@ namespace NuPack.Server.Controllers {
         // ?p=filename
         public ActionResult Download(string p) {
             DateTimeOffset lastModified = _fileSystem.GetLastModified(p);
-            return ConditionalGet(lastModified, () => File(Path.Combine(_fileSystem.Root, p), "application/zip", p));
+            return ConditionalGet(lastModified, () => File(_fileSystem.GetFullPath(p), "application/zip", p));
         }
 
         //TODO: This method is deprecated. Need to keep it around till we release NuPack CTP 2.

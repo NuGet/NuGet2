@@ -64,7 +64,8 @@
     </Compile>
     <Compile Include="HttpContextExtensions.cs" />
     <Compile Include="Infrastructure\ConditionalGetResult.cs" />
-    <Compile Include="Infrastructure\PackagesFileSystem.cs" />
+    <Compile Include="Infrastructure\FileBasedPackageStore.cs" />
+    <Compile Include="Infrastructure\IPackageStore.cs" />
     <Compile Include="Infrastructure\HttpStatusCodeResult.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="DataServices\Packages.svc.cs">
