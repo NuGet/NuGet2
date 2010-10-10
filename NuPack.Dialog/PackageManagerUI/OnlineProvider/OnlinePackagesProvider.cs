@@ -190,8 +190,8 @@ namespace NuPack.Dialog.Providers {
             ProjectManager.RemovePackageReference(id);
         }
 
-        public bool IsInstalled(string id) {
-            return (ProjectManager.LocalRepository.FindPackage(id) != null);
+        public bool IsInstalled(string id, Version version) {
+            return (ProjectManager.LocalRepository.FindPackage(id, version) != null);
         }
 
         public void Update(string id, Version version) {

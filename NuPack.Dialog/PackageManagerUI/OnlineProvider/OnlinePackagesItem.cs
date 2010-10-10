@@ -178,7 +178,7 @@ namespace NuPack.Dialog.Providers {
 
         public bool IsInstalled {
             get {
-                return _provider.IsInstalled(_packageIdentity.Id);
+                return _provider.IsInstalled(_packageIdentity.Id, _packageIdentity.Version);
             }
         }
 
