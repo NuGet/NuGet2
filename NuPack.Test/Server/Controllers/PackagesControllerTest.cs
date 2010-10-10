@@ -11,7 +11,7 @@ namespace NuPack.Test.Server.Controllers {
         [TestMethod]
         public void DownloadReturnsConditionalGetResultWithLastModifiedFromPackageFile() {
             // Arrange
-            var dateLastModified = DateTime.UtcNow.ToUniversalTime();
+            var dateLastModified = DateTime.UtcNow;
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
             var controller = new PackagesController(fileSystem.Object);
@@ -28,7 +28,7 @@ namespace NuPack.Test.Server.Controllers {
         [TestMethod]
         public void DownloadReturnsConditionalGetResultWithCorrectFileResult() {
             // Arrange
-            var dateLastModified = DateTime.UtcNow.ToUniversalTime();
+            var dateLastModified = DateTime.UtcNow;
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(f => f.Root).Returns(@"c:\packages");
             var controller = new PackagesController(fileSystem.Object);

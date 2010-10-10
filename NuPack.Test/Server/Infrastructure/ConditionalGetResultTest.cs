@@ -12,8 +12,8 @@ namespace NuPack.Test.Server.Infrastructure {
         [TestMethod]
         public void GetActionResultReturnsHttpStatusCodeResultWith302StatusWhenRequestUnmodified() {
             // Arrange
-            var dateLastModified = DateTime.UtcNow.ToUniversalTime();
-            var headers = new NameValueCollection() { { "If-Modified-Since", dateLastModified.ToString() } };
+            var dateLastModified = DateTime.UtcNow;
+            var headers = new NameValueCollection() { { "If-Modified-Since", dateLastModified.ToString("r") } };
             var context = new Mock<ControllerContext>();
             context.Setup(c => c.HttpContext.Request.Headers).Returns(headers);
             var conditionalResult = new ConditionalGetResult(dateLastModified, null);
@@ -29,11 +29,11 @@ namespace NuPack.Test.Server.Infrastructure {
         [TestMethod]
         public void GetActionResultReturnsActionResultWhenFileModifiedAfterHeader() {
             // Arrange
-            var dateLastModified = DateTime.Now;
-            var headers = new NameValueCollection() { { "If-Modified-Since", dateLastModified.AddMinutes(-10).ToString() } };
+            var dateLastModified = DateTime.UtcNow;
+            var headers = new NameValueCollection() { { "If-Modified-Since", dateLastModified.AddMinutes(-10).ToString("r") } };
             var context = new Mock<ControllerContext>();
             context.Setup(c => c.HttpContext.Request.Headers).Returns(headers);
-            var conditionalResult = new ConditionalGetResult(dateLastModified.ToUniversalTime(), () => new EmptyResult());
+            var conditionalResult = new ConditionalGetResult(dateLastModified, () => new EmptyResult());
 
             // Act
             var result = conditionalResult.GetActionResult(context.Object) as EmptyResult;
