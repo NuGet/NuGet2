@@ -6,7 +6,7 @@
 
     public class LocalPackageRepository : PackageRepositoryBase {
         private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
-        
+
         public LocalPackageRepository(string physicalPath)
             : this(new DefaultPackagePathResolver(physicalPath),
                    new FileBasedProjectSystem(physicalPath)) {
@@ -35,7 +35,7 @@
             set;
         }
 
-        public override IQueryable<IPackage> GetPackages() {            
+        public override IQueryable<IPackage> GetPackages() {
             return GetPackagesInternal().AsQueryable();
         }
 
@@ -89,15 +89,15 @@
         public override void RemovePackage(IPackage package) {
             // Delete the package file
             string packageFilePath = GetPackageFilePath(package);
-            FileSystem.DeleteFile(packageFilePath);
+            FileSystemExtensions.DeleteFile(FileSystem, packageFilePath);
 
             // Delete the package directory if any
-            FileSystem.DeleteDirectory(PathResolver.GetPackageDirectory(package), true);
+            FileSystemExtensions.DeleteDirectory(FileSystem, PathResolver.GetPackageDirectory(package), recursive: true, logger: FileSystem.Logger);
 
             // If this is the last package delete the package directory
             if (!FileSystem.GetFiles(String.Empty).Any() &&
                 !FileSystem.GetDirectories(String.Empty).Any()) {
-                FileSystem.DeleteDirectory(String.Empty, recursive: false);
+                FileSystemExtensions.DeleteDirectory(FileSystem, String.Empty, recursive: false, logger: FileSystem.Logger);
             }
         }
 

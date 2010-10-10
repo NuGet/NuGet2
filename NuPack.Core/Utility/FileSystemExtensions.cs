@@ -6,32 +6,37 @@ using NuPack.Resources;
 
 namespace NuPack {
     internal static class FileSystemExtensions {
-        internal static void AddFiles(this IFileSystem fileSystem,
+        internal static bool AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
-                                      ILogger listener) {
-            AddFiles(fileSystem, files, String.Empty, listener);
+                                      ILogger logger) {
+            return AddFiles(fileSystem, files, String.Empty, logger);
         }
 
-        internal static void AddFiles(this IFileSystem fileSystem,
+        internal static bool AddFiles(this IFileSystem fileSystem,
                                       IEnumerable<IPackageFile> files,
                                       string rootDir,
-                                      ILogger listener) {
+                                      ILogger logger) {
+            bool success = true;
             foreach (IPackageFile file in files) {
                 string path = Path.Combine(rootDir, file.Path);
-                AddFile(fileSystem, path, file.Open, listener);
+                if (!AddFile(fileSystem, path, file.Open, logger)) {
+                    success = false;
+                }
             }
-        }
-        
-        internal static void DeleteFiles(this IFileSystem fileSystem,
-                                         IEnumerable<IPackageFile> files,
-                                         ILogger listener) {
-            DeleteFiles(fileSystem, files, String.Empty, listener);
+            return success;
         }
 
         internal static void DeleteFiles(this IFileSystem fileSystem,
                                          IEnumerable<IPackageFile> files,
+                                         ILogger logger) {
+            DeleteFiles(fileSystem, files, String.Empty, logger);
+        }
+
+        internal static bool DeleteFiles(this IFileSystem fileSystem,
+                                         IEnumerable<IPackageFile> files,
                                          string rootDir,
-                                         ILogger listener) {
+                                         ILogger logger) {
+            bool success = true;
 
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
@@ -46,23 +51,54 @@ namespace NuPack {
             // Remove files from every directory
             foreach (var directory in directories) {
                 var directoryFiles = directoryLookup.Contains(directory) ? directoryLookup[directory] : Enumerable.Empty<IPackageFile>();
+                string dirPath = Path.Combine(rootDir, directory);
+
+                if (!fileSystem.DirectoryExists(dirPath)) {
+                    continue;
+                }
+
                 foreach (var file in directoryFiles) {
                     string path = Path.Combine(rootDir, file.Path);
 
-                    DeleteFile(fileSystem, path, file.Open, listener);
+                    if (!DeleteFile(fileSystem, path, file.Open, logger)) {
+                        success = false;
+                    }
                 }
-
-                string dirPath = Path.Combine(rootDir, directory);
-
+                
                 // If the directory is empty then delete it
                 if (!fileSystem.GetFiles(dirPath).Any() &&
                     !fileSystem.GetDirectories(dirPath).Any()) {
-                    fileSystem.DeleteDirectory(dirPath, recursive: false);
+                    if (!DeleteDirectory(fileSystem, dirPath, recursive: false, logger: logger)) {
+                        success = false;
+                    }
                 }
             }
+            return success;
         }
 
-        internal static void DeleteFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger listener) {
+        internal static bool DeleteDirectory(IFileSystem fileSystem, string path, bool recursive, ILogger logger) {
+            try {
+                fileSystem.DeleteDirectory(path, recursive);
+            }
+            catch (Exception e) {
+                logger.Log(MessageLevel.Warning, e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        internal static bool DeleteFile(IFileSystem fileSystem, string path) {
+            try {
+                fileSystem.DeleteFile(path);
+            }
+            catch (Exception e) {
+                fileSystem.Logger.Log(MessageLevel.Warning, e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        internal static bool DeleteFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger logger) {
             // Only delete the file if it exists and the checksum is the same
             if (fileSystem.FileExists(path)) {
                 bool contentEqual;
@@ -72,25 +108,35 @@ namespace NuPack {
                 }
 
                 if (contentEqual) {
-                    fileSystem.DeleteFile(path);
+                    if (!DeleteFile(fileSystem, path)) {
+                        return false;
+                    }
                 }
                 else {
                     // This package installed a file that was modified so warn the user
-                    listener.Log(MessageLevel.Warning, NuPackResources.Warning_FileModified, path);
+                    logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileModified, path);
                 }
             }
+            return true;
         }
 
-        internal static void AddFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger listener) {
+        internal static bool AddFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger logger) {
             // Don't overwrite file if it exists if force wasn't set to true
             if (fileSystem.FileExists(path)) {
-                listener.Log(MessageLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
+                logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
             }
             else {
                 using (Stream stream = streamFactory()) {
-                    fileSystem.AddFile(path, stream);
+                    try {
+                        fileSystem.AddFile(path, stream);
+                    }
+                    catch (Exception e) {
+                        logger.Log(MessageLevel.Warning, e.Message);
+                        return false;
+                    }
                 }
             }
+            return true;
         }
 
         internal static IEnumerable<string> GetDirectories(string path) {

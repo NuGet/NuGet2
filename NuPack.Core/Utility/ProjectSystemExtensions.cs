@@ -10,7 +10,7 @@ namespace NuPack {
         public static void AddFiles(this ProjectSystem project,
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                    ILogger listener) {
+                                    ILogger logger) {
             foreach (IPackageFile file in files) {
                 // Remove the redundant folder from the path
                 string path = RemoveContentDirectory(file.Path);
@@ -23,10 +23,10 @@ namespace NuPack {
                     path = RemoveExtension(path);
 
                     // If the transform was done then continue
-                    transformer.TransformFile(file, path, project, listener);
+                    transformer.TransformFile(file, path, project, logger);
                 }
                 else {
-                    FileSystemExtensions.AddFile(project, path, file.Open, listener);
+                    FileSystemExtensions.AddFile(project, path, file.Open, logger);
                 }
             }
         }
@@ -36,7 +36,7 @@ namespace NuPack {
                                        IEnumerable<IPackageFile> files,
                                        IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                       ILogger listener) {
+                                       ILogger logger) {
 
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
@@ -51,9 +51,15 @@ namespace NuPack {
             // Remove files from every directory
             foreach (var directory in directories) {
                 var directoryFiles = directoryLookup.Contains(directory) ? directoryLookup[directory] : Enumerable.Empty<IPackageFile>();
+
+                string dirPath = RemoveContentDirectory(directory);
+                if (!project.DirectoryExists(dirPath)) {
+                    continue;
+                }
+
                 foreach (var file in directoryFiles) {
                     // Remove the content folder from the path
-                    string path = RemoveContentDirectory(file.Path);                    
+                    string path = RemoveContentDirectory(file.Path);
                     // Try to get the package file modifier for the extension
                     string extension = Path.GetExtension(file.Path);
                     IPackageFileTransformer transformer;
@@ -66,19 +72,17 @@ namespace NuPack {
                                             where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
                                             select otherFile;
 
-                        transformer.RevertFile(file, path, matchingFiles, project, listener);
+                        transformer.RevertFile(file, path, matchingFiles, project, logger);
                     }
                     else {
-                        FileSystemExtensions.DeleteFile(project, path, file.Open, listener);
+                        FileSystemExtensions.DeleteFile(project, path, file.Open, logger);
                     }
                 }
-
-                string dirPath = RemoveContentDirectory(directory);
 
                 // If the directory is empty then delete it
                 if (!project.GetFiles(dirPath).Any() &&
                     !project.GetDirectories(dirPath).Any()) {
-                    project.DeleteDirectory(dirPath, recursive: false);
+                    FileSystemExtensions.DeleteDirectory(project, dirPath, recursive: false, logger: logger);
                 }
             }
         }

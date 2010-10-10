@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
@@ -53,20 +54,26 @@
         }
 
         public override void DeleteFile(string path) {
-            try {
-                path = GetFullPath(path);
-                File.Delete(path);
-                string folderPath = Path.GetDirectoryName(path);
-                if (!String.IsNullOrEmpty(folderPath)) {
-                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
-                }
-                else {
-                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
-                }
+            if (!FileExists(path)) {
+                return;
             }
-            catch (FileNotFoundException) {
 
-            }
+            Attempt(() => {
+                try {
+                    path = GetFullPath(path);
+                    File.Delete(path);
+                    string folderPath = Path.GetDirectoryName(path);
+                    if (!String.IsNullOrEmpty(folderPath)) {
+                        Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
+                    }
+                    else {
+                        Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
+                    }
+                }
+                catch (FileNotFoundException) {
+
+                }
+            });
         }
 
         public void DeleteDirectory(string path) {
@@ -74,14 +81,20 @@
         }
 
         public override void DeleteDirectory(string path, bool recursive) {
-            try {
-                path = GetFullPath(path);
-                Directory.Delete(path, recursive);
-                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
+            if (!DirectoryExists(path)) {
+                return;
             }
-            catch (DirectoryNotFoundException) {
 
-            }
+            Attempt(() => {
+                try {
+                    path = GetFullPath(path);
+                    Directory.Delete(path, recursive);
+                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
+                }
+                catch (DirectoryNotFoundException) {
+                    // swallow these exceptions
+                }
+            });
         }
 
         public override void AddReference(string referencePath) {
@@ -154,7 +167,7 @@
             string path = GetReferencePath(name);
             return FileExists(path);
         }
-        
+
         protected string MakeRelativePath(string fullPath) {
             return fullPath.Substring(Root.Length).TrimStart(Path.DirectorySeparatorChar);
         }
@@ -169,6 +182,22 @@
                 path += "\\";
             }
             return path;
+        }
+
+        private void Attempt(Action action, int retries = 3, int sleep = 150) {
+            while (retries > 0) {
+                try {
+                    action();
+                    break;
+                }
+                catch {
+                    retries--;
+                    if (retries == 0) {
+                        throw;
+                    }
+                }
+                Thread.Sleep(sleep);
+            }
         }
     }
 }
