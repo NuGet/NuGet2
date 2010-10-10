@@ -3,28 +3,37 @@ using System.IO;
 using System.ServiceModel.Syndication;
 using System.Web;
 using System.Web.Mvc;
+using NuPack.Server.Infrastructure;
 
 namespace NuPack.Server.Controllers {
     public class PackagesController : Controller {
+        IFileSystem _fileSystem;
+
+        //TODO: Remove this once we have DI setup.
+        public PackagesController() : this(new PackagesFileSystem(PackageUtility.PackagePhysicalPath)) { 
+        }
+
+        public PackagesController(IFileSystem fileSystem) {
+            _fileSystem = fileSystem;
+        }
+
         public ActionResult Index() {
             return View();
         }
 
         // ?p=filename
         public ActionResult Download(string p) {
-            string fullPath = Path.Combine(PackageUtility.PackagePhysicalPath, p);
-
-            DateTime lastModified = System.IO.File.GetLastWriteTimeUtc(fullPath);
-            return ConditionalGet(lastModified, () => File(fullPath, "application/zip", p));
+            DateTime lastModified = _fileSystem.GetLastModified(p);
+            return ConditionalGet(lastModified, () => File(Path.Combine(_fileSystem.Root, p), "application/zip", p));
         }
 
+        //TODO: This method is deprecated. Need to keep it around till we release NuPack CTP 2.
         public ActionResult Feed() {
             // Add the response header
             Response.AddHeader(PackageUtility.FeedVersionHeader, PackageUtility.AtomFeedVersion);
 
             if (Request.Headers[PackageUtility.FeedVersionHeader] != null) {
-                Response.StatusCode = 304;
-                return new EmptyResult();
+                return new HttpStatusCodeResult(304);
             }
 
             // Get the last modified of the package directory
@@ -46,9 +55,7 @@ namespace NuPack.Server.Controllers {
                 packageFeed.LastUpdatedTime = lastModified;
 
                 return new SyndicationFeedResult(packageFeed,
-                                                 feed => new Atom10FeedFormatter(feed),
-                                                 lastModified,
-                                                 "application/atom+xml");
+                                                 feed => new Atom10FeedFormatter(feed));
             }, cacheDuration: 60);
         }
 
@@ -60,8 +67,7 @@ namespace NuPack.Server.Controllers {
             cachePolicy.SetLastModified(lastModified);
 
             if (Request.IsUnmodified(lastModified)) {
-                Response.StatusCode = 304;
-                return new EmptyResult();
+                return new HttpStatusCodeResult(304);
             }
             return action();
         }
