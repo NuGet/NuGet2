@@ -42,7 +42,7 @@
         private IEnumerable<IPackage> GetPackagesInternal() {
             foreach (var path in GetPackageFiles()) {
                 PackageCacheEntry cacheEntry;
-                DateTime lastModified = FileSystem.GetLastModified(path);
+                DateTimeOffset lastModified = FileSystem.GetLastModified(path);
                 // If we never cached this file or we did and it's current last modified time is newer
                 // create a new entry
                 if (!_packageCache.TryGetValue(path, out cacheEntry) ||
@@ -107,13 +107,13 @@
         }
 
         private class PackageCacheEntry {
-            public PackageCacheEntry(IPackage package, DateTime lastModifiedTime) {
+            public PackageCacheEntry(IPackage package, DateTimeOffset lastModifiedTime) {
                 Package = package;
                 LastModifiedTime = lastModifiedTime;
             }
 
             public IPackage Package { get; private set; }
-            public DateTime LastModifiedTime { get; private set; }
+            public DateTimeOffset LastModifiedTime { get; private set; }
         }
     }
 }

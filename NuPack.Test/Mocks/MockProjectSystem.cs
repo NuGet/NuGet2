@@ -107,7 +107,7 @@
             return References.ContainsKey(name);
         }
 
-        public override DateTime GetLastModified(string path) {
+        public override DateTimeOffset GetLastModified(string path) {
             return DateTime.Now;
         }
     }

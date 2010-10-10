@@ -42,7 +42,7 @@
         public abstract void DeleteDirectory(string path, bool recursive);
         public abstract bool DirectoryExists(string path);
         public abstract bool FileExists(string path);
-        public abstract DateTime GetLastModified(string path);
+        public abstract DateTimeOffset GetLastModified(string path);
         public abstract bool ReferenceExists(string name);
 
         public virtual dynamic GetPropertyValue(string propertyName) {

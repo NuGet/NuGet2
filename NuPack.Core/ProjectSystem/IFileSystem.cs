@@ -15,6 +15,6 @@
         bool DirectoryExists(string path);
         void AddFile(string path, Stream stream);
         Stream OpenFile(string path);
-        DateTime GetLastModified(string path);
+        DateTimeOffset GetLastModified(string path);
     }
 }

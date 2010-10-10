@@ -128,11 +128,11 @@
                             .Select(MakeRelativePath);
         }
 
-        public override DateTime GetLastModified(string path) {
+        public override DateTimeOffset GetLastModified(string path) {
             if (DirectoryExists(path)) {
-                return new DirectoryInfo(GetFullPath(path)).LastWriteTime;
+                return new DirectoryInfo(GetFullPath(path)).LastWriteTimeUtc;
             }
-            return new FileInfo(GetFullPath(path)).LastWriteTime;
+            return new FileInfo(GetFullPath(path)).LastWriteTimeUtc;
         }
 
         public override bool FileExists(string path) {
