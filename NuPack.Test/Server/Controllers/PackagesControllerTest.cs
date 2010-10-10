@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Web;
 using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -11,25 +9,40 @@ namespace NuPack.Test.Server.Controllers {
     [TestClass]
     public class PackagesControllerTest {
         [TestMethod]
-        public void DownloadWithFileThatHasNotBeenModifiedSinceLastRequestReturns304StatusResult() { 
+        public void DownloadReturnsConditionalGetResultWithLastModifiedFromPackageFile() {
             // Arrange
             var dateLastModified = DateTime.UtcNow.ToUniversalTime();
-            var context = new Mock<ControllerContext>();
-            context.Setup(c => c.HttpContext.Response.Cache.SetCacheability(HttpCacheability.Public));
-            context.Setup(c => c.HttpContext.Response.Cache.SetLastModified(dateLastModified));
-            var headers = new NameValueCollection() { { "If-Modified-Since", dateLastModified.ToString() } };
-            context.Setup(c => c.HttpContext.Request.Headers).Returns(headers);
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
             var controller = new PackagesController(fileSystem.Object);
+            var context = new Mock<ControllerContext>();
             controller.ControllerContext = context.Object;
 
             // Act
-            var result = controller.Download("test.package.nupkg") as HttpStatusCodeResult;
+            var result = controller.Download("nupack.nupkg") as ConditionalGetResult;
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(304, result.StatusCode);
+            Assert.AreEqual(dateLastModified, result.LastModified);
+        }
+
+        [TestMethod]
+        public void DownloadReturnsConditionalGetResultWithCorrectFileResult() {
+            // Arrange
+            var dateLastModified = DateTime.UtcNow.ToUniversalTime();
+            var fileSystem = new Mock<IFileSystem>();
+            fileSystem.Setup(f => f.Root).Returns(@"c:\packages");
+            var controller = new PackagesController(fileSystem.Object);
+            var context = new Mock<ControllerContext>();
+            controller.ControllerContext = context.Object;
+
+            // Act
+            var result = controller.Download("nupack.nupkg") as ConditionalGetResult;
+
+            // Assert
+            var actualResult = result.ConditionalActionResult() as FileResult;
+            Assert.IsNotNull(actualResult);
+            Assert.AreEqual(@"nupack.nupkg", actualResult.FileDownloadName);
+            Assert.AreEqual(@"application/zip", actualResult.ContentType);
         }
     }
 }

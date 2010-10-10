@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.ServiceModel.Syndication;
-using System.Web;
 using System.Web.Mvc;
 using NuPack.Server.Infrastructure;
 
@@ -56,20 +55,13 @@ namespace NuPack.Server.Controllers {
 
                 return new SyndicationFeedResult(packageFeed,
                                                  feed => new Atom10FeedFormatter(feed));
-            }, cacheDuration: 60);
+            });
         }
 
         private ActionResult ConditionalGet(DateTime lastModified,
-                                            Func<ActionResult> action,
-                                            int cacheDuration = 30) {
-            HttpCachePolicyBase cachePolicy = Response.Cache;
-            cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetLastModified(lastModified);
+                                            Func<ActionResult> action) {
 
-            if (Request.IsUnmodified(lastModified)) {
-                return new HttpStatusCodeResult(304);
-            }
-            return action();
+            return new ConditionalGetResult(lastModified, action);
         }
     }
 }

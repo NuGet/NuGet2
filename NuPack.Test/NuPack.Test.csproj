@@ -49,6 +49,7 @@
     <Compile Include="PackageManagerTest.cs" />
     <Compile Include="Server\Controllers\PackagesControllerTest.cs" />
     <Compile Include="Server\Controllers\SyndicationFeedResultTest.cs" />
+    <Compile Include="Server\Infrastructure\ConditionalGetResultTest.cs" />
     <Compile Include="Utility\PackageUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriHelperTest.cs" />
