@@ -106,6 +106,7 @@
     <Compile Include="PackageManagerUI\Converters\DownloadCountToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
     <Compile Include="PackageManagerUI\EmptyPackageRepository.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\ExecuteCompletedEventArgs.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>
