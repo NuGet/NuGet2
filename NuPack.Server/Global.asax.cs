@@ -15,15 +15,17 @@ namespace NuPack.Server {
 
             // Add odata route
             DataServiceHostFactory factory = new DataServiceHostFactory();
-            routes.Add("odata", new ServiceRoute("odata/v1", factory, typeof(Packages)));
-
+            var serviceRoute = new ServiceRoute("odata/v1", factory, typeof(Packages));
+            serviceRoute.Defaults = new RouteValueDictionary { { "serviceType", "odata" } };
+            serviceRoute.Constraints = new RouteValueDictionary { { "serviceType", "odata" } };
+            routes.Add("odata", serviceRoute);
 
             // Map a feed route at the root
             routes.MapRoute("feed",
                             "feed",
                             new { controller = "Packages", action = "Feed" }
             );
-            
+
             routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
