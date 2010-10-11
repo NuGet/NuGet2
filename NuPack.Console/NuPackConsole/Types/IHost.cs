@@ -6,6 +6,12 @@ namespace NuPackConsole {
     /// Represents a command host that executes user input commands (synchronously).
     /// </summary>
     public interface IHost {
+
+        /// <summary>
+        /// Gets a value indicating whether this host accepts command line input.
+        /// </summary>
+        bool IsCommandEnabled { get; }
+
         /// <summary>
         /// Get the current command prompt used by this host.
         /// </summary>

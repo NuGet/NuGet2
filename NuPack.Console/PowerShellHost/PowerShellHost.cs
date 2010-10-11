@@ -32,6 +32,12 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             _privateData = privateData;
         }
 
+        public bool IsCommandEnabled {
+            get {
+                return true;
+            }
+        }
+
         public void Initialize() {
             // we setup the runspace here, rather than loading it on-demand. This is so that we can
             // load user profile scripts before the command prompt shows up. It also helps with 

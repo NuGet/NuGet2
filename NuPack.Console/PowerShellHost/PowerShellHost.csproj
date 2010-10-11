@@ -47,6 +47,8 @@
     </Compile>
     <Compile Include="CommandTokenizer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="RegistryHelper.cs" />
+    <Compile Include="UnsupportedHost.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="Utils\ComplexCommand.cs" />
     <Compile Include="Utils\IPathExpansion.cs" />

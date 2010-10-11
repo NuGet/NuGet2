@@ -36,10 +36,16 @@ namespace NuPackConsole.Implementation.Console {
             // Only Start once
             if (_dispatcher == null) {
                 IHost host = WpfConsole.Host;
+
                 if (host == null) {
                     throw new InvalidOperationException("Can't start Console dispatcher. Host is null.");
                 }
-                else if (host is IAsyncHost) {
+
+                if (!host.IsCommandEnabled) {
+                    return;
+                }
+
+                if (host is IAsyncHost) {
                     _dispatcher = new AsyncHostConsoleDispatcher(this);
                 }
                 else {

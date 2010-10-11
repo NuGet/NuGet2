@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Runtime.CompilerServices;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
@@ -31,6 +32,17 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         internal IServiceProvider ServiceProvider { get; set; }
 
         public IHost CreateHost(IConsole console) {
+            bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
+            if (isPowerShell2Installed) {
+                return CreatePowerShellHost(console);
+            }
+            else {
+                return new UnsupportedHost(console);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IHost CreatePowerShellHost(IConsole console) {
             DTE2 dte = ServiceProvider.GetService<DTE2>(typeof(DTE));
 
             IHost host = PowerShellHostService.CreateHost(

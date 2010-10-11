@@ -121,4 +121,7 @@
   <data name="Add_WrapperMembers" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>scripts\add-wrappermembers.ps1;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="Host_PSNotInstalled" xml:space="preserve">
+    <value>Error: The Package Manager console requires PowerShell 2.0 runtime, which is not detected on this machine. Please install the PowerShell 2.0 and restarts Visual Studio.</value>
+  </data>
 </root>

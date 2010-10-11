@@ -92,5 +92,14 @@ namespace NuPackConsole.Host.PowerShell {
                 return ResourceManager.GetString("Add_WrapperMembers", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: The Package Manager console requires PowerShell 2.0 runtime, which is not detected on this machine. Please install the PowerShell 2.0 and restarts Visual Studio..
+        /// </summary>
+        internal static string Host_PSNotInstalled {
+            get {
+                return ResourceManager.GetString("Host_PSNotInstalled", resourceCulture);
+            }
+        }
     }
 }
