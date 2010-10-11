@@ -44,21 +44,23 @@ namespace NuPack {
         /// <summary>
         /// Resolves the path of a file inside of a package 
         /// For paths that are relative, the destination path is resovled as the path relative to the basePath (path to the manifest file)
-        /// For all other paths, the path is resolved as the first path portion that does not contain 
+        /// For all other paths, the path is resolved as the first path portion that does not contain a wildcard character
         /// </summary>
-        /// <param name="basePath"></param>
-        /// <param name="actualPath"></param>
-        /// <param name="searchPath"></param>
-        /// <param name="targetPath"></param>
-        /// <returns></returns>
-        public static string ResolvePackagePath(string basePath, string actualPath, string targetPath) {
+        public static string ResolvePackagePath(string searchString, string basePath, string actualPath, string targetPath) {
             if (String.IsNullOrEmpty(basePath)) {
                 basePath = ".";
             }
             basePath = Path.GetFullPath(basePath);
             actualPath = Path.GetFullPath(actualPath);
             string packagePath = null;
-            if (actualPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase)) {
+
+            int searchWildCard = searchString.IndexOf("*", StringComparison.OrdinalIgnoreCase);
+            if (searchWildCard > 0) {
+                searchString = searchString.Substring(0, searchWildCard - 1);
+                int index = actualPath.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
+                packagePath = actualPath.Substring(index + searchString.Length).TrimStart(Path.DirectorySeparatorChar);
+            }
+            else if (actualPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase)) {
                 packagePath = actualPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
             }
             else{

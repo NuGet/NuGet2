@@ -182,7 +182,7 @@ namespace NuPack {
         private void AddFiles(PackageBuilder builder, string source, string destination) {
             PathSearchFilter searchFilter = PathResolver.ResolvePath(BasePath, source);
             foreach (var file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)) {
-                var destinationPath = PathResolver.ResolvePackagePath(BasePath, file, destination);
+                var destinationPath = PathResolver.ResolvePackagePath(source, BasePath, file, destination);
                 builder.Files.Add(new PhysicalPackageFile {
                     SourcePath = file,
                     TargetPath = destinationPath

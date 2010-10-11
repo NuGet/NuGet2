@@ -254,7 +254,7 @@ namespace NuPack.Test {
             var basePath = String.Empty;
 
             // Act
-            var result = PathResolver.ResolvePackagePath(basePath, path, String.Empty);
+            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, String.Empty);
 
             // Assert
             Assert.AreEqual(@"foo\bar.txt", result);
@@ -268,7 +268,7 @@ namespace NuPack.Test {
             var targetPath = @"\abc\cdf";
 
             // Act
-            var result = PathResolver.ResolvePackagePath(basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, targetPath);
 
             // Assert
             Assert.AreEqual(Path.Combine(targetPath, @"foo\bar.txt"), result);
@@ -277,11 +277,12 @@ namespace NuPack.Test {
         [TestMethod]
         public void DestinationPathResolverReturnsFileNamesForNonRelativePaths() {
             // Arrange
-            var path = Path.GetFullPath(@"z:\bar\something.txt");
+            var searchPath = @"z:\bar\something.txt";
+            var path = Path.GetFullPath(searchPath);
             var basePath = String.Empty;
 
             // Act
-            var result = PathResolver.ResolvePackagePath(basePath, path, String.Empty);
+            var result = PathResolver.ResolvePackagePath(searchPath, basePath, path, String.Empty);
 
             // Assert
             Assert.AreEqual(@"something.txt", result);
@@ -294,7 +295,7 @@ namespace NuPack.Test {
             var basePath = Path.GetFullPath(".");
 
             // Act
-            var result = PathResolver.ResolvePackagePath(basePath, path, String.Empty);
+            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, String.Empty);
 
             // Assert
             Assert.AreEqual(@"something.txt", result);
@@ -307,10 +308,66 @@ namespace NuPack.Test {
             var basePath = Path.GetFullPath(".");
             var targetPath = "foo";
             // Act
-            var result = PathResolver.ResolvePackagePath(basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, targetPath);
 
             // Assert
             Assert.AreEqual(Path.Combine(targetPath, "something.txt"), result);
+        }
+
+        [TestMethod]
+        public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenNoTargetPathSpecified() {
+            // Arrange
+            var path = Path.GetFullPath(@"folder\sub-folder\somefile.txt");
+            var basePath = Path.GetFullPath(".");
+            var targetPath = String.Empty;
+            
+            // Act
+            var result = PathResolver.ResolvePackagePath(@"folder\**", basePath, path, targetPath);
+
+            // Assert
+            Assert.AreEqual(@"sub-folder\somefile.txt", result);
+        }
+
+        [TestMethod]
+        public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenTargetPathSpecified() {
+            // Arrange
+            var path = Path.GetFullPath(@"bin\debug\pack.dll");
+            var basePath = Path.GetFullPath(".");
+            var targetPath = @"lib\sl4";
+            
+            // Act
+            var result = PathResolver.ResolvePackagePath(@"bin\debug\**", basePath, path, targetPath);
+
+            // Assert
+            Assert.AreEqual(@"lib\sl4\pack.dll", result);
+        }
+
+        [TestMethod]
+        public void PathResolverTruncatesWildCardInSearchPathWhenNoTargetPathSpecified() {
+            // Arrange
+            var path = Path.GetFullPath(@"bin\debug\pack.dll");
+            var basePath = Path.GetFullPath(".");
+            var targetPath = String.Empty;
+
+            // Act
+            var result = PathResolver.ResolvePackagePath(@"bin\debug\*.dll", basePath, path, targetPath);
+
+            // Assert
+            Assert.AreEqual(@"pack.dll", result);
+        }
+
+        [TestMethod]
+        public void PathResolverTruncatesWildCardInSearchPathWhenTargetPathSpecified() {
+            // Arrange
+            var path = Path.GetFullPath(@"bin\debug\pack.dll");
+            var basePath = Path.GetFullPath(".");
+            var targetPath = @"lib\sl4";
+
+            // Act
+            var result = PathResolver.ResolvePackagePath(@"bin\debug\*.dll", basePath, path, targetPath);
+
+            // Assert
+            Assert.AreEqual(@"lib\sl4\pack.dll", result);
         }
 
         private void AssertEqual(PathSearchFilter expected, PathSearchFilter actual) {
