@@ -22,7 +22,7 @@ namespace NuPack.Test {
             builder.Version = new Version(1, 0);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'language, description, authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description, authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
     }
 }

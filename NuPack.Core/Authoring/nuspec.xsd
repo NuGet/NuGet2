@@ -32,7 +32,7 @@
                             </xs:element>
                             <xs:element name="requireLicenseAcceptance" maxOccurs="1" minOccurs="0" type="xs:boolean" />
                             <xs:element name="description" maxOccurs="1" minOccurs="1" type="xs:string" />
-                            <xs:element name="language" maxOccurs="1" minOccurs="1" type="xs:string" default="en-US" />
+                            <xs:element name="language" maxOccurs="1" minOccurs="0" type="xs:string" default="en-US" />
                             <xs:element name="keywords" maxOccurs="1" minOccurs="0" type="xs:string" />                            
                             <xs:element name="homepage" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
                             <xs:element name="created" maxOccurs="1" minOccurs="0" type="xs:dateTime" />
