@@ -46,7 +46,7 @@
       <Link>Scripts\Profile.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\NuPack.Console\PowerShellHost\Scripts\nupack.ps1">
+    <Content Include="..\NuPack.Console\PowerShellHost\Scripts\nupack.psm1">
       <Link>Scripts\nupack.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

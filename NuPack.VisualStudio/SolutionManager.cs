@@ -54,15 +54,25 @@
             "CA1024:UsePropertiesWhereAppropriate",
             Justification="This method is potentially expensive if the cache is not constructed yet.")]
         public IEnumerable<Project> GetProjects() {
-            EnsureProjectCache();
-            return _projectCache.Values;
+            if (IsSolutionOpen) {
+                EnsureProjectCache();
+                return _projectCache.Values;
+            }
+            else {
+                return Enumerable.Empty<Project>();
+            }
         }
 
         public Project GetProject(string projectName) {
-            EnsureProjectCache();
-            Project project;
-            _projectCache.TryGetValue(projectName, out project);
-            return project;
+            if (IsSolutionOpen) {
+                EnsureProjectCache();
+                Project project;
+                _projectCache.TryGetValue(projectName, out project);
+                return project;
+            }
+            else {
+                return null;
+            }
         }
 
 
@@ -117,7 +127,7 @@
         }
 
         private void EnsureProjectCache() {
-            if (_projectCache == null) {
+            if (IsSolutionOpen && _projectCache == null) {
                 // Initialize the cache
                 _projectCache = new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase);
 
@@ -150,6 +160,12 @@
             return (from project in _projectCache.Values
                     where project.UniqueName.Equals(startupProjectName, StringComparison.OrdinalIgnoreCase)
                     select project.Name).FirstOrDefault();
+        }
+
+        private bool IsSolutionOpen {
+            get {
+                return _dte.Solution.IsOpen;
+            }
         }
     }
 }

@@ -51,7 +51,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         private void LoadStartupScripts() {
             string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
+            string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.psm1");
             string vsPath = Path.Combine(extensionLocation, @"NuPack.VisualStudio.dll");
 
             Invoke("Set-ExecutionPolicy RemoteSigned -Scope Process -Force", null, false);
@@ -75,7 +75,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             ////
             ////string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             //string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            //string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.ps1");
+            //string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.psm1");
             //initialSessionState.ImportPSModule(new string[] { profilePath, npackPath });
 
             _myHost = new MyHost(this, _name, _privateData);

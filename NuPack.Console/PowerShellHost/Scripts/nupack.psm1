@@ -23,23 +23,23 @@ function global:TabExpansion($line, $lastWord) {
     
     switch ($tokens[0]) {
         { $_ -eq 'New-Package' -or $_ -eq 'nnp' } {
-            $choices = _TabExpansionForNewPackage $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForNewPackage $secondLastToken $tokens.length $filter
         }
     
         { $_ -eq 'Install-Package' -or $_ -eq 'nip' } {
-            $choices = _TabExpansionForAddPackage $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForAddPackage $secondLastToken $tokens.length $filter
         }
 
         { $_ -eq 'Uninstall-Package' -or $_ -eq 'nup' } {
-            $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
 
         { $_ -eq 'Update-Package' -or $_ -eq 'npp' } {
-            $choices = _TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
         
         'Get-Project' {
-            $choices = _TabExpansionForGetProject $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForGetProject $secondLastToken $tokens.length $filter
         }
     }
     
@@ -53,64 +53,66 @@ function global:TabExpansion($line, $lastWord) {
     }
 }
 
-function _TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 2 -and !$secondLastWord.StartsWith('-'))) {
-        GetProjectNames
+        Get-ProjectNames
     }
 }
 
-function _TabExpansionForAddPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function TabExpansionForAddPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (Get-Package) | Group-Object ID | ForEach-Object { $_.Name }
+        (Get-Package -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        GetProjectNames
+        Get-ProjectNames
     }
 }
 
-function _TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (Get-Package -Installed) | Group-Object ID | ForEach-Object { $_.Name }
+        if (IsSolutionOpen) {
+            (Get-Package -Installed -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
+        }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        GetProjectNames
+        Get-ProjectNames
     }
 }
 
-function _TabExpansionForGetProject([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function TabExpansionForGetProject([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-name') -or ($secondLastWord -eq '')) {
-        GetProjectNames
+        Get-ProjectNames
     }
 }
 
-function global:GetProjectNames() {
+function global:Get-ProjectNames() {
     (Get-Project -All) | ForEach-Object { $_.Name }
 }
 
 # hook up Solution Opened even to execute init.ps1 script files when a new solution is opened.
 
-$global:solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
+$solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
 
-$global:solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
-    _ExecuteInitScripts
+$solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
+    ExecuteInitScripts
 })
 
-function global:_AddToolsFolderToEnv([string]$rootPath) {
+function AddToolsFolderToEnv([string]$rootPath) {
     # add tools path to the environment
     $toolsPath = (Join-Path $rootPath 'tools')
     if (Test-Path $toolsPath) {
@@ -122,7 +124,7 @@ function global:_AddToolsFolderToEnv([string]$rootPath) {
     }
 }
 
-function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
+function ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
     $fullPath = (Join-Path $rootPath $scriptFile)
     if (Test-Path $fullPath) {
         $folder = Split-Path $fullPath
@@ -130,7 +132,7 @@ function global:_ExecuteScript([string]$rootPath, [string]$scriptFile, $package)
     }
 }
 
-function global:_ExecuteInitScripts() {
+function ExecuteInitScripts() {
     $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager([object]$dte)
     $repository = $packageManager.LocalRepository
     $localPackages = $repository.GetPackages()
@@ -138,13 +140,17 @@ function global:_ExecuteInitScripts() {
     $localPackages | ForEach-Object {
         $path = $packageManager.PathResolver.GetInstallPath($_)
 
-        _AddToolsFolderToEnv $path
-        _ExecuteScript $path "tools\init.ps1" $_
+        AddToolsFolderToEnv $path
+        ExecuteScript $path "tools\init.ps1" $_
     }
 }
 
-if ($dte -and $dte.Solution -and $dte.Solution.IsOpen) {
-    _ExecuteInitScripts
+function IsSolutionOpen() {
+   return ($dte -and $dte.Solution -and $dte.Solution.IsOpen)
+}
+
+if (IsSolutionOpen) {
+    ExecuteInitScripts
 }
 
 # assign aliases to package cmdlets
@@ -156,3 +162,6 @@ New-Alias 'nup' 'Uninstall-Package'
 New-Alias 'npp' 'Update-Package'
 
 New-Alias 'List-Package' 'Get-Package'
+
+# export public functions and aliases 
+Export-ModuleMember -Function 'Get-ProjectNames','TabExpansion' -Alias 'nnp','nep','nip','nup','npp','List-Package'

@@ -57,16 +57,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 ProcessRecordCore();
             }
             catch (Exception ex) {
-                // Swallowing exception here has two purposes: 
-                // + display friendly error message to the console without the stack trace.
-                // + allows EndProcessing() to get called, so that we can unsubscribe the Logger.
-
-                if (ex.InnerException != null) {
-                    WriteError(ex.InnerException.Message);
-                }
-                else {
-                    WriteError(ex.Message);
-                }
+                WriteError(ex.InnerException ?? ex);
             }
         }
 
@@ -122,10 +113,18 @@ namespace NuPack.VisualStudio.Cmdlets {
             return SolutionManager.Current.GetProject(projectName);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Usage", 
+            "CA2201:DoNotRaiseReservedExceptionTypes",
+            Justification="This exception is passed to PowerShell. We really don't care about the type of exception here.")]
         protected void WriteError(string message) {
             if (!String.IsNullOrEmpty(message)) {
-                Host.UI.WriteErrorLine(message);
+                WriteError(new Exception(message));
             }
+        }
+
+        protected void WriteError(Exception exception) {
+            WriteError(new ErrorRecord(exception, String.Empty, ErrorCategory.NotSpecified, null));
         }
 
         protected void WriteLine(string message = null) {
