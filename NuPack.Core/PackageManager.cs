@@ -174,20 +174,20 @@
                 return;
             }
 
-            if (ExpandFiles(package)) {
-                LocalRepository.AddPackage(package);
+            ExpandFiles(package);
 
-                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+            LocalRepository.AddPackage(package);
 
-                OnInstalled(args);
-            }
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+
+            OnInstalled(args);
         }
 
-        private bool ExpandFiles(IPackage package) {
+        private void ExpandFiles(IPackage package) {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Add files files
-            return FileSystem.AddFiles(package.GetFiles(), packageDirectory, LoggerInternal);
+            FileSystem.AddFiles(package.GetFiles(), packageDirectory, LoggerInternal);
         }
 
         public void UninstallPackage(string packageId) {
@@ -256,21 +256,20 @@
                 return;
             }
 
-            if (RemoveFiles(package)) {
-                // Remove package to the repository
-                LocalRepository.RemovePackage(package);
+            RemoveFiles(package);
+            // Remove package to the repository
+            LocalRepository.RemovePackage(package);
 
-                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
+            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
 
-                OnUninstalled(args);
-            }
+            OnUninstalled(args);
         }
 
-        private bool RemoveFiles(IPackage package) {
+        private void RemoveFiles(IPackage package) {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Remove resource files
-            return FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, LoggerInternal);
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory, LoggerInternal);
         }
 
         private void OnInstalling(PackageOperationEventArgs e) {
