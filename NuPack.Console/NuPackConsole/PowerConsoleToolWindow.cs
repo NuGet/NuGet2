@@ -47,6 +47,12 @@ namespace NuPackConsole.Implementation {
             }
         }
 
+        bool IsToolbarEnabled {
+            get {
+                return (WpfConsole != null && WpfConsole.Host != null && WpfConsole.Host.IsCommandEnabled);
+            }
+        }
+
         /// <summary>
         /// Standard constructor for the tool window.
         /// </summary>
@@ -137,6 +143,15 @@ namespace NuPackConsole.Implementation {
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
         int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
+            
+            if (!IsToolbarEnabled) {
+                // disbale all buttons on the toolbar
+                if (pguidCmdGroup == GuidList.guidNuPackCmdSet) {
+                    prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_SUPPORTED;
+                    return VSConstants.S_OK;
+                }
+            }
+
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;
 
             if (this.VsTextView != null) {
@@ -332,11 +347,14 @@ namespace NuPackConsole.Implementation {
             // Try start the console session now. This needs to be after the console
             // pane getting focus to avoid incorrect initial editor layout.
             if (WpfConsole != null && WpfConsole.Content == consolePane) {
-                try {
-                    WpfConsole.Dispatcher.Start();
-                }
-                catch (Exception x) {
-                    WpfConsole.WriteLine(x.ToString());
+
+                if (WpfConsole.Host.IsCommandEnabled) {
+                    try {
+                        WpfConsole.Dispatcher.Start();
+                    }
+                    catch (Exception x) {
+                        WpfConsole.WriteLine(x.ToString());
+                    }
                 }
             }
         }

@@ -41,10 +41,6 @@ namespace NuPackConsole.Implementation.Console {
                     throw new InvalidOperationException("Can't start Console dispatcher. Host is null.");
                 }
 
-                if (!host.IsCommandEnabled) {
-                    return;
-                }
-
                 if (host is IAsyncHost) {
                     _dispatcher = new AsyncHostConsoleDispatcher(this);
                 }

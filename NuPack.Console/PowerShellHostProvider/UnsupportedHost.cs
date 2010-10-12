@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NuPackConsole.Host.PowerShell {
+namespace NuPackConsole.Host.PowerShellProvider {
 
     /// <summary>
     /// This host is used when PowerShell 2.0 runtime is not installed in the system. It's basically a no-op host.
@@ -33,7 +33,7 @@ namespace NuPackConsole.Host.PowerShell {
 
         public string Setting {
             get {
-                return string.Empty;
+                return String.Empty;
             }
             set {
             }
@@ -45,7 +45,7 @@ namespace NuPackConsole.Host.PowerShell {
 
         public string DefaultProject {
             get {
-                return string.Empty;
+                return String.Empty;
             }
             set {
             }

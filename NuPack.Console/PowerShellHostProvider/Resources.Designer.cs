@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuPackConsole.Host.PowerShell {
+namespace NuPackConsole.Host.PowerShellProvider {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuPackConsole.Host.PowerShell {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPackConsole.Host.PowerShell.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPackConsole.Host.PowerShellProvider.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,35 +61,11 @@ namespace NuPackConsole.Host.PowerShell {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #
-        ///# This private script adds $InterfaceType members to $psObject which invokes on $wrappedObject
-        ///#
-        ///Param(
-        ///    $psObject,
-        ///    $wrappedObject,
-        ///    [Type]$InterfaceType
-        ///)
-        ///
-        ///function GetInvoker
-        ///{
-        ///    Param(
-        ///        $Target,
-        ///        $Method
-        ///    )
-        ///
-        ///    if ($Method.IsGenericMethodDefinition) {
-        ///        return {
-        ///            $t = $Target
-        ///            $m = $Method.MakeGenericMethod($args)
-        ///            
-        ///            if (!$m.GetParameters()) {
-        ///                return $m.Invoke($t, @())
-        ///            }
-        ///  [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to Error: The Package Manager Console requires PowerShell 2.0 runtime, which is not detected on this machine. Please install the PowerShell 2.0 from http://support.microsoft.com/kb/968929 and restart Visual Studio..
         /// </summary>
-        internal static string Add_WrapperMembers {
+        internal static string Host_PSNotInstalled {
             get {
-                return ResourceManager.GetString("Add_WrapperMembers", resourceCulture);
+                return ResourceManager.GetString("Host_PSNotInstalled", resourceCulture);
             }
         }
     }

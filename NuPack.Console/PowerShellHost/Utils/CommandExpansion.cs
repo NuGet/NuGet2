@@ -2,30 +2,11 @@
 using System.Linq;
 
 namespace NuPackConsole.Host {
-    /// <summary>
-    /// Common ITabExpansion based command expansion provider implementation. This
-    /// provider creates an ITabExpansion based CommandExpansion if a given host
-    /// implements ITabExpansion.
-    /// </summary>
-    class CommandExpansionProvider : ICommandExpansionProvider {
-        public ICommandExpansion Create(IHost host) {
-            ITabExpansion tabExpansion = host as ITabExpansion;
-            return tabExpansion != null ? CreateTabExpansion(tabExpansion) : null;
-        }
-
-        /// <summary>
-        /// Create a ITabExpansion based command expansion instance. This base implementation
-        /// creates a CommandExpansion instance.
-        /// </summary>
-        protected virtual ICommandExpansion CreateTabExpansion(ITabExpansion tabExpansion) {
-            return new CommandExpansion(tabExpansion);
-        }
-    }
-
+    
     /// <summary>
     /// Common ITabExpansion based command expansion implementation.
     /// </summary>
-    class CommandExpansion : ICommandExpansion {
+    public class CommandExpansion : ICommandExpansion {
         protected ITabExpansion TabExpansion { get; private set; }
 
         public CommandExpansion(ITabExpansion tabExpansion) {
@@ -52,11 +33,10 @@ namespace NuPackConsole.Host {
             }
 
             // Find begin of lastword
-            int lastWordBegin = caretIndex - 1;
-            while (lastWordBegin >= 0 && !char.IsSeparator(line, lastWordBegin)) {
+            int lastWordBegin = caretIndex;
+            while (lastWordBegin > 0 && !char.IsSeparator(line, lastWordBegin - 1)) {
                 lastWordBegin--;
             }
-            lastWordBegin++;
 
             // Adjust line and lastword
             if (lastWordEnd != line.Length) {

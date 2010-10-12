@@ -3,10 +3,6 @@
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
-  </PropertyGroup>
   <Import Project="..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{6146CA62-CC16-422C-A105-3E81F7452AA6}</ProjectGuid>
@@ -14,6 +10,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuPack.VisualStudio</RootNamespace>
     <AssemblyName>NuPack.VisualStudio</AssemblyName>
+    <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Common\CommonResources.resx">

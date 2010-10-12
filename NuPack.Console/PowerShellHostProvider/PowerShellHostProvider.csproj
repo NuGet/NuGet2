@@ -2,11 +2,11 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
-    <ProjectGuid>{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}</ProjectGuid>
+    <ProjectGuid>{A5E7AEB3-738F-4C39-A459-00F90483B2FE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPackConsole.Host.PowerShell</RootNamespace>
-    <AssemblyName>NuPackConsole.Host.PowerShell</AssemblyName>
+    <RootNamespace>NuPackConsole.Host.PowerShellProvider</RootNamespace>
+    <AssemblyName>NuPackConsole.Host.PowerShellProvider</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuPack.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
@@ -18,9 +18,6 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -31,63 +28,47 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\NuPackConsole\Utils\CommonExtensionMethods.cs">
-      <Link>Utils\CommonExtensionMethods.cs</Link>
+    <Compile Include="CommandTokenizerProvider.cs" />
+    <Compile Include="PowerShellCommandExpansionProvider.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="..\NuPackConsole\Utils\UtilityMethods.cs">
-      <Link>Utils\UtilityMethods.cs</Link>
+    <Compile Include="PowerShellHostProvider.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PSTypeWrapper.cs" />
-    <Compile Include="Utils\CommandExpansion.cs" />
-    <Compile Include="CommandTokenizer.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Utils\ComplexCommand.cs" />
-    <Compile Include="Utils\MethodBinder.cs" />
-    <Compile Include="Utils\TypeWrapper.cs" />
-    <Compile Include="HostUtilities.cs" />
-    <Compile Include="Types\IPowerShellHost.cs" />
-    <Compile Include="MyHost.cs" />
-    <Compile Include="MyHostRawUserInterface.cs" />
-    <Compile Include="MyHostUI.cs" />
-    <Compile Include="PowerShellHost.cs" />
-    <Compile Include="PowerShellHostService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegistryHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Include="UnsupportedHost.cs">
+      <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Add-WrapperMembers.ps1" />
-    <None Include="Scripts\nupack.psm1" />
-    <None Include="Scripts\Profile.ps1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\NuPack.Core\NuPack.Core.csproj">
-      <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
-      <Name>NuPack.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\NuPack.VisualStudio\NuPack.VisualStudio.csproj">
-      <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
-      <Name>NuPack.VisualStudio</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NuPackConsole\NuPack.Console.csproj">
       <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
       <Name>NuPack.Console</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PowerShellHost\PowerShellHost.csproj">
+      <Project>{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}</Project>
+      <Name>PowerShellHost</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

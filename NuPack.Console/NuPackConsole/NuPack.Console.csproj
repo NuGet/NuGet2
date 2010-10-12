@@ -1,9 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <CodeAnalysisRuleSet>..\..\NuPack.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
-  </PropertyGroup>
   <Import Project="..\..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -12,6 +8,8 @@
     <ProjectGuid>{50E33DA2-AF14-486D-81B8-BD8409744A38}</ProjectGuid>
     <CreateVsixContainer>False</CreateVsixContainer>
     <DeployExtension>False</DeployExtension>
+    <CodeAnalysisRuleSet>..\..\NuPack.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -112,6 +110,8 @@
     <Compile Include="Guids.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PkgCmdID.cs" />
+    <Compile Include="Types\IPathExpansion.cs" />
+    <Compile Include="Types\ITabExpansion.cs" />
     <Compile Include="Utils\CommonExtensionMethods.cs" />
     <Compile Include="Utils\ExtensionMethods.cs" />
     <Compile Include="Utils\Marshaler.cs" />

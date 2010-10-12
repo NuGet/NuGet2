@@ -7,19 +7,7 @@ using System.Management.Automation;
 
 namespace NuPackConsole.Host.PowerShell.Implementation
 {
-    [Export(typeof(ICommandTokenizerProvider))]
-    [HostName(PowerShellHostProvider.HostName)]
-    class CommandTokenizerProvider : ICommandTokenizerProvider
-    {
-        static CommandTokenizer _instance = new CommandTokenizer();
-
-        public ICommandTokenizer Create(IHost host)
-        {
-            return _instance;
-        }
-    }
-
-    class CommandTokenizer : ICommandTokenizer
+    public class CommandTokenizer : ICommandTokenizer
     {
         public IEnumerable<Token> Tokenize(string[] lines)
         {

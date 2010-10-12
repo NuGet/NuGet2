@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuPackConsole.Host.PowerShellProvider {
     
     internal static class RegistryHelper {
 
@@ -25,6 +25,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             }
 
             string keyValue = (string)currentKey.GetValue("PowerShellVersion");
+
+            // TODO: Do a better check to be resilient against future version of PS
             return (keyValue == "2.0");
         }
     }

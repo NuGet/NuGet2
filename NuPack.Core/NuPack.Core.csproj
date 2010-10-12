@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <Import Project="..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</ProjectGuid>
@@ -10,6 +7,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuPack</RootNamespace>
     <AssemblyName>NuPack.Core</AssemblyName>
+    <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>

@@ -81,6 +81,12 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\NuPack.Console\PowerShellHostProvider\PowerShellHostProvider.csproj">
+      <Project>{A5E7AEB3-738F-4C39-A459-00F90483B2FE}</Project>
+      <Name>PowerShellHostProvider</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
     <ProjectReference Include="..\NuPack.Console\PowerShellHost\PowerShellHost.csproj">
       <Project>{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}</Project>
       <Name>PowerShellHost</Name>

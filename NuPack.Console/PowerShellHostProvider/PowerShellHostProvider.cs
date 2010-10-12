@@ -4,12 +4,14 @@ using System.Runtime.CompilerServices;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using NuPackConsole.Host.PowerShell;
+using NuPackConsole.Host.PowerShell.Implementation;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuPackConsole.Host.PowerShellProvider {
     [Export(typeof(IHostProvider))]
     [HostName(PowerShellHostProvider.HostName)]
     [DisplayName("NuPack Provider")]
-    class PowerShellHostProvider : IHostProvider {
+    internal class PowerShellHostProvider : IHostProvider {
         /// <summary>
         /// PowerConsole host name of PowerShell host.
         /// </summary>
@@ -21,11 +23,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         /// <summary>
         /// This PowerShell host name. Used for PowerShell "$host".
         /// </summary>
-        public const string PowerConsoleHostName = "NuPack";
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification="MEF")]
-        [Import]
-        internal IPowerShellHostService PowerShellHostService { get; set; }
+        public const string PowerConsoleHostName = "Package Manager Host";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "MEF")]
         [Import(typeof(SVsServiceProvider))]
@@ -43,8 +41,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IHost CreatePowerShellHost(IConsole console) {
-            DTE2 dte = ServiceProvider.GetService<DTE2>(typeof(DTE));
 
+            DTE2 dte = (DTE2)ServiceProvider.GetService(typeof(DTE));
             IHost host = PowerShellHostService.CreateHost(
                 console,
                 dte,
