@@ -24,9 +24,9 @@
         };
 
         public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project) :
-            this(sourceRepository, 
-                 pathResolver, 
-                 project, 
+            this(sourceRepository,
+                 pathResolver,
+                 project,
                  new PackageReferenceRepository(project, sourceRepository)) {
         }
 
@@ -152,27 +152,28 @@
             AddPackageReference(package, ignoreDependencies);
         }
 
-        private void AddPackageReference(IPackage package, bool ignoreDependencies) {
+        protected virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
+            AddPackageReference(package, new ProjectInstallWalker(LocalRepository,
+                                                                  SourceRepository,
+                                                                  new DependentsResolver(LocalRepository),
+                                                                  LoggerInternal,
+                                                                  ignoreDependencies));
+        }
+
+        protected void AddPackageReference(IPackage package, IDependencyResolver resolver) {
             // If there is a package with this id already referenced attempt an update
-            if (LocalRepository.IsPackageInstalled(package.Id) && TryUpdate(package)) {
+            if (LocalRepository.IsPackageInstalled(package.Id) && TryUpdate(package, resolver)) {
                 return;
             }
 
-            IEnumerable<IPackage> packages = null;
-
-            if (ignoreDependencies) {
-                packages = new[] { package };
-            }
-            else {
-                packages = DependencyManager.ResolveDependenciesForProjectInstall(package, LocalRepository, SourceRepository, LoggerInternal);
-            }
+            IEnumerable<IPackage> packages = resolver.ResolveDependencies(package);
 
             VerifyInstall(packages);
 
             AddPackageReferencesToProject(packages);
         }
 
-        private bool TryUpdate(IPackage package) {
+        private bool TryUpdate(IPackage package, IDependencyResolver resolver) {
             // Get the currently referenced package
             IPackage referencedPackage = LocalRepository.FindPackage(package.Id);
 
@@ -184,10 +185,7 @@
             }
 
             // If the package is installed (i.e the package an all of it's dependencies)
-            IEnumerable<IPackage> referencedPackageWithDependencies = DependencyManager.ResolveDependenciesForInstall(referencedPackage,
-                                                                                                                     LocalRepository,
-                                                                                                                     SourceRepository,
-                                                                                                                     LoggerInternal);
+            IEnumerable<IPackage> referencedPackageWithDependencies = resolver.ResolveDependencies(referencedPackage);
             VerifyInstall(referencedPackageWithDependencies);
 
             // Everything is installed
@@ -237,7 +235,7 @@
             Project.AddFiles(package.GetContentFiles(), _fileTransformers, LoggerInternal);
 
             // Add the references to the reference path
-            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {                
+            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
                 // Get teh physical path of the assembly reference
                 string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
 
@@ -256,7 +254,7 @@
             LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
             OnPackageReferenceAdded(args);
         }
-        
+
         public void RemovePackageReference(string packageId) {
             RemovePackageReference(packageId, forceRemove: false, removeDependencies: false);
         }
@@ -282,9 +280,15 @@
         }
 
         protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
-            IEnumerable<IPackage> packages = DependencyManager.ResolveDependenciesForProjectUninstall(package, LocalRepository, force, removeDependencies, LoggerInternal);
+            RemovePackageReference(package, new ProjectUninstallWalker(LocalRepository,
+                                                                       new DependentsResolver(LocalRepository),
+                                                                       LoggerInternal,
+                                                                       removeDependencies,
+                                                                       force));
+        }
 
-            RemovePackageReferencesFromProject(packages);
+        public virtual void RemovePackageReference(IPackage package, IDependencyResolver resolver) {
+            RemovePackageReferencesFromProject(resolver.ResolveDependencies(package));
         }
 
         private void RemovePackageReferencesFromProject(IEnumerable<IPackage> packages) {
@@ -330,7 +334,7 @@
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {
                 Project.RemoveReference(assemblyReference.Name);
             }
-            
+
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
@@ -375,6 +379,14 @@
         }
 
         protected void UpdatePackageReference(IPackage package, bool updateDependencies) {
+            UpdatePackageReference(package, new UpdateDependencyResolver(LocalRepository,
+                                                                         SourceRepository,
+                                                                         new DependentsResolver(LocalRepository),
+                                                                         LoggerInternal,
+                                                                         updateDependencies));
+        }
+
+        protected void UpdatePackageReference(IPackage package, IUpdateDependencyResolver resolver) {
             Debug.Assert(package != null, "package should not be null");
 
             // If the most up-to-date version is already installed then do nothing
@@ -393,20 +405,7 @@
 
             LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_UpdatingToSpecificVersion, oldPackage.GetFullName(), package.Version);
 
-            // When we go to update a package to a newer version, we get the install and uninstall plans then do a diff to see
-            // what really needs to be uninstalled and installed.
-            // If we had the following structure and we were updating from A 1.0 to A 2.0:
-            // A 1.0 -> [B 1.0, C 1.0]
-            // A 2.0 -> [B 1.0, C 2.0, D 1.0]
-            // We will end up uninstalling C 1.0 and installing A 2.0, C 2.0 and D 1.0
-            PackagePlan plan = DependencyManager.ResolveDependenciesForUpdate(oldPackage,
-                                                                              package,
-                                                                              LocalRepository,
-                                                                              SourceRepository,
-                                                                              LoggerInternal,
-                                                                              updateDependencies);
-
-            Execute(plan);
+            Execute(resolver.ResolveDependencies(oldPackage, package));
         }
 
         private void Execute(PackagePlan plan) {

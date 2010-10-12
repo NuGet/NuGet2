@@ -11,6 +11,19 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "Package")]
     public class GetPackageCmdlet : NuPackBaseCmdlet {
+        private readonly IPackageRepositoryFactory _repositoryFactory;
+
+        public GetPackageCmdlet()
+            : this(PackageRepositoryFactory.Default) {
+        }
+
+        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory) {
+            if (repositoryFactory == null) {
+                throw new ArgumentNullException("repositoryFactory");
+            }
+            _repositoryFactory = repositoryFactory;
+        }
+
         [Parameter]
         public SwitchParameter Installed { get; set; }
 
@@ -37,7 +50,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
                 var packageSource = ActivePackageSource;
                 if (!String.IsNullOrEmpty(packageSource)) {
-                    WritePackagesFromRepository(PackageRepositoryFactory.CreateRepository(packageSource));
+                    WritePackagesFromRepository(_repositoryFactory.CreateRepository(packageSource));
                 }
             }
         }

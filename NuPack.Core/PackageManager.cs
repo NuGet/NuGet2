@@ -41,7 +41,7 @@
             FileSystem = fileSystem;
             LocalRepository = localRepository;
         }
-        
+
         public event EventHandler<PackageOperationEventArgs> PackageInstalled {
             add {
                 _packageInstalled += value;
@@ -142,16 +142,14 @@
         }
 
         public virtual void InstallPackage(IPackage package, bool ignoreDependencies) {
-            IEnumerable<IPackage> packages = null;
+            InstallPackage(package, new InstallWalker(LocalRepository,
+                                                      SourceRepository,
+                                                      LoggerInternal,
+                                                      ignoreDependencies));
+        }
 
-            if (ignoreDependencies) {
-                packages = new[] { package };
-            }
-            else {
-                packages = DependencyManager.ResolveDependenciesForInstall(package, LocalRepository, SourceRepository, LoggerInternal);
-            }
-
-            ApplyPackages(packages);
+        protected void InstallPackage(IPackage package, IDependencyResolver resolver) {
+            ApplyPackages(resolver.ResolveDependencies(package));
         }
 
         private void ApplyPackages(IEnumerable<IPackage> packages) {
@@ -231,9 +229,15 @@
         }
 
         public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
-            IEnumerable<IPackage> packages = DependencyManager.ResolveDependenciesForUninstall(package, LocalRepository, forceRemove, removeDependencies, LoggerInternal);
+            UninstallPackage(package, new UninstallWalker(LocalRepository,
+                                                          new DependentsResolver(LocalRepository),
+                                                          LoggerInternal,
+                                                          removeDependencies,
+                                                          forceRemove));
+        }
 
-            RemovePackages(packages);
+        public virtual void UninstallPackage(IPackage package, IDependencyResolver resolver) {
+            RemovePackages(resolver.ResolveDependencies(package));
         }
 
         private void RemovePackages(IEnumerable<IPackage> packages) {

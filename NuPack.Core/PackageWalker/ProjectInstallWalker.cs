@@ -5,36 +5,35 @@
     using System.Linq;
     using NuPack.Resources;
 
-    internal class ProjectInstallWalker : InstallWalker {
-        private DependentLookup _dependentsLookup;
-
+    public class ProjectInstallWalker : InstallWalker {
         public ProjectInstallWalker(IPackageRepository localRepository,
                                     IPackageRepository sourceRepository,
-                                    ILogger listener,
-                                    bool ignoreDependencies = false)
-            : base(localRepository, sourceRepository, listener, ignoreDependencies) {
+                                    IDependencyResolver dependentsResolver,
+                                    ILogger logger,
+                                    bool ignoreDependencies)
+            : base(localRepository, sourceRepository, logger, ignoreDependencies) {
+            if (dependentsResolver == null) {
+                throw new ArgumentNullException("dependentsResolver");
+            }
+            DependentsResolver = dependentsResolver;
         }
 
-        private DependentLookup DependentsLookup {
-            get {
-                if (_dependentsLookup == null) {
-                    _dependentsLookup = DependentLookup.Create(Repository);
-                }
-                return _dependentsLookup;
-            }
+        protected IDependencyResolver DependentsResolver {
+            get;
+            private set;
         }
 
         protected virtual IEnumerable<IPackage> GetDependents(IPackage package) {
             // Get all dependents for this package that we don't want to skip
-            return DependentsLookup.GetDependents(package);
+            return DependentsResolver.ResolveDependencies(package);
         }
 
         protected override void LogDependencyExists(PackageDependency dependency) {
-            Listener.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyReferenced, dependency);
+            Logger.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyReferenced, dependency);
         }
 
         protected override void LogRetrieveDependencyFromSource(PackageDependency dependency) {
-            Listener.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
+            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
         }
 
         protected override void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {

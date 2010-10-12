@@ -7,7 +7,6 @@ using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
     public class VSPackageSourceProvider {
-
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=199193";
 
         private PackageSourceSettingsManager _settingsManager;
@@ -37,7 +36,7 @@ namespace NuPack.VisualStudio {
                 dteValue => {
                     IServiceProvider serviceProvider = dteValue.GetServiceProvider();
                     var provider = new VSPackageSourceProvider(serviceProvider);
-                    return new VsPackageSourceCacheItem(provider, new VSPackageSourceRepository(provider));
+                    return new VsPackageSourceCacheItem(provider, new VSPackageSourceRepository(PackageRepositoryFactory.Default, provider));
                 }
             );
         }

@@ -4,7 +4,7 @@
     using System.Linq;
     using System.Text;
 
-    internal class PackagePlan {        
+    public class PackagePlan {
         public PackagePlan(IEnumerable<IPackage> packagesToInstall, IEnumerable<IPackage> packagesToUninstall) {
             PackagesToInstall = packagesToInstall;
             PackagesToUninstall = packagesToUninstall;

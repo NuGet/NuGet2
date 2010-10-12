@@ -1,7 +1,7 @@
 ﻿namespace NuPack {
     using System.Collections.Generic;
 
-    internal class PackageMarker {
+    public class PackageMarker {
         public PackageMarker()
             : this(PackageComparer.IdComparer) {
         }

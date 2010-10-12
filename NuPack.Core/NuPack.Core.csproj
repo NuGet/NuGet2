@@ -35,6 +35,10 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="PackageWalker\IDependencyResolver.cs" />
+    <Compile Include="PackageWalker\IUpdateDependencyResolver.cs" />
+    <Compile Include="PackageWalker\UpdateDependencyResolver.cs" />
+    <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
@@ -70,7 +74,6 @@
     <Compile Include="PackageWalker\ProjectUpdateInstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectUpdateUninstallWalker.cs" />
     <Compile Include="ProjectManager.cs" />
-    <Compile Include="PackageWalker\DependencyManager.cs" />
     <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
     <Compile Include="Utility\HttpWebRequestor.cs" />
@@ -82,7 +85,7 @@
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="PackageWalker\BasicPackageWalker.cs" />
-    <Compile Include="PackageWalker\DependentLookup.cs" />
+    <Compile Include="PackageWalker\DependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
     <Compile Include="PackageWalker\InstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectInstallWalker.cs" />

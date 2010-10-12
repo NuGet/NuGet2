@@ -5,27 +5,39 @@
     using System.Linq;
     using NuPack.Resources;
 
-    internal abstract class BasicPackageWalker : PackageWalker {
-        public BasicPackageWalker(IPackageRepository repository, ILogger listener) {
+    public abstract class BasicPackageWalker : PackageWalker {
+        protected BasicPackageWalker(IPackageRepository repository, ILogger logger) {
+            if (repository == null) {
+                throw new ArgumentNullException("repository");
+            }
+            if (logger == null) {
+                throw new ArgumentNullException("logger");
+            }
             Repository = repository;
-            Listener = listener;
+            Logger = logger;
         }
 
-        protected ILogger Listener { get; private set; }
+        protected ILogger Logger {
+            get;
+            private set;
+        }
 
-        protected IPackageRepository Repository { get; private set; }
+        protected IPackageRepository Repository {
+            get;
+            private set;
+        }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
             return Repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
         }
 
-        protected override void RaiseDependencyResolveError(PackageDependency dependency) {
+        protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                 String.Format(CultureInfo.CurrentCulture,
                 NuPackResources.UnableToResolveDependency, dependency));
         }
 
-        protected override void RaiseCycleError(IEnumerable<IPackage> packages) {
+        protected override void OnCycleError(IEnumerable<IPackage> packages) {
             throw new InvalidOperationException(
                                 String.Format(CultureInfo.CurrentCulture,
                                 NuPackResources.CircularDependencyDetected, String.Join(" => ",

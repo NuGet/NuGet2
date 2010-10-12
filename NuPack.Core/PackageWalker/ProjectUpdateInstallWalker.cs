@@ -1,18 +1,26 @@
 ﻿namespace NuPack {
     using System.Collections.Generic;
     using System.Linq;
+    using System;
 
-    internal class ProjectUpdateInstallWalker : ProjectInstallWalker {
+    public class ProjectUpdateInstallWalker : ProjectInstallWalker {
         public ProjectUpdateInstallWalker(IEnumerable<IPackage> dependentsToExclude,
                                           IPackageRepository localRepository,
                                           IPackageRepository sourceRepository,
-                                          ILogger listener,
+                                          IDependencyResolver dependentsResolver,
+                                          ILogger logger,
                                           bool ignoreDependencies)
-            : base(localRepository, sourceRepository, listener, ignoreDependencies) {
+            : base(localRepository, sourceRepository, dependentsResolver, logger, ignoreDependencies) {
+            if (dependentsToExclude == null) {
+                throw new ArgumentNullException("dependentsToExclude");
+            }
             DependentsToExclude = dependentsToExclude;
         }
 
-        private IEnumerable<IPackage> DependentsToExclude { get; set; }
+        private IEnumerable<IPackage> DependentsToExclude {
+            get;
+            set;
+        }
 
         protected override IEnumerable<IPackage> GetDependents(IPackage package) {
             return base.GetDependents(package)

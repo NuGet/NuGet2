@@ -5,11 +5,19 @@ using System.Linq;
 namespace NuPack.VisualStudio {
     public class VSPackageSourceRepository : IPackageRepository {
         private readonly VSPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
+
         private static readonly ConcurrentDictionary<string, IPackageRepository> _repositoryCache = new ConcurrentDictionary<string, IPackageRepository>(StringComparer.OrdinalIgnoreCase);
-        public VSPackageSourceRepository(VSPackageSourceProvider packageSourceProvider) {
+
+        public VSPackageSourceRepository(IPackageRepositoryFactory repositoryFactory, VSPackageSourceProvider packageSourceProvider) {
+            if (repositoryFactory == null) {
+                throw new ArgumentNullException("repositoryFactory");
+            }
+
             if (packageSourceProvider == null) {
                 throw new ArgumentNullException("packageSourceProvider");
             }
+            _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
         }
 
@@ -35,10 +43,10 @@ namespace NuPack.VisualStudio {
             ActiveRepository.RemovePackage(package);
         }
 
-        private static IPackageRepository GetRepository(PackageSource source) {
+        private IPackageRepository GetRepository(PackageSource source) {
             IPackageRepository repository;
             if (!_repositoryCache.TryGetValue(source.Source, out repository)) {
-                repository = PackageRepositoryFactory.CreateRepository(source.Source);
+                repository = _repositoryFactory.CreateRepository(source.Source);
                 _repositoryCache.TryAdd(source.Source, repository);
             }
             return repository;

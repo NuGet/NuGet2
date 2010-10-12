@@ -2,10 +2,9 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    internal abstract class PackageWalker {
+    public abstract class PackageWalker {
         private PackageMarker _marker;
-        public PackageWalker() {
-            
+        protected PackageWalker() {           
         }
 
         protected virtual bool RaiseErrorOnCycle {
@@ -58,7 +57,7 @@
                     IPackage resolvedDependency = ResolveDependency(dependency);
 
                     if (resolvedDependency == null) {
-                        RaiseDependencyResolveError(dependency);
+                        OnDependencyResolveError(dependency);
                         return;
                     }
 
@@ -73,7 +72,7 @@
                         if (RaiseErrorOnCycle) {
                             List<IPackage> packages = Marker.Packages.ToList();
                             packages.Add(resolvedDependency);
-                            RaiseCycleError(packages);
+                            OnCycleError(packages);
                             return;
                         }
                         continue;
@@ -93,7 +92,7 @@
             return false;
         }
 
-        protected virtual void RaiseCycleError(IEnumerable<IPackage> packages) {
+        protected virtual void OnCycleError(IEnumerable<IPackage> packages) {
         }
 
         protected virtual bool SkipDependency(PackageDependency dependency) {
@@ -106,7 +105,7 @@
         protected virtual void Process(IPackage package) {
         }
 
-        protected virtual void RaiseDependencyResolveError(PackageDependency dependency) {
+        protected virtual void OnDependencyResolveError(PackageDependency dependency) {
         }
 
         protected abstract IPackage ResolveDependency(PackageDependency dependency);

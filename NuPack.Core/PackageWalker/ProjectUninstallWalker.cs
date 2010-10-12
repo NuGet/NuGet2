@@ -5,13 +5,17 @@
     using System.Linq;
     using NuPack.Resources;
 
-    internal class ProjectUninstallWalker : UninstallWalker {        
-        public ProjectUninstallWalker(IPackageRepository repository, ILogger listener)
-            : base(repository, listener) {
+    public class ProjectUninstallWalker : UninstallWalker {
+        public ProjectUninstallWalker(IPackageRepository repository,
+                                      IDependencyResolver dependentsResolver,
+                                      ILogger logger,
+                                      bool removeDependencies,
+                                      bool forceRemove)
+            : base(repository, dependentsResolver, logger, removeDependencies, forceRemove) {
         }
 
         protected override void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
-            Listener.Log(MessageLevel.Warning, NuPackResources.Warning_RemovingPackageReferenceWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
+            Logger.Log(MessageLevel.Warning, NuPackResources.Warning_RemovingPackageReferenceWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
         }
 
         protected override InvalidOperationException CreatePackageHasDependentsException(IPackage package, IEnumerable<IPackage> dependents) {
@@ -23,6 +27,6 @@
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
                         NuPackResources.PackageHasMultipleDependentsReferenced, package.GetFullName(), String.Join(", ",
                         dependents.Select(d => d.GetFullName()))));
-        }        
+        }
     }
 }

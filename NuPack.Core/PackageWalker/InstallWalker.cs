@@ -4,16 +4,19 @@
     using System.Linq;
     using NuPack.Resources;
 
-    internal class InstallWalker : BasicPackageWalker {
+    public class InstallWalker : BasicPackageWalker, IDependencyResolver {
         private bool _ignoreDependencies;
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
-                             ILogger listener,
-                             bool ignoreDependencies = false) :
-            base(localRepository, listener) {
+                             ILogger logger,
+                             bool ignoreDependencies) :
+            base(localRepository, logger) {
 
-            _ignoreDependencies = ignoreDependencies;
+            if (sourceRepository == null) {
+                throw new ArgumentNullException("sourceRepository");
+            }
             SourceRepository = sourceRepository;
+            _ignoreDependencies = ignoreDependencies;
         }
 
         protected override bool IgnoreDependencies {
@@ -24,22 +27,22 @@
 
         protected IPackageRepository SourceRepository {
             get;
-            set;
+            private set;
         }
 
         // List of packages to install after the walk
         // If this is null, then there were errors
-        public IList<IPackage> Output {
+        public IList<IPackage> Packages {
             get;
             private set;
         }
 
         protected override void Process(IPackage package) {
-            if (Output == null) {
-                Output = new List<IPackage>();
+            if (Packages == null) {
+                Packages = new List<IPackage>();
             }
 
-            Output.Add(package);
+            Packages.Add(package);
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
@@ -57,7 +60,7 @@
                 package = SourceRepository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
 
                 if (package != null) {
-                    Listener.Log(MessageLevel.Info, NuPackResources.Log_PackageRetrieveSuccessfully);
+                    Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageRetrieveSuccessfully);
                 }
             }
 
@@ -65,21 +68,26 @@
         }
 
         protected virtual void LogDependencyExists(PackageDependency dependency) {
-            Listener.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
+            Logger.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
         }
 
         protected virtual void LogRetrieveDependencyFromSource(PackageDependency dependency) {
             // We didn't resolve the dependency so try to retrieve it from the source
-            Listener.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
+            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
         }
 
         protected override bool SkipDependency(PackageDependency dependency) {
             IQueryable<IPackage> packages = (from p in Marker.Packages
-                                            where p.Id.Equals(dependency.Id, StringComparison.OrdinalIgnoreCase)
-                                            select p).AsQueryable();
+                                             where p.Id.Equals(dependency.Id, StringComparison.OrdinalIgnoreCase)
+                                             select p).AsQueryable();
 
             IPackage package = packages.FindByVersion(dependency.MinVersion, dependency.MaxVersion, dependency.Version);
             return package != null && Marker.IsVisited(package);
+        }
+
+        public IEnumerable<IPackage> ResolveDependencies(IPackage package) {
+            Walk(package);
+            return Packages;
         }
     }
 }

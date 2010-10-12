@@ -4,12 +4,23 @@
     using System.Globalization;
     using System.Linq;
     using NuPack.Resources;
+    using System.Diagnostics.CodeAnalysis;
 
-    internal class UninstallWalker : BasicPackageWalker {
-        private DependentLookup _dependentsLookup;
+    public class UninstallWalker : BasicPackageWalker, IDependencyResolver {
+        private List<IPackage> _packages;
 
-        public UninstallWalker(IPackageRepository repository, ILogger listener)
-            : base(repository, listener) {
+        public UninstallWalker(IPackageRepository repository,
+                               IDependencyResolver dependentsResolver,
+                               ILogger logger,
+                               bool removeDependencies,
+                               bool forceRemove)
+            : base(repository, logger) {
+            if (dependentsResolver == null) {
+                throw new ArgumentNullException("dependentsResolver");
+            }
+            DependentsResolver = dependentsResolver;
+            RemoveDependencies = removeDependencies;
+            Force = forceRemove;
             SkippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
         }
 
@@ -19,26 +30,39 @@
             }
         }
 
-        public IList<IPackage> Output { get; set; }
-
-        public bool RemoveDependencies { get; set; }
-
-        public bool Force { get; set; }
-
-        public IDictionary<IPackage, IEnumerable<IPackage>> SkippedPackages { get; set; }
-
-        private DependentLookup DependentsLookup {
+        public IList<IPackage> Packages {
             get {
-                if (_dependentsLookup == null) {
-                    _dependentsLookup = DependentLookup.Create(Repository);
+                if (_packages == null) {
+                    _packages = new List<IPackage>();
                 }
-                return _dependentsLookup;
+                return _packages;
             }
+        }
+
+        public bool RemoveDependencies {
+            get;
+            private set;
+        }
+
+        public bool Force {
+            get;
+            private set;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "It's not worth it creating a type for this")]
+        public IDictionary<IPackage, IEnumerable<IPackage>> SkippedPackages {
+            get;
+            private set;
+        }
+
+        protected IDependencyResolver DependentsResolver {
+            get;
+            private set;
         }
 
         protected override void BeforeWalk(IPackage package) {
             // Before choosing to uninstall a package we need to figure out if it is in use
-            IEnumerable<IPackage> dependents = DependentsLookup.GetDependents(package);
+            IEnumerable<IPackage> dependents = DependentsResolver.ResolveDependencies(package);
             if (dependents.Any()) {
                 if (Force) {
                     // We're going to uninstall this package even though other packages depend on it
@@ -53,12 +77,9 @@
 
             base.BeforeWalk(package);
         }
-        
+
         protected override void Process(IPackage package) {
-            if (Output == null) {
-                Output = new List<IPackage>();
-            }
-            Output.Add(package);
+            Packages.Add(package);
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
@@ -66,8 +87,8 @@
         }
 
         protected override bool SkipResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
-            IEnumerable<IPackage> dependents = DependentsLookup.GetDependents(resolvedDependency)
-                                                               .Except(Marker.Packages, PackageComparer.IdAndVersionComparer);
+            IEnumerable<IPackage> dependents = DependentsResolver.ResolveDependencies(resolvedDependency)
+                                                                 .Except(Marker.Packages, PackageComparer.IdAndVersionComparer);
             if (!Force && dependents.Any()) {
                 // If we aren't ignoring dependents then we skip this dependency if it has any dependents
                 SkippedPackages[resolvedDependency] = dependents;
@@ -77,7 +98,7 @@
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
-            Listener.Log(MessageLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
+            Logger.Log(MessageLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
         }
 
         protected virtual InvalidOperationException CreatePackageHasDependentsException(IPackage package, IEnumerable<IPackage> dependents) {
@@ -92,11 +113,27 @@
 
         }
 
-        protected override void RaiseDependencyResolveError(PackageDependency dependency) {
+        protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                                 String.Format(CultureInfo.CurrentCulture,
                                 NuPackResources.UnableToLocateDependency,
                                 dependency));
+        }
+
+        public IEnumerable<IPackage> ResolveDependencies(IPackage package) {
+            Walk(package);
+            LogSkippedPackages();
+            return Packages;
+        }
+
+        protected virtual void LogSkippedPackages() {
+            foreach (var pair in SkippedPackages) {
+                if (!Packages.Contains(pair.Key, PackageComparer.IdAndVersionComparer)) {
+                    Logger.Log(MessageLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
+                                pair.Key,
+                                String.Join(", ", pair.Value.Select(p => p.GetFullName())));
+                }
+            }
         }
     }
 }

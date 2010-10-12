@@ -1,28 +1,36 @@
 ﻿namespace NuPack {
     using System;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Net;
     using Microsoft.Internal.Web.Utils;
 
-    public static class PackageRepositoryFactory {
+    public class PackageRepositoryFactory : IPackageRepositoryFactory {
         private const string NuPackVersionHeader = "NuPackVersion";
+        private static readonly IPackageRepositoryFactory _default = new PackageRepositoryFactory();
 
-        public static IPackageRepository CreateRepository(string feedOrPath) {
-            if (String.IsNullOrEmpty(feedOrPath)) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "feedOrPath");
+        public static IPackageRepositoryFactory Default {
+            get {
+                return _default;
             }
-
-            if (IsLocalPath(feedOrPath)) {
-                return new LocalPackageRepository(feedOrPath);
-            }
-            return CreateFeedRepository(new Uri(feedOrPath));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+        public IPackageRepository CreateRepository(string source) {
+            if (String.IsNullOrEmpty(source)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
+            }
+
+            if (IsLocalPath(source)) {
+                return new LocalPackageRepository(source);
+            }
+            return CreateFeedRepository(new Uri(source));
+        }
+
+        [SuppressMessage(
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't care about handling exception in this case.")]
+            Justification = "We don't care about handling exception in this case.")]
         private static IPackageRepository CreateFeedRepository(Uri uri) {
             // HACK: We need a better way the feed version and choose the right client impl
             FeedType feedType = FeedType.Atom;

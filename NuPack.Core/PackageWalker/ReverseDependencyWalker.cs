@@ -1,12 +1,13 @@
 ﻿namespace NuPack {
-    using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using NuPack.Resources;
+    using System.Diagnostics.CodeAnalysis;
+    using System;
 
-    internal class ReverseDependencyWalker : PackageWalker {
+    public class ReverseDependencyWalker : PackageWalker {
         public ReverseDependencyWalker(IPackageRepository repository) {
+            if (repository == null) {
+                throw new ArgumentNullException("repository");
+            }
             Repository = repository;
             Dependents = new Dictionary<IPackage, HashSet<IPackage>>(PackageComparer.IdAndVersionComparer);
         }
@@ -17,9 +18,16 @@
             }
         }
 
-        private IPackageRepository Repository { get; set; }
+        protected IPackageRepository Repository {
+            get;
+            private set;
+        }
 
-        public IDictionary<IPackage, HashSet<IPackage>> Dependents { get; set; }
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "It's not worth it creating a type for this")]
+        public IDictionary<IPackage, HashSet<IPackage>> Dependents {
+            get;
+            private set;
+        }
 
         protected override PackageMarker CreateMarker() {
             return new PackageMarker(PackageComparer.IdAndVersionComparer);
