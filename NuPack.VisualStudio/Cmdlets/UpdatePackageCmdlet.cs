@@ -28,32 +28,34 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             var packageManager = PackageManager;
-            bool isSolutionLevelPackage = IsSolutionOnlyPackage(packageManager.LocalRepository, Id, Version);
+            using (new LoggerDisposer(packageManager.FileSystem, this)) {
+                bool isSolutionLevelPackage = IsSolutionOnlyPackage(packageManager.LocalRepository, Id, Version);
 
-            if (isSolutionLevelPackage) {
-                if (!String.IsNullOrEmpty(Project)) {
-                    WriteError(String.Format(
-                        CultureInfo.CurrentCulture,
-                        VsResources.Cmdlet_PackageForSolutionOnly,
-                        Id));
-                }
-                else {
-                    using (new LoggerDisposer(packageManager, this)) {
-                        packageManager.UpdatePackage(Id, Version, UpdateDependencies.IsPresent);
+                if (isSolutionLevelPackage) {
+                    if (!String.IsNullOrEmpty(Project)) {
+                        WriteError(String.Format(
+                            CultureInfo.CurrentCulture,
+                            VsResources.Cmdlet_PackageForSolutionOnly,
+                            Id));
                     }
-                }
-            }
-            else {
-                var projectManager = ProjectManager;
-                if (projectManager != null) {
-                    using (new LoggerDisposer(projectManager, this)) {
-                        projectManager.UpdatePackageReference(Id, Version, UpdateDependencies.IsPresent);
+                    else {
+                        using (new LoggerDisposer(packageManager, this)) {
+                            packageManager.UpdatePackage(Id, Version, UpdateDependencies.IsPresent);
+                        }
                     }
                 }
                 else {
-                    using (new LoggerDisposer(packageManager, this)) {
-                        // if there is no project specified, update at the solution level
-                        packageManager.UpdatePackage(Id, Version, UpdateDependencies);
+                    var projectManager = ProjectManager;
+                    if (projectManager != null) {
+                        using (new LoggerDisposer(projectManager, this)) {
+                            projectManager.UpdatePackageReference(Id, Version, UpdateDependencies.IsPresent);
+                        }
+                    }
+                    else {
+                        using (new LoggerDisposer(packageManager, this)) {
+                            // if there is no project specified, update at the solution level
+                            packageManager.UpdatePackage(Id, Version, UpdateDependencies);
+                        }
                     }
                 }
             }

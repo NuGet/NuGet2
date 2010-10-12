@@ -27,30 +27,31 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             var packageManager = PackageManager;
-
-            bool isSolutionLevel = IsSolutionOnlyPackage(packageManager.LocalRepository, Id);
-            if (isSolutionLevel) {
-                if (!String.IsNullOrEmpty(Project)) {
-                    WriteError(String.Format(
-                        CultureInfo.CurrentCulture,
-                        VsResources.Cmdlet_PackageForSolutionOnly,
-                        Id));
-                }
-                else {
-                    using (new LoggerDisposer(packageManager, this)) {
-                        packageManager.UninstallPackage(Id, null, Force.IsPresent, RemoveDependencies.IsPresent);
+            using (new LoggerDisposer(packageManager.FileSystem, this)) {
+                bool isSolutionLevel = IsSolutionOnlyPackage(packageManager.LocalRepository, Id);
+                if (isSolutionLevel) {
+                    if (!String.IsNullOrEmpty(Project)) {
+                        WriteError(String.Format(
+                            CultureInfo.CurrentCulture,
+                            VsResources.Cmdlet_PackageForSolutionOnly,
+                            Id));
                     }
-                }
-            }
-            else {
-                var projectManager = ProjectManager;
-                if (projectManager != null) {
-                    using (new LoggerDisposer(projectManager, this)) {
-                        projectManager.RemovePackageReference(Id, Force.IsPresent, RemoveDependencies.IsPresent);
+                    else {
+                        using (new LoggerDisposer(packageManager, this)) {
+                            packageManager.UninstallPackage(Id, null, Force.IsPresent, RemoveDependencies.IsPresent);
+                        }
                     }
                 }
                 else {
-                    WriteError(VsResources.Cmdlet_MissingProjectParameter);
+                    var projectManager = ProjectManager;
+                    if (projectManager != null) {
+                        using (new LoggerDisposer(projectManager, this)) {
+                            projectManager.RemovePackageReference(Id, Force.IsPresent, RemoveDependencies.IsPresent);
+                        }
+                    }
+                    else {
+                        WriteError(VsResources.Cmdlet_MissingProjectParameter);
+                    }
                 }
             }
         }

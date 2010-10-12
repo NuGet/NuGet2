@@ -3,7 +3,6 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Threading;
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
@@ -58,22 +57,23 @@
                 return;
             }
 
-            Attempt(() => {
-                try {
-                    path = GetFullPath(path);
-                    File.Delete(path);
-                    string folderPath = Path.GetDirectoryName(path);
-                    if (!String.IsNullOrEmpty(folderPath)) {
-                        Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
-                    }
-                    else {
-                        Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
-                    }
+            try {
+                path = GetFullPath(path);
+                File.Delete(path);
+                string folderPath = Path.GetDirectoryName(path);
+                if (!String.IsNullOrEmpty(folderPath)) {
+                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
                 }
-                catch (FileNotFoundException) {
+                else {
+                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
+                }
+            }
+            catch (UnauthorizedAccessException) {
 
-                }
-            });
+            }
+            catch (FileNotFoundException) {
+
+            }
         }
 
         public void DeleteDirectory(string path) {
@@ -85,16 +85,17 @@
                 return;
             }
 
-            Attempt(() => {
-                try {
-                    path = GetFullPath(path);
-                    Directory.Delete(path, recursive);
-                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
-                }
-                catch (DirectoryNotFoundException) {
-                    // swallow these exceptions
-                }
-            });
+            try {
+                path = GetFullPath(path);
+                Directory.Delete(path, recursive);
+                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
+            }
+            catch (UnauthorizedAccessException) {
+
+            }
+            catch (DirectoryNotFoundException) {
+
+            }
         }
 
         public override void AddReference(string referencePath) {
@@ -125,20 +126,40 @@
 
         public override IEnumerable<string> GetFiles(string path, string filter) {
             path = EnsureTrailingSlash(GetFullPath(path));
-            if (!Directory.Exists(path)) {
-                return Enumerable.Empty<string>();
+            try {
+                if (!Directory.Exists(path)) {
+                    return Enumerable.Empty<string>();
+                }
+                return Directory.EnumerateFiles(path, filter)
+                                .Select(MakeRelativePath);
             }
-            return Directory.EnumerateFiles(path, filter)
-                            .Select(MakeRelativePath);
+            catch (UnauthorizedAccessException) {
+
+            }
+            catch (DirectoryNotFoundException) {
+
+            }
+
+            return Enumerable.Empty<string>();
         }
 
         public override IEnumerable<string> GetDirectories(string path) {
-            path = EnsureTrailingSlash(GetFullPath(path));
-            if (!Directory.Exists(path)) {
-                return Enumerable.Empty<string>();
+            try {
+                path = EnsureTrailingSlash(GetFullPath(path));
+                if (!Directory.Exists(path)) {
+                    return Enumerable.Empty<string>();
+                }
+                return Directory.EnumerateDirectories(path)
+                                .Select(MakeRelativePath);
             }
-            return Directory.EnumerateDirectories(path)
-                            .Select(MakeRelativePath);
+            catch (UnauthorizedAccessException) {
+
+            }
+            catch (DirectoryNotFoundException) {
+                
+            }
+
+            return Enumerable.Empty<string>();
         }
 
         public override DateTimeOffset GetLastModified(string path) {
@@ -182,22 +203,6 @@
                 path += "\\";
             }
             return path;
-        }
-
-        private void Attempt(Action action, int retries = 3, int sleep = 150) {
-            while (retries > 0) {
-                try {
-                    action();
-                    break;
-                }
-                catch {
-                    retries--;
-                    if (retries == 0) {
-                        throw;
-                    }
-                }
-                Thread.Sleep(sleep);
-            }
         }
     }
 }

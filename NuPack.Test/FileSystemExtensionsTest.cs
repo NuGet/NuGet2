@@ -13,7 +13,7 @@
             var files = PackageUtility.CreateFiles(new[] { "A", "B", "C" });
 
             // Act
-            fileSystem.AddFiles(files, NullLogger.Instance);
+            fileSystem.AddFiles(files);
 
             // Assert
             Assert.IsTrue(fileSystem.FileExists("A"));
@@ -25,12 +25,13 @@
         public void AddFilesAddFilesToProjectSystemIfNotExists() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(m => m.Logger).Returns(NullLogger.Instance);
             mockFileSystem.Setup(m => m.AddFile(It.IsAny<string>(), It.IsAny<Stream>())).Verifiable();
             mockFileSystem.Setup(m => m.FileExists("A")).Returns(true);
             var files = PackageUtility.CreateFiles(new[] { "A", "B", "C" });
 
             // Act
-            mockFileSystem.Object.AddFiles(files, NullLogger.Instance);
+            mockFileSystem.Object.AddFiles(files);
 
             // Assert
             mockFileSystem.Verify(m => m.AddFile("A", It.IsAny<Stream>()), Times.Never());

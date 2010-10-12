@@ -83,21 +83,21 @@
         public override void AddPackage(IPackage package) {
             string packageFilePath = GetPackageFilePath(package);
 
-            FileSystem.AddFile(packageFilePath, stream => PackageBuilder.Save(package, stream));
+            FileSystem.AddFileWithCheck(packageFilePath, stream => PackageBuilder.Save(package, stream));
         }
 
         public override void RemovePackage(IPackage package) {
             // Delete the package file
             string packageFilePath = GetPackageFilePath(package);
-            FileSystemExtensions.DeleteFile(FileSystem, packageFilePath);
+            FileSystem.DeleteFileSafe(packageFilePath);
 
             // Delete the package directory if any
-            FileSystemExtensions.DeleteDirectory(FileSystem, PathResolver.GetPackageDirectory(package), recursive: true, logger: FileSystem.Logger);
+            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: true);
 
             // If this is the last package delete the package directory
-            if (!FileSystem.GetFiles(String.Empty).Any() &&
-                !FileSystem.GetDirectories(String.Empty).Any()) {
-                FileSystemExtensions.DeleteDirectory(FileSystem, String.Empty, recursive: false, logger: FileSystem.Logger);
+            if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
+                !FileSystem.GetDirectoriesSafe(String.Empty).Any()) {
+                    FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
             }
         }
 

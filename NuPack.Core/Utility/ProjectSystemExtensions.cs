@@ -8,10 +8,9 @@ using System.Linq;
 namespace NuPack {
     // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
     public static class ProjectSystemExtensions {
-        public static void AddFiles(this ProjectSystem project,
-                                    IEnumerable<IPackageFile> files,
-                                    IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                    ILogger logger) {
+        public static void AddFiles(this ProjectSystem project, 
+                                    IEnumerable<IPackageFile> files, 
+                                    IDictionary<string, IPackageFileTransformer> fileTransformers) {
             foreach (IPackageFile file in files) {
                 // Remove the redundant folder from the path
                 string path = RemoveContentDirectory(file.Path);
@@ -24,20 +23,19 @@ namespace NuPack {
                     path = RemoveExtension(path);
 
                     // If the transform was done then continue
-                    transformer.TransformFile(file, path, project, logger);
+                    transformer.TransformFile(file, path, project);
                 }
                 else {
-                    FileSystemExtensions.AddFile(project, path, file.Open, logger);
+                    project.AddFileWithCheck(path, file.Open);
                 }
             }
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        public static void DeleteFiles(this ProjectSystem project,
-                                       IEnumerable<IPackageFile> files,
-                                       IEnumerable<IPackage> otherPackages,
-                                       IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                       ILogger logger) {
+        public static void DeleteFiles(this ProjectSystem project, 
+                                       IEnumerable<IPackageFile> files, 
+                                       IEnumerable<IPackage> otherPackages, 
+                                       IDictionary<string, IPackageFileTransformer> fileTransformers) {
 
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
@@ -73,17 +71,17 @@ namespace NuPack {
                                             where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
                                             select otherFile;
 
-                        transformer.RevertFile(file, path, matchingFiles, project, logger);
+                        transformer.RevertFile(file, path, matchingFiles, project);
                     }
                     else {
-                        FileSystemExtensions.DeleteFile(project, path, file.Open, logger);
+                        project.DeleteFileSafe(path, file.Open);
                     }
                 }
 
                 // If the directory is empty then delete it
-                if (!project.GetFiles(dirPath).Any() &&
-                    !project.GetDirectories(dirPath).Any()) {
-                    FileSystemExtensions.DeleteDirectory(project, dirPath, recursive: false, logger: logger);
+                if (!project.GetFilesSafe(dirPath).Any() &&
+                    !project.GetDirectoriesSafe(dirPath).Any()) {
+                        project.DeleteDirectorySafe(dirPath, recursive: false);
                 }
             }
         }

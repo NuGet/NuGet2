@@ -1,37 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NuPack.Resources;
 
 namespace NuPack {
     internal static class FileSystemExtensions {
-        internal static void AddFiles(this IFileSystem fileSystem,
-                                      IEnumerable<IPackageFile> files,
-                                      ILogger logger) {
-            AddFiles(fileSystem, files, String.Empty, logger);
+        internal static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files) {
+            AddFiles(fileSystem, files, String.Empty);
         }
 
-        internal static void AddFiles(this IFileSystem fileSystem,
-                                      IEnumerable<IPackageFile> files,
-                                      string rootDir,
-                                      ILogger logger) {
+        internal static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir) {
             foreach (IPackageFile file in files) {
                 string path = Path.Combine(rootDir, file.Path);
-                AddFile(fileSystem, path, file.Open, logger);
+                fileSystem.AddFileWithCheck(path, file.Open);
             }
         }
 
-        internal static void DeleteFiles(this IFileSystem fileSystem,
-                                         IEnumerable<IPackageFile> files,
-                                         ILogger logger) {
-            DeleteFiles(fileSystem, files, String.Empty, logger);
+        internal static void DeleteFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files) {
+            DeleteFiles(fileSystem, files, String.Empty);
         }
 
-        internal static void DeleteFiles(this IFileSystem fileSystem,
-                                         IEnumerable<IPackageFile> files,
-                                         string rootDir,
-                                         ILogger logger) {
+        internal static void DeleteFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir) {
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
 
@@ -54,36 +46,54 @@ namespace NuPack {
                 foreach (var file in directoryFiles) {
                     string path = Path.Combine(rootDir, file.Path);
 
-                    DeleteFile(fileSystem, path, file.Open, logger);
+                    fileSystem.DeleteFileSafe(path, file.Open);
                 }
 
                 // If the directory is empty then delete it
-                if (!fileSystem.GetFiles(dirPath).Any() &&
-                    !fileSystem.GetDirectories(dirPath).Any()) {
-                    DeleteDirectory(fileSystem, dirPath, recursive: false, logger: logger);
+                if (!fileSystem.GetFilesSafe(dirPath).Any() &&
+                    !fileSystem.GetDirectoriesSafe(dirPath).Any()) {
+                    fileSystem.DeleteDirectorySafe(dirPath, recursive: false);
                 }
             }
         }
 
-        internal static void DeleteDirectory(IFileSystem fileSystem, string path, bool recursive, ILogger logger) {
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning an move on")]
+        internal static IEnumerable<string> GetDirectoriesSafe(this IFileSystem fileSystem, string path) {
             try {
-                fileSystem.DeleteDirectory(path, recursive);
-            }
-            catch (Exception e) {
-                logger.Log(MessageLevel.Warning, e.Message);
-            }
-        }
-
-        internal static void DeleteFile(IFileSystem fileSystem, string path) {
-            try {
-                fileSystem.DeleteFile(path);
+                return fileSystem.GetDirectories(path);
             }
             catch (Exception e) {
                 fileSystem.Logger.Log(MessageLevel.Warning, e.Message);
             }
+
+            return Enumerable.Empty<string>();
         }
 
-        internal static void DeleteFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger logger) {
+        internal static IEnumerable<string> GetFilesSafe(this IFileSystem fileSystem, string path) {
+            return GetFilesSafe(fileSystem, path, "*.*");
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning an move on")]
+        internal static IEnumerable<string> GetFilesSafe(this IFileSystem fileSystem, string path, string filter) {
+            try {
+                return fileSystem.GetFiles(path, filter);
+            }
+            catch (Exception e) {
+                fileSystem.Logger.Log(MessageLevel.Warning, e.Message);
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        internal static void DeleteDirectorySafe(this IFileSystem fileSystem, string path, bool recursive) {
+            DoSafeAction(() => fileSystem.DeleteDirectory(path, recursive), fileSystem.Logger);
+        }
+
+        internal static void DeleteFileSafe(this IFileSystem fileSystem, string path) {
+            DoSafeAction(() => fileSystem.DeleteFile(path), fileSystem.Logger);
+        }
+
+        internal static void DeleteFileSafe(this IFileSystem fileSystem, string path, Func<Stream> streamFactory) {
             // Only delete the file if it exists and the checksum is the same
             if (fileSystem.FileExists(path)) {
                 bool contentEqual;
@@ -93,29 +103,42 @@ namespace NuPack {
                 }
 
                 if (contentEqual) {
-                    DeleteFile(fileSystem, path);
+                    fileSystem.DeleteFileSafe(path);
                 }
                 else {
                     // This package installed a file that was modified so warn the user
-                    logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileModified, path);
+                    fileSystem.Logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileModified, path);
                 }
             }
         }
 
-        internal static void AddFile(IFileSystem fileSystem, string path, Func<Stream> streamFactory, ILogger logger) {
+        internal static void AddFileWithCheck(this IFileSystem fileSystem, string path, Func<Stream> streamFactory) {
             // Don't overwrite file if it exists if force wasn't set to true
             if (fileSystem.FileExists(path)) {
-                logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
+                fileSystem.Logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
             }
             else {
                 using (Stream stream = streamFactory()) {
-                    try {
-                        fileSystem.AddFile(path, stream);
-                    }
-                    catch (Exception e) {
-                        logger.Log(MessageLevel.Warning, e.Message);
-                    }
+                    fileSystem.AddFile(path, stream);
                 }
+            }
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The caller is responsible for closing the stream")]
+        internal static void AddFileWithCheck(this IFileSystem fileSystem, string path, Action<Stream> write) {
+            fileSystem.AddFileWithCheck(path, () => {
+                var stream = new MemoryStream();
+                write(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                return stream;
+            });
+        }
+
+        internal static void AddFile(this IFileSystem fileSystem, string path, Action<Stream> write) {
+            using (var stream = new MemoryStream()) {
+                write(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                fileSystem.AddFile(path, stream);
             }
         }
 
@@ -137,11 +160,29 @@ namespace NuPack {
             while (index >= 0);
         }
 
-        internal static void AddFile(this IFileSystem fileSystem, string path, Action<Stream> write) {
-            using (var stream = new MemoryStream()) {
-                write(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                fileSystem.AddFile(path, stream);
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning an move on")]
+        private static void DoSafeAction(Action action, ILogger logger) {
+            try {
+                Attempt(action);
+            }
+            catch (Exception e) {
+                logger.Log(MessageLevel.Warning, e.Message);
+            }
+        }
+
+        private static void Attempt(Action action, int retries = 3, int delayBeforeRetry = 150) {
+            while (retries > 0) {
+                try {
+                    action();
+                    break;
+                }
+                catch {
+                    retries--;
+                    if (retries == 0) {
+                        throw;
+                    }
+                }
+                Thread.Sleep(delayBeforeRetry);
             }
         }
     }

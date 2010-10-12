@@ -232,7 +232,7 @@
             var assemblyReferences = ResolveAssemblyReferences(package);
 
             // Add content files
-            Project.AddFiles(package.GetContentFiles(), _fileTransformers, LoggerInternal);
+            Project.AddFiles(package.GetContentFiles(), _fileTransformers);
 
             // Add the references to the reference path
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
@@ -328,7 +328,7 @@
             var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
-            Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers, LoggerInternal);
+            Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
 
             // Remove references
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {

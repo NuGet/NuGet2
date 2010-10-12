@@ -6,11 +6,11 @@ namespace NuPack {
         /// <summary>
         /// Transforms the file
         /// </summary>
-        void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem, ILogger listener);
+        void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem);
 
         /// <summary>
         /// Reverses the transform
         /// </summary>
-        void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem, ILogger listener);
+        void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem);
     }
 }
