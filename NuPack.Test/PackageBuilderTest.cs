@@ -49,6 +49,7 @@ namespace NuPack.Test {
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors><author>Velio Ivanov</author></authors>
+    <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
             
@@ -56,6 +57,7 @@ namespace NuPack.Test {
 <package><metadata>
     <version>2.5</version>
     <authors><author>Velio Ivanov</author></authors>
+    <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
             
@@ -63,6 +65,7 @@ namespace NuPack.Test {
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <authors><author>Velio Ivanov</author></authors>
+    <language>en-us</language>    
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
@@ -70,10 +73,19 @@ namespace NuPack.Test {
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
+    <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
             string badSpec4 = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors><author>Velio Ivanov</author></authors>
+    <language>en-us</language>
+  </metadata></package>";
+
+            string badSpec5 = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
@@ -88,6 +100,7 @@ namespace NuPack.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec2.AsStream()));
             ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec3.AsStream()));
             ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec4.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec5.AsStream()));
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
 
