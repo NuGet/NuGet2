@@ -1,16 +1,24 @@
-﻿namespace NuPack {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-    using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
+namespace NuPack {
     public static class PackageRepositoryExtensions {
+        private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description" };
+
         internal static bool IsPackageInstalled(this IPackageRepository repository, IPackage package) {
             return repository.IsPackageInstalled(package.Id, package.Version);
         }
 
-        internal static bool IsPackageInstalled(this IPackageRepository repository, string packageId, Version version = null) {
+        internal static bool IsPackageInstalled(this IPackageRepository repository, string packageId) {
+            return IsPackageInstalled(repository, packageId, version: null);
+        }
+
+        internal static bool IsPackageInstalled(this IPackageRepository repository, string packageId, Version version) {
             return repository.FindPackage(packageId, null, null, version) != null;
         }
 
@@ -29,6 +37,18 @@
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion, Version exactVersion) {
             return repository.FindPackagesById(packageId).FindByVersion(minVersion, maxVersion, exactVersion);
         }
+
+        /// <summary>
+        /// Looks up packages that contains one or more searchTerm in its metadata
+        /// </summary>
+        public static IQueryable<IPackage> GetPackages(this IPackageRepository repository, params string[] searchTerms) {
+            var packages = repository.GetPackages();
+            if (searchTerms == null || !searchTerms.Any()) {
+                return packages;
+            }
+            return packages.Where(BuildSearchExpression(searchTerms));
+        }
+
 
         public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository) {
             List<IPackage> packages = repository.GetPackages().ToList();
@@ -72,6 +92,30 @@
             Expression toLowerExpression = Expression.Call(propertyExpression, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
             // == localPackage.Id
             return Expression.Equal(toLowerExpression, Expression.Constant(package.Id.ToLower()));
+        }
+
+        /// <summary>
+        /// Constructs an expression to search for individual tokens in a search term in the Id and Description of packages
+        /// </summary>
+        private static Expression<Func<IPackage, bool>> BuildSearchExpression(IEnumerable<string> searchTerms) {
+            Debug.Assert(searchTerms != null);
+
+            Expression condition = searchTerms.SelectMany(term => BuildExpressionsForTerm(term)).Aggregate(Expression.OrElse);
+            return Expression.Lambda<Func<IPackage, bool>>(condition, Expression.Parameter(typeof(IPackage)));
+        }
+
+        private static IEnumerable<Expression> BuildExpressionsForTerm(string term) {
+            var packageType = typeof(IPackage);
+            var stringType = typeof(String);
+            var packageTypeExpression = Expression.Parameter(packageType);
+            MethodInfo stringContains = stringType.GetMethod("Contains");
+            MethodInfo stringToLower = stringType.GetMethod("ToLower", Type.EmptyTypes);
+
+            foreach (var propertyName in _packagePropertiesToSearch) {
+                var propertyExpression = Expression.Property(packageTypeExpression, propertyName);
+                var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
+                yield return Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower()));
+            }
         }
 
         private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
