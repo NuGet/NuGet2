@@ -55,6 +55,8 @@ namespace NuPack {
             string packagePath = null;
 
             int searchWildCard = searchString.IndexOf("*", StringComparison.OrdinalIgnoreCase);
+            // If the search path in the manifest does not contain a wildcard character 
+            // or the wildcard is at the start of search path, do not truncate the search path from the actualPath
             if (searchWildCard > 0) {
                 searchString = searchString.Substring(0, searchWildCard - 1);
                 int index = actualPath.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
