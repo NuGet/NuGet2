@@ -24,6 +24,9 @@ namespace NuPack.VisualStudio.Cmdlets {
             _repositoryFactory = repositoryFactory;
         }
 
+        [Parameter(Position=0)]
+        public string Filter { get; set; }
+
         [Parameter]
         public SwitchParameter Installed { get; set; }
 
@@ -33,13 +36,13 @@ namespace NuPack.VisualStudio.Cmdlets {
         protected override void ProcessRecordCore() {
             if (IsSolutionOpen) {
                 if (Updates.IsPresent) {
-                    ShowUpdatePackages();
+                    ShowUpdatePackages(Filter);
                 }
                 else if (Installed.IsPresent) {
-                    WritePackagesFromRepository(PackageManager.LocalRepository);
+                    WritePackagesFromRepository(PackageManager.LocalRepository, Filter);
                 }
                 else {
-                    WritePackagesFromRepository(PackageManager.SourceRepository);
+                    WritePackagesFromRepository(PackageManager.SourceRepository, Filter);
                 }
             }
             else {
@@ -50,13 +53,13 @@ namespace NuPack.VisualStudio.Cmdlets {
 
                 var packageSource = ActivePackageSource;
                 if (!String.IsNullOrEmpty(packageSource)) {
-                    WritePackagesFromRepository(_repositoryFactory.CreateRepository(packageSource));
+                    WritePackagesFromRepository(_repositoryFactory.CreateRepository(packageSource), Filter);
                 }
             }
         }
 
-        private void WritePackagesFromRepository(IPackageRepository repository) {
-            WritePackages(repository.GetPackages());
+        private void WritePackagesFromRepository(IPackageRepository repository, string filter) {
+            WritePackages(repository.GetPackages(filter));
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
@@ -70,8 +73,8 @@ namespace NuPack.VisualStudio.Cmdlets {
             WriteObject(query, enumerateCollection: true);
         }
 
-        private void ShowUpdatePackages() {
-            IEnumerable<IPackage> updates = PackageManager.LocalRepository.GetUpdates(PackageManager.SourceRepository);
+        private void ShowUpdatePackages(string filter) {
+            IEnumerable<IPackage> updates = PackageManager.LocalRepository.GetUpdates(PackageManager.SourceRepository, filter);
             WritePackages(updates);
         }
 

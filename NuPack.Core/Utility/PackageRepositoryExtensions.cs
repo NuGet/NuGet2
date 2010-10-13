@@ -43,15 +43,20 @@ namespace NuPack {
         /// </summary>
         public static IQueryable<IPackage> GetPackages(this IPackageRepository repository, params string[] searchTerms) {
             var packages = repository.GetPackages();
-            if (searchTerms == null || !searchTerms.Any()) {
+            if (searchTerms == null) {
                 return packages;
             }
-            return packages.Where(BuildSearchExpression(searchTerms));
+
+            IEnumerable<string> nonNullTerms = searchTerms.Where(s => s != null);
+            if (!nonNullTerms.Any()) {
+                return packages;
+            }
+            
+            return packages.Where(BuildSearchExpression(nonNullTerms));
         }
 
-
-        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository) {
-            List<IPackage> packages = repository.GetPackages().ToList();
+        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository, params string[] searchTerms) {
+            List<IPackage> packages = repository.GetPackages(searchTerms).ToList();
 
             if (!packages.Any()) {
                 yield break;
