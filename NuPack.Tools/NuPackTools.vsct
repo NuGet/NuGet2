@@ -36,13 +36,13 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
         <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
         <Strings>
-          <ButtonText>Package Manager Console</ButtonText>
+          <ButtonText>Package Manager C&amp;onsole</ButtonText>
         </Strings>
       </Button>
 
       <Button guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0x1020" type="Button">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup"/>
-        <Icon guid="guidToolbarImages2" id="bmpSourceSettings" />
+        <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
         <Strings>
           <ButtonText>&amp;Manage package sources</ButtonText>
         </Strings>
@@ -86,7 +86,6 @@
    
     <Bitmaps>
       <Bitmap guid="guidToolbarImages" href="Resources\Toolbar.png"/>
-      <Bitmap guid="guidToolbarImages2" href="Resources\SourceSettings.png" />
     </Bitmaps>
   </Commands>
 
@@ -135,11 +134,9 @@
     <GuidSymbol name="guidToolbarImages" value="{8124159b-5cc6-40b8-b330-db13a86b57c2}" >
       <IDSymbol name="bmpPowerConsole" value="1" />
       <IDSymbol name="bmpClearConsole" value="2" />
+      <IDSymbol name="bmpSourceSettings" value="3" />
     </GuidSymbol>
-    <GuidSymbol name="guidToolbarImages2" value="{049D6D94-B408-4171-B5F7-FB98EC753135}">
-      <IDSymbol name="bmpSourceSettings" value="1" />
-    </GuidSymbol>
-
+    
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidNuPack_Dialog_PackageCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
         <IDSymbol name="MyMenuGroup" value="0x1020" />

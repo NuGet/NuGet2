@@ -58,6 +58,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <None Include="Resources\Toolbar.png" />
     <None Include="Resources\SourceSettings.png" />
     <VSCTCompile Include="NuPackTools.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
@@ -67,9 +68,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <None Include="Resources\Toolbar.png" />
-    <None Include="Resources\Images_32bit.bmp" />
-    <None Include="Resources\Images_24bit.bmp" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
