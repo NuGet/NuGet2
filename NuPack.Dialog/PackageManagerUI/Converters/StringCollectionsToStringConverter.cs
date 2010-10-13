@@ -8,8 +8,15 @@ namespace NuPack.Dialog.PackageManagerUI {
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             if (targetType == typeof(string)) {
-                IEnumerable<string> parts = (IEnumerable<string>)value;
-                return String.Join(", ", parts);
+
+                string stringValue = value as string;
+                if (stringValue != null) {
+                    return stringValue;
+                }
+                else {
+                    IEnumerable<string> parts = (IEnumerable<string>)value;
+                    return String.Join(", ", parts);
+                }
             }
 
             return value;
