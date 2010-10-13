@@ -57,7 +57,7 @@ namespace NuPack {
             }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning an move on")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
         internal static IEnumerable<string> GetDirectoriesSafe(this IFileSystem fileSystem, string path) {
             try {
                 return fileSystem.GetDirectories(path);
@@ -73,7 +73,7 @@ namespace NuPack {
             return GetFilesSafe(fileSystem, path, "*.*");
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning an move on")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
         internal static IEnumerable<string> GetFilesSafe(this IFileSystem fileSystem, string path, string filter) {
             try {
                 return fileSystem.GetFiles(path, filter);
@@ -160,7 +160,7 @@ namespace NuPack {
             while (index >= 0);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning an move on")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
         private static void DoSafeAction(Action action, ILogger logger) {
             try {
                 Attempt(action);
