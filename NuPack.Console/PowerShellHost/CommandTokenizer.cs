@@ -5,12 +5,9 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Management.Automation;
 
-namespace NuPackConsole.Host.PowerShell.Implementation
-{
-    public class CommandTokenizer : ICommandTokenizer
-    {
-        public IEnumerable<Token> Tokenize(string[] lines)
-        {
+namespace NuPackConsole.Host.PowerShell.Implementation {
+    public class CommandTokenizer : ICommandTokenizer {
+        public IEnumerable<Token> Tokenize(string[] lines) {
             Collection<PSParseError> errors;
             Collection<PSToken> tokens = PSParser.Tokenize(lines, out errors);
             return tokens.Select((t) => new Token(
@@ -40,8 +37,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             /* Position = 19,           */ TokenType.Operator,
         };
 
-        static TokenType MapTokenType(PSTokenType psTokenType)
-        {
+        static TokenType MapTokenType(PSTokenType psTokenType) {
             int i = (int)psTokenType;
             return (i >= 0 && i < _tokenTypes.Length) ? _tokenTypes[i] : TokenType.Other;
         }

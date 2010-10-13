@@ -6,70 +6,58 @@ using System.Management.Automation.Host;
 using System.Security;
 using System.Windows.Media;
 
-namespace NuPackConsole.Host.PowerShell.Implementation
-{
-    class MyHostUI : PSHostUserInterface
-    {
+namespace NuPackConsole.Host.PowerShell.Implementation {
+    class MyHostUI : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
 
         IConsole Console { get; set; }
 
-        public MyHostUI(IConsole console)
-        {
+        public MyHostUI(IConsole console) {
             UtilityMethods.ThrowIfArgumentNull(console);
             this.Console = console;
         }
 
         public override Dictionary<string, PSObject> Prompt(
-            string caption, string message, Collection<FieldDescription> descriptions)
-        {
+            string caption, string message, Collection<FieldDescription> descriptions) {
             return null;
             //throw new NotImplementedException();
         }
 
         public override int PromptForChoice(
-            string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
-        {
+            string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice) {
             return -1;
             //throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(
             string caption, string message, string userName, string targetName,
-            PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
-        {
+            PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options) {
             return null;
             //throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(
-            string caption, string message, string userName, string targetName)
-        {
+            string caption, string message, string userName, string targetName) {
             return null;
             //throw new NotImplementedException();
         }
 
         PSHostRawUserInterface _rawUI;
-        public override PSHostRawUserInterface RawUI
-        {
-            get
-            {
-                if (_rawUI == null)
-                {
+        public override PSHostRawUserInterface RawUI {
+            get {
+                if (_rawUI == null) {
                     _rawUI = new MyHostRawUserInterface(Console);
                 }
                 return _rawUI;
             }
         }
 
-        public override string ReadLine()
-        {
+        public override string ReadLine() {
             return null;
             //throw new NotImplementedException();
         }
 
-        public override SecureString ReadLineAsSecureString()
-        {
+        public override SecureString ReadLineAsSecureString() {
             return null;
             //throw new NotImplementedException();
         }
@@ -79,10 +67,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation
         /// <summary>
         /// Convert a System.ConsoleColor enum to a Color value, or null if c is not a valid enum.
         /// </summary>
-        static Color? ToColor(ConsoleColor c)
-        {
-            if (_consoleColors == null)
-            {
+        static Color? ToColor(ConsoleColor c) {
+            if (_consoleColors == null) {
                 // colors copied from hkcu:\Console color table
                 _consoleColors = new Color[16]
                 {
@@ -106,61 +92,50 @@ namespace NuPackConsole.Host.PowerShell.Implementation
             }
 
             int i = (int)c;
-            if (i >= 0 && i < _consoleColors.Length)
-            {
+            if (i >= 0 && i < _consoleColors.Length) {
                 return _consoleColors[i];
             }
 
             return null; // invalid color
         }
 
-        public override void Write(string value)
-        {
+        public override void Write(string value) {
             Console.Write(value);
         }
 
-        public override void WriteLine(string value)
-        {
+        public override void WriteLine(string value) {
             Console.WriteLine(value);
         }
 
-        void Write(string value, ConsoleColor foregroundColor, ConsoleColor backgroundColor = NoColor)
-        {
+        void Write(string value, ConsoleColor foregroundColor, ConsoleColor backgroundColor = NoColor) {
             Console.Write(value, ToColor(foregroundColor), ToColor(backgroundColor));
         }
 
-        void WriteLine(string value, ConsoleColor foregroundColor, ConsoleColor backgroundColor = NoColor)
-        {
+        void WriteLine(string value, ConsoleColor foregroundColor, ConsoleColor backgroundColor = NoColor) {
             // If append \n only, text becomes 1 line when copied to notepad.
             Write(value + Environment.NewLine, foregroundColor, backgroundColor);
         }
 
-        public override void Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value)
-        {
+        public override void Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value) {
             Write(value, foregroundColor, backgroundColor);
         }
 
-        public override void WriteDebugLine(string message)
-        {
+        public override void WriteDebugLine(string message) {
             WriteLine(message, ConsoleColor.DarkGray);
         }
 
-        public override void WriteErrorLine(string value)
-        {
+        public override void WriteErrorLine(string value) {
             WriteLine(value, ConsoleColor.Red);
         }
 
-        public override void WriteProgress(long sourceId, ProgressRecord record)
-        {
+        public override void WriteProgress(long sourceId, ProgressRecord record) {
         }
 
-        public override void WriteVerboseLine(string message)
-        {
+        public override void WriteVerboseLine(string message) {
             WriteLine(message, ConsoleColor.DarkGray);
         }
 
-        public override void WriteWarningLine(string message)
-        {
+        public override void WriteWarningLine(string message) {
             WriteLine(message, ConsoleColor.Magenta);
         }
     }

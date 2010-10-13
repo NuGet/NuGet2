@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
 
 namespace NuPackConsole.Host.PowerShellProvider {
-    
+
     internal static class RegistryHelper {
 
         /// <summary>
