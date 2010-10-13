@@ -108,6 +108,8 @@
                     Executed="ExecutedInstallPackage" />
         <CommandBinding x:Uid="CommandBinding_ShowOptionsPage" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
                     Executed="ExecutedShowOptionsPage" />
+        <CommandBinding x:Uid="CommandBinding_OpenLicenseLink" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}"
+                    Executed="ExecuteOpenLicenseLink" />
     </Window.CommandBindings>
     <Window.InputBindings>
       <KeyBinding x:Uid="KeyBinding_1" Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />

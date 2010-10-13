@@ -192,6 +192,21 @@ namespace NuPack.Dialog.PackageManagerUI {
             e.CanExecute = true;
         }
 
+        private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {
+            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
+            if (control == null) {
+                return;
+            }
+
+            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            if (selectedItem == null) {
+                return;
+            }
+
+            UriHelper.OpenLicenseLink(selectedItem.LicenseUrl);
+            e.Handled = true;
+        }
+
         private void ExecutedFocusOnSearchBox(object sender, ExecutedRoutedEventArgs e) {
         }
 

@@ -149,6 +149,7 @@
     <Compile Include="ToolsOptionsUI\ToolsOptionsPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ToolsOptionsUI\ToolsOptionsControl.resx">

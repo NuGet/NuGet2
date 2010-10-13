@@ -231,8 +231,7 @@
         <DataTemplate.Resources>
             <self:SizeInBytesConverter x:Uid="self:SizeInBytesConverter" x:Key="sizeInBytesConverter" />
             <BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_2" x:Key="boolToVis" />
-            <self:BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_3" WhenTrue="Collapsed" WhenFalse="Visible" x:Key="refLinkSizeBoolToVis" />
-            <self:DownloadCountToVisibilityConverter x:Uid="self:DownloadCountToVisibilityConverter" x:Key="downloadCountToVisibilityConverter" />
+            <self:BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_3" WhenTrue="Visible" WhenFalse="Collapsed" x:Key="BoolToVisibilityConverter" />
             <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
         </DataTemplate.Resources>
         
@@ -251,11 +250,15 @@
                         <self:TextBlockControl x:Uid="TextBlock_DetailCreatedByValueOnline" AutomationProperties.AutomationId="TextBlock_DetailCreatedByValueOnline" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" />
                     </StackPanel>
                     
-                    <StackPanel x:Uid="StackPanel_15" Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding IsReferenceLink, Converter={StaticResource refLinkSizeBoolToVis}}">
+                    <StackPanel x:Uid="StackPanel_15" Style="{StaticResource DetailMetadataStyle}">
                         <self:TextBlockControl x:Uid="TextBlock_DetailVersionOnline" AutomationProperties.AutomationId="TextBlock_DetailVersionOnline" Text="Version:" Style="{StaticResource DetailMetadataLabelStyle}" />
                         <self:TextBlockControl x:Uid="TextBlock_DetailVersionValueOnline" AutomationProperties.AutomationId="TextBlock_DetailVersionValueOnline" Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                     </StackPanel>
-                    
+
+                    <TextBlock Visibility="{Binding RequireLicenseAcceptance, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}">View License Terms</Hyperlink>
+                    </TextBlock>
+
                     <self:TextBlockControl x:Uid="TextBlock_PackageDescription" Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
                     </self:TextBlockControl>
                     

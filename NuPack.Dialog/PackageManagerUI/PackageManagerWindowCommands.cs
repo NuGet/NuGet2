@@ -9,5 +9,6 @@ namespace NuPack.Dialog.PackageManagerUI {
         public static RoutedCommand SelectOnlineProvider = new RoutedCommand();
         public static RoutedCommand ShowOptionsPage = new RoutedCommand();
         public static RoutedCommand FocusOnSearchBox = new RoutedCommand();
+        public static RoutedCommand OpenLicenseLink = new RoutedCommand();
     }
 }
