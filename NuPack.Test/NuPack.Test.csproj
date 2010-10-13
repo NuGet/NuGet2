@@ -39,6 +39,7 @@
     <Compile Include="DependencyManagerTest.cs" />
     <Compile Include="PackageBuilderTest.cs" />
     <Compile Include="PackageRepositoryFactoryTest.cs" />
+    <Compile Include="PackageRepositoryTest.cs" />
     <Compile Include="PackageSyndicationFeedTest.cs" />
     <Compile Include="PathResolverTest.cs" />
     <Compile Include="PreprocessorTest.cs" />

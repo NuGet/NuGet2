@@ -99,23 +99,26 @@ namespace NuPack {
         /// </summary>
         private static Expression<Func<IPackage, bool>> BuildSearchExpression(IEnumerable<string> searchTerms) {
             Debug.Assert(searchTerms != null);
-
-            Expression condition = searchTerms.SelectMany(term => BuildExpressionsForTerm(term)).Aggregate(Expression.OrElse);
-            return Expression.Lambda<Func<IPackage, bool>>(condition, Expression.Parameter(typeof(IPackage)));
+            var parameterExpression = Expression.Parameter(typeof(IPackage));
+            // package.Id.ToLower().Contains(term1) || package.Id.ToLower().Contains(term2)  ...
+            Expression condition = (from term in searchTerms
+                                    from property in _packagePropertiesToSearch
+                                    select BuildExpressionForTerm(parameterExpression, term, property)).Aggregate(Expression.OrElse);
+            return Expression.Lambda<Func<IPackage, bool>>(condition, parameterExpression);
         }
 
-        private static IEnumerable<Expression> BuildExpressionsForTerm(string term) {
-            var packageType = typeof(IPackage);
-            var stringType = typeof(String);
-            var packageTypeExpression = Expression.Parameter(packageType);
-            MethodInfo stringContains = stringType.GetMethod("Contains");
-            MethodInfo stringToLower = stringType.GetMethod("ToLower", Type.EmptyTypes);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower", 
+            Justification="The expression is remoted using Odata which does not support the culture parameter")]
+        private static Expression BuildExpressionForTerm(ParameterExpression packageParameterExpression, string term, string propertyName) {
+            MethodInfo stringContains = typeof(String).GetMethod("Contains");
+            MethodInfo stringToLower = typeof(String).GetMethod("ToLower", Type.EmptyTypes);
 
-            foreach (var propertyName in _packagePropertiesToSearch) {
-                var propertyExpression = Expression.Property(packageTypeExpression, propertyName);
-                var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
-                yield return Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower()));
-            }
+            // package.Id / package.Description
+            var propertyExpression = Expression.Property(packageParameterExpression, propertyName);
+            // .ToLower()
+            var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
+            // .Contains(term.ToLower())
+            return Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower()));
         }
 
         private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
