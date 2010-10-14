@@ -1,10 +1,10 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
     using NuPack.Resources;
-    using System.Diagnostics.CodeAnalysis;
 
     public class UninstallWalker : BasicPackageWalker, IDependencyResolver {
         private Stack<IPackage> _packages;
