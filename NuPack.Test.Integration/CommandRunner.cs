@@ -1,4 +1,4 @@
-﻿namespace NuPack.Test.Integration.NuPackCommandLine {
+﻿namespace NuPack.Test.Integration {
 
     using System;
     using System.Diagnostics;
@@ -29,7 +29,7 @@
                 errorOutput = p.StandardError;
 
                 if (waitForExit) {
-                    p.WaitForExit();
+                    p.WaitForExit(1000);
                 }
             }
             result = standardOutput.ReadToEnd();

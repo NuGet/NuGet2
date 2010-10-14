@@ -17,9 +17,12 @@
         <ILMergeFileFinalName>NuPack.exe</ILMergeFileFinalName>
         <ILMergeInternalizeIgnoreFile>$(NuPackRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
         <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
+        <MSBuildBuildDirectory>$(NuPackRoot)\NuPack.MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
+        <MSBuildDropDirectory>$(NuPackDropDirectory)\MSBuild</MSBuildDropDirectory>
+        <MSBuildILMergeFileFinalName>NuPack.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
 
-    <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
     </Target>
 
     <Target Name="Build">
@@ -29,6 +32,7 @@
     <Target Name="RunTests">
         <MSBuild Projects="$(NuPackRoot)\NuPack.Test\NuPack.Test.csproj" Targets="RunTests">
         </MSBuild>
+        <MSBuild Projects="$(NuPackRoot)\NuPack.MSBuild.Test\NuPack.MSBuild.Test.csproj" Targets="RunTests" />
     </Target>
 
     <Target Name="BuildPackages">
@@ -44,6 +48,7 @@
         <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
+        <MakeDir Directories="$(MSBuildDropDirectory)" Condition="!Exists('$(MSBuildDropDirectory)')" />
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
@@ -69,6 +74,14 @@
         <Message Text="Copying the NuPack Server output to $(ServerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
+
+    <Target Name="CopyMSBuildOutputToDropDirectory">
+      <ItemGroup>
+        <MSBuildOutputItems Exclude="$(MSBuildBuildDirectory)\**\*.pdb" Include="$(MSBuildBuildDirectory)\**\*.*" />
+      </ItemGroup>
+      <Message Text="Copying NuPack.MSBuild.dll output to $(MSBuildDropDirectory)" />
+      <Copy ContinueOnError="false" SourceFiles="@(MSBuildOutputItems)" DestinationFiles="@(MSBuildOutputItems ->'$(MSBuildDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>
     
     <Target Name="CopyLicenseToAllDirectories">
         <ItemGroup>
@@ -89,6 +102,17 @@
         <Exec Command="$(ILMergeExe) /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:$(ILMergeInternalizeIgnoreFile) /target:exe /out:$(ILMergeFileFinalName) /log:$(ILMergeArtifactDirectory)\ilmerge.log /ndebug /allowDup $(ILMergeFileFinalName) %(ILMergeItems.FileName)%(ILMergeItems.Extension)" WorkingDirectory="$(MergeDirectory)" />
         <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
         <Delete Files="@(ILMergeItems)" />
+    </Target>
+  
+    <Target Name="ILMergeMSBuild">
+      <ItemGroup>
+        <MSBuildILMergeItems Include="$(MSBuildDropDirectory)\NuPack.Core.dll" />
+      </ItemGroup>
+      <MakeDir Directories="$(ILMergeArtifactDirectory)" Condition="!Exists('$(ILMergeArtifactDirectory)')" />
+      <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
+      <Exec Command="$(ILMergeExe) /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:$(ILMergeInternalizeIgnoreFile) /target:dll /out:$(MSBuildILMergeFileFinalName) /log:$(ILMergeArtifactDirectory)\ilmerge.msbuild.log /ndebug /allowDup $(MSBuildILMergeFileFinalName) %(MSBuildILMergeItems.FileName)%(MSBuildILMergeItems.Extension)" WorkingDirectory="$(MSBuildDropDirectory)" />
+      <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
+      <Delete Files="@(MSBuildILMergeItems)" />
     </Target>
     
     <Target Name="RunIntegrationTests">

@@ -34,12 +34,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notices", "notices", "{E8BE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2E61590-0069-4746-A44D-4B2B805EDD91}"
 	ProjectSection(SolutionItems) = preProject
+		Build\Build.proj = Build\Build.proj
 		CodeAnalysisDictionary.xml = CodeAnalysisDictionary.xml
 		NuPack.Test.Integration\NuPack.Test.Integration.testsettings = NuPack.Test.Integration\NuPack.Test.Integration.testsettings
 		NuPack.vsmdi = NuPack.vsmdi
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHostProvider", "NuPack.Console\PowerShellHostProvider\PowerShellHostProvider.csproj", "{A5E7AEB3-738F-4C39-A459-00F90483B2FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.MSBuild", "NuPack.MSBuild\NuPack.MSBuild.csproj", "{74CD9786-C226-4A58-A250-2DBC9EE29670}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.MSBuild.Test", "NuPack.MSBuild.Test\NuPack.MSBuild.Test.csproj", "{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -123,6 +128,18 @@ Global
 		{A5E7AEB3-738F-4C39-A459-00F90483B2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5E7AEB3-738F-4C39-A459-00F90483B2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5E7AEB3-738F-4C39-A459-00F90483B2FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74CD9786-C226-4A58-A250-2DBC9EE29670}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{74CD9786-C226-4A58-A250-2DBC9EE29670}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{74CD9786-C226-4A58-A250-2DBC9EE29670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74CD9786-C226-4A58-A250-2DBC9EE29670}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74CD9786-C226-4A58-A250-2DBC9EE29670}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74CD9786-C226-4A58-A250-2DBC9EE29670}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,5 +147,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D3106412-E3AF-4CB6-B6D3-3664465B491F} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{135A5956-39CD-495C-8FB2-06678A90488D} = {E7B39EAD-EA32-4011-845A-C949A336389A}
+		{6A76CD40-AB6E-4321-9978-3DB0B7A180D6} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 	EndGlobalSection
 EndGlobal
