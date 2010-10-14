@@ -1,5 +1,6 @@
 ﻿namespace NuPack {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Xml.Linq;
@@ -58,7 +59,13 @@
             return source;
         }
 
+
+
         public static XElement MergeWith(this XElement source, XElement target) {
+            return MergeWith(source, target, null);
+        }
+
+        public static XElement MergeWith(this XElement source, XElement target, IDictionary<XName, Action<XElement, XElement>> nodeActions) {
             if (target == null) {
                 return source;
             }
@@ -77,11 +84,17 @@
                 var sourceChild = source.Element(targetChild.Name);
                 if (sourceChild != null && !HasConflict(sourceChild, targetChild)) {
                     // Other wise merge recursively
-                    sourceChild.MergeWith(targetChild);
+                    sourceChild.MergeWith(targetChild, nodeActions);
                 }
                 else {
-                    // If that element is null then add that node
-                    source.Add(targetChild);
+                    Action<XElement, XElement> nodeAction;
+                    if (nodeActions != null && nodeActions.TryGetValue(targetChild.Name, out nodeAction)) {
+                        nodeAction(source, targetChild);
+                    }
+                    else {
+                        // If that element is null then add that node
+                        source.Add(targetChild);
+                    }
                 }
             }
             return source;

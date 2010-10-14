@@ -297,6 +297,90 @@
         }
 
         [TestMethod]
+        public void AddPackageWithTransformFile() {
+            // Arrange
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            mockProjectSystem.AddFile("web.config",
+@"<configuration>
+    <system.web>
+        <compilation debug=""true"" targetFramework=""4.0"" />
+    </system.web>
+</configuration>
+".AsStream());
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var package = new Mock<IPackage>();
+            package.Setup(m => m.Id).Returns("A");
+            package.Setup(m => m.Version).Returns(new Version("1.0"));
+            var file = new Mock<IPackageFile>();
+            file.Setup(m => m.Path).Returns(@"content\web.config.transform");
+            file.Setup(m => m.Open()).Returns(() =>
+@"<configuration>
+    <configSections>
+        <add a=""n"" />
+    </configSections>
+</configuration>
+".AsStream());
+            package.Setup(m => m.GetFiles()).Returns(new[] { file.Object });
+            mockRepository.AddPackage(package.Object);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <configSections>
+    <add a=""n"" />
+  </configSections>
+  <system.web>
+    <compilation debug=""true"" targetFramework=""4.0"" />
+  </system.web>
+</configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
+        }
+
+        [TestMethod]
+        public void RemovePackageWithTransformFile() {
+            // Arrange
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            mockProjectSystem.AddFile("web.config",
+@"<configuration>
+    <system.web>
+        <compilation debug=""true"" targetFramework=""4.0"" baz=""test"" />
+    </system.web>
+</configuration>
+".AsStream());
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var package = new Mock<IPackage>();
+            package.Setup(m => m.Id).Returns("A");
+            package.Setup(m => m.Version).Returns(new Version("1.0"));
+            var file = new Mock<IPackageFile>();
+            file.Setup(m => m.Path).Returns(@"content\web.config.transform");
+            file.Setup(m => m.Open()).Returns(() =>
+@"<configuration>
+    <system.web>
+        <compilation debug=""true"" targetFramework=""4.0"" />
+    </system.web>
+</configuration>
+".AsStream());
+            package.Setup(m => m.GetFiles()).Returns(new[] { file.Object });
+            mockRepository.AddPackage(package.Object);
+            projectManager.LocalRepository.AddPackage(package.Object);
+            
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <system.web>
+    <compilation baz=""test"" />
+  </system.web>
+</configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
+        }
+
+        [TestMethod]
         public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();

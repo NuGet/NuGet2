@@ -1,4 +1,6 @@
 ﻿namespace NuPack.Test {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Xml.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,6 +23,40 @@
             Assert.AreEqual(2, barElement.Attributes().Count());
             AssertAttributeValue(barElement, "a", "aValue");
             AssertAttributeValue(barElement, "b", "bValue");
+        }
+
+        [TestMethod]
+        public void MergingWithNodeActions() {
+            // Arrange
+            XElement a = XElement.Parse(@"<foo><baz /></foo>");
+            XElement b = XElement.Parse(@"<foo><bar /></foo>");
+
+            // Act
+            var result = a.MergeWith(b, new Dictionary<XName, Action<XElement, XElement>> {
+                { "bar", (parent, element) => parent.AddFirst(element) }
+            });
+
+            // Assert
+            var elements = result.Elements().ToList();
+            Assert.AreEqual(2, elements.Count);
+            Assert.AreEqual("bar", elements[0].Name);
+            Assert.AreEqual("baz", elements[1].Name);
+        }
+
+        [TestMethod]
+        public void MergingWithoutInsertionMappingsAddsToEnd() {
+            // Arrange
+            XElement a = XElement.Parse(@"<foo><baz /></foo>");
+            XElement b = XElement.Parse(@"<foo><bar /></foo>");
+
+            // Act
+            var result = a.MergeWith(b);
+
+            // Assert
+            var elements = result.Elements().ToList();
+            Assert.AreEqual(2, elements.Count);
+            Assert.AreEqual("baz", elements[0].Name);
+            Assert.AreEqual("bar", elements[1].Name);
         }
 
         [TestMethod]

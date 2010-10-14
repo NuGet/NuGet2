@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Runtime.Versioning;
+    using System.Xml.Linq;
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
@@ -19,7 +20,7 @@
 
         // REVIEW: These should be externally pluggable
         private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
-            { ".transform", new XmlTransfomer() },
+            { ".transform", new XmlTransfomer(GetConfigMappings()) },
             { ".pp", new Preprocessor() }
         };
 
@@ -318,14 +319,17 @@
                                           from assemblyReference in assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>() // This can happen if package installed left the project in a bad state
                                           select assemblyReference;
 
-            // Get other files
+            // Get content files from other packages
+            // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
-                                    from file in p.GetContentFiles()
+                                    from file in p.GetContentFiles()                                    
+                                    where !_fileTransformers.ContainsKey(Path.GetExtension(file.Path)) 
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
             var assemblyReferencesToDelete = package.AssemblyReferences.Except(otherAssemblyReferences, PackageFileComparer.Default);
-            var contentFilesToDelete = package.GetContentFiles().Except(otherContentFiles, PackageFileComparer.Default);
+            var contentFilesToDelete = package.GetContentFiles()                                              
+                                              .Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
@@ -489,6 +493,15 @@
                           g.Key.Version <= projectFramework.Version
                     orderby g.Key.Version descending
                     select g).FirstOrDefault();
+        }
+
+        private static IDictionary<XName, Action<XElement, XElement>> GetConfigMappings() {
+            // REVIEW: This might be an edge case, but we're setting this rule for all xml files.
+            // If someone happens to do a transform where the xml file has a configSections node
+            // we will add it first. This is probably fine, but this is a config specific scenario
+            return new Dictionary<XName, Action<XElement, XElement>>() {
+                { "configSections" , (parent, element) => parent.AddFirst(element) }
+            };
         }
 
         private class PackageFileComparer : IEqualityComparer<IPackageFile> {
