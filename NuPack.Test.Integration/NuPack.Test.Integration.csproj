@@ -49,6 +49,9 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="NuPackCommandLine\CommandRunner.cs" />
     <Compile Include="NuPackCommandLine\NuPackCommandLineTest.cs" />
     <Compile Include="NuPackCommandLine\NuSpecFileContext.cs" />
