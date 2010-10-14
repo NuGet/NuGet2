@@ -7,7 +7,7 @@
     using System.Diagnostics.CodeAnalysis;
 
     public class UninstallWalker : BasicPackageWalker, IDependencyResolver {
-        private List<IPackage> _packages;
+        private Stack<IPackage> _packages;
 
         public UninstallWalker(IPackageRepository repository,
                                IDependencyResolver dependentsResolver,
@@ -30,10 +30,10 @@
             }
         }
 
-        public IList<IPackage> Packages {
+        public Stack<IPackage> Packages {
             get {
                 if (_packages == null) {
-                    _packages = new List<IPackage>();
+                    _packages = new Stack<IPackage>();
                 }
                 return _packages;
             }
@@ -79,7 +79,7 @@
         }
 
         protected override void Process(IPackage package) {
-            Packages.Add(package);
+            Packages.Push(package);
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
