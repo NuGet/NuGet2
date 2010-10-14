@@ -14,39 +14,50 @@ namespace NuPack.Dialog.Providers {
     /// a list of packages from a package feed which will be shown in the Add NuPack dialog.
     /// </summary>
     internal class OnlinePackagesProvider : VsExtensionsProvider, IVsProgressPaneConsumer {
-        private IVsExtensionsTreeNode m_SearchNode = null;
-        private bool m_OnlineDisabled;
-        private Dispatcher m_CurrentDispatcher;
-        private ResourceDictionary _resources;
+        private IVsExtensionsTreeNode _searchNode;
+        private readonly bool _onlineDisabled;
+        private Dispatcher _currentDispatcher;
+        private readonly ResourceDictionary _resources;
+        private readonly VSPackageManager _packageManager;
+        private readonly EnvDTE.Project _activeProject;
        
-        public OnlinePackagesProvider(ResourceDictionary resources, bool onlineDisabled) {
+        public OnlinePackagesProvider(VSPackageManager packageManager, EnvDTE.Project activeProject, ResourceDictionary resources, bool onlineDisabled) {
+
+            if (packageManager == null) {
+                throw new ArgumentNullException("packageManager");
+            }
+
+            if (activeProject == null) {
+                throw new ArgumentNullException("activeProject");
+            }
+
+            if (resources == null) {
+                throw new ArgumentNullException("resources");
+            }
+
             _resources = resources;
-            m_OnlineDisabled = onlineDisabled;
+            _onlineDisabled = onlineDisabled;
+            _packageManager = packageManager;
+            _activeProject = activeProject;
         }
 
         private IVsProgressPane ProgressPane { get; set; }
 
-        private EnvDTE.DTE DTE {
-            get {
-                return DTEExtensions.DTE;
-            }
-        }
-
         protected VSPackageManager PackageManager {
             get {
-                return VSPackageManager.GetPackageManager(DTE);
+                return _packageManager;
             }
         }
 
-        protected EnvDTE.Project Project {
+        protected EnvDTE.Project ActiveProject {
             get {
-                return DTE.GetActiveProject();
+                return _activeProject;
             }
         }
 
         protected ProjectManager ProjectManager {
             get {
-                return PackageManager.GetProjectManager(Project);
+                return this.PackageManager.GetProjectManager(ActiveProject);
             }
         }
 
@@ -71,7 +82,7 @@ namespace NuPack.Dialog.Providers {
         public override IVsExtensionsTreeNode ExtensionsTree {
             get {
                 if (RootNode == null) {
-                    this.m_CurrentDispatcher = Dispatcher.CurrentDispatcher;
+                    this._currentDispatcher = Dispatcher.CurrentDispatcher;
                     RootNode = new BasePackagesTree(null, String.Empty);
                     new Thread(new ThreadStart(CreateExtensionsTree)).Start();
                 }
@@ -111,21 +122,21 @@ namespace NuPack.Dialog.Providers {
         }
 
         public override IVsExtensionsTreeNode Search(string searchTerms) {
-            if (m_OnlineDisabled) return null;
+            if (_onlineDisabled) return null;
 
-            if (m_SearchNode != null) {
+            if (_searchNode != null) {
                 // dispose any search results
-                this.RootNode.Nodes.Remove(m_SearchNode);
-                m_SearchNode = null;
+                this.RootNode.Nodes.Remove(_searchNode);
+                _searchNode = null;
             }
 
             if (!string.IsNullOrEmpty(searchTerms)) {
-                m_SearchNode = new OnlinePackagesSearchNode(this, this.PackagesRepository, this.RootNode, searchTerms);
-                m_SearchNode.IsSelected = true;
-                ExtensionsTree.Nodes.Add(m_SearchNode);
+                _searchNode = new OnlinePackagesSearchNode(this, this.RootNode, searchTerms);
+                _searchNode.IsSelected = true;
+                ExtensionsTree.Nodes.Add(_searchNode);
             }
 
-            return m_SearchNode;
+            return _searchNode;
         }
 
         #region IVsProgressPaneConsumer Members
@@ -137,7 +148,7 @@ namespace NuPack.Dialog.Providers {
         #endregion
 
         private void CreateExtensionsTree() {
-            this.m_CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new ThreadStart(delegate() {
+            this._currentDispatcher.BeginInvoke(DispatcherPriority.Normal, new ThreadStart(delegate() {
                 if (this.ProgressPane != null && this.ProgressPane.Show(null, false)) {
                     this.ProgressPane.IsIndeterminate = true;
                 }
@@ -148,24 +159,24 @@ namespace NuPack.Dialog.Providers {
                 this.ProgressPane.Close();
             }
 
-            if (this.m_CurrentDispatcher != null) {
-                this.m_CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal,
+            if (this._currentDispatcher != null) {
+                this._currentDispatcher.BeginInvoke(DispatcherPriority.Normal,
                     new ThreadStart(delegate() {
                     //The user may have done a search before we finished getting the category list.
                     //temporarily remove it
-                    if (m_SearchNode != null) {
-                        RootNode.Nodes.Remove(m_SearchNode);
+                    if (_searchNode != null) {
+                        RootNode.Nodes.Remove(_searchNode);
                     }
 
                     //Add the special "All" node which doesn't filter by category.
-                    RootNode.Nodes.Add(new OnlinePackagesTree(this, PackagesRepository, "All", RootNode));
+                    RootNode.Nodes.Add(new OnlinePackagesTree(this, "All", RootNode));
 
                     rootNodes.ForEach(node => RootNode.Nodes.Add(node));
 
-                    if (m_SearchNode != null) {
+                    if (_searchNode != null) {
                         //Re-add the search node and select it if the user was doing a search
-                        RootNode.Nodes.Add(m_SearchNode);
-                        m_SearchNode.IsSelected = true;
+                        RootNode.Nodes.Add(_searchNode);
+                        _searchNode.IsSelected = true;
                     }
                     else {
                         //If they weren't doing a search, select the first category.
@@ -173,12 +184,6 @@ namespace NuPack.Dialog.Providers {
                     }
                 }
                 ));
-            }
-        }
-
-        internal static string CurrentLocale {
-            get {
-                return System.Globalization.CultureInfo.CurrentCulture.Name.ToLowerInvariant();
             }
         }
 
@@ -198,6 +203,10 @@ namespace NuPack.Dialog.Providers {
             ProjectManager.UpdatePackageReference(id, version);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance", 
+            "CA1822:MarkMembersAsStatic",
+            Justification="This method is invoked from XAML.")]
         public bool CanBeUpdated(IPackage package) {
             if (package == null) {
                 return false;
@@ -210,7 +219,7 @@ namespace NuPack.Dialog.Providers {
 
         public IEnumerable<IPackage> GetPackageDependencyGraph(IPackage rootPackage) {
             HashSet<IPackage> packageGraph = new HashSet<IPackage>();
-            if (DTE.Solution.IsOpen) {
+            if (DTEExtensions.DTE.Solution.IsOpen) {
 
                 EventHandler<PackageOperationEventArgs> handler = (s, o) => {
                     o.Cancel = true;

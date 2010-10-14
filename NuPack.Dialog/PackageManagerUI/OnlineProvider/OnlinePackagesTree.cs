@@ -1,37 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuPack.Dialog.Providers {
     internal class OnlinePackagesTree : OnlinePackagesTreeBase {
-        #region Private Members
 
-        private string m_Name;
-        private string Category { get; set; }
+        private string _category;
 
-        #endregion
+        public OnlinePackagesTree(OnlinePackagesProvider provider, string category, IVsExtensionsTreeNode parent) :
+            base(parent, provider) {
 
-        #region Constructors
-
-        /// <summary>
-        /// Constructor - requires provider
-        /// </summary>
-        /// <param name="provider">Instance of IVsTemplateProvider</param>
-        public OnlinePackagesTree(OnlinePackagesProvider provider, IPackageRepository repository, string category, IVsExtensionsTreeNode parent) :
-            base(repository, parent, provider) {
-            if (category == null) throw new ArgumentNullException("category");
-            this.Category = category;
+            if (category == null) {
+                throw new ArgumentNullException("category");
+            }
+            _category = category;
         }
-
-        #endregion
 
         public override string Name {
             get {
-                if (m_Name == null) {
-                    m_Name = Category;
-                }
-                return m_Name;
+                return _category;
             }
         }
 
@@ -39,8 +26,7 @@ namespace NuPack.Dialog.Providers {
             return query;
         }
 
-        protected override void FillNodes(IList<IVsExtensionsTreeNode> nodes) {
-
+        protected override void FillNodes(System.Collections.Generic.IList<IVsExtensionsTreeNode> nodes) {
         }
     }
 }

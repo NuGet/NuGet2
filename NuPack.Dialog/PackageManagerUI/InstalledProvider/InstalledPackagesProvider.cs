@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -11,8 +12,8 @@ namespace NuPack.Dialog.Providers {
         private readonly ResourceDictionary _resources;
         private object _mediumIconDataTemplate;
 
-        public InstalledPackagesProvider(ResourceDictionary resources)
-            : base(resources, false) {
+        public InstalledPackagesProvider(VSPackageManager packageManager, EnvDTE.Project activeProject, ResourceDictionary resources)
+            : base(packageManager, activeProject, resources, false) {
             _resources = resources;
         }
 

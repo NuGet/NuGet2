@@ -15,8 +15,8 @@ namespace NuPack.Dialog.Providers {
         /// Constructor - requires provider
         /// </summary>
         /// <param name="provider">Instance of IVsTemplateProvider</param>
-        public OnlinePackagesSearchNode(OnlinePackagesProvider provider, IPackageRepository repository, IVsExtensionsTreeNode parent, string searchText) :
-            base(repository, parent, provider) {
+        public OnlinePackagesSearchNode(OnlinePackagesProvider provider, IVsExtensionsTreeNode parent, string searchText) :
+            base(parent, provider) {
             this.SearchText = searchText;
 
             // Mark this node as a SearchResults node to assist navigation in ExtensionsExplorer

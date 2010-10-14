@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuPack.Dialog.Providers {
@@ -16,33 +15,21 @@ namespace NuPack.Dialog.Providers {
         private IList<IVsExtension> _extensions = null;
         private IList<IVsExtensionsTreeNode> _nodes = null;
         private int _totalPages = 1, _currentPage = 1;
-        private Dispatcher _currentDispatcher;
         private bool _progressPaneActive;
         private bool _isExpanded;
         private bool _isSelected;
-        private QueryState _activeQueryState;
         private object _activeQueryStateLock = new object();
         private bool _activeQueryStateCancelled;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<EventArgs> PageDataChanged;
 
-        internal OnlinePackagesTreeBase(IPackageRepository repository, IVsExtensionsTreeNode parent, OnlinePackagesProvider provider) {
-            if (repository == null) {
-                throw new ArgumentNullException("repository");
-            }
-
+        internal OnlinePackagesTreeBase(IVsExtensionsTreeNode parent, OnlinePackagesProvider provider) {
             Parent = parent;
-            Repository = repository;
             Provider = provider;
         }
 
         protected OnlinePackagesProvider Provider {
-            get;
-            set;
-        }
-
-        protected IPackageRepository Repository {
             get;
             set;
         }
@@ -52,6 +39,10 @@ namespace NuPack.Dialog.Providers {
             set;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance", 
+            "CA1811:AvoidUncalledPrivateCode",
+            Justification="We will need this property soon.")]
         private IVsMessagePane MessagePane {
             get;
             set;
@@ -187,7 +178,6 @@ namespace NuPack.Dialog.Providers {
             if (_extensions != null) {
                 _extensions.Clear();
             }
-            _currentDispatcher = Dispatcher.CurrentDispatcher;
             GetExtensionsForPage(pageNumber);
         }
 
@@ -201,7 +191,6 @@ namespace NuPack.Dialog.Providers {
         private void CancelCurrentExtensionQuery() {
             lock (_activeQueryStateLock) {
                 Trace.WriteLine("Cancelling pending extensions query");
-                _activeQueryState = null;
                 _activeQueryStateCancelled = true;
             }
 
@@ -220,10 +209,6 @@ namespace NuPack.Dialog.Providers {
             var query = GetQuery();
 
             lock (_activeQueryStateLock) {
-                //Create a new user state object that can be used for tracking this query.
-                _activeQueryState = new QueryState() {
-                    PageNumber = pageNumber,
-                };
                 _activeQueryStateCancelled = false;
             }
 
@@ -234,7 +219,9 @@ namespace NuPack.Dialog.Providers {
 
         private delegate void ExecuteDelegate(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async);
 
+        // TODO: Investigate whether we should avoid catching general Exception
         // Temporary method for async
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ExecuteAsync(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async) {
             IEnumerable<IPackage> packages = null;
             int totalCount = 0;
@@ -272,8 +259,6 @@ namespace NuPack.Dialog.Providers {
             IEnumerable<IPackage> packages = args.Results;
 
             lock (_activeQueryStateLock) {
-                //Reset the currently active query.
-                _activeQueryState = null;
                 _activeQueryStateCancelled = false;
             }
 
@@ -311,13 +296,5 @@ namespace NuPack.Dialog.Providers {
         public void SetMessagePane(IVsMessagePane messagePane) {
             MessagePane = messagePane;
         }
-
-        /// <summary>
-        /// A class used as a the userState object for ExecuteASync
-        /// </summary>
-        private class QueryState {
-            public int PageNumber { get; set; }
-        }
-
     }
 }

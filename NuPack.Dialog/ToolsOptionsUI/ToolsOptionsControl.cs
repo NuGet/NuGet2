@@ -130,6 +130,10 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability", 
+            "CA2000:Dispose objects before losing scope",
+            Justification="Cannot dispose e.Font object because it is shared.")]
         private void AllPackageSourcesList_DrawItem(object sender, DrawItemEventArgs e) {
             // Draw the background of the ListBox control for each item.
             e.DrawBackground();
@@ -140,24 +144,35 @@ namespace NuPack.Dialog.ToolsOptionsUI {
 
             var currentItem = PackageSourcesListBox.Items[e.Index];
 
-            // if the item is the active package source, draw it in bold
-            Font newFont = (_activePackageSource != null && _activePackageSource.Equals(currentItem)) ?
-                new Font(e.Font, FontStyle.Bold) :
-                e.Font;
+            using (StringFormat drawFormat = new StringFormat {
+                        Alignment = StringAlignment.Near,
+                        Trimming = StringTrimming.EllipsisCharacter,
+                        LineAlignment = StringAlignment.Center}) {
 
-            StringFormat drawFormat = new StringFormat {
-                Alignment = StringAlignment.Near,
-                Trimming = StringTrimming.EllipsisCharacter,
-                LineAlignment = StringAlignment.Center
-            };
+                // if the item is the active package source, draw it in bold
+                Font newFont = (_activePackageSource != null && _activePackageSource.Equals(currentItem)) ?
+                            new Font(e.Font, FontStyle.Bold) : 
+                            e.Font;
 
-            // Draw the current item text based on the current Font 
-            // and the custom brush settings.
-            e.Graphics.DrawString(PackageSourcesListBox.GetItemText(currentItem),
-                newFont, new SolidBrush(e.ForeColor), e.Bounds, drawFormat);
+                using (Brush foreBrush = new SolidBrush(e.ForeColor)) {
+                    // Draw the current item text based on the current Font 
+                    // and the custom brush settings.
+                    e.Graphics.DrawString(
+                        PackageSourcesListBox.GetItemText(currentItem), 
+                        newFont, 
+                        foreBrush, 
+                        e.Bounds, 
+                        drawFormat);
 
-            // If the ListBox has focus, draw a focus rectangle around the selected item.
-            e.DrawFocusRectangle();
+                    // If the ListBox has focus, draw a focus rectangle around the selected item.
+                    e.DrawFocusRectangle();
+                }
+
+                // only dispose the Font object if we create it. Do NOT dispose the shared e.Font object.
+                if (newFont != e.Font) {
+                    newFont.Dispose();
+                }
+            }
         }
 
         private void PackageSourcesListBox_KeyDown(object sender, KeyEventArgs e) {

@@ -1,5 +1,6 @@
 ﻿<pfui:DialogWindow
-    x:Uid="PackageManagerDialog" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    x:Class="NuPack.Dialog.PackageManagerUI.PackageManagerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:shared="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,137 +11,142 @@
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:ExtensionsExplorer="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer;assembly=Microsoft.VisualStudio.ExtensionsExplorer"
     mc:Ignorable="d"
-    x:Class="NuPack.Dialog.PackageManagerUI.PackageManagerWindow"
     Background="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundGradientKey}}"
     Title="Add Package Reference"
     WindowStartupLocation="CenterOwner"
-    HasHelpButton="True" HasMaximizeButton="False" HasMinimizeButton="False"
-    ResizeMode="CanResize" ShowInTaskbar="False" SnapsToDevicePixels="True"
-    Width="955" Height="660" MinWidth="800" MinHeight="450"
+    HasHelpButton="True" 
+    HasMaximizeButton="False" 
+    HasMinimizeButton="False"
+    ResizeMode="CanResize" 
+    ShowInTaskbar="False" 
+    SnapsToDevicePixels="True"
+    Width="900" 
+    Height="600" 
+    MinWidth="800" 
+    MinHeight="450"
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
-    Hyperlink.RequestNavigate="HandleRequestNavigate"
-    Loaded="Window_Loaded"
     Closed="DialogWindow_Closed">
+    
     <Window.Resources>
-      <ResourceDictionary x:Uid="ResourceDictionary_1">
-        <ResourceDictionary.MergedDictionaries>
-          <ResourceDictionary x:Uid="ResourceDictionary_2" Source="CommonStyles.xaml" />
-          <ResourceDictionary Source="TemplateStyles.xaml" />
-          <ResourceDictionary Source="OnlineProviderTemplates.xaml" />
-        </ResourceDictionary.MergedDictionaries>
-        <!--XAML for style taken from env\shell\UIInternal\Styles\MainWindowStyle.xaml-->
-        <Style x:Uid="Style_2" x:Key="mainGridStyle" TargetType="{x:Type Grid}">
-            <Style.Triggers>
-                <!-- Turn on the textured background when gradients are enabled -->
-                <DataTrigger x:Uid="DataTrigger_2" Binding="{Binding Source={x:Static pfui:EnvironmentRenderCapabilities.Current}, Path=AreGradientsAllowed}"
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+                <ResourceDictionary Source="TemplateStyles.xaml" />
+                <ResourceDictionary Source="OnlineProviderTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <Style x:Key="mainGridStyle" TargetType="{x:Type Grid}">
+                <Style.Triggers>
+                    <!-- Turn on the textured background when gradients are enabled -->
+                    <DataTrigger  Binding="{Binding Source={x:Static pfui:EnvironmentRenderCapabilities.Current}, Path=AreGradientsAllowed}"
                              Value="True">
-                    <Setter x:Uid="Setter_4" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundTextureKey}}" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-            <DataTemplate x:Uid="MediumIconTemplate_1" x:Key="MediumIconTemplate" DataType="{x:Type  ExtensionsExplorer:IVsExtension}" >
-                 <Grid x:Uid="MediumIconviewDataTemplateGridUid" MinHeight="16" Width="420" HorizontalAlignment="Left" >
+                        <Setter  Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundTextureKey}}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <DataTemplate  x:Key="MediumIconTemplate" DataType="{x:Type ExtensionsExplorer:IVsExtension}" >
+                <Grid MinHeight="16" Width="420" HorizontalAlignment="Left" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="400" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="1"  x:Uid="StackPanel_10" Orientation="Horizontal" Width="400" HorizontalAlignment="Left" >
-                        <TextBlock x:Uid="TextBlock_1" Text="{Binding Path=NonNullName}" ToolTip="{Binding Path=Description}" Width="300" MinHeight="16"
-                       Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="NoWrap" TextAlignment="Left" TextTrimming="WordEllipsis" />
-                        <TextBlock x:Uid="TextBlock_2" HorizontalAlignment="Left" Text="{Binding Path=Version}" ToolTip="{Binding Path=FullPath}" Width="80" MinHeight="16"
-                       Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="NoWrap" TextAlignment="Left" TextTrimming="WordEllipsis"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Width="400" HorizontalAlignment="Left" >
+                        <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Description}" Width="300" MinHeight="16"
+                            Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="NoWrap" TextAlignment="Left" TextTrimming="WordEllipsis" />
+                        <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Version}" ToolTip="{Binding Path=FullPath}" Width="80" MinHeight="16"
+                            Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="NoWrap" TextAlignment="Left" TextTrimming="WordEllipsis"/>
                     </StackPanel>
                 </Grid>
             </DataTemplate>
-            <DataTemplate x:Uid="DataTemplate_OnlineTileTemplateA" x:Key="OnlineTileTemplateA">
+            <DataTemplate  x:Key="OnlineTileTemplateA">
                 <DataTemplate.Resources>
-                    <BooleanToVisibilityConverter x:Uid="BooleanToVisibilityConverter_1" x:Key="boolToVis" />
+                    <BooleanToVisibilityConverter  x:Key="boolToVis" />
                 </DataTemplate.Resources>
-                <Grid x:Uid="Grid_6" >
+                <Grid  >
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition x:Uid="ColumnDefinition_9" Width="38" />
-                        <ColumnDefinition x:Uid="ColumnDefinition_10" Width="*" />
-                        <ColumnDefinition x:Uid="ColumnDefinition_11" Width="Auto" />
+                        <ColumnDefinition  Width="38" />
+                        <ColumnDefinition  Width="*" />
+                        <ColumnDefinition  Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel x:Uid="StackPanel_6" Grid.Column="1" >
-                        <self:TextBlockControl x:Uid="TextBlock_TileNameOnline" 
-                                       AutomationProperties.AutomationId="TextBlock_TileNameOnline" 
-                                       Text="{Binding Name}" FontWeight="Bold" FontSize="14" MinHeight="30">
+                    <StackPanel Grid.Column="1">
+                        <self:TextBlockControl  
+                            AutomationProperties.AutomationId="TextBlock_TileNameOnline"
+                            Text="{Binding Name}" FontWeight="Bold" FontSize="14" MinHeight="30">
                             <TextBlock.ToolTip>
-                                <TextBlock x:Uid="TextBlock_2" Text="{Binding Name}" />
+                                <TextBlock  Text="{Binding Name}" />
                             </TextBlock.ToolTip>
                         </self:TextBlockControl>
-                        <self:TextBlockControl x:Uid="TextBlock_TileDescriptionOnline"
-                                       AutomationProperties.AutomationId="TextBlock_TileDescriptionOnline" 
-                                       Text="{Binding Description}" TextTrimming="CharacterEllipsis" MaxHeight="20">
+                        <self:TextBlockControl 
+                            AutomationProperties.AutomationId="TextBlock_TileDescriptionOnline" 
+                            Text="{Binding Description}" TextTrimming="CharacterEllipsis" MaxHeight="20">
                             <TextBlock.ToolTip>
-                                <TextBlock x:Uid="TextBlock_1" Text="{Binding Description}" />
+                                <TextBlock Text="{Binding Description}" />
                             </TextBlock.ToolTip>
                         </self:TextBlockControl>
-                        <self:TextBlockControl x:Uid="TextBlock_Space"
-                                       Text="" MinHeight="10">
+                        <self:TextBlockControl 
+                             Text="" MinHeight="10">
                         </self:TextBlockControl>
                     </StackPanel>
-                    <StackPanel x:Uid="StackPanel_7" Grid.Column="3" >
-                        <self:TextBlockControl x:Uid="TextBlock_Version" 
-                                       AutomationProperties.AutomationId="TextBlock_Version" 
-                                       Text="{Binding Version}">
+                    <StackPanel Grid.Column="3">
+                        <self:TextBlockControl  
+                            AutomationProperties.AutomationId="TextBlock_Version" 
+                            Text="{Binding Version}">
                         </self:TextBlockControl>
                     </StackPanel>
-
                 </Grid>
             </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
+
     <Window.CommandBindings>
-        <CommandBinding x:Uid="CommandBinding_UninstallPackage" Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
+        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
                     CanExecute="CanExecuteUninstallPackage"
                     Executed="ExecutedUninstallPackage" />
-        <CommandBinding x:Uid="CommandBinding_UpdatePackage" Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
+        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
                     CanExecute="CanExecuteUpdatePackage"
                     Executed="ExecutedUpdatePackage" />
-        <CommandBinding x:Uid="CommandBinding_Close" Command="ApplicationCommands.Close"
+        <CommandBinding  Command="ApplicationCommands.Close"
                     CanExecute="CanExecuteClose"
                     Executed="ExecutedClose" />
-        <CommandBinding x:Uid="CommandBinding_InstallPackage" Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
+        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
                     CanExecute="CanExecuteInstallPackage"
                     Executed="ExecutedInstallPackage" />
-        <CommandBinding x:Uid="CommandBinding_ShowOptionsPage" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
+        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
                     Executed="ExecutedShowOptionsPage" />
-        <CommandBinding x:Uid="CommandBinding_OpenLicenseLink" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}"
+        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}"
                     Executed="ExecuteOpenLicenseLink" />
     </Window.CommandBindings>
+
     <Window.InputBindings>
-      <KeyBinding x:Uid="KeyBinding_1" Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
+        <KeyBinding  Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
     </Window.InputBindings>
-    
-    <Grid x:Uid="mainGrid" x:Name="mainGrid" >
+
+    <Grid x:Name="mainGrid">
         <Grid.Resources>
-            <Style x:Uid="hiddenWhenRequiredRestartMessageNullStyle" x:Key="hiddenWhenRequiredRestartMessageNullStyle" >
+            <Style x:Key="hiddenWhenRequiredRestartMessageNullStyle" >
                 <Style.Triggers>
-                    <DataTrigger x:Uid="DataTrigger_1" Binding="{Binding RestartRequired}" Value="{x:Null}" >
-                        <Setter x:Uid="Setter_1" Property="UIElement.Visibility" Value="Hidden" />
+                    <DataTrigger  Binding="{Binding RestartRequired}" Value="{x:Null}" >
+                        <Setter  Property="UIElement.Visibility" Value="Hidden" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <!--<RowDefinition x:Uid="RowDefinition_10" Height="Auto"/>-->
-            <RowDefinition x:Uid="RowDefinition_11" Height="*" />
-            <RowDefinition x:Uid="RowDefinition_12" Height="Auto"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <Grid x:Uid="sharedControlGrid" Grid.Row="0" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
+
+        <Grid  Grid.Row="0" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
             <Grid.RowDefinitions>
-                <RowDefinition x:Uid="RowDefinition_13" />
-                <RowDefinition x:Uid="RowDefinition_14" Height="Auto" />
+                <RowDefinition  />
+                <RowDefinition  Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.Effect>
-                <DropShadowEffect x:Uid="DropShadowEffect_1" Direction="270" Opacity="0.25" ShadowDepth="3" />
+                <DropShadowEffect  Direction="270" Opacity="0.25" ShadowDepth="3" />
             </Grid.Effect>
             <shared:VSExtensionsExplorerCtl
-                x:Uid="_explorer"
+                
                 x:Name="explorer"
                 ActiveView="MediumIcons"
                 HorizontalAlignment="Stretch"
@@ -150,7 +156,7 @@
                 IsMediumIconsViewButtonVisible="True"
                 IsSmallIconsViewButtonVisible="True"
                 IsLargeIconsViewButtonVisible="False"/>
-            <StackPanel x:Uid="StackPanel_2" Grid.Row="1" Margin="0,2">
+            <StackPanel  Grid.Row="1" Margin="0,2">
             </StackPanel>
         </Grid>
 
@@ -166,28 +172,26 @@
                 TextWrapping="Wrap" />
         </Border>
 
-        <Grid x:Uid="Grid_5" x:Name="FooterGrid" Grid.Row="1" MinHeight="50">
+        <Grid x:Name="FooterGrid" Grid.Row="1" MinHeight="50">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Uid="ColumnDefinition_6" x:Name="FooterGridCol1"/>
-                <ColumnDefinition x:Uid="ColumnDefinition_7" x:Name="FooterGridCol2" Width="Auto"/>
+                <ColumnDefinition x:Name="FooterGridCol1"/>
+                <ColumnDefinition x:Name="FooterGridCol2" Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border x:Uid="Border_3"
-                    x:Name="FooterBorder"
-                    CornerRadius="3"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="12"
-                    >
-               
+            <Border 
+                x:Name="FooterBorder"
+                CornerRadius="3"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Margin="12">
             </Border>
-            <Grid x:Uid="Grid_7" Grid.Column="0" x:Name="FooterButtonGridL" Margin="12,12,12,12">
-                <StackPanel x:Uid="StackPanel_2" x:Name="FooterButtonLeftPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Button x:Uid="Button_Settings" MinWidth="75" MinHeight="23" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" Content="Settings..."/>
+            <Grid  Grid.Column="0" x:Name="FooterButtonGridL" Margin="12,12,12,12">
+                <StackPanel  x:Name="FooterButtonLeftPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                    <Button  MinWidth="75" MinHeight="23" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" Content="Settings..."/>
                 </StackPanel>
             </Grid>
-            <Grid x:Uid="Grid_6" Grid.Column="1" x:Name="FooterButtonGrid" Margin="0,12,12,12">
-                <StackPanel x:Uid="StackPanel_1" x:Name="FooterButtonRightPanel" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                    <Button x:Uid="Button_CloseDialog" MinWidth="75" MinHeight="23" Command="ApplicationCommands.Close" Content="_Close" IsCancel="True" />
+            <Grid Grid.Column="1" x:Name="FooterButtonGrid" Margin="0,12,12,12">
+                <StackPanel x:Name="FooterButtonRightPanel" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                    <Button MinWidth="75" MinHeight="23" Command="ApplicationCommands.Close" Content="_Close" IsCancel="True" />
                 </StackPanel>
             </Grid>
         </Grid>

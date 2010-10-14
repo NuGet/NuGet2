@@ -25,6 +25,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ToolsOptionsControl));
             this.NPackURILabel = new System.Windows.Forms.Label();
             this.NewPackageSource = new System.Windows.Forms.TextBox();
             this.addButton = new System.Windows.Forms.Button();
@@ -38,49 +39,29 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             // 
             // NPackURILabel
             // 
-            this.NPackURILabel.AutoSize = true;
-            this.NPackURILabel.Location = new System.Drawing.Point(2, 7);
-            this.NPackURILabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            resources.ApplyResources(this.NPackURILabel, "NPackURILabel");
             this.NPackURILabel.Name = "NPackURILabel";
-            this.NPackURILabel.Size = new System.Drawing.Size(138, 13);
-            this.NPackURILabel.TabIndex = 0;
-            this.NPackURILabel.Text = "Available package sources:";
             // 
             // NewPackageSource
             // 
-            this.NewPackageSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.NewPackageSource.Location = new System.Drawing.Point(5, 136);
+            resources.ApplyResources(this.NewPackageSource, "NewPackageSource");
             this.NewPackageSource.Name = "NewPackageSource";
-            this.NewPackageSource.Size = new System.Drawing.Size(302, 20);
-            this.NewPackageSource.TabIndex = 4;
             // 
             // addButton
             // 
-            this.addButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.addButton.Location = new System.Drawing.Point(311, 133);
-            this.addButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            resources.ApplyResources(this.addButton, "addButton");
             this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(79, 23);
-            this.addButton.TabIndex = 5;
-            this.addButton.Text = "&Add";
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
             // 
             // PackageSourcesListBox
             // 
-            this.PackageSourcesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            resources.ApplyResources(this.PackageSourcesListBox, "PackageSourcesListBox");
             this.PackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
             this.PackageSourcesListBox.DisplayMember = "Source";
             this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.PackageSourcesListBox.FormattingEnabled = true;
-            this.PackageSourcesListBox.ItemHeight = 20;
-            this.PackageSourcesListBox.Location = new System.Drawing.Point(5, 29);
-            this.PackageSourcesListBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.PackageSourcesListBox.Name = "PackageSourcesListBox";
-            this.PackageSourcesListBox.Size = new System.Drawing.Size(302, 84);
-            this.PackageSourcesListBox.TabIndex = 1;
             this.PackageSourcesListBox.ValueMember = "Source";
             this.PackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.AllPackageSourcesList_DrawItem);
             this.PackageSourcesListBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyDown);
@@ -91,42 +72,31 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.PackageSourcesContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CopyPackageSourceStripMenuItem});
             this.PackageSourcesContextMenu.Name = "contextMenuStrip1";
-            this.PackageSourcesContextMenu.Size = new System.Drawing.Size(153, 48);
+            resources.ApplyResources(this.PackageSourcesContextMenu, "PackageSourcesContextMenu");
             this.PackageSourcesContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.PackageSourcesContextMenu_ItemClicked);
             // 
             // CopyPackageSourceStripMenuItem
             // 
             this.CopyPackageSourceStripMenuItem.Name = "CopyPackageSourceStripMenuItem";
-            this.CopyPackageSourceStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.CopyPackageSourceStripMenuItem.Text = "Copy";
+            resources.ApplyResources(this.CopyPackageSourceStripMenuItem, "CopyPackageSourceStripMenuItem");
             // 
             // removeButton
             // 
-            this.removeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.removeButton.Location = new System.Drawing.Point(311, 57);
-            this.removeButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            resources.ApplyResources(this.removeButton, "removeButton");
             this.removeButton.Name = "removeButton";
-            this.removeButton.Size = new System.Drawing.Size(80, 23);
-            this.removeButton.TabIndex = 3;
-            this.removeButton.Text = "&Remove";
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.OnRemoveButtonClick);
             // 
             // defaultButton
             // 
-            this.defaultButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.defaultButton.Location = new System.Drawing.Point(310, 29);
-            this.defaultButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            resources.ApplyResources(this.defaultButton, "defaultButton");
             this.defaultButton.Name = "defaultButton";
-            this.defaultButton.Size = new System.Drawing.Size(80, 23);
-            this.defaultButton.TabIndex = 2;
-            this.defaultButton.Text = "&Set Default";
             this.defaultButton.UseVisualStyleBackColor = true;
             this.defaultButton.Click += new System.EventHandler(this.OnDefaultPackageSourceButtonClick);
             // 
             // ToolsOptionsControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.defaultButton);
             this.Controls.Add(this.removeButton);
@@ -135,7 +105,6 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.Controls.Add(this.NPackURILabel);
             this.Controls.Add(this.NewPackageSource);
             this.Name = "ToolsOptionsControl";
-            this.Size = new System.Drawing.Size(397, 174);
             this.PackageSourcesContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -145,12 +114,12 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         #endregion
 
         private System.Windows.Forms.Label NPackURILabel;
-        public System.Windows.Forms.TextBox NewPackageSource;
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.ListBox PackageSourcesListBox;
         private System.Windows.Forms.Button removeButton;
         private System.Windows.Forms.Button defaultButton;
         private ContextMenuStrip PackageSourcesContextMenu;
         private ToolStripMenuItem CopyPackageSourceStripMenuItem;
+        private TextBox NewPackageSource;
     }
 }

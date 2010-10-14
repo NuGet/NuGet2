@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using NuPack.Dialog.Providers;
 using DTEPackage = Microsoft.VisualStudio.Shell.Package;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.PackageManagerUI {
     /// <summary>
@@ -19,9 +19,6 @@ namespace NuPack.Dialog.PackageManagerUI {
         private readonly OnlinePackagesProvider _installedPackagesProvider;
         private readonly OnlinePackagesProvider _onlinePackagesProvider;
 
-        ///// <summary>
-        ///// Constructor for the Package Manager Window
-        ///// </summary>
         public PackageManagerWindow(DTEPackage ownerPackage)
             : base(F1Keyword) {
 
@@ -30,22 +27,18 @@ namespace NuPack.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            _installedPackagesProvider = new InstalledPackagesProvider(Resources);
+            VSPackageManager packageManager = VSPackageManager.GetPackageManager(DTEExtensions.DTE);
+            EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
+
+            _installedPackagesProvider = new InstalledPackagesProvider(packageManager, activeProject, Resources);
             this.explorer.Providers.Add(_installedPackagesProvider);
 
-            UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(Resources);
+            UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(packageManager, activeProject, Resources);
             this.explorer.Providers.Add(updatePackagesProvider);
 
-            _onlinePackagesProvider = new OnlinePackagesProvider(Resources, false);
+            _onlinePackagesProvider = new OnlinePackagesProvider(packageManager, activeProject, Resources, false);
             this.explorer.Providers.Add(_onlinePackagesProvider);
             this.explorer.SelectedProvider = _onlinePackagesProvider;
-        }
-
-        protected void Window_Loaded(object sender, EventArgs e) {
-        }
-
-
-        void HandleRequestNavigate(object sender, RoutedEventArgs e) {
         }
 
         private void ExecutedUninstallPackage(object sender, ExecutedRoutedEventArgs e) {
@@ -67,7 +60,6 @@ namespace NuPack.Dialog.PackageManagerUI {
             }
 
             provider.Uninstall(selectedItem.Id);
-
 
             // Remove the item from the "All" tree of installed packages
             var allTree = _installedPackagesProvider.ExtensionsTree.Nodes.First();

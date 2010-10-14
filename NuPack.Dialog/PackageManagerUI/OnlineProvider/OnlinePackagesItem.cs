@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -12,8 +11,6 @@ namespace NuPack.Dialog.Providers {
         private OnlinePackagesProvider _provider;
         private BitmapSource _previewImage;
         private NuPack.IPackage _packageIdentity;
-
-        private static ConcurrentDictionary<string, BitmapSource> s_previewImageDefault = new ConcurrentDictionary<string, BitmapSource>();
 
         /// <summary>
         /// The reference item is used within the Add NuPack dialog that we're using for Add Reference
@@ -65,12 +62,20 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
+        [SuppressMessage(
+            "Microsoft.Performance",
+            "CA1811:AvoidUncalledPrivateCode",
+            Justification = "This property is data-bound in XAML.")]
         public IEnumerable<string> Authors {
             get {
                 return _packageIdentity.Authors;
             }
         }
 
+        [SuppressMessage(
+            "Microsoft.Performance",
+            "CA1811:AvoidUncalledPrivateCode",
+            Justification = "This property is data-bound in XAML.")]
         public bool RequireLicenseAcceptance {
             get {
                 return _packageIdentity.RequireLicenseAcceptance;
@@ -103,10 +108,6 @@ namespace NuPack.Dialog.Providers {
         /// </summary>
         public BitmapSource PreviewImage {
             get {
-                if (_previewImage == null) {
-                    return _previewImage = GetPreviewImage();
-                }
-
                 return _previewImage;
             }
             private set {
@@ -114,18 +115,15 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        /// <summary>
-        /// Get the preview image for this reference
-        /// </summary>
-        private BitmapSource GetPreviewImage() {
-            return null;
-        }
-
         public float Priority {
             get;
             private set;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance",
+            "CA1811:AvoidUncalledPrivateCode",
+            Justification = "We will need this property soon.")]
         public BitmapSource ThumbnailImage {
             get;
             private set;
@@ -137,11 +135,7 @@ namespace NuPack.Dialog.Providers {
 
         private void OnNotifyPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {
-                try {
-                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                }
-                catch {
-                }
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
@@ -155,16 +149,14 @@ namespace NuPack.Dialog.Providers {
             private set;
         }
 
-        public string NonNullName {
-            get {
-                return this.Name ?? string.Empty;
-            }
-        }
-
         public string Id {
             get { return _packageIdentity.Id; }
         }
 
+        [SuppressMessage(
+            "Microsoft.Performance",
+            "CA1811:AvoidUncalledPrivateCode",
+            Justification = "This property is data-bound in XAML")]
         public string Dependencies {
             get {
                 StringBuilder dependencies = new StringBuilder();
