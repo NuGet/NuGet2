@@ -18,12 +18,6 @@
         <ILMergeInternalizeIgnoreFile>$(NuPackRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
         <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
     </PropertyGroup>
-    <ItemGroup>
-        <LicenseFileItems Include="$(MSBuildProjectDirectory)\..\LICENSE.txt" />
-        <ExeOutputItems Exclude="$(ExeBuildDirectory)\**\*.pdb" Include="$(ExeBuildDirectory)\**\*.*" />
-        <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
-        <ServerOutputItems Exclude="$(ServerBuildDirectory)\obj\*.*;$(ServerBuildDirectory)\**\*.cs;$(ServerBuildDirectory)\**\*.csproj" Include="$(ServerBuildDirectory)\**\*.*" />
-    </ItemGroup>
 
     <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; RunIntegrationTests">
     </Target>
@@ -53,19 +47,33 @@
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
+        <ItemGroup>
+            <ExeOutputItems Exclude="$(ExeBuildDirectory)\**\*.pdb" Include="$(ExeBuildDirectory)\**\*.*" />
+        </ItemGroup>
         <Message Text="Copying the NuPack Console output to $(ExeDropDirectory)" />
-        <Copy ContinueOnError="false" SourceFiles="@(ExeOutputItems)" DestinationFiles="@(ExeOutputItems -&gt;'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(ExeOutputItems)" DestinationFiles="@(ExeOutputItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
     <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
+        <ItemGroup>
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
+        </ItemGroup>
         <Message Text="Copying the NuPack Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
-        <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
+    
     <Target Name="CopyServerOutputToDropDirectory">
+        <ItemGroup>
+            <LicenseFileItems Include="$(MSBuildProjectDirectory)\..\LICENSE.txt" />
+        </ItemGroup>
         <Message Text="Copying the NuPack Server output to $(ServerDropDirectory)" />
-        <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
+    
     <Target Name="CopyLicenseToAllDirectories">
+        <ItemGroup>
+            <LicenseFileItems Include="$(MSBuildProjectDirectory)\..\LICENSE.txt" />
+        </ItemGroup>
         <Message Text="Copying the License to all drop directories" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -84,7 +92,7 @@
     </Target>
     
     <Target Name="RunIntegrationTests">
-	<MSBuild Projects="$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.csproj" Targets="RunIntegrationTests">
+    <MSBuild Projects="$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.csproj" Targets="RunIntegrationTests">
         </MSBuild>
     </Target>
 </Project>
