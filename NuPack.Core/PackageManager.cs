@@ -106,7 +106,7 @@
                 _logger = value;
             }
         }
- 
+
         public void InstallPackage(string packageId) {
             InstallPackage(packageId, version: null, ignoreDependencies: false);
         }
@@ -135,31 +135,29 @@
         }
 
         public virtual void InstallPackage(IPackage package, bool ignoreDependencies) {
-            InstallPackage(package, new InstallWalker(LocalRepository,
+            Execute(package, new InstallWalker(LocalRepository,
                                                       SourceRepository,
                                                       Logger,
                                                       ignoreDependencies));
         }
 
-        protected void InstallPackage(IPackage package, IPackageOperationResolver resolver) {
-            Execute(resolver.ResolveOperations(package));
-        }
+        private void Execute(IPackage package, IPackageOperationResolver resolver) {
+            foreach (PackageOperation operation in resolver.ResolveOperations(package)) {
+                bool packageExists = LocalRepository.Exists(operation.Package);
 
-        private void Execute(IEnumerable<PackageOperation> operations) {
-            Debug.Assert(operations != null, "packages shouldn't be null");
-
-            foreach (PackageOperation operation in operations) {                
                 if (operation.Action == PackageAction.Install) {
                     // If the package is already installed, then skip it
-                    if (LocalRepository.Exists(operation.Package)) {
+                    if (packageExists) {
                         Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
-                        continue;
                     }
-
-                    ExecuteInstall(operation.Package);
+                    else {
+                        ExecuteInstall(operation.Package);
+                    }
                 }
                 else {
-                    ExecuteUninstall(operation.Package);
+                    if (packageExists) {
+                        ExecuteUninstall(operation.Package);
+                    }
                 }
             }
         }
@@ -227,15 +225,11 @@
         }
 
         public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
-            UninstallPackage(package, new UninstallWalker(LocalRepository,
-                                                          new ReverseDependencyWalker(LocalRepository),
-                                                          Logger,
-                                                          removeDependencies,
-                                                          forceRemove));
-        }
-
-        public virtual void UninstallPackage(IPackage package, IPackageOperationResolver resolver) {
-            Execute(resolver.ResolveOperations(package));
+            Execute(package, new UninstallWalker(LocalRepository,
+                                                 new ReverseDependencyWalker(LocalRepository),
+                                                 Logger,
+                                                 removeDependencies,
+                                                 forceRemove));
         }
 
         private void ExecuteUninstall(IPackage package) {
