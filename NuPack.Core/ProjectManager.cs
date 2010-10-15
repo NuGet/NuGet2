@@ -73,17 +73,10 @@
 
         public ILogger Logger {
             get {
-                return _logger;
+                return _logger ?? NullLogger.Instance;
             }
             set {
                 _logger = value;
-                Project.Logger = value;
-            }
-        }
-
-        private ILogger LoggerInternal {
-            get {
-                return Logger ?? NullLogger.Instance;
             }
         }
 
@@ -154,25 +147,21 @@
         }
 
         protected virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
-            AddPackageReference(package, new ProjectInstallWalker(LocalRepository,
+            Execute(package, new ProjectInstallWalker(LocalRepository,
                                                                   SourceRepository,
                                                                   new ReverseDependencyWalker(LocalRepository),
-                                                                  LoggerInternal,
+                                                                  Logger,
                                                                   ignoreDependencies));
         }
 
-        protected void AddPackageReference(IPackage package, IPackageOperationResolver resolver) {
-            Execute(resolver.ResolveOperations(package));
-        }
-
-        private void Execute(IEnumerable<PackageOperation> operations) {
-            foreach (PackageOperation operation in operations) {
+        protected void Execute(IPackage package, IPackageOperationResolver resolver) {
+            foreach (PackageOperation operation in resolver.ResolveOperations(package)) {
                 bool packageExists = LocalRepository.Exists(operation.Package);
 
                 if (operation.Action == PackageAction.Install) {
                     // If the package is already installed, then skip it
                     if (packageExists) {
-                        LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
+                        Logger.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
                     }
                     else {
                         AddPackageReferenceToProject(operation.Package);
@@ -207,7 +196,7 @@
 
                 // If this assembly is already referenced by the project then skip it
                 if (Project.ReferenceExists(assemblyReference.Name)) {
-                    LoggerInternal.Log(MessageLevel.Warning, NuPackResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
+                    Logger.Log(MessageLevel.Warning, NuPackResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
                     continue;
                 }
 
@@ -217,7 +206,7 @@
             // Add package to local repository
             LocalRepository.AddPackage(package);
 
-            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
+            Logger.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
             OnPackageReferenceAdded(args);
         }
 
@@ -246,15 +235,11 @@
         }
 
         protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
-            RemovePackageReference(package, new UninstallWalker(LocalRepository,
-                                                                new ReverseDependencyWalker(LocalRepository),
-                                                                LoggerInternal,
-                                                                removeDependencies,
-                                                                force));
-        }
-
-        protected virtual void RemovePackageReference(IPackage package, IPackageOperationResolver resolver) {
-            Execute(resolver.ResolveOperations(package));
+            Execute(package, new UninstallWalker(LocalRepository,
+                                                 new ReverseDependencyWalker(LocalRepository),
+                                                 Logger,
+                                                 removeDependencies,
+                                                 force));
         }
 
         private void RemovePackageReferenceFromProject(IPackage package) {
@@ -299,7 +284,7 @@
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
+            Logger.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
             OnPackageReferenceRemoved(args);
         }
 
@@ -323,12 +308,12 @@
                     NuPackResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
             }
 
-            LoggerInternal.Log(MessageLevel.Debug, NuPackResources.Debug_LookingForUpdates, packageId);
+            Logger.Log(MessageLevel.Debug, NuPackResources.Debug_LookingForUpdates, packageId);
 
             IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
 
             if (package == null) {
-                LoggerInternal.Log(MessageLevel.Info, NuPackResources.Log_NoUpdatesAvailable, packageId);
+                Logger.Log(MessageLevel.Info, NuPackResources.Log_NoUpdatesAvailable, packageId);
             }
             else {
                 UpdatePackageReference(package, updateDependencies);

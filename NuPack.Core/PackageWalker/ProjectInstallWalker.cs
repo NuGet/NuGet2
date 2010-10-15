@@ -27,36 +27,39 @@
         protected override void OnBeforeDependencyWalk(IPackage package) {
             IPackage installedPackage = Repository.FindPackage(package.Id);
 
-            if (installedPackage != null) {
-                // First we get a list of dependents for the installed package.
-                // Then we find the dependency in the foreach dependent that this installed package used to satisfy.
-                // We then check if the resolved package also meets that dependency and if it doesn't it's added to the list
-                // i.e A1 -> C >= 1
-                //     B1 -> C >= 1
-                //     C2 -> []
-                // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
-                var dependents = from dependentPackage in GetDependents(installedPackage)
-                                 where !IsDependencySatisfied(dependentPackage, package)
-                                 select dependentPackage;
+            // Package isn't installed so do nothing
+            if (installedPackage == null) {
+                return;
+            }
+            
+            // First we get a list of dependents for the installed package.
+            // Then we find the dependency in the foreach dependent that this installed package used to satisfy.
+            // We then check if the resolved package also meets that dependency and if it doesn't it's added to the list
+            // i.e A1 -> C >= 1
+            //     B1 -> C >= 1
+            //     C2 -> []
+            // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
+            var dependents = from dependentPackage in GetDependents(installedPackage)
+                             where !IsDependencySatisfied(dependentPackage, package)
+                             select dependentPackage;
 
-                if (dependents.Any()) {
-                    throw CreatePackageConflictException(package, installedPackage, dependents);
-                }
-                else if (package.Version < installedPackage.Version) {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                        NuPackResources.NewerVersionAlreadyReferenced, package.Id));
+            if (dependents.Any()) {
+                throw CreatePackageConflictException(package, installedPackage, dependents);
+            }
+            else if (package.Version < installedPackage.Version) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuPackResources.NewerVersionAlreadyReferenced, package.Id));
 
-                }
-                else if (package.Version > installedPackage.Version) {
-                    // Turn warnings off, since were forcing uninstall
-                    IPackageOperationResolver resolver = new UninstallWalker(Repository, DependentsResolver, Logger, !IgnoreDependencies, forceRemove: true) {
-                        LogWarnings = false
-                    };
+            }
+            else if (package.Version > installedPackage.Version) {
+                // Turn warnings off, since were forcing uninstall
+                IPackageOperationResolver resolver = new UninstallWalker(Repository, DependentsResolver, Logger, !IgnoreDependencies, forceRemove: true) {
+                    LogWarnings = false
+                };
 
-                    foreach (var operation in resolver.ResolveOperations(installedPackage)) {
-                        Operations.Add(operation);
-                    }
+                foreach (var operation in resolver.ResolveOperations(installedPackage)) {
+                    Operations.Add(operation);
                 }
             }
         }
