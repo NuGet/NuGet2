@@ -26,9 +26,6 @@
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup" priority="0x2000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
       </Group>
-      <Group guid="guidNuPack_Dialog_PackageCmdSet" id="MyMenuGroup" priority="0x0600">
-          <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_REFERENCEROOT"/>
-      </Group>
     </Groups>
     
     <Buttons>
@@ -56,11 +53,12 @@
         </Strings>
       </Button>
 
-      <Button guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0x0100" type="Button">
-          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFERENCE" />
+      <Button guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x0100" type="Button">
+          <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
           <CommandFlag>DefaultInvisible</CommandFlag>
+          <CommandFlag>DynamicVisibility</CommandFlag>
           <Strings>
-              <CommandName>cmdidASPNETPackages</CommandName>
+              <CommandName>cmdidAddPackages</CommandName>
               <ButtonText>Add Pac&amp;kage Reference...</ButtonText>
           </Strings>
       </Button>
@@ -90,23 +88,23 @@
   </Commands>
 
   <VisibilityConstraints>
-    <VisibilityItem guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" context="UICONTEXT_SolutionExists" />
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExists" />
   </VisibilityConstraints>
 
   <CommandPlacements>
-      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
       </CommandPlacement>
-      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
       </CommandPlacement>
-      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
       </CommandPlacement>
-      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidVenusCmdId" id="IDG_VENUS_CTX_REFERENCE"/>
       </CommandPlacement>
-      <CommandPlacement guid="guidNuPack_Dialog_PackageCmdSet" id="cmdidASPNETPackages" priority="0xF100">
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
       </CommandPlacement>
   </CommandPlacements>
@@ -138,13 +136,15 @@
     </GuidSymbol>
     
     <!-- This is the guid used to group the menu commands together -->
-    <GuidSymbol name="guidNuPack_Dialog_PackageCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
-        <IDSymbol name="MyMenuGroup" value="0x1020" />
-        <IDSymbol name="cmdidASPNETPackages" value="0x0100" />
+    <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
+        <IDSymbol name="cmdidAddPackages" value="0x0100" />
     </GuidSymbol>
     <GuidSymbol name="guidVenusCmdId" value="{C7547851-4E3A-4E5B-9173-FA6E9C8BD82C}" >
         <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />
         <IDSymbol name="IDG_CTX_REFERENCE" value="0x102" />
+    </GuidSymbol>
+    <GuidSymbol name="guidReferenceContext" value="{D309F791-903F-11D0-9EFC-00A0C911004F}">
+      <IdSymbol name="cmdAddReferenceGroup" value="0x450" />
     </GuidSymbol>
   </Symbols>
 

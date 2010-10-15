@@ -25,9 +25,12 @@
                     yield return project;
                 }
 
-                foreach (ProjectItem projectItem in project.ProjectItems) {
-                    if (projectItem.SubProject != null) {
-                        projects.Push(projectItem.SubProject);
+                // ProjectItems property can be null if the project is unloaded
+                if (project.ProjectItems != null) {
+                    foreach (ProjectItem projectItem in project.ProjectItems) {
+                        if (projectItem.SubProject != null) {
+                            projects.Push(projectItem.SubProject);
+                        }
                     }
                 }
             }

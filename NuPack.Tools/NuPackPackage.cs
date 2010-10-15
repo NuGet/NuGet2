@@ -3,15 +3,14 @@ using System.ComponentModel.Design;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuPack.Dialog;
 using NuPack.Dialog.PackageManagerUI;
 using NuPack.Dialog.ToolsOptionsUI;
-using NuPackConsole.Implementation;
 using NuPack.VisualStudio;
-using EnvDTE;
+using NuPackConsole.Implementation;
 
 namespace NuPack.Tools {
     /// <summary>
@@ -49,17 +48,22 @@ namespace NuPack.Tools {
         /// See the Initialize method to see how the menu item is associated to this function using
         /// the OleMenuCommandService service and the MenuCommand class.
         /// </summary>
-        private void MenuItemCallback(object sender, EventArgs e) {
-            var window = new PackageManagerWindow(this);
-            try {
-                window.ShowModal();
-            }
-            catch (TargetInvocationException exception) {
-                MessageBox.Show((exception.InnerException ?? exception).Message);
+        private void ShowAddPackageDialog(object sender, EventArgs e) {
+            if (HasActiveLoadedProject) {
+                var window = new PackageManagerWindow(this);
+                try {
+                    window.ShowModal();
+                }
+                catch (TargetInvocationException exception) {
+                    MessageBox.Show((exception.InnerException ?? exception).Message);
+                }
             }
         }
 
-        #region Package Members
+        private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
+            OleMenuCommand command = (OleMenuCommand)sender;
+            command.Visible = HasActiveLoadedProject;
+        }
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -82,12 +86,22 @@ namespace NuPack.Tools {
                 mcs.AddCommand( menuToolWin );
 
                 // Create the command for the menu item.
-                CommandID menuCommandID = new CommandID(GuidList.guidNuPackDialogCmdSet, (int)PkgCmdIDList.cmdidASPNETPackages);
-                MenuCommand menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
+                CommandID menuCommandID = new CommandID(GuidList.guidNuPackDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
+                OleMenuCommand menuItem = new OleMenuCommand(ShowAddPackageDialog, null, BeforeQueryStatusForAddPackageDialog, menuCommandID);
                 mcs.AddCommand(menuItem);
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Gets whether the current IDE has an active and non-unloaded project, which is a precondition for
+        /// showing the Add Package Reference dialog
+        /// </summary>
+        private bool HasActiveLoadedProject {
+            get {
+                Project project = DTEExtensions.DTE.GetActiveProject();
+                // REVIEW: Is there a better check than ProjectItems and Properties?
+                return (project != null && project.ProjectItems != null && project.Properties != null);
+            }
+        }
     }
 }
