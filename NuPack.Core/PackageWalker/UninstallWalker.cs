@@ -134,9 +134,9 @@
 
                 foreach (var pair in SkippedPackages) {
                     if (!packages.Contains(pair.Key)) {
-                        Logger.Log(MessageLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
-                                    pair.Key,
-                                    String.Join(", ", pair.Value.Select(p => p.GetFullName())));
+                        Logger.Log(MessageLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents,
+                                   pair.Key,
+                                   String.Join(", ", pair.Value.Select(p => p.GetFullName())));
                     }
                 }
             }
@@ -152,16 +152,13 @@
         }
 
         private bool IsConnected(IPackage package) {
+            // We could cache the results of this lookup
             if (Marker.Packages.Contains(package, PackageComparer.IdAndVersionComparer)) {
                 return true;
             }
 
-            bool connected = false;
-            foreach (var dependent in DependentsResolver.GetDependents(package)) {
-                connected = IsConnected(dependent);
-            }
-
-            return connected;
+            IEnumerable<IPackage> dependents = DependentsResolver.GetDependents(package);
+            return dependents.Any() && dependents.All(IsConnected);
         }
     }
 }
