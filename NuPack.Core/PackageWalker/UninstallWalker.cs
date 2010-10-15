@@ -99,7 +99,7 @@
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return Repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
+            return Repository.FindPackage(dependency);
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
@@ -126,6 +126,7 @@
         }
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
+            Operations.Clear();
             Walk(package);
 
             if (LogWarnings) {
