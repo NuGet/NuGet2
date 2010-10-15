@@ -331,7 +331,7 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is already referencing a newer version of &apos;{1}&apos;.
+        ///   Looks up a localized string similar to Already referencing a newer version of &apos;{0}&apos;.
         /// </summary>
         internal static string NewerVersionAlreadyReferenced {
             get {

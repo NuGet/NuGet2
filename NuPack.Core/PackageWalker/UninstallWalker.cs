@@ -6,22 +6,40 @@
     using System.Linq;
     using NuPack.Resources;
 
-    public class UninstallWalker : BasicPackageWalker, IDependencyResolver {
-        private Stack<IPackage> _packages;
-
+    public class UninstallWalker : PackageWalker, IPackageOperationResolver {
         public UninstallWalker(IPackageRepository repository,
-                               IDependencyResolver dependentsResolver,
+                               IDependentsResolver dependentsResolver,
                                ILogger logger,
                                bool removeDependencies,
-                               bool forceRemove)
-            : base(repository, logger) {
+                               bool forceRemove) {
             if (dependentsResolver == null) {
                 throw new ArgumentNullException("dependentsResolver");
             }
+            if (repository == null) {
+                throw new ArgumentNullException("repository");
+            }
+            if (logger == null) {
+                throw new ArgumentNullException("logger");
+            }
+
+            Logger = logger;
+            Repository = repository;
             DependentsResolver = dependentsResolver;
             RemoveDependencies = removeDependencies;
             Force = forceRemove;
             SkippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
+            Operations = new Stack<PackageOperation>();
+            LogWarnings = true;
+        }
+
+        protected ILogger Logger {
+            get;
+            private set;
+        }
+
+        protected IPackageRepository Repository {
+            get;
+            private set;
         }
 
         protected override bool IgnoreDependencies {
@@ -30,13 +48,9 @@
             }
         }
 
-        public Stack<IPackage> Packages {
-            get {
-                if (_packages == null) {
-                    _packages = new Stack<IPackage>();
-                }
-                return _packages;
-            }
+        public Stack<PackageOperation> Operations {
+            get;
+            private set;
         }
 
         public bool RemoveDependencies {
@@ -49,52 +63,43 @@
             private set;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "It's not worth it creating a type for this")]
-        public IDictionary<IPackage, IEnumerable<IPackage>> SkippedPackages {
+        public bool LogWarnings {
+            get;
+            set;
+        }
+
+        private IDictionary<IPackage, IEnumerable<IPackage>> SkippedPackages {
+            get;
+            set;
+        }
+
+        protected IDependentsResolver DependentsResolver {
             get;
             private set;
         }
 
-        protected IDependencyResolver DependentsResolver {
-            get;
-            private set;
-        }
-
-        protected override void BeforeWalk(IPackage package) {
+        protected override void OnBeforeDependencyWalk(IPackage package) {
             // Before choosing to uninstall a package we need to figure out if it is in use
-            IEnumerable<IPackage> dependents = DependentsResolver.ResolveDependencies(package);
+            IEnumerable<IPackage> dependents = GetDependents(package);
             if (dependents.Any()) {
                 if (Force) {
                     // We're going to uninstall this package even though other packages depend on it
                     // Warn the user of the other packages that might break as a result and continue processing the package
-                    WarnRemovingPackageBreaksDependents(package, dependents);
+                    SkippedPackages[package] = dependents;
                 }
                 else {
                     // We're not ignoring dependents so raise an error telling the user what the dependents are
                     throw CreatePackageHasDependentsException(package, dependents);
                 }
             }
-
-            base.BeforeWalk(package);
         }
 
-        protected override void Process(IPackage package) {
-            Packages.Push(package);
+        protected override void OnAfterDependencyWalk(IPackage package) {
+            Operations.Push(new PackageOperation(package, PackageAction.Uninstall));
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
             return Repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
-        }
-
-        protected override bool SkipResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
-            IEnumerable<IPackage> dependents = DependentsResolver.ResolveDependencies(resolvedDependency)
-                                                                 .Except(Marker.Packages, PackageComparer.IdAndVersionComparer);
-            if (!Force && dependents.Any()) {
-                // If we aren't ignoring dependents then we skip this dependency if it has any dependents
-                SkippedPackages[resolvedDependency] = dependents;
-                return true;
-            }
-            return false;
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
@@ -120,20 +125,43 @@
                                 dependency));
         }
 
-        public IEnumerable<IPackage> ResolveDependencies(IPackage package) {
+        public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
             Walk(package);
-            LogSkippedPackages();
-            return Packages;
-        }
 
-        protected virtual void LogSkippedPackages() {
-            foreach (var pair in SkippedPackages) {
-                if (!Packages.Contains(pair.Key, PackageComparer.IdAndVersionComparer)) {
-                    Logger.Log(MessageLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
-                                pair.Key,
-                                String.Join(", ", pair.Value.Select(p => p.GetFullName())));
+            if (LogWarnings) {
+                var packages = new HashSet<IPackage>(from o in Operations
+                                                     select o.Package, PackageComparer.IdAndVersionComparer);
+
+                foreach (var pair in SkippedPackages) {
+                    if (!packages.Contains(pair.Key)) {
+                        Logger.Log(MessageLevel.Warning, NuPackResources.Warning_PackageSkippedBecauseItIsInUse,
+                                    pair.Key,
+                                    String.Join(", ", pair.Value.Select(p => p.GetFullName())));
+                    }
                 }
             }
+
+            return Operations;
+        }
+
+        private IEnumerable<IPackage> GetDependents(IPackage package) {
+            // REVIEW: Perf?
+            return from p in DependentsResolver.GetDependents(package)
+                   where !IsConnected(p)
+                   select p;
+        }
+
+        private bool IsConnected(IPackage package) {
+            if (Marker.Packages.Contains(package, PackageComparer.IdAndVersionComparer)) {
+                return true;
+            }
+
+            bool connected = false;
+            foreach (var dependent in DependentsResolver.GetDependents(package)) {
+                connected = IsConnected(dependent);
+            }
+
+            return connected;
         }
     }
 }

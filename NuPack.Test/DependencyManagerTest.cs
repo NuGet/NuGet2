@@ -37,10 +37,10 @@
             DependentsResolver lookup = new DependentsResolver(mockRepository);
 
             // Assert
-            Assert.AreEqual(0, lookup.ResolveDependencies(packageA1).Count());
-            Assert.AreEqual(0, lookup.ResolveDependencies(packageA2).Count());
-            Assert.AreEqual(1, lookup.ResolveDependencies(packageB1).Count());
-            Assert.AreEqual(1, lookup.ResolveDependencies(packageB2).Count());
+            Assert.AreEqual(0, lookup.GetDependents(packageA1).Count());
+            Assert.AreEqual(0, lookup.GetDependents(packageA2).Count());
+            Assert.AreEqual(1, lookup.GetDependents(packageB1).Count());
+            Assert.AreEqual(1, lookup.GetDependents(packageB2).Count());
         }
 
         [TestMethod]
@@ -52,13 +52,13 @@
                                                                  PackageDependency.CreateDependency("B")
                                                              });
 
-            IDependencyResolver resolver = new InstallWalker(new MockPackageRepository(),
+            IPackageOperationResolver resolver = new InstallWalker(new MockPackageRepository(),
                                                              new MockPackageRepository(),
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(package), "Unable to resolve dependency 'B'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(package), "Unable to resolve dependency 'B'");
         }
 
         [TestMethod]
@@ -81,13 +81,13 @@
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new InstallWalker(localRepository,
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'");
         }
 
         [TestMethod]
@@ -128,16 +128,16 @@
             sourceRepository.AddPackage(packageC);
             sourceRepository.AddPackage(packageD);
 
-            IDependencyResolver resolver = new InstallWalker(localRepository,
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false);
 
             // Act
-            var packages = resolver.ResolveDependencies(packageA).ToList();
+            var packages = resolver.ResolveOperations(packageA).ToList();
 
             // Assert
-            var dict = packages.ToDictionary(p => p.Id);
+            var dict = packages.ToDictionary(p => p.Package.Id);
             Assert.AreEqual(4, packages.Count);
             Assert.IsNotNull(dict["A"]);
             Assert.IsNotNull(dict["B"]);
@@ -182,17 +182,17 @@
             localRepository.AddPackage(packageC);
             localRepository.AddPackage(packageD);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
 
-            
+
 
             // Act
-            var packages = resolver.ResolveDependencies(packageA)
-                                   .ToDictionary(p => p.Id);
+            var packages = resolver.ResolveOperations(packageA)
+                                   .ToDictionary(p => p.Package.Id);
 
             // Assert
             Assert.AreEqual(4, packages.Count);
@@ -229,14 +229,14 @@
             sourceRepository.AddPackage(packageA15);
             sourceRepository.AddPackage(packageB10);
 
-            IDependencyResolver resolver = new InstallWalker(localRepository,
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false);
 
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageA10), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.5'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA10), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.5'");
         }
 
         [TestMethod]
@@ -253,13 +253,13 @@
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new InstallWalker(localRepository,
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageA), "Unable to resolve dependency 'B (>= 1.5)'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (>= 1.5)'");
         }
 
         [TestMethod]
@@ -278,13 +278,13 @@
             IPackage packageB = PackageUtility.CreatePackage("B", "1.4");
             sourceRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new InstallWalker(localRepository,
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageA), "Unable to resolve dependency 'B (= 1.5)'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'");
         }
 
         [TestMethod]
@@ -302,15 +302,15 @@
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
 
             // Act
-            var packages = resolver.ResolveDependencies(packageA)
-                                            .ToDictionary(p => p.Id);
+            var packages = resolver.ResolveOperations(packageA)
+                                            .ToDictionary(p => p.Package.Id);
 
             // Assert
             Assert.AreEqual(2, packages.Count);
@@ -332,14 +332,14 @@
 
             localRepository.AddPackage(packageA);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageA), "Unable to locate dependency 'B'. It may have been uninstalled");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to locate dependency 'B'. It may have been uninstalled");
         }
 
         [TestMethod]
@@ -357,14 +357,14 @@
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: false,
                                                                forceRemove: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it");
         }
 
         [TestMethod]
@@ -382,14 +382,14 @@
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveDependencies(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it");
         }
 
         [TestMethod]
@@ -407,15 +407,15 @@
             localRepository.AddPackage(packageA);
             localRepository.AddPackage(packageB);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: false,
                                                                forceRemove: true);
 
             // Act
-            var packages = resolver.ResolveDependencies(packageB)
-                             .ToDictionary(p => p.Id);
+            var packages = resolver.ResolveOperations(packageB)
+                             .ToDictionary(p => p.Package.Id);
 
             // Assert
             Assert.AreEqual(1, packages.Count);
@@ -423,18 +423,22 @@
         }
 
         [TestMethod]
-        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesUninstallsUnusedDependencies() {
+        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesThrowsIfDependencyInUse() {
             // Arrange
             var localRepository = new MockPackageRepository();
 
+            // A 1.0 -> [B, C] 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("B"),
                                                                 PackageDependency.CreateDependency("C")
                                                             });
 
+
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
             IPackage packageC = PackageUtility.CreatePackage("C", "1.0");
+
+            // D -> [C]
             IPackage packageD = PackageUtility.CreatePackage("D", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("C"),
@@ -445,20 +449,14 @@
             localRepository.AddPackage(packageB);
             localRepository.AddPackage(packageC);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
 
             // Act
-            var packages = resolver.ResolveDependencies(packageA)
-                                            .ToDictionary(p => p.Id);
-
-            // Assert     
-            Assert.AreEqual(2, packages.Count);
-            Assert.IsNotNull(packages["A"]);
-            Assert.IsNotNull(packages["B"]);
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to uninstall 'C 1.0' because 'D 1.0' depends on it");
         }
 
         [TestMethod]
@@ -484,21 +482,20 @@
             localRepository.AddPackage(packageC);
             localRepository.AddPackage(packageD);
 
-            IDependencyResolver resolver = new UninstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
                                                                new DependentsResolver(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: true);
 
             // Act
-            var packages = resolver.ResolveDependencies(packageA)
-                                   .ToDictionary(p => p.Id);
+            var packages = resolver.ResolveOperations(packageA)
+                                   .ToDictionary(p => p.Package.Id);
 
             // Assert            
             Assert.IsNotNull(packages["A"]);
             Assert.IsNotNull(packages["B"]);
             Assert.IsNotNull(packages["C"]);
         }
-
     }
 }

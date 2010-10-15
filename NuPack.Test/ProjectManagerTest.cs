@@ -57,7 +57,7 @@
             ExceptionAssert.Throws<UnauthorizedAccessException>(() => projectManager.AddPackageReference("A"));
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
         }
 
         [TestMethod]
@@ -102,7 +102,7 @@
             sourceRepository.AddPackage(packageB10);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", Version.Parse("1.0")), @"C:\MockFileSystem\ is already referencing a newer version of 'A'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", Version.Parse("1.0")), @"Already referencing a newer version of 'A'");
         }
 
         [TestMethod]
@@ -135,7 +135,7 @@
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
         }
 
         [TestMethod]
@@ -162,7 +162,7 @@
             projectManager.RemovePackageReference("foo");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(package));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(package));
         }
 
         [TestMethod]
@@ -433,10 +433,10 @@
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB20));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB20));
         }
 
         [TestMethod]
@@ -496,12 +496,12 @@
             projectManager.UpdatePackageReference("A");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageC20));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageD10));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageC10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageD10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageC10));
         }
 
         [TestMethod]
@@ -534,7 +534,7 @@
             projectManager.LocalRepository.AddPackage(packageA20);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: Version.Parse("1.0")), @"C:\MockFileSystem\ is already referencing a newer version of 'A'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: Version.Parse("1.0")), @"Already referencing a newer version of 'A'");
         }
 
         [TestMethod]
@@ -605,10 +605,10 @@
             projectManager.UpdatePackageReference("A", version: null, updateDependencies: false);
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA20));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB10));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageB20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB20));
         }
 
         [TestMethod]
@@ -651,10 +651,10 @@
             projectManager.UpdatePackageReference("C");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageC20));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageC10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageC10));
         }
 
         [TestMethod]
@@ -711,14 +711,14 @@
             projectManager.UpdatePackageReference("A");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageC20));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageD10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageG10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageD10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageG10));
 
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageC10));
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageC10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
         }
 
         [TestMethod]
@@ -771,7 +771,7 @@
             sourceRepository.AddPackage(packageC20);
             sourceRepository.AddPackage(packageD10);
 
-            // Act
+            // Act 
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'");
         }
 
@@ -820,8 +820,8 @@
             projectManager.UpdatePackageReference("NetFramework");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(package10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(package35));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(package10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(package35));
         }
 
         [TestMethod]
@@ -844,8 +844,8 @@
             projectManager.UpdatePackageReference("NetFramework", new Version("1.1"));
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(package10));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(package11));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(package10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(package11));
         }
 
         [TestMethod]
@@ -871,8 +871,8 @@
             projectManager.RemovePackageReference("A");
 
             // Assert            
-            Assert.IsFalse(projectManager.LocalRepository.IsPackageInstalled(packageA));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB));
         }
 
         [TestMethod]
@@ -907,9 +907,9 @@
             projectManager.AddPackageReference("A");
 
             // Assert            
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageA));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageB));
-            Assert.IsTrue(projectManager.LocalRepository.IsPackageInstalled(packageC));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC));
         }
 
         [TestMethod]

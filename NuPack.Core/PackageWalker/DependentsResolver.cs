@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class DependentsResolver : IDependencyResolver {
+    public class DependentsResolver : IDependentsResolver {
         private readonly IPackageRepository _repository;
         private IDictionary<IPackage, HashSet<IPackage>> _dependentsLookup;
 
@@ -14,7 +14,7 @@
             _repository = repository;
         }
 
-        public IEnumerable<IPackage> ResolveDependencies(IPackage package) {
+        public IEnumerable<IPackage> GetDependents(IPackage package) {
             EnsureLookup();
             HashSet<IPackage> dependents;
             if (_dependentsLookup.TryGetValue(package, out dependents)) {

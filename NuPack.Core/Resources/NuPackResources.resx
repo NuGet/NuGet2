@@ -208,7 +208,7 @@
     <value>Updating '{0}' to version '{1}'</value>
   </data>
   <data name="NewerVersionAlreadyReferenced" xml:space="preserve">
-    <value>{0} is already referencing a newer version of '{1}'</value>
+    <value>Already referencing a newer version of '{0}'</value>
   </data>
   <data name="PackageDoesNotContainManifest" xml:space="preserve">
     <value>Package does not contain a manifest.</value>

@@ -33,9 +33,10 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="PackageWalker\IDependencyResolver.cs" />
-    <Compile Include="PackageWalker\IUpdateDependencyResolver.cs" />
-    <Compile Include="PackageWalker\UpdateDependencyResolver.cs" />
+    <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
+    <Compile Include="PackageWalker\IDependentsResolver.cs" />
+    <Compile Include="PackageWalker\PackageAction.cs" />
+    <Compile Include="PackageWalker\PackageOperation.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
@@ -68,9 +69,6 @@
     <Compile Include="Packages\DefaultPackagePathResolver.cs" />
     <Compile Include="Packages\IPackage.cs" />
     <Compile Include="Packages\IPackagePathResolver.cs" />
-    <Compile Include="PackageWalker\ProjectUninstallWalker.cs" />
-    <Compile Include="PackageWalker\ProjectUpdateInstallWalker.cs" />
-    <Compile Include="PackageWalker\ProjectUpdateUninstallWalker.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
@@ -82,7 +80,6 @@
     <Compile Include="Packages\FeedPackage.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
-    <Compile Include="PackageWalker\BasicPackageWalker.cs" />
     <Compile Include="PackageWalker\DependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
     <Compile Include="PackageWalker\InstallWalker.cs" />
@@ -94,7 +91,6 @@
     <Compile Include="Utility\PackageExtensions.cs" />
     <Compile Include="Utility\PackageRepositoryExtensions.cs" />
     <Compile Include="Utility\FileSystemExtensions.cs" />
-    <Compile Include="PackagePlan.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
     <Compile Include="Resources\NuPackResources.Designer.cs">
       <AutoGen>True</AutoGen>

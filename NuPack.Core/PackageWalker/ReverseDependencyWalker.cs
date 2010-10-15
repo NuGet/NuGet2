@@ -34,18 +34,20 @@
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return Repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
+            return Repository.FindPackage(dependency);
         }
 
-        protected override void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
+        protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
             HashSet<IPackage> values;
-            if (!Dependents.TryGetValue(resolvedDependency, out values)) {
+            if (!Dependents.TryGetValue(dependency, out values)) {
                 values = new HashSet<IPackage>(PackageComparer.IdAndVersionComparer);
-                Dependents[resolvedDependency] = values;
+                Dependents[dependency] = values;
             }
 
             // Add the current package to the list of dependents
             values.Add(package);
+            return base.OnAfterResolveDependency(package, dependency);
         }
+
     }
 }

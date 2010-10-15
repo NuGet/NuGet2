@@ -10,15 +10,15 @@ namespace NuPack {
     public static class PackageRepositoryExtensions {
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description" };
 
-        internal static bool IsPackageInstalled(this IPackageRepository repository, IPackage package) {
-            return repository.IsPackageInstalled(package.Id, package.Version);
+        public static bool Exists(this IPackageRepository repository, IPackage package) {
+            return repository.Exists(package.Id, package.Version);
         }
 
-        internal static bool IsPackageInstalled(this IPackageRepository repository, string packageId) {
-            return IsPackageInstalled(repository, packageId, version: null);
+        public static bool Exists(this IPackageRepository repository, string packageId) {
+            return Exists(repository, packageId, version: null);
         }
 
-        internal static bool IsPackageInstalled(this IPackageRepository repository, string packageId, Version version) {
+        public static bool Exists(this IPackageRepository repository, string packageId, Version version) {
             return repository.FindPackage(packageId, null, null, version) != null;
         }
 
@@ -36,6 +36,10 @@ namespace NuPack {
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion, Version exactVersion) {
             return repository.FindPackagesById(packageId).FindByVersion(minVersion, maxVersion, exactVersion);
+        }
+
+        public static IPackage FindPackage(this IPackageRepository repository, PackageDependency dependency) {
+            return repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
         }
 
         /// <summary>

@@ -38,8 +38,8 @@
             packageManager.InstallPackage("A", version: null, ignoreDependencies: true);
 
             // Assert
-            Assert.IsTrue(localRepository.IsPackageInstalled(packageA));
-            Assert.IsFalse(localRepository.IsPackageInstalled(packageC));
+            Assert.IsTrue(localRepository.Exists(packageA));
+            Assert.IsFalse(localRepository.Exists(packageC));
         }
 
         [TestMethod]
@@ -75,7 +75,7 @@
             packageManager.UninstallPackage("foo");
 
             // Assert
-            Assert.IsFalse(packageManager.LocalRepository.IsPackageInstalled(package));
+            Assert.IsFalse(packageManager.LocalRepository.Exists(package));
         }
 
         [TestMethod]
@@ -147,8 +147,8 @@
             packageManager.UninstallPackage("A");
 
             // Assert            
-            Assert.IsFalse(localRepository.IsPackageInstalled(packageA));
-            Assert.IsTrue(localRepository.IsPackageInstalled(packageB));
+            Assert.IsFalse(localRepository.Exists(packageA));
+            Assert.IsTrue(localRepository.Exists(packageB));
         }
 
         [TestMethod]
@@ -182,9 +182,9 @@
             packageManager.InstallPackage("A");
 
             // Assert            
-            Assert.IsTrue(localRepository.IsPackageInstalled(packageA));
-            Assert.IsTrue(localRepository.IsPackageInstalled(packageB));
-            Assert.IsTrue(localRepository.IsPackageInstalled(packageC));
+            Assert.IsTrue(localRepository.Exists(packageA));
+            Assert.IsTrue(localRepository.Exists(packageB));
+            Assert.IsTrue(localRepository.Exists(packageC));
         }
 
         [TestMethod]
@@ -205,7 +205,7 @@
 
 
             // Assert
-            Assert.IsFalse(packageManager.LocalRepository.IsPackageInstalled(packageA));
+            Assert.IsFalse(packageManager.LocalRepository.Exists(packageA));
         }
 
         private PackageManager CreatePackageManager() {

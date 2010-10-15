@@ -141,21 +141,26 @@
                                                       ignoreDependencies));
         }
 
-        protected void InstallPackage(IPackage package, IDependencyResolver resolver) {
-            ApplyPackages(resolver.ResolveDependencies(package));
+        protected void InstallPackage(IPackage package, IPackageOperationResolver resolver) {
+            Execute(resolver.ResolveOperations(package));
         }
 
-        private void ApplyPackages(IEnumerable<IPackage> packages) {
-            Debug.Assert(packages != null, "packages shouldn't be null");
+        private void Execute(IEnumerable<PackageOperation> operations) {
+            Debug.Assert(operations != null, "packages shouldn't be null");
 
-            foreach (IPackage package in packages) {
-                // If the package is already installed, then skip it
-                if (LocalRepository.IsPackageInstalled(package)) {
-                    Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, package.GetFullName());
-                    continue;
+            foreach (PackageOperation operation in operations) {                
+                if (operation.Action == PackageAction.Install) {
+                    // If the package is already installed, then skip it
+                    if (LocalRepository.Exists(operation.Package)) {
+                        Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
+                        continue;
+                    }
+
+                    ExecuteInstall(operation.Package);
                 }
-
-                ExecuteInstall(package);
+                else {
+                    ExecuteUninstall(operation.Package);
+                }
             }
         }
 
@@ -229,16 +234,8 @@
                                                           forceRemove));
         }
 
-        public virtual void UninstallPackage(IPackage package, IDependencyResolver resolver) {
-            RemovePackages(resolver.ResolveDependencies(package));
-        }
-
-        private void RemovePackages(IEnumerable<IPackage> packages) {
-            Debug.Assert(packages != null, "packages should not be null");
-
-            foreach (var package in packages) {
-                ExecuteUninstall(package);
-            }
+        public virtual void UninstallPackage(IPackage package, IPackageOperationResolver resolver) {
+            Execute(resolver.ResolveOperations(package));
         }
 
         private void ExecuteUninstall(IPackage package) {

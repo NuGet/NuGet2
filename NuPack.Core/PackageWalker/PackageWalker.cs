@@ -1,10 +1,13 @@
 ﻿namespace NuPack {
+    using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
+    using NuPack.Resources;
 
     public abstract class PackageWalker {
         private PackageMarker _marker;
-        protected PackageWalker() {           
+        protected PackageWalker() {
         }
 
         protected virtual bool RaiseErrorOnCycle {
@@ -33,27 +36,22 @@
         }
 
         public void Walk(IPackage package) {
-            BeforeWalk(package);
-            WalkInternal(package);
-        }
-
-        private void WalkInternal(IPackage package) {
             // Do nothing if we saw this package already
             if (Marker.IsVisited(package)) {
                 return;
             }
+
+            OnBeforeDependencyWalk(package);
 
             // Mark the package as processing
             Marker.MarkProcessing(package);
 
             if (!IgnoreDependencies) {
                 foreach (var dependency in package.Dependencies) {
-                    if (SkipDependency(dependency)) {
-                        // Skip dependency before we resolve it
+                    if (!OnBeforeResolveDependency(dependency)) {
                         continue;
                     }
 
-                    // Resolve the dependency
                     IPackage resolvedDependency = ResolveDependency(dependency);
 
                     if (resolvedDependency == null) {
@@ -61,56 +59,51 @@
                         return;
                     }
 
-                    if (SkipResolvedDependency(package, dependency, resolvedDependency)) {
-                        // Skip dependency after resolution
+                    if (!OnAfterResolveDependency(package, resolvedDependency)) {
                         continue;
                     }
-
-                    ProcessResolvedDependency(package, dependency, resolvedDependency);                    
 
                     if (Marker.IsCycle(resolvedDependency)) {
                         if (RaiseErrorOnCycle) {
                             List<IPackage> packages = Marker.Packages.ToList();
                             packages.Add(resolvedDependency);
-                            OnCycleError(packages);
-                            return;
+
+                            throw new InvalidOperationException(
+                               String.Format(CultureInfo.CurrentCulture,
+                               NuPackResources.CircularDependencyDetected, String.Join(" => ",
+                               packages.Select(p => p.GetFullName()))));
                         }
+
                         continue;
                     }
 
-                    WalkInternal(resolvedDependency);
+                    Walk(resolvedDependency);
                 }
             }
 
             // Mark the package as visited
             Marker.MarkVisited(package);
 
-            Process(package);
+            OnAfterDependencyWalk(package);
         }
 
-        protected virtual bool SkipResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
-            return false;
+        protected virtual bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
+            return true;
         }
 
-        protected virtual void OnCycleError(IEnumerable<IPackage> packages) {
+        protected virtual bool OnBeforeResolveDependency(PackageDependency dependency) {
+            return true;
         }
 
-        protected virtual bool SkipDependency(PackageDependency dependency) {
-            return false;
+        protected virtual void OnBeforeDependencyWalk(IPackage package) {
         }
 
-        protected virtual void ProcessResolvedDependency(IPackage package, PackageDependency dependency, IPackage resolvedDependency) {
-        }
-
-        protected virtual void Process(IPackage package) {
+        protected virtual void OnAfterDependencyWalk(IPackage package) {
         }
 
         protected virtual void OnDependencyResolveError(PackageDependency dependency) {
         }
 
         protected abstract IPackage ResolveDependency(PackageDependency dependency);
-
-        protected virtual void BeforeWalk(IPackage package) {
-        }
     }
 }
