@@ -230,7 +230,7 @@
     <DataTemplate  x:Key="OnlineDetailTemplate">
         <DataTemplate.Resources>
             <BooleanToVisibilityConverter  x:Key="boolToVis" />
-            <self:BooleanToVisibilityConverter  WhenTrue="Visible" WhenFalse="Collapsed" x:Key="BoolToVisibilityConverter" />
+            <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
         </DataTemplate.Resources>
         
@@ -254,7 +254,7 @@
                         <self:TextBlockControl  AutomationProperties.AutomationId="TextBlock_DetailVersionValueOnline" Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                     </StackPanel>
 
-                    <TextBlock Visibility="{Binding RequireLicenseAcceptance, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
                         <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}">View License Terms</Hyperlink>
                     </TextBlock>
 
