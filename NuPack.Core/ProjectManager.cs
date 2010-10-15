@@ -156,7 +156,7 @@
         protected virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
             AddPackageReference(package, new ProjectInstallWalker(LocalRepository,
                                                                   SourceRepository,
-                                                                  new DependentsResolver(LocalRepository),
+                                                                  new ReverseDependencyWalker(LocalRepository),
                                                                   LoggerInternal,
                                                                   ignoreDependencies));
         }
@@ -247,7 +247,7 @@
 
         protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
             RemovePackageReference(package, new UninstallWalker(LocalRepository,
-                                                                new DependentsResolver(LocalRepository),
+                                                                new ReverseDependencyWalker(LocalRepository),
                                                                 LoggerInternal,
                                                                 removeDependencies,
                                                                 force));

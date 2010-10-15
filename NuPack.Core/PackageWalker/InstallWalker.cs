@@ -50,7 +50,7 @@
             private set;
         }
 
-        public IList<PackageOperation> Operations {
+        protected IList<PackageOperation> Operations {
             get;
             private set;
         }

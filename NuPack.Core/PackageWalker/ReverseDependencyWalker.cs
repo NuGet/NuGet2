@@ -1,15 +1,15 @@
 ﻿namespace NuPack {
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
 
-    public class ReverseDependencyWalker : PackageWalker {
+    public class ReverseDependencyWalker : PackageWalker, IDependentsResolver {
         public ReverseDependencyWalker(IPackageRepository repository) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
             Repository = repository;
-            Dependents = new Dictionary<IPackage, HashSet<IPackage>>(PackageComparer.IdAndVersionComparer);
         }
 
         protected override bool RaiseErrorOnCycle {
@@ -23,10 +23,9 @@
             private set;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "It's not worth it creating a type for this")]
-        public IDictionary<IPackage, HashSet<IPackage>> Dependents {
+        private IDictionary<IPackage, HashSet<IPackage>> DependentsLookup {
             get;
-            private set;
+            set;
         }
 
         protected override PackageMarker CreateMarker() {
@@ -38,10 +37,12 @@
         }
 
         protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
+            Debug.Assert(DependentsLookup != null);
+
             HashSet<IPackage> values;
-            if (!Dependents.TryGetValue(dependency, out values)) {
+            if (!DependentsLookup.TryGetValue(dependency, out values)) {
                 values = new HashSet<IPackage>(PackageComparer.IdAndVersionComparer);
-                Dependents[dependency] = values;
+                DependentsLookup[dependency] = values;
             }
 
             // Add the current package to the list of dependents
@@ -49,5 +50,20 @@
             return base.OnAfterResolveDependency(package, dependency);
         }
 
+
+        public IEnumerable<IPackage> GetDependents(IPackage package) {
+            if (DependentsLookup == null) {
+                DependentsLookup = new Dictionary<IPackage, HashSet<IPackage>>(PackageComparer.IdAndVersionComparer);
+                foreach (IPackage p in Repository.GetPackages()) {
+                    Walk(p);
+                }
+            }
+
+            HashSet<IPackage> dependents;
+            if (DependentsLookup.TryGetValue(package, out dependents)) {
+                return dependents;
+            }
+            return Enumerable.Empty<IPackage>();
+        }
     }
 }

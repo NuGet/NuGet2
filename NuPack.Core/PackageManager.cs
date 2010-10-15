@@ -228,7 +228,7 @@
 
         public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
             UninstallPackage(package, new UninstallWalker(LocalRepository,
-                                                          new DependentsResolver(LocalRepository),
+                                                          new ReverseDependencyWalker(LocalRepository),
                                                           Logger,
                                                           removeDependencies,
                                                           forceRemove));

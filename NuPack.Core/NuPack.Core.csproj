@@ -80,7 +80,6 @@
     <Compile Include="Packages\FeedPackage.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
-    <Compile Include="PackageWalker\DependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
     <Compile Include="PackageWalker\InstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectInstallWalker.cs" />

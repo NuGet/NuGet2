@@ -34,7 +34,7 @@
             mockRepository.AddPackage(packageB2);
 
             // Act 
-            DependentsResolver lookup = new DependentsResolver(mockRepository);
+            IDependentsResolver lookup = new ReverseDependencyWalker(mockRepository);
 
             // Assert
             Assert.AreEqual(0, lookup.GetDependents(packageA1).Count());
@@ -183,7 +183,7 @@
             localRepository.AddPackage(packageD);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -303,7 +303,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -333,7 +333,7 @@
             localRepository.AddPackage(packageA);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -358,7 +358,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: false,
                                                                forceRemove: false);
@@ -383,7 +383,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -408,7 +408,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: false,
                                                                forceRemove: true);
@@ -450,7 +450,7 @@
             localRepository.AddPackage(packageC);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -483,7 +483,7 @@
             localRepository.AddPackage(packageD);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsResolver(localRepository),
+                                                               new ReverseDependencyWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: true);

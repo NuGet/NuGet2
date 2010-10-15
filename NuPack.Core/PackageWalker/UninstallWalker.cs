@@ -48,9 +48,9 @@
             }
         }
 
-        public Stack<PackageOperation> Operations {
+        private Stack<PackageOperation> Operations {
             get;
-            private set;
+            set;
         }
 
         public bool RemoveDependencies {
