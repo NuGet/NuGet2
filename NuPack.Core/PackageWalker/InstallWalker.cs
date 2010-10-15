@@ -65,11 +65,11 @@
 
             if (package != null) {
                 // We have it installed locally
-                LogDependencyExists(dependency);
+                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
             }
             else {
                 // We didn't resolve the dependency so try to retrieve it from the source
-                LogRetrieveDependencyFromSource(dependency);
+                Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
                 package = SourceRepository.FindPackage(dependency);
 
@@ -80,16 +80,7 @@
 
             return package;
         }
-
-        protected virtual void LogDependencyExists(PackageDependency dependency) {
-            Logger.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
-        }
-
-        protected virtual void LogRetrieveDependencyFromSource(PackageDependency dependency) {
-            // We didn't resolve the dependency so try to retrieve it from the source
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
-        }
-
+        
         protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                 String.Format(CultureInfo.CurrentCulture,

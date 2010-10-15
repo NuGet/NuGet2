@@ -28,42 +28,7 @@
 
             return packages.FirstOrDefault();
         }
-
-        internal static bool IsDependencySatisfied(this IPackage package, IPackage targetPackage) {
-            PackageDependency dependency = (from d in package.Dependencies
-                                            where d.Id.Equals(targetPackage.Id, StringComparison.OrdinalIgnoreCase)
-                                            select d).FirstOrDefault();
-
-            Debug.Assert(dependency != null, "Package doesn't have this dependency");
-
-            // Given a package's dependencies and a target package we want to see if the target package
-            // satisfies the package's dependencies i.e:
-            // A 1.0 -> B 1.0
-            // A 2.0 -> B 2.0
-            // C 1.0 -> B (>= 1.0) (min version 1.0)
-            // Updating to A 2.0 from A 1.0 needs to know if there is a conflict with C
-            // Since C works with B (>= 1.0) it it should be ok to update A
-
-            // If there is an exact version specified then we check if the package is that exact version
-            if (dependency.Version != null) {
-                return dependency.Version.Equals(targetPackage.Version);
-            }
-
-            bool isSatisfied = true;
-
-            // See if it meets the minimum version requirement if any
-            if (dependency.MinVersion != null) {
-                isSatisfied = targetPackage.Version >= dependency.MinVersion;
-            }
-
-            // See if it meets the maximum version requirement if any
-            if (dependency.MaxVersion != null) {
-                isSatisfied = isSatisfied && targetPackage.Version <= dependency.MaxVersion;
-            }
-
-            return isSatisfied;
-        }
-
+        
         public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
             return package.GetFiles().Where(file => file.Path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
         }

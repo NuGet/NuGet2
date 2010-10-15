@@ -1,6 +1,7 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using NuPack.Resources;
@@ -22,14 +23,6 @@
             get;
             private set;
         }
-        
-        protected override void LogDependencyExists(PackageDependency dependency) {
-            Logger.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyReferenced, dependency);
-        }
-
-        protected override void LogRetrieveDependencyFromSource(PackageDependency dependency) {
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageReferenceFromSource, dependency);
-        }
 
         protected override void OnBeforeDependencyWalk(IPackage package) {
             IPackage installedPackage = Repository.FindPackage(package.Id);
@@ -43,7 +36,7 @@
                 //     C2 -> []
                 // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
                 var dependents = from dependentPackage in GetDependents(installedPackage)
-                                 where !dependentPackage.IsDependencySatisfied(package)
+                                 where !IsDependencySatisfied(dependentPackage, package)
                                  select dependentPackage;
 
                 if (dependents.Any()) {
@@ -89,5 +82,41 @@
                         dependents.Select(d => d.GetFullName()))));
 
         }
+
+        private static bool IsDependencySatisfied(IPackage package, IPackage targetPackage) {
+            PackageDependency dependency = (from d in package.Dependencies
+                                            where d.Id.Equals(targetPackage.Id, StringComparison.OrdinalIgnoreCase)
+                                            select d).FirstOrDefault();
+
+            Debug.Assert(dependency != null, "Package doesn't have this dependency");
+
+            // Given a package's dependencies and a target package we want to see if the target package
+            // satisfies the package's dependencies i.e:
+            // A 1.0 -> B 1.0
+            // A 2.0 -> B 2.0
+            // C 1.0 -> B (>= 1.0) (min version 1.0)
+            // Updating to A 2.0 from A 1.0 needs to know if there is a conflict with C
+            // Since C works with B (>= 1.0) it it should be ok to update A
+
+            // If there is an exact version specified then we check if the package is that exact version
+            if (dependency.Version != null) {
+                return dependency.Version.Equals(targetPackage.Version);
+            }
+
+            bool isSatisfied = true;
+
+            // See if it meets the minimum version requirement if any
+            if (dependency.MinVersion != null) {
+                isSatisfied = targetPackage.Version >= dependency.MinVersion;
+            }
+
+            // See if it meets the maximum version requirement if any
+            if (dependency.MaxVersion != null) {
+                isSatisfied = isSatisfied && targetPackage.Version <= dependency.MaxVersion;
+            }
+
+            return isSatisfied;
+        }
+
     }
 }

@@ -16,7 +16,7 @@
         }
 
         public override string ToString() {
-            return (Action == PackageAction.Install ? "(+)" : "(-)") + Package.Id + " " + Package.Version;
+            return (Action == PackageAction.Install ? "+ " : "- ") + Package.Id + " " + Package.Version;
         }
     }
 }
