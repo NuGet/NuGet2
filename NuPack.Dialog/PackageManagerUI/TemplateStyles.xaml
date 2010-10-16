@@ -18,12 +18,9 @@
         <Setter  Property="StretchDirection" Value="DownOnly" />
         <Setter  Property="Stretch" Value="Uniform" />
     </Style>
-    <c:FontSizeConverter  x:Key="FontSizeConverter" />
     <Style  x:Key="TileTitleTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
         <Setter  Property="ToolTipService.ShowOnDisabled" Value="True" />
         <Setter  Property="FontWeight" Value="Bold" />
-        <!--Environment FontSize + 2-->
-        <Setter  Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource FontSizeConverter}, ConverterParameter=2.0}" />
         <Setter  Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
     <Style  x:Key="TileDescriptionTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
@@ -106,16 +103,13 @@
         <Setter  Property="Margin" Value="3,0,0,0" />
         <Setter  Property="ToolTip">
             <Setter.Value>
-                <ToolTip  DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <TextBlock  Text="{Binding Text}" Style="{StaticResource TileToolTipStyle}"/>
+                <ToolTip>
+                    <TextBlock Text="{Binding Text}" Style="{StaticResource TileToolTipStyle}"/>
                 </ToolTip>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <shared:UriToBitmapImageConverter  x:Key="uriToPreviewImageConverter" />
-    <shared:UriToBitmapImageConverter  x:Key="uriToIconConverter" />
-
-    <BitmapImage  x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
-    <BitmapImage  x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
+    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
+    <BitmapImage x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
 </ResourceDictionary>

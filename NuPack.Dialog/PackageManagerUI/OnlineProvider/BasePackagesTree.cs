@@ -7,8 +7,8 @@ namespace NuPack.Dialog.Providers {
     /// Base implementation of IVsExtensionsTreeNode
     /// </summary>
     public class BasePackagesTree : IVsExtensionsTreeNode {
-        private IList<IVsExtension> extensions = new ObservableCollection<IVsExtension>();
-        private IList<IVsExtensionsTreeNode> nodes = new ObservableCollection<IVsExtensionsTreeNode>();
+        private readonly IList<IVsExtension> extensions = new ObservableCollection<IVsExtension>();
+        private readonly IList<IVsExtensionsTreeNode> nodes = new ObservableCollection<IVsExtensionsTreeNode>();
 
         #region IVsExtensionsTreeNode Members
 

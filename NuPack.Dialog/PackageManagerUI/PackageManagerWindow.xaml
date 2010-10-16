@@ -6,26 +6,25 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:self="clr-namespace:NuPack.Dialog.PackageManagerUI"
+    xmlns:resources="clr-namespace:NuPack.Dialog"
     xmlns:resx="clr-namespace:NuPack.VisualStudio.Resources;assembly=NuPack.VisualStudio"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:ExtensionsExplorer="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer;assembly=Microsoft.VisualStudio.ExtensionsExplorer"
     mc:Ignorable="d"
     Background="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundGradientKey}}"
-    Title="Add Package Reference"
+    Title="{x:Static resources:Resources.Dialog_Title}"
     WindowStartupLocation="CenterOwner"
     HasHelpButton="True" 
-    HasMaximizeButton="False" 
+    HasMaximizeButton="False"
     HasMinimizeButton="False"
-    ResizeMode="CanResize" 
-    ShowInTaskbar="False" 
+    ResizeMode="CanResize"
+    ShowInTaskbar="False"
     SnapsToDevicePixels="True"
-    Width="900" 
-    Height="600" 
+    Width="900"
+    Height="600"
     MinWidth="800" 
-    MinHeight="450"
-    DataContext="{Binding RelativeSource={RelativeSource Self}}"
-    Closed="DialogWindow_Closed">
+    MinHeight="450">
     
     <Window.Resources>
         <ResourceDictionary>
@@ -34,131 +33,65 @@
                 <ResourceDictionary Source="TemplateStyles.xaml" />
                 <ResourceDictionary Source="OnlineProviderTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            
-            <Style x:Key="mainGridStyle" TargetType="{x:Type Grid}">
-                <Style.Triggers>
-                    <!-- Turn on the textured background when gradients are enabled -->
-                    <DataTrigger  Binding="{Binding Source={x:Static pfui:EnvironmentRenderCapabilities.Current}, Path=AreGradientsAllowed}"
-                             Value="True">
-                        <Setter  Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundTextureKey}}" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-            <DataTemplate  x:Key="MediumIconTemplate" DataType="{x:Type ExtensionsExplorer:IVsExtension}" >
-                <Grid MinHeight="16" Width="420" HorizontalAlignment="Left" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="400" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Width="400" HorizontalAlignment="Left" >
-                        <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Description}" Width="300" MinHeight="16"
-                            Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="NoWrap" TextAlignment="Left" TextTrimming="WordEllipsis" />
-                        <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Version}" ToolTip="{Binding Path=FullPath}" Width="80" MinHeight="16"
-                            Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="NoWrap" TextAlignment="Left" TextTrimming="WordEllipsis"/>
-                    </StackPanel>
-                </Grid>
-            </DataTemplate>
-            <DataTemplate  x:Key="OnlineTileTemplateA">
-                <DataTemplate.Resources>
-                    <BooleanToVisibilityConverter  x:Key="boolToVis" />
-                </DataTemplate.Resources>
-                <Grid  >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition  Width="38" />
-                        <ColumnDefinition  Width="*" />
-                        <ColumnDefinition  Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="1">
-                        <self:TextBlockControl  
-                            AutomationProperties.AutomationId="TextBlock_TileNameOnline"
-                            Text="{Binding Name}" FontWeight="Bold" FontSize="14" MinHeight="30">
-                            <TextBlock.ToolTip>
-                                <TextBlock  Text="{Binding Name}" />
-                            </TextBlock.ToolTip>
-                        </self:TextBlockControl>
-                        <self:TextBlockControl 
-                            AutomationProperties.AutomationId="TextBlock_TileDescriptionOnline" 
-                            Text="{Binding Description}" TextTrimming="CharacterEllipsis" MaxHeight="20">
-                            <TextBlock.ToolTip>
-                                <TextBlock Text="{Binding Description}" />
-                            </TextBlock.ToolTip>
-                        </self:TextBlockControl>
-                        <self:TextBlockControl 
-                             Text="" MinHeight="10">
-                        </self:TextBlockControl>
-                    </StackPanel>
-                    <StackPanel Grid.Column="3">
-                        <self:TextBlockControl  
-                            AutomationProperties.AutomationId="TextBlock_Version" 
-                            Text="{Binding Version}">
-                        </self:TextBlockControl>
-                    </StackPanel>
-                </Grid>
-            </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
 
     <Window.CommandBindings>
-        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
-                    CanExecute="CanExecuteUninstallPackage"
-                    Executed="ExecutedUninstallPackage" />
-        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
-                    CanExecute="CanExecuteUpdatePackage"
-                    Executed="ExecutedUpdatePackage" />
-        <CommandBinding  Command="ApplicationCommands.Close"
-                    CanExecute="CanExecuteClose"
-                    Executed="ExecutedClose" />
-        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
-                    CanExecute="CanExecuteInstallPackage"
-                    Executed="ExecutedInstallPackage" />
-        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
-                    Executed="ExecutedShowOptionsPage" />
-        <CommandBinding  Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}"
-                    Executed="ExecuteOpenLicenseLink" />
+        <CommandBinding 
+            Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
+            CanExecute="CanExecuteInstallPackage"
+            Executed="ExecutedInstallPackage" />
+        
+        <CommandBinding 
+            Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
+            CanExecute="CanExecuteUninstallPackage"
+            Executed="ExecutedUninstallPackage" />
+        
+        <CommandBinding
+            Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
+            CanExecute="CanExecuteUpdatePackage"
+            Executed="ExecutedUpdatePackage" />
+        
+        <CommandBinding 
+            Command="ApplicationCommands.Close"
+            CanExecute="CanExecuteClose"
+            Executed="ExecutedClose" />
+        
+        <CommandBinding 
+            Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
+            Executed="ExecutedShowOptionsPage" />
+        
+        <CommandBinding 
+            Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}"
+            Executed="ExecuteOpenLicenseLink" />
+        
+        <CommandBinding
+            Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}"
+            Executed="ExecuteSetFocusOnSearchBox" />
     </Window.CommandBindings>
 
     <Window.InputBindings>
-        <KeyBinding  Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
+        <KeyBinding Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
     </Window.InputBindings>
 
-    <Grid x:Name="mainGrid">
-        <Grid.Resources>
-            <Style x:Key="hiddenWhenRequiredRestartMessageNullStyle" >
-                <Style.Triggers>
-                    <DataTrigger  Binding="{Binding RestartRequired}" Value="{x:Null}" >
-                        <Setter  Property="UIElement.Visibility" Value="Hidden" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Resources>
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid  Grid.Row="0" Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
-            <Grid.RowDefinitions>
-                <RowDefinition  />
-                <RowDefinition  Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.Effect>
-                <DropShadowEffect  Direction="270" Opacity="0.25" ShadowDepth="3" />
-            </Grid.Effect>
+        <Border Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" Padding="0,0,0,4">
             <shared:VSExtensionsExplorerCtl
-                
                 x:Name="explorer"
                 ActiveView="MediumIcons"
                 HorizontalAlignment="Stretch"
                 SnapsToDevicePixels="True"
                 ListViewIsVirtualizing="True"
                 IsFxComboVisible="False"
-                IsMediumIconsViewButtonVisible="True"
-                IsSmallIconsViewButtonVisible="True"
-                IsLargeIconsViewButtonVisible="False"/>
-            <StackPanel  Grid.Row="1" Margin="0,2">
-            </StackPanel>
-        </Grid>
+                IsMediumIconsViewButtonVisible="False"
+                IsSmallIconsViewButtonVisible="False"
+                IsLargeIconsViewButtonVisible="False" />
+        </Border>
 
         <Border Grid.Row="0"
                 Width="220"
@@ -172,28 +105,32 @@
                 TextWrapping="Wrap" />
         </Border>
 
-        <Grid x:Name="FooterGrid" Grid.Row="1" MinHeight="50">
+        <Grid Grid.Row="1" MinHeight="50">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="FooterGridCol1"/>
-                <ColumnDefinition x:Name="FooterGridCol2" Width="Auto"/>
+                <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Border 
-                x:Name="FooterBorder"
-                CornerRadius="3"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Margin="12">
-            </Border>
-            <Grid  Grid.Column="0" x:Name="FooterButtonGridL" Margin="12,12,12,12">
-                <StackPanel  x:Name="FooterButtonLeftPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Button  MinWidth="75" MinHeight="23" Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" Content="Settings..."/>
-                </StackPanel>
-            </Grid>
-            <Grid Grid.Column="1" x:Name="FooterButtonGrid" Margin="0,12,12,12">
-                <StackPanel x:Name="FooterButtonRightPanel" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                    <Button MinWidth="75" MinHeight="23" Command="ApplicationCommands.Close" Content="_Close" IsCancel="True" />
-                </StackPanel>
-            </Grid>
+
+            <Button 
+                Grid.Column="0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="12"
+                MinWidth="75" 
+                MinHeight="23"
+                Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" 
+                Content="{x:Static resources:Resources.Dialog_Settings}" />
+
+            <Button 
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="12"
+                MinWidth="75" 
+                MinHeight="23" 
+                Command="ApplicationCommands.Close" 
+                Content="{x:Static resources:Resources.Dialog_Close}" 
+                IsCancel="True" />
         </Grid>
     </Grid>
 </pfui:DialogWindow>

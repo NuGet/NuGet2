@@ -95,7 +95,7 @@ namespace NuPack.Dialog.Providers {
         public override object MediumIconDataTemplate {
             get {
                 if (_mediumIconDataTemplate == null) {
-                    _mediumIconDataTemplate = _resources["OnlineTileTemplate"];
+                    _mediumIconDataTemplate = _resources["OnlinePackageItemTemplate"];
                 }
                 return _mediumIconDataTemplate;
             }
@@ -105,7 +105,7 @@ namespace NuPack.Dialog.Providers {
         public override object DetailViewDataTemplate {
             get {
                 if (_detailViewDataTemplate == null) {
-                    _detailViewDataTemplate = _resources["OnlineDetailTemplate"];
+                    _detailViewDataTemplate = _resources["PackageDetailTemplate"];
                 }
                 return _detailViewDataTemplate;
             }
@@ -113,7 +113,7 @@ namespace NuPack.Dialog.Providers {
 
         public override string Name {
             get {
-                return "Online";
+                return Resources.Dialog_OnlineProvider;
             }
         }
 
@@ -139,13 +139,9 @@ namespace NuPack.Dialog.Providers {
             return _searchNode;
         }
 
-        #region IVsProgressPaneConsumer Members
-
         void IVsProgressPaneConsumer.SetProgressPane(IVsProgressPane progressPane) {
             this.ProgressPane = progressPane;
         }
-
-        #endregion
 
         private void CreateExtensionsTree() {
             this._currentDispatcher.BeginInvoke(DispatcherPriority.Normal, new ThreadStart(delegate() {
@@ -162,19 +158,19 @@ namespace NuPack.Dialog.Providers {
             if (this._currentDispatcher != null) {
                 this._currentDispatcher.BeginInvoke(DispatcherPriority.Normal,
                     new ThreadStart(delegate() {
-                    //The user may have done a search before we finished getting the category list.
-                    //temporarily remove it
+                    // The user may have done a search before we finished getting the category list.
+                    // temporarily remove it
                     if (_searchNode != null) {
                         RootNode.Nodes.Remove(_searchNode);
                     }
 
-                    //Add the special "All" node which doesn't filter by category.
-                    RootNode.Nodes.Add(new OnlinePackagesTree(this, "All", RootNode));
+                    // Add the special "All" node which doesn't filter by category.
+                    RootNode.Nodes.Add(new OnlinePackagesTree(this, Resources.Dialog_RootNodeAll, RootNode));
 
                     rootNodes.ForEach(node => RootNode.Nodes.Add(node));
 
                     if (_searchNode != null) {
-                        //Re-add the search node and select it if the user was doing a search
+                        // Re-add the search node and select it if the user was doing a search
                         RootNode.Nodes.Add(_searchNode);
                         _searchNode.IsSelected = true;
                     }
@@ -203,10 +199,6 @@ namespace NuPack.Dialog.Providers {
             ProjectManager.UpdatePackageReference(id, version);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance", 
-            "CA1822:MarkMembersAsStatic",
-            Justification="This method is invoked from XAML.")]
         public bool CanBeUpdated(IPackage package) {
             if (package == null) {
                 return false;
@@ -214,7 +206,8 @@ namespace NuPack.Dialog.Providers {
 
             // the specified package can be updated if the local repository contains a package 
             // with matching id and smaller version number.
-            return ProjectManager.LocalRepository.GetPackages().Any(p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
+            return ProjectManager.LocalRepository.GetPackages().Any(
+                p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
         public IEnumerable<IPackage> GetPackageDependencyGraph(IPackage rootPackage) {

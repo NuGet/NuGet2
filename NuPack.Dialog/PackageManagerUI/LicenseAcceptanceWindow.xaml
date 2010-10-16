@@ -5,6 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:self="clr-namespace:NuPack.Dialog.PackageManagerUI"
+    xmlns:resources="clr-namespace:NuPack.Dialog"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     ResizeMode="NoResize"
     Width="400"
@@ -18,7 +19,9 @@
             <Setter Property="Margin" Value="6,6,6,2" />
             <Setter Property="Padding" Value="10,3,10,3" />
         </Style>
+        
         <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
+        
         <DataTemplate x:Key="LicenseItemTemplate">
             <StackPanel Margin="2,0,2,5">
                 <TextBlock TextWrapping="Wrap">
@@ -27,7 +30,9 @@
                     <Run Text="{Binding Authors, Mode=OneTime, StringFormat=(Author: {0}), Converter={StaticResource authorNamesConverter}}" />
                 </TextBlock>
                 <TextBlock>
-                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">View License Terms</Hyperlink>
+                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">
+                        <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
+                    </Hyperlink>
                 </TextBlock>
             </StackPanel>
         </DataTemplate>
@@ -40,8 +45,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
-        <TextBlock Grid.Row="0" Margin="0,3,0,3" Text="The following package(s) will be installed:" />
+
+        <TextBlock Grid.Row="0" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" />
         <ItemsControl
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             Grid.Row="1" 
@@ -54,10 +59,10 @@
             ItemsSource="{Binding}"
             ItemTemplate="{StaticResource LicenseItemTemplate}">
         </ItemsControl>
-        <TextBlock Grid.Row="2" Margin="0,0,0,3" TextWrapping="Wrap" Text="By clicking &quot;I Accept,&quot; you agree to the license terms for the product or component listed above. If you do not agree to the license terms, click &quot;I Decline&quot;." />
-        <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal"  HorizontalAlignment="Right">
-            <Button Content="I _Decline" Click="OnDeclineButtonClick" IsCancel="True" />
-            <Button Content="I _Accept" Click="OnAcceptButtonClick" />
+        <TextBlock Grid.Row="2" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" />
+        <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="{x:Static resources:Resources.License_Decline}" Click="OnDeclineButtonClick" IsCancel="True" />
+            <Button Content="{x:Static resources:Resources.License_Accept}" Click="OnAcceptButtonClick" />
         </StackPanel>
     </Grid>
 </pfui:DialogWindow>

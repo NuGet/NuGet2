@@ -132,6 +132,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatePackagesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolsOptionsUI\Settings.cs" />
@@ -147,6 +152,10 @@
     <Compile Include="PackageManagerUI\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="ToolsOptionsUI\ToolsOptionsControl.resx">
       <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
     </EmbeddedResource>

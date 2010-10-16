@@ -5,35 +5,27 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 namespace NuPack.Dialog.Providers {
 
     internal class OnlinePackagesSearchNode : OnlinePackagesTreeBase {
-        #region Private Members
-        private string SearchText { get; set; }
-        #endregion
 
-        #region Constructors
+        private string _searchText;
 
-        /// <summary>
-        /// Constructor - requires provider
-        /// </summary>
-        /// <param name="provider">Instance of IVsTemplateProvider</param>
         public OnlinePackagesSearchNode(OnlinePackagesProvider provider, IVsExtensionsTreeNode parent, string searchText) :
             base(parent, provider) {
-            this.SearchText = searchText;
+
+            _searchText = searchText;
 
             // Mark this node as a SearchResults node to assist navigation in ExtensionsExplorer
-            this.IsSearchResultsNode = true;
+            IsSearchResultsNode = true;
         }
-
-        #endregion
 
         public override string Name {
             get {
-                return "Search Results";
+                return Resources.Dialog_RootNodeSearch;
             }
         }
 
         protected override IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query) {
-            query = query.Where(p => (p.Description != null && p.Description.ToUpper().Contains(SearchText.ToUpper())) 
-                || (p.Id != null && p.Id.ToUpper().Contains(SearchText.ToUpper())));
+            query = query.Where(p => (p.Description != null && p.Description.ToUpper().Contains(_searchText.ToUpper())) 
+                || (p.Id != null && p.Id.ToUpper().Contains(_searchText.ToUpper())));
             return query;
         }
 

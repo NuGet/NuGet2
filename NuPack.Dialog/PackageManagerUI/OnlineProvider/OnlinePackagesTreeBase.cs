@@ -9,7 +9,10 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuPack.Dialog.Providers {
     internal abstract class OnlinePackagesTreeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
-        //The number of extensions to show per page.
+
+        private delegate void ExecuteDelegate(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async);
+
+        // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
 
         private IList<IVsExtension> _extensions = null;
@@ -217,8 +220,6 @@ namespace NuPack.Dialog.Providers {
             worker.BeginInvoke(query, pageNumber, ItemsPerPage, async, null, null);
         }
 
-        private delegate void ExecuteDelegate(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async);
-
         // TODO: Investigate whether we should avoid catching general Exception
         // Temporary method for async
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -275,7 +276,7 @@ namespace NuPack.Dialog.Providers {
                 _extensions[0].IsSelected = true;
             }
 
-            totalPages = (int)Math.Ceiling((double)args.TotalCount / (double)ItemsPerPage);
+            totalPages = (args.TotalCount + ItemsPerPage - 1) / ItemsPerPage;
             pageNumber = args.PageNumber;
 
             TotalPages = (totalPages == 0) ? 1 : totalPages;

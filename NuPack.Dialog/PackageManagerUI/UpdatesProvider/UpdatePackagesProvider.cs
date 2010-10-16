@@ -4,6 +4,7 @@ using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     internal class UpdatePackagesProvider : OnlinePackagesProvider {
+
         private ResourceDictionary _resources;
         private object _mediumIconDataTemplate;
 
@@ -14,15 +15,14 @@ namespace NuPack.Dialog.Providers {
 
         public override string Name {
             get {
-                // TODO: Localize this string
-                return "Updates";
+                return Resources.Dialog_UpdateProvider;
             }
         }
 
         public override object MediumIconDataTemplate {
             get {
                 if (_mediumIconDataTemplate == null) {
-                    _mediumIconDataTemplate = _resources["OnlineUpdateTileTemplate"];
+                    _mediumIconDataTemplate = _resources["UpdatePackageItemTemplate"];
                 }
                 return _mediumIconDataTemplate;
             }

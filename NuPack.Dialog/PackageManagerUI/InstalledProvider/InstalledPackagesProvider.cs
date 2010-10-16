@@ -8,7 +8,7 @@ namespace NuPack.Dialog.Providers {
     /// a list of installed packages which will be shown in the Add Package dialog.
     /// </summary>
     internal class InstalledPackagesProvider : OnlinePackagesProvider {
-        private const string XamlTemplateKey = "InstalledPackagesTileTemplate";
+        private const string XamlTemplateKey = "InstalledPackageItemTemplate";
         private readonly ResourceDictionary _resources;
         private object _mediumIconDataTemplate;
 
@@ -19,7 +19,7 @@ namespace NuPack.Dialog.Providers {
 
         public override string Name {
             get {
-                return "Installed";
+                return Resources.Dialog_InstalledProvider;
             }
         }
 
