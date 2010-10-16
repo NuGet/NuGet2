@@ -98,9 +98,11 @@ namespace NuPack.Tools {
         /// </summary>
         private bool HasActiveLoadedProject {
             get {
+                // All unloaded projects have this Kind value
+                const string UnloadedProjectKind = "{67294A52-A4F0-11D2-AA88-00C04F688DDE}";
+
                 Project project = DTEExtensions.DTE.GetActiveProject();
-                // REVIEW: Is there a better check than ProjectItems and Properties?
-                return (project != null && project.ProjectItems != null && project.Properties != null);
+                return (project != null && !project.Kind.Equals(UnloadedProjectKind, StringComparison.OrdinalIgnoreCase));
             }
         }
     }
