@@ -6,6 +6,8 @@ using NuPack.Server.Infrastructure;
 
 namespace NuPack.Server.Controllers {
     public class PackagesController : Controller {
+        private static readonly IPackageRepository repository = new LocalPackageRepository(PackageUtility.PackagePhysicalPath);
+
         IPackageStore _fileSystem;
 
         public PackagesController(IPackageStore fileSystem) {
@@ -19,10 +21,12 @@ namespace NuPack.Server.Controllers {
         // ?p=filename
         public ActionResult Download(string p) {
             DateTimeOffset lastModified = _fileSystem.GetLastModified(p);
-            return ConditionalGet(lastModified, () => File(_fileSystem.GetFullPath(p), "application/zip", p));
+            return new ConditionalGetResult(lastModified,
+                                            () => File(_fileSystem.GetFullPath(p), "application/zip", p));
         }
 
         //TODO: This method is deprecated. Need to keep it around till we release NuPack CTP 2.
+        [OutputCache(Duration = 60)]
         public ActionResult Feed() {
             // Add the response header
             Response.AddHeader(PackageUtility.FeedVersionHeader, PackageUtility.AtomFeedVersion);
@@ -34,9 +38,9 @@ namespace NuPack.Server.Controllers {
             // Get the last modified of the package directory
             DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
 
-            return ConditionalGet(lastModified, () => {
+            return new ConditionalGetResult(lastModified, () => { 
                 SyndicationFeed packageFeed = PackageSyndicationFeed.Create(
-                    PackageUtility.PackagePhysicalPath,
+                    repository,
                     package => PackageUtility.GetPackageUrl(package.Id, package.Version.ToString(), Request.Url));
 
 
@@ -52,12 +56,6 @@ namespace NuPack.Server.Controllers {
                 return new SyndicationFeedResult(packageFeed,
                                                  feed => new Atom10FeedFormatter(feed));
             });
-        }
-
-        private ActionResult ConditionalGet(DateTimeOffset lastModified,
-                                            Func<ActionResult> action) {
-
-            return new ConditionalGetResult(lastModified, action);
         }
     }
 }

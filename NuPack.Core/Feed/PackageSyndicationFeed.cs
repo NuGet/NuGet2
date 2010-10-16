@@ -42,13 +42,14 @@
                 SyndicationLink downloadLink = item.Links[0];
                 downloadLink.RelationshipType = "enclosure";
                 try {
+                    // Removed hash since it isn't used by the ctp client
                     // TODO: Move this code outside of auto feed generation
-                    using (var stream = new MemoryStream()) {
-                        PackageBuilder.Save(package, stream);
-                        downloadLink.Length = stream.Length;
-                        var hashAttributeName = new XmlQualifiedName("hash");
-                        downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);
-                    }
+                    //using (var stream = new MemoryStream()) {
+                    //PackageBuilder.Save(package, stream);
+                    //downloadLink.Length = stream.Length;
+                    //var hashAttributeName = new XmlQualifiedName("hash");
+                    //downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);
+                    //}
                 }
                 catch {
                     // REVIEW: Is this correct?
@@ -59,8 +60,8 @@
 
                 // Add the license url link if the package specifies one
                 if (package.LicenseUrl != null) {
-                    item.Links.Add(new SyndicationLink(package.LicenseUrl) { 
-                         RelationshipType = "license"
+                    item.Links.Add(new SyndicationLink(package.LicenseUrl) {
+                        RelationshipType = "license"
                     });
                 }
 
@@ -69,7 +70,7 @@
                         Name = author
                     });
                 }
-                
+
                 if (!String.IsNullOrEmpty(package.Category)) {
                     item.Categories.Add(new SyndicationCategory(package.Category));
                 }
