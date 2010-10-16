@@ -7,7 +7,7 @@
     using System.Text.RegularExpressions;
     using EnvDTE;
 
-    internal static class ProjectExtensions {
+    public static class ProjectExtensions {
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
         private static readonly string[] _supportedProjectTypes = new[] { VSConstants.WebSiteProjectKind, 
@@ -116,6 +116,10 @@
 
         public static bool IsWebSite(this Project project) {
             return project.Kind != null && project.Kind.Equals(VSConstants.WebSiteProjectKind, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsUnloaded(this Project project) {
+            return VSConstants.UnloadedProjectKind.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
     }
