@@ -41,7 +41,8 @@
         }
 
         public override IEnumerable<string> GetFiles(string path) {
-            return Paths.Select(f => f.Key).Where(f => f.StartsWith(path));
+            return Paths.Select(f => f.Key)
+                        .Where(f => Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase));
         }
 
         public override IEnumerable<string> GetFiles(string path, string filter) {
@@ -78,7 +79,15 @@
         }
 
         public override IEnumerable<string> GetDirectories(string path) {
-            return Paths.Select(f => f.Key).Where(f => f.StartsWith(path));
+            return Paths.GroupBy(f => Path.GetDirectoryName(f.Key))
+                        .SelectMany(g => FileSystemExtensions.GetDirectories(g.Key))
+                        .Where(f => !String.IsNullOrEmpty(f) && 
+                               Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase))
+                        .Distinct();
+        }
+
+        public void AddFile(string path) {
+            AddFile(path, new MemoryStream());
         }
 
         public override void AddFile(string path, Stream stream) {

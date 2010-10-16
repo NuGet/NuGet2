@@ -36,10 +36,10 @@
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return GetPackagesInternal().AsQueryable();
+            return GetPackages(OpenPackage).AsQueryable();
         }
 
-        private IEnumerable<IPackage> GetPackagesInternal() {
+        internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage) {
             foreach (var path in GetPackageFiles()) {
                 PackageCacheEntry cacheEntry;
                 DateTimeOffset lastModified = FileSystem.GetLastModified(path);
@@ -51,7 +51,7 @@
                     string packagePath = path;
 
                     // Create the package
-                    var package = new ZipPackage(() => FileSystem.OpenFile(packagePath));
+                    IPackage package = openPackage(packagePath);
 
                     // create a cache entry with the last modified time
                     cacheEntry = new PackageCacheEntry(package, lastModified);
@@ -99,6 +99,10 @@
                 !FileSystem.GetDirectoriesSafe(String.Empty).Any()) {
                     FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
             }
+        }
+
+        private IPackage OpenPackage(string path) {
+            return new ZipPackage(() => FileSystem.OpenFile(path));
         }
 
         private string GetPackageFilePath(IPackage package) {
