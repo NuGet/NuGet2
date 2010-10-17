@@ -30,7 +30,7 @@
 
             ProjectItem projectItem;
             // If we couldn't get the folder, or the file doesn't exist, return null
-            if (container == null || !container.TryGetProjectItem(fileName, out projectItem)) {
+            if (container == null || !container.TryGetFile(fileName, out projectItem)) {
                 return null;
             }
 
@@ -47,12 +47,37 @@
             return true;
         }
 
-        public static bool TryGetProjectItem(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
-            projectItem = (from ProjectItem p in projectItems
-                           where p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
-                           select p).FirstOrDefault();
+        public static bool TryGetFolder(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
+            return TryGetProjectItem(projectItems, name, new[] { VSConstants.VsProjectItemKindPhysicalFolder }, out projectItem);
+        }
+
+        public static bool TryGetFile(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
+            return TryGetProjectItem(projectItems, name, new[] { VSConstants.VsProjectItemKindPhysicalFile }, out projectItem);
+        }
+
+        public static bool TryGetProjectItem(this ProjectItems projectItems, string name, IEnumerable<string> kinds, out ProjectItem projectItem) {
+            projectItem = GetProjectItem(projectItems, name);
+
+            if (projectItem == null) {
+                // If we didn't find the project item at the top level, then we look one more level down.
+                // In VS files can have other nested files like aspx and aspx.cs. These are actually top level files in the file system
+                // but are represented as nested project items in VS.
+                projectItem = (from ProjectItem item in projectItems
+                               where kinds.Contains(item.Kind) &&
+                                     item.ProjectItems != null &&
+                                     item.ProjectItems.Count > 0
+                               select GetProjectItem(item.ProjectItems, name) into item
+                               where item != null
+                               select item).FirstOrDefault();
+            }
 
             return projectItem != null;
+        }
+
+        private static ProjectItem GetProjectItem(ProjectItems projectItems, string name) {
+            return (from ProjectItem item in projectItems
+                    where item.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+                    select item).FirstOrDefault();
         }
 
         public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, params string[] kinds) {
@@ -92,7 +117,7 @@
             }
 
             ProjectItem subFolder;
-            if (projectItems.TryGetProjectItem(folderName, out subFolder)) {
+            if (projectItems.TryGetFolder(folderName, out subFolder)) {
                 // Get the sub folder
                 return subFolder.ProjectItems;
             }
