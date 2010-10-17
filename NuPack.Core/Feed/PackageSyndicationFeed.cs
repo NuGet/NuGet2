@@ -1,10 +1,9 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
-    using System.IO;
     using System.Linq;
-    using System.Security.Cryptography;
     using System.ServiceModel.Syndication;
     using System.Xml;
     using System.Xml.Linq;
@@ -20,8 +19,6 @@
             return Create(new LocalPackageRepository(physicalPath), uriSelector);
         }
 
-        // REVIEW: Is it right to have a general catch statement in the body of this method
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static SyndicationFeed Create(IPackageRepository repository, Func<IPackage, Uri> uriSelector) {
             var items = new List<SyndicationItem>();
             foreach (var package in repository.GetPackages()) {
@@ -41,23 +38,7 @@
                 // Setup the link for the download
                 SyndicationLink downloadLink = item.Links[0];
                 downloadLink.RelationshipType = "enclosure";
-                try {
-                    // Removed hash since it isn't used by the ctp client
-                    // TODO: Move this code outside of auto feed generation
-                    //using (var stream = new MemoryStream()) {
-                    //PackageBuilder.Save(package, stream);
-                    //downloadLink.Length = stream.Length;
-                    //var hashAttributeName = new XmlQualifiedName("hash");
-                    //downloadLink.AttributeExtensions[hashAttributeName] = "sha-512:" + GetHash(stream);
-                    //}
-                }
-                catch {
-                    // REVIEW: Is this correct?
-                    // Skip this package if it we failed to save the stream for some reason 
-                    // (most likely caused by a package that won't validate).
-                    continue;
-                }
-
+               
                 // Add the license url link if the package specifies one
                 if (package.LicenseUrl != null) {
                     item.Links.Add(new SyndicationLink(package.LicenseUrl) {
@@ -113,12 +94,5 @@
             feed.AttributeExtensions.Add(new XmlQualifiedName(PackageXmlNamespace, XNamespace.Xmlns.NamespaceName), Constants.SchemaNamespace);
             return feed;
         }
-
-        //private static string GetHash(Stream stream) {
-        //    using (var hashAlgorithm = SHA512.Create()) {
-        //        return String.Join(String.Empty, hashAlgorithm.ComputeHash(stream)
-        //                                                      .Select(b => b.ToString("x2", CultureInfo.InvariantCulture)));
-        //    }
-        //}
     }
 }

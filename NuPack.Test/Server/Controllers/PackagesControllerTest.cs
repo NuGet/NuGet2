@@ -7,15 +7,15 @@ using NuPack.Server.Infrastructure;
 
 namespace NuPack.Test.Server.Controllers {
     [TestClass]
-    public class PackagesControllerTest {
-        // Disabled tests to fix perf issue with server
-        //[TestMethod]
+    public class PackagesControllerTest {        
+        [TestMethod]
         public void DownloadReturnsConditionalGetResultWithLastModifiedFromPackageFile() {
             // Arrange
             var dateLastModified = DateTimeOffset.Now;
-            var repository = new Mock<IPackageStore>();
-            repository.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
-            var controller = new PackagesController(repository.Object);
+            var store = new Mock<IPackageStore>();
+            var repository = new Mock<IPackageRepository>();
+            store.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
+            var controller = new PackagesController(store.Object, repository.Object);
             var context = new Mock<ControllerContext>();
             controller.ControllerContext = context.Object;
 
@@ -26,13 +26,14 @@ namespace NuPack.Test.Server.Controllers {
             Assert.AreEqual(dateLastModified, result.LastModified);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void DownloadReturnsConditionalGetResultWithCorrectFileResult() {
             // Arrange
             var dateLastModified = DateTime.UtcNow;
-            var repository = new Mock<IPackageStore>();
-            repository.Setup(f => f.GetFullPath("nupack.nupkg")).Returns(@"c:\packages\nupack.nupkg");
-            var controller = new PackagesController(repository.Object);
+            var store = new Mock<IPackageStore>();
+            var repository = new Mock<IPackageRepository>();
+            store.Setup(f => f.GetFullPath("nupack.nupkg")).Returns(@"c:\packages\nupack.nupkg");
+            var controller = new PackagesController(store.Object, repository.Object);
             var context = new Mock<ControllerContext>();
             controller.ControllerContext = context.Object;
 

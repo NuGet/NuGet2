@@ -6,12 +6,12 @@ using NuPack.Server.Infrastructure;
 
 namespace NuPack.Server.Controllers {
     public class PackagesController : Controller {
-        private static readonly IPackageRepository repository = new LocalPackageRepository(PackageUtility.PackagePhysicalPath);
+        private readonly IPackageStore _fileSystem;
+        private readonly IPackageRepository _repository;
 
-        IPackageStore _fileSystem;
-
-        public PackagesController(IPackageStore fileSystem) {
+        public PackagesController(IPackageStore fileSystem, IPackageRepository repository) {
             _fileSystem = fileSystem;
+            _repository = repository;
         }
 
         public ActionResult Index() {
@@ -26,7 +26,7 @@ namespace NuPack.Server.Controllers {
         }
 
         //TODO: This method is deprecated. Need to keep it around till we release NuPack CTP 2.
-        [OutputCache(Duration = 60)]
+        [OutputCache(Duration = 60, VaryByParam = "none")]
         public ActionResult Feed() {
             // Add the response header
             Response.AddHeader(PackageUtility.FeedVersionHeader, PackageUtility.AtomFeedVersion);
@@ -38,9 +38,9 @@ namespace NuPack.Server.Controllers {
             // Get the last modified of the package directory
             DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
 
-            return new ConditionalGetResult(lastModified, () => { 
+            return new ConditionalGetResult(lastModified, () => {
                 SyndicationFeed packageFeed = PackageSyndicationFeed.Create(
-                    repository,
+                    _repository,
                     package => PackageUtility.GetPackageUrl(package.Id, package.Version.ToString(), Request.Url));
 
 
