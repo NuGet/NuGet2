@@ -104,12 +104,17 @@ function global:Get-ProjectNames() {
     (Get-Project -All) | ForEach-Object { $_.Name }
 }
 
-# hook up Solution Opened even to execute init.ps1 script files when a new solution is opened.
+# Hook up Solution events
 
 $solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
 
 $solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
     ExecuteInitScripts
+    UpdateWorkingDirectory
+})
+
+$solutionEvents.add_AfterClosing([EnvDTE._dispSolutionEvents_AfterClosingEventHandler]{
+    UpdateWorkingDirectory
 })
 
 function AddToolsFolderToEnv([string]$rootPath) {
@@ -145,12 +150,23 @@ function ExecuteInitScripts() {
     }
 }
 
+function UpdateWorkingDirectory
+{
+    $SolutionDir = if($DTE -and $DTE.Solution -and $DTE.Solution.FullName) { Split-Path $DTE.Solution.FullName -Parent }
+    if ($SolutionDir) {
+        Set-Location $SolutionDir
+    } else {
+        Set-Location $Env:USERPROFILE
+    }
+}
+
 function IsSolutionOpen() {
    return ($dte -and $dte.Solution -and $dte.Solution.IsOpen)
 }
 
 if (IsSolutionOpen) {
     ExecuteInitScripts
+    UpdateWorkingDirectory
 }
 
 # assign aliases to package cmdlets
