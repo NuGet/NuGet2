@@ -1,11 +1,10 @@
-﻿namespace NuPack {
-    using System;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Net;
-    using Microsoft.Internal.Web.Utils;
+﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using Microsoft.Internal.Web.Utils;
 
+namespace NuPack {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
         private const string NuPackVersionHeader = "NuPackVersion";
         private static readonly IPackageRepositoryFactory _default = new PackageRepositoryFactory();
@@ -21,10 +20,11 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
             }
 
-            if (IsLocalPath(source)) {
-                return new LocalPackageRepository(source);
+            Uri uri = new Uri(source);
+            if (uri.IsFile) {
+                return new LocalPackageRepository(uri.LocalPath);
             }
-            return CreateFeedRepository(new Uri(source));
+            return CreateFeedRepository(uri);
         }
 
         [SuppressMessage(
@@ -58,10 +58,6 @@
 
             Debug.Fail("Unknown feed type");
             return null;
-        }
-
-        private static bool IsLocalPath(string feedOrPath) {
-            return Path.IsPathRooted(feedOrPath);
         }
 
         private enum FeedType {
