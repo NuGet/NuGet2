@@ -3,12 +3,22 @@ using System.Data.Services;
 using System.Data.Services.Common;
 using System.Data.Services.Providers;
 using System.IO;
-using System.ServiceModel;
 using System.Web;
+using Ninject;
+using NuPack.Server.Infrastructure;
 
 namespace NuPack.Server.DataServices {
-    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
-    public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {
+    // Disabled for live service
+    // [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
+    public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {       
+        private IPackageRepository Repository {
+            get {
+                // It's bad to use the container directly but we aren't in the loop when this 
+                // class is created
+                return NinjectBootstrapper.Kernel.Get<IPackageRepository>();
+            }
+        }
+        
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config) {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);
@@ -17,15 +27,13 @@ namespace NuPack.Server.DataServices {
             config.UseVerboseErrors = true;
         }
 
-        protected override PackageContext CreateDataSource() {           
-            return new PackageContext(new LocalPackageRepository(PackageUtility.PackagePhysicalPath));
+        protected override PackageContext CreateDataSource() {
+            return new PackageContext(Repository);
         }
 
         protected override void OnStartProcessingRequest(ProcessRequestArgs args) {
             base.OnStartProcessingRequest(args);
 
-            // HACK: Exceptions for control flow yay! Only way to stop the request from completing
-            // right now
             HttpRequestBase request = new HttpRequestWrapper(HttpContext.Current.Request);
             DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
             if (request.IsUnmodified(lastModified)) {
@@ -36,13 +44,13 @@ namespace NuPack.Server.DataServices {
             args.OperationContext.ResponseHeaders[PackageUtility.FeedVersionHeader] = PackageUtility.ODataFeedVersion;
 
             // Try to determine if this is a request for the feed version
-            if(args.OperationContext.RequestHeaders[PackageUtility.FeedVersionHeader] != null) {
+            if (args.OperationContext.RequestHeaders[PackageUtility.FeedVersionHeader] != null) {
                 throw new DataServiceException(200, null);
             }
 
             HttpCachePolicy cachePolicy = HttpContext.Current.Response.Cache;
             cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetLastModified(Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath));
+            cachePolicy.SetLastModified(lastModified);
         }
 
         public void DeleteStream(object entity, DataServiceOperationContext operationContext) {

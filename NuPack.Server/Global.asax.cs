@@ -14,7 +14,7 @@ namespace NuPack.Server {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             // Add odata route
-            DataServiceHostFactory factory = new DataServiceHostFactory();
+            var factory = new DataServiceHostFactory();
             var serviceRoute = new ServiceRoute("odata/v1", factory, typeof(Packages));
             serviceRoute.Defaults = new RouteValueDictionary { { "serviceType", "odata" } };
             serviceRoute.Constraints = new RouteValueDictionary { { "serviceType", "odata" } };
@@ -36,7 +36,7 @@ namespace NuPack.Server {
 
         protected void Application_Start() {
             AreaRegistration.RegisterAllAreas();
-            NinjectBootstrapper.RegisterNinjectControllerFactory();
+            ControllerBuilder.Current.SetControllerFactory(new NinjectControllerFactory(NinjectBootstrapper.Kernel));
             RegisterRoutes(RouteTable.Routes);
         }
     }

@@ -1,11 +1,14 @@
-﻿using System.Web.Mvc;
+﻿using System;
 using Ninject;
 
 namespace NuPack.Server.Infrastructure {
     public static class NinjectBootstrapper {
-        public static void RegisterNinjectControllerFactory() {
-            var kernel = new StandardKernel(new Bindings());
-            ControllerBuilder.Current.SetControllerFactory(new NinjectControllerFactory(kernel));
+        private static readonly Lazy<IKernel> _kernel = new Lazy<IKernel>(() => new StandardKernel(new Bindings()));
+
+        public static IKernel Kernel {
+            get {
+                return _kernel.Value;
+            }
         }
     }
 }
