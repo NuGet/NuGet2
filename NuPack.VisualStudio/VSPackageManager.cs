@@ -22,6 +22,14 @@ namespace NuPack.VisualStudio {
             this(dte, VSPackageSourceProvider.GetRepository(dte))  {
         }
 
+        /// <summary>
+        /// This overload is called from Powershell script
+        /// </summary>
+        /// <param name="dte"></param>
+        public VSPackageManager(object dte) :
+            this((DTE)dte) {
+        }
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
         public VSPackageManager(DTE dte, IPackageRepository sourceRepository) :
             base(sourceRepository: sourceRepository,
