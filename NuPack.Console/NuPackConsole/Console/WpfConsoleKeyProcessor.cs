@@ -216,6 +216,13 @@ namespace NuPackConsole.Implementation.Console {
                             hr = VSConstants.S_OK;
                         }
                         break;
+                    case VSConstants.VSStd2KCmdID.CUTLINE:
+                        // clears the console when CutLine shortcut key is pressed,
+                        // usually it is Ctrl + L
+                        WpfConsole.ClearConsole();
+                        WpfConsole.ClearConsole();
+                        hr = VSConstants.S_OK;
+                        break;
                 }
             }
 

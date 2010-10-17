@@ -435,6 +435,13 @@ namespace NuPackConsole.Implementation.Console {
             // Raise event
             ConsoleCleared.Raise(this);
         }
+ 
+        public void ClearConsole() {
+            if (_inputLineStart != null) {
+                Dispatcher.ClearConsole();
+            }
+        }
+
 
         #endregion
 
