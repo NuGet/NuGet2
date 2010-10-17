@@ -133,7 +133,7 @@ function ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
 }
 
 function ExecuteInitScripts() {
-    $packageManager = [NuPack.VisualStudio.VsPackageManager]::GetPackageManager([object]$dte)
+    $packageManager = new NuPack.VisualStudio.VsPackageManager($dte)
     $repository = $packageManager.LocalRepository
     $localPackages = $repository.GetPackages()
 

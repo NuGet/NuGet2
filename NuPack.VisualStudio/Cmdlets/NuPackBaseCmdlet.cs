@@ -16,13 +16,16 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// Gets an instance of VSPackageManager to be used throughout the execution of this command.
         /// </summary>
         /// <value>The package manager.</value>
-        public VSPackageManager PackageManager {
+        protected virtual VSPackageManager PackageManager {
             get {
                 if (_packageManager == null) {
                     _packageManager = GetPackageManager();
                 }
 
                 return _packageManager;
+            }
+            set {
+                _packageManager = value;
             }
         }
 
@@ -105,8 +108,21 @@ namespace NuPack.VisualStudio.Cmdlets {
             if (dte == null) {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
+            return new VSPackageManager(dte);
+        }
 
-            return VSPackageManager.GetPackageManager(dte);
+        protected static VSPackageManager GetPackageManager(string source) {
+            if (!IsSolutionOpen) {
+                return null;
+            }
+
+            // prepare a PackageManager instance for use throughout the command execution lifetime
+            DTE dte = DTEExtensions.DTE;
+            if (dte == null) {
+                throw new InvalidOperationException("DTE isn't loaded.");
+            }
+
+            return new VSPackageManager(dte, PackageRepositoryFactory.Default.CreateRepository(source));
         }
 
         protected static Project GetProjectFromName(string projectName) {

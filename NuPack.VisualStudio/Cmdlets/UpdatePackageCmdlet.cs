@@ -19,12 +19,19 @@ namespace NuPack.VisualStudio.Cmdlets {
         [Parameter(Position = 3)]
         public SwitchParameter UpdateDependencies { get; set; }
 
+        [Parameter(Position = 4)]
+        public string Source { get; set; }
+
         #endregion
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {
                 WriteError(VsResources.Cmdlet_NoSolution);
                 return;
+            }
+
+            if (!String.IsNullOrEmpty(Source)) {
+                PackageManager = GetPackageManager(Source);
             }
 
             var packageManager = PackageManager;

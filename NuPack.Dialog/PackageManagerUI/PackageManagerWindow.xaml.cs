@@ -27,7 +27,7 @@ namespace NuPack.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            VSPackageManager packageManager = VSPackageManager.GetPackageManager(DTEExtensions.DTE);
+            VSPackageManager packageManager = new VSPackageManager(DTEExtensions.DTE);
             EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
 
             _installedPackagesProvider = new InstalledPackagesProvider(packageManager, activeProject, Resources);

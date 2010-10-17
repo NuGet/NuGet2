@@ -24,38 +24,41 @@ namespace NuPack.VisualStudio.Cmdlets {
             _repositoryFactory = repositoryFactory;
         }
 
-        [Parameter(Position=0)]
+        [Parameter(Position = 0)]
         public string Filter { get; set; }
 
-        [Parameter]
+        [Parameter(Position = 1)]
         public SwitchParameter Installed { get; set; }
 
-        [Parameter]
+        [Parameter(Position = 2)]
         public SwitchParameter Updates { get; set; }
 
+        [Parameter(Position = 3)]
+        public string Source { get; set; }
+
         protected override void ProcessRecordCore() {
-            if (IsSolutionOpen) {
-                if (Updates.IsPresent) {
-                    ShowUpdatePackages(Filter);
-                }
-                else if (Installed.IsPresent) {
-                    WritePackagesFromRepository(PackageManager.LocalRepository, Filter);
-                }
-                else {
-                    WritePackagesFromRepository(PackageManager.SourceRepository, Filter);
-                }
+            if (!IsSolutionOpen && (Installed.IsPresent || Updates.IsPresent)) {
+                WriteError(VsResources.Cmdlet_NoSolution);
+                return;
+            }
+
+            if (Updates.IsPresent) {
+                ShowUpdatePackages(Filter);
+            }
+            IPackageRepository repository;
+            if (!String.IsNullOrEmpty(Source)) {
+                repository = _repositoryFactory.CreateRepository(Source);
+            }
+            else if (Installed.IsPresent) {
+                repository = PackageManager.LocalRepository;
+            }
+            else if (IsSolutionOpen) {
+                repository = PackageManager.SourceRepository;
             }
             else {
-                if (Installed.IsPresent || Updates.IsPresent) {
-                    WriteError(VsResources.Cmdlet_NoSolution);
-                    return;
-                }
-
-                var packageSource = ActivePackageSource;
-                if (!String.IsNullOrEmpty(packageSource)) {
-                    WritePackagesFromRepository(_repositoryFactory.CreateRepository(packageSource), Filter);
-                }
+                repository = _repositoryFactory.CreateRepository(ActivePackageSource);
             }
+            WritePackagesFromRepository(repository, Filter);
         }
 
         private void WritePackagesFromRepository(IPackageRepository repository, string filter) {

@@ -1,65 +1,48 @@
-﻿namespace NuPack.VisualStudio {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Linq;
-    using EnvDTE;
-    using EnvDTE80;
-    using Microsoft.VisualStudio.ComponentModelHost;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio.ComponentModelHost;
+
+namespace NuPack.VisualStudio {
 
     public class VSPackageManager : PackageManager {
-        private static readonly ConcurrentDictionary<Solution, VSPackageManager> _packageManagerCache = new ConcurrentDictionary<Solution, VSPackageManager>();        
-        private Dictionary<Project, ProjectManager> _projectManagers = null;
+        private const string SolutionRepositoryDirectory = "packages";
+        private readonly Dictionary<Project, ProjectManager> _projectManagers = null;
+        private static SolutionEvents _solutionEvents;
+        private static IFileSystem _solutionFileSystem;
+        private static IPackageRepository _solutionRepository;
 
-        private readonly DTE _dte;
-        private readonly SolutionEvents _solutionEvents;
-        
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public VSPackageManager(DTE dte, IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem)
-            : base(sourceRepository, pathResolver, fileSystem) {
-            if (dte == null) {
-                throw new ArgumentNullException("dte");
-            }
+        public VSPackageManager(DTE dte) :
+            this(dte, VSPackageSourceProvider.GetRepository(dte))  {
+        }
 
-            _dte = dte;
-            // Apparently you must hold on to the instance you get from here, or it may be garbage collected and you
-            // lose your events.
-            _solutionEvents = _dte.Events.SolutionEvents;
-
-            _solutionEvents.ProjectAdded += OnProjectAdded;
-            _solutionEvents.ProjectRemoved += OnProjectRemoved;
-            _solutionEvents.BeforeClosing += OnBeforeClosing;
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
+        public VSPackageManager(DTE dte, IPackageRepository sourceRepository) :
+            base(sourceRepository: sourceRepository,
+                pathResolver: new DefaultPackagePathResolver(GetFileSystem(dte)),
+                fileSystem: GetFileSystem(dte),
+                localRepository: GetSolutionRepository(dte)) {
+            
+            _projectManagers = SolutionManager.Current.GetProjects().ToDictionary(project => project, project => CreateProjectManager(project));
         }
 
         private IEnumerable<ProjectManager> ProjectManagers {
             get {
-                EnsureProjectManagers();
                 return _projectManagers.Values;
             }
         }
 
         public ProjectManager GetProjectManager(Project project) {
-            EnsureProjectManagers();
             ProjectManager projectManager;
             _projectManagers.TryGetValue(project, out projectManager);
             return projectManager;
-        }
-
-        private void EnsureProjectManagers() {
-            // Cache the list of projects
-            if (_projectManagers == null) {
-                _projectManagers = new Dictionary<Project, ProjectManager>();
-
-                foreach (Project project in _dte.Solution.GetAllProjects()) {
-                    // Create a project manager for each of the projects
-                    var projectManager = CreateProjectManager(project);
-
-                    _projectManagers.Add(project, projectManager);
-                }
-            }
         }
 
         public void UpdatePackage(string packageId, Version version, bool updateDependencies) {
@@ -89,10 +72,10 @@
             }
         }
 
-        internal void OnPackageReferenceRemoved(IPackage removedPackage, bool force = false, bool removeDependencies = false) {
+        internal void OnPackageReferenceRemoved(IPackage removedPackage, bool forceRemove = false, bool removeDependencies = false) {
             if (!IsPackageReferenced(removedPackage)) {
                 // There are no packages that depend on this one so just uninstall it
-                base.UninstallPackage(removedPackage.Id, removedPackage.Version, force, removeDependencies);
+                base.UninstallPackage(removedPackage.Id, removedPackage.Version, forceRemove, removeDependencies);
             }
         }
 
@@ -100,32 +83,38 @@
             return GetProjectsWithPackage(package.Id, package.Version).Any();
         }
 
-        // Need object overloads so that the powershell script can call into it
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public static VSPackageManager GetPackageManager(object dte) {
-            return GetPackageManager((DTE)dte);
-        }
-
-        public static VSPackageManager GetPackageManager(DTE dte) {
-            // Since we can't change the repository of an existing package manager
-            // we need to create an entry that is based on the soltuion and the repository source            
-            VSPackageManager packageManager;
-            if (!_packageManagerCache.TryGetValue(dte.Solution, out packageManager)) {
-                // Get the file system for the solution folder
-                IFileSystem solutionFileSystem = GetFileSystem(dte);
-
-                // Create a new vs package manager
-                packageManager = new VSPackageManager(dte, 
-                                                      VSPackageSourceProvider.GetRepository(dte), 
-                                                      new DefaultPackagePathResolver(solutionFileSystem), solutionFileSystem);
-
-                // Add it to the cache
-                _packageManagerCache.TryAdd(dte.Solution, packageManager);
-            }
-            return packageManager;
+        private static IPackageRepository GetSolutionRepository(DTE dte) {
+            EnsureSolutionRepository(dte);
+            return _solutionRepository;
         }
 
         private static IFileSystem GetFileSystem(DTE dte) {
+            EnsureSolutionRepository(dte);
+            return _solutionFileSystem;
+        }
+
+        private static void EnsureSolutionRepository(DTE dte) {
+            if (_solutionRepository == null) {
+                EnsureSolutionEventBindings(dte);
+                _solutionFileSystem = CreateFileSystem(dte);
+                _solutionRepository = new LocalPackageRepository(new DefaultPackagePathResolver(_solutionFileSystem), _solutionFileSystem);
+            }
+        }
+
+        private static void EnsureSolutionEventBindings(DTE dte) {
+            if (_solutionEvents == null) {
+                // Keep a reference to SolutionEvents so that it doesn't get GC'ed. Otherwise, we won't receive events.
+                _solutionEvents = dte.Events.SolutionEvents;
+                _solutionEvents.BeforeClosing += OnSolutionClosing;
+            }
+        }
+
+        private static void OnSolutionClosing() {
+            _solutionFileSystem = null;
+            _solutionRepository = null;
+        }
+
+        private static IFileSystem CreateFileSystem(DTE dte) {
             // Get the component model service from dte                               
             var componentModel = dte.GetService<IComponentModel>(typeof(SComponentModel));
 
@@ -172,7 +161,6 @@
 
             return null;
         }
-
         private ProjectManager CreateProjectManager(Project project) {
             return new VSProjectManager(this, PathResolver, project);
         }
@@ -182,33 +170,6 @@
                    let package = projectManager.LocalRepository.FindPackage(packageId)
                    where package != null && (version == null || (version != null && package.Version.Equals(version)))
                    select projectManager;
-        }
-
-        private void OnBeforeClosing() {
-            // Invalidate our cache on closing
-            _projectManagers = null;
-
-            // Remove this item from the cache
-            VSPackageManager removed;
-            _packageManagerCache.TryRemove(_dte.Solution, out removed);
-        }
-
-        private void OnProjectRemoved(Project project) {
-            if (_projectManagers != null) {
-                _projectManagers.Remove(project);
-            }
-        }
-
-        private void OnProjectAdded(Project project) {
-            // Only add supported projects
-            if (project.IsSupported()) {
-                EnsureProjectManagers();
-                // If _projectManagers was null then EnsureProjectManagers would have populated 
-                // the cache with this project already.
-                if (!_projectManagers.ContainsKey(project)) {
-                    _projectManagers.Add(project, CreateProjectManager(project));
-                }
-            }
         }
     }
 }

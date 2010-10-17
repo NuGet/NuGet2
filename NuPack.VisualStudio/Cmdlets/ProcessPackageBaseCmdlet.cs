@@ -12,6 +12,16 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
 
+        protected override VSPackageManager PackageManager {
+            get {
+                 return base.PackageManager;
+            }
+            set {
+                base.PackageManager = value;
+                _projectManager = null;
+            }
+        }
+
         private ProjectManager _projectManager;
         protected ProjectManager ProjectManager {
             get {
