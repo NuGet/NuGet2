@@ -21,6 +21,7 @@
       <Term CompoundAlternate="NuPack">nupack</Term>
       <Term CompoundAlternate="ConsoleDispatcher">ConsoleDispatcher</Term>
       <Term CompoundAlternate="PowerShell">PowerShell</Term>
+      <Term CompoundAlternate="WebSite">WebSite</Term>
     </Compound>
     <DiscreteExceptions>
       <Term></Term>
