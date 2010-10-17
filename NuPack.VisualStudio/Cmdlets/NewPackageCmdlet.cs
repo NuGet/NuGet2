@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
@@ -18,8 +17,6 @@ namespace NuPack.VisualStudio.Cmdlets {
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
-        #region Parameters
-
         [Parameter(Position = 0)]
         public string Project { get; set; }
 
@@ -29,8 +26,6 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         [Parameter(Position = 2)]
         public string TargetFile { get; set; }
-
-        #endregion
 
         protected override void ProcessRecordCore() {
 

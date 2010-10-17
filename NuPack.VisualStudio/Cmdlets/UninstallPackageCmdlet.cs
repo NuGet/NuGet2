@@ -10,15 +10,11 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
     public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
-        #region Parameters
-
         [Parameter(Position = 2)]
         public SwitchParameter Force { get; set; }
 
         [Parameter(Position = 3)]
         public SwitchParameter RemoveDependencies { get; set; }
-
-        #endregion
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {

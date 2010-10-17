@@ -49,12 +49,10 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        #region Processing methods
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We want to display friendly message to the console.")]
+            Justification = "We want to display friendly message to the console.")]
         protected sealed override void ProcessRecord() {
             try {
                 ProcessRecordCore();
@@ -68,10 +66,6 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuPackBaseCmdlet.
         /// </summary>
         protected abstract void ProcessRecordCore();
-
-        #endregion
-
-        #region ILogger implementation
 
         void ILogger.Log(MessageLevel level, string message, params object[] args) {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
@@ -93,10 +87,6 @@ namespace NuPack.VisualStudio.Cmdlets {
                     break;
             }
         }
-
-        #endregion
-
-        #region Helper functions
 
         private static VSPackageManager GetPackageManager() {
             if (!IsSolutionOpen) {
@@ -130,9 +120,9 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Usage", 
+            "Microsoft.Usage",
             "CA2201:DoNotRaiseReservedExceptionTypes",
-            Justification="This exception is passed to PowerShell. We really don't care about the type of exception here.")]
+            Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
         protected void WriteError(string message) {
             if (!String.IsNullOrEmpty(message)) {
                 WriteError(new Exception(message));
@@ -151,7 +141,5 @@ namespace NuPack.VisualStudio.Cmdlets {
                 Host.UI.WriteLine(message);
             }
         }
-
-        #endregion
     }
 }

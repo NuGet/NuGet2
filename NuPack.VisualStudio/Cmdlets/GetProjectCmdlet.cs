@@ -1,6 +1,6 @@
-﻿namespace NuPack.VisualStudio.Cmdlets {
-    using System.Management.Automation;
+﻿using System.Management.Automation;
 
+namespace NuPack.VisualStudio.Cmdlets {
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
@@ -8,10 +8,10 @@
     [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = "Single")]
     public class GetProjectCmdlet : Cmdlet {
 
-        [Parameter(Position=0, ParameterSetName = "Single")]
+        [Parameter(Position = 0, ParameterSetName = "Single")]
         public string Name { get; set; }
 
-        [Parameter(Position=0, ParameterSetName = "All")]
+        [Parameter(Position = 0, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
         protected override void ProcessRecord() {

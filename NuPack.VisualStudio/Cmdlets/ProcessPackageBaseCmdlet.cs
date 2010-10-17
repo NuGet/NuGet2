@@ -11,10 +11,17 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
     public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
+        private ProjectManager _projectManager;
+
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
+        public string Id { get; set; }
+
+        [Parameter(Position = 1)]
+        public string Project { get; set; }
 
         protected override VSPackageManager PackageManager {
             get {
-                 return base.PackageManager;
+                return base.PackageManager;
             }
             set {
                 base.PackageManager = value;
@@ -22,7 +29,6 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        private ProjectManager _projectManager;
         protected ProjectManager ProjectManager {
             get {
                 if (_projectManager == null) {
@@ -32,16 +38,6 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return _projectManager;
             }
         }
-
-        #region Parameters
-
-        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
-        public string Id { get; set; }
-
-        [Parameter(Position = 1)]
-        public string Project { get; set; }
-
-        #endregion
 
         protected override void BeginProcessing() {
             base.BeginProcessing();

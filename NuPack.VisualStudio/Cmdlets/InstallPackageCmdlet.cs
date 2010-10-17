@@ -9,7 +9,6 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsLifecycle.Install, "Package")]
     public class InstallPackageCmdlet : ProcessPackageBaseCmdlet {
-        #region Parameters
 
         [Parameter(Position = 2)]
         public Version Version { get; set; }
@@ -19,7 +18,6 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         [Parameter(Position = 4)]
         public string Source { get; set; }
-        #endregion
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen) {
