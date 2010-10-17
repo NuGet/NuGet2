@@ -120,6 +120,19 @@
             }
         }
 
+        public override dynamic GetPropertyValue(string propertyName) {
+            if(propertyName == null) {
+                return null;
+            }
+
+            // Return empty string for the root namespace of this project.
+            if (propertyName.Equals("RootNamespace", StringComparison.OrdinalIgnoreCase)) {
+                return String.Empty;
+            }
+
+            return base.GetPropertyValue(propertyName);
+        }
+
         public override IEnumerable<string> GetFiles(string path) {
             return GetFiles(path, "*.*");
         }
