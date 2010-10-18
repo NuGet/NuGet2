@@ -24,9 +24,7 @@ namespace NuPack.Dialog.Providers {
         }
 
         protected override IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query) {
-            query = query.Where(p => (p.Description != null && p.Description.ToUpper().Contains(_searchText.ToUpper())) 
-                || (p.Id != null && p.Id.ToUpper().Contains(_searchText.ToUpper())));
-            return query;
+            return query.Find(_searchText);
         }
 
         protected override void FillNodes(IList<IVsExtensionsTreeNode> nodes) {

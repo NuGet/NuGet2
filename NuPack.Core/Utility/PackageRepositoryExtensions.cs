@@ -8,7 +8,6 @@ using System.Reflection;
 
 namespace NuPack {
     public static class PackageRepositoryExtensions {
-        private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description" };
 
         public static bool Exists(this IPackageRepository repository, IPackage package) {
             return repository.Exists(package.Id, package.Version);
@@ -46,17 +45,7 @@ namespace NuPack {
         /// Looks up packages that contains one or more searchTerm in its metadata
         /// </summary>
         public static IQueryable<IPackage> GetPackages(this IPackageRepository repository, params string[] searchTerms) {
-            var packages = repository.GetPackages();
-            if (searchTerms == null) {
-                return packages;
-            }
-
-            IEnumerable<string> nonNullTerms = searchTerms.Where(s => s != null);
-            if (!nonNullTerms.Any()) {
-                return packages;
-            }
-            
-            return packages.Where(BuildSearchExpression(nonNullTerms));
+            return repository.GetPackages().Find(searchTerms);
         }
 
         public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository, params string[] searchTerms) {
@@ -101,33 +90,6 @@ namespace NuPack {
             Expression toLowerExpression = Expression.Call(propertyExpression, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
             // == localPackage.Id
             return Expression.Equal(toLowerExpression, Expression.Constant(package.Id.ToLower()));
-        }
-
-        /// <summary>
-        /// Constructs an expression to search for individual tokens in a search term in the Id and Description of packages
-        /// </summary>
-        private static Expression<Func<IPackage, bool>> BuildSearchExpression(IEnumerable<string> searchTerms) {
-            Debug.Assert(searchTerms != null);
-            var parameterExpression = Expression.Parameter(typeof(IPackage));
-            // package.Id.ToLower().Contains(term1) || package.Id.ToLower().Contains(term2)  ...
-            Expression condition = (from term in searchTerms
-                                    from property in _packagePropertiesToSearch
-                                    select BuildExpressionForTerm(parameterExpression, term, property)).Aggregate(Expression.OrElse);
-            return Expression.Lambda<Func<IPackage, bool>>(condition, parameterExpression);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower", 
-            Justification="The expression is remoted using Odata which does not support the culture parameter")]
-        private static Expression BuildExpressionForTerm(ParameterExpression packageParameterExpression, string term, string propertyName) {
-            MethodInfo stringContains = typeof(String).GetMethod("Contains");
-            MethodInfo stringToLower = typeof(String).GetMethod("ToLower", Type.EmptyTypes);
-
-            // package.Id / package.Description
-            var propertyExpression = Expression.Property(packageParameterExpression, propertyName);
-            // .ToLower()
-            var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
-            // .Contains(term.ToLower())
-            return Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower()));
         }
 
         private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
