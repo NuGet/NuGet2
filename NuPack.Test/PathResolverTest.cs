@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuPack.Test {
     [TestClass]
@@ -250,8 +247,8 @@ namespace NuPack.Test {
         [TestMethod]
         public void DestinationPathResolverGeneratesRelativePaths() {
             // Arrange
-            var path = Path.GetFullPath(@".\foo\bar.txt");
-            var basePath = String.Empty;
+            var path = @"root\sub-dir\foo\bar.txt";
+            var basePath = @"root\sub-dir";
 
             // Act
             var result = PathResolver.ResolvePackagePath("*.*", basePath, path, String.Empty);
@@ -263,8 +260,8 @@ namespace NuPack.Test {
         [TestMethod]
         public void DestinationPathResolverGeneratesRelativePathsPrependedWithTargetPath() {
             // Arrange
-            var path = Path.GetFullPath(@".\foo\bar.txt");
-            var basePath = String.Empty;
+            var path = @"dir\subdir\foo\bar.txt";
+            var basePath = @"dir\subdir";
             var targetPath = @"\abc\cdf";
 
             // Act
@@ -278,7 +275,7 @@ namespace NuPack.Test {
         public void DestinationPathResolverReturnsFileNamesForNonRelativePaths() {
             // Arrange
             var searchPath = @"z:\bar\something.txt";
-            var path = Path.GetFullPath(searchPath);
+            var path = searchPath;
             var basePath = String.Empty;
 
             // Act
@@ -291,8 +288,8 @@ namespace NuPack.Test {
         [TestMethod]
         public void DestinationPathResolverReturnsFileNamesForPathsInBasePath() {
             // Arrange
-            var path = Path.GetFullPath(@".\something.txt");
-            var basePath = Path.GetFullPath(".");
+            var path = @"dir\subdir\something.txt";
+            var basePath = @"dir\subdir";
 
             // Act
             var result = PathResolver.ResolvePackagePath("*.*", basePath, path, String.Empty);
@@ -304,8 +301,8 @@ namespace NuPack.Test {
         [TestMethod]
         public void DestinationPathResolverPrependsTargetPath() {
             // Arrange
-            var path = Path.GetFullPath(@".\something.txt");
-            var basePath = Path.GetFullPath(".");
+            var path = @"dir\subdir\something.txt";
+            var basePath = @"dir\subdir";
             var targetPath = "foo";
             // Act
             var result = PathResolver.ResolvePackagePath("*.*", basePath, path, targetPath);
@@ -317,8 +314,8 @@ namespace NuPack.Test {
         [TestMethod]
         public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenNoTargetPathSpecified() {
             // Arrange
-            var path = Path.GetFullPath(@"folder\sub-folder\somefile.txt");
-            var basePath = Path.GetFullPath(".");
+            var path = @"root\folder\sub-folder\somefile.txt";
+            var basePath = "root";
             var targetPath = String.Empty;
             
             // Act
@@ -331,26 +328,26 @@ namespace NuPack.Test {
         [TestMethod]
         public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenTargetPathSpecified() {
             // Arrange
-            var path = Path.GetFullPath(@"bin\debug\pack.dll");
-            var basePath = Path.GetFullPath(".");
+            var path = @"root\dir\subdir\pack.dll";
+            var basePath = @"root";
             var targetPath = @"lib\sl4";
             
             // Act
-            var result = PathResolver.ResolvePackagePath(@"bin\debug\**", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(@"root\dir\**", basePath, path, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\sl4\pack.dll", result);
+            Assert.AreEqual(@"lib\sl4\subdir\pack.dll", result);
         }
 
         [TestMethod]
         public void PathResolverTruncatesWildCardInSearchPathWhenNoTargetPathSpecified() {
             // Arrange
-            var path = Path.GetFullPath(@"bin\debug\pack.dll");
-            var basePath = Path.GetFullPath(".");
+            var path = @"root\dir\subdir\pack.dll";
+            var basePath = @"root";
             var targetPath = String.Empty;
 
             // Act
-            var result = PathResolver.ResolvePackagePath(@"bin\debug\*.dll", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(@"root\dir\subdir\**\*.dll", basePath, path, targetPath);
 
             // Assert
             Assert.AreEqual(@"pack.dll", result);
@@ -359,12 +356,12 @@ namespace NuPack.Test {
         [TestMethod]
         public void PathResolverTruncatesWildCardInSearchPathWhenTargetPathSpecified() {
             // Arrange
-            var path = Path.GetFullPath(@"bin\debug\pack.dll");
-            var basePath = Path.GetFullPath(".");
+            var path = @"root\dir\subdir\pack.dll";
+            var basePath = @"root";
             var targetPath = @"lib\sl4";
 
             // Act
-            var result = PathResolver.ResolvePackagePath(@"bin\debug\*.dll", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(@"dir\subdir\*.dll", basePath, path, targetPath);
 
             // Assert
             Assert.AreEqual(@"lib\sl4\pack.dll", result);
