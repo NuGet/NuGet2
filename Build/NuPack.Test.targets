@@ -4,13 +4,18 @@
     <ProgramFilesDir Condition="Exists('$(ProgramFiles) %28x86%29')">$(ProgramFiles) (x86)</ProgramFilesDir>
     <VsDir>$(ProgramFilesDir)\Microsoft Visual Studio 10.0</VsDir>
     <DevEnvDir>$(VsDir)\Common7\IDE</DevEnvDir>
+    <TestResultsFile>$(AssemblyName).trx</TestResultsFile>
+    <TestAssembly>$(AssemblyName).dll</TestAssembly>
+    <IntegrationTestSettings>$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.testsettings</IntegrationTestSettings>
 </PropertyGroup>
 
 <Target Name="RunTests">
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+    <Delete Files="$(TargetDir)$(TestResultsFile)" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:$(TestAssembly) /resultsfile:$(TestResultsFile)" WorkingDirectory="$(TargetDir)" ContinueOnError="false" />
 </Target>
 
 <Target Name="RunIntegrationTests">
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TargetDir)\$(AssemblyName).dll&quot; /testsettings:&quot;$(MSBuildProjectDirectory)\NuPack.Test.Integration.testsettings&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+    <Delete Files="$(TargetDir)$(TestResultsFile)" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:$(TestAssembly) /resultsfile:$(TestResultsFile) /testsettings:$(IntegrationTestSettings)" WorkingDirectory="$(TargetDir)" ContinueOnError="false" />
 </Target>
 </Project>

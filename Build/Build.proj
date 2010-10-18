@@ -116,7 +116,6 @@
     </Target>
     
     <Target Name="RunIntegrationTests">
-    <MSBuild Projects="$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.csproj" Targets="RunIntegrationTests">
-        </MSBuild>
+        <MSBuild Projects="$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.csproj" Targets="RunIntegrationTests" />
     </Target>
 </Project>

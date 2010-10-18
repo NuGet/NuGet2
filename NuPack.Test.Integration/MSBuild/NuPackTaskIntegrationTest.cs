@@ -9,8 +9,8 @@ using System.IO;
 namespace NuPack.Test.Integration.MSBuild {
     [TestClass]
     public class NuPackTaskIntegrationTest {
-        static readonly string _absolutePackageDir = Path.GetFullPath(@"..\..\..\_package");
-        static readonly string _absolutePackageSourceDir = Path.GetFullPath(@"..\..\..\_package_source");
+        static string _absolutePackageDir = Path.GetFullPath(@"..\..\..\_package");
+        static string _absolutePackageSourceDir = Path.GetFullPath(@"..\..\..\_package_source");
         static string _msBuildPath;
         const string _packageFile = "Fnord.1.2.3.nupkg";
         const string _packageDir = @".\_package";
@@ -18,9 +18,10 @@ namespace NuPack.Test.Integration.MSBuild {
         const string _workingDir = @".\_working";
 
         [TestInitialize]
-        public void Initialize() {
+        public void Initialize(TestContext context) {
             DeleteTestDirs();
-
+            _absolutePackageDir = Path.Combine(context.TestDeploymentDir, @"..\..\..\_package");
+            _absolutePackageSourceDir = Path.Combine(context.TestDeploymentDir, @"..\..\..\_package_source");
             Directory.CreateDirectory(_absolutePackageDir);
             Directory.CreateDirectory(_absolutePackageSourceDir);
             Directory.CreateDirectory(_packageSourceDir);
@@ -83,7 +84,7 @@ namespace NuPack.Test.Integration.MSBuild {
             Assert.IsTrue(result.Contains(@"The ""NuPack"" task was not given a value for the required parameter ""SpecFile"""));
             Assert.IsTrue(result.Contains("Build FAILED."));
         }
-        
+
         [TestMethod]
         public void WillLogAnErrorWhenTheSpecFileIsBad() {
             string nuPackTaskXml = CreateTaskXml(packageSourceDir: "aBadPath");
@@ -115,8 +116,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
             Assert.IsTrue(result.Contains(
                 string.Format(
-                    "Creating a package for {0} at {1}.", 
-                    Path.GetFullPath(Path.Combine(_packageSourceDir, "fnord.nuspec")), 
+                    "Creating a package for {0} at {1}.",
+                    Path.GetFullPath(Path.Combine(_packageSourceDir, "fnord.nuspec")),
                     Path.GetFullPath(Path.Combine(_packageDir, _packageFile)))));
             Assert.IsTrue(result.Contains(
                 string.Format(
@@ -139,7 +140,7 @@ namespace NuPack.Test.Integration.MSBuild {
                     Path.GetFullPath(Path.Combine(_packageSourceDir, "fnord.nuspec")),
                     Path.GetFullPath(Path.Combine(_packageDir, _packageFile)))));
         }
-        
+
         static string CreatePackageSourceAndBuildFile(string nuPackTaskXml, string packageSourceDir = _packageSourceDir) {
             var buildFileContents = string.Format(
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
@@ -193,8 +194,7 @@ namespace NuPack.Test.Integration.MSBuild {
             DeleteTestDir(_workingDir);
         }
 
-        static void DeleteTestDir(string dir)
-        {
+        static void DeleteTestDir(string dir) {
             string libDir = Path.Combine(dir, "lib");
 
             if (Directory.Exists(libDir)) {
