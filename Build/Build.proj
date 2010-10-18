@@ -12,7 +12,7 @@
         <VisualStudioAddInDropDirectory>$(NuPackDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <ServerBuildDirectory>$(NuPackRoot)\NuPack.Server</ServerBuildDirectory>
         <ServerDropDirectory>$(NuPackDropDirectory)\Server</ServerDropDirectory>
-        <ZipExe>$(NuPackRoot)\packages\7zip4.65\Tools\7z.exe</ZipExe>
+        <ZipExe>$(NuPackRoot)\Tools\7zip4.65\7z.exe</ZipExe>
         <ILMergeExe>$(NuPackRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
         <ILMergeFileFinalName>NuPack.exe</ILMergeFileFinalName>
@@ -74,7 +74,7 @@
         </ItemGroup>
         <Message Text="Copying the NuPack Server output to $(ServerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\www\%(RecursiveDir)%(Filename)%(Extension)')" />
-	<Exec Command="$(ZipExe) a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
+        <Exec Command="$(ZipExe) a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
     </Target>
 
     <Target Name="CopyMSBuildOutputToDropDirectory">
