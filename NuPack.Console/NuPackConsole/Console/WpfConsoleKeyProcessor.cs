@@ -116,6 +116,17 @@ namespace NuPackConsole.Implementation.Console {
                                 }
                             }
                         }
+                        else
+                        {
+                            if (IsSelectionReadonly)
+                            {
+                                WpfTextView.Selection.Clear();
+                            }
+                            if (IsCaretInReadOnlyRegion)
+                            {
+                                WpfTextView.Caret.MoveTo(WpfConsole.InputLineExtent.End);
+                            }
+                        }
                         break;
 
                     case VSConstants.VSStd2KCmdID.LEFT:
