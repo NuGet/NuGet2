@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace NuPackConsole.Implementation.Console {
 
-    class WpfConsoleKeyProcessor : OleCommandFilter {
+    internal class WpfConsoleKeyProcessor : OleCommandFilter {
 
         WpfConsole WpfConsole { get; set; }
         IWpfTextView WpfTextView { get; set; }
@@ -116,14 +116,11 @@ namespace NuPackConsole.Implementation.Console {
                                 }
                             }
                         }
-                        else
-                        {
-                            if (IsSelectionReadonly)
-                            {
+                        else {
+                            if (IsSelectionReadonly) {
                                 WpfTextView.Selection.Clear();
                             }
-                            if (IsCaretInReadOnlyRegion)
-                            {
+                            if (IsCaretInReadOnlyRegion) {
                                 WpfTextView.Caret.MoveTo(WpfConsole.InputLineExtent.End);
                             }
                         }

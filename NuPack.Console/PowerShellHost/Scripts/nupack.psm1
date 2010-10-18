@@ -150,12 +150,12 @@ function ExecuteInitScripts() {
     }
 }
 
-function UpdateWorkingDirectory
-{
+function UpdateWorkingDirectory {
     $SolutionDir = if($DTE -and $DTE.Solution -and $DTE.Solution.FullName) { Split-Path $DTE.Solution.FullName -Parent }
     if ($SolutionDir) {
         Set-Location $SolutionDir
-    } else {
+    } 
+    else {
         Set-Location $Env:USERPROFILE
     }
 }
