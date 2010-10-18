@@ -4,18 +4,20 @@
     <ProgramFilesDir Condition="Exists('$(ProgramFiles) %28x86%29')">$(ProgramFiles) (x86)</ProgramFilesDir>
     <VsDir>$(ProgramFilesDir)\Microsoft Visual Studio 10.0</VsDir>
     <DevEnvDir>$(VsDir)\Common7\IDE</DevEnvDir>
-    <TestResultsFile>$(AssemblyName).trx</TestResultsFile>
-    <TestAssembly>$(AssemblyName).dll</TestAssembly>
-    <IntegrationTestSettings>$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.testsettings</IntegrationTestSettings>
+    <TestResultsFile>$(TargetDir)$(AssemblyName).trx</TestResultsFile>
+    <TestAssembly>$(TargetDir)$(AssemblyName).dll</TestAssembly>
+    <IntegrationTestSettings>NuPack.Test.Integration\NuPack.Test.Integration.testsettings</IntegrationTestSettings>
 </PropertyGroup>
 
 <Target Name="RunTests">
-    <Delete Files="$(TargetDir)$(TestResultsFile)" />
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:$(TestAssembly) /resultsfile:$(TestResultsFile)" WorkingDirectory="$(TargetDir)" ContinueOnError="false" />
+    <Delete Files="$(TestResultsFile)" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:$(TestAssembly) /resultsfile:$(TestResultsFile)" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+    <Message Text="##teamcity[importData type='mstest' path='$(TestResultsFile)']"/>
 </Target>
 
 <Target Name="RunIntegrationTests">
-    <Delete Files="$(TargetDir)$(TestResultsFile)" />
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:$(TestAssembly) /resultsfile:$(TestResultsFile) /testsettings:$(IntegrationTestSettings)" WorkingDirectory="$(TargetDir)" ContinueOnError="false" />
+    <Delete Files="$(TestResultsFile)" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:$(TestAssembly) /resultsfile:$(TestResultsFile) /testsettings:$(IntegrationTestSettings)" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+    <Message Text="##teamcity[importData type='mstest' path='$(TestResultsFile)']"/>
 </Target>
 </Project>

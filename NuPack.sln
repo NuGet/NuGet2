@@ -36,8 +36,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Build\Build.proj = Build\Build.proj
 		CodeAnalysisDictionary.xml = CodeAnalysisDictionary.xml
+		Build\ilmerge.internalize.ignore.txt = Build\ilmerge.internalize.ignore.txt
+		Build\NuPack.Settings.targets = Build\NuPack.Settings.targets
 		NuPack.Test.Integration\NuPack.Test.Integration.testsettings = NuPack.Test.Integration\NuPack.Test.Integration.testsettings
+		Build\NuPack.Test.targets = Build\NuPack.Test.targets
 		NuPack.vsmdi = NuPack.vsmdi
+		Build\PackageBuild.proj = Build\PackageBuild.proj
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHostProvider", "NuPack.Console\PowerShellHostProvider\PowerShellHostProvider.csproj", "{A5E7AEB3-738F-4C39-A459-00F90483B2FE}"

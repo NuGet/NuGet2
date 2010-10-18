@@ -18,10 +18,9 @@ namespace NuPack.Test.Integration.MSBuild {
         const string _workingDir = @".\_working";
 
         [TestInitialize]
-        public void Initialize(TestContext context) {
+        public void Initialize() {
             DeleteTestDirs();
-            _absolutePackageDir = Path.Combine(context.TestDeploymentDir, @"..\..\..\_package");
-            _absolutePackageSourceDir = Path.Combine(context.TestDeploymentDir, @"..\..\..\_package_source");
+            
             Directory.CreateDirectory(_absolutePackageDir);
             Directory.CreateDirectory(_absolutePackageSourceDir);
             Directory.CreateDirectory(_packageSourceDir);
