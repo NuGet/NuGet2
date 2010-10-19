@@ -32,9 +32,13 @@
 
             return packages.FirstOrDefault();
         }
-        
+
+        public static IEnumerable<IPackageFile> GetFiles(this IPackage package, string directory) {
+            return package.GetFiles().Where(file => file.Path.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
+        }
+
         public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
-            return package.GetFiles().Where(file => file.Path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
+            return package.GetFiles(Constants.ContentDirectory);
         }
 
         public static bool HasProjectContent(this IPackage package) {

@@ -9,7 +9,6 @@ using EnvDTE80;
 using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace NuPack.VisualStudio {
-
     public class VSPackageManager : PackageManager {
         private const string SolutionRepositoryDirectory = "packages";
         private readonly Dictionary<Project, ProjectManager> _projectManagers = null;
@@ -19,7 +18,7 @@ namespace NuPack.VisualStudio {
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
         public VSPackageManager(DTE dte) :
-            this(dte, VSPackageSourceProvider.GetRepository(dte))  {
+            this(dte, VSPackageSourceProvider.GetRepository(dte)) {
         }
 
         /// <summary>
@@ -36,8 +35,9 @@ namespace NuPack.VisualStudio {
                 pathResolver: new DefaultPackagePathResolver(GetFileSystem(dte)),
                 fileSystem: GetFileSystem(dte),
                 localRepository: GetSolutionRepository(dte)) {
-            
-            _projectManagers = SolutionManager.Current.GetProjects().ToDictionary(project => project, project => CreateProjectManager(project));
+
+            _projectManagers = SolutionManager.Current.GetProjects().ToDictionary(project => project,
+                                                                                  CreateProjectManager);
         }
 
         private IEnumerable<ProjectManager> ProjectManagers {
@@ -52,38 +52,179 @@ namespace NuPack.VisualStudio {
             return projectManager;
         }
 
-        public void UpdatePackage(string packageId, Version version, bool updateDependencies) {
+        public void InstallPackage(Project project, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
+            IPackage package = SourceRepository.FindPackage(packageId, version);
+
+            if (package == null) {
+                // TODO: Error handling
+                return;
+            }
+
+            var resolver = new VSInstallDependencyResolver(LocalRepository, SourceRepository, logger, ignoreDependencies);
+            resolver.Resolve(package);
+
+            // Execute the solution only operations
+            ExecuteSolutionOperations(resolver.SolutionOperations, logger);
+
+            // If we're going an operation on all projects then report exceptions as warnings
+            bool exceptionsAsWarnings = project == null;
+
+            foreach (var projectManager in GetTargetProjects(project)) {
+                IPackageOperationResolver projectResolver = GetResolver(projectManager, ignoreDependencies);
+                try {
+                    // Execute project level operations
+                    ExecuteProjectOperations(resolver.ProjectOperations, projectManager, logger, new HashSet<IPackage>(), projectResolver);
+                }
+                catch (Exception e) {
+                    if (exceptionsAsWarnings) {
+                        logger.Log(MessageLevel.Warning, e.Message);
+                    }
+                    else {
+                        throw;
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<ProjectManager> GetTargetProjects(Project project) {
+            if (project != null) {
+                yield return GetProjectManager(project);
+            }
+            else {
+                foreach (var projectManager in ProjectManagers) {
+                    yield return projectManager;
+                }
+            }
+        }
+
+        private IPackageOperationResolver GetResolver(ProjectManager projectManager, bool ignoreDependencies) {
+            return new ProjectInstallWalker(projectManager.LocalRepository,
+                                            projectManager.SourceRepository,
+                                            new DependentsWalker(projectManager.LocalRepository),
+                                            NullLogger.Instance,
+                                            ignoreDependencies);
+
+        }
+
+        public void UninstallPackage(Project project, string id, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
+            IPackage package = LocalRepository.FindPackage(id, version);
+
+            if (package == null) {
+                // TODO: Error handling
+                return;
+            }
+
+            var resolver = new VSUninstallDependencyResolver(LocalRepository,
+                                                             new DependentsWalker(LocalRepository),
+                                                             logger,
+                                                             removeDependencies,
+                                                             forceRemove);
+            resolver.Resolve(package);
+
+            // Execute the solution only operations
+            ExecuteSolutionOperations(resolver.SolutionOperations, logger);
+
+            bool exceptionsAsWarnings = project == null;
+
+            // Execute project level operations
+            foreach (var projectManager in GetTargetProjects(project)) {
+                try {
+                    ExecuteProjectOperations(resolver.ProjectOperations, projectManager, logger, null, null);
+                }
+                catch (Exception e) {
+                    if (exceptionsAsWarnings) {
+                        logger.Log(MessageLevel.Warning, e.Message);
+                    }
+                    else {
+                        throw;
+                    }
+                }
+            }
+
+        }
+
+        private void ExecuteProjectOperations(IEnumerable<PackageOperation> operations,
+                                              ProjectManager projectManager,
+                                              ILogger logger,
+                                              HashSet<IPackage> processed,
+                                              IPackageOperationResolver projectResolver) {
+            try {
+                // REVIEW: We shouldn't have to set loggers at this level
+                FileSystem.Logger = logger;
+                projectManager.Logger = logger;
+                projectManager.Project.Logger = logger;
+
+                foreach (var operation in operations) {
+                    if (operation.Action == PackageAction.Uninstall) {
+                        ExecuteProjectUninstall(projectManager, operation, logger);
+                    }
+                    else {
+                        // Do nothing if this package has already been verified
+                        if (!processed.Contains(operation.Package)) {
+                            // Keep track of the list of verified packages so we don't walk the graph more than we need to
+                            IEnumerable<PackageOperation> installOperations = projectResolver.ResolveOperations(operation.Package);
+                            processed.Add(operation.Package);
+                            ExecuteProjectOperations(installOperations, projectManager, logger, processed, projectResolver);
+                        }
+                        else {
+                            ExecuteProjectInstall(projectManager, operation);
+                        }
+                    }
+                }
+            }
+            finally {
+                projectManager.Logger = null;
+                projectManager.Project.Logger = null;
+                FileSystem.Logger = null;
+            }
+        }
+
+        private void ExecuteSolutionOperations(IEnumerable<PackageOperation> operations, ILogger logger) {
+            try {
+                FileSystem.Logger = logger;
+                Logger = logger;
+
+                // Execute solution only operations
+                foreach (var operation in operations) {
+                    Execute(operation);
+                }
+            }
+            finally {
+                Logger = null;
+                FileSystem.Logger = null;
+            }
+        }
+
+        private void ExecuteProjectInstall(ProjectManager projectManager, PackageOperation operation) {
+            Execute(operation);
+
+            projectManager.Execute(operation);
+
+        }
+
+        private void ExecuteProjectUninstall(ProjectManager projectManager, PackageOperation operation, ILogger logger) {
+            try {
+                // If the package doesn't exist
+                if (!projectManager.LocalRepository.Exists(operation.Package)) {
+                    Logger = logger;
+                }
+
+                projectManager.Execute(operation);
+
+                if (!IsPackageReferenced(operation.Package)) {
+                    Execute(operation);
+                }
+            }
+            finally {
+                if (Logger != null) {
+                    Logger = null;
+                }
+            }
+        }
+
+        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger) {
             var projectManagers = GetProjectsWithPackage(packageId, version);
-            if (projectManagers.Any()) {
-                foreach (var projectManager in projectManagers) {
-                    projectManager.UpdatePackageReference(packageId, version, updateDependencies);
-                }
-            }
-            else {
-                InstallPackage(packageId, version);
-            }
-        }
-
-        public override void UninstallPackage(IPackage package, bool forceRemove = false, bool removeDependencies = false) {
-            // Remove reference from projects that reference this package
-            var projectManagers = GetProjectsWithPackage(package.Id, package.Version);
-            if (projectManagers.Any()) {
-                // We don't need to actually call uninstall since uninstalling it from all the projects
-                // already has a side effect of removing it from the package manager
-                foreach (ProjectManager projectManager in projectManagers) {
-                    projectManager.RemovePackageReference(package.Id, forceRemove, removeDependencies);
-                }
-            }
-            else {
-                base.UninstallPackage(package, forceRemove, removeDependencies);
-            }
-        }
-
-        internal void OnPackageReferenceRemoved(IPackage removedPackage, bool forceRemove = false, bool removeDependencies = false) {
-            if (!IsPackageReferenced(removedPackage)) {
-                // There are no packages that depend on this one so just uninstall it
-                base.UninstallPackage(removedPackage.Id, removedPackage.Version, forceRemove, removeDependencies);
-            }
+            InstallPackage(null, packageId, version, !updateDependencies, logger);
         }
 
         private bool IsPackageReferenced(IPackage package) {
@@ -169,7 +310,7 @@ namespace NuPack.VisualStudio {
             return null;
         }
         private ProjectManager CreateProjectManager(Project project) {
-            return new VSProjectManager(this, PathResolver, project);
+            return new ProjectManager(LocalRepository, PathResolver, ProjectSystemFactory.CreateProjectSystem(project));
         }
 
         private IEnumerable<ProjectManager> GetProjectsWithPackage(string packageId, Version version) {

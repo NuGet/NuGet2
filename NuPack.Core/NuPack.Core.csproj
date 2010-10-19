@@ -83,7 +83,7 @@
     <Compile Include="PackageWalker\PackageWalker.cs" />
     <Compile Include="PackageWalker\InstallWalker.cs" />
     <Compile Include="PackageWalker\ProjectInstallWalker.cs" />
-    <Compile Include="PackageWalker\ReverseDependencyWalker.cs" />
+    <Compile Include="PackageWalker\DependentsWalker.cs" />
     <Compile Include="PackageWalker\UninstallWalker.cs" />
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="Repositories\PackageReferenceRepository.cs" />
