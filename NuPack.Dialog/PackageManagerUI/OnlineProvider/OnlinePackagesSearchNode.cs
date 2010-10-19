@@ -6,7 +6,7 @@ namespace NuPack.Dialog.Providers {
 
     internal class OnlinePackagesSearchNode : OnlinePackagesTreeBase {
 
-        private string _searchText;
+        private readonly string _searchText;
 
         public OnlinePackagesSearchNode(OnlinePackagesProvider provider, IVsExtensionsTreeNode parent, string searchText) :
             base(parent, provider) {

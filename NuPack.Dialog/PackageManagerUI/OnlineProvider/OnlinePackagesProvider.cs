@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -13,15 +14,16 @@ namespace NuPack.Dialog.Providers {
     /// IVsExtensionsProvider implementation responsible for gathering
     /// a list of packages from a package feed which will be shown in the Add NuPack dialog.
     /// </summary>
-    internal class OnlinePackagesProvider : VsExtensionsProvider, IVsProgressPaneConsumer {
+    internal class OnlinePackagesProvider : VsExtensionsProvider {
         private IVsExtensionsTreeNode _searchNode;
-        private readonly bool _onlineDisabled;
-        private Dispatcher _currentDispatcher;
         private readonly ResourceDictionary _resources;
         private readonly VSPackageManager _packageManager;
         private readonly EnvDTE.Project _activeProject;
-       
-        public OnlinePackagesProvider(VSPackageManager packageManager, EnvDTE.Project activeProject, ResourceDictionary resources, bool onlineDisabled) {
+
+        public OnlinePackagesProvider(
+            VSPackageManager packageManager, 
+            EnvDTE.Project activeProject, 
+            ResourceDictionary resources) {
 
             if (packageManager == null) {
                 throw new ArgumentNullException("packageManager");
@@ -36,12 +38,15 @@ namespace NuPack.Dialog.Providers {
             }
 
             _resources = resources;
-            _onlineDisabled = onlineDisabled;
             _packageManager = packageManager;
             _activeProject = activeProject;
         }
 
-        private IVsProgressPane ProgressPane { get; set; }
+        public virtual bool RefreshOnNodeSelection {
+            get {
+                return false;
+            }
+        }
 
         protected VSPackageManager PackageManager {
             get {
@@ -82,9 +87,8 @@ namespace NuPack.Dialog.Providers {
         public override IVsExtensionsTreeNode ExtensionsTree {
             get {
                 if (RootNode == null) {
-                    this._currentDispatcher = Dispatcher.CurrentDispatcher;
                     RootNode = new BasePackagesTree(null, String.Empty);
-                    new Thread(new ThreadStart(CreateExtensionsTree)).Start();
+                    CreateExtensionsTree();
                 }
 
                 return RootNode;
@@ -122,7 +126,9 @@ namespace NuPack.Dialog.Providers {
         }
 
         public override IVsExtensionsTreeNode Search(string searchTerms) {
-            if (_onlineDisabled) return null;
+            if (OperationCoordinator.IsBusy) {
+                return null;
+            }
 
             if (_searchNode != null) {
                 // dispose any search results
@@ -139,64 +145,103 @@ namespace NuPack.Dialog.Providers {
             return _searchNode;
         }
 
-        void IVsProgressPaneConsumer.SetProgressPane(IVsProgressPane progressPane) {
-            this.ProgressPane = progressPane;
-        }
-
         private void CreateExtensionsTree() {
-            this._currentDispatcher.BeginInvoke(DispatcherPriority.Normal, new ThreadStart(delegate() {
-                if (this.ProgressPane != null && this.ProgressPane.Show(null, false)) {
-                    this.ProgressPane.IsIndeterminate = true;
-                }
-            }));
-
-            List<IVsExtensionsTreeNode> rootNodes = new List<IVsExtensionsTreeNode>();
-            if (this.ProgressPane != null) {
-                this.ProgressPane.Close();
+            // The user may have done a search before we finished getting the category list; temporarily remove it
+            if (_searchNode != null) {
+                RootNode.Nodes.Remove(_searchNode);
             }
 
-            if (this._currentDispatcher != null) {
-                this._currentDispatcher.BeginInvoke(DispatcherPriority.Normal,
-                    new ThreadStart(delegate() {
-                    // The user may have done a search before we finished getting the category list.
-                    // temporarily remove it
-                    if (_searchNode != null) {
-                        RootNode.Nodes.Remove(_searchNode);
-                    }
+            // Add the special "All" node which doesn't filter by category.
+            RootNode.Nodes.Add(new OnlinePackagesTree(this, Resources.Dialog_RootNodeAll, RootNode));
 
-                    // Add the special "All" node which doesn't filter by category.
-                    RootNode.Nodes.Add(new OnlinePackagesTree(this, Resources.Dialog_RootNodeAll, RootNode));
-
-                    rootNodes.ForEach(node => RootNode.Nodes.Add(node));
-
-                    if (_searchNode != null) {
-                        // Re-add the search node and select it if the user was doing a search
-                        RootNode.Nodes.Add(_searchNode);
-                        _searchNode.IsSelected = true;
-                    }
-                    else {
-                        //If they weren't doing a search, select the first category.
-                        RootNode.Nodes.First().IsSelected = true;
-                    }
-                }
-                ));
+            if (_searchNode != null) {
+                // Re-add the search node and select it if the user was doing a search
+                RootNode.Nodes.Add(_searchNode);
+                _searchNode.IsSelected = true;
+            }
+            else {
+                //If they weren't doing a search, select the first category.
+                RootNode.Nodes.First().IsSelected = true;
             }
         }
 
-        public void Install(string id, Version version) {
-            ProjectManager.AddPackageReference(id, version);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        public void Install(OnlinePackagesItem item) {
+            if (OperationCoordinator.IsBusy) {
+                return;
+            }
+
+            // disable all operations while this install is in progress
+            OperationCoordinator.IsBusy = true;
+
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(DoInstallAsync);
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnInstallCompleted);
+            worker.RunWorkerAsync(item);
         }
 
-        public void Uninstall(string id) {
-            ProjectManager.RemovePackageReference(id);
+        private void DoInstallAsync(object sender, DoWorkEventArgs e) {
+            OnlinePackagesItem item = (OnlinePackagesItem)e.Argument;
+            ProjectManager.AddPackageReference(item.Id, new Version(item.Version));
+            e.Result = item;
+        }
+
+        private void OnInstallCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            OperationCoordinator.IsBusy = false;
+
+            if (e.Error == null) {
+                OnlinePackagesItem item = (OnlinePackagesItem)e.Result;
+                item.UpdateInstallStatus();
+            }
         }
 
         public bool IsInstalled(string id, Version version) {
-            return (ProjectManager.LocalRepository.FindPackage(id, version) != null);
+            return ProjectManager.LocalRepository.Exists(id, version);
         }
 
-        public void Update(string id, Version version) {
-            ProjectManager.UpdatePackageReference(id, version);
+        public void Uninstall(OnlinePackagesItem item) {
+            if (OperationCoordinator.IsBusy) {
+                return;
+            }
+
+            try {
+                OperationCoordinator.IsBusy = true;
+                ProjectManager.RemovePackageReference(item.Id);
+            }
+            finally {
+                OperationCoordinator.IsBusy = false;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        public void Update(OnlinePackagesItem item) {
+            if (OperationCoordinator.IsBusy) {
+                Debug.WriteLine("operation denied because it is busy");
+                return;
+            }
+
+            // disable all operations while this update is in progress
+            OperationCoordinator.IsBusy = true;
+
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnUpdateCompleted);
+            worker.DoWork += new DoWorkEventHandler(DoUpdateAsync);
+            worker.RunWorkerAsync(item);
+        }
+
+        private void DoUpdateAsync(object sender, DoWorkEventArgs e) {
+            OnlinePackagesItem item = (OnlinePackagesItem)e.Argument;
+            ProjectManager.UpdatePackageReference(item.Id, new Version(item.Version));
+            e.Result = item;
+        }
+
+        private void OnUpdateCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            OperationCoordinator.IsBusy = false;
+
+            if (e.Error == null) {
+                OnlinePackagesItem item = (OnlinePackagesItem)e.Result;
+                item.UpdateUpdateStatus();
+            }
         }
 
         public bool CanBeUpdated(IPackage package) {

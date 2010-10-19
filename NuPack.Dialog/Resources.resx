@@ -127,10 +127,13 @@
     <value>_Install</value>
   </data>
   <data name="Dialog_InstalledProvider" xml:space="preserve">
-    <value>Installed</value>
+    <value>Installed packages</value>
+  </data>
+  <data name="Dialog_MessageBoxTitle" xml:space="preserve">
+    <value>Error</value>
   </data>
   <data name="Dialog_OnlineProvider" xml:space="preserve">
-    <value>Online</value>
+    <value>Available</value>
   </data>
   <data name="Dialog_PackageInstalledTooltip" xml:space="preserve">
     <value>This package is already installed.</value>

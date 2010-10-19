@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
@@ -27,15 +28,15 @@ namespace NuPack.Dialog.PackageManagerUI {
             VSPackageManager packageManager = new VSPackageManager(DTEExtensions.DTE);
             EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
 
-            _installedPackagesProvider = new InstalledPackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(_installedPackagesProvider);
-
             UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(packageManager, activeProject, Resources);
             this.explorer.Providers.Add(updatePackagesProvider);
-
-            _onlinePackagesProvider = new OnlinePackagesProvider(packageManager, activeProject, Resources, false);
+           
+            _onlinePackagesProvider = new OnlinePackagesProvider(packageManager, activeProject, Resources);
             this.explorer.Providers.Add(_onlinePackagesProvider);
-            this.explorer.SelectedProvider = _onlinePackagesProvider;
+
+            _installedPackagesProvider = new InstalledPackagesProvider(packageManager, activeProject, Resources);
+            this.explorer.Providers.Add(_installedPackagesProvider);
+            this.explorer.SelectedProvider = _installedPackagesProvider;
         }
 
         private void ExecutedInstallPackage(object sender, ExecutedRoutedEventArgs e) {
@@ -56,40 +57,41 @@ namespace NuPack.Dialog.PackageManagerUI {
 
             bool accepted = ShowLicenseWindowIfRequired(selectedItem);
             if (accepted) {
-                provider.Install(selectedItem.Id, new Version(selectedItem.Version));
+                provider.Install(selectedItem);
+                e.Handled = true;
             }
         }
 
         private void CanExecuteInstallPackage(object sender, CanExecuteRoutedEventArgs e) {
+
+            if (OperationCoordinator.IsBusy) {
+                e.CanExecute = false;
+                return;
+            }
+
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 e.CanExecute = false;
                 return;
             }
+
             OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
             if (selectedItem == null) {
                 e.CanExecute = false;
                 return;
             }
 
-            if (selectedItem.IsInstalled) {
-                //Don't allow the download command on packages that are already installed.
-                e.CanExecute = false;
-                return;
-            }
-
-            e.CanExecute = true;
+            // Don't allow the download command on packages that are already installed.
+            e.CanExecute = !selectedItem.IsInstalled;
         }
 
         private void ExecutedUninstallPackage(object sender, ExecutedRoutedEventArgs e) {
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-
             if (control == null) {
                 return;
             }
 
             OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-
             if (selectedItem == null) {
                 return;
             }
@@ -99,18 +101,26 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            provider.Uninstall(selectedItem.Id);
+            try {
+                provider.Uninstall(selectedItem);
 
-            // Remove the item from the "All" tree of installed packages
-            var allTree = _installedPackagesProvider.ExtensionsTree.Nodes.First();
-            var uninstalledItem = allTree.Extensions.FirstOrDefault(c => c.Id.Equals(selectedItem.Id, StringComparison.OrdinalIgnoreCase));
+                // Remove the item from the "All" tree of installed packages
+                var allTree = _installedPackagesProvider.ExtensionsTree.Nodes.First();
+                allTree.Extensions.Remove(selectedItem);
 
-            if (uninstalledItem != null) {
-                allTree.Extensions.Remove(uninstalledItem);
+                e.Handled = true;
+            }
+            catch (InvalidOperationException ex) {
+                MessageBox.Show(ex.Message, NuPack.Dialog.Resources.Dialog_MessageBoxTitle);
             }
         }
 
         private void CanExecuteUninstallPackage(object sender, CanExecuteRoutedEventArgs e) {
+            if (OperationCoordinator.IsBusy) {
+                e.CanExecute = false;
+                return;
+            }
+
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 e.CanExecute = false;
@@ -144,11 +154,17 @@ namespace NuPack.Dialog.PackageManagerUI {
 
             bool accepted = ShowLicenseWindowIfRequired(selectedItem);
             if (accepted) {
-                provider.Update(selectedItem.Id, new Version(selectedItem.Version));
+                provider.Update(selectedItem);
+                e.Handled = true;
             }
         }
 
         private void CanExecuteUpdatePackage(object sender, CanExecuteRoutedEventArgs e) {
+            if (OperationCoordinator.IsBusy) {
+                e.CanExecute = false;
+                return;
+            }
+
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 e.CanExecute = false;
@@ -211,6 +227,14 @@ namespace NuPack.Dialog.PackageManagerUI {
             }
             else {
                 return true;
+            }
+        }
+
+        private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            OnlinePackagesTreeBase selectedNode = explorer.SelectedExtensionTreeNode as OnlinePackagesTreeBase;
+            if (selectedNode != null) {
+                // notify the selected node that it is opened.
+                selectedNode.OnOpened();
             }
         }
     }

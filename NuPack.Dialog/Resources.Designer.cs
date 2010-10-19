@@ -88,7 +88,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Installed.
+        ///   Looks up a localized string similar to Installed packages.
         /// </summary>
         public static string Dialog_InstalledProvider {
             get {
@@ -97,7 +97,16 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Online.
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Dialog_MessageBoxTitle {
+            get {
+                return ResourceManager.GetString("Dialog_MessageBoxTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Available.
         /// </summary>
         public static string Dialog_OnlineProvider {
             get {

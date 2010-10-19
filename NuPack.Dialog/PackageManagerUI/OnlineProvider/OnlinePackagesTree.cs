@@ -7,7 +7,10 @@ namespace NuPack.Dialog.Providers {
 
         private string _category;
 
-        public OnlinePackagesTree(OnlinePackagesProvider provider, string category, IVsExtensionsTreeNode parent) :
+        public OnlinePackagesTree(
+            OnlinePackagesProvider provider, 
+            string category, 
+            IVsExtensionsTreeNode parent) : 
             base(parent, provider) {
 
             if (category == null) {

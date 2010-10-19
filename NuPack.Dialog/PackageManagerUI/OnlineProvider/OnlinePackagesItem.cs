@@ -11,7 +11,7 @@ namespace NuPack.Dialog.Providers {
         private OnlinePackagesProvider _provider;
         private BitmapSource _previewImage;
         private NuPack.IPackage _packageIdentity;
-
+        
         /// <summary>
         /// The reference item is used within the Add NuPack dialog that we're using for Add Reference
         /// It will "house" the actual reference item that we'll use for the act of adding references
@@ -174,10 +174,18 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
+        internal void UpdateInstallStatus() {
+            OnNotifyPropertyChanged("IsInstalled");
+        }
+
         public bool IsUpdated {
             get {
                 return !_provider.CanBeUpdated(_packageIdentity);
             }
+        }
+
+        internal void UpdateUpdateStatus() {
+            OnNotifyPropertyChanged("IsUpdated");
         }
     }
 }

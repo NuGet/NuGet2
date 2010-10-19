@@ -90,7 +90,8 @@
                 IsFxComboVisible="False"
                 IsMediumIconsViewButtonVisible="False"
                 IsSmallIconsViewButtonVisible="False"
-                IsLargeIconsViewButtonVisible="False" />
+                IsLargeIconsViewButtonVisible="False"
+                CategorySelectionChanged="OnCategorySelectionChanged" />
         </Border>
 
         <Border Grid.Row="0"

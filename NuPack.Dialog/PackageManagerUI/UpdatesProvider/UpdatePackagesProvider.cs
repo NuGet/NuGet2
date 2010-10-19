@@ -9,13 +9,19 @@ namespace NuPack.Dialog.Providers {
         private object _mediumIconDataTemplate;
 
         public UpdatePackagesProvider(VSPackageManager packageManager, EnvDTE.Project activeProject, ResourceDictionary resources)
-            : base(packageManager, activeProject, resources, false) {
+            : base(packageManager, activeProject, resources) {
             _resources = resources;
         }
 
         public override string Name {
             get {
                 return Resources.Dialog_UpdateProvider;
+            }
+        }
+
+        public override bool RefreshOnNodeSelection {
+            get {
+                return true;
             }
         }
 

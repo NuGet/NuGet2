@@ -15,26 +15,28 @@ namespace NuPack.Dialog.Providers {
         // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
 
-        private IList<IVsExtension> _extensions = null;
-        private IList<IVsExtensionsTreeNode> _nodes = null;
+        private IList<IVsExtension> _extensions;
+        private IList<IVsExtensionsTreeNode> _nodes;
         private int _totalPages = 1, _currentPage = 1;
         private bool _progressPaneActive;
         private bool _isExpanded;
         private bool _isSelected;
-        private object _activeQueryStateLock = new object();
         private bool _activeQueryStateCancelled;
+        private bool _loadingInProgress;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<EventArgs> PageDataChanged;
 
         internal OnlinePackagesTreeBase(IVsExtensionsTreeNode parent, OnlinePackagesProvider provider) {
+            Debug.Assert(provider != null);
+
             Parent = parent;
             Provider = provider;
         }
 
         protected OnlinePackagesProvider Provider {
             get;
-            set;
+            private set;
         }
 
         private IVsProgressPane ProgressPane {
@@ -42,10 +44,6 @@ namespace NuPack.Dialog.Providers {
             set;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance", 
-            "CA1811:AvoidUncalledPrivateCode",
-            Justification="We will need this property soon.")]
         private IVsMessagePane MessagePane {
             get;
             set;
@@ -72,8 +70,10 @@ namespace NuPack.Dialog.Providers {
                 return _isSelected;
             }
             set {
-                _isSelected = value;
-                OnNotifyPropertyChanged("IsSelected");
+                if (_isSelected != value) {
+                    _isSelected = value;
+                    OnNotifyPropertyChanged("IsSelected");
+                }
             }
         }
 
@@ -86,8 +86,10 @@ namespace NuPack.Dialog.Providers {
                 return _isExpanded;
             }
             set {
-                _isExpanded = value;
-                OnNotifyPropertyChanged("IsExpanded");
+                if (_isExpanded != value) {
+                    _isExpanded = value;
+                    OnNotifyPropertyChanged("IsExpanded");
+                }
             }
         }
 
@@ -132,9 +134,7 @@ namespace NuPack.Dialog.Providers {
                 return _totalPages;
             }
             internal set {
-                Trace.WriteLine("New Total Pages: " + value);
                 _totalPages = value;
-
                 NotifyPropertyChanged();
             }
         }
@@ -145,9 +145,15 @@ namespace NuPack.Dialog.Providers {
             }
             internal set {
                 _currentPage = value;
-
                 NotifyPropertyChanged();
             }
+        }
+
+        /// <summary>
+        /// Refresh the list of packages belong to this node
+        /// </summary>
+        public void Refresh() {
+            LoadPage(CurrentPage);
         }
 
         public override string ToString() {
@@ -160,7 +166,7 @@ namespace NuPack.Dialog.Providers {
         /// <param name="info"></param>
         private void NotifyPropertyChanged() {
             if (PageDataChanged != null) {
-                PageDataChanged(this, new EventArgs());
+                PageDataChanged(this, EventArgs.Empty);
             }
         }
 
@@ -168,80 +174,79 @@ namespace NuPack.Dialog.Providers {
         /// Loads a specified page
         /// </summary>
         /// <param name="pageNumber"></param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We want to show the error message in the message pane rather than blowing up VS.")]
         public void LoadPage(int pageNumber) {
-            Trace.WriteLine("Loading page " + pageNumber);
+
             if (pageNumber < 1) {
+                throw new ArgumentOutOfRangeException("pageNumber");
+            }
+
+            Trace.WriteLine("Dialog loading page: " + pageNumber);
+            if (_loadingInProgress) {
                 return;
             }
 
-            if (ProgressPane != null && ProgressPane.Show(new CancelProgressCallback(CancelCurrentExtensionQuery), true)) {
-                _progressPaneActive = true;
+            // trying to get the query (but not executing it yet)
+            IQueryable<IPackage> query = null;
+            try {
+                query = GetQuery();
+            }
+            catch (Exception ex) {
+                ShowMessagePane((ex.InnerException ?? ex).Message);
             }
 
-            if (_extensions != null) {
-                _extensions.Clear();
-            }
-            GetExtensionsForPage(pageNumber);
-        }
+            if (query != null) {
+                // avoid more than one loading occurring at the same time
+                _loadingInProgress = true;
+                _activeQueryStateCancelled = false;
 
-        public void SetProgressPane(IVsProgressPane progressPane) {
-            ProgressPane = progressPane;
+                ShowProgressPane();
+
+                AsyncOperation async = AsyncOperationManager.CreateOperation(query);
+                ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
+                worker.BeginInvoke(query, pageNumber, ItemsPerPage, async, null, null);
+            }
         }
 
         /// <summary>
-        /// Cancels the current running query
+        /// Called when user clicks on the Cancel button in the progress pane
         /// </summary>
         private void CancelCurrentExtensionQuery() {
-            lock (_activeQueryStateLock) {
-                Trace.WriteLine("Cancelling pending extensions query");
-                _activeQueryStateCancelled = true;
-            }
-
-            if (_extensions != null) {
-                _extensions.Clear();
-            }
+            Trace.WriteLine("Cancelling pending extensions query.");
+            _activeQueryStateCancelled = true;
         }
 
-        private void GetExtensionsForPage(object pageNumberObject) {
-            if (!(pageNumberObject is int)) {
-                return;
-            }
-
-            int pageNumber = (int)pageNumberObject;
-
-            var query = GetQuery();
-
-            lock (_activeQueryStateLock) {
-                _activeQueryStateCancelled = false;
-            }
-
-            AsyncOperation async = AsyncOperationManager.CreateOperation(query);
-            ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
-            worker.BeginInvoke(query, pageNumber, ItemsPerPage, async, null, null);
-        }
-
-        // TODO: Investigate whether we should avoid catching general Exception
-        // Temporary method for async
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        /// <summary>
+        /// This method executes on background thread.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We want to show error message inside the dialog, rather than blowing up VS.")]
         private void ExecuteAsync(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async) {
-            IEnumerable<IPackage> packages = null;
-            int totalCount = 0;
+            ExecuteCompletedEventArgs eventArgs = null;
 
+            int totalCount = 0;
             try {
                 // This should execute the query
                 totalCount = query.Count();
 
                 IQueryable<IPackage> pageQuery = query.Skip((pageNumber - 1) * itemsPerPage).Take(itemsPerPage);
+                IEnumerable<IPackage> packages = pageQuery.ToList();
 
-                packages = pageQuery.ToList();
+                eventArgs = new ExecuteCompletedEventArgs(null, false, null, packages, pageNumber, totalCount);
             }
             catch (Exception ex) {
+                totalCount = 0;
+                eventArgs = new ExecuteCompletedEventArgs(ex, false, null, null, pageNumber, totalCount);
+
                 Debug.WriteLine(ex);
             }
-            finally {
-                var e = new ExecuteCompletedEventArgs(null, false, null, packages, pageNumber, totalCount);
-                async.PostOperationCompleted(new SendOrPostCallback(QueryExecutionCompleted), e);
-            }
+            
+            async.PostOperationCompleted(new SendOrPostCallback(QueryExecutionCompleted), eventArgs);
         }
 
         protected abstract IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query);
@@ -256,36 +261,39 @@ namespace NuPack.Dialog.Providers {
         }
 
         private void QueryExecutionCompleted(object data) {
+            _loadingInProgress = false;
+
             var args = (ExecuteCompletedEventArgs)data;
-            IEnumerable<IPackage> packages = args.Results;
 
-            lock (_activeQueryStateLock) {
+            if (_activeQueryStateCancelled) {
                 _activeQueryStateCancelled = false;
+                HideProgressPane();
             }
+            else if (args.Error == null) {
+                IEnumerable<IPackage> packages = args.Results;
 
-            int totalPages = 0;
-            int pageNumber = 0;
+                _extensions.Clear();
+                foreach (IPackage package in packages) {
+                    _extensions.Add(new OnlinePackagesItem(Provider, package, false, null, 0, null));
+                }
 
-            // Safe to access e.Results since we've already checked for 
-            // e.Cancelled and e.Error
-            foreach (IPackage package in packages) {
-                _extensions.Add(new OnlinePackagesItem(Provider, package, false, null, 0, null));
+                if (_extensions.Count > 0) {
+                    _extensions[0].IsSelected = true;
+                }
+
+                int totalPages = (args.TotalCount + ItemsPerPage - 1) / ItemsPerPage;
+                int pageNumber = args.PageNumber;
+
+                TotalPages = Math.Max(1, totalPages);
+                CurrentPage = Math.Max(1, pageNumber);
+
+                HideProgressPane();
             }
-
-            if (_extensions.Count > 0) {
-                _extensions[0].IsSelected = true;
+            else {
+                // show error message in the Message pane
+                Exception exception = args.Error;
+                ShowMessagePane((exception.InnerException ?? exception).Message);
             }
-
-            totalPages = (args.TotalCount + ItemsPerPage - 1) / ItemsPerPage;
-            pageNumber = args.PageNumber;
-
-            TotalPages = (totalPages == 0) ? 1 : totalPages;
-            CurrentPage = (totalPages == 0) ? 1 : pageNumber;
-
-            if (_progressPaneActive && ProgressPane != null) {
-                ProgressPane.Close();
-            }
-            _progressPaneActive = false;
         }
 
         protected void OnNotifyPropertyChanged(string propertyName) {
@@ -294,8 +302,48 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
+        public void SetProgressPane(IVsProgressPane progressPane) {
+            ProgressPane = progressPane;
+        }
+
         public void SetMessagePane(IVsMessagePane messagePane) {
             MessagePane = messagePane;
+        }
+
+        protected bool ShowProgressPane() {
+            if (ProgressPane != null) {
+                _progressPaneActive = true;
+                return ProgressPane.Show(new CancelProgressCallback(CancelCurrentExtensionQuery), true);
+            }
+            else {
+                return false;
+            }
+        }
+
+        protected void HideProgressPane() {
+            if (_progressPaneActive && ProgressPane != null) {
+                ProgressPane.Close();
+                _progressPaneActive = false;
+            }
+        }
+
+        protected bool ShowMessagePane(string message) {
+            if (MessagePane != null) {
+                MessagePane.SetMessageThreadSafe(message);
+                return MessagePane.Show();
+            }
+            else {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Called when this node is opened.
+        /// </summary>
+        internal void OnOpened() {
+            if (Provider.RefreshOnNodeSelection && !this.IsSearchResultsNode) {
+                Refresh();
+            }
         }
     }
 }

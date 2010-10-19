@@ -14,7 +14,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
     public partial class ToolsOptionsControl : UserControl {
-        private VSPackageSourceProvider _packageSourceProvider = Settings.PackageSourceProvider;
+        private VSPackageSourceProvider _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
         private BindingSource _allPackageSources;
         private PackageSource _activePackageSource;
         private bool _initialized;
