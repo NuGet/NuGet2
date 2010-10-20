@@ -29,11 +29,18 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.NPackURILabel = new System.Windows.Forms.Label();
             this.NewPackageSource = new System.Windows.Forms.TextBox();
             this.addButton = new System.Windows.Forms.Button();
-            this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
             this.PackageSourcesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.CopyPackageSourceStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeButton = new System.Windows.Forms.Button();
             this.defaultButton = new System.Windows.Forms.Button();
+            this.NewPackageName = new System.Windows.Forms.TextBox();
+            this.NewPackageNameLabel = new System.Windows.Forms.Label();
+            this.NewPackageSourceLabel = new System.Windows.Forms.Label();
+            this.PackageSourcesListView = new System.Windows.Forms.ListView();
+            this.DefaultColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.SourceColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.PackageSourcesImages = new System.Windows.Forms.ImageList(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,19 +60,6 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.addButton.Name = "addButton";
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
-            // 
-            // PackageSourcesListBox
-            // 
-            resources.ApplyResources(this.PackageSourcesListBox, "PackageSourcesListBox");
-            this.PackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
-            this.PackageSourcesListBox.DisplayMember = "Source";
-            this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.PackageSourcesListBox.FormattingEnabled = true;
-            this.PackageSourcesListBox.Name = "PackageSourcesListBox";
-            this.PackageSourcesListBox.ValueMember = "Source";
-            this.PackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.AllPackageSourcesList_DrawItem);
-            this.PackageSourcesListBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyDown);
-            this.PackageSourcesListBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseDown);
             // 
             // PackageSourcesContextMenu
             // 
@@ -94,15 +88,67 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.defaultButton.UseVisualStyleBackColor = true;
             this.defaultButton.Click += new System.EventHandler(this.OnDefaultPackageSourceButtonClick);
             // 
+            // NewPackageName
+            // 
+            resources.ApplyResources(this.NewPackageName, "NewPackageName");
+            this.NewPackageName.Name = "NewPackageName";
+            // 
+            // NewPackageNameLabel
+            // 
+            resources.ApplyResources(this.NewPackageNameLabel, "NewPackageNameLabel");
+            this.NewPackageNameLabel.Name = "NewPackageNameLabel";
+            // 
+            // NewPackageSourceLabel
+            // 
+            resources.ApplyResources(this.NewPackageSourceLabel, "NewPackageSourceLabel");
+            this.NewPackageSourceLabel.Name = "NewPackageSourceLabel";
+            // 
+            // PackageSourcesListView
+            // 
+            resources.ApplyResources(this.PackageSourcesListView, "PackageSourcesListView");
+            this.PackageSourcesListView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.PackageSourcesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.DefaultColumn,
+            this.NameColumn,
+            this.SourceColumn});
+            this.PackageSourcesListView.FullRowSelect = true;
+            this.PackageSourcesListView.LargeImageList = this.PackageSourcesImages;
+            this.PackageSourcesListView.MultiSelect = false;
+            this.PackageSourcesListView.Name = "PackageSourcesListView";
+            this.PackageSourcesListView.SmallImageList = this.PackageSourcesImages;
+            this.PackageSourcesListView.UseCompatibleStateImageBehavior = false;
+            this.PackageSourcesListView.View = System.Windows.Forms.View.Details;
+            // 
+            // DefaultColumn
+            // 
+            resources.ApplyResources(this.DefaultColumn, "DefaultColumn");
+            // 
+            // NameColumn
+            // 
+            resources.ApplyResources(this.NameColumn, "NameColumn");
+            // 
+            // SourceColumn
+            // 
+            resources.ApplyResources(this.SourceColumn, "SourceColumn");
+            // 
+            // PackageSourcesImages
+            // 
+            this.PackageSourcesImages.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("PackageSourcesImages.ImageStream")));
+            this.PackageSourcesImages.TransparentColor = System.Drawing.Color.Transparent;
+            this.PackageSourcesImages.Images.SetKeyName(0, "checkmark.png");
+            // 
             // ToolsOptionsControl
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.PackageSourcesListView);
+            this.Controls.Add(this.NewPackageSourceLabel);
+            this.Controls.Add(this.NewPackageNameLabel);
+            this.Controls.Add(this.NewPackageName);
             this.Controls.Add(this.defaultButton);
             this.Controls.Add(this.removeButton);
-            this.Controls.Add(this.PackageSourcesListBox);
-            this.Controls.Add(this.addButton);
             this.Controls.Add(this.NPackURILabel);
+            this.Controls.Add(this.addButton);
             this.Controls.Add(this.NewPackageSource);
             this.Name = "ToolsOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);
@@ -114,12 +160,19 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         #endregion
 
         private System.Windows.Forms.Label NPackURILabel;
+        public System.Windows.Forms.TextBox NewPackageSource;
         private System.Windows.Forms.Button addButton;
-        private System.Windows.Forms.ListBox PackageSourcesListBox;
         private System.Windows.Forms.Button removeButton;
         private System.Windows.Forms.Button defaultButton;
         private ContextMenuStrip PackageSourcesContextMenu;
         private ToolStripMenuItem CopyPackageSourceStripMenuItem;
-        private TextBox NewPackageSource;
+        public TextBox NewPackageName;
+        private Label NewPackageNameLabel;
+        private Label NewPackageSourceLabel;
+        private System.Windows.Forms.ListView PackageSourcesListView;
+        private ColumnHeader NameColumn;
+        private ColumnHeader SourceColumn;
+        private ColumnHeader DefaultColumn;
+        private ImageList PackageSourcesImages;
     }
 }

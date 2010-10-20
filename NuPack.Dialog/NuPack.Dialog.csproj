@@ -139,6 +139,7 @@
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatePackagesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ToolsOptionsUI\ListViewDataBinder.cs" />
     <Compile Include="ToolsOptionsUI\Settings.cs" />
     <Compile Include="ToolsOptionsUI\ToolsOptionsControl.cs">
       <SubType>UserControl</SubType>
@@ -201,6 +202,9 @@
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml">
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\checkmark.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

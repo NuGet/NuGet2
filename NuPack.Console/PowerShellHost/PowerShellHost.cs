@@ -212,7 +212,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         public string Setting {
             get {
                 var activePackageSource = _packageSourceProvider.ActivePackageSource;
-                return activePackageSource == null ? null : activePackageSource.Source;
+                return activePackageSource == null ? null : activePackageSource.Name;
             }
             set {
                 if (string.IsNullOrEmpty(value)) {
@@ -221,12 +221,12 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
 
                 _packageSourceProvider.ActivePackageSource =
                     _packageSourceProvider.GetPackageSources().FirstOrDefault(
-                        ps => ps.Source.Equals(value, StringComparison.OrdinalIgnoreCase));
+                        ps => ps.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         public string[] GetAvailableSettings() {
-            return _packageSourceProvider.GetPackageSources().Select(ps => ps.Source).ToArray();
+            return _packageSourceProvider.GetPackageSources().Select(ps => ps.Name).ToArray();
         }
 
         public string DefaultProject {
