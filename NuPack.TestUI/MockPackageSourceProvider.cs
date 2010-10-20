@@ -2,14 +2,12 @@
 using System.Linq;
 using NuPack.VisualStudio;
 
-namespace NuPack.TestUI
-{
-    class MockPackageSourceProvider : IPackageSourceProvider
-    {
+namespace NuPack.TestUI {
+    class MockPackageSourceProvider : IPackageSourceProvider {
         private IList<PackageSource> _packageSources = new List<PackageSource>();
 
         public PackageSource ActivePackageSource {
-            get; 
+            get;
             set;
         }
 

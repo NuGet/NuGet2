@@ -3,8 +3,8 @@ using System.Collections;
 using System.Windows.Forms;
 
 namespace NuPack.Dialog.ToolsOptionsUI {
-    
-    class ListViewDataBinder<T> {
+
+    internal class ListViewDataBinder<T> {
 
         private ListView _listView;
         private Func<T, string[]> _itemBuilder;
@@ -17,7 +17,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         }
 
         public object DataSource {
-            get; 
+            get;
             set;
         }
 

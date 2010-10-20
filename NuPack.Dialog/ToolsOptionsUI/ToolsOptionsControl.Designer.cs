@@ -37,7 +37,6 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.NewPackageNameLabel = new System.Windows.Forms.Label();
             this.NewPackageSourceLabel = new System.Windows.Forms.Label();
             this.PackageSourcesListView = new System.Windows.Forms.ListView();
-            this.DefaultColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SourceColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.PackageSourcesImages = new System.Windows.Forms.ImageList(this.components);
@@ -108,7 +107,6 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             resources.ApplyResources(this.PackageSourcesListView, "PackageSourcesListView");
             this.PackageSourcesListView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PackageSourcesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.DefaultColumn,
             this.NameColumn,
             this.SourceColumn});
             this.PackageSourcesListView.FullRowSelect = true;
@@ -118,10 +116,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.PackageSourcesListView.SmallImageList = this.PackageSourcesImages;
             this.PackageSourcesListView.UseCompatibleStateImageBehavior = false;
             this.PackageSourcesListView.View = System.Windows.Forms.View.Details;
-            // 
-            // DefaultColumn
-            // 
-            resources.ApplyResources(this.DefaultColumn, "DefaultColumn");
+            this.PackageSourcesListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListView_MouseClick);
             // 
             // NameColumn
             // 
@@ -160,19 +155,18 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         #endregion
 
         private System.Windows.Forms.Label NPackURILabel;
-        public System.Windows.Forms.TextBox NewPackageSource;
+        private System.Windows.Forms.TextBox NewPackageSource;
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.Button removeButton;
         private System.Windows.Forms.Button defaultButton;
         private ContextMenuStrip PackageSourcesContextMenu;
         private ToolStripMenuItem CopyPackageSourceStripMenuItem;
-        public TextBox NewPackageName;
+        private TextBox NewPackageName;
         private Label NewPackageNameLabel;
         private Label NewPackageSourceLabel;
         private System.Windows.Forms.ListView PackageSourcesListView;
         private ColumnHeader NameColumn;
         private ColumnHeader SourceColumn;
-        private ColumnHeader DefaultColumn;
         private ImageList PackageSourcesImages;
     }
 }

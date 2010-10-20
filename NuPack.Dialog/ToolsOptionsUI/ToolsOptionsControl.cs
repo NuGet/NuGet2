@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using NuPack.VisualStudio;
@@ -27,13 +25,18 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             SetupDataBindings();
         }
 
-        public ToolsOptionsControl() : this(Settings.PackageSourceProvider) {
+        public ToolsOptionsControl()
+            : this(Settings.PackageSourceProvider) {
         }
 
         private void SetupDataBindings() {
             NewPackageName.TextChanged += (o, e) => UpdateUI();
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
             PackageSourcesListView.ItemSelectionChanged += (o, e) => UpdateUI();
+            PackageSourcesListView.Leave += (o, e) => {
+                                                PackageSourcesListView.SelectedItems.Clear();
+                                                UpdateUI();
+                                            };
 
             UpdateUI();
 
@@ -52,7 +55,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             UpdateUI();
         }
 
-        public void InitializeOnActivated() {
+        internal void InitializeOnActivated() {
             if (_initialized) {
                 return;
             }
@@ -62,10 +65,11 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             _activePackageSource = _packageSourceProvider.ActivePackageSource;
 
             _listViewDataBinder = new ListViewDataBinder<PackageSource>(PackageSourcesListView,
-                ps => new string[] { "", ps.Name, ps.Source },
+                ps => new string[] { ps.Name, ps.Source },  // new ListViewItem
                 (ps, item) => {
-                    if ((_activePackageSource == null && item.Index == 0)
-                    || (_activePackageSource != null && _activePackageSource.Equals(ps))) {
+                    // set checkmark image on default package
+                    if ((_activePackageSource == null && item.Index == 0)   // no default package, so select first
+                    || (ps.Equals(_activePackageSource))) { // OR current item is default package so set checkmark
                         item.ImageIndex = 0;
                     }
                 }
@@ -78,7 +82,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         /// Persist the package sources, which was add/removed via the Options page, to the VS Settings store.
         /// This gets called when users click OK button.
         /// </summary>
-        public void ApplyChangedSettings() {
+        internal void ApplyChangedSettings() {
             _packageSourceProvider.SetPackageSources((IEnumerable<PackageSource>)_allPackageSources.DataSource);
             _packageSourceProvider.ActivePackageSource = _activePackageSource;
         }
@@ -86,7 +90,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         /// <summary>
         /// This gets called when users close the Options dialog
         /// </summary>
-        public void ClearSettings() {
+        internal void ClearSettings() {
             // clear this flag so that we will set up the bindings again when the option page is activated next time
             _initialized = false;
 
@@ -156,9 +160,17 @@ namespace NuPack.Dialog.ToolsOptionsUI {
 
 
         private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
-            //if (e.ClickedItem == CopyPackageSourceStripMenuItem && _currentSelectedSource != null) {
-            //    Clipboard.SetText(_currentSelectedSource);
-            //}
+            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListView.SelectedItems.Count > 0) {
+                var selectedPackageSource = (PackageSource) PackageSourcesListView.SelectedItems[0].Tag;
+                Clipboard.Clear();
+                Clipboard.SetText(selectedPackageSource.Source);
+            }
+        }
+
+        private void PackageSourcesListView_MouseClick(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Right) {
+                PackageSourcesContextMenu.Show(PackageSourcesListView, e.Location);
+            }
         }
 
     }

@@ -5,11 +5,9 @@ using System.Text;
 using System.Windows.Forms;
 using NuPack.Dialog.ToolsOptionsUI;
 
-namespace NuPack.TestUI
-{
-    public partial class TestForm : Form
-    {
-        private MockPackageSourceProvider _packageSourceProvider  = new MockPackageSourceProvider();
+namespace NuPack.TestUI {
+    public partial class TestForm : Form {
+        private MockPackageSourceProvider _packageSourceProvider = new MockPackageSourceProvider();
         private ToolsOptionsControl _optionsControl;
         public TestForm() {
             InitializeComponent();

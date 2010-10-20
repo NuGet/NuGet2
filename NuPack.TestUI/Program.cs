@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace NuPack.TestUI
-{
-    static class Program
-    {
+namespace NuPack.TestUI {
+    static class Program {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
