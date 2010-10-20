@@ -33,10 +33,6 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             NewPackageName.TextChanged += (o, e) => UpdateUI();
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
             PackageSourcesListView.ItemSelectionChanged += (o, e) => UpdateUI();
-            PackageSourcesListView.Leave += (o, e) => {
-                                                PackageSourcesListView.SelectedItems.Clear();
-                                                UpdateUI();
-                                            };
 
             UpdateUI();
 

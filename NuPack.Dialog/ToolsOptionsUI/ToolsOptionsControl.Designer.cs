@@ -136,15 +136,15 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.NPackURILabel);
             this.Controls.Add(this.PackageSourcesListView);
-            this.Controls.Add(this.NewPackageSourceLabel);
             this.Controls.Add(this.NewPackageNameLabel);
             this.Controls.Add(this.NewPackageName);
+            this.Controls.Add(this.NewPackageSourceLabel);
+            this.Controls.Add(this.NewPackageSource);
+            this.Controls.Add(this.addButton);
             this.Controls.Add(this.defaultButton);
             this.Controls.Add(this.removeButton);
-            this.Controls.Add(this.NPackURILabel);
-            this.Controls.Add(this.addButton);
-            this.Controls.Add(this.NewPackageSource);
             this.Name = "ToolsOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
