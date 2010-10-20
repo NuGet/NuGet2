@@ -110,6 +110,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.NameColumn,
             this.SourceColumn});
             this.PackageSourcesListView.FullRowSelect = true;
+            this.PackageSourcesListView.HideSelection = false;
             this.PackageSourcesListView.LargeImageList = this.PackageSourcesImages;
             this.PackageSourcesListView.MultiSelect = false;
             this.PackageSourcesListView.Name = "PackageSourcesListView";
