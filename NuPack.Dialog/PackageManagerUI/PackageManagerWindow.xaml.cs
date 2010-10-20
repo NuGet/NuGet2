@@ -111,7 +111,11 @@ namespace NuPack.Dialog.PackageManagerUI {
                 e.Handled = true;
             }
             catch (InvalidOperationException ex) {
-                MessageBox.Show(ex.Message, NuPack.Dialog.Resources.Dialog_MessageBoxTitle);
+                MessageBox.Show(
+                    ex.Message,
+                    NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 

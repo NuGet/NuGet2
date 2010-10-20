@@ -55,7 +55,11 @@ namespace NuPack.Tools {
                     window.ShowModal();
                 }
                 catch (TargetInvocationException exception) {
-                    MessageBox.Show((exception.InnerException ?? exception).Message);
+                    MessageBox.Show(
+                        (exception.InnerException ?? exception).Message,
+                        NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                 }
             }
         }

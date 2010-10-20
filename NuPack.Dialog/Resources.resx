@@ -130,7 +130,7 @@
     <value>Installed packages</value>
   </data>
   <data name="Dialog_MessageBoxTitle" xml:space="preserve">
-    <value>Error</value>
+    <value>Operation failed</value>
   </data>
   <data name="Dialog_OnlineProvider" xml:space="preserve">
     <value>Available</value>

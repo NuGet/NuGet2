@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 namespace NuPack.Dialog.Providers {
     internal abstract class OnlinePackagesTreeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
 
-        private delegate void ExecuteDelegate(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async);
+        private delegate void ExecuteDelegate(int pageNumber, int itemsPerPage, AsyncOperation async);
 
         // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
@@ -189,30 +189,19 @@ namespace NuPack.Dialog.Providers {
                 return;
             }
 
-            // trying to get the query (but not executing it yet)
-            IQueryable<IPackage> query = null;
-            try {
-                query = GetQuery();
-            }
-            catch (Exception ex) {
-                ShowMessagePane((ex.InnerException ?? ex).Message);
-            }
+            ShowProgressPane();
 
-            if (query != null) {
-                // avoid more than one loading occurring at the same time
-                _loadingInProgress = true;
-                _activeQueryStateCancelled = false;
+            // avoid more than one loading occurring at the same time
+            _loadingInProgress = true;
+            _activeQueryStateCancelled = false;
 
-                ShowProgressPane();
-
-                AsyncOperation async = AsyncOperationManager.CreateOperation(query);
-                ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
-                worker.BeginInvoke(query, pageNumber, ItemsPerPage, async, null, null);
-            }
+            AsyncOperation async = AsyncOperationManager.CreateOperation(null);
+            ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
+            worker.BeginInvoke(pageNumber, ItemsPerPage, async, null, null);
         }
 
         /// <summary>
-        /// Called when user clicks on the Cancel button in the progress pane
+        /// Called when user clicks on the Cancel button in the progress pane.
         /// </summary>
         private void CancelCurrentExtensionQuery() {
             Trace.WriteLine("Cancelling pending extensions query.");
@@ -226,11 +215,14 @@ namespace NuPack.Dialog.Providers {
             "Microsoft.Design", 
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification="We want to show error message inside the dialog, rather than blowing up VS.")]
-        private void ExecuteAsync(IQueryable<IPackage> query, int pageNumber, int itemsPerPage, AsyncOperation async) {
+        private void ExecuteAsync(int pageNumber, int itemsPerPage, AsyncOperation async) {
             ExecuteCompletedEventArgs eventArgs = null;
-
             int totalCount = 0;
+
             try {
+                // Getting the query (but not executing it yet)
+                IQueryable<IPackage> query = GetQuery();
+
                 // This should execute the query
                 totalCount = query.Count();
 

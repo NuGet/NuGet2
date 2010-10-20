@@ -216,7 +216,6 @@ namespace NuPack.Dialog.Providers {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public void Update(OnlinePackagesItem item) {
             if (OperationCoordinator.IsBusy) {
-                Debug.WriteLine("operation denied because it is busy");
                 return;
             }
 

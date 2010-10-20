@@ -155,6 +155,7 @@
     <EmbeddedResource Include="Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="ToolsOptionsUI\ToolsOptionsControl.resx">
       <DependentUpon>ToolsOptionsControl.cs</DependentUpon>

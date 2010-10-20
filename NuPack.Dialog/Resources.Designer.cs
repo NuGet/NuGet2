@@ -97,7 +97,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error.
+        ///   Looks up a localized string similar to Operation failed.
         /// </summary>
         public static string Dialog_MessageBoxTitle {
             get {
