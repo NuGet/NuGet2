@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using EnvDTE;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {

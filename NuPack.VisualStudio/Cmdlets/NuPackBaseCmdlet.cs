@@ -9,8 +9,29 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// This is the base class for all NuPack cmdlets.
     /// </summary>
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
-
         private IVsPackageManager _packageManager;
+        private readonly ISolutionManager _solutionManager;
+        private readonly DTE _dte;
+
+        protected NuPackBaseCmdlet()
+            : this(NuPack.VisualStudio.SolutionManager.Current, DTEExtensions.DTE) { }
+
+        protected NuPackBaseCmdlet(ISolutionManager solutionManager, DTE dte) {
+            _solutionManager = solutionManager;
+            _dte = dte;
+        }
+
+        protected ISolutionManager SolutionManager {
+            get {
+                return _solutionManager;
+            }
+        }
+
+        protected DTE DTE {
+            get {
+                return _dte;
+            }
+        }
 
         /// <summary>
         /// Gets an instance of VSPackageManager to be used throughout the execution of this command.
@@ -33,19 +54,18 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// Gets the default project name if a -Project parameter is not supplied.
         /// </summary>
         /// <value>The default project name.</value>
-        protected static string DefaultProjectName {
+        protected string DefaultProjectName {
             get {
-                return SolutionManager.Current.DefaultProjectName;
+                return SolutionManager.DefaultProjectName;
             }
         }
 
         /// <summary>
         /// Gets a value indicating whether there is a solution open in the IDE.
         /// </summary>
-        protected static bool IsSolutionOpen {
+        protected bool IsSolutionOpen {
             get {
-                var dte = DTEExtensions.DTE;
-                return dte != null && dte.Solution != null && dte.Solution.IsOpen;
+                return DTE != null && DTE.Solution != null && DTE.Solution.IsOpen;
             }
         }
 
@@ -107,16 +127,15 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             // prepare a PackageManager instance for use throughout the command execution lifetime
-            DTE dte = DTEExtensions.DTE;
-            if (dte == null) {
+            if (DTE == null) {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
 
             return new VsPackageManager(dte, PackageRepositoryFactory.Default.CreateRepository(source));
         }
 
-        protected static Project GetProjectFromName(string projectName) {
-            return SolutionManager.Current.GetProject(projectName);
+        protected Project GetProjectFromName(string projectName) {
+            return SolutionManager.GetProject(projectName);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

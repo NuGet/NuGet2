@@ -129,11 +129,8 @@
         private void EnsureProjectCache() {
             if (IsSolutionOpen && _projectCache == null) {
                 // Initialize the cache
-                _projectCache = new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (var project in _dte.Solution.GetAllProjects()) {
-                    _projectCache[project.Name] = project;
-                }
+                var allProjects = _dte.Solution.GetAllProjects();
+                _projectCache = allProjects.ToDictionary(project => project.Name, StringComparer.OrdinalIgnoreCase);
             }
         }
 

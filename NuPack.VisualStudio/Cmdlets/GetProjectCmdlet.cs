@@ -7,6 +7,17 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = "Single")]
     public class GetProjectCmdlet : Cmdlet {
+        private readonly ISolutionManager _solutionManager;
+        
+        public GetProjectCmdlet()
+            : this(SolutionManager.Current) {
+
+        }
+
+        public GetProjectCmdlet(ISolutionManager solutionManager) {
+            _solutionManager = solutionManager;
+        }
+
 
         [Parameter(Position = 0, ParameterSetName = "Single")]
         public string Name { get; set; }
@@ -16,15 +27,15 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         protected override void ProcessRecord() {
             if (All.IsPresent) {
-                WriteObject(SolutionManager.Current.GetProjects(), enumerateCollection: true);
+                WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
             }
             else {
                 string projectName = Name;
                 if (string.IsNullOrEmpty(projectName)) {
                     // if the Name parameter is not specified, get the default project name
-                    projectName = SolutionManager.Current.DefaultProjectName;
+                    projectName = _solutionManager.DefaultProjectName;
                 }
-                WriteObject(SolutionManager.Current.GetProject(projectName));
+                WriteObject(_solutionManager.GetProject(projectName));
             }
         }
     }
