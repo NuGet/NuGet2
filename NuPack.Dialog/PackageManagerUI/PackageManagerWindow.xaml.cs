@@ -213,5 +213,9 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return true;
             }
         }
+
+        private void OnDialogWindowClosed(object sender, EventArgs e) {
+            explorer.Providers.Clear();
+        }
     }
 }
