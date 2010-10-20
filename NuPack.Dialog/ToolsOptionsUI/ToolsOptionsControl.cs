@@ -35,12 +35,11 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             PackageSourcesListView.ItemSelectionChanged += (o, e) => UpdateUI();
 
             UpdateUI();
-
         }
 
         public void UpdateUI() {
-            addButton.Enabled = !String.IsNullOrEmpty(NewPackageName.Text.Trim()) &&
-                                !String.IsNullOrEmpty(NewPackageSource.Text.Trim());
+            addButton.Enabled = !String.IsNullOrWhiteSpace(NewPackageName.Text) &&
+                                !String.IsNullOrWhiteSpace(NewPackageSource.Text);
 
             defaultButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
             removeButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
@@ -65,7 +64,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
                 (ps, item) => {
                     // set checkmark image on default package
                     if ((_activePackageSource == null && item.Index == 0)   // no default package, so select first
-                    || (ps.Equals(_activePackageSource))) { // OR current item is default package so set checkmark
+                        || (ps.Equals(_activePackageSource))) { // OR current item is default package so set checkmark
                         item.ImageIndex = 0;
                     }
                 }
@@ -168,6 +167,5 @@ namespace NuPack.Dialog.ToolsOptionsUI {
                 PackageSourcesContextMenu.Show(PackageSourcesListView, e.Location);
             }
         }
-
     }
 }

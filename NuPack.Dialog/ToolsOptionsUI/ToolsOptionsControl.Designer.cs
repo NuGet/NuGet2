@@ -26,7 +26,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ToolsOptionsControl));
-            this.NPackURILabel = new System.Windows.Forms.Label();
+            this.HeaderLabel = new System.Windows.Forms.Label();
             this.NewPackageSource = new System.Windows.Forms.TextBox();
             this.addButton = new System.Windows.Forms.Button();
             this.PackageSourcesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -43,10 +43,10 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             this.PackageSourcesContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
-            // NPackURILabel
+            // HeaderLabel
             // 
-            resources.ApplyResources(this.NPackURILabel, "NPackURILabel");
-            this.NPackURILabel.Name = "NPackURILabel";
+            resources.ApplyResources(this.HeaderLabel, "HeaderLabel");
+            this.HeaderLabel.Name = "HeaderLabel";
             // 
             // NewPackageSource
             // 
@@ -137,12 +137,12 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.NPackURILabel);
+            this.Controls.Add(this.HeaderLabel);
             this.Controls.Add(this.PackageSourcesListView);
-            this.Controls.Add(this.NewPackageNameLabel);
             this.Controls.Add(this.NewPackageName);
-            this.Controls.Add(this.NewPackageSourceLabel);
+            this.Controls.Add(this.NewPackageNameLabel);
             this.Controls.Add(this.NewPackageSource);
+            this.Controls.Add(this.NewPackageSourceLabel);
             this.Controls.Add(this.addButton);
             this.Controls.Add(this.defaultButton);
             this.Controls.Add(this.removeButton);
@@ -155,7 +155,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
 
         #endregion
 
-        private System.Windows.Forms.Label NPackURILabel;
+        private System.Windows.Forms.Label HeaderLabel;
         private System.Windows.Forms.TextBox NewPackageSource;
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.Button removeButton;
