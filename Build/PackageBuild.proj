@@ -18,7 +18,7 @@
       Directories="$(ServerPackagesDirectory)"
       Condition="!Exists('$(ServerPackagesDirectory)')" />
     <Exec 
-      Command="$(NuPackConsoleExe) %(Specs.FullPath)"
+      Command="$(NuPackConsoleExe) pack %(Specs.FullPath)"
       WorkingDirectory="$(ServerPackagesDirectory)"/>
   </Target>
 </Project>

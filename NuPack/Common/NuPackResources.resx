@@ -117,10 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="IdVersionNotSpecified" xml:space="preserve">
-    <value>Package Identifier and Version not specified.</value>
+  <data name="HelpCommandDescription" xml:space="preserve">
+    <value>The Help command is used to display general help and also help information about other commands.</value>
   </data>
-  <data name="OutputFileNotSpecified" xml:space="preserve">
-    <value>Output file not specified.</value>
+  <data name="HelpCommandUsageDecription" xml:space="preserve">
+    <value>Passing a command name to help with provide the help information for that command.</value>
+  </data>
+  <data name="HelpCommandUsageSummary" xml:space="preserve">
+    <value>[command]</value>
+  </data>
+  <data name="InvalidOptionValueError" xml:space="preserve">
+    <value>Invalid option value: '{0} {1}'</value>
+  </data>
+  <data name="MissingOptionValueError" xml:space="preserve">
+    <value>Missing option value for: '{0}'</value>
+  </data>
+  <data name="OptionInvalidWithoutSetter" xml:space="preserve">
+    <value>[option] on '{0}' is invalid without a setter.</value>
+  </data>
+  <data name="PackageCommandBasePathDescription" xml:space="preserve">
+    <value>The Base Path of the files defined in the nuspec file.</value>
+  </data>
+  <data name="PackageCommandDescription" xml:space="preserve">
+    <value>The pack command is used to create a NuPack package based on the provide NuSpec file.</value>
+  </data>
+  <data name="PackageCommandOutputDirDescription" xml:space="preserve">
+    <value>Where to put the NuPack file after it is created.</value>
+  </data>
+  <data name="PackageCommandSuccess" xml:space="preserve">
+    <value>Successfully created package '{0}'.</value>
+  </data>
+  <data name="PackageCommandUsageDescription" xml:space="preserve">
+    <value>To create a package provide the manifest file (NuSpec file) location. Optionally you may specify one of the options for additional functionality.</value>
+  </data>
+  <data name="PackageCommandUsageSummary" xml:space="preserve">
+    <value>&lt;manifest&gt; [options]</value>
+  </data>
+  <data name="ResourcePropertyDoesNotHaveAccessibleGet" xml:space="preserve">
+    <value>The resource type '{0}' does not have an accessible get for the '{1}' property.</value>
+  </data>
+  <data name="ResourcePropertyNotStringType" xml:space="preserve">
+    <value>The property '{0}' on resource type '{1}' is not a string type.</value>
+  </data>
+  <data name="ResourceTypeDoesNotHaveProperty" xml:space="preserve">
+    <value>The resource type '{0}' does not have an accessible static property named '{1}'.</value>
+  </data>
+  <data name="TooFewArgsError" xml:space="preserve">
+    <value>Too little arguments.</value>
+  </data>
+  <data name="TooManyArgsError" xml:space="preserve">
+    <value>Too many arguments.</value>
+  </data>
+  <data name="UnableToConvertTypeError" xml:space="preserve">
+    <value>Unable to change from type '{0}' to '{1}'.</value>
+  </data>
+  <data name="UnknowCommandError" xml:space="preserve">
+    <value>Unknown command: '{0}'</value>
+  </data>
+  <data name="UnknownOptionError" xml:space="preserve">
+    <value>Unknown option: '{0}'</value>
   </data>
 </root>

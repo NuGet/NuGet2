@@ -116,8 +116,8 @@
             return builder;
         }
 
-        public static PackageBuilder ReadFrom(string path) {
-            XmlManifestReader reader = new XmlManifestReader(path);
+        public static PackageBuilder ReadFrom(string path, string basePath) {
+            XmlManifestReader reader = new XmlManifestReader(path, basePath);
             PackageBuilder builder = new PackageBuilder();
             reader.ReadContentTo(builder);
             return builder;

@@ -61,20 +61,182 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package Identifier and Version not specified..
+        ///   Looks up a localized string similar to The Help command is used to display general help and also help information about other commands..
         /// </summary>
-        internal static string IdVersionNotSpecified {
+        internal static string HelpCommandDescription {
             get {
-                return ResourceManager.GetString("IdVersionNotSpecified", resourceCulture);
+                return ResourceManager.GetString("HelpCommandDescription", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Output file not specified..
+        ///   Looks up a localized string similar to Passing a command name to help with provide the help information for that command..
         /// </summary>
-        internal static string OutputFileNotSpecified {
+        internal static string HelpCommandUsageDecription {
             get {
-                return ResourceManager.GetString("OutputFileNotSpecified", resourceCulture);
+                return ResourceManager.GetString("HelpCommandUsageDecription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [command].
+        /// </summary>
+        internal static string HelpCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("HelpCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid option value: &apos;{0} {1}&apos;.
+        /// </summary>
+        internal static string InvalidOptionValueError {
+            get {
+                return ResourceManager.GetString("InvalidOptionValueError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
+        /// </summary>
+        internal static string MissingOptionValueError {
+            get {
+                return ResourceManager.GetString("MissingOptionValueError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [option] on &apos;{0}&apos; is invalid without a setter..
+        /// </summary>
+        internal static string OptionInvalidWithoutSetter {
+            get {
+                return ResourceManager.GetString("OptionInvalidWithoutSetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Base Path of the files defined in the nuspec file..
+        /// </summary>
+        internal static string PackageCommandBasePathDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandBasePathDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The pack command is used to create a NuPack package based on the provide NuSpec file..
+        /// </summary>
+        internal static string PackageCommandDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Where to put the NuPack file after it is created..
+        /// </summary>
+        internal static string PackageCommandOutputDirDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandOutputDirDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully created package &apos;{0}&apos;..
+        /// </summary>
+        internal static string PackageCommandSuccess {
+            get {
+                return ResourceManager.GetString("PackageCommandSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To create a package provide the manifest file (NuSpec file) location. Optionally you may specify one of the options for additional functionality..
+        /// </summary>
+        internal static string PackageCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;manifest&gt; [options].
+        /// </summary>
+        internal static string PackageCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("PackageCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The resource type &apos;{0}&apos; does not have an accessible get for the &apos;{1}&apos; property..
+        /// </summary>
+        internal static string ResourcePropertyDoesNotHaveAccessibleGet {
+            get {
+                return ResourceManager.GetString("ResourcePropertyDoesNotHaveAccessibleGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on resource type &apos;{1}&apos; is not a string type..
+        /// </summary>
+        internal static string ResourcePropertyNotStringType {
+            get {
+                return ResourceManager.GetString("ResourcePropertyNotStringType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The resource type &apos;{0}&apos; does not have an accessible static property named &apos;{1}&apos;..
+        /// </summary>
+        internal static string ResourceTypeDoesNotHaveProperty {
+            get {
+                return ResourceManager.GetString("ResourceTypeDoesNotHaveProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too little arguments..
+        /// </summary>
+        internal static string TooFewArgsError {
+            get {
+                return ResourceManager.GetString("TooFewArgsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments..
+        /// </summary>
+        internal static string TooManyArgsError {
+            get {
+                return ResourceManager.GetString("TooManyArgsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to change from type &apos;{0}&apos; to &apos;{1}&apos;..
+        /// </summary>
+        internal static string UnableToConvertTypeError {
+            get {
+                return ResourceManager.GetString("UnableToConvertTypeError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown command: &apos;{0}&apos;.
+        /// </summary>
+        internal static string UnknowCommandError {
+            get {
+                return ResourceManager.GetString("UnknowCommandError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown option: &apos;{0}&apos;.
+        /// </summary>
+        internal static string UnknownOptionError {
+            get {
+                return ResourceManager.GetString("UnknownOptionError", resourceCulture);
             }
         }
     }

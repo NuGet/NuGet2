@@ -10,10 +10,10 @@ namespace NuPack {
     internal class XmlManifestReader {
         private XDocument _manifestDocument;
 
-        public XmlManifestReader(string manifestFile) {
+        public XmlManifestReader(string manifestFile, string basePath) {
             _manifestDocument = XDocument.Load(manifestFile);
             ValidateSchema(_manifestDocument);
-            BasePath = Path.GetDirectoryName(manifestFile);
+            BasePath = basePath;
         }
 
         public XmlManifestReader(XDocument document) {
@@ -37,7 +37,7 @@ namespace NuPack {
         }
 
 
-        private static void EnsureNamespace(XElement element) {            
+        private static void EnsureNamespace(XElement element) {
             // This method recursively goes through all descendants and makes sure it's in the nuspec namespace.
             // Namespaces are hard to type by hand so we don't want to require it, but we can 
             // transform the document in memory before validation if the namespace wasn't specified.
@@ -89,8 +89,8 @@ namespace NuPack {
             builder.Description = metadataElement.Element(MakeName("description")).Value;
 
             XElement authorsElement = metadataElement.Element(MakeName("authors"));
-            builder.Authors.AddRange(from e in authorsElement.Elements(MakeName("author")) 
-                                            select e.Value);
+            builder.Authors.AddRange(from e in authorsElement.Elements(MakeName("author"))
+                                     select e.Value);
 
             DateTime created;
             if (DateTime.TryParse(metadataElement.GetOptionalElementValue("created", Constants.ManifestSchemaNamespace), out created)) {
