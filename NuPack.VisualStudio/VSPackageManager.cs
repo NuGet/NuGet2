@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.ComponentModelHost;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
     public class VSPackageManager : PackageManager {
@@ -52,34 +54,38 @@ namespace NuPack.VisualStudio {
             return projectManager;
         }
 
-        public void InstallPackage(ProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
-            if (projectManager == null) {
-                throw new ArgumentNullException("projectManager");
-            }
-
+        public void InstallPackage(ProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {           
             InitializeLogger(logger, projectManager);
 
             // REVIEW: This isn't transactional, so if add package reference fails
             // the user has to manually clean it up by uninstalling it
             InstallPackage(packageId, version, ignoreDependencies);
-            projectManager.AddPackageReference(packageId, version, ignoreDependencies);
+            
+            if (projectManager != null) {
+                projectManager.AddPackageReference(packageId, version, ignoreDependencies);
+            }
         }
 
         public void UninstallPackage(ProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
-            if (projectManager == null) {
-                throw new ArgumentNullException("projectManager");
-            }
-
             InitializeLogger(logger, projectManager);
+
+            var projectsWithPackage = GetProjectsWithPackage(packageId, version);
 
             // If we've specified a version then we've probably trying to remove a specific version of
             // a solution level package (since we allow side by side there)
-            if (version == null && projectManager.LocalRepository.Exists(packageId)) {
+            if (projectManager != null && 
+                projectManager.LocalRepository.Exists(packageId) && 
+                version == null) {
                 projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
             }
-
-            if (!IsPackageReferenced(packageId, version)) {
+            else if (!projectsWithPackage.Any()) {
                 UninstallPackage(packageId, version, forceRemove, removeDependencies);
+            }
+            else {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                        VsResources.PackageCannotBeRemovedBecauseItIsInUse,
+                        packageId, String.Join(", ", projectsWithPackage.Select(p => p.Project.ProjectName))));
             }
         }
 
@@ -92,12 +98,11 @@ namespace NuPack.VisualStudio {
             // Setup logging on all of our objects
             Logger = logger;
             FileSystem.Logger = logger;
-            projectManager.Logger = logger;
-            projectManager.Project.Logger = logger;
-        }
 
-        private bool IsPackageReferenced(string packageId, Version version) {
-            return GetProjectsWithPackage(packageId, version).Any();
+            if (projectManager != null) {
+                projectManager.Logger = logger;
+                projectManager.Project.Logger = logger;
+            }
         }
 
         private static IPackageRepository GetSolutionRepository(DTE dte) {

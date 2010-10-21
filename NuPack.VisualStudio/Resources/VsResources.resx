@@ -177,4 +177,7 @@
   <data name="Cmdlet_ExecutingScript" xml:space="preserve">
     <value>Executing script file {0}.</value>
   </data>
+  <data name="PackageCannotBeRemovedBecauseItIsInUse" xml:space="preserve">
+    <value>'{0}' cannot be removed because it in use by '{1}'</value>
+  </data>
 </root>

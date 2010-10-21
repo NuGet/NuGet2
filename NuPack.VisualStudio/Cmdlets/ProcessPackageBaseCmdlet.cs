@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
@@ -69,16 +70,26 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return null;
             }
 
-            if (String.IsNullOrEmpty(projectName)) {
-                projectName = DefaultProjectName;
+            Project project = null;
+
+            // If the user specified a project then use it
+            if (!String.IsNullOrEmpty(projectName)) {
+                project = GetProjectFromName(projectName);
+
+                // If that project was invalid then throw
+                if (project == null) {
+                    throw new InvalidOperationException(VsResources.Cmdlet_MissingProjectParameter);
+                }
+            }
+            else if (!String.IsNullOrEmpty(DefaultProjectName)) {
+                // If there is a default project then use it
+                project = GetProjectFromName(DefaultProjectName);
+
+                Debug.Assert(project != null, "default project should never be invalid");
             }
 
-            if (String.IsNullOrEmpty(projectName)) {
-                return null;
-            }
-
-            Project project = GetProjectFromName(projectName);
             if (project == null) {
+                // No project specified and default project was null
                 return null;
             }
 

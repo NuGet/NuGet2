@@ -21,8 +21,8 @@ namespace NuPack.Dialog.Providers {
         private readonly EnvDTE.Project _activeProject;
 
         public OnlinePackagesProvider(
-            VSPackageManager packageManager, 
-            EnvDTE.Project activeProject, 
+            VSPackageManager packageManager,
+            EnvDTE.Project activeProject,
             ResourceDictionary resources) {
 
             if (packageManager == null) {
@@ -182,7 +182,7 @@ namespace NuPack.Dialog.Providers {
 
         private void DoInstallAsync(object sender, DoWorkEventArgs e) {
             OnlinePackagesItem item = (OnlinePackagesItem)e.Argument;
-            ProjectManager.AddPackageReference(item.Id, new Version(item.Version));
+            PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false, logger: NullLogger.Instance);
             e.Result = item;
         }
 
@@ -206,7 +206,7 @@ namespace NuPack.Dialog.Providers {
 
             try {
                 OperationCoordinator.IsBusy = true;
-                ProjectManager.RemovePackageReference(item.Id);
+                PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
             }
             finally {
                 OperationCoordinator.IsBusy = false;
@@ -230,7 +230,7 @@ namespace NuPack.Dialog.Providers {
 
         private void DoUpdateAsync(object sender, DoWorkEventArgs e) {
             OnlinePackagesItem item = (OnlinePackagesItem)e.Argument;
-            ProjectManager.UpdatePackageReference(item.Id, new Version(item.Version));
+            PackageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true, logger: NullLogger.Instance);
             e.Result = item;
         }
 

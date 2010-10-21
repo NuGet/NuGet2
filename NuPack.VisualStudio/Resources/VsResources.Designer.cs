@@ -232,6 +232,15 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be removed because it in use by &apos;{1}&apos;.
+        /// </summary>
+        public static string PackageCannotBeRemovedBecauseItIsInUse {
+            get {
+                return ResourceManager.GetString("PackageCannotBeRemovedBecauseItIsInUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The package source does not belong to the collection of available sources..
         /// </summary>
         public static string PackageSource_Invalid {
