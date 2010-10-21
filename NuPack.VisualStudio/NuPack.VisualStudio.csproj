@@ -74,7 +74,6 @@
     <Compile Include="PackageSource\VSPackageSourceProvider.cs" />
     <Compile Include="SolutionExtensions.cs" />
     <Compile Include="SolutionManager.cs" />
-    <Compile Include="VSProjectManager.cs" />
     <Compile Include="ProjectExtensions.cs" />
     <Compile Include="ProjectSystemFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
