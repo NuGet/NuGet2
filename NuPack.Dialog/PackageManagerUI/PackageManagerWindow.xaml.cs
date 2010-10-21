@@ -12,10 +12,10 @@ using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 namespace NuPack.Dialog.PackageManagerUI {
 
     public partial class PackageManagerWindow : DialogWindow {
+
         private const string F1Keyword = "vs.ExtensionManager";
+
         private readonly DTEPackage _ownerPackage;
-        private readonly OnlinePackagesProvider _installedPackagesProvider;
-        private readonly OnlinePackagesProvider _onlinePackagesProvider;
 
         public PackageManagerWindow(DTEPackage ownerPackage)
             : base(F1Keyword) {
@@ -25,44 +25,37 @@ namespace NuPack.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
+            SetupProviders();
+        }
+
+        private void SetupProviders() {
             VSPackageManager packageManager = new VSPackageManager(DTEExtensions.DTE);
             EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
 
-            UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(updatePackagesProvider);
-           
-            _onlinePackagesProvider = new OnlinePackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(_onlinePackagesProvider);
+            ProjectManager projectManager = packageManager.GetProjectManager(activeProject);
 
-            _installedPackagesProvider = new InstalledPackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(_installedPackagesProvider);
-            this.explorer.SelectedProvider = _installedPackagesProvider;
+            // The ExtensionsExplorer control display providers in reverse order.
+            // We want the providers to appear as Installed - Online - Updates
+
+            var updatesProvider = new UpdatesProvider(packageManager, projectManager, Resources);
+            explorer.Providers.Add(updatesProvider);
+
+            var onlineProvider = new OnlineProvider(
+                packageManager,
+                projectManager,
+                PackageRepositoryFactory.Default,
+                VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
+                Resources);
+            explorer.Providers.Add(onlineProvider);
+
+            var installedProvider = new InstalledProvider(projectManager, Resources);
+            explorer.Providers.Add(installedProvider);
+
+            // make the Installed provider as selected by default
+            explorer.SelectedProvider = installedProvider;
         }
 
-        private void ExecutedInstallPackage(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
-            }
-
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                return;
-            }
-
-            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
-            if (provider == null) {
-                return;
-            }
-
-            bool accepted = ShowLicenseWindowIfRequired(selectedItem);
-            if (accepted) {
-                provider.Install(selectedItem);
-                e.Handled = true;
-            }
-        }
-
-        private void CanExecuteInstallPackage(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanExecuteCommandOnPackage(object sender, CanExecuteRoutedEventArgs e) {
 
             if (OperationCoordinator.IsBusy) {
                 e.CanExecute = false;
@@ -75,14 +68,36 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 e.CanExecute = false;
                 return;
             }
 
-            // Don't allow the download command on packages that are already installed.
-            e.CanExecute = !selectedItem.IsInstalled;
+            e.CanExecute = selectedItem.IsEnabled;
+        }
+
+        private void ExecutedInstallPackage(object sender, ExecutedRoutedEventArgs e) {
+            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
+            if (control == null) {
+                return;
+            }
+
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
+            if (selectedItem == null) {
+                return;
+            }
+
+            OnlineProvider provider = control.SelectedProvider as OnlineProvider;
+            if (provider == null) {
+                return;
+            }
+
+            bool accepted = ShowLicenseWindowIfRequired(selectedItem, provider);
+            if (accepted) {
+                provider.Install(selectedItem);
+                e.Handled = true;
+            }
         }
 
         private void ExecutedUninstallPackage(object sender, ExecutedRoutedEventArgs e) {
@@ -91,12 +106,12 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 return;
             }
 
-            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
+            InstalledProvider provider = control.SelectedProvider as InstalledProvider;
             if (provider == null) {
                 return;
             }
@@ -105,7 +120,7 @@ namespace NuPack.Dialog.PackageManagerUI {
                 provider.Uninstall(selectedItem);
 
                 // Remove the item from the "All" tree of installed packages
-                var allTree = _installedPackagesProvider.ExtensionsTree.Nodes.First();
+                var allTree = provider.ExtensionsTree.Nodes.First();
                 allTree.Extensions.Remove(selectedItem);
 
                 e.Handled = true;
@@ -119,70 +134,28 @@ namespace NuPack.Dialog.PackageManagerUI {
             }
         }
 
-        private void CanExecuteUninstallPackage(object sender, CanExecuteRoutedEventArgs e) {
-            if (OperationCoordinator.IsBusy) {
-                e.CanExecute = false;
-                return;
-            }
-
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                e.CanExecute = false;
-                return;
-            }
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                e.CanExecute = false;
-                return;
-            }
-
-            // Only allow the download command on packages that are already installed.
-            e.CanExecute = selectedItem.IsInstalled;
-        }
-
         private void ExecutedUpdatePackage(object sender, ExecutedRoutedEventArgs e) {
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 return;
             }
 
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 return;
             }
 
-            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
+            UpdatesProvider provider = control.SelectedProvider as UpdatesProvider;
             if (provider == null) {
                 return;
             }
 
-            bool accepted = ShowLicenseWindowIfRequired(selectedItem);
+            bool accepted = ShowLicenseWindowIfRequired(selectedItem, provider);
             if (accepted) {
                 provider.Update(selectedItem);
                 e.Handled = true;
             }
         }
-
-        private void CanExecuteUpdatePackage(object sender, CanExecuteRoutedEventArgs e) {
-            if (OperationCoordinator.IsBusy) {
-                e.CanExecute = false;
-                return;
-            }
-
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                e.CanExecute = false;
-                return;
-            }
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                e.CanExecute = false;
-                return;
-            }
-
-            e.CanExecute = !selectedItem.IsUpdated;
-        }
-
 
         private void ExecutedClose(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
@@ -203,7 +176,7 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 return;
             }
@@ -216,8 +189,9 @@ namespace NuPack.Dialog.PackageManagerUI {
             explorer.SetFocusOnSearchBox();
         }
 
-        private bool ShowLicenseWindowIfRequired(OnlinePackagesItem selectedItem) {
-            IEnumerable<IPackage> packageGraph = _onlinePackagesProvider.GetPackageDependencyGraph(selectedItem.ExtensionRecord);
+        // TODO: the dynamic parameter is temporary until GetPackageDependencyGraph is brought into Core
+        private bool ShowLicenseWindowIfRequired(PackageItem selectedItem, dynamic provider) {
+            IEnumerable<IPackage> packageGraph = provider.GetPackageDependencyGraph(selectedItem.PackageIdentity);
             IEnumerable<IPackage> packagesRequireLicense = packageGraph.Where(p => p.RequireLicenseAcceptance);
 
             if (packagesRequireLicense.Any()) {
@@ -235,15 +209,14 @@ namespace NuPack.Dialog.PackageManagerUI {
         }
 
         private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
-            OnlinePackagesTreeBase selectedNode = explorer.SelectedExtensionTreeNode as OnlinePackagesTreeBase;
+            PackagesTreeNodeBase selectedNode = explorer.SelectedExtensionTreeNode as PackagesTreeNodeBase;
             if (selectedNode != null) {
                 // notify the selected node that it is opened.
                 selectedNode.OnOpened();
             }
         }
 
-        private void OnDialogWindowClosed(object sender, EventArgs e)
-        {
+        private void OnDialogWindowClosed(object sender, EventArgs e) {
             explorer.Providers.Clear();
         }
     }

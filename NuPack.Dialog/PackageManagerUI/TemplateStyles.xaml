@@ -111,5 +111,4 @@
     </Style>
 
     <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
-    <BitmapImage x:Key="BitmapImage_DefaultPreviewImage" UriSource="pack://application:,,,/NuPack.Dialog;component/PackageManagerUI/PreviewImage.png" />
 </ResourceDictionary>

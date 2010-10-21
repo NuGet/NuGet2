@@ -1,7 +1,8 @@
-﻿namespace NuPack.Dialog.Providers {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+
+namespace NuPack.Dialog.Providers {
 
     public class ExecuteCompletedEventArgs : AsyncCompletedEventArgs {
         private IEnumerable<IPackage> _results;

@@ -8,7 +8,7 @@ using System.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuPack.Dialog.Providers {
-    internal abstract class OnlinePackagesTreeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
+    internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
 
         private delegate void ExecuteDelegate(int pageNumber, int itemsPerPage, AsyncOperation async);
 
@@ -27,14 +27,14 @@ namespace NuPack.Dialog.Providers {
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<EventArgs> PageDataChanged;
 
-        internal OnlinePackagesTreeBase(IVsExtensionsTreeNode parent, OnlinePackagesProvider provider) {
+        internal PackagesTreeNodeBase(IVsExtensionsTreeNode parent, PackagesProviderBase provider) {
             Debug.Assert(provider != null);
 
             Parent = parent;
             Provider = provider;
         }
 
-        protected OnlinePackagesProvider Provider {
+        protected PackagesProviderBase Provider {
             get;
             private set;
         }
@@ -116,7 +116,6 @@ namespace NuPack.Dialog.Providers {
             get {
                 if (_nodes == null) {
                     _nodes = new ObservableCollection<IVsExtensionsTreeNode>();
-                    FillNodes(_nodes);
                 }
                 return _nodes;
             }
@@ -161,6 +160,12 @@ namespace NuPack.Dialog.Providers {
         }
 
         /// <summary>
+        /// Get all packages belonging to this node.
+        /// </summary>
+        /// <returns></returns>
+        public abstract IQueryable<IPackage> GetPackages();
+
+        /// <summary>
         /// Helper function to raise property changed events
         /// </summary>
         /// <param name="info"></param>
@@ -171,15 +176,14 @@ namespace NuPack.Dialog.Providers {
         }
 
         /// <summary>
-        /// Loads a specified page
+        /// Loads the packages in the specified page.
         /// </summary>
         /// <param name="pageNumber"></param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We want to show the error message in the message pane rather than blowing up VS.")]
+            Justification = "We want to show the error message in the message pane rather than blowing up VS.")]
         public void LoadPage(int pageNumber) {
-
             if (pageNumber < 1) {
                 throw new ArgumentOutOfRangeException("pageNumber");
             }
@@ -212,16 +216,15 @@ namespace NuPack.Dialog.Providers {
         /// This method executes on background thread.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We want to show error message inside the dialog, rather than blowing up VS.")]
+            Justification = "We want to show error message inside the dialog, rather than blowing up VS.")]
         private void ExecuteAsync(int pageNumber, int itemsPerPage, AsyncOperation async) {
             ExecuteCompletedEventArgs eventArgs = null;
             int totalCount = 0;
 
             try {
-                // Getting the query (but not executing it yet)
-                IQueryable<IPackage> query = GetQuery();
+                IQueryable<IPackage> query = GetPackages();
 
                 // This should execute the query
                 totalCount = query.Count();
@@ -237,19 +240,8 @@ namespace NuPack.Dialog.Providers {
 
                 Debug.WriteLine(ex);
             }
-            
+
             async.PostOperationCompleted(new SendOrPostCallback(QueryExecutionCompleted), eventArgs);
-        }
-
-        protected abstract IQueryable<IPackage> PreviewQuery(IQueryable<IPackage> query);
-
-        protected abstract void FillNodes(IList<IVsExtensionsTreeNode> nodes);
-
-        private IQueryable<IPackage> GetQuery() {
-            var query = PreviewQuery(Provider.GetQuery());
-
-            Trace.WriteLine("Query Created: " + query.ToString());
-            return query;
         }
 
         private void QueryExecutionCompleted(object data) {
@@ -266,7 +258,7 @@ namespace NuPack.Dialog.Providers {
 
                 _extensions.Clear();
                 foreach (IPackage package in packages) {
-                    _extensions.Add(new OnlinePackagesItem(Provider, package, false, null, 0, null));
+                    _extensions.Add(new PackageItem(Provider, package, null));
                 }
 
                 if (_extensions.Count > 0) {
@@ -333,6 +325,7 @@ namespace NuPack.Dialog.Providers {
         /// Called when this node is opened.
         /// </summary>
         internal void OnOpened() {
+            Provider.SelectedNode = this;
             if (Provider.RefreshOnNodeSelection && !this.IsSearchResultsNode) {
                 Refresh();
             }

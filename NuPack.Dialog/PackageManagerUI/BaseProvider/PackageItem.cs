@@ -7,31 +7,34 @@ using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuPack.Dialog.Providers {
-    internal class OnlinePackagesItem : IVsExtension, INotifyPropertyChanged {
-        private OnlinePackagesProvider _provider;
-        private BitmapSource _previewImage;
-        private NuPack.IPackage _packageIdentity;
+
+    internal class PackageItem : IVsExtension, INotifyPropertyChanged {
+
+        private PackagesProviderBase _provider;
+        private IPackage _packageIdentity;
         
         /// <summary>
         /// The reference item is used within the Add NuPack dialog that we're using for Add Reference
         /// It will "house" the actual reference item that we'll use for the act of adding references
         /// </summary>
-        public OnlinePackagesItem(OnlinePackagesProvider provider, NuPack.IPackage referenceRecord, bool isSelected, BitmapSource previewImage, float priority, BitmapSource thumbnail) {
+        public PackageItem(
+            PackagesProviderBase provider, 
+            IPackage referenceRecord, 
+            BitmapSource thumbnail) {
+
             _provider = provider;
             _packageIdentity = referenceRecord;
 
-            PreviewImage = previewImage;
-            Priority = priority;
+            Priority = 0;
             ThumbnailImage = thumbnail;
             MediumThumbnailImage = thumbnail;
             SmallThumbnailImage = thumbnail;
-            IsSelected = isSelected;
         }
 
         /// <summary>
         /// The embedded reference record that will be used to interface with the dialog list
         /// </summary>
-        public NuPack.IPackage ExtensionRecord {
+        public IPackage PackageIdentity {
             get { return _packageIdentity; }
         }
 
@@ -103,16 +106,22 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
+        public bool IsEnabled {
+            get {
+                return _provider.GetIsCommandEnabled(this);
+            }
+        }
+
+        internal void UpdateEnabledStatus() {
+            OnNotifyPropertyChanged("IsEnabled");
+        }
+
         /// <summary>
         /// The image to be used in the details pane for this reference
         /// </summary>
         public BitmapSource PreviewImage {
-            get {
-                return _previewImage;
-            }
-            private set {
-                _previewImage = value;
-            }
+            get;
+            set;
         }
 
         public float Priority {
@@ -129,9 +138,7 @@ namespace NuPack.Dialog.Providers {
             private set;
         }
 
-#pragma warning disable 0067
         public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore 0067
 
         private void OnNotifyPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {
@@ -166,26 +173,6 @@ namespace NuPack.Dialog.Providers {
                 }
                 return dependencies.Length > 0 ? "Dependencies:" + dependencies.ToString() : String.Empty;
             }
-        }
-
-        public bool IsInstalled {
-            get {
-                return _provider.IsInstalled(_packageIdentity.Id, _packageIdentity.Version);
-            }
-        }
-
-        internal void UpdateInstallStatus() {
-            OnNotifyPropertyChanged("IsInstalled");
-        }
-
-        public bool IsUpdated {
-            get {
-                return !_provider.CanBeUpdated(_packageIdentity);
-            }
-        }
-
-        internal void UpdateUpdateStatus() {
-            OnNotifyPropertyChanged("IsUpdated");
         }
     }
 }

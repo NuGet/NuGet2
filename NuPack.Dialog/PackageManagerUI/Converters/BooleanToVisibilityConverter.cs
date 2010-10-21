@@ -11,32 +11,16 @@ namespace NuPack.Dialog.PackageManagerUI {
     /// value is false.
     /// </summary>
     public class BooleanToVisibilityConverter : IValueConverter {
-        public BooleanToVisibilityConverter() {
-            //Use the same defaults as the built-in converter to avoid confusion
-            WhenTrue = Visibility.Visible;
-            WhenFalse = Visibility.Collapsed;
-        }
+        
+        public bool Inverted { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            bool? boolValue = value as bool?;
-            if (boolValue == null || !boolValue.HasValue) {
-                throw new ArgumentException("Value must be Boolean.", "value");
-            }
-            if (targetType == null || targetType != typeof(Visibility)) {
-                throw new ArgumentException("Must convert to Visibility.", "targetType");
+            bool boolValue = (bool)value;
+            if (Inverted) {
+                boolValue = !boolValue;
             }
 
-            return boolValue.Value ? WhenTrue : WhenFalse;
-        }
-
-        public Visibility WhenTrue {
-            get;
-            set;
-        }
-
-        public Visibility WhenFalse {
-            get;
-            set;
+            return boolValue ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {

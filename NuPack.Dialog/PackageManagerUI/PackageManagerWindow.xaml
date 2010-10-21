@@ -40,17 +40,17 @@
     <Window.CommandBindings>
         <CommandBinding 
             Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
-            CanExecute="CanExecuteInstallPackage"
+            CanExecute="CanExecuteCommandOnPackage"
             Executed="ExecutedInstallPackage" />
         
         <CommandBinding 
             Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
-            CanExecute="CanExecuteUninstallPackage"
+            CanExecute="CanExecuteCommandOnPackage"
             Executed="ExecutedUninstallPackage" />
         
         <CommandBinding
             Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
-            CanExecute="CanExecuteUpdatePackage"
+            CanExecute="CanExecuteCommandOnPackage"
             Executed="ExecutedUpdatePackage" />
         
         <CommandBinding 

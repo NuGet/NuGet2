@@ -9,12 +9,11 @@
         <ResourceDictionary Source="TemplateStyles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
+    <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
+
+    <!-- data template for the Online provider -->
     <DataTemplate x:Key="OnlinePackageItemTemplate">
-        <DataTemplate.Resources>
-            <BooleanToVisibilityConverter x:Key="boolToVis" />
-            <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
-        </DataTemplate.Resources>
-        
         <Grid Style="{StaticResource TileTemplateGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="38" />
@@ -50,7 +49,7 @@
                 <Image
                     HorizontalAlignment="Right"
                     Source="{StaticResource BitmapImage_AlreadyInstalled}"
-                    Visibility="{Binding IsInstalled, Mode=OneWay, Converter={StaticResource boolToVis}}">
+                    Visibility="{Binding IsEnabled, Mode=OneWay, Converter={StaticResource boolToVis}}">
                     <Image.ToolTip>
                         <TextBlock 
                             Text="{x:Static resources:Resources.Dialog_PackageInstalledTooltip}"
@@ -71,18 +70,15 @@
             <MultiDataTrigger >
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding IsSelected}" Value="True" />
-                    <Condition Binding="{Binding IsInstalled}" Value="False" />
+                    <Condition Binding="{Binding IsEnabled}" Value="True" />
                 </MultiDataTrigger.Conditions>
                 <Setter TargetName="Button_Download" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
 
+    <!-- data template for the Updates provider -->
     <DataTemplate x:Key="UpdatePackageItemTemplate">
-        <DataTemplate.Resources>
-            <BooleanToVisibilityConverter x:Key="boolToVis" />
-            <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
-        </DataTemplate.Resources>
         <Grid Style="{StaticResource TileTemplateGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="38" />
@@ -116,38 +112,40 @@
                 Grid.Column="2"
                 Style="{StaticResource TileRightStackPanelStyle}"
                 Visibility="Visible">
-                    <Image
-                       Source="{StaticResource BitmapImage_AlreadyInstalled}"
-                       Visibility="{Binding IsUpdated, Mode=OneWay, Converter={StaticResource boolToVis}}"
-                       HorizontalAlignment="Right">
-                        <Image.ToolTip>
-                            <TextBlock 
-                                Text="{x:Static resources:Resources.Dialog_PackageUpdatedTooltip}"
-                                Style="{StaticResource TileToolTipStyle}" />
-                        </Image.ToolTip>
-                    </Image>
-                    <Button 
-                        x:Name="Button_Update"
-                        Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
-                        Content="{x:Static resources:Resources.Dialog_UpdateButton}"
-                        IsDefault="True"
-                        Visibility="Collapsed"
-                        Style="{StaticResource DetailButtonStyle}" />
+                <Image
+                    Source="{StaticResource BitmapImage_AlreadyInstalled}"
+                    Visibility="{Binding IsEnabled, Mode=OneWay, Converter={StaticResource boolToVis}}"
+                    HorizontalAlignment="Right">
+                    <Image.ToolTip>
+                        <TextBlock 
+                            Text="{x:Static resources:Resources.Dialog_PackageUpdatedTooltip}"
+                            Style="{StaticResource TileToolTipStyle}" />
+                    </Image.ToolTip>
+                </Image>
+                <Button 
+                    x:Name="Button_Update"
+                    Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
+                    Content="{x:Static resources:Resources.Dialog_UpdateButton}"
+                    IsDefault="True"
+                    Visibility="Collapsed"
+                    Style="{StaticResource DetailButtonStyle}" />
             </StackPanel>
         </Grid>
+        
         <DataTemplate.Triggers>
             <MultiDataTrigger >
                 <MultiDataTrigger.Conditions>
-                    <Condition  Binding="{Binding IsSelected}" Value="True" />
-                    <Condition  Binding="{Binding IsUpdated}" Value="False" />
+                    <Condition Binding="{Binding IsSelected}" Value="True" />
+                    <Condition Binding="{Binding IsEnabled}" Value="True" />
                 </MultiDataTrigger.Conditions>
-                <Setter  TargetName="Button_Update" Property="Visibility" Value="Visible" />
+                <Setter TargetName="Button_Update" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
 
+    <!-- data template for the Installed provider -->
     <DataTemplate  x:Key="InstalledPackageItemTemplate">
-        <Grid  Style="{StaticResource TileTemplateGridStyle}">
+        <Grid Style="{StaticResource TileTemplateGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="38" />
                 <ColumnDefinition Width="*" />
@@ -194,60 +192,48 @@
             <MultiDataTrigger >
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding IsSelected}" Value="True" />
-                    <Condition Binding="{Binding IsInstalled}" Value="True" />
+                    <Condition Binding="{Binding IsEnabled}" Value="True" />
                 </MultiDataTrigger.Conditions>
                 <Setter TargetName="Button_Uninstall" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
 
+    <!-- data template for the package details pane -->
     <DataTemplate x:Key="PackageDetailTemplate">
         <DataTemplate.Resources>
             <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
         </DataTemplate.Resources>
         
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <Grid Margin="8">
-                <Grid.RowDefinitions>
-                    <!-- Metadata -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- Image -->
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                
-                <StackPanel >
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                        <self:TextBlockControl Grid.Column="1" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
-                    </Grid>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">                
+            <StackPanel Margin="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Grid.Column="1" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                </Grid>
                     
-                    <StackPanel Style="{StaticResource DetailMetadataStyle}">
-                        <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                        <self:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
-                    </StackPanel>
-
-                    <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
-                        <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}">
-                             <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
-                        </Hyperlink>
-                    </TextBlock>
-
-                    <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
-                    </self:TextBlockControl>
-                    
-                    <self:TextBlockControl Style="{StaticResource DetailDependenciesTextBoxStyle}" Text="{Binding Dependencies}" >
-                    </self:TextBlockControl>
+                <StackPanel Style="{StaticResource DetailMetadataStyle}">
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
-                <Border HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Style="{StaticResource DetailBorderStyle}" Margin="0,4,0,0">
-                    <Image Style="{StaticResource DetailImageStyle}" Source="{StaticResource BitmapImage_DefaultPreviewImage}">
-                    </Image>
-                </Border>
-            </Grid>
+
+                <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}">
+                            <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
+                </self:TextBlockControl>
+                    
+                <self:TextBlockControl Style="{StaticResource DetailDependenciesTextBoxStyle}" Text="{Binding Dependencies}" >
+                </self:TextBlockControl>
+            </StackPanel>
         </ScrollViewer>
     </DataTemplate>
 </ResourceDictionary>
