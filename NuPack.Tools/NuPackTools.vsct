@@ -65,7 +65,7 @@
     </Buttons>
 
     <Combos>
-      <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="270" priority="0x1005">
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="200" priority="0x1005">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
