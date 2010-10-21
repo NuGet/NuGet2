@@ -151,7 +151,7 @@
     <value>_Settings</value>
   </data>
   <data name="Dialog_Title" xml:space="preserve">
-    <value>Add Package Reference</value>
+    <value>Add Library Package Reference</value>
   </data>
   <data name="Dialog_UninstallButton" xml:space="preserve">
     <value>_Uninstall</value>

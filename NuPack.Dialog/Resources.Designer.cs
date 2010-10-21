@@ -160,7 +160,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add Package Reference.
+        ///   Looks up a localized string similar to Add Library Package Reference.
         /// </summary>
         public static string Dialog_Title {
             get {

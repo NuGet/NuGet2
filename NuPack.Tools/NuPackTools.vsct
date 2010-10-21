@@ -59,7 +59,7 @@
           <CommandFlag>DynamicVisibility</CommandFlag>
           <Strings>
               <CommandName>cmdidAddPackages</CommandName>
-              <ButtonText>Add Pac&amp;kage Reference...</ButtonText>
+              <ButtonText>Add Library Pac&amp;kage Reference...</ButtonText>
           </Strings>
       </Button>
     </Buttons>

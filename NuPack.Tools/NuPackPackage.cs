@@ -98,7 +98,7 @@ namespace NuPack.Tools {
 
         /// <summary>
         /// Gets whether the current IDE has an active and non-unloaded project, which is a precondition for
-        /// showing the Add Package Reference dialog
+        /// showing the Add Library Package Reference dialog
         /// </summary>
         private bool HasActiveLoadedProject {
             get {
