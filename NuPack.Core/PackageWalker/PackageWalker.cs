@@ -102,13 +102,17 @@
                 if (parentInfo.InitialTarget == PackageTargets.None) {
                     // Update the parent target type
                     parentInfo.Target |= info.Target;
+
+                    // If we ended up with both that means we found a dependency only packges
+                    // that has a mix of solution and project level packages
+                    if (parentInfo.Target == PackageTargets.Both) {
+                        throw new InvalidOperationException(NuPackResources.MetaPackagesCannotMixDependencies);
+                    }
                 }
 
-                // TODO: Add error checking for children of solution and meta packages
-                // with no dependencies
-                if (parentInfo.InitialTarget == PackageTargets.Solution && 
-                    info.Target.HasFlag(PackageTargets.Project)) {
-                    // throw 
+                // Solution packages can't depend on project level packages
+                if (parentInfo.Target == PackageTargets.Solution && info.Target.HasFlag(PackageTargets.Project)) {
+                    throw new InvalidOperationException(NuPackResources.SolutionLevelPackagesCannotDependOnProjectLevelPackages);
                 }
             }
 
@@ -134,7 +138,7 @@
 
         protected abstract IPackage ResolveDependency(PackageDependency dependency);
 
-        protected PackageWalkInfo GetPackageInfo(IPackage package) {
+        protected internal PackageWalkInfo GetPackageInfo(IPackage package) {
             PackageWalkInfo info;
             if (!_packageLookup.TryGetValue(package, out info)) {
                 info = new PackageWalkInfo(GetPackageTarget(package));
@@ -148,11 +152,11 @@
                 return PackageTargets.Project;
             }
 
-            if (package.HasTools() && !package.Dependencies.Any()) {
-                return PackageTargets.Solution;
+            if (package.IsDependencyOnly()) {
+                return PackageTargets.None;
             }
 
-            return PackageTargets.None;
+            return PackageTargets.Solution;
         }
     }
 }

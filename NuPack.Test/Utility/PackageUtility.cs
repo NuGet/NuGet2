@@ -89,14 +89,14 @@
                                               string version,
                                               IEnumerable<string> content = null,
                                               IEnumerable<string> assemblyReferences = null,
-                                              IEnumerable<string> resources = null,
+                                              IEnumerable<string> tools = null,
                                               IEnumerable<PackageDependency> dependencies = null) {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
                                  content,
                                  CreateAssemblyReferences(assemblyReferences),
-                                 resources,
+                                 tools,
                                  dependencies);
         }
 
@@ -104,16 +104,16 @@
                                               string version,
                                               IEnumerable<string> content,
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
-                                              IEnumerable<string> resources,
+                                              IEnumerable<string> tools,
                                               IEnumerable<PackageDependency> dependencies) {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
-            resources = resources ?? Enumerable.Empty<string>();
+            tools = tools ?? Enumerable.Empty<string>();
 
             var allFiles = new List<IPackageFile>();
             allFiles.AddRange(CreateFiles(content, "content"));
-            allFiles.AddRange(CreateFiles(resources, "resources"));
+            allFiles.AddRange(CreateFiles(tools, "tools"));
             allFiles.AddRange(assemblyReferences);
 
             var mockPackage = new Mock<IPackage>() { CallBase = true };

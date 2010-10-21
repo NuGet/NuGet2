@@ -41,12 +41,18 @@
             return package.GetFiles(Constants.ContentDirectory);
         }
 
+        /// <summary>
+        /// Returns true if a package has no content that applies to a project.
+        /// </summary>
         public static bool HasProjectContent(this IPackage package) {
             return package.AssemblyReferences.Any() || package.GetContentFiles().Any();
         }
 
-        public static bool HasTools(this IPackage package) {
-            return package.GetFiles(Constants.ToolsDirectory).Any();
+        /// <summary>
+        /// Returns true if a package has dependencies but no files.
+        /// </summary>
+        public static bool IsDependencyOnly(this IPackage package) {
+            return !package.GetFiles().Any() && package.Dependencies.Any();
         }
 
         public static string GetFullName(this IPackage package) {

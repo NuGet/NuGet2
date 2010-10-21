@@ -111,7 +111,7 @@
             var packageB = PackageUtility.CreatePackage("B", "1.0",
                                                         content: null,
                                                         assemblyReferences: new[] { PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("SP", new Version("40.0"))) },
-                                                        resources: null,
+                                                        tools: null,
                                                         dependencies: null);
             projectManager.LocalRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);

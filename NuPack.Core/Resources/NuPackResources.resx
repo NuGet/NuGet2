@@ -201,6 +201,9 @@
   <data name="Log_UpdatingToSpecificVersion" xml:space="preserve">
     <value>Updating '{0}' to version '{1}'</value>
   </data>
+  <data name="MetaPackagesCannotMixDependencies" xml:space="preserve">
+    <value>Child dependencies of dependency only packages cannot mix solution level and project level packages</value>
+  </data>
   <data name="NewerVersionAlreadyReferenced" xml:space="preserve">
     <value>Already referencing a newer version of '{0}'</value>
   </data>
@@ -236,6 +239,9 @@
   </data>
   <data name="ReferenceDoesNotExist" xml:space="preserve">
     <value>Unable to add a assembly reference to '{0}'. The file does not exist</value>
+  </data>
+  <data name="SolutionLevelPackagesCannotDependOnProjectLevelPackages" xml:space="preserve">
+    <value>Solution level packages cannot depend on project level packages</value>
   </data>
   <data name="TokenHasNoValue" xml:space="preserve">
     <value>The replacement token '{0}' has no value.</value>

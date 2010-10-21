@@ -313,6 +313,15 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Child dependencies of dependency only packages cannot mix solution level and project level packages.
+        /// </summary>
+        internal static string MetaPackagesCannotMixDependencies {
+            get {
+                return ResourceManager.GetString("MetaPackagesCannotMixDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Already referencing a newer version of &apos;{0}&apos;.
         /// </summary>
         internal static string NewerVersionAlreadyReferenced {
@@ -417,6 +426,15 @@ namespace NuPack.Resources {
         internal static string ReferenceDoesNotExist {
             get {
                 return ResourceManager.GetString("ReferenceDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Solution level packages cannot depend on project level packages.
+        /// </summary>
+        internal static string SolutionLevelPackagesCannotDependOnProjectLevelPackages {
+            get {
+                return ResourceManager.GetString("SolutionLevelPackagesCannotDependOnProjectLevelPackages", resourceCulture);
             }
         }
         
