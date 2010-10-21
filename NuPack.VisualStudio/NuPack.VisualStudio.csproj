@@ -58,7 +58,6 @@
     <Compile Include="Cmdlets\GetProjectCmdlet.cs" />
     <Compile Include="Cmdlets\InstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\GetPackageCmdlet.cs" />
-    <Compile Include="Cmdlets\LoggerDisposer.cs" />
     <Compile Include="Cmdlets\NewPackageCmdlet.cs" />
     <Compile Include="Cmdlets\NuPackBaseCmdlet.cs" />
     <Compile Include="Cmdlets\ProcessPackageBaseCmdlet.cs" />

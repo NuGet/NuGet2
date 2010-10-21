@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Management.Automation;
 using NuPack.VisualStudio.Resources;
 
@@ -11,9 +10,12 @@ namespace NuPack.VisualStudio.Cmdlets {
     [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
     public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
         [Parameter(Position = 2)]
-        public SwitchParameter Force { get; set; }
+        public Version Version { get; set; }
 
         [Parameter(Position = 3)]
+        public SwitchParameter Force { get; set; }
+
+        [Parameter(Position = 4)]
         public SwitchParameter RemoveDependencies { get; set; }
 
         protected override void ProcessRecordCore() {
@@ -22,9 +24,8 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return;
             }
 
-            var packageManager = PackageManager;
-            EnvDTE.Project project = GetProjectFromName(Project ?? DefaultProjectName);
-            packageManager.UninstallPackage(project, Id, Force.IsPresent, RemoveDependencies.IsPresent, this);
+            ProjectManager projectManager = ProjectManager;
+            PackageManager.UninstallPackage(projectManager, Id, Version, Force.IsPresent, RemoveDependencies.IsPresent, this);
         }
     }
 }

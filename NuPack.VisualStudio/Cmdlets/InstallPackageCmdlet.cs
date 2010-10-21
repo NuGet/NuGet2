@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Management.Automation;
 using NuPack.VisualStudio.Resources;
 
@@ -29,9 +28,8 @@ namespace NuPack.VisualStudio.Cmdlets {
                 PackageManager = GetPackageManager(Source);
             }
 
-            var packageManager = PackageManager;
-            EnvDTE.Project project = GetProjectFromName(Project ?? DefaultProjectName);
-            packageManager.InstallPackage(project, Id, Version, IgnoreDependencies.IsPresent, this);
+            ProjectManager projectManager = ProjectManager;
+            PackageManager.InstallPackage(projectManager, Id, Version, IgnoreDependencies.IsPresent, this);
         }
     }
 }

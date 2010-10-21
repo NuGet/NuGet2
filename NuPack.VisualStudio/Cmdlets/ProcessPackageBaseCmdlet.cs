@@ -65,7 +65,6 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         private ProjectManager GetProjectManager(string projectName) {
-
             if (PackageManager == null) {
                 return null;
             }
@@ -114,19 +113,17 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
-            ProjectManager manager = (ProjectManager)sender;
-            string projectName = manager.Project.ProjectName;
-            EnvDTE.Project projectIns = GetProjectFromName(projectName);
+            var projectManager = (ProjectManager)sender;
+            EnvDTE.Project project = GetProjectFromName(projectManager.Project.ProjectName);
 
-            ExecuteScript(e.InstallPath, "install.ps1", e.Package, projectIns);
+            ExecuteScript(e.InstallPath, "install.ps1", e.Package, project);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
-            ProjectManager manager = (ProjectManager)sender;
-            string projectName = manager.Project.ProjectName;
-            EnvDTE.Project projectIns = GetProjectFromName(projectName);
+            var projectManager = (ProjectManager)sender;
+            EnvDTE.Project project = GetProjectFromName(projectManager.Project.ProjectName);
 
-            ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, projectIns);
+            ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, project);
         }
 
         protected void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project) {
@@ -164,11 +161,6 @@ namespace NuPack.VisualStudio.Cmdlets {
 
                 WriteLine(message);
             }
-        }
-
-        protected static bool IsSolutionOnlyPackage(IPackageRepository repository, string id, Version version = null) {
-            var package = repository.FindPackage(id, null, null, version);
-            return package != null && !package.HasProjectContent();
         }
     }
 }

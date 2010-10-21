@@ -52,47 +52,48 @@ namespace NuPack.VisualStudio {
             return projectManager;
         }
 
-        public void InstallPackage(Project project, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
-            if (project == null) {
-                throw new ArgumentNullException("project");
+        public void InstallPackage(ProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
+            if (projectManager == null) {
+                throw new ArgumentNullException("projectManager");
             }
-
-            ProjectManager projectManager = GetProjectManager(project);
-
 
             InitializeLogger(logger, projectManager);
 
+            // REVIEW: This isn't transactional, so if add package reference fails
+            // the user has to manually clean it up by uninstalling it
             InstallPackage(packageId, version, ignoreDependencies);
             projectManager.AddPackageReference(packageId, version, ignoreDependencies);
         }
 
+        public void UninstallPackage(ProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
+            if (projectManager == null) {
+                throw new ArgumentNullException("projectManager");
+            }
+
+            InitializeLogger(logger, projectManager);
+
+            // If we've specified a version then we've probably trying to remove a specific version of
+            // a solution level package (since we allow side by side there)
+            if (version == null && projectManager.LocalRepository.Exists(packageId)) {
+                projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
+            }
+
+            if (!IsPackageReferenced(packageId, version)) {
+                UninstallPackage(packageId, version, forceRemove, removeDependencies);
+            }
+        }
+
+        // REVIEW: Do we even need this method?
+        public void UpdatePackage(ProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
+            InstallPackage(projectManager, id, version, !updateDependencies, logger);
+        }
+
         private void InitializeLogger(ILogger logger, ProjectManager projectManager) {
+            // Setup logging on all of our objects
             Logger = logger;
             FileSystem.Logger = logger;
             projectManager.Logger = logger;
             projectManager.Project.Logger = logger;
-        }
-
-        public void UninstallPackage(Project project, string packageId, bool forceRemove, bool removeDependencies, ILogger logger) {
-            if (project == null) {
-                throw new ArgumentNullException("project");
-            }
-
-            ProjectManager projectManager = GetProjectManager(project);
-
-            InitializeLogger(logger, projectManager);
-
-            if (projectManager.LocalRepository.Exists(packageId)) {
-                projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
-            }
-
-            if (!IsPackageReferenced(packageId, null)) {
-                UninstallPackage(packageId, null, forceRemove, removeDependencies);
-            }
-        }
-
-        public void UpdatePackage(Project project, string id, bool updateDependencies, ILogger logger) {
-            InstallPackage(project, id, null, !updateDependencies, logger);
         }
 
         private bool IsPackageReferenced(string packageId, Version version) {
