@@ -62,7 +62,9 @@ namespace NuPack.VisualStudio.Cmdlets {
             if (Updates.IsPresent) {
                 ShowUpdatePackages(repository, Filter);
             }
-            WritePackagesFromRepository(repository, Filter);
+            else {
+                WritePackagesFromRepository(repository, Filter);
+            }
         }
 
         private void WritePackagesFromRepository(IPackageRepository repository, string filter) {
