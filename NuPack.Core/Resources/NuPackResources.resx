@@ -159,17 +159,11 @@
   <data name="Debug_RemovedFolder" xml:space="preserve">
     <value>Removed folder '{0}'</value>
   </data>
-  <data name="Log_AttemptingToInstallPackage" xml:space="preserve">
-    <value>Attempting to install '{0}'...</value>
-  </data>
   <data name="Log_AttemptingToRetrievePackageFromSource" xml:space="preserve">
     <value>'{0}' not installed. Attempting to retrieve dependency from source...</value>
   </data>
   <data name="Log_AttemptingToRetrievePackageReferenceFromSource" xml:space="preserve">
     <value>'{0}' not referenced. Retrieving dependency...</value>
-  </data>
-  <data name="Log_AttemptingToUninstall" xml:space="preserve">
-    <value>Attempting to uninstall '{0}'...</value>
   </data>
   <data name="Log_LeavingPackageInstalled" xml:space="preserve">
     <value>Leaving '{0}' installed</value>

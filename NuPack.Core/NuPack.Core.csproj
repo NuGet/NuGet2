@@ -37,6 +37,8 @@
     <Compile Include="PackageWalker\IDependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageAction.cs" />
     <Compile Include="PackageWalker\PackageOperation.cs" />
+    <Compile Include="PackageWalker\PackageTargets.cs" />
+    <Compile Include="PackageWalker\PackageWalkInfo.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />

@@ -142,10 +142,10 @@
 
         protected virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
             Execute(package, new ProjectInstallWalker(LocalRepository,
-                                                                  SourceRepository,
-                                                                  new DependentsWalker(LocalRepository),
-                                                                  Logger,
-                                                                  ignoreDependencies));
+                                                      SourceRepository,
+                                                      new DependentsWalker(LocalRepository),
+                                                      NullLogger.Instance,
+                                                      ignoreDependencies));
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {

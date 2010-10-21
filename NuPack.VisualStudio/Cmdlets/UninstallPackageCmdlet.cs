@@ -24,7 +24,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
             var packageManager = PackageManager;
             EnvDTE.Project project = GetProjectFromName(Project ?? DefaultProjectName);
-            packageManager.UninstallPackage(project, Id, null, Force.IsPresent, RemoveDependencies.IsPresent, this);
+            packageManager.UninstallPackage(project, Id, Force.IsPresent, RemoveDependencies.IsPresent, this);
         }
     }
 }

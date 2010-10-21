@@ -45,6 +45,10 @@
             return package.AssemblyReferences.Any() || package.GetContentFiles().Any();
         }
 
+        public static bool HasTools(this IPackage package) {
+            return package.GetFiles(Constants.ToolsDirectory).Any();
+        }
+
         public static string GetFullName(this IPackage package) {
             return package.Id + " " + package.Version;
         }

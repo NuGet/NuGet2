@@ -127,9 +127,7 @@
                     String.Format(CultureInfo.CurrentCulture,
                     NuPackResources.UnknownPackage, packageId));
             }
-            else {
-                Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToInstallPackage, package.GetFullName());
-
+            else {               
                 InstallPackage(package, ignoreDependencies);
             }
         }
@@ -214,8 +212,6 @@
                     CultureInfo.CurrentCulture,
                     NuPackResources.UnknownPackage, packageId));
             }
-
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToUninstall, package.GetFullName());
 
             UninstallPackage(package, forceRemove, removeDependencies);
         }

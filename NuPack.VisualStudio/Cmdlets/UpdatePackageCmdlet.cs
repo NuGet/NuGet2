@@ -30,8 +30,8 @@ namespace NuPack.VisualStudio.Cmdlets {
                 PackageManager = GetPackageManager(Source);
             }
 
-            var packageManager = PackageManager;
-            PackageManager.UpdatePackage(Id, Version, UpdateDependencies, this);
+            EnvDTE.Project project = GetProjectFromName(Project ?? DefaultProjectName);
+            PackageManager.UpdatePackage(project, Id, UpdateDependencies, this);
         }
     }
 }

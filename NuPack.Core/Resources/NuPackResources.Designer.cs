@@ -187,15 +187,6 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Attempting to install &apos;{0}&apos;....
-        /// </summary>
-        internal static string Log_AttemptingToInstallPackage {
-            get {
-                return ResourceManager.GetString("Log_AttemptingToInstallPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; not installed. Attempting to retrieve dependency from source....
         /// </summary>
         internal static string Log_AttemptingToRetrievePackageFromSource {
@@ -210,15 +201,6 @@ namespace NuPack.Resources {
         internal static string Log_AttemptingToRetrievePackageReferenceFromSource {
             get {
                 return ResourceManager.GetString("Log_AttemptingToRetrievePackageReferenceFromSource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attempting to uninstall &apos;{0}&apos;....
-        /// </summary>
-        internal static string Log_AttemptingToUninstall {
-            get {
-                return ResourceManager.GetString("Log_AttemptingToUninstall", resourceCulture);
             }
         }
         
