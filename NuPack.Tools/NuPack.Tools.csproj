@@ -59,7 +59,6 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="Resources\Toolbar.png" />
-    <None Include="Resources\SourceSettings.png" />
     <VSCTCompile Include="NuPackTools.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
