@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using NuPack.VisualStudio;
@@ -14,34 +13,41 @@ namespace NuPack.Dialog.ToolsOptionsUI {
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
     public partial class ToolsOptionsControl : UserControl {
-        private VSPackageSourceProvider _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
+        private IPackageSourceProvider _packageSourceProvider;
         private BindingSource _allPackageSources;
         private PackageSource _activePackageSource;
         private bool _initialized;
-        private string _currentSelectedSource;
+        private ListViewDataBinder<PackageSource> _listViewDataBinder;
 
-        public ToolsOptionsControl() {
+        public ToolsOptionsControl(IPackageSourceProvider packageSourceProvider) {
+            _packageSourceProvider = packageSourceProvider;
             InitializeComponent();
             SetupDataBindings();
         }
 
+        public ToolsOptionsControl()
+            : this(VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
+        }
+
         private void SetupDataBindings() {
-            // Bind the Add Package Source button the text box. It's enabled when textbox is non-empty
-            Binding addButtonBinding = new Binding("Enabled", NewPackageSource, "Text");
-            addButtonBinding.Format += (o, e) => e.Value = !String.IsNullOrEmpty((String)e.Value);
-            addButton.DataBindings.Add(addButtonBinding);
+            NewPackageName.TextChanged += (o, e) => UpdateUI();
+            NewPackageSource.TextChanged += (o, e) => UpdateUI();
+            PackageSourcesListView.ItemSelectionChanged += (o, e) => UpdateUI();
 
-            //// Bind both Remove Package Source and Add Package Source buttons to the List Box.
-            //// The buttons are enabled when the List Box has some item selected
-            //ConvertEventHandler bindingFormat = (o, e) => e.Value = (Convert.ToInt32(e.Value) > -1);
+            UpdateUI();
+        }
 
-            //Binding removeButtonBinding = new Binding("Enabled", PackageSourcesListBox, "SelectedIndex");
-            //removeButtonBinding.Format += bindingFormat;
-            //removeButton.DataBindings.Add(removeButtonBinding);
+        public void UpdateUI() {
+            addButton.Enabled = !String.IsNullOrWhiteSpace(NewPackageName.Text) &&
+                                !String.IsNullOrWhiteSpace(NewPackageSource.Text);
 
-            //Binding defaultButtonBinding = new Binding("Enabled", PackageSourcesListBox, "SelectedIndex");
-            //defaultButtonBinding.Format += bindingFormat;
-            //defaultButton.DataBindings.Add(defaultButtonBinding);
+            defaultButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
+            removeButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
+        }
+
+        public void BindData() {
+            _listViewDataBinder.Bind();
+            UpdateUI();
         }
 
         internal void InitializeOnActivated() {
@@ -52,7 +58,19 @@ namespace NuPack.Dialog.ToolsOptionsUI {
             _initialized = true;
             _allPackageSources = new BindingSource(_packageSourceProvider.GetPackageSources().ToList(), null);
             _activePackageSource = _packageSourceProvider.ActivePackageSource;
-            PackageSourcesListBox.DataSource = _allPackageSources;
+
+            _listViewDataBinder = new ListViewDataBinder<PackageSource>(PackageSourcesListView,
+                ps => new string[] { ps.Name, ps.Source },  // new ListViewItem
+                (ps, item) => {
+                    // set checkmark image on default package
+                    if ((_activePackageSource == null && item.Index == 0)   // no default package, so select first
+                        || (ps.Equals(_activePackageSource))) { // OR current item is default package so set checkmark
+                        item.ImageIndex = 0;
+                    }
+                }
+                );
+            _listViewDataBinder.DataSource = _allPackageSources;
+            BindData();
         }
 
         /// <summary>
@@ -73,15 +91,20 @@ namespace NuPack.Dialog.ToolsOptionsUI {
 
             _allPackageSources = null;
             _activePackageSource = null;
+            NewPackageName.Text = String.Empty;
             NewPackageSource.Text = String.Empty;
+            UpdateUI();
         }
 
         private void OnRemoveButtonClick(object sender, EventArgs e) {
-            PackageSource selectedPackage = PackageSourcesListBox.SelectedItem as PackageSource;
+            if (PackageSourcesListView.SelectedItems.Count == 0) {
+                return;
+            }
+            var selectedPackage = PackageSourcesListView.SelectedItems[0].Tag as PackageSource;
             if (selectedPackage != null) {
                 _allPackageSources.Remove(selectedPackage);
 
-                if (_activePackageSource.Equals(selectedPackage)) {
+                if (_activePackageSource != null && _activePackageSource.Equals(selectedPackage)) {
                     _activePackageSource = null;
 
                     // if user deletes the active package source, assign the first item as the active one
@@ -90,17 +113,17 @@ namespace NuPack.Dialog.ToolsOptionsUI {
                     }
                 }
 
-                PackageSourcesListBox.Invalidate();
+                BindData();
             }
         }
 
         private void OnAddButtonClick(object sender, EventArgs e) {
-            string source = NewPackageSource.Text;
+            var name = NewPackageName.Text;
+            var source = NewPackageSource.Text;
             if (!String.IsNullOrWhiteSpace(source)) {
                 source = source.Trim();
 
-                // TODO: Provide another textbox for PackageSource name
-                PackageSource newPackageSource = new PackageSource("New", source);
+                var newPackageSource = new PackageSource(name, source);
                 if (_allPackageSources.Contains(newPackageSource)) {
                     return;
                 }
@@ -113,91 +136,35 @@ namespace NuPack.Dialog.ToolsOptionsUI {
                     _activePackageSource = newPackageSource;
                 }
 
-                // redraw the listbox to show the new default package source (if any)
-                PackageSourcesListBox.Invalidate();
+                BindData();
 
-                // now clear the text box
+                // now clear the text boxes
+                NewPackageName.Text = String.Empty;
                 NewPackageSource.Text = String.Empty;
             }
         }
 
         private void OnDefaultPackageSourceButtonClick(object sender, EventArgs e) {
-            PackageSource selectedPackageSource = PackageSourcesListBox.SelectedItem as PackageSource;
-            if (selectedPackageSource != null) {
-                _activePackageSource = selectedPackageSource;
-
-                PackageSourcesListBox.Invalidate();
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability", 
-            "CA2000:Dispose objects before losing scope",
-            Justification="Cannot dispose e.Font object because it is shared.")]
-        private void AllPackageSourcesList_DrawItem(object sender, DrawItemEventArgs e) {
-            // Draw the background of the ListBox control for each item.
-            e.DrawBackground();
-
-            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count) {
+            if (PackageSourcesListView.SelectedItems.Count == 0) {
                 return;
             }
 
-            var currentItem = PackageSourcesListBox.Items[e.Index];
-
-            using (StringFormat drawFormat = new StringFormat {
-                        Alignment = StringAlignment.Near,
-                        Trimming = StringTrimming.EllipsisCharacter,
-                        LineAlignment = StringAlignment.Center}) {
-
-                // if the item is the active package source, draw it in bold
-                Font newFont = (_activePackageSource != null && _activePackageSource.Equals(currentItem)) ?
-                            new Font(e.Font, FontStyle.Bold) : 
-                            e.Font;
-
-                using (Brush foreBrush = new SolidBrush(e.ForeColor)) {
-                    // Draw the current item text based on the current Font 
-                    // and the custom brush settings.
-                    e.Graphics.DrawString(
-                        PackageSourcesListBox.GetItemText(currentItem), 
-                        newFont, 
-                        foreBrush, 
-                        e.Bounds, 
-                        drawFormat);
-
-                    // If the ListBox has focus, draw a focus rectangle around the selected item.
-                    e.DrawFocusRectangle();
-                }
-
-                // only dispose the Font object if we create it. Do NOT dispose the shared e.Font object.
-                if (newFont != e.Font) {
-                    newFont.Dispose();
-                }
-            }
+            _activePackageSource = PackageSourcesListView.SelectedItems[0].Tag as PackageSource;
+            BindData();
         }
 
-        private void PackageSourcesListBox_KeyDown(object sender, KeyEventArgs e) {
-            if (e.KeyCode == Keys.C && e.Control) {
-                if (PackageSourcesListBox.SelectedValue != null) {
-                    Clipboard.SetText((string)PackageSourcesListBox.SelectedValue);
-                }
-            }
-        }
 
         private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
-            if (e.ClickedItem == CopyPackageSourceStripMenuItem && _currentSelectedSource != null) {
-                Clipboard.SetText(_currentSelectedSource);
+            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListView.SelectedItems.Count > 0) {
+                var selectedPackageSource = (PackageSource) PackageSourcesListView.SelectedItems[0].Tag;
+                Clipboard.Clear();
+                Clipboard.SetText(selectedPackageSource.Source);
             }
         }
 
-        private void PackageSourcesListBox_MouseDown(object sender, MouseEventArgs e) {
+        private void PackageSourcesListView_MouseClick(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Right) {
-                var index = PackageSourcesListBox.IndexFromPoint(e.Location);
-                if (index == ListBox.NoMatches) {
-                    _currentSelectedSource = null;
-                }
-                else {
-                    _currentSelectedSource = ((PackageSource)PackageSourcesListBox.Items[index]).Source;
-                }
+                PackageSourcesContextMenu.Show(PackageSourcesListView, e.Location);
             }
         }
     }

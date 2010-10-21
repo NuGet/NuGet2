@@ -118,49 +118,52 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="NPackURILabel.AutoSize" type="System.Boolean, mscorlib">
+  <data name="HeaderLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="NPackURILabel.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="HeaderLabel.Location" type="System.Drawing.Point, System.Drawing">
     <value>3, 9</value>
   </data>
-  <data name="NPackURILabel.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="HeaderLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>181, 17</value>
   </data>
-  <data name="NPackURILabel.TabIndex" type="System.Int32, mscorlib">
+  <data name="HeaderLabel.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
-  <data name="NPackURILabel.Text" xml:space="preserve">
-    <value>Available package sources:</value>
+  <data name="HeaderLabel.Text" xml:space="preserve">
+    <value>Availa&amp;ble package sources:</value>
   </data>
-  <data name="&gt;&gt;NPackURILabel.Name" xml:space="preserve">
-    <value>NPackURILabel</value>
+  <data name="&gt;&gt;HeaderLabel.Name" xml:space="preserve">
+    <value>HeaderLabel</value>
   </data>
-  <data name="&gt;&gt;NPackURILabel.Type" xml:space="preserve">
+  <data name="&gt;&gt;HeaderLabel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;NPackURILabel.Parent" xml:space="preserve">
+  <data name="&gt;&gt;HeaderLabel.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;NPackURILabel.ZOrder" xml:space="preserve">
-    <value>5</value>
+  <data name="&gt;&gt;HeaderLabel.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="NewPackageSource.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Left, Right</value>
   </data>
   <data name="NewPackageSource.Location" type="System.Drawing.Point, System.Drawing">
-    <value>7, 167</value>
+    <value>68, 226</value>
   </data>
   <data name="NewPackageSource.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
   </data>
+  <data name="NewPackageSource.MaxLength" type="System.Int32, mscorlib">
+    <value>1000</value>
+  </data>
   <data name="NewPackageSource.Size" type="System.Drawing.Size, System.Drawing">
-    <value>401, 22</value>
+    <value>421, 22</value>
   </data>
   <data name="NewPackageSource.TabIndex" type="System.Int32, mscorlib">
-    <value>4</value>
+    <value>7</value>
   </data>
   <data name="&gt;&gt;NewPackageSource.Name" xml:space="preserve">
     <value>NewPackageSource</value>
@@ -172,13 +175,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;NewPackageSource.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>5</value>
   </data>
   <data name="addButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
   </data>
   <data name="addButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>415, 164</value>
+    <value>496, 223</value>
   </data>
   <data name="addButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 3, 2</value>
@@ -187,7 +190,7 @@
     <value>105, 28</value>
   </data>
   <data name="addButton.TabIndex" type="System.Int32, mscorlib">
-    <value>5</value>
+    <value>8</value>
   </data>
   <data name="addButton.Text" xml:space="preserve">
     <value>&amp;Add</value>
@@ -202,22 +205,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;addButton.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="PackageSourcesListBox.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Left, Right</value>
+    <value>7</value>
   </data>
   <metadata name="PackageSourcesContextMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
   <data name="CopyPackageSourceStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 24</value>
+    <value>102, 22</value>
   </data>
   <data name="CopyPackageSourceStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Copy</value>
+    <value>Copy</value>
   </data>
   <data name="PackageSourcesContextMenu.Size" type="System.Drawing.Size, System.Drawing">
-    <value>153, 50</value>
+    <value>103, 26</value>
   </data>
   <data name="&gt;&gt;PackageSourcesContextMenu.Name" xml:space="preserve">
     <value>PackageSourcesContextMenu</value>
@@ -225,38 +225,11 @@
   <data name="&gt;&gt;PackageSourcesContextMenu.Type" xml:space="preserve">
     <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PackageSourcesListBox.ItemHeight" type="System.Int32, mscorlib">
-    <value>20</value>
-  </data>
-  <data name="PackageSourcesListBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>7, 36</value>
-  </data>
-  <data name="PackageSourcesListBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 2, 3, 2</value>
-  </data>
-  <data name="PackageSourcesListBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>401, 84</value>
-  </data>
-  <data name="PackageSourcesListBox.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.Name" xml:space="preserve">
-    <value>PackageSourcesListBox</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ListBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
   <data name="removeButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
   </data>
   <data name="removeButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>415, 70</value>
+    <value>497, 70</value>
   </data>
   <data name="removeButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 3, 2</value>
@@ -280,13 +253,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;removeButton.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>9</value>
   </data>
   <data name="defaultButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
   </data>
   <data name="defaultButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>413, 36</value>
+    <value>496, 36</value>
   </data>
   <data name="defaultButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 3, 2</value>
@@ -310,7 +283,175 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;defaultButton.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="NewPackageName.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <data name="NewPackageName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>68, 192</value>
+  </data>
+  <data name="NewPackageName.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="NewPackageName.MaxLength" type="System.Int32, mscorlib">
+    <value>50</value>
+  </data>
+  <data name="NewPackageName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>423, 22</value>
+  </data>
+  <data name="NewPackageName.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;NewPackageName.Name" xml:space="preserve">
+    <value>NewPackageName</value>
+  </data>
+  <data name="&gt;&gt;NewPackageName.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;NewPackageName.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;NewPackageName.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="NewPackageNameLabel.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="NewPackageNameLabel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 195</value>
+  </data>
+  <data name="NewPackageNameLabel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>49, 17</value>
+  </data>
+  <data name="NewPackageNameLabel.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="NewPackageNameLabel.Text" xml:space="preserve">
+    <value>Na&amp;me:</value>
+  </data>
+  <data name="&gt;&gt;NewPackageNameLabel.Name" xml:space="preserve">
+    <value>NewPackageNameLabel</value>
+  </data>
+  <data name="&gt;&gt;NewPackageNameLabel.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;NewPackageNameLabel.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;NewPackageNameLabel.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="NewPackageSourceLabel.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="NewPackageSourceLabel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 229</value>
+  </data>
+  <data name="NewPackageSourceLabel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>57, 17</value>
+  </data>
+  <data name="NewPackageSourceLabel.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="NewPackageSourceLabel.Text" xml:space="preserve">
+    <value>So&amp;urce:</value>
+  </data>
+  <data name="&gt;&gt;NewPackageSourceLabel.Name" xml:space="preserve">
+    <value>NewPackageSourceLabel</value>
+  </data>
+  <data name="&gt;&gt;NewPackageSourceLabel.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;NewPackageSourceLabel.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;NewPackageSourceLabel.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="PackageSourcesListView.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <data name="NameColumn.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NameColumn.Width" type="System.Int32, mscorlib">
+    <value>120</value>
+  </data>
+  <data name="SourceColumn.Text" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="SourceColumn.Width" type="System.Int32, mscorlib">
+    <value>208</value>
+  </data>
+  <metadata name="PackageSourcesImages.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>230, 17</value>
+  </metadata>
+  <data name="PackageSourcesImages.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
+        LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
+        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAAu
+        CAAAAk1TRnQBSQFMAwEBAAFgAQABYAEAARABAAEQAQAE/wEJAQAI/wFCAU0BNgEEBgABNgEEAgABKAMA
+        AUADAAEQAwABAQEAAQgGAAEEGAABgAIAAYADAAKAAQABgAMAAYABAAGAAQACgAIAA8ABAAHAAdwBwAEA
+        AfABygGmAQABMwUAATMBAAEzAQABMwEAAjMCAAMWAQADHAEAAyIBAAMpAQADVQEAA00BAANCAQADOQEA
+        AYABfAH/AQACUAH/AQABkwEAAdYBAAH/AewBzAEAAcYB1gHvAQAB1gLnAQABkAGpAa0CAAH/ATMDAAFm
+        AwABmQMAAcwCAAEzAwACMwIAATMBZgIAATMBmQIAATMBzAIAATMB/wIAAWYDAAFmATMCAAJmAgABZgGZ
+        AgABZgHMAgABZgH/AgABmQMAAZkBMwIAAZkBZgIAApkCAAGZAcwCAAGZAf8CAAHMAwABzAEzAgABzAFm
+        AgABzAGZAgACzAIAAcwB/wIAAf8BZgIAAf8BmQIAAf8BzAEAATMB/wIAAf8BAAEzAQABMwEAAWYBAAEz
+        AQABmQEAATMBAAHMAQABMwEAAf8BAAH/ATMCAAMzAQACMwFmAQACMwGZAQACMwHMAQACMwH/AQABMwFm
+        AgABMwFmATMBAAEzAmYBAAEzAWYBmQEAATMBZgHMAQABMwFmAf8BAAEzAZkCAAEzAZkBMwEAATMBmQFm
+        AQABMwKZAQABMwGZAcwBAAEzAZkB/wEAATMBzAIAATMBzAEzAQABMwHMAWYBAAEzAcwBmQEAATMCzAEA
+        ATMBzAH/AQABMwH/ATMBAAEzAf8BZgEAATMB/wGZAQABMwH/AcwBAAEzAv8BAAFmAwABZgEAATMBAAFm
+        AQABZgEAAWYBAAGZAQABZgEAAcwBAAFmAQAB/wEAAWYBMwIAAWYCMwEAAWYBMwFmAQABZgEzAZkBAAFm
+        ATMBzAEAAWYBMwH/AQACZgIAAmYBMwEAA2YBAAJmAZkBAAJmAcwBAAFmAZkCAAFmAZkBMwEAAWYBmQFm
+        AQABZgKZAQABZgGZAcwBAAFmAZkB/wEAAWYBzAIAAWYBzAEzAQABZgHMAZkBAAFmAswBAAFmAcwB/wEA
+        AWYB/wIAAWYB/wEzAQABZgH/AZkBAAFmAf8BzAEAAcwBAAH/AQAB/wEAAcwBAAKZAgABmQEzAZkBAAGZ
+        AQABmQEAAZkBAAHMAQABmQMAAZkCMwEAAZkBAAFmAQABmQEzAcwBAAGZAQAB/wEAAZkBZgIAAZkBZgEz
+        AQABmQEzAWYBAAGZAWYBmQEAAZkBZgHMAQABmQEzAf8BAAKZATMBAAKZAWYBAAOZAQACmQHMAQACmQH/
+        AQABmQHMAgABmQHMATMBAAFmAcwBZgEAAZkBzAGZAQABmQLMAQABmQHMAf8BAAGZAf8CAAGZAf8BMwEA
+        AZkBzAFmAQABmQH/AZkBAAGZAf8BzAEAAZkC/wEAAcwDAAGZAQABMwEAAcwBAAFmAQABzAEAAZkBAAHM
+        AQABzAEAAZkBMwIAAcwCMwEAAcwBMwFmAQABzAEzAZkBAAHMATMBzAEAAcwBMwH/AQABzAFmAgABzAFm
+        ATMBAAGZAmYBAAHMAWYBmQEAAcwBZgHMAQABmQFmAf8BAAHMAZkCAAHMAZkBMwEAAcwBmQFmAQABzAKZ
+        AQABzAGZAcwBAAHMAZkB/wEAAswCAALMATMBAALMAWYBAALMAZkBAAPMAQACzAH/AQABzAH/AgABzAH/
+        ATMBAAGZAf8BZgEAAcwB/wGZAQABzAH/AcwBAAHMAv8BAAHMAQABMwEAAf8BAAFmAQAB/wEAAZkBAAHM
+        ATMCAAH/AjMBAAH/ATMBZgEAAf8BMwGZAQAB/wEzAcwBAAH/ATMB/wEAAf8BZgIAAf8BZgEzAQABzAJm
+        AQAB/wFmAZkBAAH/AWYBzAEAAcwBZgH/AQAB/wGZAgAB/wGZATMBAAH/AZkBZgEAAf8CmQEAAf8BmQHM
+        AQAB/wGZAf8BAAH/AcwCAAH/AcwBMwEAAf8BzAFmAQAB/wHMAZkBAAH/AswBAAH/AcwB/wEAAv8BMwEA
+        AcwB/wFmAQAC/wGZAQAC/wHMAQACZgH/AQABZgH/AWYBAAFmAv8BAAH/AmYBAAH/AWYB/wEAAv8BZgEA
+        ASEBAAGlAQADXwEAA3cBAAOGAQADlgEAA8sBAAOyAQAD1wEAA90BAAPjAQAD6gEAA/EBAAP4AQAB8AH7
+        Af8BAAGkAqABAAOAAwAB/wIAAf8DAAL/AQAB/wMAAf8BAAH/AQAC/wIAA/8BABD/MAAQ/zAABP8B8wGY
+        BE8BSQF4AfQD/zAAA/8BCAFPBVADTwHwAv8wAAL/AfQBTwFyAZcBUAFPBFACTwH0Af8wAAL/AZgClwFQ
+        AggBUAFPA1ABTwEHAf8wAAL/AXIBmAGXAZgC/wHzAVABTwJQAU8BcgH/MAAC/wGXApgB/wEHAXIB/wHz
+        AVABTwJQAXIB/zAAAv8BlwGeAZgBCAJPAXIB/wHzAVABTwFQAXIB/zAAAv8BlwHCAZgDlwFPAXMB/wHz
+        AXIBUAFyAf8wAAL/AZcBwgGfAZgBeAKXAU8BmAH/AZgBUAFyAf8wAAL/AQgBmAEbAZ4BmAF4ApcBUAJ4
+        AU8BCAH/MAAD/wF4AcIBGwGfApgCeAGXAVABcgL/MAAD/wH0AXgBmALCAZ4CmAFyAXgB9AL/MAAE/wH0
+        AZgBcgOXAXIBCAT/MAAQ/zAAAUIBTQE+BwABPgMAASgDAAFAAwABEAMAAQEBAAEBBQABgBcAA/+BAAs=
+</value>
+  </data>
+  <data name="PackageSourcesListView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>7, 36</value>
+  </data>
+  <data name="PackageSourcesListView.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="PackageSourcesListView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>483, 142</value>
+  </data>
+  <data name="PackageSourcesListView.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListView.Name" xml:space="preserve">
+    <value>PackageSourcesListView</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListView.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListView.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -322,13 +463,31 @@
     <value>4, 4, 4, 4</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>529, 214</value>
+    <value>612, 274</value>
   </data>
   <data name="&gt;&gt;CopyPackageSourceStripMenuItem.Name" xml:space="preserve">
     <value>CopyPackageSourceStripMenuItem</value>
   </data>
   <data name="&gt;&gt;CopyPackageSourceStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;NameColumn.Name" xml:space="preserve">
+    <value>NameColumn</value>
+  </data>
+  <data name="&gt;&gt;NameColumn.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;SourceColumn.Name" xml:space="preserve">
+    <value>SourceColumn</value>
+  </data>
+  <data name="&gt;&gt;SourceColumn.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ColumnHeader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesImages.Name" xml:space="preserve">
+    <value>PackageSourcesImages</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesImages.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ImageList, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>ToolsOptionsControl</value>

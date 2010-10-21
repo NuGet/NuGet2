@@ -106,7 +106,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Available.
+        ///   Looks up a localized string similar to Online.
         /// </summary>
         public static string Dialog_OnlineProvider {
             get {

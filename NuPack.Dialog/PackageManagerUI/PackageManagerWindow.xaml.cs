@@ -241,5 +241,10 @@ namespace NuPack.Dialog.PackageManagerUI {
                 selectedNode.OnOpened();
             }
         }
+
+        private void OnDialogWindowClosed(object sender, EventArgs e)
+        {
+            explorer.Providers.Clear();
+        }
     }
 }

@@ -67,6 +67,7 @@
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ISourceControlFileSystemProvider.cs" />
+    <Compile Include="PackageSource\IPackageSourceProvider.cs" />
     <Compile Include="PackageSource\PackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\SerializationHelper.cs" />
     <Compile Include="PackageSource\VSPackageSourceRepository.cs" />

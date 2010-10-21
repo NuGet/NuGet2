@@ -6,7 +6,8 @@ using Microsoft.VisualStudio.Shell;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
-    public class VSPackageSourceProvider {
+    public class VSPackageSourceProvider : IPackageSourceProvider
+    {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=199193";
 
         private PackageSourceSettingsManager _settingsManager;
