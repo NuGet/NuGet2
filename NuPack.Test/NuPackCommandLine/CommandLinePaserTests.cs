@@ -11,65 +11,55 @@ namespace NuPack.Test.NuPackCommandLine {
         public void GetNextCommandLineItem_BreaksOnSpacesOutSideDoubleQuotes() {
             // Arrange
             string input = "foo bar";
-            string expectedItem = "foo";
-            string expectRemainingInput = "bar";
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(ref input);
             // Assert
-            Assert.AreEqual(expectedItem, actualItem);
-            Assert.AreEqual(expectRemainingInput, input);
+            Assert.AreEqual("foo", actualItem);
+            Assert.AreEqual("bar", input);
         }
 
         [TestMethod]
         public void GetNextCommandLineItem_DeosNotBreakOnSpacesinSideDoubleQuotes() {
             // Arrange
             string input = "\"foo bar\"";
-            string expectedItem = "foo bar";
-            string expectRemainingInput = "";
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(ref input);
             // Assert
-            Assert.AreEqual(expectedItem, actualItem);
-            Assert.AreEqual(expectRemainingInput, input);
+            Assert.AreEqual("foo bar", actualItem);
+            Assert.AreEqual("", input);
         }
 
         [TestMethod]
         public void GetNextCommandLineItem_DoesNotBreakOnSpacesWithOutClosingQuote() {
             // Arrange
             string input = "\"foo bar";
-            string expectedItem = "foo bar";
-            string expectRemainingInput = "";
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(ref input);
             // Assert
-            Assert.AreEqual(expectedItem, actualItem);
-            Assert.AreEqual(expectRemainingInput, input);
+            Assert.AreEqual("foo bar", actualItem);
+            Assert.AreEqual("", input);
         }
 
         [TestMethod]
         public void GetNextCommandLineItem_ReturnsEmptyStringWithEmptyInput() {
             // Arrange
             string input = "";
-            string expectedItem = "";
-            string expectRemainingInput = "";
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(ref input);
             // Assert
-            Assert.AreEqual(expectedItem, actualItem);
-            Assert.AreEqual(expectRemainingInput, input);
+            Assert.AreEqual("", actualItem);
+            Assert.AreEqual("", input);
         }
 
         [TestMethod]
         public void GetNextCommandLineItem_BreaksOnSpacesWithASingleQuote() {
             // Arrange
             string input = "'foo bar'";
-            string expectedItem = "'foo";
-            string expectRemainingInput = "bar'";
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(ref input);
             // Assert
-            Assert.AreEqual(expectedItem, actualItem);
-            Assert.AreEqual(expectRemainingInput, input);
+            Assert.AreEqual("'foo", actualItem);
+            Assert.AreEqual("bar'", input);
         }
 
         [TestMethod]

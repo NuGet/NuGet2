@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using NuPack.Common;
+﻿namespace NuPack {
 
-namespace NuPack {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using NuPack.Common;
+
     public class CommandLineParser {
         private ICommandManager _commandManager;
 
@@ -21,7 +22,7 @@ namespace NuPack {
 
         public ICommand ExtractOptions(ICommand command, string commandLine) {
             List<string> arguments = new List<string>();
-            Dictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
+            IDictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
 
             while (true) {
                 string option = GetNextCommandLineItem(ref commandLine);
@@ -70,7 +71,7 @@ namespace NuPack {
                 try {
                     propInfo.SetValue(command, CommandLineUtility.ChangeType(value, propInfo.PropertyType), null);
                 }
-                catch (Exception) {
+                catch {
                     throw new CommandLineException(NuPackResources.InvalidOptionValueError, option, value);
                 }
             }

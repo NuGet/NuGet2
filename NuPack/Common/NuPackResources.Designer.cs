@@ -70,7 +70,7 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Passing a command name to help with provide the help information for that command..
+        ///   Looks up a localized string similar to Pass a command name to display help information for that command..
         /// </summary>
         internal static string HelpCommandUsageDecription {
             get {
@@ -124,7 +124,7 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The pack command is used to create a NuPack package based on the provide NuSpec file..
+        ///   Looks up a localized string similar to Creates a NuPack package based on the provided NuSpec file..
         /// </summary>
         internal static string PackageCommandDescription {
             get {
@@ -133,11 +133,20 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Where to put the NuPack file after it is created..
+        ///   Looks up a localized string similar to Specifies the directory for the created NuPack file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
             get {
                 return ResourceManager.GetString("PackageCommandOutputDirDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please specify a nuspec file to use..
+        /// </summary>
+        internal static string PackageCommandSpecifyNuSpecFileError {
+            get {
+                return ResourceManager.GetString("PackageCommandSpecifyNuSpecFileError", resourceCulture);
             }
         }
         
@@ -151,7 +160,7 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To create a package provide the manifest file (NuSpec file) location. Optionally you may specify one of the options for additional functionality..
+        ///   Looks up a localized string similar to Specify the location of the manifest (Nuspec) file to create a package..
         /// </summary>
         internal static string PackageCommandUsageDescription {
             get {

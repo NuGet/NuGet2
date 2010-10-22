@@ -1,4 +1,5 @@
 ﻿namespace NuPack {
+
     using System.Collections.Generic;
 
     public interface ICommand {

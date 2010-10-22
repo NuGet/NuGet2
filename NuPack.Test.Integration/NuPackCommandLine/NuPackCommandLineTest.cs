@@ -1,5 +1,6 @@
 namespace NuPack.Test.Integration.NuPackCommandLine {
 
+    using System;
     using System.IO;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,9 +15,10 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             const string folder = @".\nospecs\";
             if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
             // Act
-            string result = CommandRunner.Run(nupackExePath, folder, string.Empty, true);
+            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, string.Empty, true);
             // Assert
-            Assert.AreEqual(true, result.Contains("usage: NuPack <command> [args] [options]"));
+            Assert.AreEqual(0, result.Item1);
+            Assert.AreEqual(true, result.Item2.Contains("usage: NuPack <command> [args] [options]"));
         }
 
         [TestMethod]
@@ -25,9 +27,10 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             const string folder = @".\nospecs\";
             if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
             // Act
-            string result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
             // Assert
-            Assert.AreEqual("Please specify a nuspec file to use.", result.Trim());
+            Assert.AreEqual(1, result.Item1);
+            Assert.AreEqual("Please specify a nuspec file to use.", result.Item2.Trim());
         }
 
         [TestMethod]
@@ -51,10 +54,11 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             File.AppendAllText(nuspecFile2, NuSpecFileContext.FileContents);
 
             // Act
-            string result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
 
             // Assert
-            Assert.AreEqual("Please specify a nuspec file to use.", result.Trim());
+            Assert.AreEqual(1, result.Item1);
+            Assert.AreEqual("Please specify a nuspec file to use.", result.Item2.Trim());
         }
 
         [TestMethod]
@@ -74,10 +78,11 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             File.AppendAllText(nuspecFile, NuSpecFileContext.FileContents);
 
             //Act
-            string result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
 
             //Assert
-            Assert.AreEqual(true, result.Contains("Successfully created package"));
+            Assert.AreEqual(0, result.Item1);
+            Assert.AreEqual(true, result.Item2.Contains("Successfully created package"));
         }
 
         [TestMethod]
@@ -103,10 +108,11 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             File.AppendAllText(nuspecFile, NuSpecFileContext.FileContents);
 
             //Act
-            string result = CommandRunner.Run(nupackExePath, @".\onespec\", "pack /outdir " + @"..\output\", true);
+            Tuple<int, string> result = CommandRunner.Run(nupackExePath, @".\onespec\", "pack -o " + @"..\output\", true);
 
             //Assert
-            Assert.AreEqual(true, result.Contains("Successfully created package"));
+            Assert.AreEqual(0, result.Item1);
+            Assert.AreEqual(true, result.Item2.Contains("Successfully created package"));
             Assert.AreEqual(true, File.Exists(expectedPackage));
 
         }

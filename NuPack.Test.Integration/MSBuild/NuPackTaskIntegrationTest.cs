@@ -214,7 +214,7 @@ namespace NuPack.Test.Integration.MSBuild {
                 GetMSBuildPath(),
                 _workingDir,
                 "fnord.msbuild /v:d /t:Package",
-                true);
+                true).Item2;
         }
 
         static string GetMSBuildPath() {

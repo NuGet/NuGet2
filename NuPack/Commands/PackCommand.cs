@@ -17,15 +17,15 @@
 
         public List<string> Arguments { get; set; }
 
-        [Option(typeof(NuPackResources), "PackageCommandOutputDirDescription", AltName = "outdir")]
+        [Option(typeof(NuPackResources), "PackageCommandOutputDirDescription", AltName = "o")]
         public string OutputDirectory { get; set; }
 
-        [Option(typeof(NuPackResources), "PackageCommandBasePathDescription", AltName = "base")]
+        [Option(typeof(NuPackResources), "PackageCommandBasePathDescription", AltName = "b")]
         public string BasePath { get; set; }
 
         public void Execute() {
             string nuspecFile;
-            
+
             if (Arguments.Any()) {
                 nuspecFile = Arguments[0];
             }
@@ -35,7 +35,7 @@
                     nuspecFile = possibleNuspecFiles[0];
                 }
                 else {
-                    throw new CommandLineException("Please specify a nuspec file to use.");
+                    throw new CommandLineException(NuPackResources.PackageCommandSpecifyNuSpecFileError);
                 }
             }
 

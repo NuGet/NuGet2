@@ -1,4 +1,5 @@
 ﻿namespace NuPack {
+
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
@@ -14,7 +15,7 @@
             _commands = new Dictionary<CommandAttribute, ICommand>();
         }
 
-        public Dictionary<CommandAttribute, ICommand> GetCommands() {
+        public IDictionary<CommandAttribute, ICommand> GetCommands() {
             return _commands;
         }
 
@@ -36,7 +37,7 @@
             return null;
         }
 
-        public Dictionary<OptionAttribute, PropertyInfo> GetCommandOptions(ICommand command) {
+        public IDictionary<OptionAttribute, PropertyInfo> GetCommandOptions(ICommand command) {
             Dictionary<OptionAttribute, PropertyInfo> result = new Dictionary<OptionAttribute, PropertyInfo>();
 
             foreach (PropertyInfo propInfo in command.GetType().GetProperties()) {

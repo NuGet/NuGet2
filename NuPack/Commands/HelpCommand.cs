@@ -36,10 +36,10 @@
         }
 
         public HelpCommand(ICommandManager commandManager, string commandExe, string productName, string helpUrl) {
-            this._commandManager = commandManager;
-            this._commandExe = commandExe;
-            this._productName = productName;
-            this._helpUrl = helpUrl;
+            _commandManager = commandManager;
+            _commandExe = commandExe;
+            _productName = productName;
+            _helpUrl = helpUrl;
         }
 
         public void Execute() {
@@ -78,14 +78,14 @@
 
         private void PrintCommand(int maxWidth, CommandAttribute commandAttribute) {
             // Write out the command name left justified with the max command's width's padding
-            Console.Write("  {0, -" + maxWidth + "}   ", GetCommandText(commandAttribute));
+            Console.Write(" {0, -" + maxWidth + "}   ", GetCommandText(commandAttribute));
             // Starting index of the description
             int descriptionPadding = maxWidth + 4;
             PrintJustified(descriptionPadding, commandAttribute.GetDescription());
         }
 
         private void PrintJustified(int startIndex, string text) {
-            PrintJustified(startIndex, text, Console.WindowWidth);
+            PrintJustified(startIndex, text, GetConsoleWidth());
         }
 
         private void PrintJustified(int startIndex, string text, int maxWidth) {
@@ -100,7 +100,7 @@
                 int length = Math.Min(text.Length, maxWidth);
                 // Text we can print without overflowing the console.
                 string content = text.Substring(0, length);
-                int leftPadding = startIndex + length - Console.CursorLeft;
+                int leftPadding = startIndex + length - GetConsoleCursorLeft();
                 // Print it with the correct padding
                 Console.WriteLine("{0," + leftPadding + "}", content);
                 // Get the next substring to be printed
@@ -116,7 +116,7 @@
             ICommand command = _commandManager.GetCommand(commandName);
 
             if (command == null) {
-                throw new CommandLineException("Unknown command: '{0}'", commandName);
+                throw new CommandLineException(NuPackResources.UnknowCommandError, commandName);
             }
 
             CommandAttribute attribute = _commandManager.GetCommandAttribute(command);
@@ -134,11 +134,11 @@
 
             if (attribute.GetUsageDescription() != null) {
                 int padding = 5;
-                PrintJustified(padding, attribute.GetUsageDescription(), Console.WindowWidth - padding);
+                PrintJustified(padding, attribute.GetUsageDescription(), GetConsoleWidth() - padding);
                 Console.WriteLine();
             }
 
-            Dictionary<OptionAttribute, PropertyInfo> options = _commandManager.GetCommandOptions(command);
+            IDictionary<OptionAttribute, PropertyInfo> options = _commandManager.GetCommandOptions(command);
 
             if (options.Count > 0) {
                 Console.WriteLine("options:");
@@ -158,6 +158,28 @@
                 }
                 Console.WriteLine();
             }
+        }
+
+        private int GetConsoleWidth() {
+            int maxWidth;
+            try {
+                maxWidth = Console.WindowWidth;
+            }
+            catch (System.IO.IOException) {
+                maxWidth = 60;
+            }
+            return maxWidth;
+        }
+
+        private int GetConsoleCursorLeft() {
+            int cursorLeft;
+            try {
+                cursorLeft = Console.CursorLeft;
+            }
+            catch (System.IO.IOException) {
+                cursorLeft = 0;
+            }
+            return cursorLeft;
         }
 
         private static string GetAltText(string altNameText) {

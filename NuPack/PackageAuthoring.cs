@@ -1,4 +1,5 @@
 ﻿namespace NuPack {
+
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
@@ -29,7 +30,7 @@
             container.ComposeParts(this);
         }
 
-        public static void Main(string[] args) {
+        public static int Main(string[] args) {
             // Import Dependecies  
             var p = new PackageAuthoring();
             p.Initialize();
@@ -47,7 +48,9 @@
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
+                return 1;
             }
+            return 0;
         }
     }
 }

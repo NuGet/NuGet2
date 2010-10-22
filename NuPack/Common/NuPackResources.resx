@@ -121,7 +121,7 @@
     <value>The Help command is used to display general help and also help information about other commands.</value>
   </data>
   <data name="HelpCommandUsageDecription" xml:space="preserve">
-    <value>Passing a command name to help with provide the help information for that command.</value>
+    <value>Pass a command name to display help information for that command.</value>
   </data>
   <data name="HelpCommandUsageSummary" xml:space="preserve">
     <value>[command]</value>
@@ -139,16 +139,19 @@
     <value>The Base Path of the files defined in the nuspec file.</value>
   </data>
   <data name="PackageCommandDescription" xml:space="preserve">
-    <value>The pack command is used to create a NuPack package based on the provide NuSpec file.</value>
+    <value>Creates a NuPack package based on the provided NuSpec file.</value>
   </data>
   <data name="PackageCommandOutputDirDescription" xml:space="preserve">
-    <value>Where to put the NuPack file after it is created.</value>
+    <value>Specifies the directory for the created NuPack file</value>
+  </data>
+  <data name="PackageCommandSpecifyNuSpecFileError" xml:space="preserve">
+    <value>Please specify a nuspec file to use.</value>
   </data>
   <data name="PackageCommandSuccess" xml:space="preserve">
     <value>Successfully created package '{0}'.</value>
   </data>
   <data name="PackageCommandUsageDescription" xml:space="preserve">
-    <value>To create a package provide the manifest file (NuSpec file) location. Optionally you may specify one of the options for additional functionality.</value>
+    <value>Specify the location of the manifest (Nuspec) file to create a package.</value>
   </data>
   <data name="PackageCommandUsageSummary" xml:space="preserve">
     <value>&lt;manifest&gt; [options]</value>

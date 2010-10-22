@@ -6,21 +6,21 @@
 
     public class CommandRunner {
 
-        public static string Run(string process, string workingDirectory, string arguments, bool waitForExit) {
+        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit) {
 
             string result = string.Empty;
 
             ProcessStartInfo psi = new ProcessStartInfo(Path.GetFullPath(process), arguments) {
-                                           WorkingDirectory = Path.GetFullPath(workingDirectory),
-                                           UseShellExecute = false,
-                                           CreateNoWindow = true,
-                                           RedirectStandardOutput = true,
-                                           RedirectStandardError = true,
-                                       };
+                WorkingDirectory = Path.GetFullPath(workingDirectory),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
 
             StreamReader standardOutput;
             StreamReader errorOutput;
-
+            int exitCode = 1;
 
             using (Process p = new Process()) {
                 p.StartInfo = psi;
@@ -28,8 +28,12 @@
                 standardOutput = p.StandardOutput;
                 errorOutput = p.StandardError;
 
+
                 if (waitForExit) {
                     p.WaitForExit(1000);
+                }
+                if (p.HasExited) {
+                    exitCode = p.ExitCode;
                 }
             }
             result = standardOutput.ReadToEnd();
@@ -39,7 +43,7 @@
 
             Console.WriteLine(result);
 
-            return result;
+            return new Tuple<int, string>(exitCode, result);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿namespace NuPack {
+
     using System;
     using System.Globalization;
 

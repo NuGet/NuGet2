@@ -88,7 +88,7 @@ namespace NuPack.Test.NuPackCommandLine {
             var expectedPropertyInfoTwo = typeof(MockCommand).GetProperty("MessageTwo");
             expected.Add(expectedOptionAttributeTwo, expectedPropertyInfoTwo);
             // Act
-            Dictionary<OptionAttribute, PropertyInfo> actual = cm.GetCommandOptions(cmd);
+            IDictionary<OptionAttribute, PropertyInfo> actual = cm.GetCommandOptions(cmd);
             // Assert
             Assert.AreEqual(2, actual.Count);
             Assert.AreEqual(expectedOptionAttributeOne, actual.Keys.First());
