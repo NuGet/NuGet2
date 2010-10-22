@@ -162,18 +162,9 @@ namespace NuPack.Dialog.Providers {
             get { return _packageIdentity.Id; }
         }
 
-        [SuppressMessage(
-            "Microsoft.Performance",
-            "CA1811:AvoidUncalledPrivateCode",
-            Justification = "This property is data-bound in XAML")]
-        public string Dependencies {
+        public IEnumerable<PackageDependency> Dependencies {
             get {
-                StringBuilder dependencies = new StringBuilder();
-                foreach (PackageDependency dependency in _packageIdentity.Dependencies) {
-                    dependencies.Append("\r\n\t");
-                    dependencies.Append(dependency);
-                }
-                return dependencies.Length > 0 ? "Dependencies:" + dependencies.ToString() : String.Empty;
+                return _packageIdentity.Dependencies;
             }
         }
     }

@@ -123,6 +123,9 @@
   <data name="Dialog_CreatedByLabel" xml:space="preserve">
     <value>Created by:</value>
   </data>
+  <data name="Dialog_DependenciesLabel" xml:space="preserve">
+    <value>Dependencies:</value>
+  </data>
   <data name="Dialog_InstallButton" xml:space="preserve">
     <value>_Install</value>
   </data>
@@ -132,8 +135,14 @@
   <data name="Dialog_MessageBoxTitle" xml:space="preserve">
     <value>Operation failed</value>
   </data>
+  <data name="Dialog_NoDependencyLabel" xml:space="preserve">
+    <value>(none)</value>
+  </data>
   <data name="Dialog_OnlineProvider" xml:space="preserve">
     <value>Online</value>
+  </data>
+  <data name="Dialog_PackageDisclaimer" xml:space="preserve">
+    <value>Each item above may have sub-dependencies subject to additional license agreements.</value>
   </data>
   <data name="Dialog_PackageInstalledTooltip" xml:space="preserve">
     <value>This package is already installed.</value>
@@ -172,10 +181,10 @@
     <value>I _Decline</value>
   </data>
   <data name="License_HeaderText" xml:space="preserve">
-    <value>The following package(s) will be installed:</value>
+    <value>The following package(s) require a click-to-accept license:</value>
   </data>
   <data name="License_LicenseText" xml:space="preserve">
-    <value>By clicking "I Accept," you agree to the license terms for the product or component listed above. If you do not agree to the license terms, click "I Decline".</value>
+    <value>By clicking “I Accept,” you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click “I Decline”.</value>
   </data>
   <data name="License_ViewLicense" xml:space="preserve">
     <value>View License Terms</value>

@@ -108,6 +108,7 @@
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PackageManagerUI\Converters\CountToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\ExecuteCompletedEventArgs.cs" />

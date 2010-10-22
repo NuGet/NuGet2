@@ -10,6 +10,8 @@
     </ResourceDictionary.MergedDictionaries>
 
     <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
+    <self:CountToVisibilityConverter x:Key="countConverter" />
+    <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
     <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
 
     <!-- data template for the package extension item -->
@@ -86,6 +88,7 @@
         
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">                
             <StackPanel Margin="8">
+                <!-- Authors -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -94,23 +97,50 @@
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl Grid.Column="1" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
                 </Grid>
-                    
+                
+                <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
+                <!-- View License link -->
                 <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
                     <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}">
                             <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
                     </Hyperlink>
                 </TextBlock>
 
+                <!-- Description -->
                 <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
                 </self:TextBlockControl>
-                    
-                <self:TextBlockControl Style="{StaticResource DetailDependenciesTextBoxStyle}" Text="{Binding Dependencies}" >
+
+                <!-- Dependencies list -->
+                <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DependenciesLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                                        
+                <ItemsControl
+                    x:Name="DependencyItems"
+                    Margin="25,5,0,0"
+                    ItemsSource="{Binding Dependencies}">
+                </ItemsControl>
+
+                <self:TextBlockControl 
+                    x:Name="NoneLabel"
+                    Margin="25,5,0,0"
+                    Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource invertedCountConverter}}"
+                    Style="{StaticResource DetailDescriptionTextBoxStyle}" 
+                    Text="{x:Static resources:Resources.Dialog_NoDependencyLabel}">
                 </self:TextBlockControl>
+
+                <self:TextBlockControl 
+                    x:Name="Disclaimer"
+                    FontStyle="Italic"
+                    Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource countConverter}}"
+                    Style="{StaticResource DetailDescriptionTextBoxStyle}" 
+                    Text="{x:Static resources:Resources.Dialog_PackageDisclaimer}"
+                    TextWrapping="Wrap">
+                </self:TextBlockControl>
+                
             </StackPanel>
         </ScrollViewer>
     </DataTemplate>

@@ -79,6 +79,15 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dependencies:.
+        /// </summary>
+        public static string Dialog_DependenciesLabel {
+            get {
+                return ResourceManager.GetString("Dialog_DependenciesLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Install.
         /// </summary>
         public static string Dialog_InstallButton {
@@ -106,11 +115,29 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to (none).
+        /// </summary>
+        public static string Dialog_NoDependencyLabel {
+            get {
+                return ResourceManager.GetString("Dialog_NoDependencyLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Online.
         /// </summary>
         public static string Dialog_OnlineProvider {
             get {
                 return ResourceManager.GetString("Dialog_OnlineProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Each item above may have sub-dependencies subject to additional license agreements..
+        /// </summary>
+        public static string Dialog_PackageDisclaimer {
+            get {
+                return ResourceManager.GetString("Dialog_PackageDisclaimer", resourceCulture);
             }
         }
         
@@ -223,7 +250,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following package(s) will be installed:.
+        ///   Looks up a localized string similar to The following package(s) require a click-to-accept license:.
         /// </summary>
         public static string License_HeaderText {
             get {
@@ -232,7 +259,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to By clicking &quot;I Accept,&quot; you agree to the license terms for the product or component listed above. If you do not agree to the license terms, click &quot;I Decline&quot;..
+        ///   Looks up a localized string similar to By clicking “I Accept,” you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click “I Decline”..
         /// </summary>
         public static string License_LicenseText {
             get {
