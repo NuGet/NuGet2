@@ -6,7 +6,7 @@
     using EnvDTE;
     using EnvDTE80;
 
-    public class SolutionManager {
+    public class SolutionManager : ISolutionManager {
         private static readonly Lazy<SolutionManager> _instance = new Lazy<SolutionManager>(() => new SolutionManager(DTEExtensions.DTE));
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;

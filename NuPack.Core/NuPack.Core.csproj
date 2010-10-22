@@ -33,6 +33,8 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="IPackageManager.cs" />
+    <Compile Include="IProjectManager.cs" />
     <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
     <Compile Include="PackageWalker\IDependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageAction.cs" />

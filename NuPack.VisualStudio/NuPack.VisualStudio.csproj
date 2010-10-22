@@ -65,7 +65,9 @@
     <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="ISolutionManager.cs" />
     <Compile Include="ISourceControlFileSystemProvider.cs" />
+    <Compile Include="IVSPackageManager.cs" />
     <Compile Include="PackageSource\IPackageSourceProvider.cs" />
     <Compile Include="PackageSource\PackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\SerializationHelper.cs" />

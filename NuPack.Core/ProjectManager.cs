@@ -1,7 +1,6 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -10,7 +9,7 @@
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
-    public class ProjectManager {
+    public class ProjectManager : IProjectManager {
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdded;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoving;
@@ -154,7 +153,7 @@
             }
         }
 
-        public void Execute(PackageOperation operation) {
+        protected void Execute(PackageOperation operation) {
             bool packageExists = LocalRepository.Exists(operation.Package);
 
             if (operation.Action == PackageAction.Install) {

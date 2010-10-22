@@ -6,7 +6,7 @@
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
-    public class PackageManager {
+    public class PackageManager : IPackageManager {
         private ILogger _logger;
 
         private event EventHandler<PackageOperationEventArgs> _packageInstalling;
@@ -145,7 +145,7 @@
             }
         }
 
-        public void Execute(PackageOperation operation) {
+        protected void Execute(PackageOperation operation) {
             bool packageExists = LocalRepository.Exists(operation.Package);
 
             if (operation.Action == PackageAction.Install) {

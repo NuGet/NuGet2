@@ -12,7 +12,7 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
     public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
-        private ProjectManager _projectManager;
+        private IProjectManager _projectManager;
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public string Id { get; set; }
@@ -20,7 +20,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         [Parameter(Position = 1)]
         public string Project { get; set; }
 
-        protected override VSPackageManager PackageManager {
+        protected override IVSPackageManager PackageManager {
             get {
                 return base.PackageManager;
             }
@@ -30,7 +30,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected ProjectManager ProjectManager {
+        protected IProjectManager ProjectManager {
             get {
                 if (_projectManager == null) {
                     _projectManager = GetProjectManager(Project);
@@ -65,7 +65,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             WriteLine();
         }
 
-        private ProjectManager GetProjectManager(string projectName) {
+        private IProjectManager GetProjectManager(string projectName) {
             if (PackageManager == null) {
                 return null;
             }
@@ -93,7 +93,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return null;
             }
 
-            ProjectManager projectManager = PackageManager.GetProjectManager(project);
+            IProjectManager projectManager = PackageManager.GetProjectManager(project);
             projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
             projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
 

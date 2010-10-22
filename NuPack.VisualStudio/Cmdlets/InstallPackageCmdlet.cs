@@ -28,7 +28,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 PackageManager = GetPackageManager(Source);
             }
 
-            ProjectManager projectManager = ProjectManager;
+            IProjectManager projectManager = ProjectManager;
             PackageManager.InstallPackage(projectManager, Id, Version, IgnoreDependencies.IsPresent, this);
         }
     }

@@ -11,9 +11,11 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
-    public class VSPackageManager : PackageManager {
+    // TODO: Move this class into the NuPack.Core and change the name
+    public class VSPackageManager : PackageManager, IVSPackageManager {
         private const string SolutionRepositoryDirectory = "packages";
-        private readonly Dictionary<Project, ProjectManager> _projectManagers = null;
+        private readonly Dictionary<Project, IProjectManager> _projectManagers = null;
+
         private static SolutionEvents _solutionEvents;
         private static IFileSystem _solutionFileSystem;
         private static IPackageRepository _solutionRepository;
@@ -33,68 +35,75 @@ namespace NuPack.VisualStudio {
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
         public VSPackageManager(DTE dte, IPackageRepository sourceRepository) :
-            base(sourceRepository: sourceRepository,
-                pathResolver: new DefaultPackagePathResolver(GetFileSystem(dte)),
-                fileSystem: GetFileSystem(dte),
-                localRepository: GetSolutionRepository(dte)) {
-
-            _projectManagers = SolutionManager.Current.GetProjects().ToDictionary(project => project,
-                                                                                  CreateProjectManager);
+            this(SolutionManager.Current,
+                sourceRepository,
+                new DefaultPackagePathResolver(GetFileSystem(dte)),
+                GetFileSystem(dte),
+                GetSolutionRepository(dte)) {
         }
 
-        private IEnumerable<ProjectManager> ProjectManagers {
+        public VSPackageManager(ISolutionManager solutionManager,
+                                IPackageRepository sourceRepository,
+                                IPackagePathResolver pathResolver,
+                                IFileSystem fileSystem,
+                                IPackageRepository localRepository) :
+            base(sourceRepository, pathResolver, fileSystem, localRepository) {
+
+            _projectManagers = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
+        }
+
+        protected virtual IEnumerable<IProjectManager> ProjectManagers {
             get {
                 return _projectManagers.Values;
             }
         }
 
-        public ProjectManager GetProjectManager(Project project) {
-            ProjectManager projectManager;
+        public IProjectManager GetProjectManager(Project project) {
+            IProjectManager projectManager;
             _projectManagers.TryGetValue(project, out projectManager);
             return projectManager;
         }
 
-        public void InstallPackage(ProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {           
+        public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
             // REVIEW: This isn't transactional, so if add package reference fails
             // the user has to manually clean it up by uninstalling it
             InstallPackage(packageId, version, ignoreDependencies);
-            
+
             if (projectManager != null) {
                 projectManager.AddPackageReference(packageId, version, ignoreDependencies);
             }
         }
 
-        public void UninstallPackage(ProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
+        public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
             var projectsWithPackage = GetProjectsWithPackage(packageId, version);
 
             // If we've specified a version then we've probably trying to remove a specific version of
             // a solution level package (since we allow side by side there)
-            if (projectManager != null && 
-                projectManager.LocalRepository.Exists(packageId) && 
-                version == null) {
+            if (projectManager != null && projectManager.LocalRepository.Exists(packageId) && version == null) {
                 projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
+
+                if (!projectsWithPackage.Any()) {
+                    UninstallPackage(packageId, version, forceRemove, removeDependencies);
+                }
             }
             else if (!projectsWithPackage.Any()) {
                 UninstallPackage(packageId, version, forceRemove, removeDependencies);
             }
             else {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                        VsResources.PackageCannotBeRemovedBecauseItIsInUse,
-                        packageId, String.Join(", ", projectsWithPackage.Select(p => p.Project.ProjectName))));
+                logger.Log(MessageLevel.Warning, VsResources.PackageCannotBeRemovedBecauseItIsInUse, packageId, String.Join(", ", projectsWithPackage.Select(p => p.Project.ProjectName)));
             }
         }
 
         // REVIEW: Do we even need this method?
-        public void UpdatePackage(ProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
+        public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
             InstallPackage(projectManager, id, version, !updateDependencies, logger);
         }
 
-        private void InitializeLogger(ILogger logger, ProjectManager projectManager) {
+        private void InitializeLogger(ILogger logger, IProjectManager projectManager) {
             // Setup logging on all of our objects
             Logger = logger;
             FileSystem.Logger = logger;
@@ -184,11 +193,11 @@ namespace NuPack.VisualStudio {
             return null;
         }
 
-        private ProjectManager CreateProjectManager(Project project) {
+        private IProjectManager CreateProjectManager(Project project) {
             return new ProjectManager(LocalRepository, PathResolver, ProjectSystemFactory.CreateProjectSystem(project));
         }
 
-        private IEnumerable<ProjectManager> GetProjectsWithPackage(string packageId, Version version) {
+        private IEnumerable<IProjectManager> GetProjectsWithPackage(string packageId, Version version) {
             return from projectManager in ProjectManagers
                    let package = projectManager.LocalRepository.FindPackage(packageId)
                    where package != null && (version == null || (version != null && package.Version.Equals(version)))

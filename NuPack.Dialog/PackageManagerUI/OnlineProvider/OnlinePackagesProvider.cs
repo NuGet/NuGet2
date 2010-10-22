@@ -60,9 +60,9 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected ProjectManager ProjectManager {
+        protected IProjectManager ProjectManager {
             get {
-                return this.PackageManager.GetProjectManager(ActiveProject);
+                return PackageManager.GetProjectManager(ActiveProject);
             }
         }
 

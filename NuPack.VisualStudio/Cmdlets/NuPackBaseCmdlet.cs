@@ -10,13 +10,13 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
 
-        private VSPackageManager _packageManager;
+        private IVSPackageManager _packageManager;
 
         /// <summary>
         /// Gets an instance of VSPackageManager to be used throughout the execution of this command.
         /// </summary>
         /// <value>The package manager.</value>
-        protected virtual VSPackageManager PackageManager {
+        protected virtual IVSPackageManager PackageManager {
             get {
                 if (_packageManager == null) {
                     _packageManager = GetPackageManager();

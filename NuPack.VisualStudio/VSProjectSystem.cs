@@ -8,7 +8,7 @@
     using EnvDTE;
     using NuPack.VisualStudio.Resources;
 
-    internal class VSProjectSystem : FileBasedProjectSystem {
+    public class VSProjectSystem : FileBasedProjectSystem {
         private const string BinDir = "bin";
 
         private FrameworkName _targetFramework;
@@ -47,10 +47,10 @@
             return null;
         }
 
-        public override void AddFile(string path, Stream inputStream) {
+        public override void AddFile(string path, Stream stream) {
             EnsureCheckedOutIfExists(path);
 
-            base.AddFile(path, inputStream);
+            base.AddFile(path, stream);
             AddFileToProject(path);
         }
 

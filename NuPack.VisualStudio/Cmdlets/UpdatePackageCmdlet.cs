@@ -29,7 +29,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 PackageManager = GetPackageManager(Source);
             }
 
-            ProjectManager projectManager = ProjectManager;
+            IProjectManager projectManager = ProjectManager;
             PackageManager.UpdatePackage(projectManager, Id, Version, UpdateDependencies, this);
         }
     }

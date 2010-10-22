@@ -4,8 +4,8 @@
     using EnvDTE;
     using NuPack.VisualStudio.Resources;
 
-    internal static class ProjectSystemFactory {                
-        internal static VSProjectSystem CreateProjectSystem(Project project) {            
+    public static class ProjectSystemFactory {
+        public static VSProjectSystem CreateProjectSystem(Project project) {            
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
