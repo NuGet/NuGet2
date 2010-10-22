@@ -31,8 +31,8 @@
     </Target>
 
     <Target Name="RunTests">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.Test\NuPack.Test.csproj" Targets="RunTests">
-        </MSBuild>
+        <MSBuild Projects="$(NuPackRoot)\NuPack.Test\NuPack.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuPackRoot)\NuPack.VisualStudio.Test\NuPack.VisualStudio.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuPackRoot)\NuPack.MSBuild.Test\NuPack.MSBuild.Test.csproj" Targets="RunTests" />
     </Target>
 
