@@ -180,4 +180,7 @@
   <data name="PackageCannotBeRemovedBecauseItIsInUse" xml:space="preserve">
     <value>'{0}' cannot be removed because it in use by '{1}'</value>
   </data>
+  <data name="NoActivePackageSource" xml:space="preserve">
+    <value>Unable to retrieve package list because no source was specified.</value>
+  </data>
 </root>

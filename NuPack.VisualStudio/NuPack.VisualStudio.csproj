@@ -68,6 +68,7 @@
     <Compile Include="ISolutionManager.cs" />
     <Compile Include="ISourceControlFileSystemProvider.cs" />
     <Compile Include="IVsPackageManager.cs" />
+    <Compile Include="PackageSource\CachedRepositoryFactory.cs" />
     <Compile Include="PackageSource\IPackageSourceProvider.cs" />
     <Compile Include="PackageSource\PackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\SerializationHelper.cs" />

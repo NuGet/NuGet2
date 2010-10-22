@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Linq;
+using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
     public class VsPackageSourceRepository : IPackageRepository {
-        private readonly VsPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
-        private static readonly ConcurrentDictionary<string, IPackageRepository> _repositoryCache = new ConcurrentDictionary<string, IPackageRepository>(StringComparer.OrdinalIgnoreCase);
-
-        public VsPackageSourceRepository(IPackageRepositoryFactory repositoryFactory, VsPackageSourceProvider packageSourceProvider) {
+        public VsPackageSourceRepository(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
@@ -23,7 +21,10 @@ namespace NuPack.VisualStudio {
 
         private IPackageRepository ActiveRepository {
             get {
-                return GetRepository(_packageSourceProvider.ActivePackageSource);
+                if (_packageSourceProvider.ActivePackageSource == null) {
+                    throw new InvalidOperationException(VsResources.NoActivePackageSource);
+                }
+                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
             }
         }
 
@@ -41,15 +42,6 @@ namespace NuPack.VisualStudio {
 
         public void RemovePackage(IPackage package) {
             ActiveRepository.RemovePackage(package);
-        }
-
-        private IPackageRepository GetRepository(PackageSource source) {
-            IPackageRepository repository;
-            if (!_repositoryCache.TryGetValue(source.Source, out repository)) {
-                repository = _repositoryFactory.CreateRepository(source.Source);
-                _repositoryCache.TryAdd(source.Source, repository);
-            }
-            return repository;
         }
     }
 }

@@ -5,6 +5,7 @@ using EnvDTE;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
+    // REVIEW: Does this need to have a dictionary? Do we ever get more than one instance of dte?
     public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=199193";
 
@@ -35,7 +36,7 @@ namespace NuPack.VisualStudio {
                 dteValue => {
                     IServiceProvider serviceProvider = dteValue.GetServiceProvider();
                     var provider = new VsPackageSourceProvider(serviceProvider);
-                    return new VsPackageSourceCacheItem(provider, new VsPackageSourceRepository(PackageRepositoryFactory.Default, provider));
+                    return new VsPackageSourceCacheItem(provider, new VsPackageSourceRepository(CachedRepositoryFactory.Instance, provider));
                 }
             );
         }
@@ -149,6 +150,6 @@ namespace NuPack.VisualStudio {
             }
             public VsPackageSourceProvider Provider { get; private set; }
             public IPackageRepository Repository { get; private set; }
-        }
+        }        
     }
 }

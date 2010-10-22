@@ -232,6 +232,15 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to retrieve package list because no source was specified..
+        /// </summary>
+        public static string NoActivePackageSource {
+            get {
+                return ResourceManager.GetString("NoActivePackageSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; cannot be removed because it in use by &apos;{1}&apos;.
         /// </summary>
         public static string PackageCannotBeRemovedBecauseItIsInUse {

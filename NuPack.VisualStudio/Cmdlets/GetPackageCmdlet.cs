@@ -12,9 +12,22 @@ namespace NuPack.VisualStudio.Cmdlets {
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = "Default")]
     public class GetPackageCmdlet : NuPackBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IPackageSourceProvider _packageSourceProvider;
 
         public GetPackageCmdlet()
-            : this(PackageRepositoryFactory.Default) {
+            : this(CachedRepositoryFactory.Instance,
+                   VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
+        }
+
+        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider) {
+            if (repositoryFactory == null) {
+                throw new ArgumentNullException("repositoryFactory");
+            }
+            if (packageSourceProvider == null) {
+                throw new ArgumentNullException("packageSourceProvider");
+            }
+            _repositoryFactory = repositoryFactory;
+            _packageSourceProvider = packageSourceProvider;
         }
 
         [Parameter(Position = 0)]
@@ -30,14 +43,14 @@ namespace NuPack.VisualStudio.Cmdlets {
         [Parameter(ParameterSetName = "Updates")]
         public string Source { get; set; }
 
-
-        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory) {
-            if (repositoryFactory == null) {
-                throw new ArgumentNullException("repositoryFactory");
+        private string ActivePackageSource {
+            get {
+                if (_packageSourceProvider.ActivePackageSource != null) {
+                    return _packageSourceProvider.ActivePackageSource.Source;
+                }
+                return null;
             }
-            _repositoryFactory = repositoryFactory;
         }
-
 
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen && (Installed.IsPresent || Updates.IsPresent)) {
@@ -55,8 +68,11 @@ namespace NuPack.VisualStudio.Cmdlets {
             else if (IsSolutionOpen) {
                 repository = PackageManager.SourceRepository;
             }
-            else {
+            else if(!String.IsNullOrEmpty(ActivePackageSource)) {
                 repository = _repositoryFactory.CreateRepository(ActivePackageSource);
+            }
+            else {
+                throw new InvalidOperationException(VsResources.NoActivePackageSource);
             }
 
             if (Updates.IsPresent) {
@@ -85,19 +101,6 @@ namespace NuPack.VisualStudio.Cmdlets {
         private void ShowUpdatePackages(IPackageRepository repository, string filter) {
             IEnumerable<IPackage> updates = PackageManager.LocalRepository.GetUpdates(repository, filter);
             WritePackages(updates);
-        }
-
-        private static string ActivePackageSource {
-            get {
-                var packageSourceProvider = VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
-
-                if (packageSourceProvider != null && packageSourceProvider.ActivePackageSource != null) {
-                    return packageSourceProvider.ActivePackageSource.Source;
-                }
-                else {
-                    return null;
-                }
-            }
         }
     }
 }
