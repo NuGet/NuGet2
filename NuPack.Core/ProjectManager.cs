@@ -374,12 +374,19 @@
             }
 
             // Group references by target framework (if there is no target framework we assume it is the same as the project framework)
-            var frameworkGroups = allAssemblyReferences.GroupBy(g => g.TargetFramework ?? projectFramework);
+            var frameworkGroups = allAssemblyReferences.ToLookup(g => g.TargetFramework);
 
+            // If we have an exact match then use it.
+            if (frameworkGroups.Contains(projectFramework)) {
+                return frameworkGroups[projectFramework];
+            }
+
+            // Of all the versioned groups, try to find the best match
             return (from g in frameworkGroups
-                    where g.Key.Identifier.Equals(projectFramework.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                          g.Key.Version <= projectFramework.Version
-                    orderby g.Key.Version descending
+                    let framework = g.Key ?? projectFramework
+                    where framework.Identifier.Equals(projectFramework.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                          framework.Version <= projectFramework.Version
+                    orderby framework.Version descending
                     select g).FirstOrDefault();
         }
 

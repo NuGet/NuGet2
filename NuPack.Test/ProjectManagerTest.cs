@@ -931,6 +931,7 @@
                                                          .ToList();
 
             // Assert
+            Assert.AreEqual(1, targetAssemblyReferences.Count);
             Assert.AreSame(assemblyReference30, targetAssemblyReferences[0]);
         }
 
@@ -948,7 +949,26 @@
             var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences).ToList();
 
             // Assert
+            Assert.AreEqual(1, targetAssemblyReferences.Count);
             Assert.AreSame(assemblyReferenceNoVersion, targetAssemblyReferences[0]);
+        }
+
+        [TestMethod]
+        public void GetCompatibleReferencesReferenceMostSpecificVersionWins() {
+            // Arrange
+            var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
+            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
+            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
+            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
+            var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo.dll", null);
+            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference10, assemblyReference20, assemblyReference30, assemblyReference40, assemblyReferenceNoVersion };
+
+            // Act
+            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences).ToList();
+
+            // Assert
+            Assert.AreEqual(1, targetAssemblyReferences.Count);
+            Assert.AreSame(assemblyReference40, targetAssemblyReferences[0]);
         }
 
         [TestMethod]
