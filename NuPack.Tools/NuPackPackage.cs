@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -10,6 +11,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using NuPack.Dialog.PackageManagerUI;
 using NuPack.Dialog.ToolsOptionsUI;
 using NuPack.VisualStudio;
+using NuPack.VisualStudio.Resources;
 using NuPackConsole.Implementation;
 
 namespace NuPack.Tools {
@@ -49,7 +51,7 @@ namespace NuPack.Tools {
         /// the OleMenuCommandService service and the MenuCommand class.
         /// </summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
-            if (HasActiveLoadedProject) {
+            if (HasActiveLoadedSupportedProject) {
                 var window = new PackageManagerWindow(this);
                 try {
                     window.ShowModal();
@@ -62,11 +64,20 @@ namespace NuPack.Tools {
                         MessageBoxImage.Error);
                 }
             }
+            else {
+                Project project = DTEExtensions.DTE.GetActiveProject();
+                string projectName = project != null ? project.Name : String.Empty;
+                MessageBox.Show(
+                    String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName),
+                    NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = HasActiveLoadedProject;
+            command.Visible = HasActiveLoadedSupportedProject;
         }
 
         /// <summary>
@@ -97,13 +108,13 @@ namespace NuPack.Tools {
         }
 
         /// <summary>
-        /// Gets whether the current IDE has an active and non-unloaded project, which is a precondition for
+        /// Gets whether the current IDE has an active, supported and non-unloaded project, which is a precondition for
         /// showing the Add Library Package Reference dialog
         /// </summary>
-        private bool HasActiveLoadedProject {
+        private bool HasActiveLoadedSupportedProject {
             get {
                 Project project = DTEExtensions.DTE.GetActiveProject();
-                return (project != null && !project.IsUnloaded());
+                return (project != null && !project.IsUnloaded() && project.IsSupported());
             }
         }
     }
