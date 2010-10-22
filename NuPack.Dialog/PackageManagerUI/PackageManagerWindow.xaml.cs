@@ -68,7 +68,12 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            e.CanExecute = selectedItem.IsEnabled;
+            try {
+                e.CanExecute = selectedItem.IsEnabled;
+            }
+            catch (Exception) {
+                e.CanExecute = false;
+            }
         }
 
         private void ExecutedPackageCommand(object sender, ExecutedRoutedEventArgs e) {
@@ -88,7 +93,16 @@ namespace NuPack.Dialog.PackageManagerUI {
 
             PackagesProviderBase provider = control.SelectedProvider as PackagesProviderBase;
             if (provider != null) {
-                provider.Execute(selectedItem, this);
+                try {
+                    provider.Execute(selectedItem, this);
+                }
+                catch (Exception exception) {
+                    MessageBox.Show(
+                        (exception.InnerException ?? exception).Message,
+                        NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
         }
 
