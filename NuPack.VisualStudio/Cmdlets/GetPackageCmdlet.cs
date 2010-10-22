@@ -89,7 +89,7 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         private static string ActivePackageSource {
             get {
-                var packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
+                var packageSourceProvider = VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE);
 
                 if (packageSourceProvider != null && packageSourceProvider.ActivePackageSource != null) {
                     return packageSourceProvider.ActivePackageSource.Source;

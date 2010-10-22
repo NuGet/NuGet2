@@ -8,7 +8,7 @@ namespace NuPack.Dialog.Providers {
         private ResourceDictionary _resources;
         private object _mediumIconDataTemplate;
 
-        public UpdatePackagesProvider(VSPackageManager packageManager, EnvDTE.Project activeProject, ResourceDictionary resources)
+        public UpdatePackagesProvider(VsPackageManager packageManager, EnvDTE.Project activeProject, ResourceDictionary resources)
             : base(packageManager, activeProject, resources) {
             _resources = resources;
         }

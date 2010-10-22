@@ -10,9 +10,9 @@
     public static class ProjectExtensions {
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
-        private static readonly string[] _supportedProjectTypes = new[] { VSConstants.WebSiteProjectKind, 
-                                                                          VSConstants.CsharpProjectKind, 
-                                                                          VSConstants.VbProjectKind };
+        private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectKind, 
+                                                                          VsConstants.CsharpProjectKind, 
+                                                                          VsConstants.VbProjectKind };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
         // Get the ProjectItems for a folder path
@@ -48,11 +48,11 @@
         }
 
         public static bool TryGetFolder(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
-            return TryGetProjectItem(projectItems, name, new[] { VSConstants.VsProjectItemKindPhysicalFolder }, out projectItem);
+            return TryGetProjectItem(projectItems, name, new[] { VsConstants.VsProjectItemKindPhysicalFolder }, out projectItem);
         }
 
         public static bool TryGetFile(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
-            return TryGetProjectItem(projectItems, name, new[] { VSConstants.VsProjectItemKindPhysicalFile }, out projectItem);
+            return TryGetProjectItem(projectItems, name, new[] { VsConstants.VsProjectItemKindPhysicalFile }, out projectItem);
         }
 
         public static bool TryGetProjectItem(this ProjectItems projectItems, string name, IEnumerable<string> kinds, out ProjectItem projectItem) {
@@ -140,11 +140,11 @@
         }
 
         public static bool IsWebSite(this Project project) {
-            return project.Kind != null && project.Kind.Equals(VSConstants.WebSiteProjectKind, StringComparison.OrdinalIgnoreCase);
+            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectKind, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsUnloaded(this Project project) {
-            return VSConstants.UnloadedProjectKind.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+            return VsConstants.UnloadedProjectKind.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
     }

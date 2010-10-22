@@ -4,7 +4,7 @@
     using EnvDTE;
     using NuPack.VisualStudio.Resources;
 
-    internal class WebSiteProjectSystem : VSProjectSystem {
+    internal class WebSiteProjectSystem : VsProjectSystem {
         public WebSiteProjectSystem(Project project)
             : base(project) {
         }

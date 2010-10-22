@@ -10,13 +10,13 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
 
-        private IVSPackageManager _packageManager;
+        private IVsPackageManager _packageManager;
 
         /// <summary>
         /// Gets an instance of VSPackageManager to be used throughout the execution of this command.
         /// </summary>
         /// <value>The package manager.</value>
-        protected virtual IVSPackageManager PackageManager {
+        protected virtual IVsPackageManager PackageManager {
             get {
                 if (_packageManager == null) {
                     _packageManager = GetPackageManager();
@@ -88,7 +88,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        private static VSPackageManager GetPackageManager() {
+        private static IVsPackageManager GetPackageManager() {
             if (!IsSolutionOpen) {
                 return null;
             }
@@ -98,10 +98,10 @@ namespace NuPack.VisualStudio.Cmdlets {
             if (dte == null) {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
-            return new VSPackageManager(dte);
+            return new VsPackageManager(dte);
         }
 
-        protected static VSPackageManager GetPackageManager(string source) {
+        protected static IVsPackageManager GetPackageManager(string source) {
             if (!IsSolutionOpen) {
                 return null;
             }
@@ -112,7 +112,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
 
-            return new VSPackageManager(dte, PackageRepositoryFactory.Default.CreateRepository(source));
+            return new VsPackageManager(dte, PackageRepositoryFactory.Default.CreateRepository(source));
         }
 
         protected static Project GetProjectFromName(string projectName) {

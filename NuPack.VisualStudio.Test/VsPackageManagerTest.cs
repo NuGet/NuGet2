@@ -21,7 +21,7 @@ namespace NuPack.Test.VisualStudio {
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
-            var packageManager = new VSPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -44,7 +44,7 @@ namespace NuPack.Test.VisualStudio {
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VSPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -117,7 +117,7 @@ namespace NuPack.Test.VisualStudio {
                                       localRepository);
         }
 
-        public class MockVsPackageManager : VSPackageManager {
+        public class MockVsPackageManager : VsPackageManager {
             private IEnumerable<IProjectManager> _projectManagers;
 
             public MockVsPackageManager(ISolutionManager solutionManager,

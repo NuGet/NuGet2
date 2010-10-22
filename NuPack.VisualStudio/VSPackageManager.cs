@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using EnvDTE;
@@ -12,7 +11,7 @@ using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
     // TODO: Move this class into the NuPack.Core and change the name
-    public class VSPackageManager : PackageManager, IVSPackageManager {
+    public class VsPackageManager : PackageManager, IVsPackageManager {
         private const string SolutionRepositoryDirectory = "packages";
         private readonly Dictionary<Project, IProjectManager> _projectManagers = null;
 
@@ -21,20 +20,20 @@ namespace NuPack.VisualStudio {
         private static IPackageRepository _solutionRepository;
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public VSPackageManager(DTE dte) :
-            this(dte, VSPackageSourceProvider.GetRepository(dte)) {
+        public VsPackageManager(DTE dte) :
+            this(dte, VsPackageSourceProvider.GetRepository(dte)) {
         }
 
         /// <summary>
         /// This overload is called from Powershell script
         /// </summary>
         /// <param name="dte"></param>
-        public VSPackageManager(object dte) :
+        public VsPackageManager(object dte) :
             this((DTE)dte) {
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public VSPackageManager(DTE dte, IPackageRepository sourceRepository) :
+        public VsPackageManager(DTE dte, IPackageRepository sourceRepository) :
             this(SolutionManager.Current,
                 sourceRepository,
                 new DefaultPackagePathResolver(GetFileSystem(dte)),
@@ -42,7 +41,7 @@ namespace NuPack.VisualStudio {
                 GetSolutionRepository(dte)) {
         }
 
-        public VSPackageManager(ISolutionManager solutionManager,
+        public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
                                 IPackagePathResolver pathResolver,
                                 IFileSystem fileSystem,
@@ -64,6 +63,10 @@ namespace NuPack.VisualStudio {
             return projectManager;
         }
 
+        public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
+            InstallPackage(projectManager, packageId, version, ignoreDependencies, NullLogger.Instance);
+        }
+
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
@@ -74,6 +77,10 @@ namespace NuPack.VisualStudio {
             if (projectManager != null) {
                 projectManager.AddPackageReference(packageId, version, ignoreDependencies);
             }
+        }
+
+        public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies) {
+            UninstallPackage(projectManager, packageId, version, forceRemove, removeDependencies, NullLogger.Instance);
         }
 
         public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
@@ -98,6 +105,10 @@ namespace NuPack.VisualStudio {
             }
         }
 
+        public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies) {
+            UpdatePackage(projectManager, id, version, updateDependencies, NullLogger.Instance);
+        }
+        
         // REVIEW: Do we even need this method?
         public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
             InstallPackage(projectManager, id, version, !updateDependencies, logger);

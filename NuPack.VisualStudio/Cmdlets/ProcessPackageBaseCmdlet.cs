@@ -20,7 +20,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         [Parameter(Position = 1)]
         public string Project { get; set; }
 
-        protected override IVSPackageManager PackageManager {
+        protected override IVsPackageManager PackageManager {
             get {
                 return base.PackageManager;
             }

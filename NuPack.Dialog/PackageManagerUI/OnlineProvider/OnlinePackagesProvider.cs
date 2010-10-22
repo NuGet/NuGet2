@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
-using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuPack.VisualStudio;
@@ -17,11 +15,11 @@ namespace NuPack.Dialog.Providers {
     internal class OnlinePackagesProvider : VsExtensionsProvider {
         private IVsExtensionsTreeNode _searchNode;
         private readonly ResourceDictionary _resources;
-        private readonly VSPackageManager _packageManager;
+        private readonly IVsPackageManager _packageManager;
         private readonly EnvDTE.Project _activeProject;
 
         public OnlinePackagesProvider(
-            VSPackageManager packageManager,
+            IVsPackageManager packageManager,
             EnvDTE.Project activeProject,
             ResourceDictionary resources) {
 
@@ -48,7 +46,7 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected VSPackageManager PackageManager {
+        protected IVsPackageManager PackageManager {
             get {
                 return _packageManager;
             }
@@ -182,7 +180,7 @@ namespace NuPack.Dialog.Providers {
 
         private void DoInstallAsync(object sender, DoWorkEventArgs e) {
             OnlinePackagesItem item = (OnlinePackagesItem)e.Argument;
-            PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false, logger: NullLogger.Instance);
+            PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
             e.Result = item;
         }
 
@@ -206,7 +204,7 @@ namespace NuPack.Dialog.Providers {
 
             try {
                 OperationCoordinator.IsBusy = true;
-                PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
+                PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
             }
             finally {
                 OperationCoordinator.IsBusy = false;
@@ -230,7 +228,7 @@ namespace NuPack.Dialog.Providers {
 
         private void DoUpdateAsync(object sender, DoWorkEventArgs e) {
             OnlinePackagesItem item = (OnlinePackagesItem)e.Argument;
-            PackageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true, logger: NullLogger.Instance);
+            PackageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true);
             e.Result = item;
         }
 
@@ -255,9 +253,10 @@ namespace NuPack.Dialog.Providers {
         }
 
         public IEnumerable<IPackage> GetPackageDependencyGraph(IPackage rootPackage) {
+            // TODO: Add an api to the core to do this.
+
             HashSet<IPackage> packageGraph = new HashSet<IPackage>();
             if (DTEExtensions.DTE.Solution.IsOpen) {
-
                 EventHandler<PackageOperationEventArgs> handler = (s, o) => {
                     o.Cancel = true;
                     packageGraph.Add(o.Package);

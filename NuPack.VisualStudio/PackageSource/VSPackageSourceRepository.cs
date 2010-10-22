@@ -3,13 +3,13 @@ using System.Collections.Concurrent;
 using System.Linq;
 
 namespace NuPack.VisualStudio {
-    public class VSPackageSourceRepository : IPackageRepository {
-        private readonly VSPackageSourceProvider _packageSourceProvider;
+    public class VsPackageSourceRepository : IPackageRepository {
+        private readonly VsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
         private static readonly ConcurrentDictionary<string, IPackageRepository> _repositoryCache = new ConcurrentDictionary<string, IPackageRepository>(StringComparer.OrdinalIgnoreCase);
 
-        public VSPackageSourceRepository(IPackageRepositoryFactory repositoryFactory, VSPackageSourceProvider packageSourceProvider) {
+        public VsPackageSourceRepository(IPackageRepositoryFactory repositoryFactory, VsPackageSourceProvider packageSourceProvider) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
