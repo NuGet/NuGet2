@@ -373,20 +373,18 @@
                 return Enumerable.Empty<IPackageAssemblyReference>();
             }
 
-            // Group references by target framework (if there is no target framework we assume it is the same as the project framework)
-            var frameworkGroups = allAssemblyReferences.ToLookup(g => g.TargetFramework);
+            // Default framework for assembly references with an unspecified framework name
+            // always match the project framework's identifier by is the lowest possible version
+            var defaultFramework = new FrameworkName(projectFramework.Identifier, new Version());
 
-            // If we have an exact match then use it.
-            if (frameworkGroups.Contains(projectFramework)) {
-                return frameworkGroups[projectFramework];
-            }
+            // Group references by target framework (if there is no target framework we assume it is the default)
+            var frameworkGroups = allAssemblyReferences.GroupBy(g => g.TargetFramework ?? defaultFramework);
 
-            // Of all the versioned groups, try to find the best match
+            // Try to find the best match
             return (from g in frameworkGroups
-                    let framework = g.Key ?? projectFramework
-                    where framework.Identifier.Equals(projectFramework.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                          framework.Version <= projectFramework.Version
-                    orderby framework.Version descending
+                    where g.Key.Identifier.Equals(projectFramework.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                          g.Key.Version <= projectFramework.Version
+                    orderby g.Key.Version descending
                     select g).FirstOrDefault();
         }
 
