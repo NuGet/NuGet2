@@ -106,13 +106,13 @@
                     // If we ended up with both that means we found a dependency only packges
                     // that has a mix of solution and project level packages
                     if (parentInfo.Target == PackageTargets.Both) {
-                        throw new InvalidOperationException(NuPackResources.MetaPackagesCannotMixDependencies);
+                        throw new InvalidOperationException(NuPackResources.DependencyOnlyCannotMixDependencies);
                     }
                 }
 
                 // Solution packages can't depend on project level packages
-                if (parentInfo.Target == PackageTargets.Solution && info.Target.HasFlag(PackageTargets.Project)) {
-                    throw new InvalidOperationException(NuPackResources.SolutionLevelPackagesCannotDependOnProjectLevelPackages);
+                if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
+                    throw new InvalidOperationException(NuPackResources.ExternalPackagesCannotDependOnProjectLevelPackages);
                 }
             }
 
@@ -156,7 +156,7 @@
                 return PackageTargets.None;
             }
 
-            return PackageTargets.Solution;
+            return PackageTargets.External;
         }
     }
 }

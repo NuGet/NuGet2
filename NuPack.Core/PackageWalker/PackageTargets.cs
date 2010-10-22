@@ -5,7 +5,7 @@ namespace NuPack {
     public enum PackageTargets {
         None = 0,
         Project = 1,
-        Solution = 2,
-        Both = Project | Solution
+        External = 2,
+        Both = Project | External
     }
 }

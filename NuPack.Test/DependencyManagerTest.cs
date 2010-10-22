@@ -575,11 +575,11 @@
             mockRepository.AddPackage(solutionPackage);
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(metaPackage), "Child dependencies of dependency only packages cannot mix solution level and project level packages");
+            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(metaPackage), "Child dependencies of dependency only packages cannot mix external and project packages");
         }
 
         [TestMethod]
-        public void SolutionLevelPackagesThatDepdendOnProjectLevelPackagesThrows() {
+        public void ExternalPackagesThatDepdendOnProjectLevelPackagesThrows() {
             // Arrange
             var mockRepository = new MockPackageRepository();
             var walker = new TestWalker(mockRepository);
@@ -595,7 +595,7 @@
             mockRepository.AddPackage(solutionPackage);
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(solutionPackage), "Solution level packages cannot depend on project level packages");
+            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(solutionPackage), "External packages cannot depend on packages that target projects.");
         }
 
         private class TestWalker : PackageWalker {

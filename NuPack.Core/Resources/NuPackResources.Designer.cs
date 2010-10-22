@@ -187,6 +187,24 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Child dependencies of dependency only packages cannot mix external and project packages.
+        /// </summary>
+        internal static string DependencyOnlyCannotMixDependencies {
+            get {
+                return ResourceManager.GetString("DependencyOnlyCannotMixDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External packages cannot depend on packages that target projects..
+        /// </summary>
+        internal static string ExternalPackagesCannotDependOnProjectLevelPackages {
+            get {
+                return ResourceManager.GetString("ExternalPackagesCannotDependOnProjectLevelPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; not installed. Attempting to retrieve dependency from source....
         /// </summary>
         internal static string Log_AttemptingToRetrievePackageFromSource {
@@ -313,15 +331,6 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Child dependencies of dependency only packages cannot mix solution level and project level packages.
-        /// </summary>
-        internal static string MetaPackagesCannotMixDependencies {
-            get {
-                return ResourceManager.GetString("MetaPackagesCannotMixDependencies", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Already referencing a newer version of &apos;{0}&apos;.
         /// </summary>
         internal static string NewerVersionAlreadyReferenced {
@@ -426,15 +435,6 @@ namespace NuPack.Resources {
         internal static string ReferenceDoesNotExist {
             get {
                 return ResourceManager.GetString("ReferenceDoesNotExist", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Solution level packages cannot depend on project level packages.
-        /// </summary>
-        internal static string SolutionLevelPackagesCannotDependOnProjectLevelPackages {
-            get {
-                return ResourceManager.GetString("SolutionLevelPackagesCannotDependOnProjectLevelPackages", resourceCulture);
             }
         }
         
