@@ -187,11 +187,20 @@ namespace NuPack.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Attempting to install &apos;{0}&apos;....
+        ///   Looks up a localized string similar to Child dependencies of dependency only packages cannot mix external and project packages.
         /// </summary>
-        internal static string Log_AttemptingToInstallPackage {
+        internal static string DependencyOnlyCannotMixDependencies {
             get {
-                return ResourceManager.GetString("Log_AttemptingToInstallPackage", resourceCulture);
+                return ResourceManager.GetString("DependencyOnlyCannotMixDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External packages cannot depend on packages that target projects..
+        /// </summary>
+        internal static string ExternalPackagesCannotDependOnProjectLevelPackages {
+            get {
+                return ResourceManager.GetString("ExternalPackagesCannotDependOnProjectLevelPackages", resourceCulture);
             }
         }
         
@@ -210,15 +219,6 @@ namespace NuPack.Resources {
         internal static string Log_AttemptingToRetrievePackageReferenceFromSource {
             get {
                 return ResourceManager.GetString("Log_AttemptingToRetrievePackageReferenceFromSource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attempting to uninstall &apos;{0}&apos;....
-        /// </summary>
-        internal static string Log_AttemptingToUninstall {
-            get {
-                return ResourceManager.GetString("Log_AttemptingToUninstall", resourceCulture);
             }
         }
         

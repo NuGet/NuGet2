@@ -6,7 +6,6 @@
         public static readonly string ContentDirectory = "content";
         public static readonly string PackageReferenceFile = "packages.config";
 
-
         internal const string SchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/";
     }
 }

@@ -141,6 +141,10 @@
             }
         }
 
+        public override string ToString() {
+            return Id + " " + Version;
+        }
+
         private PackageBuilder GetMetadata() {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);

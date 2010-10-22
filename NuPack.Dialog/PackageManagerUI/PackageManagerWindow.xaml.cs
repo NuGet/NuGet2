@@ -28,10 +28,10 @@ namespace NuPack.Dialog.PackageManagerUI {
         }
 
         private void SetupProviders() {
-            VSPackageManager packageManager = new VSPackageManager(DTEExtensions.DTE);
+            VsPackageManager packageManager = new VsPackageManager(DTEExtensions.DTE);
             EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
 
-            ProjectManager projectManager = packageManager.GetProjectManager(activeProject);
+            IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
 
             // The ExtensionsExplorer control display providers in reverse order.
             // We want the providers to appear as Installed - Online - Updates
@@ -39,15 +39,10 @@ namespace NuPack.Dialog.PackageManagerUI {
             var updatesProvider = new UpdatesProvider(packageManager, projectManager, Resources);
             explorer.Providers.Add(updatesProvider);
 
-            var onlineProvider = new OnlineProvider(
-                packageManager,
-                projectManager,
-                PackageRepositoryFactory.Default,
-                VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
-                Resources);
+            var onlineProvider = new OnlineProvider(packageManager, projectManager, Resources, PackageRepositoryFactory.Default, VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE));
             explorer.Providers.Add(onlineProvider);
 
-            var installedProvider = new InstalledProvider(projectManager, Resources);
+            var installedProvider = new InstalledProvider(packageManager, projectManager, Resources);
             explorer.Providers.Add(installedProvider);
 
             // make the Installed provider as selected by default

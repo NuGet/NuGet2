@@ -58,7 +58,6 @@
     <Compile Include="Cmdlets\GetProjectCmdlet.cs" />
     <Compile Include="Cmdlets\InstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\GetPackageCmdlet.cs" />
-    <Compile Include="Cmdlets\LoggerDisposer.cs" />
     <Compile Include="Cmdlets\NewPackageCmdlet.cs" />
     <Compile Include="Cmdlets\NuPackBaseCmdlet.cs" />
     <Compile Include="Cmdlets\ProcessPackageBaseCmdlet.cs" />
@@ -66,15 +65,16 @@
     <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="ISolutionManager.cs" />
     <Compile Include="ISourceControlFileSystemProvider.cs" />
+    <Compile Include="IVsPackageManager.cs" />
     <Compile Include="PackageSource\IPackageSourceProvider.cs" />
     <Compile Include="PackageSource\PackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\SerializationHelper.cs" />
-    <Compile Include="PackageSource\VSPackageSourceRepository.cs" />
-    <Compile Include="PackageSource\VSPackageSourceProvider.cs" />
+    <Compile Include="PackageSource\VsPackageSourceRepository.cs" />
+    <Compile Include="PackageSource\VsPackageSourceProvider.cs" />
     <Compile Include="SolutionExtensions.cs" />
     <Compile Include="SolutionManager.cs" />
-    <Compile Include="VSProjectManager.cs" />
     <Compile Include="ProjectExtensions.cs" />
     <Compile Include="ProjectSystemFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,10 +83,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>VsResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="VSConstants.cs" />
-    <Compile Include="VSPackageManager.cs" />
+    <Compile Include="VsConstants.cs" />
+    <Compile Include="VsPackageManager.cs" />
     <Compile Include="WebSiteProjectSystem.cs" />
-    <Compile Include="VSProjectSystem.cs" />
+    <Compile Include="VsProjectSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\VsResources.resx">

@@ -4,8 +4,8 @@
     using System.Diagnostics;
     using System.Linq;
 
-    public class ReverseDependencyWalker : PackageWalker, IDependentsResolver {
-        public ReverseDependencyWalker(IPackageRepository repository) {
+    public class DependentsWalker : PackageWalker, IDependentsResolver {
+        public DependentsWalker(IPackageRepository repository) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }

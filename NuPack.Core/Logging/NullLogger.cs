@@ -1,6 +1,12 @@
 ﻿namespace NuPack {
     public class NullLogger : ILogger {
-        internal static readonly ILogger Instance = new NullLogger();
+        private static readonly ILogger _instance = new NullLogger();
+
+        public static ILogger Instance {
+            get{
+                return _instance;
+            }
+        }
 
         public void Log(MessageLevel level, string message, params object[] args) {
         }

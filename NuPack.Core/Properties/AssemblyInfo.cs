@@ -7,3 +7,4 @@ using System.Runtime.CompilerServices;
 [assembly: CLSCompliant(true)]
 
 [assembly: InternalsVisibleTo("NuPack.Test")]
+[assembly: InternalsVisibleTo("NuPack.Test.Utility")]

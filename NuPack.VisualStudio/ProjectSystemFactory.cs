@@ -4,8 +4,8 @@
     using EnvDTE;
     using NuPack.VisualStudio.Resources;
 
-    internal static class ProjectSystemFactory {                
-        internal static VSProjectSystem CreateProjectSystem(Project project) {            
+    public static class ProjectSystemFactory {
+        public static VsProjectSystem CreateProjectSystem(Project project) {            
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
@@ -22,7 +22,7 @@
             }
 
             // If it's not a web site we assume it's a regular VS project
-            return new VSProjectSystem(project);
+            return new VsProjectSystem(project);
         }
     }
 }

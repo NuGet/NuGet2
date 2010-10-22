@@ -34,7 +34,7 @@
             mockRepository.AddPackage(packageB2);
 
             // Act 
-            IDependentsResolver lookup = new ReverseDependencyWalker(mockRepository);
+            IDependentsResolver lookup = new DependentsWalker(mockRepository);
 
             // Assert
             Assert.AreEqual(0, lookup.GetDependents(packageA1).Count());
@@ -183,7 +183,7 @@
             localRepository.AddPackage(packageD);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -303,7 +303,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -333,7 +333,7 @@
             localRepository.AddPackage(packageA);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -358,7 +358,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: false,
                                                                forceRemove: false);
@@ -383,7 +383,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -408,7 +408,7 @@
             localRepository.AddPackage(packageB);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: false,
                                                                forceRemove: true);
@@ -450,7 +450,7 @@
             localRepository.AddPackage(packageC);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: false);
@@ -483,7 +483,7 @@
             localRepository.AddPackage(packageD);
 
             IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new ReverseDependencyWalker(localRepository),
+                                                               new DependentsWalker(localRepository),
                                                                NullLogger.Instance,
                                                                removeDependencies: true,
                                                                forceRemove: true);
@@ -496,6 +496,117 @@
             Assert.IsNotNull(packages["A"]);
             Assert.IsNotNull(packages["B"]);
             Assert.IsNotNull(packages["C"]);
+        }
+
+        [TestMethod]
+        public void ProjectInstallWalkerIgnoresSolutionLevelPackages() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+
+            IPackage projectPackage = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "1.5"))
+                                                                }, content: new[] { "content" });
+
+            sourceRepository.AddPackage(projectPackage);
+
+            IPackage toolsPackage = PackageUtility.CreatePackage("B", "1.5", tools: new[] { "init.ps1" });
+            sourceRepository.AddPackage(toolsPackage);
+
+            IPackageOperationResolver resolver = new ProjectInstallWalker(localRepository,
+                                                                          sourceRepository,
+                                                                          new DependentsWalker(localRepository),
+                                                                          NullLogger.Instance,
+                                                                          ignoreDependencies: false);
+
+            // Act
+            var packages = resolver.ResolveOperations(projectPackage)
+                                   .ToDictionary(p => p.Package.Id);
+
+            // Assert            
+            Assert.AreEqual(1, packages.Count);
+            Assert.IsNotNull(packages["A"]);
+        }
+
+        [TestMethod]
+        public void AfterPackageWalkMetaPackageIsClassifiedTheSameAsDependencies() {
+            // Arrange
+            var mockRepository = new MockPackageRepository();
+            var walker = new TestWalker(mockRepository);
+
+            IPackage metaPackage = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B"),
+                                                                    PackageDependency.CreateDependency("C")
+                                                                });
+
+            IPackage projectPackageA = PackageUtility.CreatePackage("B", "1.0", content: new[] { "contentB" });
+            IPackage projectPackageB = PackageUtility.CreatePackage("C", "1.0", content: new[] { "contentC" });
+
+            mockRepository.AddPackage(projectPackageA);
+            mockRepository.AddPackage(projectPackageB);
+
+            Assert.AreEqual(PackageTargets.None, walker.GetPackageInfo(metaPackage).Target);
+
+            // Act
+            walker.Walk(metaPackage);
+
+            // Assert
+            Assert.AreEqual(PackageTargets.Project, walker.GetPackageInfo(metaPackage).Target);
+        }
+
+        [TestMethod]
+        public void MetaPackageWithMixedTargetsThrows() {
+            // Arrange
+            var mockRepository = new MockPackageRepository();
+            var walker = new TestWalker(mockRepository);
+
+            IPackage metaPackage = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B"),
+                                                                    PackageDependency.CreateDependency("C")
+                                                                });
+
+            IPackage projectPackageA = PackageUtility.CreatePackage("B", "1.0", content: new[] { "contentB" });
+            IPackage solutionPackage = PackageUtility.CreatePackage("C", "1.0", tools: new[] { "tools" });
+
+            mockRepository.AddPackage(projectPackageA);
+            mockRepository.AddPackage(solutionPackage);
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(metaPackage), "Child dependencies of dependency only packages cannot mix external and project packages");
+        }
+
+        [TestMethod]
+        public void ExternalPackagesThatDepdendOnProjectLevelPackagesThrows() {
+            // Arrange
+            var mockRepository = new MockPackageRepository();
+            var walker = new TestWalker(mockRepository);
+
+            IPackage solutionPackage = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B")
+                                                                }, tools: new[] { "install.ps1" });
+
+            IPackage projectPackageA = PackageUtility.CreatePackage("B", "1.0", content: new[] { "contentB" });
+
+            mockRepository.AddPackage(projectPackageA);
+            mockRepository.AddPackage(solutionPackage);
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(solutionPackage), "External packages cannot depend on packages that target projects.");
+        }
+
+        private class TestWalker : PackageWalker {
+            private readonly IPackageRepository _repository;
+            public TestWalker(IPackageRepository repository) {
+                _repository = repository;
+            }
+
+            protected override IPackage ResolveDependency(PackageDependency dependency) {
+                return _repository.FindPackage(dependency);
+            }
         }
     }
 }

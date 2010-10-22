@@ -15,17 +15,15 @@ namespace NuPack.Dialog.Providers {
     internal class OnlineProvider : PackagesProviderBase {
         private IPackageRepositoryFactory _packageRepositoryFactory;
         private IPackageSourceProvider _packageSourceProvider;
-        private VSPackageManager _packageManager;
 
         public OnlineProvider(
-            VSPackageManager packageManager,
-            ProjectManager projectManager,
-            IPackageRepositoryFactory packageRepositoryFactory,
-            IPackageSourceProvider packageSourceProvider,
-            ResourceDictionary resources) :
-            base(projectManager, resources) {
+            IVsPackageManager packageManager, 
+            IProjectManager projectManager, 
+            ResourceDictionary resources, 
+            IPackageRepositoryFactory packageRepositoryFactory, 
+            IPackageSourceProvider packageSourceProvider) :
+            base(packageManager, projectManager, resources) {
 
-            _packageManager = packageManager;
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
         }
@@ -74,7 +72,7 @@ namespace NuPack.Dialog.Providers {
             }
 
             // display license window if necessary
-            DependencyHelper helper = new DependencyHelper(_packageManager.SourceRepository);
+            DependencyHelper helper = new DependencyHelper(PackageManager.SourceRepository);
             IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity).Where(p => p.RequireLicenseAcceptance);
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
@@ -94,7 +92,7 @@ namespace NuPack.Dialog.Providers {
 
         private void DoInstallAsync(object sender, DoWorkEventArgs e) {
             PackageItem item = (PackageItem)e.Argument;
-            ProjectManager.AddPackageReference(item.Id, new Version(item.Version));
+            PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
             e.Result = item;
         }
 

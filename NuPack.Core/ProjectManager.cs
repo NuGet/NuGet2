@@ -1,7 +1,6 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -10,7 +9,7 @@
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
-    public class ProjectManager {
+    public class ProjectManager : IProjectManager {
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdded;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoving;
@@ -137,40 +136,38 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
-            if (!package.HasProjectContent()) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuPackResources.PackageHasNoProjectContent, package.GetFullName()));
-            }
-
             AddPackageReference(package, ignoreDependencies);
         }
 
         protected virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
             Execute(package, new ProjectInstallWalker(LocalRepository,
-                                                                  SourceRepository,
-                                                                  new ReverseDependencyWalker(LocalRepository),
-                                                                  Logger,
-                                                                  ignoreDependencies));
+                                                      SourceRepository,
+                                                      new DependentsWalker(LocalRepository),
+                                                      NullLogger.Instance,
+                                                      ignoreDependencies));
         }
 
-        protected void Execute(IPackage package, IPackageOperationResolver resolver) {
+        private void Execute(IPackage package, IPackageOperationResolver resolver) {
             foreach (PackageOperation operation in resolver.ResolveOperations(package)) {
-                bool packageExists = LocalRepository.Exists(operation.Package);
+                Execute(operation);
+            }
+        }
 
-                if (operation.Action == PackageAction.Install) {
-                    // If the package is already installed, then skip it
-                    if (packageExists) {
-                        Logger.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
-                    }
-                    else {
-                        AddPackageReferenceToProject(operation.Package);
-                    }
+        protected void Execute(PackageOperation operation) {
+            bool packageExists = LocalRepository.Exists(operation.Package);
+
+            if (operation.Action == PackageAction.Install) {
+                // If the package is already installed, then skip it
+                if (packageExists) {
+                    Logger.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
                 }
                 else {
-                    if (packageExists) {
-                        RemovePackageReferenceFromProject(operation.Package);
-                    }
+                    AddPackageReferenceToProject(operation.Package);
+                }
+            }
+            else {
+                if (packageExists) {
+                    RemovePackageReferenceFromProject(operation.Package);
                 }
             }
         }
@@ -236,7 +233,7 @@
 
         protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
             Execute(package, new UninstallWalker(LocalRepository,
-                                                 new ReverseDependencyWalker(LocalRepository),
+                                                 new DependentsWalker(LocalRepository),
                                                  Logger,
                                                  removeDependencies,
                                                  force));

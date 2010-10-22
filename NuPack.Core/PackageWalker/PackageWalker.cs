@@ -1,12 +1,15 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using NuPack.Resources;
 
     public abstract class PackageWalker {
+        private readonly Dictionary<IPackage, PackageWalkInfo> _packageLookup = new Dictionary<IPackage, PackageWalkInfo>();
         private PackageMarker _marker;
+
         protected PackageWalker() {
         }
 
@@ -59,6 +62,10 @@
                         return;
                     }
 
+                    // Set the parent
+                    PackageWalkInfo dependencyInfo = GetPackageInfo(resolvedDependency);
+                    dependencyInfo.Parent = package;
+
                     if (!OnAfterResolveDependency(package, resolvedDependency)) {
                         continue;
                     }
@@ -84,6 +91,31 @@
             // Mark the package as visited
             Marker.MarkVisited(package);
 
+            PackageWalkInfo info = GetPackageInfo(package);
+
+            // If our parent is an unknown then we need to bubble up the type
+            if (info.Parent != null) {
+                PackageWalkInfo parentInfo = GetPackageInfo(info.Parent);
+
+                Debug.Assert(parentInfo != null);
+
+                if (parentInfo.InitialTarget == PackageTargets.None) {
+                    // Update the parent target type
+                    parentInfo.Target |= info.Target;
+
+                    // If we ended up with both that means we found a dependency only packges
+                    // that has a mix of solution and project level packages
+                    if (parentInfo.Target == PackageTargets.Both) {
+                        throw new InvalidOperationException(NuPackResources.DependencyOnlyCannotMixDependencies);
+                    }
+                }
+
+                // Solution packages can't depend on project level packages
+                if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
+                    throw new InvalidOperationException(NuPackResources.ExternalPackagesCannotDependOnProjectLevelPackages);
+                }
+            }
+
             OnAfterDependencyWalk(package);
         }
 
@@ -105,5 +137,26 @@
         }
 
         protected abstract IPackage ResolveDependency(PackageDependency dependency);
+
+        protected internal PackageWalkInfo GetPackageInfo(IPackage package) {
+            PackageWalkInfo info;
+            if (!_packageLookup.TryGetValue(package, out info)) {
+                info = new PackageWalkInfo(GetPackageTarget(package));
+                _packageLookup.Add(package, info);
+            }
+            return info;
+        }
+
+        private static PackageTargets GetPackageTarget(IPackage package) {
+            if (package.HasProjectContent()) {
+                return PackageTargets.Project;
+            }
+
+            if (package.IsDependencyOnly()) {
+                return PackageTargets.None;
+            }
+
+            return PackageTargets.External;
+        }
     }
 }

@@ -2,12 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EnvDTE;
-using Microsoft.VisualStudio.Shell;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio {
-    public class VSPackageSourceProvider : IPackageSourceProvider
-    {
+    public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=199193";
 
         private PackageSourceSettingsManager _settingsManager;
@@ -16,14 +14,14 @@ namespace NuPack.VisualStudio {
 
         private static readonly ConcurrentDictionary<_DTE, VsPackageSourceCacheItem> _cache = new ConcurrentDictionary<_DTE, VsPackageSourceCacheItem>();
 
-        private VSPackageSourceProvider(IServiceProvider serviceProvider) {
+        private VsPackageSourceProvider(IServiceProvider serviceProvider) {
             _settingsManager = new PackageSourceSettingsManager(serviceProvider);
 
             DeserializePackageSources();
             DeserializeActivePackageSource();
         }
 
-        public static VSPackageSourceProvider GetSourceProvider(_DTE dte) {
+        public static VsPackageSourceProvider GetSourceProvider(_DTE dte) {
             return GetCacheItem(dte).Provider;
         }
 
@@ -36,8 +34,8 @@ namespace NuPack.VisualStudio {
                 dte,
                 dteValue => {
                     IServiceProvider serviceProvider = dteValue.GetServiceProvider();
-                    var provider = new VSPackageSourceProvider(serviceProvider);
-                    return new VsPackageSourceCacheItem(provider, new VSPackageSourceRepository(PackageRepositoryFactory.Default, provider));
+                    var provider = new VsPackageSourceProvider(serviceProvider);
+                    return new VsPackageSourceCacheItem(provider, new VsPackageSourceRepository(PackageRepositoryFactory.Default, provider));
                 }
             );
         }
@@ -48,7 +46,7 @@ namespace NuPack.VisualStudio {
             if (!String.IsNullOrEmpty(propertyString)) {
                 _packageSources = SerializationHelper.Deserialize<HashSet<PackageSource>>(propertyString);
             }
-            
+
             if (_packageSources == null) {
                 _packageSources = new HashSet<PackageSource>();
             }
@@ -68,7 +66,7 @@ namespace NuPack.VisualStudio {
                 _settingsManager.IsFirstRunning = false;
             }
         }
-        
+
         public PackageSource ActivePackageSource {
             get {
                 return _activePackageSource;
@@ -86,9 +84,9 @@ namespace NuPack.VisualStudio {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1024:UsePropertiesWhereAppropriate",
-            Justification="This method is potentially expensive because we are retrieving data from VS settings store.")]
+            Justification = "This method is potentially expensive because we are retrieving data from VS settings store.")]
         public IEnumerable<PackageSource> GetPackageSources() {
             return _packageSources;
         }
@@ -101,7 +99,7 @@ namespace NuPack.VisualStudio {
 
             if (!_packageSources.Contains(source)) {
                 _packageSources.Add(source);
-                
+
                 // if the package source that we just added is the only one, make it the default
                 if (ActivePackageSource == null && _packageSources.Count == 1) {
                     ActivePackageSource = source;
@@ -145,11 +143,11 @@ namespace NuPack.VisualStudio {
         }
 
         private class VsPackageSourceCacheItem {
-            public VsPackageSourceCacheItem(VSPackageSourceProvider provider, IPackageRepository repository) {
+            public VsPackageSourceCacheItem(VsPackageSourceProvider provider, IPackageRepository repository) {
                 Provider = provider;
                 Repository = repository;
             }
-            public VSPackageSourceProvider Provider { get; private set; }
+            public VsPackageSourceProvider Provider { get; private set; }
             public IPackageRepository Repository { get; private set; }
         }
     }

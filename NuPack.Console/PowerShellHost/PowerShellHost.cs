@@ -19,7 +19,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         private object _privateData;
         private Runspace _myRunSpace;
         private MyHost _myHost;
-        private VSPackageSourceProvider _packageSourceProvider;
+        private VsPackageSourceProvider _packageSourceProvider;
 
         protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -27,7 +27,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             this.Console = console;
             this.IsAsync = isAsync;
 
-            _packageSourceProvider = VSPackageSourceProvider.GetSourceProvider(dte);
+            _packageSourceProvider = VsPackageSourceProvider.GetSourceProvider(dte);
             _name = name;
             _privateData = privateData;
         }

@@ -159,17 +159,17 @@
   <data name="Debug_RemovedFolder" xml:space="preserve">
     <value>Removed folder '{0}'</value>
   </data>
-  <data name="Log_AttemptingToInstallPackage" xml:space="preserve">
-    <value>Attempting to install '{0}'...</value>
+  <data name="DependencyOnlyCannotMixDependencies" xml:space="preserve">
+    <value>Child dependencies of dependency only packages cannot mix external and project packages</value>
+  </data>
+  <data name="ExternalPackagesCannotDependOnProjectLevelPackages" xml:space="preserve">
+    <value>External packages cannot depend on packages that target projects.</value>
   </data>
   <data name="Log_AttemptingToRetrievePackageFromSource" xml:space="preserve">
     <value>'{0}' not installed. Attempting to retrieve dependency from source...</value>
   </data>
   <data name="Log_AttemptingToRetrievePackageReferenceFromSource" xml:space="preserve">
     <value>'{0}' not referenced. Retrieving dependency...</value>
-  </data>
-  <data name="Log_AttemptingToUninstall" xml:space="preserve">
-    <value>Attempting to uninstall '{0}'...</value>
   </data>
   <data name="Log_LeavingPackageInstalled" xml:space="preserve">
     <value>Leaving '{0}' installed</value>

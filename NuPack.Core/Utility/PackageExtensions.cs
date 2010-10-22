@@ -32,13 +32,27 @@
 
             return packages.FirstOrDefault();
         }
-        
-        public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
-            return package.GetFiles().Where(file => file.Path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
+
+        public static IEnumerable<IPackageFile> GetFiles(this IPackage package, string directory) {
+            return package.GetFiles().Where(file => file.Path.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
         }
 
+        public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
+            return package.GetFiles(Constants.ContentDirectory);
+        }
+
+        /// <summary>
+        /// Returns true if a package has no content that applies to a project.
+        /// </summary>
         public static bool HasProjectContent(this IPackage package) {
             return package.AssemblyReferences.Any() || package.GetContentFiles().Any();
+        }
+
+        /// <summary>
+        /// Returns true if a package has dependencies but no files.
+        /// </summary>
+        public static bool IsDependencyOnly(this IPackage package) {
+            return !package.GetFiles().Any() && package.Dependencies.Any();
         }
 
         public static string GetFullName(this IPackage package) {

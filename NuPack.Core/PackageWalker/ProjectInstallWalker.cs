@@ -31,7 +31,7 @@
             if (installedPackage == null) {
                 return;
             }
-            
+
             // First we get a list of dependents for the installed package.
             // Then we find the dependency in the foreach dependent that this installed package used to satisfy.
             // We then check if the resolved package also meets that dependency and if it doesn't it's added to the list
@@ -50,7 +50,6 @@
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuPackResources.NewerVersionAlreadyReferenced, package.Id));
-
             }
             else if (package.Version > installedPackage.Version) {
                 // Turn warnings off, since were forcing uninstall
@@ -61,6 +60,14 @@
                 foreach (var operation in resolver.ResolveOperations(installedPackage)) {
                     Operations.Add(operation);
                 }
+            }
+        }
+
+        protected override void OnAfterDependencyWalk(IPackage package) {
+            PackageWalkInfo info = GetPackageInfo(package);
+
+            if (info.Target == PackageTargets.Project) {
+                base.OnAfterDependencyWalk(package);
             }
         }
 
@@ -120,6 +127,5 @@
 
             return isSatisfied;
         }
-
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuPack.Dialog.PackageManagerUI;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -9,8 +10,8 @@ namespace NuPack.Dialog.Providers {
     /// </summary>
     internal class InstalledProvider : PackagesProviderBase {
 
-        public InstalledProvider(ProjectManager projectManager, ResourceDictionary resources)
-            : base(projectManager, resources) {
+        public InstalledProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
+            : base(packageManager, projectManager, resources) {
         }
 
         public override string Name {
@@ -44,7 +45,7 @@ namespace NuPack.Dialog.Providers {
 
             try {
                 OperationCoordinator.IsBusy = true;
-                ProjectManager.RemovePackageReference(item.Id);
+                PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
 
                 if (SelectedNode != null) {
                     SelectedNode.Extensions.Remove(item);

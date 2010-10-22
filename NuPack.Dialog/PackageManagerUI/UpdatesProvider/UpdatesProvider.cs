@@ -9,11 +9,9 @@ using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     internal class UpdatesProvider : PackagesProviderBase {
-        private VSPackageManager _packageManager;
 
-        public UpdatesProvider(VSPackageManager packageManager, ProjectManager projectManager, ResourceDictionary resources)
-            : base(projectManager, resources) {
-            _packageManager = packageManager;
+        public UpdatesProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
+            : base(packageManager, projectManager, resources) {
         }
 
         public override string Name {
@@ -34,7 +32,7 @@ namespace NuPack.Dialog.Providers {
                 Resources.Dialog_RootNodeAll,
                 RootNode,
                 ProjectManager.LocalRepository,
-                _packageManager.SourceRepository);
+                PackageManager.SourceRepository);
 
             RootNode.Nodes.Add(allNode);
         }
@@ -61,7 +59,7 @@ namespace NuPack.Dialog.Providers {
             }
 
             // display license window if necessary
-            DependencyHelper helper = new DependencyHelper(_packageManager.SourceRepository);
+            DependencyHelper helper = new DependencyHelper(PackageManager.SourceRepository);
             IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity).Where(p => p.RequireLicenseAcceptance);
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
@@ -81,7 +79,7 @@ namespace NuPack.Dialog.Providers {
 
         private void DoUpdateAsync(object sender, DoWorkEventArgs e) {
             PackageItem item = (PackageItem)e.Argument;
-            ProjectManager.UpdatePackageReference(item.Id, new Version(item.Version));
+            PackageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true);
             e.Result = item;
         }
 

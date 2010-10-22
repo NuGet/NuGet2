@@ -26,7 +26,7 @@ namespace NuPack.Dialog.ToolsOptionsUI {
         }
 
         public ToolsOptionsControl()
-            : this(VSPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
+            : this(VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
         }
 
         private void SetupDataBindings() {

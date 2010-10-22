@@ -4,6 +4,7 @@ using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuPack.Dialog.PackageManagerUI;
+using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -18,7 +19,7 @@ namespace NuPack.Dialog.Providers {
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
 
-        protected PackagesProviderBase(ProjectManager projectManager, ResourceDictionary resources) {
+        protected PackagesProviderBase(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources) {
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
             }
@@ -29,6 +30,7 @@ namespace NuPack.Dialog.Providers {
 
             _resources = resources;
             ProjectManager = projectManager;
+            PackageManager = packageManager;
         }
 
         public virtual bool RefreshOnNodeSelection {
@@ -37,7 +39,12 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected ProjectManager ProjectManager {
+        protected IVsPackageManager PackageManager {
+            get;
+            private set;
+        }
+
+        protected IProjectManager ProjectManager {
             get;
             private set;
         }

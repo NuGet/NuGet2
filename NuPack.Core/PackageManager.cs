@@ -6,7 +6,7 @@
     using Microsoft.Internal.Web.Utils;
     using NuPack.Resources;
 
-    public class PackageManager {
+    public class PackageManager : IPackageManager {
         private ILogger _logger;
 
         private event EventHandler<PackageOperationEventArgs> _packageInstalling;
@@ -127,9 +127,7 @@
                     String.Format(CultureInfo.CurrentCulture,
                     NuPackResources.UnknownPackage, packageId));
             }
-            else {
-                Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToInstallPackage, package.GetFullName());
-
+            else {               
                 InstallPackage(package, ignoreDependencies);
             }
         }
@@ -143,21 +141,25 @@
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {
             foreach (PackageOperation operation in resolver.ResolveOperations(package)) {
-                bool packageExists = LocalRepository.Exists(operation.Package);
+                Execute(operation);
+            }
+        }
 
-                if (operation.Action == PackageAction.Install) {
-                    // If the package is already installed, then skip it
-                    if (packageExists) {
-                        Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
-                    }
-                    else {
-                        ExecuteInstall(operation.Package);
-                    }
+        protected void Execute(PackageOperation operation) {
+            bool packageExists = LocalRepository.Exists(operation.Package);
+
+            if (operation.Action == PackageAction.Install) {
+                // If the package is already installed, then skip it
+                if (packageExists) {
+                    Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
                 }
                 else {
-                    if (packageExists) {
-                        ExecuteUninstall(operation.Package);
-                    }
+                    ExecuteInstall(operation.Package);
+                }
+            }
+            else {
+                if (packageExists) {
+                    ExecuteUninstall(operation.Package);
                 }
             }
         }
@@ -211,8 +213,6 @@
                     NuPackResources.UnknownPackage, packageId));
             }
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToUninstall, package.GetFullName());
-
             UninstallPackage(package, forceRemove, removeDependencies);
         }
 
@@ -226,7 +226,7 @@
 
         public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
             Execute(package, new UninstallWalker(LocalRepository,
-                                                 new ReverseDependencyWalker(LocalRepository),
+                                                 new DependentsWalker(LocalRepository),
                                                  Logger,
                                                  removeDependencies,
                                                  forceRemove));

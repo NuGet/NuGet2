@@ -8,12 +8,12 @@
     using EnvDTE;
     using NuPack.VisualStudio.Resources;
 
-    internal class VSProjectSystem : FileBasedProjectSystem {
+    public class VsProjectSystem : FileBasedProjectSystem {
         private const string BinDir = "bin";
 
         private FrameworkName _targetFramework;
 
-        public VSProjectSystem(Project project)
+        public VsProjectSystem(Project project)
             : base(project.GetPropertyValue<string>("FullPath")) {
             Project = project;
         }
@@ -47,10 +47,10 @@
             return null;
         }
 
-        public override void AddFile(string path, Stream inputStream) {
+        public override void AddFile(string path, Stream stream) {
             EnsureCheckedOutIfExists(path);
 
-            base.AddFile(path, inputStream);
+            base.AddFile(path, stream);
             AddFileToProject(path);
         }
 
@@ -138,13 +138,13 @@
 
         public override IEnumerable<string> GetFiles(string path, string filter) {
             // Get all physical files
-            return from p in Project.GetChildItems(path, filter, VSConstants.VsProjectItemKindPhysicalFile)
+            return from p in Project.GetChildItems(path, filter, VsConstants.VsProjectItemKindPhysicalFile)
                    select p.Name;
         }
 
         public override IEnumerable<string> GetDirectories(string path) {
             // Get all physical folders
-            return from p in Project.GetChildItems(path, "*.*", VSConstants.VsProjectItemKindPhysicalFolder)
+            return from p in Project.GetChildItems(path, "*.*", VsConstants.VsProjectItemKindPhysicalFolder)
                    select p.Name;
         }
 
