@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
@@ -11,11 +10,11 @@ using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuPack.Dialog.PackageManagerUI {
 
-    public partial class PackageManagerWindow : DialogWindow {
+    public partial class PackageManagerWindow : DialogWindow, ILicenseWindowOpener {
+
         private const string F1Keyword = "vs.ExtensionManager";
+
         private readonly DTEPackage _ownerPackage;
-        private readonly OnlinePackagesProvider _installedPackagesProvider;
-        private readonly OnlinePackagesProvider _onlinePackagesProvider;
 
         public PackageManagerWindow(DTEPackage ownerPackage)
             : base(F1Keyword) {
@@ -25,44 +24,32 @@ namespace NuPack.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
+            SetupProviders();
+        }
+
+        private void SetupProviders() {
             VsPackageManager packageManager = new VsPackageManager(DTEExtensions.DTE);
             EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
 
-            UpdatePackagesProvider updatePackagesProvider = new UpdatePackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(updatePackagesProvider);
-           
-            _onlinePackagesProvider = new OnlinePackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(_onlinePackagesProvider);
+            IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
 
-            _installedPackagesProvider = new InstalledPackagesProvider(packageManager, activeProject, Resources);
-            this.explorer.Providers.Add(_installedPackagesProvider);
-            this.explorer.SelectedProvider = _installedPackagesProvider;
+            // The ExtensionsExplorer control display providers in reverse order.
+            // We want the providers to appear as Installed - Online - Updates
+
+            var updatesProvider = new UpdatesProvider(packageManager, projectManager, Resources);
+            explorer.Providers.Add(updatesProvider);
+
+            var onlineProvider = new OnlineProvider(packageManager, projectManager, Resources, PackageRepositoryFactory.Default, VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE));
+            explorer.Providers.Add(onlineProvider);
+
+            var installedProvider = new InstalledProvider(packageManager, projectManager, Resources);
+            explorer.Providers.Add(installedProvider);
+
+            // make the Installed provider as selected by default
+            explorer.SelectedProvider = installedProvider;
         }
 
-        private void ExecutedInstallPackage(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
-            }
-
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                return;
-            }
-
-            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
-            if (provider == null) {
-                return;
-            }
-
-            bool accepted = ShowLicenseWindowIfRequired(selectedItem);
-            if (accepted) {
-                provider.Install(selectedItem);
-                e.Handled = true;
-            }
-        }
-
-        private void CanExecuteInstallPackage(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanExecuteCommandOnPackage(object sender, CanExecuteRoutedEventArgs e) {
 
             if (OperationCoordinator.IsBusy) {
                 e.CanExecute = false;
@@ -75,121 +62,38 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 e.CanExecute = false;
                 return;
             }
 
-            // Don't allow the download command on packages that are already installed.
-            e.CanExecute = !selectedItem.IsInstalled;
+            e.CanExecute = selectedItem.IsEnabled;
         }
 
-        private void ExecutedUninstallPackage(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
-            }
-
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                return;
-            }
-
-            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
-            if (provider == null) {
-                return;
-            }
-
-            try {
-                provider.Uninstall(selectedItem);
-
-                // Remove the item from the "All" tree of installed packages
-                var allTree = _installedPackagesProvider.ExtensionsTree.Nodes.First();
-                allTree.Extensions.Remove(selectedItem);
-
-                e.Handled = true;
-            }
-            catch (InvalidOperationException ex) {
-                MessageBox.Show(
-                    ex.Message,
-                    NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
-
-        private void CanExecuteUninstallPackage(object sender, CanExecuteRoutedEventArgs e) {
+        private void ExecutedPackageCommand(object sender, ExecutedRoutedEventArgs e) {
             if (OperationCoordinator.IsBusy) {
-                e.CanExecute = false;
                 return;
             }
 
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
-                e.CanExecute = false;
-                return;
-            }
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                e.CanExecute = false;
                 return;
             }
 
-            // Only allow the download command on packages that are already installed.
-            e.CanExecute = selectedItem.IsInstalled;
-        }
-
-        private void ExecutedUpdatePackage(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
-            }
-
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 return;
             }
 
-            OnlinePackagesProvider provider = control.SelectedProvider as OnlinePackagesProvider;
-            if (provider == null) {
-                return;
-            }
-
-            bool accepted = ShowLicenseWindowIfRequired(selectedItem);
-            if (accepted) {
-                provider.Update(selectedItem);
-                e.Handled = true;
+            PackagesProviderBase provider = control.SelectedProvider as PackagesProviderBase;
+            if (provider != null) {
+                provider.Execute(selectedItem, this);
             }
         }
-
-        private void CanExecuteUpdatePackage(object sender, CanExecuteRoutedEventArgs e) {
-            if (OperationCoordinator.IsBusy) {
-                e.CanExecute = false;
-                return;
-            }
-
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                e.CanExecute = false;
-                return;
-            }
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
-            if (selectedItem == null) {
-                e.CanExecute = false;
-                return;
-            }
-
-            e.CanExecute = !selectedItem.IsUpdated;
-        }
-
 
         private void ExecutedClose(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
-        }
-
-        private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = true;
         }
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
@@ -203,7 +107,7 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            OnlinePackagesItem selectedItem = control.SelectedExtension as OnlinePackagesItem;
+            PackageItem selectedItem = control.SelectedExtension as PackageItem;
             if (selectedItem == null) {
                 return;
             }
@@ -216,34 +120,25 @@ namespace NuPack.Dialog.PackageManagerUI {
             explorer.SetFocusOnSearchBox();
         }
 
-        private bool ShowLicenseWindowIfRequired(OnlinePackagesItem selectedItem) {
-            IEnumerable<IPackage> packageGraph = _onlinePackagesProvider.GetPackageDependencyGraph(selectedItem.ExtensionRecord);
-            IEnumerable<IPackage> packagesRequireLicense = packageGraph.Where(p => p.RequireLicenseAcceptance);
+        bool ILicenseWindowOpener.ShowLicenseWindow(IEnumerable<IPackage> dataContext) {
+            var licenseWidow = new LicenseAcceptanceWindow() {
+                Owner = this,
+                DataContext = dataContext
+            };
 
-            if (packagesRequireLicense.Any()) {
-                var licenseWidow = new LicenseAcceptanceWindow() {
-                    Owner = this,
-                    DataContext = packagesRequireLicense
-                };
-
-                bool? dialogResult = licenseWidow.ShowDialog();
-                return dialogResult ?? false;
-            }
-            else {
-                return true;
-            }
+            bool? dialogResult = licenseWidow.ShowDialog();
+            return dialogResult ?? false;
         }
 
         private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
-            OnlinePackagesTreeBase selectedNode = explorer.SelectedExtensionTreeNode as OnlinePackagesTreeBase;
+            PackagesTreeNodeBase selectedNode = explorer.SelectedExtensionTreeNode as PackagesTreeNodeBase;
             if (selectedNode != null) {
                 // notify the selected node that it is opened.
                 selectedNode.OnOpened();
             }
         }
 
-        private void OnDialogWindowClosed(object sender, EventArgs e)
-        {
+        private void OnDialogWindowClosed(object sender, EventArgs e) {
             explorer.Providers.Clear();
         }
     }

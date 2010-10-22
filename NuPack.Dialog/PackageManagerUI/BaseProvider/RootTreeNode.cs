@@ -6,7 +6,7 @@ namespace NuPack.Dialog.Providers {
     /// <summary>
     /// Base implementation of IVsExtensionsTreeNode
     /// </summary>
-    public class BasePackagesTree : IVsExtensionsTreeNode {
+    public class RootPackagesTreeNode : IVsExtensionsTreeNode {
         private readonly IList<IVsExtension> extensions = new ObservableCollection<IVsExtension>();
         private readonly IList<IVsExtensionsTreeNode> nodes = new ObservableCollection<IVsExtensionsTreeNode>();
 
@@ -46,7 +46,7 @@ namespace NuPack.Dialog.Providers {
 
         #endregion
 
-        public BasePackagesTree(IVsExtensionsTreeNode parent, string name) {
+        public RootPackagesTreeNode(IVsExtensionsTreeNode parent, string name) {
             this.Parent = parent;
             this.Name = name;
         }

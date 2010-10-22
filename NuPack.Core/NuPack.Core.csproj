@@ -35,6 +35,7 @@
     </Compile>
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
+    <Compile Include="PackageWalker\DependencyResolver.cs" />
     <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
     <Compile Include="PackageWalker\IDependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageAction.cs" />

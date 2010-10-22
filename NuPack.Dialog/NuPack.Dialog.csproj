@@ -110,21 +110,24 @@
     </Compile>
     <Compile Include="PackageManagerUI\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\ExecuteCompletedEventArgs.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OperationCoordinator.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\ExecuteCompletedEventArgs.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
+    <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PackageManagerUI\InstalledProvider\InstalledPackagesProvider.cs" />
+    <Compile Include="PackageManagerUI\InstalledProvider\InstalledProvider.cs" />
     <Compile Include="PackageManagerUI\LicenseAcceptanceWindow.xaml.cs">
       <DependentUpon>LicenseAcceptanceWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PackageManagerUI\OnlineProvider\BasePackagesTree.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesItem.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesProvider.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesSearchNode.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesTree.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlinePackagesTreeBase.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\RootTreeNode.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackageItem.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\OnlineProvider.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackagesSearchNode.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\SimpleTreeNode.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackagesTreeNodeBase.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindow.xaml.cs">
       <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -133,12 +136,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatePackagesProvider.cs" />
+    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolsOptionsUI\ListViewDataBinder.cs" />
     <Compile Include="ToolsOptionsUI\ToolsOptionsControl.cs">
@@ -206,6 +210,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\checkmark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PackageManagerUI\PackagesProvider.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
