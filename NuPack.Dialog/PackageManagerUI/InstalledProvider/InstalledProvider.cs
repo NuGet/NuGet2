@@ -1,5 +1,6 @@
 ﻿using System.Windows;
-using NuPack.VisualStudio;
+using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuPack.Dialog.PackageManagerUI;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -7,7 +8,6 @@ namespace NuPack.Dialog.Providers {
     /// a list of installed packages which will be shown in the Add Package dialog.
     /// </summary>
     internal class InstalledProvider : PackagesProviderBase {
-        private const string XamlTemplateKey = "InstalledPackageItemTemplate";
 
         public InstalledProvider(ProjectManager projectManager, ResourceDictionary resources)
             : base(projectManager, resources) {
@@ -25,23 +25,19 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected override string MediumIconDataTemplateKey {
-            get { return XamlTemplateKey; }
-        }
-
         protected override void FillRootNodes() {
             var allNode = new SimpleTreeNode(this, Resources.Dialog_RootNodeAll, RootNode, ProjectManager.LocalRepository);
 
             RootNode.Nodes.Add(allNode);
         }
 
-        public override bool GetIsCommandEnabled(PackageItem item) {
+        public override bool CanExecute(PackageItem item) {
             // enable command on a Package in the Installed provider if the package is installed.
             return ProjectManager.LocalRepository.Exists(item.PackageIdentity);
         }
 
         // TODO: consider doing uninstall asynchronously on background thread if perf is bad, which is unlikely
-        public void Uninstall(PackageItem item) {
+        public override void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             if (OperationCoordinator.IsBusy) {
                 return;
             }
@@ -49,10 +45,20 @@ namespace NuPack.Dialog.Providers {
             try {
                 OperationCoordinator.IsBusy = true;
                 ProjectManager.RemovePackageReference(item.Id);
+
+                if (SelectedNode != null) {
+                    SelectedNode.Extensions.Remove(item);
+                }
             }
             finally {
                 OperationCoordinator.IsBusy = false;
             }
+        }
+
+        public override IVsExtension CreateExtension(IPackage package) {
+            return new PackageItem(this, package, null) {
+                CommandName = Resources.Dialog_UninstallButton
+            };
         }
     }
 }

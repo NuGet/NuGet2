@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
+using NuPack.Dialog.PackageManagerUI;
 
 namespace NuPack.Dialog.Providers {
     /// <summary>
@@ -65,14 +66,10 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected abstract string MediumIconDataTemplateKey {
-            get; 
-        }
-
         public override object MediumIconDataTemplate {
             get {
                 if (_mediumIconDataTemplate == null) {
-                    _mediumIconDataTemplate = _resources[MediumIconDataTemplateKey];
+                    _mediumIconDataTemplate = _resources["PackageItemTemplate"];
                 }
                 return _mediumIconDataTemplate;
             }
@@ -113,9 +110,6 @@ namespace NuPack.Dialog.Providers {
             return _searchNode;
         }
 
-        protected virtual void FillRootNodes() {
-        }
-
         private void CreateExtensionsTree() {
             // The user may have done a search before we finished getting the category list; temporarily remove it
             if (_searchNode != null) {
@@ -139,6 +133,13 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        public abstract bool GetIsCommandEnabled(PackageItem item);
+        protected virtual void FillRootNodes() {
+        }
+
+        public abstract IVsExtension CreateExtension(IPackage package);
+
+        public abstract bool CanExecute(PackageItem item);
+
+        public abstract void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener);
     }
 }

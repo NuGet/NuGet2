@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
@@ -11,7 +10,7 @@ using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuPack.Dialog.PackageManagerUI {
 
-    public partial class PackageManagerWindow : DialogWindow {
+    public partial class PackageManagerWindow : DialogWindow, ILicenseWindowOpener {
 
         private const string F1Keyword = "vs.ExtensionManager";
 
@@ -77,7 +76,11 @@ namespace NuPack.Dialog.PackageManagerUI {
             e.CanExecute = selectedItem.IsEnabled;
         }
 
-        private void ExecutedInstallPackage(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecutedPackageCommand(object sender, ExecutedRoutedEventArgs e) {
+            if (OperationCoordinator.IsBusy) {
+                return;
+            }
+
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
             if (control == null) {
                 return;
@@ -88,81 +91,14 @@ namespace NuPack.Dialog.PackageManagerUI {
                 return;
             }
 
-            OnlineProvider provider = control.SelectedProvider as OnlineProvider;
-            if (provider == null) {
-                return;
-            }
-
-            bool accepted = ShowLicenseWindowIfRequired(selectedItem, provider);
-            if (accepted) {
-                provider.Install(selectedItem);
-                e.Handled = true;
-            }
-        }
-
-        private void ExecutedUninstallPackage(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
-            }
-
-            PackageItem selectedItem = control.SelectedExtension as PackageItem;
-            if (selectedItem == null) {
-                return;
-            }
-
-            InstalledProvider provider = control.SelectedProvider as InstalledProvider;
-            if (provider == null) {
-                return;
-            }
-
-            try {
-                provider.Uninstall(selectedItem);
-
-                // Remove the item from the "All" tree of installed packages
-                var allTree = provider.ExtensionsTree.Nodes.First();
-                allTree.Extensions.Remove(selectedItem);
-
-                e.Handled = true;
-            }
-            catch (InvalidOperationException ex) {
-                MessageBox.Show(
-                    ex.Message,
-                    NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
-
-        private void ExecutedUpdatePackage(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
-            }
-
-            PackageItem selectedItem = control.SelectedExtension as PackageItem;
-            if (selectedItem == null) {
-                return;
-            }
-
-            UpdatesProvider provider = control.SelectedProvider as UpdatesProvider;
-            if (provider == null) {
-                return;
-            }
-
-            bool accepted = ShowLicenseWindowIfRequired(selectedItem, provider);
-            if (accepted) {
-                provider.Update(selectedItem);
-                e.Handled = true;
+            PackagesProviderBase provider = control.SelectedProvider as PackagesProviderBase;
+            if (provider != null) {
+                provider.Execute(selectedItem, this);
             }
         }
 
         private void ExecutedClose(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
-        }
-
-        private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = true;
         }
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
@@ -189,23 +125,14 @@ namespace NuPack.Dialog.PackageManagerUI {
             explorer.SetFocusOnSearchBox();
         }
 
-        // TODO: the dynamic parameter is temporary until GetPackageDependencyGraph is brought into Core
-        private bool ShowLicenseWindowIfRequired(PackageItem selectedItem, dynamic provider) {
-            IEnumerable<IPackage> packageGraph = provider.GetPackageDependencyGraph(selectedItem.PackageIdentity);
-            IEnumerable<IPackage> packagesRequireLicense = packageGraph.Where(p => p.RequireLicenseAcceptance);
+        bool ILicenseWindowOpener.ShowLicenseWindow(IEnumerable<IPackage> dataContext) {
+            var licenseWidow = new LicenseAcceptanceWindow() {
+                Owner = this,
+                DataContext = dataContext
+            };
 
-            if (packagesRequireLicense.Any()) {
-                var licenseWidow = new LicenseAcceptanceWindow() {
-                    Owner = this,
-                    DataContext = packagesRequireLicense
-                };
-
-                bool? dialogResult = licenseWidow.ShowDialog();
-                return dialogResult ?? false;
-            }
-            else {
-                return true;
-            }
+            bool? dialogResult = licenseWidow.ShowDialog();
+            return dialogResult ?? false;
         }
 
         private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {

@@ -258,7 +258,7 @@ namespace NuPack.Dialog.Providers {
 
                 _extensions.Clear();
                 foreach (IPackage package in packages) {
-                    _extensions.Add(new PackageItem(Provider, package, null));
+                    _extensions.Add(Provider.CreateExtension(package));
                 }
 
                 if (_extensions.Count > 0) {

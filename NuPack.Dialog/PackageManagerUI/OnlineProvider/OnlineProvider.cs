@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
+using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuPack.Dialog.PackageManagerUI;
 using NuPack.VisualStudio;
 
 namespace NuPack.Dialog.Providers {
@@ -10,17 +13,15 @@ namespace NuPack.Dialog.Providers {
     /// a list of packages from a package feed which will be shown in the Add NuPack dialog.
     /// </summary>
     internal class OnlineProvider : PackagesProviderBase {
-
-        private const string XamlTemplateKey = "OnlinePackageItemTemplate";
         private IPackageRepositoryFactory _packageRepositoryFactory;
-        private VSPackageSourceProvider _packageSourceProvider;
+        private IPackageSourceProvider _packageSourceProvider;
         private VSPackageManager _packageManager;
 
         public OnlineProvider(
             VSPackageManager packageManager,
             ProjectManager projectManager,
             IPackageRepositoryFactory packageRepositoryFactory,
-            VSPackageSourceProvider packageSourceProvider,
+            IPackageSourceProvider packageSourceProvider,
             ResourceDictionary resources) :
             base(projectManager, resources) {
 
@@ -42,45 +43,44 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        protected override string MediumIconDataTemplateKey {
-            get { return XamlTemplateKey; }
-        }
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We want to suppress all errors to show an empty node.")]
         protected override void FillRootNodes() {
             var packageSources = _packageSourceProvider.GetPackageSources();
 
             // create one tree node per package source
             // REVIEW: do we want to truncate the number of nodes?
             foreach (var source in packageSources) {
-
                 PackagesTreeNodeBase node = null;
                 try {
                     IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source.Source);
-                    node = new SimpleTreeNode(this, NormalizeCategory(source.Name), RootNode, repository);
+                    node = new SimpleTreeNode(this, source.Name, RootNode, repository);
                 }
-                catch (UriFormatException) {
-                    // exception occurs if the Source value is invalid. In which case, adds the empty tree node in place
-                    node = new EmptyTreeNode(this, NormalizeCategory(source.Name), RootNode);
+                catch (Exception) {
+                    // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
+                    node = new EmptyTreeNode(this, source.Name, RootNode);
                 }
 
                 RootNode.Nodes.Add(node);
             }
         }
 
-        private static string NormalizeCategory(string category) {
-            const int MaxCategoryLength = 50;
-            if (category.Length > MaxCategoryLength) {
-                return category.Substring(0, MaxCategoryLength) + "...";
-            }
-            else {
-                return category;
-            }
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public void Install(PackageItem item) {
+        public override void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             if (OperationCoordinator.IsBusy) {
                 return;
+            }
+
+            // display license window if necessary
+            DependencyHelper helper = new DependencyHelper(_packageManager.SourceRepository);
+            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity).Where(p => p.RequireLicenseAcceptance);
+            if (licensePackages.Any()) {
+                bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
+                if (!accepted) {
+                    return;
+                }
             }
 
             // disable all operations while this install is in progress
@@ -107,30 +107,15 @@ namespace NuPack.Dialog.Providers {
             }
         }
 
-        public override bool GetIsCommandEnabled(PackageItem item) {
+        public override bool CanExecute(PackageItem item) {
             // only enable command on a Package in the Online provider if it is not installed yet
             return !ProjectManager.LocalRepository.Exists(item.Id, new Version(item.Version));
         }
 
-        // TODO: Temporary. Will add a helper method in Core to replace this.
-        public IEnumerable<IPackage> GetPackageDependencyGraph(IPackage rootPackage) {
-            HashSet<IPackage> packageGraph = new HashSet<IPackage>();
-            if (DTEExtensions.DTE.Solution.IsOpen) {
-
-                EventHandler<PackageOperationEventArgs> handler = (s, o) => {
-                    o.Cancel = true;
-                    packageGraph.Add(o.Package);
-                };
-
-                try {
-                    _packageManager.PackageInstalling += handler;
-                    _packageManager.InstallPackage(rootPackage, ignoreDependencies: false);
-                }
-                finally {
-                    _packageManager.PackageInstalling -= handler;
-                }
-            }
-            return packageGraph;
+        public override IVsExtension CreateExtension(IPackage package) {
+            return new PackageItem(this, package, null) {
+                CommandName = Resources.Dialog_InstallButton
+            };
         }
     }
 }

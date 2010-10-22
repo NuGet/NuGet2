@@ -113,7 +113,8 @@
     <Compile Include="PackageManagerUI\BaseProvider\ExecuteCompletedEventArgs.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\DummyTreeNode.cs" />
+    <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -209,6 +210,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\checkmark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PackageManagerUI\PackagesProvider.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

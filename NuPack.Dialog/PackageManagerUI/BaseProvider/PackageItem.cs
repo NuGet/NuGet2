@@ -14,16 +14,13 @@ namespace NuPack.Dialog.Providers {
         private IPackage _packageIdentity;
         
         /// <summary>
-        /// The reference item is used within the Add NuPack dialog that we're using for Add Reference
+        /// The reference item is used within the Add Package dialog.
         /// It will "house" the actual reference item that we'll use for the act of adding references
         /// </summary>
-        public PackageItem(
-            PackagesProviderBase provider, 
-            IPackage referenceRecord, 
-            BitmapSource thumbnail) {
+        public PackageItem(PackagesProviderBase provider, IPackage package, BitmapSource thumbnail) {
 
             _provider = provider;
-            _packageIdentity = referenceRecord;
+            _packageIdentity = package;
 
             Priority = 0;
             ThumbnailImage = thumbnail;
@@ -108,7 +105,7 @@ namespace NuPack.Dialog.Providers {
 
         public bool IsEnabled {
             get {
-                return _provider.GetIsCommandEnabled(this);
+                return _provider.CanExecute(this);
             }
         }
 
@@ -127,6 +124,11 @@ namespace NuPack.Dialog.Providers {
         public float Priority {
             get;
             private set;
+        }
+
+        public string CommandName {
+            get;
+            set;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

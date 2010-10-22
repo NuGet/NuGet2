@@ -39,23 +39,12 @@
 
     <Window.CommandBindings>
         <CommandBinding 
-            Command="{x:Static self:PackageManagerWindowCommands.InstallPackage}"
+            Command="{x:Static self:PackageManagerWindowCommands.PackageOperationCommand}"
             CanExecute="CanExecuteCommandOnPackage"
-            Executed="ExecutedInstallPackage" />
-        
-        <CommandBinding 
-            Command="{x:Static self:PackageManagerWindowCommands.UninstallPackage}"
-            CanExecute="CanExecuteCommandOnPackage"
-            Executed="ExecutedUninstallPackage" />
+            Executed="ExecutedPackageCommand" />
         
         <CommandBinding
-            Command="{x:Static self:PackageManagerWindowCommands.UpdatePackage}"
-            CanExecute="CanExecuteCommandOnPackage"
-            Executed="ExecutedUpdatePackage" />
-        
-        <CommandBinding 
             Command="ApplicationCommands.Close"
-            CanExecute="CanExecuteClose"
             Executed="ExecutedClose" />
         
         <CommandBinding 

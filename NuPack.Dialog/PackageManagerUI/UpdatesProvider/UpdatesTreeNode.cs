@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 namespace NuPack.Dialog.Providers {
 
     /// <summary>
-    /// This tree node lists all packages from a fixed repository.
+    /// This class represents a tree node under the Updates tab
     /// </summary>
     internal class UpdatesTreeNode : PackagesTreeNodeBase {
         private readonly string _category;
