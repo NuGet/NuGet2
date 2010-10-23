@@ -36,17 +36,15 @@ namespace NuPack.VisualStudio {
         public VsPackageManager(DTE dte, IPackageRepository sourceRepository) :
             this(SolutionManager.Current,
                 sourceRepository,
-                new DefaultPackagePathResolver(GetFileSystem(dte)),
                 GetFileSystem(dte),
                 GetSolutionRepository(dte)) {
         }
 
         public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
-                                IPackagePathResolver pathResolver,
                                 IFileSystem fileSystem,
                                 IPackageRepository localRepository) :
-            base(sourceRepository, pathResolver, fileSystem, localRepository) {
+            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository) {
 
             _projectManagers = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
         }
@@ -108,7 +106,7 @@ namespace NuPack.VisualStudio {
         public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies) {
             UpdatePackage(projectManager, id, version, updateDependencies, NullLogger.Instance);
         }
-        
+
         // REVIEW: Do we even need this method?
         public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
             InstallPackage(projectManager, id, version, !updateDependencies, logger);

@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
-    <ProjectGuid>{42E1151E-EEA6-46E1-B94D-C1395F92C990}</ProjectGuid>
+    <ProjectGuid>{3840480F-EA53-4CD4-8155-7CA579CB8E37}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuPack.VisualStudio.Test</RootNamespace>
@@ -22,6 +22,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -29,6 +30,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GetPackageCmdletTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetProjectCmdletTest.cs" />
     <Compile Include="TestCommandRuntime.cs" />

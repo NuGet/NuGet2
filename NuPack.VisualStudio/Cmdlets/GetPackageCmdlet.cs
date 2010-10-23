@@ -17,11 +17,14 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         public GetPackageCmdlet()
             : this(CachedRepositoryFactory.Instance,
-                   VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
+                   VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
+                   NuPack.VisualStudio.SolutionManager.Current,
+                   DTEExtensions.DTE,
+                   packageManager: null /* this would be lazily created */) {
         }
 
-        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, ISolutionManager solutionManager, DTE dte, VSPackageManager packageManager)
-            : base(solutionManager, dte, packageManager) {
+        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider, ISolutionManager solutionManager, DTE dte, VsPackageManager packageManager)
+            : base(solutionManager, repositoryFactory, dte, packageManager) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }

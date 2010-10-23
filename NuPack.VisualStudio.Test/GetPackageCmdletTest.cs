@@ -13,7 +13,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsAllPackagesFromActiveSourceWhenNoParametersAreSpecified() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             
             // Act 
             var result = cmdlet.GetResults();
@@ -25,7 +25,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoParametersAreSpecified() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Source = "foo";
            
             // Act 
@@ -40,7 +40,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsFilteredPackagesFromActiveSource() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Filter = "A C";
 
             // Act 
@@ -55,7 +55,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsAllPackagesFromLocalRepositoryWhenInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Installed = new SwitchParameter(isPresent: true);
 
             // Act 
@@ -68,7 +68,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsFilteredPackagesFromLocalRepositoryWhenInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Installed = new SwitchParameter(isPresent: true);
             cmdlet.Filter = "C";
 
@@ -83,7 +83,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsUpdatesWhenUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Updates = new SwitchParameter(isPresent: true);
 
             // Act 
@@ -98,7 +98,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsUpdatesFromSourceWhenUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Updates = new SwitchParameter(isPresent: true);
             cmdlet.Source = "foo";
 
@@ -114,7 +114,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(isSolutionOpen: false), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(isSolutionOpen: false), GetPackageManager());
             cmdlet.Installed = new SwitchParameter(isPresent: true);
 
             // Act 
@@ -125,7 +125,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(isSolutionOpen: false), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(isSolutionOpen: false), GetPackageManager());
             cmdlet.Updates = new SwitchParameter(isPresent: true);
             var result = new List<object>();
 
@@ -145,7 +145,7 @@ namespace NuPack.VisualStudio.Test {
             return repositoryFactory.Object;
         }
 
-        private static VSPackageManager GetPackageManager() {
+        private static VsPackageManager GetPackageManager() {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<IPackageRepository>();
             var localPackages = new[] { GetPackage("A"), GetPackage("C", "0.9") };
@@ -155,7 +155,7 @@ namespace NuPack.VisualStudio.Test {
             var remotePackages = new[] { GetPackage("A"), GetPackage("C", "1.1"), GetPackage("D") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
-            return new VSPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, localRepo.Object, fileSystem.Object);
+            return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object);
         }
 
         private static IPackage GetPackage(string name, string version = "1.0") {
@@ -165,6 +165,12 @@ namespace NuPack.VisualStudio.Test {
             package.SetupGet(c => c.Description).Returns(name);
 
             return package.Object;
+        }
+
+        private static IPackageSourceProvider GetSourceProvider() {
+            Mock<IPackageSourceProvider> sourceProvider = new Mock<IPackageSourceProvider>();
+            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("foo", "foo"));
+            return sourceProvider.Object;
         }
     }
 }

@@ -11,15 +11,18 @@ namespace NuPack.VisualStudio.Cmdlets {
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly DTE _dte;
 
+        // Remove this constructor once all cmdlets have been converted.
         protected NuPackBaseCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, dte: DTEExtensions.DTE, packageManager: null) { }
+            : this(NuPack.VisualStudio.SolutionManager.Current, repositoryFactory: CachedRepositoryFactory.Instance, dte: DTEExtensions.DTE,  packageManager: null) { }
 
-        protected NuPackBaseCmdlet(ISolutionManager solutionManager, DTE dte, VSPackageManager packageManager) {
+        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte, VsPackageManager packageManager) {
             _solutionManager = solutionManager;
             _dte = dte;
             _packageManager = packageManager;
+            _repositoryFactory = repositoryFactory;
         }
 
         protected ISolutionManager SolutionManager {
@@ -115,30 +118,31 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        private static IVsPackageManager GetPackageManager() {
+        protected IVsPackageManager GetPackageManager() {
+            if (DTE == null) {
+                throw new InvalidOperationException("DTE isn't loaded.");
+            }
+
             if (!IsSolutionOpen) {
                 return null;
             }
 
             // prepare a PackageManager instance for use throughout the command execution lifetime
             DTE dte = DTEExtensions.DTE;
-            if (dte == null) {
-                throw new InvalidOperationException("DTE isn't loaded.");
-            }
             return new VsPackageManager(dte);
         }
 
-        protected static IVsPackageManager GetPackageManager(string source) {
-            if (!IsSolutionOpen) {
-                return null;
-            }
-
+        protected IVsPackageManager GetPackageManager(string source) {
             // prepare a PackageManager instance for use throughout the command execution lifetime
             if (DTE == null) {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
 
-            return new VsPackageManager(dte, PackageRepositoryFactory.Default.CreateRepository(source));
+            if (!IsSolutionOpen) {
+                return null;
+            }
+
+            return new VsPackageManager(DTE, _repositoryFactory.CreateRepository(source));
         }
 
         protected Project GetProjectFromName(string projectName) {

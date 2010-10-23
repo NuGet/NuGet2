@@ -21,7 +21,7 @@ namespace NuPack.Test.VisualStudio {
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
-            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -44,7 +44,7 @@ namespace NuPack.Test.VisualStudio {
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -72,7 +72,7 @@ namespace NuPack.Test.VisualStudio {
 
             IProjectManager projectWithPackage = CreateProjectManagerWithPackage(package);
             IProjectManager otherProjectWithPackage = CreateProjectManagerWithPackage(package);
-            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository, new[] { otherProjectWithPackage });
+            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository, new[] { otherProjectWithPackage });
 
             // Act
             packageManager.UninstallPackage(projectWithPackage, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
@@ -98,7 +98,7 @@ namespace NuPack.Test.VisualStudio {
             sourceRepository.AddPackage(package);
 
             IProjectManager projectWithPackage = CreateProjectManagerWithPackage(package);
-            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, pathResolver, projectSystem, localRepository, Enumerable.Empty<IProjectManager>());
+            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository, Enumerable.Empty<IProjectManager>());
 
             // Act
             packageManager.UninstallPackage(projectWithPackage, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
@@ -122,11 +122,10 @@ namespace NuPack.Test.VisualStudio {
 
             public MockVsPackageManager(ISolutionManager solutionManager,
                                         IPackageRepository sourceRepository,
-                                        IPackagePathResolver pathResolver,
                                         IFileSystem fileSystem,
                                         IPackageRepository localRepository,
                                         IEnumerable<IProjectManager> projectManagers) :
-                base(solutionManager, sourceRepository, pathResolver, fileSystem, localRepository) {
+                base(solutionManager, sourceRepository, fileSystem, localRepository) {
                 _projectManagers = projectManagers;
             }
 

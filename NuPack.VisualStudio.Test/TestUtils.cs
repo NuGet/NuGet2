@@ -20,7 +20,7 @@ namespace NuPack.VisualStudio.Test {
             project.SetupGet(p => p.Name).Returns(name);
             project.SetupGet(p => p.FullName).Returns(name);
             project.SetupGet(p => p.UniqueName).Returns(name);
-            project.SetupGet(p => p.Kind).Returns(VSConstants.CsharpProjectKind);
+            project.SetupGet(p => p.Kind).Returns(VsConstants.CsharpProjectKind);
             
             Mock<Properties> properties = new Mock<Properties>();
             Mock<Property> fullName = new Mock<Property>();
