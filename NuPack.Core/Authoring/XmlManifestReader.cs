@@ -10,6 +10,8 @@ namespace NuPack {
     internal class XmlManifestReader {
         private XDocument _manifestDocument;
 
+        public XmlManifestReader(string manifestFile) : this(manifestFile, Path.GetDirectoryName(manifestFile)) { }
+
         public XmlManifestReader(string manifestFile, string basePath) {
             _manifestDocument = XDocument.Load(manifestFile);
             ValidateSchema(_manifestDocument);

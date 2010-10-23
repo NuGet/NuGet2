@@ -160,7 +160,13 @@
             }
         }
 
-        private int GetConsoleWidth() {
+        /* Until we can abstract the Console Object we need to catch IOException 
+         * (the exception that happens if the property has not been set) which 
+         * is thrown from WindowWidth and CursorLeft when there is no window aka 
+         * in the integration tests. We can later change this so that we can 
+         * pass in our own console object and keep these errors from being thrown. */
+
+        private static int GetConsoleWidth() {
             int maxWidth;
             try {
                 maxWidth = Console.WindowWidth;
@@ -171,7 +177,7 @@
             return maxWidth;
         }
 
-        private int GetConsoleCursorLeft() {
+        private static int GetConsoleCursorLeft() {
             int cursorLeft;
             try {
                 cursorLeft = Console.CursorLeft;

@@ -25,9 +25,12 @@
         public ICommandManager Manager { get; set; }
 
         public void Initialize() {
-            AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-            var container = new CompositionContainer(catalog);
-            container.ComposeParts(this);
+            using (AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(Assembly.GetExecutingAssembly()))) {
+                using (var container = new CompositionContainer(catalog)) {
+                    container.ComposeParts(this);
+                }
+            }
+
         }
 
         public static int Main(string[] args) {

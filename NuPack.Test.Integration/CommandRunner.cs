@@ -43,7 +43,7 @@
 
             Console.WriteLine(result);
 
-            return new Tuple<int, string>(exitCode, result);
+            return Tuple.Create<int, string>(exitCode, result);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace NuPack.Test.NuPackCommandLine {
         }
 
         [TestMethod]
-        public void GetUsageSummary_ReturnsDescriptionIfTypeNotSet() {
+        public void GetUsageSummary_ReturnsUsageSummaryIfTypeNotSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(
                 "MockCommand", "Description") { UsageSummary = "Not a Resource", UsageSummaryResourceName = "ResourceName" };
@@ -57,7 +57,7 @@ namespace NuPack.Test.NuPackCommandLine {
         }
 
         [TestMethod]
-        public void GetUsageDescription_ReturnsDescriptionIfTypeNotSet() {
+        public void GetUsageDescription_ReturnsUsageDescriptionIfTypeNotSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(
                 "MockCommand", "Description") { UsageDescription = "Not a Resource", UsageDescriptionResourceName = "ResourceName" };
