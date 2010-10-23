@@ -47,6 +47,7 @@
     <Compile Include="PackageWalker\PackageOperation.cs" />
     <Compile Include="PackageWalker\PackageTargets.cs" />
     <Compile Include="PackageWalker\PackageWalkInfo.cs" />
+    <Compile Include="Repositories\AggregateRepository.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
@@ -96,7 +97,7 @@
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="Repositories\PackageReferenceRepository.cs" />
     <Compile Include="Utility\PackageExtensions.cs" />
-    <Compile Include="Utility\PackageRepositoryExtensions.cs" />
+    <Compile Include="Repositories\PackageRepositoryExtensions.cs" />
     <Compile Include="Utility\FileSystemExtensions.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
     <Compile Include="Resources\NuGetResources.Designer.cs">
