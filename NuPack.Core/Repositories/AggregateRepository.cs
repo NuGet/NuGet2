@@ -20,13 +20,27 @@ namespace NuPack {
                                                 PackageComparer.IdAndVersionComparer);
         }
 
-        private class AggregateQuery<T> : IQueryable<T>, IQueryProvider {
+        private class QueryableHelper {
+            private static readonly MethodInfo[] _methods = typeof(Queryable).GetMethods(BindingFlags.Public | BindingFlags.Static);
+            public static readonly MethodInfo CountMethod = _methods.First(m => m.Name == "Count");
+            public static readonly MethodInfo TakeMethod = _methods.First(m => m.Name == "Take");
+
+
+            public static MethodInfo GetQueryableMethod(Expression expression) {
+                if (expression.NodeType == ExpressionType.Call) {
+                    var call = (MethodCallExpression)expression;
+                    if (call.Method.IsStatic && call.Method.DeclaringType == typeof(Queryable)) {
+                        return call.Method.GetGenericMethodDefinition();
+                    }
+                }
+                return null;
+            }
+        }
+
+        private class AggregateQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
             private readonly IEnumerable<IQueryable<T>> _queryables;
             private readonly IEqualityComparer<T> _distinctComparer;
             private readonly Expression _expression;
-
-            private static readonly MethodInfo _queryableCount = typeof(Queryable).GetMethods(BindingFlags.Public | BindingFlags.Static)
-                                                                                  .First(m => m.Name == "Count");
 
             public AggregateQuery(IEnumerable<IQueryable<T>> queryables, IEqualityComparer<T> distinctComparer) {
                 _queryables = queryables;
@@ -41,12 +55,20 @@ namespace NuPack {
             }
 
             public IEnumerator<T> GetEnumerator() {
+                // For each IQueryable<T> in our list, we apply each expression
+                // and run them in parallel using PLINQ. After the results come back
+                // we run our distinct comparer to remove duplicates
                 IQueryable<T> aggregateQuery = _queryables.SelectMany(GetQuery)
                                                           .AsParallel()
                                                           .Distinct(_distinctComparer)
                                                           .AsQueryable();
 
-                return GetQuery(aggregateQuery).GetEnumerator();
+                // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
+                // after all initial expression has been applied.
+                Expression aggregateExpression = RewriteForAggregattion(aggregateQuery, Expression);
+                return aggregateQuery.Provider
+                                     .CreateQuery<T>(aggregateExpression)
+                                     .GetEnumerator();
             }
 
             IEnumerator IEnumerable.GetEnumerator() {
@@ -94,7 +116,7 @@ namespace NuPack {
                 var results = (from queryable in _queryables
                                select Execute<TResult>(queryable, expression)).AsQueryable();
 
-                if (IsCountExpression(expression)) {
+                if (QueryableHelper.GetQueryableMethod(expression) == QueryableHelper.CountMethod) {
                     // HACK: This is in correct since we aren't removing duplicates but count is mostly for paging
                     // so we don't care *that* much
                     return (TResult)(object)results.Cast<int>().Sum();
@@ -105,11 +127,6 @@ namespace NuPack {
 
             public object Execute(Expression expression) {
                 return Execute<object>(expression);
-            }
-
-            private bool IsCountExpression(Expression expression) {
-                return expression.NodeType == ExpressionType.Call &&
-                       ((MethodCallExpression)expression).Method.GetGenericMethodDefinition() == _queryableCount;
             }
 
             private IQueryable CreateQuery(Type elementType, Expression expression) {
@@ -128,6 +145,10 @@ namespace NuPack {
 
             private static object Execute(IQueryable queryable, Expression expression) {
                 return queryable.Provider.Execute(Rewrite(queryable, expression));
+            }
+
+            private static Expression RewriteForAggregattion(IQueryable queryable, Expression expression) {
+                return new AggregateRewriter(queryable).Visit(expression);
             }
 
             private static Expression Rewrite(IQueryable queryable, Expression expression) {
@@ -150,6 +171,22 @@ namespace NuPack {
                     type = type.BaseType;
                 }
                 return null;
+            }
+
+            private class AggregateRewriter : ExpressionRewriter {
+                public AggregateRewriter(IQueryable aggregateQuery)
+                    : base(aggregateQuery) {
+                }
+
+                protected override Expression VisitMethodCall(MethodCallExpression node) {
+                    // We're removing expressions that we don't want to aggregate over. So far 
+                    // that's everything except for take(n)
+                    if (QueryableHelper.GetQueryableMethod(node) != QueryableHelper.TakeMethod) {
+                        return Visit(node.Arguments[0]);
+                    }
+
+                    return base.VisitMethodCall(node);
+                }
             }
 
             private class ExpressionRewriter : ExpressionVisitor {
