@@ -14,11 +14,12 @@ namespace NuPack.VisualStudio.Cmdlets {
         private readonly DTE _dte;
 
         protected NuPackBaseCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, DTEExtensions.DTE) { }
+            : this(NuPack.VisualStudio.SolutionManager.Current, dte: DTEExtensions.DTE, packageManager: null) { }
 
-        protected NuPackBaseCmdlet(ISolutionManager solutionManager, DTE dte) {
+        protected NuPackBaseCmdlet(ISolutionManager solutionManager, DTE dte, VSPackageManager packageManager) {
             _solutionManager = solutionManager;
             _dte = dte;
+            _packageManager = packageManager;
         }
 
         protected ISolutionManager SolutionManager {
@@ -90,6 +91,12 @@ namespace NuPack.VisualStudio.Cmdlets {
         void ILogger.Log(MessageLevel level, string message, params object[] args) {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
             Log(level, formattedMessage);
+        }
+
+        public void Execute() {
+            BeginProcessing();
+            ProcessRecord();
+            EndProcessing();
         }
 
         protected void Log(MessageLevel level, string formattedMessage) {

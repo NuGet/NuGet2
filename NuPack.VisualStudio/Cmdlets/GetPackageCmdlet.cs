@@ -20,7 +20,8 @@ namespace NuPack.VisualStudio.Cmdlets {
                    VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
         }
 
-        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider) {
+        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, ISolutionManager solutionManager, DTE dte, VSPackageManager packageManager)
+            : base(solutionManager, dte, packageManager) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
@@ -52,7 +53,6 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return null;
             }
         }
-
         protected override void ProcessRecordCore() {
             if (!IsSolutionOpen && (Installed.IsPresent || Updates.IsPresent)) {
                 WriteError(VsResources.Cmdlet_NoSolution);
@@ -85,7 +85,12 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         private void WritePackagesFromRepository(IPackageRepository repository, string filter) {
-            WritePackages(repository.GetPackages(filter));
+            if (!String.IsNullOrEmpty(filter)) {
+                WritePackages(repository.GetPackages(filter.Split()));
+            }
+            else {
+                WritePackages(repository.GetPackages());
+            }
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {

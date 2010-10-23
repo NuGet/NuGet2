@@ -18,7 +18,6 @@ namespace NuPack.VisualStudio.Cmdlets {
             _solutionManager = solutionManager;
         }
 
-
         [Parameter(Position = 0, ParameterSetName = "Single")]
         public string Name { get; set; }
 
