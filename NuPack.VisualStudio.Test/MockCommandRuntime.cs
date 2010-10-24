@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Management.Automation;
 using System.Collections;
-using System.Reflection;
+using System.Collections.Generic;
+using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Test {
-    public class TestCommandRuntime : ICommandRuntime {
-        private List<object> output;
+    public class MockCommandRuntime : ICommandRuntime {
+        private readonly List<object> output;
 
         // Methods
-        public TestCommandRuntime(List<object> outputArrayList) {
+        public MockCommandRuntime(List<object> outputArrayList) {
             if (outputArrayList == null) {
                 throw new ArgumentNullException("outputArrayList");
             }
@@ -98,19 +95,6 @@ namespace NuPack.VisualStudio.Test {
         }
 
         public void WriteWarning(string text) {
-        }
-
-        public static IList<object> ExecutePSCmdlet(PSCmdlet cmdlet) {
-            var output = new List<object>();
-            var runtime = new TestCommandRuntime(output);
-
-            var type = typeof(PSCmdlet);
-            
-            type.GetMethod("BeginProcessing", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(cmdlet, null);
-            type.GetMethod("ProcessRecord", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(cmdlet, null);
-            type.GetMethod("EndProcessing", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(cmdlet, null);
-
-            return output;
         }
 
         public PSTransactionContext CurrentPSTransaction {

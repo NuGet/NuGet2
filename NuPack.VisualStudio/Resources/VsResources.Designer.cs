@@ -133,6 +133,15 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More than one .nuspec files were found..
+        /// </summary>
+        public static string Cmdlet_TooManySpecFiles {
+            get {
+                return ResourceManager.GetString("Cmdlet_TooManySpecFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies..
         /// </summary>
         public static string Console_DisclaimerText {

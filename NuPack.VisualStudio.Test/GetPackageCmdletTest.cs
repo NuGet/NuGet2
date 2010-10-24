@@ -14,7 +14,7 @@ namespace NuPack.VisualStudio.Test {
         public void GetPackageReturnsAllPackagesFromActiveSourceWhenNoParametersAreSpecified() {
             // Arrange 
             var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
-            
+
             // Act 
             var result = cmdlet.GetResults();
 
@@ -27,29 +27,29 @@ namespace NuPack.VisualStudio.Test {
             // Arrange 
             var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Source = "foo";
-           
+
             // Act 
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
             Assert.AreEqual(2, result.Count());
-            Assert.AreEqual("C", result.First().Id);
-            Assert.AreEqual("Y", result.Last().Id);
+            Assert.AreEqual("P1", result.First().Id);
+            Assert.AreEqual("P6", result.Last().Id);
         }
 
         [TestMethod]
         public void GetPackageReturnsFilteredPackagesFromActiveSource() {
             // Arrange 
             var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
-            cmdlet.Filter = "A C";
+            cmdlet.Filter = "P1 P3";
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
             Assert.AreEqual(2, result.Count());
-            Assert.AreEqual(result.First().Id, "A");
-            Assert.AreEqual(result.Last().Id, "C");
+            Assert.AreEqual(result.First().Id, "P1");
+            Assert.AreEqual(result.Last().Id, "P3");
         }
 
         [TestMethod]
@@ -70,14 +70,14 @@ namespace NuPack.VisualStudio.Test {
             // Arrange 
             var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Installed = new SwitchParameter(isPresent: true);
-            cmdlet.Filter = "C";
+            cmdlet.Filter = "P1";
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
             Assert.AreEqual(1, result.Count());
-            Assert.AreEqual("C", result.First().Id);
+            Assert.AreEqual("P1", result.First().Id);
         }
 
         [TestMethod]
@@ -92,7 +92,7 @@ namespace NuPack.VisualStudio.Test {
             // Assert
             var package = result.Single();
             Assert.AreEqual(Version.Parse("1.1"), package.Version);
-            Assert.AreEqual("C", package.Id);
+            Assert.AreEqual("P1", package.Id);
         }
 
         [TestMethod]
@@ -103,29 +103,29 @@ namespace NuPack.VisualStudio.Test {
             cmdlet.Source = "foo";
 
             // Act 
-            var result = cmdlet.GetResults<dynamic>(); 
+            var result = cmdlet.GetResults<dynamic>();
 
             // Assert
             var package = result.Single();
             Assert.AreEqual(Version.Parse("1.4"), package.Version);
-            Assert.AreEqual("C", package.Id);
+            Assert.AreEqual("P1", package.Id);
         }
 
         [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(isSolutionOpen: false), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: false), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Installed = new SwitchParameter(isPresent: true);
 
             // Act 
-            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), 
+            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
                 "The current environment doesn't have a solution open.");
         }
 
         [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(isSolutionOpen: false), GetPackageManager());
+            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: false), TestUtils.GetDTE(), GetPackageManager());
             cmdlet.Updates = new SwitchParameter(isPresent: true);
             var result = new List<object>();
 
@@ -137,7 +137,7 @@ namespace NuPack.VisualStudio.Test {
         private static IPackageRepositoryFactory GetRepositoryFactory() {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
-            var packages = new[] { GetPackage("C", "1.4"), GetPackage("Y") };
+            var packages = new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
             repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
@@ -145,26 +145,16 @@ namespace NuPack.VisualStudio.Test {
             return repositoryFactory.Object;
         }
 
-        private static VsPackageManager GetPackageManager() {
+        private static IVsPackageManager GetPackageManager() {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<IPackageRepository>();
-            var localPackages = new[] { GetPackage("A"), GetPackage("C", "0.9") };
-            var updates = new [] { GetPackage("X"), GetPackage("Y") };
+            var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
-            var remotePackages = new[] { GetPackage("A"), GetPackage("C", "1.1"), GetPackage("D") };
+            var remotePackages = new[] { PackageUtility.CreatePackage("P0", "1.1"), PackageUtility.CreatePackage("P1", "1.1"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
             return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object);
-        }
-
-        private static IPackage GetPackage(string name, string version = "1.0") {
-            var package = new Mock<IPackage>();
-            package.SetupGet(c => c.Id).Returns(name);
-            package.SetupGet(c => c.Version).Returns(Version.Parse(version));
-            package.SetupGet(c => c.Description).Returns(name);
-
-            return package.Object;
         }
 
         private static IPackageSourceProvider GetSourceProvider() {

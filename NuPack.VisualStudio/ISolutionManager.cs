@@ -10,5 +10,7 @@ namespace NuPack.VisualStudio {
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is an expensive operation")]
         IEnumerable<Project> GetProjects();
+
+        bool IsSolutionOpen { get; }
     }
 }

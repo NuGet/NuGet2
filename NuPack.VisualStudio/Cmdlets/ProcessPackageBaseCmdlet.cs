@@ -20,6 +20,10 @@ namespace NuPack.VisualStudio.Cmdlets {
         [Parameter(Position = 1)]
         public string Project { get; set; }
 
+        protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte)
+            : base(solutionManager, repositoryFactory, dte) {
+        }
+
         protected override IVsPackageManager PackageManager {
             get {
                 return base.PackageManager;
@@ -33,7 +37,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         protected IProjectManager ProjectManager {
             get {
                 if (_projectManager == null) {
-                    _projectManager = GetProjectManager(Project);
+                    _projectManager = GetProjectManager();
                 }
 
                 return _projectManager;
@@ -65,7 +69,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             WriteLine();
         }
 
-        private IProjectManager GetProjectManager(string projectName) {
+        private IProjectManager GetProjectManager() {
             if (PackageManager == null) {
                 return null;
             }
@@ -73,17 +77,17 @@ namespace NuPack.VisualStudio.Cmdlets {
             Project project = null;
 
             // If the user specified a project then use it
-            if (!String.IsNullOrEmpty(projectName)) {
-                project = GetProjectFromName(projectName);
+            if (!String.IsNullOrEmpty(Project)) {
+                project = SolutionManager.GetProject(Project);
 
                 // If that project was invalid then throw
                 if (project == null) {
                     throw new InvalidOperationException(VsResources.Cmdlet_MissingProjectParameter);
                 }
             }
-            else if (!String.IsNullOrEmpty(DefaultProjectName)) {
+            else if (!String.IsNullOrEmpty(SolutionManager.DefaultProjectName)) {
                 // If there is a default project then use it
-                project = GetProjectFromName(DefaultProjectName);
+                project = SolutionManager.GetProject(SolutionManager.DefaultProjectName);
 
                 Debug.Assert(project != null, "default project should never be invalid");
             }
@@ -125,14 +129,14 @@ namespace NuPack.VisualStudio.Cmdlets {
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
-            EnvDTE.Project project = GetProjectFromName(projectManager.Project.ProjectName);
+            EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
 
             ExecuteScript(e.InstallPath, "install.ps1", e.Package, project);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
-            EnvDTE.Project project = GetProjectFromName(projectManager.Project.ProjectName);
+            EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
 
             ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, project);
         }

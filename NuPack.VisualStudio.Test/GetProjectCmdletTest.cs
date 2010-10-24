@@ -1,11 +1,8 @@
-﻿using System.Runtime.InteropServices;
-using Castle.DynamicProxy.Generators;
+﻿using System.Linq;
+using System.Management.Automation;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Linq;
 using NuPack.VisualStudio.Cmdlets;
-using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Test {
     [TestClass]

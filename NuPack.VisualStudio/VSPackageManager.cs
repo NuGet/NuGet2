@@ -55,7 +55,7 @@ namespace NuPack.VisualStudio {
             }
         }
 
-        public IProjectManager GetProjectManager(Project project) {
+        public virtual IProjectManager GetProjectManager(Project project) {
             IProjectManager projectManager;
             _projectManagers.TryGetValue(project, out projectManager);
             return projectManager;
@@ -65,7 +65,7 @@ namespace NuPack.VisualStudio {
             InstallPackage(projectManager, packageId, version, ignoreDependencies, NullLogger.Instance);
         }
 
-        public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
+        public virtual void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
             // REVIEW: This isn't transactional, so if add package reference fails
@@ -81,7 +81,7 @@ namespace NuPack.VisualStudio {
             UninstallPackage(projectManager, packageId, version, forceRemove, removeDependencies, NullLogger.Instance);
         }
 
-        public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
+        public virtual void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
             var projectsWithPackage = GetProjectsWithPackage(packageId, version);
@@ -108,7 +108,7 @@ namespace NuPack.VisualStudio {
         }
 
         // REVIEW: Do we even need this method?
-        public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
+        public virtual void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
             InstallPackage(projectManager, id, version, !updateDependencies, logger);
         }
 

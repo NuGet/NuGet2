@@ -183,4 +183,7 @@
   <data name="NoActivePackageSource" xml:space="preserve">
     <value>Unable to retrieve package list because no source was specified.</value>
   </data>
+  <data name="Cmdlet_TooManySpecFiles" xml:space="preserve">
+    <value>More than one .nuspec files were found.</value>
+  </data>
 </root>

@@ -46,13 +46,22 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether there is a solution open in the IDE.
+        /// </summary>
+        public bool IsSolutionOpen {
+            get {
+                return _dte != null && _dte.Solution != null && _dte.Solution.IsOpen;
+            }
+        }
+
+        /// <summary>
         /// Gets a list of supported projects currently loaded in the solution
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1024:UsePropertiesWhereAppropriate",
-            Justification="This method is potentially expensive if the cache is not constructed yet.")]
+            Justification = "This method is potentially expensive if the cache is not constructed yet.")]
         public IEnumerable<Project> GetProjects() {
             if (IsSolutionOpen) {
                 EnsureProjectCache();
@@ -157,12 +166,6 @@
             return (from project in _projectCache.Values
                     where project.UniqueName.Equals(startupProjectName, StringComparison.OrdinalIgnoreCase)
                     select project.Name).FirstOrDefault();
-        }
-
-        private bool IsSolutionOpen {
-            get {
-                return _dte.Solution.IsOpen;
-            }
         }
     }
 }

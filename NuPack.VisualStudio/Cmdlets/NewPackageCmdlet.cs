@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
 using NuPack.VisualStudio.Resources;
@@ -13,9 +14,16 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
     public class NewPackageCmdlet : NuPackBaseCmdlet {
-
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
+
+        public NewPackageCmdlet()
+            : this(NuPack.VisualStudio.SolutionManager.Current, CachedRepositoryFactory.Instance, DTEExtensions.DTE) {
+        }
+
+        public NewPackageCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte)
+            : base(solutionManager, repositoryFactory, dte) {
+        }
 
         [Parameter(Position = 0)]
         public string Project { get; set; }
@@ -28,10 +36,13 @@ namespace NuPack.VisualStudio.Cmdlets {
         public string TargetFile { get; set; }
 
         protected override void ProcessRecordCore() {
+            if (!SolutionManager.IsSolutionOpen) {
+                throw new InvalidOperationException(VsResources.Cmdlet_NoSolution);
+            }
 
             string projectName = Project;
             if (String.IsNullOrEmpty(projectName)) {
-                projectName = DefaultProjectName;
+                projectName = SolutionManager.DefaultProjectName;
             }
 
             if (String.IsNullOrEmpty(projectName)) {
@@ -39,47 +50,66 @@ namespace NuPack.VisualStudio.Cmdlets {
                 return;
             }
 
-            var projectIns = GetProjectFromName(projectName);
+            var projectIns = SolutionManager.GetProject(projectName);
             if (projectIns == null) {
                 WriteError(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ProjectNotFound, projectName));
                 return;
             }
 
-            var specItem = FindSpecFile(projectIns, SpecFile);
-            if (specItem == null) {
+            ProjectItem specFile;
+            try {
+                specFile = FindSpecFile(projectIns, SpecFile).SingleOrDefault();
+            }
+            catch (InvalidOperationException) {
+                // Single would throw if more than one spec files were found
+                WriteError(VsResources.Cmdlet_TooManySpecFiles);
+                return;
+            }
+            if (specFile == null) {
                 WriteError(VsResources.Cmdlet_NuspecFileNotFound);
                 return;
             }
+            string specFilePath = specFile.FileNames[0];
+            
 
-            var specFilePath = specItem.FileNames[0];
             var builder = NuPack.PackageBuilder.ReadFrom(specFilePath);
-            builder.Modified = builder.Created = DateTime.Now;
-            // Remove the output file or the package spec might try to include it (which is default behavior)
-            builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
+            builder.Modified = DateTime.Now;
+            builder.Created = DateTime.Now;
+            
+            // Get the output file path
+            string outputFile = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);
+            // Remove .nuspec and .nupkg files from output package 
+            RemoveExludedFiles(builder);
+            
+            WriteLine(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_CreatingPackage, outputFile));
+            using(Stream stream = File.Create(outputFile)) {
+                builder.Save(stream);
+            }
+            WriteLine(VsResources.Cmdlet_PackageCreated);
+        }
 
-            string outputFile = TargetFile;
+        internal static string GetPackageFilePath(string outputFile, string projectPath, string id, Version version) {
             if (String.IsNullOrEmpty(outputFile)) {
-                outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
+                outputFile = String.Join(".", id, version, Constants.PackageExtension.TrimStart('.'));
             }
 
             if (!Path.IsPathRooted(outputFile)) {
                 // if the path is a relative, prepend the project path to it
-                string folder = Path.GetDirectoryName(projectIns.FullName);
+                string folder = Path.GetDirectoryName(projectPath);
                 outputFile = Path.Combine(folder, outputFile);
             }
 
-            WriteLine(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_CreatingPackage, outputFile));
-
-            using (Stream stream = File.Create(outputFile)) {
-                builder.Save(stream);
-            }
-
-            WriteLine(VsResources.Cmdlet_PackageCreated);
+            return outputFile;
         }
 
-        private static ProjectItem FindSpecFile(EnvDTE.Project projectIns, string specFile) {
+        internal static void RemoveExludedFiles(PackageBuilder builder) {
+            // Remove the output file or the package spec might try to include it (which is default behavior)
+            builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
+        }
+
+        private static IEnumerable<ProjectItem> FindSpecFile(EnvDTE.Project projectIns, string specFile) {
             if (!String.IsNullOrEmpty(specFile)) {
-                return projectIns.ProjectItems.Item(specFile);
+                yield return projectIns.ProjectItems.Item(specFile);
             }
             else {
                 // Verify if the project has exactly one file with the .nuspec extension. 
@@ -90,14 +120,13 @@ namespace NuPack.VisualStudio.Cmdlets {
                 foreach (ProjectItem item in projectIns.ProjectItems) {
                     if (item.Name.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
                         foundItem = item;
+                        yield return foundItem;
                         count++;
                         if (count > 1) {
-                            break;
+                            yield break;
                         }
                     }
                 }
-
-                return (count == 1) ? foundItem : null;
             }
         }
     }

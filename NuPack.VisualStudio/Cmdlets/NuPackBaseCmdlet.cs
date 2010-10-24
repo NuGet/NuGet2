@@ -14,11 +14,10 @@ namespace NuPack.VisualStudio.Cmdlets {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly DTE _dte;
 
-        // Remove this constructor once all cmdlets have been converted.
-        protected NuPackBaseCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, repositoryFactory: CachedRepositoryFactory.Instance, dte: DTEExtensions.DTE,  packageManager: null) { }
+        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte) :
+            this(solutionManager, repositoryFactory, dte, packageManager: null) { }
 
-        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte, VsPackageManager packageManager) {
+        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte, IVsPackageManager packageManager) {
             _solutionManager = solutionManager;
             _dte = dte;
             _packageManager = packageManager;
@@ -54,25 +53,6 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        /// <summary>
-        /// Gets the default project name if a -Project parameter is not supplied.
-        /// </summary>
-        /// <value>The default project name.</value>
-        protected string DefaultProjectName {
-            get {
-                return SolutionManager.DefaultProjectName;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether there is a solution open in the IDE.
-        /// </summary>
-        protected bool IsSolutionOpen {
-            get {
-                return DTE != null && DTE.Solution != null && DTE.Solution.IsOpen;
-            }
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
@@ -96,7 +76,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             Log(level, formattedMessage);
         }
 
-        public void Execute() {
+        internal void Execute() {
             BeginProcessing();
             ProcessRecord();
             EndProcessing();
@@ -123,13 +103,12 @@ namespace NuPack.VisualStudio.Cmdlets {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
 
-            if (!IsSolutionOpen) {
+            if (!SolutionManager.IsSolutionOpen) {
                 return null;
             }
 
             // prepare a PackageManager instance for use throughout the command execution lifetime
-            DTE dte = DTEExtensions.DTE;
-            return new VsPackageManager(dte);
+            return new VsPackageManager(DTE);
         }
 
         protected IVsPackageManager GetPackageManager(string source) {
@@ -138,15 +117,11 @@ namespace NuPack.VisualStudio.Cmdlets {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
 
-            if (!IsSolutionOpen) {
+            if (!SolutionManager.IsSolutionOpen) {
                 return null;
             }
 
             return new VsPackageManager(DTE, _repositoryFactory.CreateRepository(source));
-        }
-
-        protected Project GetProjectFromName(string projectName) {
-            return SolutionManager.GetProject(projectName);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -164,6 +139,11 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         protected void WriteLine(string message = null) {
+            if (Host == null) {
+                // Host is null when running unit tests. Simply return in this case
+                return;
+            }
+
             if (message == null) {
                 Host.UI.WriteLine();
             }

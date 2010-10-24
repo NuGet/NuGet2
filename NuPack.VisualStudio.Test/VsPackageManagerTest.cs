@@ -117,7 +117,7 @@ namespace NuPack.Test.VisualStudio {
                                       localRepository);
         }
 
-        public class MockVsPackageManager : VsPackageManager {
+        private class MockVsPackageManager : VsPackageManager {
             private IEnumerable<IProjectManager> _projectManagers;
 
             public MockVsPackageManager(ISolutionManager solutionManager,

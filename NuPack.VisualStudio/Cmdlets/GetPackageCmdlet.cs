@@ -23,7 +23,7 @@ namespace NuPack.VisualStudio.Cmdlets {
                    packageManager: null /* this would be lazily created */) {
         }
 
-        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider, ISolutionManager solutionManager, DTE dte, VsPackageManager packageManager)
+        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider, ISolutionManager solutionManager, DTE dte, IVsPackageManager packageManager)
             : base(solutionManager, repositoryFactory, dte, packageManager) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
@@ -57,7 +57,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
         protected override void ProcessRecordCore() {
-            if (!IsSolutionOpen && (Installed.IsPresent || Updates.IsPresent)) {
+            if (!SolutionManager.IsSolutionOpen && (Installed.IsPresent || Updates.IsPresent)) {
                 WriteError(VsResources.Cmdlet_NoSolution);
                 return;
             }
@@ -69,10 +69,10 @@ namespace NuPack.VisualStudio.Cmdlets {
             else if (!String.IsNullOrEmpty(Source)) {
                 repository = _repositoryFactory.CreateRepository(Source);
             }
-            else if (IsSolutionOpen) {
+            else if (SolutionManager.IsSolutionOpen) {
                 repository = PackageManager.SourceRepository;
             }
-            else if(!String.IsNullOrEmpty(ActivePackageSource)) {
+            else if (!String.IsNullOrEmpty(ActivePackageSource)) {
                 repository = _repositoryFactory.CreateRepository(ActivePackageSource);
             }
             else {

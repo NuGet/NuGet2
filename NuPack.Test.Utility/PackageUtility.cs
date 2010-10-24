@@ -9,7 +9,7 @@
     
     public class PackageUtility {        
         public static IPackage CreatePackage(string id,
-                                              string version,
+                                              string version = "1.0",
                                               IEnumerable<string> content = null,
                                               IEnumerable<string> assemblyReferences = null,
                                               IEnumerable<string> tools = null,
