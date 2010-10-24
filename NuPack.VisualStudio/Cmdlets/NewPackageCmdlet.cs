@@ -13,10 +13,6 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
     public class NewPackageCmdlet : NuPackBaseCmdlet {
-
-        private static readonly HashSet<string> _exclude =
-            new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
-
         [Parameter(Position = 0)]
         public string Project { get; set; }
 

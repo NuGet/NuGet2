@@ -1,6 +1,7 @@
 ﻿namespace NuPack {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -239,6 +240,7 @@
                                                  force));
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private void RemovePackageReferenceFromProject(IPackage package) {
             PackageOperationEventArgs args = CreateOperation(package);
             OnPackageReferenceRemoving(args);

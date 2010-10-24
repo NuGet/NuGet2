@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 namespace NuPack {
     public static class PackageRepositoryExtensions {
 
-        public static bool Exists(this IPackageRepository repository, IPackage package) {
+        public static bool Exists(this IPackageRepository repository, IPackageMetadata package) {
             return repository.Exists(package.Id, package.Version);
         }
 

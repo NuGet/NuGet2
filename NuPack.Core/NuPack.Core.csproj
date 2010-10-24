@@ -33,6 +33,9 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="Authoring\ManifestDependency.cs" />
+    <Compile Include="Authoring\ManifestFile.cs" />
+    <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
     <Compile Include="Packages\IPackageMetadata.cs" />
@@ -67,7 +70,7 @@
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
     <Compile Include="Authoring\PackageBuilder.cs" />
     <Compile Include="Authoring\PathResolver.cs" />
-    <Compile Include="Authoring\XmlManifestReader.cs" />
+    <Compile Include="Authoring\Manifest.cs" />
     <Compile Include="PackageSource\PackageSource.cs" />
     <Compile Include="Packages\DataServicePackage.cs" />
     <Compile Include="Packages\DefaultPackagePathResolver.cs" />

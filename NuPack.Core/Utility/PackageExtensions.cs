@@ -55,7 +55,7 @@
             return !package.GetFiles().Any() && package.Dependencies.Any();
         }
 
-        public static string GetFullName(this IPackage package) {
+        public static string GetFullName(this IPackageMetadata package) {
             return package.Id + " " + package.Version;
         }
 
