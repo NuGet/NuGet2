@@ -42,18 +42,18 @@
             try {
                 var manifestFile = args.First();
                 string outputDirectory = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
-                PackageBuilder builder = PackageBuilder.ReadFrom(manifestFile);
-                builder.Created = DateTime.Now;
-                builder.Modified = DateTime.Now;
-                var outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
+                PackageBuilder builder;
+                using (Stream stream = File.OpenRead(manifestFile)) {
+                    builder = new PackageBuilder(stream);
+                }
 
-                // Remove the output file or the package spec might try to include it (which is default behavior)
-                builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
+                var outputFile = String.Join(".", builder.Manifest.Metadata.Id, builder.Manifest.Metadata.Version, Constants.PackageExtension.TrimStart('.'));
+                File.Delete(outputFile);
 
                 string outputPath = Path.Combine(outputDirectory, outputFile);
 
                 using (Stream stream = File.Create(outputPath)) {
-                    builder.Save(stream);
+                    builder.Save(stream, basePath: Path.GetDirectoryName(manifestFile));
                 }
 
                 Console.WriteLine("{0} created successfully", outputPath);

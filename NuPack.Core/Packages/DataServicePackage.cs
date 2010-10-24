@@ -1,57 +1,28 @@
-﻿namespace NuPack {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Net;
-    using System.Data.Services.Common;
-    using System.Data.Services.Client;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Services.Common;
+using System.IO;
+using System.Linq;
 
+namespace NuPack {
     [DataServiceKey("Id", "Version")]
-    [EntityPropertyMappingAttribute("Modified", SyndicationItemProperty.Updated, SyndicationTextContentKind.Plaintext, keepInContent: false)]
-    [EntityPropertyMappingAttribute("Id", SyndicationItemProperty.Title, SyndicationTextContentKind.Plaintext, keepInContent: false)]
-    [EntityPropertyMappingAttribute("Description", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
-    [EntityPropertyMappingAttribute("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
+    [EntityPropertyMapping("Id", SyndicationItemProperty.Title, SyndicationTextContentKind.Plaintext, keepInContent: false)]
+    [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
+    [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
-        private Lazy<IPackage> _retrievedPackage;
-
+        private Lazy<IPackage> _package;
         public string Id {
             get;
             set;
         }
 
-        public string Category {
+        public string Version {
             get;
             set;
         }
 
-        public string Description {
-            get;
-            set;
-        }
-
-        public string Language {
-            get;
-            set;
-        }
-
-        public string LastModifiedBy {
-            get;
-            set;
-        }
-
-        public bool RequireLicenseAcceptance {
-            get;
-            set;
-        }
-
-        public Uri LicenseUrl {
-            get;
-            set;
-        }
-
-        public string Keywords {
+        public string Title {
             get;
             set;
         }
@@ -61,37 +32,39 @@
             set;
         }
 
-        public string Version {
-            get;
-            set;
-        }
-        
-        IEnumerable<string> IPackage.Keywords {
-            get {
-                return Keywords.Split(',');
-            }
-        }
-
-        IEnumerable<string> IPackage.Authors {
-            get {
-                return Authors.Split(',');
-            }
-        }
-
-        public DateTime Created {
+        public Uri IconUrl {
             get;
             set;
         }
 
-        public DateTime Modified {
+        public Uri LicenseUrl {
             get;
             set;
         }
 
-        Version IPackage.Version {
-            get {
-                return new Version(Version);
-            }
+        public Uri ProjectUrl {
+            get;
+            set;
+        }
+
+        public bool RequireLicenseAcceptance {
+            get;
+            set;
+        }
+
+        public string Description {
+            get;
+            set;
+        }
+
+        public string Summary {
+            get;
+            set;
+        }
+
+        public string Language {
+            get;
+            set;
         }
 
         public string Dependencies {
@@ -99,7 +72,16 @@
             set;
         }
 
-        IEnumerable<PackageDependency> IPackage.Dependencies {
+        IEnumerable<string> IPackageMetadata.Authors {
+            get {
+                if(String.IsNullOrEmpty(Authors)) {
+                    return Enumerable.Empty<string>();
+                }
+                return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+
+        IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
                 return from d in Dependencies.Split(',')
                        let parts = d.Split(':')
@@ -111,18 +93,31 @@
             }
         }
 
+        Version IPackageMetadata.Version {
+            get {
+                if (Version != null) {
+                    return new Version(Version);
+                }
+                return null;
+            }
+        }
+
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return _retrievedPackage.Value.AssemblyReferences;
+                return _package.Value.AssemblyReferences;
             }
         }
        
         public IEnumerable<IPackageFile> GetFiles() {
-            return _retrievedPackage.Value.GetFiles();
+            return _package.Value.GetFiles();
+        }
+
+        public Stream GetStream() {
+            return _package.Value.GetStream();
         }
 
         internal void InitializeDownloader(Func<IPackage> downloader) {
-            _retrievedPackage = new Lazy<IPackage>(downloader, isThreadSafe: false);
+            _package = new Lazy<IPackage>(downloader, isThreadSafe: false);
         }
     }
 }

@@ -10,19 +10,29 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="metadata" maxOccurs="1" minOccurs="1">
-                    <xs:complexType>                        
+                    <xs:complexType>
                         <xs:all>
                             <xs:element name="id" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="version" maxOccurs="1" minOccurs="1" type="xs:string" />
-                            <xs:element name="category" maxOccurs="1" minOccurs="0" type="xs:string" />
-                            <xs:element name="authors" maxOccurs="1" minOccurs="1">
-                                <xs:complexType>
-                                    <xs:sequence>
-                                        <xs:element name="author" minOccurs="1" maxOccurs="unbounded" type="xs:string"></xs:element>
-                                    </xs:sequence>
-                                </xs:complexType>
-                            </xs:element>
+                            <xs:element name="title" maxOccurs="1" minOccurs="0" type="xs:string" />
+                            <xs:element name="authors" maxOccurs="1" minOccurs="1" />
                             <xs:element name="licenseUrl" maxOccurs="1" minOccurs="0">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:anyURI">
+                                        <xs:whiteSpace value="collapse" />
+                                        <xs:minLength value="1" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                            <xs:element name="projectUrl" maxOccurs="1" minOccurs="0">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:anyURI">
+                                        <xs:whiteSpace value="collapse" />
+                                        <xs:minLength value="1" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                            <xs:element name="iconUrl" maxOccurs="1" minOccurs="0">
                                 <xs:simpleType>
                                     <xs:restriction base="xs:anyURI">
                                         <xs:whiteSpace value="collapse" />
@@ -32,26 +42,23 @@
                             </xs:element>
                             <xs:element name="requireLicenseAcceptance" maxOccurs="1" minOccurs="0" type="xs:boolean" />
                             <xs:element name="description" maxOccurs="1" minOccurs="1" type="xs:string" />
-                            <xs:element name="language" maxOccurs="1" minOccurs="1" type="xs:string" default="en-US" />
-                            <xs:element name="keywords" maxOccurs="1" minOccurs="0" type="xs:string" />                            
-                            <xs:element name="homepage" maxOccurs="1" minOccurs="0" type="xs:anyURI" />
-                            <xs:element name="created" maxOccurs="1" minOccurs="0" type="xs:dateTime" />
-                            <xs:element name="modified" maxOccurs="1" minOccurs="0" type="xs:dateTime" />
-                        </xs:all>
-                    </xs:complexType>
-                </xs:element>
-                <xs:element name="dependencies" maxOccurs="1" minOccurs="0">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element name="dependency" minOccurs="1" maxOccurs="unbounded">
+                            <xs:element name="summary" maxOccurs="1" minOccurs="0" type="xs:string" />
+                            <xs:element name="language" maxOccurs="1" minOccurs="0" type="xs:string" default="en-US" />
+                            <xs:element name="dependencies" maxOccurs="1" minOccurs="0">
                                 <xs:complexType>
-                                    <xs:attribute name="id" type="xs:string" use="required" />
-                                    <xs:attribute name="minversion" type="xs:string" use="optional" />
-                                    <xs:attribute name="maxversion" type="xs:string" use="optional" />
-                                    <xs:attribute name="version" type="xs:string" use="optional" />
+                                    <xs:sequence>
+                                        <xs:element name="dependency" minOccurs="1" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:attribute name="id" type="xs:string" use="required" />
+                                                <xs:attribute name="minVersion" type="xs:string" use="optional" />
+                                                <xs:attribute name="maxVersion" type="xs:string" use="optional" />
+                                                <xs:attribute name="version" type="xs:string" use="optional" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
-                        </xs:sequence>
+                        </xs:all>
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="files" minOccurs="0" maxOccurs="unbounded">

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace NuPack {
     public static class PackageRepositoryExtensions {
@@ -56,7 +54,7 @@ namespace NuPack {
             }
 
             // Filter packages by what we currently have installed
-            ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackage));
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
             Expression expressionBody = packages.Select(package => GetCompareExpression(parameterExpression, package))
                                                 .Aggregate(Expression.OrElse);
 

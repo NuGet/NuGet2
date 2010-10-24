@@ -1,82 +1,31 @@
-﻿namespace NuPack {
-    using System;
-    using System.Collections.ObjectModel;
-    using System.IO;
-    using System.IO.Packaging;
-    using System.Xml.Linq;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Packaging;
+using System.Linq;
+using System.Xml.Serialization;
 
+namespace NuPack {
     public class PackageBuilder {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
 
-        public PackageBuilder() {
+        public PackageBuilder(Stream stream) {
+            var serializer = new XmlSerializer(typeof(Manifest));
+            Manifest = (Manifest)serializer.Deserialize(stream);
             Files = new Collection<IPackageFile>();
-            Dependencies = new Collection<PackageDependency>();
-            Keywords = new Collection<string>();
-            Authors = new Collection<string>();
         }
 
-        public string Id {
-            get;
-            set;
+        public PackageBuilder()
+            : this(new Manifest()) {
         }
 
-        public string Description {
-            get;
-            set;
+        public PackageBuilder(Manifest manifest) {
+            Manifest = manifest;
+            Files = new Collection<IPackageFile>();
         }
 
-        public Collection<string> Authors {
-            get;
-            private set;
-        }
-
-        public Collection<string> Keywords {
-            get;
-            private set;
-        }
-
-        public string Category {
-            get;
-            set;
-        }
-
-        public Version Version {
-            get;
-            set;
-        }
-
-        public DateTime Created {
-            get;
-            set;
-        }
-
-        public string Language {
-            get;
-            set;
-        }
-
-        public Uri LicenseUrl {
-            get;
-            set;
-        }
-
-        public bool RequireLicenseAcceptance {
-            get;
-            set;
-        }
-
-        public DateTime Modified {
-            get;
-            set;
-        }
-
-        public string LastModifiedBy {
-            get;
-            set;
-        }
-
-        public Collection<PackageDependency> Dependencies {
+        public Manifest Manifest {
             get;
             private set;
         }
@@ -86,73 +35,26 @@
             private set;
         }
 
-        public static void Save(IPackage package, Stream stream) {
-            ReadFrom(package).Save(stream);
+        public void Save(Stream stream) {
+            Save(stream, basePath: null);
         }
 
-        public void Save(Stream stream) {
+        public void Save(Stream stream, string basePath) {
             using (Package package = Package.Open(stream, FileMode.Create)) {
                 WriteManifest(package);
-                WriteFiles(package);
+                WriteFiles(package, basePath);
 
                 // Copy the metadata properties back to the package
-                package.PackageProperties.Category = Category;
-                package.PackageProperties.Created = Created;
-                package.PackageProperties.Creator = String.Join(", ", Authors);
-                package.PackageProperties.Description = Description;
-                package.PackageProperties.Identifier = Id;
-                package.PackageProperties.Version = Version.ToString();
-                package.PackageProperties.Keywords = String.Join(", ", Keywords);
-                package.PackageProperties.LastModifiedBy = LastModifiedBy;
-                package.PackageProperties.Modified = Modified;
-                package.PackageProperties.Language = Language;
+                package.PackageProperties.Creator = Manifest.Metadata.Authors;
+                package.PackageProperties.Description = Manifest.Metadata.Description;
+                package.PackageProperties.Identifier = Manifest.Metadata.Id;
+                package.PackageProperties.Version = Manifest.Metadata.Version;
+                package.PackageProperties.Language = Manifest.Metadata.Language;
             }
         }
 
-        public static PackageBuilder ReadFrom(Stream stream) {
-            XmlManifestReader reader = new XmlManifestReader(XDocument.Load(stream));
-            PackageBuilder builder = new PackageBuilder();
-            reader.ReadContentTo(builder);
-            return builder;
-        }
-
-        public static PackageBuilder ReadFrom(string path) {
-            XmlManifestReader reader = new XmlManifestReader(path);
-            PackageBuilder builder = new PackageBuilder();
-            reader.ReadContentTo(builder);
-            return builder;
-        }
-
-        public static PackageBuilder ReadFrom(IPackage package) {
-            PackageBuilder packageBuilder = new PackageBuilder();
-
-            // Copy meta data
-            packageBuilder.Authors.AddRange(package.Authors);
-            packageBuilder.Category = package.Category;
-            packageBuilder.Created = package.Created;
-            packageBuilder.Description = package.Description;
-            packageBuilder.Id = package.Id;
-            packageBuilder.Keywords.AddRange(package.Keywords);
-            packageBuilder.Version = package.Version;
-            packageBuilder.LastModifiedBy = package.LastModifiedBy;
-            packageBuilder.Language = package.Language;
-            packageBuilder.Modified = package.Modified;
-            packageBuilder.LicenseUrl = package.LicenseUrl;
-
-            // Copy dependencies
-            packageBuilder.Dependencies.AddRange(package.Dependencies);
-
-            // Copy files
-            packageBuilder.Files.AddRange(package.GetFiles());
-
-            // Remove the manifest file
-            packageBuilder.Files.RemoveAll(file => Utility.IsManifest(file.Path));
-
-            return packageBuilder;
-        }
-
         private void WriteManifest(Package package) {
-            Uri uri = UriHelper.CreatePartUri(Id + Constants.ManifestExtension);
+            Uri uri = UriHelper.CreatePartUri(Manifest.Metadata.Id + Constants.ManifestExtension);
 
             // Create the manifest relationship
             package.CreateRelationship(uri, TargetMode.Internal, Constants.SchemaNamespace + ManifestRelationType);
@@ -161,26 +63,51 @@
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
 
             using (Stream stream = packagePart.GetStream()) {
-                var writer = new XmlManifestWriter(this);
-                writer.Save(stream);
-            }
-
-            // We need to reopen the stream after we've written the manifest so we can validate it
-            using (Stream stream = packagePart.GetStream()) {
-                XmlManifestReader.ValidateSchema(XDocument.Load(stream));
+                // TODO: Validate xsd
+                var serializer = new XmlSerializer(typeof(Manifest));
+                serializer.Serialize(stream, Manifest);
             }
         }
 
-        private void WriteFiles(Package package) {
-            foreach (var file in Files) {
-                using (Stream stream = file.Open()) {
+        private void WriteFiles(Package package, string basePath) {
+            // If there's no base path then ignore the files node
+            if (!String.IsNullOrEmpty(basePath)) {
+                if (Manifest.Files != null && !Manifest.Files.Any()) {
+                    AddFiles(package, basePath, @"**\*.*", null);
+                }
+                else {
+                    foreach (var file in Manifest.Files) {
+                        AddFiles(package, basePath, file.Source, file.Target);
+                    }
+                }
+            }
+
+            // Add files that might not come from expanding files on disk
+            foreach (IPackageFile file in Files) {
+                using (Stream stream = file.GetStream()) {
                     CreatePart(package, file.Path, stream);
                 }
             }
         }
 
-        private static void CreatePart(Package package, string packagePath, Stream sourceStream) {
-            Uri uri = UriHelper.CreatePartUri(packagePath);
+        private void AddFiles(Package package, string basePath, string source, string destination) {
+            PathSearchFilter searchFilter = PathResolver.ResolvePath(basePath, source);
+            foreach (var file in Directory.EnumerateFiles(searchFilter.SearchDirectory,
+                                                          searchFilter.SearchPattern,
+                                                          searchFilter.SearchOption)) {
+                var destinationPath = PathResolver.ResolvePackagePath(source, basePath, file, destination);
+                using (Stream stream = File.OpenRead(file)) {
+                    CreatePart(package, destinationPath, stream);
+                }
+            }
+        }
+
+        private static void CreatePart(Package package, string path, Stream sourceStream) {
+            if (Utility.IsManifest(path)) {
+                return;
+            }
+
+            Uri uri = UriHelper.CreatePartUri(path);
 
             // Create the part
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);

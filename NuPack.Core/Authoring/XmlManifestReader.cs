@@ -1,13 +1,149 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Schema;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace NuPack {
-    internal class XmlManifestReader {
+    [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
+    public class Manifest {
+        public Manifest() {
+            Metadata = new ManifestMetadata();
+        }
+        [XmlElement("metadata", IsNullable = false)]
+        public ManifestMetadata Metadata { get; set; }
+
+        [XmlArray("files")]
+        [XmlArrayItem("file")]
+        public List<ManifestFile> Files { get; set; }
+
+        public void Save(Stream stream) {
+            var serializer = new XmlSerializer(typeof(Manifest));
+            serializer.Serialize(stream, this);
+        }
+    }
+
+    [XmlType("file", Namespace = Constants.ManifestSchemaNamespace)]
+    public class ManifestFile {
+        [XmlElement("src")]
+        public string Source { get; set; }
+
+        [XmlElement("target")]
+        public string Target { get; set; }
+    }
+
+    [XmlType("metadata", Namespace = Constants.ManifestSchemaNamespace)]
+    public class ManifestMetadata : IPackageMetadata {
+        [XmlElement("id")]
+        public string Id { get; set; }
+
+        [XmlElement("version")]
+        public string Version { get; set; }
+
+        [XmlElement("title")]
+        public string Title { get; set; }
+
+        [XmlElement("authors")]
+        public string Authors { get; set; }
+
+        [XmlElement("licenseUrl")]
+        public string LicenseUrl { get; set; }
+
+        [XmlElement("projectUrl")]
+        public string ProjectUrl { get; set; }
+
+        [XmlElement("iconUrl")]
+        public string IconUrl { get; set; }
+
+        [XmlElement("requireLicenseAcceptance")]
+        public bool RequireLicenseAcceptance { get; set; }
+
+        [XmlElement("description")]
+        public string Description { get; set; }
+
+        [XmlElement("summary")]
+        public string Summary { get; set; }
+
+        [XmlElement("language")]
+        public string Language { get; set; }
+
+        [XmlArray("dependencies")]
+        [XmlArrayItem("dependency")]
+        public List<ManifestDependency> Dependencies { get; set; }
+
+        Version IPackageMetadata.Version {
+            get {
+                if (Version == null) {
+                    return null;
+                }
+                return new Version(Version);
+            }
+        }
+
+        Uri IPackageMetadata.IconUrl {
+            get {
+                if (IconUrl == null) {
+                    return null;
+                }
+                return new Uri(IconUrl);
+            }
+        }
+
+        Uri IPackageMetadata.LicenseUrl {
+            get {
+                if (LicenseUrl == null) {
+                    return null;
+                }
+                return new Uri(LicenseUrl);
+            }
+        }
+
+        Uri IPackageMetadata.ProjectUrl {
+            get {
+                if (ProjectUrl == null) {
+                    return null;
+                }
+                return new Uri(ProjectUrl);
+            }
+        }
+
+        IEnumerable<string> IPackageMetadata.Authors {
+            get {
+                if (String.IsNullOrEmpty(Authors)) {
+                    return Enumerable.Empty<string>();
+                }
+                return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+
+        IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
+            get {
+                return from dependency in Dependencies
+                       select PackageDependency.CreateDependency(dependency.Id,
+                                                                 Utility.ParseOptionalVersion(dependency.MinVersion),
+                                                                 Utility.ParseOptionalVersion(dependency.MaxVersion),
+                                                                 Utility.ParseOptionalVersion(dependency.Version));
+            }
+        }
+    }
+
+    [XmlType("dependency", Namespace = Constants.ManifestSchemaNamespace)]
+    public class ManifestDependency {
+        [XmlAttribute("id")]
+        public string Id { get; set; }
+
+        [XmlAttribute("minVersion")]
+        public string MinVersion { get; set; }
+
+        [XmlAttribute("maxVersion")]
+        public string MaxVersion { get; set; }
+
+        [XmlAttribute("version")]
+        public string Version { get; set; }
+    }
+
+    /*internal class XmlManifestReader {
         private XDocument _manifestDocument;
 
         public XmlManifestReader(string manifestFile) {
@@ -182,12 +318,12 @@ namespace NuPack {
         private void AddFiles(PackageBuilder builder, string source, string destination) {
             PathSearchFilter searchFilter = PathResolver.ResolvePath(BasePath, source);
             foreach (var file in Directory.EnumerateFiles(searchFilter.SearchDirectory, searchFilter.SearchPattern, searchFilter.SearchOption)) {
-                var destinationPath = PathResolver.ResolvePackagePath(source, BasePath, file, destination);
+                var destinationPath = PathResolver.ResolvePath(source, BasePath, file, destination);
                 builder.Files.Add(new PhysicalPackageFile {
                     SourcePath = file,
                     TargetPath = destinationPath
                 });
             }
         }
-    }
+    }*/
 }

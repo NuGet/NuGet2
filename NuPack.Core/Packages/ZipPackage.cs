@@ -1,12 +1,13 @@
-﻿namespace NuPack {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.IO.Packaging;
-    using System.Linq;
-    using Microsoft.Internal.Web.Utils;
-    using NuPack.Resources;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Packaging;
+using System.Linq;
+using System.Xml.Serialization;
+using Microsoft.Internal.Web.Utils;
+using NuPack.Resources;
 
+namespace NuPack {
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
         private const string AssemblyReferencesExtension = ".dll";
@@ -14,7 +15,6 @@
         // paths to exclude
         private static readonly string[] _excludePaths = new[] { "_rels", "package" };
 
-        private PackageBuilder _metadata;
         // We don't store the steam itself, just a way to open the stream on demand
         // so we don't have to hold on to that resource
         private Func<Stream> _streamFactory;
@@ -24,6 +24,7 @@
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "fileName");
             }
             _streamFactory = () => File.OpenRead(fileName);
+            EnsureManifest();
         }
 
         internal ZipPackage(Func<Stream> streamFactory) {
@@ -31,93 +32,67 @@
                 throw new ArgumentNullException("streamFactory");
             }
             _streamFactory = streamFactory;
-        }
-
-        private PackageBuilder Metadata {
-            get {
-                if (_metadata == null) {
-                    _metadata = GetMetadata();
-                }
-                return _metadata;
-            }
-        }
-
-        public DateTime Created {
-            get {
-                return Metadata.Created;
-            }
-        }
-
-        public IEnumerable<string> Authors {
-            get {
-                return Metadata.Authors;
-            }
-        }
-
-        public string Category {
-            get {
-                return Metadata.Category;
-            }
+            EnsureManifest();
         }
 
         public string Id {
-            get {
-                return Metadata.Id;
-            }
-        }
-
-        public bool RequireLicenseAcceptance {
-            get {
-                return Metadata.RequireLicenseAcceptance;
-            }
-        }
-
-        public Uri LicenseUrl {
-            get {
-                return Metadata.LicenseUrl;
-            }
+            get;
+            set;
         }
 
         public Version Version {
-            get {
-                return Metadata.Version;
-            }
+            get;
+            set;
+        }
+
+        public string Title {
+            get;
+            set;
+        }
+
+        public IEnumerable<string> Authors {
+            get;
+            set;
+        }
+
+        public Uri IconUrl {
+            get;
+            set;
+        }
+
+        public Uri LicenseUrl {
+            get;
+            set;
+        }
+
+        public Uri ProjectUrl {
+            get;
+            set;
+        }
+
+        public bool RequireLicenseAcceptance {
+            get;
+            set;
         }
 
         public string Description {
-            get {
-                return Metadata.Description;
-            }
+            get;
+            set;
         }
 
-        public IEnumerable<string> Keywords {
-            get {
-                return Metadata.Keywords;
-            }
+        public string Summary {
+            get;
+            set;
         }
 
         public string Language {
-            get {
-                return Metadata.Language;
-            }
-        }
-
-        public DateTime Modified {
-            get {
-                return Metadata.Modified;
-            }
-        }
-
-        public string LastModifiedBy {
-            get {
-                return Metadata.LastModifiedBy;
-            }
+            get;
+            set;
         }
 
         public IEnumerable<PackageDependency> Dependencies {
-            get {
-                return Metadata.Dependencies;
-            }
+            get;
+            set;
         }
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
@@ -141,11 +116,11 @@
             }
         }
 
-        public override string ToString() {
-            return Id + " " + Version;
+        public Stream GetStream() {
+            return _streamFactory();
         }
 
-        private PackageBuilder GetMetadata() {
+        private void EnsureManifest() {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);
 
@@ -155,14 +130,28 @@
                     throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
                 }
 
-                PackagePart manifest = package.GetPart(relationshipType.TargetUri);
+                PackagePart manifestPart = package.GetPart(relationshipType.TargetUri);
 
-                if (manifest == null) {
+                if (manifestPart == null) {
                     throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
                 }
 
-                using (Stream manifestStream = manifest.GetStream()) {
-                    return PackageBuilder.ReadFrom(manifestStream);
+                using (Stream manifestStream = manifestPart.GetStream()) {
+                    var serializer = new XmlSerializer(typeof(Manifest));
+                    IPackageMetadata metadata = ((Manifest)serializer.Deserialize(manifestStream)).Metadata;
+
+                    Id = metadata.Id;
+                    Version = metadata.Version;
+                    Title = metadata.Title;
+                    Authors = metadata.Authors;
+                    IconUrl = metadata.IconUrl;
+                    LicenseUrl = metadata.LicenseUrl;
+                    ProjectUrl = metadata.ProjectUrl;
+                    RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
+                    Description = metadata.Description;
+                    Summary = metadata.Summary;
+                    Language = metadata.Language;
+                    Dependencies = metadata.Dependencies;
                 }
             }
         }

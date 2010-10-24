@@ -56,7 +56,7 @@
             var assemblyReferences = new List<IPackageAssemblyReference>();
             foreach (var fileName in fileNames) {
                 var mockAssemblyReference = new Mock<IPackageAssemblyReference>();
-                mockAssemblyReference.Setup(m => m.Open()).Returns(() => new MemoryStream());
+                mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
                 mockAssemblyReference.Setup(m => m.Path).Returns(fileName);
                 mockAssemblyReference.Setup(m => m.Name).Returns(Path.GetFileName(fileName));
                 assemblyReferences.Add(mockAssemblyReference.Object);
@@ -66,7 +66,7 @@
 
         public static IPackageAssemblyReference CreateAssemblyReference(string path, FrameworkName targetFramework) {
             var mockAssemblyReference = new Mock<IPackageAssemblyReference>();
-            mockAssemblyReference.Setup(m => m.Open()).Returns(() => new MemoryStream());
+            mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockAssemblyReference.Setup(m => m.Path).Returns(path);
             mockAssemblyReference.Setup(m => m.Name).Returns(path);
             mockAssemblyReference.Setup(m => m.TargetFramework).Returns(targetFramework);
@@ -79,7 +79,7 @@
                 string path = Path.Combine(directory, fileName);
                 var mockFile = new Mock<IPackageFile>();
                 mockFile.Setup(m => m.Path).Returns(path);
-                mockFile.Setup(m => m.Open()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(path)));
+                mockFile.Setup(m => m.GetStream()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(path)));
                 files.Add(mockFile.Object);
             }
             return files;

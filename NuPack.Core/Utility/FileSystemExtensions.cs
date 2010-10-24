@@ -15,7 +15,7 @@ namespace NuPack {
         internal static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir) {
             foreach (IPackageFile file in files) {
                 string path = Path.Combine(rootDir, file.Path);
-                fileSystem.AddFileWithCheck(path, file.Open);
+                fileSystem.AddFileWithCheck(path, file.GetStream);
             }
         }
 
@@ -46,7 +46,7 @@ namespace NuPack {
                 foreach (var file in directoryFiles) {
                     string path = Path.Combine(rootDir, file.Path);
 
-                    fileSystem.DeleteFileSafe(path, file.Open);
+                    fileSystem.DeleteFileSafe(path, file.GetStream);
                 }
 
                 // If the directory is empty then delete it

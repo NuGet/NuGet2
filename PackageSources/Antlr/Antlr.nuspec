@@ -1,12 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<package>
-  <metadata>
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Antlr</id>
     <version>3.1.1</version>
-    <authors>
-      <author>Terence Parr</author>
-    </authors>
+    <authors>Terence Parr</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
-    <language>en-US</language>
+    <summary>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</summary>
   </metadata>
 </package>

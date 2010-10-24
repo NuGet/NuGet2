@@ -6,6 +6,6 @@
             get;
         }
 
-        Stream Open();       
+        Stream GetStream();       
     }
 }

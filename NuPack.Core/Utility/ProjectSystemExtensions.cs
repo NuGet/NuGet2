@@ -26,7 +26,7 @@ namespace NuPack {
                     transformer.TransformFile(file, path, project);
                 }
                 else {
-                    project.AddFileWithCheck(path, file.Open);
+                    project.AddFileWithCheck(path, file.GetStream);
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace NuPack {
                         transformer.RevertFile(file, path, matchingFiles, project);
                     }
                     else {
-                        project.DeleteFileSafe(path, file.Open);
+                        project.DeleteFileSafe(path, file.GetStream);
                     }
                 }
 

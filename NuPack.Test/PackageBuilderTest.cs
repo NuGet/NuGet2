@@ -4,27 +4,8 @@ using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuPack.Test {
-    [TestClass]
+    /*[TestClass]
     public class PackageBuilderTest {
-        [TestMethod]
-        public void ReadingPackageBuilderFromPackageCopiesAllPropertiesAndFiles() {
-            // Arrange
-            var package = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "c" });
-
-            // Act
-            PackageBuilder builder = PackageBuilder.ReadFrom(package);
-
-            // Assert
-            Assert.AreEqual(package.Id, builder.Id);
-            Assert.AreEqual(package.Language, builder.Language);
-            Assert.AreEqual(package.Version, builder.Version);
-            Assert.AreEqual(package.Description, builder.Description);
-            Assert.AreEqual(package.Category, builder.Category);
-            Assert.AreEqual(package.LicenseUrl, builder.LicenseUrl);
-            CollectionAssert.AreEqual(package.Dependencies.ToList(), builder.Dependencies);
-            CollectionAssert.AreEqual(package.GetFiles().ToList(), builder.Files);
-        }
-
         [TestMethod]
         public void PackageBuilderThrowsIfXmlIsMalformed() {
             // Arrange
@@ -34,10 +15,10 @@ namespace NuPack.Test {
             string spec4 = @"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>";
 
             // Act and Assert
-            ExceptionAssert.Throws<XmlException>(() => PackageBuilder.ReadFrom(spec1.AsStream()));
-            ExceptionAssert.Throws<XmlException>(() => PackageBuilder.ReadFrom(spec2.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec3.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec4.AsStream()));
+            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream()));
+            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream()));
         }
 
 
@@ -93,14 +74,14 @@ namespace NuPack.Test {
   </metadata></package>";
             
             // Act
-            var packageBuilder = PackageBuilder.ReadFrom(spec.AsStream());
+            var packageBuilder = new PackageBuilder(spec.AsStream());
 
             // Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec1.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec2.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec3.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec4.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec5.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec1.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec2.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec3.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec4.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec5.AsStream()));
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
 
@@ -124,7 +105,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            PackageBuilder builder = PackageBuilder.ReadFrom(spec.AsStream());
+            PackageBuilder builder = new PackageBuilder(spec.AsStream());
 
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
@@ -156,7 +137,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream()));
         }
 
         [TestMethod]
@@ -178,7 +159,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream()));
         }
 
         [TestMethod]
@@ -200,7 +181,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<UriFormatException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+            ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream()));
         }
-    }
+    }*/
 }

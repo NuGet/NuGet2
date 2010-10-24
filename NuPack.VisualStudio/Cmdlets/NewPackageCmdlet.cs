@@ -52,14 +52,15 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             var specFilePath = specItem.FileNames[0];
-            var builder = NuPack.PackageBuilder.ReadFrom(specFilePath);
-            builder.Modified = builder.Created = DateTime.Now;
-            // Remove the output file or the package spec might try to include it (which is default behavior)
-            builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
-
+            PackageBuilder builder;
+            using (Stream stream = File.OpenRead(specFilePath)) {
+                builder = new PackageBuilder(stream);
+            }
             string outputFile = TargetFile;
+            File.Delete(outputFile);
+
             if (String.IsNullOrEmpty(outputFile)) {
-                outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
+                outputFile = String.Join(".", builder.Manifest.Metadata.Id, builder.Manifest.Metadata.Version, Constants.PackageExtension.TrimStart('.'));
             }
 
             if (!Path.IsPathRooted(outputFile)) {

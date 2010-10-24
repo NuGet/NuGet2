@@ -301,7 +301,7 @@
             package.Setup(m => m.Version).Returns(new Version("1.0"));
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
-            file.Setup(m => m.Open()).Returns(() =>
+            file.Setup(m => m.GetStream()).Returns(() =>
 @"<configuration>
     <configSections>
         <add a=""n"" />
@@ -344,7 +344,7 @@
             package.Setup(m => m.Version).Returns(new Version("1.0"));
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
-            file.Setup(m => m.Open()).Returns(() =>
+            file.Setup(m => m.GetStream()).Returns(() =>
 @"<configuration>
     <system.web>
         <compilation debug=""true"" targetFramework=""4.0"" />

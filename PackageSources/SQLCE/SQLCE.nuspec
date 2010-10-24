@@ -1,12 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<package>
-  <metadata>
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>SQLCE</id>
     <version>4.0.8402.1</version>
-    <authors>
-      <author>Microsoft</author>
-    </authors>
+    <authors>Microsoft</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Embedded SQL database.</description>
-    <language>en-US</language>
+    <summary>Embedded SQL database.</summary>
   </metadata>
 </package>

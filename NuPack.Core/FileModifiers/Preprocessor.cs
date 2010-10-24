@@ -26,7 +26,7 @@ namespace NuPack {
         }
         
         private static string Process(IPackageFile file, ProjectSystem projectSystem) {
-            string text = file.Open().ReadToEnd();
+            string text = file.GetStream().ReadToEnd();
             return _tokenRegex.Replace(text, match => ReplaceToken(match, projectSystem));
         }
 
