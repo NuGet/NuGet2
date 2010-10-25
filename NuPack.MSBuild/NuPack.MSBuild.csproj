@@ -44,11 +44,9 @@
     </Compile>
     <Compile Include="FileSystemWrapper.cs" />
     <Compile Include="IExtendedFileSystem.cs" />
-    <Compile Include="IPackageBuilder.cs" />
     <Compile Include="IPackageBuilderFactory.cs" />
     <Compile Include="NuPack.cs" />
     <Compile Include="PackageBuilderFactory.cs" />
-    <Compile Include="PackageBuilderWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\NuPackResources.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -23,6 +25,39 @@ namespace NuPack {
         public void Save(Stream stream) {
             var serializer = new XmlSerializer(typeof(Manifest));
             serializer.Serialize(stream, this);
+        }
+
+        public static Manifest Create(IPackageMetadata metadata) {
+            return new Manifest {
+                Metadata = new ManifestMetadata {
+                    Id = metadata.Id,
+                    Version = GetVersionString(metadata.Version),
+                    Title = metadata.Title,
+                    Authors = String.Join(",", metadata.Authors),
+                    LicenseUrl = metadata.LicenseUrl != null ? metadata.LicenseUrl.OriginalString : null,
+                    ProjectUrl = metadata.ProjectUrl != null ? metadata.ProjectUrl.OriginalString : null,
+                    IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString : null,
+                    RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
+                    Description = metadata.Description,
+                    Summary = metadata.Summary,
+                    Dependencies = metadata.Dependencies == null ||
+                                   !metadata.Dependencies.Any() ? null :
+                                   (from d in metadata.Dependencies
+                                    select new ManifestDependency {
+                                        Id = d.Id,
+                                        MinVersion = GetVersionString(d.MinVersion),
+                                        MaxVersion = GetVersionString(d.MaxVersion),
+                                        Version = GetVersionString(d.Version)
+                                    }).ToList()
+                }
+            };
+        }
+
+        private static string GetVersionString(Version version) {
+            if (version == null) {
+                return null;
+            }
+            return version.ToString();
         }
     }
 }

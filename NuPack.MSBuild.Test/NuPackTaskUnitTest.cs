@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -57,8 +58,47 @@ namespace NuPack.Test.MSBuild {
 
             bool actualResut = task.Execute();
 
-            packageBuilderStub.Verify(x => x.Save(packageStreamStub.Object, It.IsAny<string>()));
+            packageBuilderStub.Verify(x => x.Save(packageStreamStub.Object));
             Assert.IsTrue(actualResut);
+        }
+
+        [TestMethod]
+        public void WillRemoveNuspecFilesFromPackage() {
+            var packageBuilderStub = new Mock<IPackageBuilder>();
+            var packageFileStub = new Mock<IPackageFile>();
+            packageFileStub.Setup(x => x.Path).Returns("/aFile.nuspec");
+            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+            packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
+
+            bool actualResut = task.Execute();
+
+            Assert.AreEqual(0, packageBuilderStub.Object.Files.Count);
+        }
+
+        [TestMethod]
+        public void WillRemoveNupkgFilesFromPackage() {
+            var packageBuilderStub = new Mock<IPackageBuilder>();
+            var packageFileStub = new Mock<IPackageFile>();
+            packageFileStub.Setup(x => x.Path).Returns("/aFile.nupkg");
+            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+            packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
+
+            bool actualResut = task.Execute();
+
+            Assert.AreEqual(0, packageBuilderStub.Object.Files.Count);
+        }
+
+        [TestMethod]
+        public void WillNotRemoveALibraryFileFromPackage() {
+            var packageBuilderStub = new Mock<IPackageBuilder>();
+            var packageFileStub = new Mock<IPackageFile>();
+            packageFileStub.Setup(x => x.Path).Returns("/lib/aFile.dll");
+            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+            packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
+
+            bool actualResut = task.Execute();
+
+            Assert.AreEqual(1, packageBuilderStub.Object.Files.Count);
         }
 
         [TestMethod]
@@ -82,7 +122,7 @@ namespace NuPack.Test.MSBuild {
             var packageBuilderStub = new Mock<IPackageBuilder>();
             var buildEngineStub = new Mock<IBuildEngine>();
             NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, buildEngineStub: buildEngineStub);
-            packageBuilderStub.Setup(x => x.Save(It.IsAny<Stream>(), It.IsAny<string>())).Throws(new Exception());
+            packageBuilderStub.Setup(x => x.Save(It.IsAny<Stream>())).Throws(new Exception());
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
@@ -116,7 +156,10 @@ namespace NuPack.Test.MSBuild {
                 .Returns("thePackageId");
             packageBuilderStub
                 .SetupGet(x => x.Version)
-                .Returns("1.0");
+                .Returns(new Version(1, 0));
+            packageBuilderStub
+                .SetupGet(x => x.Files)
+                .Returns(new Collection<IPackageFile>());
             packageBuilderFactoryStub
                 .Setup(x => x.CreateFrom("/thePackageId.nuspec"))
                 .Returns(packageBuilderStub.Object);

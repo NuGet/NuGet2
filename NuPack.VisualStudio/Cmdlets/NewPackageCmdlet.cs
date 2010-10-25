@@ -13,6 +13,8 @@ namespace NuPack.VisualStudio.Cmdlets {
     /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
     public class NewPackageCmdlet : NuPackBaseCmdlet {
+        private static readonly HashSet<string> _exclude = new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
+
         [Parameter(Position = 0)]
         public string Project { get; set; }
 
@@ -48,15 +50,15 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             var specFilePath = specItem.FileNames[0];
-            PackageBuilder builder;
-            using (Stream stream = File.OpenRead(specFilePath)) {
-                builder = new PackageBuilder(stream);
-            }
+            var builder = new PackageBuilder(specFilePath);
+
             string outputFile = TargetFile;
-            File.Delete(outputFile);
+
+            // Remove the output file or the package spec might try to include it (which is default behavior)
+            builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
 
             if (String.IsNullOrEmpty(outputFile)) {
-                outputFile = String.Join(".", builder.Manifest.Metadata.Id, builder.Manifest.Metadata.Version, Constants.PackageExtension.TrimStart('.'));
+                outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
             }
 
             if (!Path.IsPathRooted(outputFile)) {
