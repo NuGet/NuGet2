@@ -22,11 +22,12 @@ namespace NuPack.VisualStudio.Test {
         public void NewPackageCmdletThrowsIfProjectSpecifiedDoesNotExist() {
             // Arrange
             var project = "does-not-exist";
-            var cmdlet = new NewPackageCmdlet(TestUtils.GetSolutionManager(), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE());
+            var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "test", projects: new[] { TestUtils.GetProject("test") });
+            var cmdlet = new NewPackageCmdlet(solutionManager, new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE());
             cmdlet.Project = project;
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), 
+            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
                 String.Format("Project '{0}' is not found.", project));
         }
 
@@ -102,7 +103,7 @@ namespace NuPack.VisualStudio.Test {
             // Assert
             Assert.AreEqual(packagePath, outputFile);
         }
-        
+
         [TestMethod]
         public void GetPackageFilePathUsesIdAndVersionWhenOutputFileIsNull() {
             // Arrange

@@ -10,7 +10,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetProjectCmdletReturnsDefaultProjectWhenNoFlagsAreSet() {
             // Arrange
-            var cmdlet = new GetProjectCmdlet(TestUtils.GetSolutionManager());
+            var cmdlet = BuildCmdlet();
 
             // Act
             var result = cmdlet.Invoke<Project>();
@@ -24,7 +24,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetProjectCmdletReturnsProjectWhenProjectNameIsSpecified() {
             // Arrange
-            var cmdlet = new GetProjectCmdlet(TestUtils.GetSolutionManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Name = "WebSite1";
 
             // Act
@@ -39,7 +39,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetProjectCmdletDoesNotThrowWhenProjectNameDoesNotExist() {
             // Arrange
-            var cmdlet = new GetProjectCmdlet(TestUtils.GetSolutionManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Name = "WebSite2";
 
             // Act
@@ -53,14 +53,22 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetProjectCmdletReturnsAllProjectsWhenAllIsSet() {
             // Arrange
-            var cmdlet = new GetProjectCmdlet(TestUtils.GetSolutionManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.All = new SwitchParameter(isPresent: true);
 
             // Act
             var result = cmdlet.Invoke<Project>();
-            
+
             // Assert
             Assert.AreEqual(3, result.Count());
+        }
+
+        private static GetProjectCmdlet BuildCmdlet() {
+            var projects = new[] { 
+                TestUtils.GetProject("ConsoleApplication1"), TestUtils.GetProject("WebSite1"), TestUtils.GetProject("TestProject1") 
+            };
+            var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "ConsoleApplication1", projects: projects);
+            return new GetProjectCmdlet(solutionManager);
         }
     }
 }

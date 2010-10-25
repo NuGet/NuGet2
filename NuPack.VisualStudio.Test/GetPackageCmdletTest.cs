@@ -13,7 +13,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsAllPackagesFromActiveSourceWhenNoParametersAreSpecified() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
 
             // Act 
             var result = cmdlet.GetResults();
@@ -25,7 +25,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoParametersAreSpecified() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Source = "foo";
 
             // Act 
@@ -40,7 +40,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsFilteredPackagesFromActiveSource() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Filter = "P1 P3";
 
             // Act 
@@ -55,7 +55,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsAllPackagesFromLocalRepositoryWhenInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Installed = new SwitchParameter(isPresent: true);
 
             // Act 
@@ -68,7 +68,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsFilteredPackagesFromLocalRepositoryWhenInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Installed = new SwitchParameter(isPresent: true);
             cmdlet.Filter = "P1";
 
@@ -83,7 +83,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsUpdatesWhenUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
 
             // Act 
@@ -98,7 +98,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageReturnsUpdatesFromSourceWhenUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
             cmdlet.Source = "foo";
 
@@ -114,7 +114,7 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndInstalledIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: false), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.Installed = new SwitchParameter(isPresent: true);
 
             // Act 
@@ -125,13 +125,17 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent() {
             // Arrange 
-            var cmdlet = new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: false), TestUtils.GetDTE(), GetPackageManager());
+            var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.Updates = new SwitchParameter(isPresent: true);
             var result = new List<object>();
 
             // Act 
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
                 "The current environment doesn't have a solution open.");
+        }
+
+        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
+            return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), TestUtils.GetDTE(), GetPackageManager());
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

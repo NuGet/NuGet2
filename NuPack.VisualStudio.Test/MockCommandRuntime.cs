@@ -5,14 +5,14 @@ using System.Management.Automation;
 
 namespace NuPack.VisualStudio.Test {
     public class MockCommandRuntime : ICommandRuntime {
-        private readonly List<object> output;
+        private readonly List<object> _output;
 
         // Methods
-        public MockCommandRuntime(List<object> outputArrayList) {
-            if (outputArrayList == null) {
-                throw new ArgumentNullException("outputArrayList");
+        public MockCommandRuntime(List<object> outputList) {
+            if (outputList == null) {
+                throw new ArgumentNullException("outputList");
             }
-            this.output = outputArrayList;
+            _output = outputList;
         }
 
         public bool ShouldContinue(string query, string caption) {
@@ -65,22 +65,22 @@ namespace NuPack.VisualStudio.Test {
         }
 
         public void WriteObject(object sendToPipeline) {
-            this.output.Add(sendToPipeline);
+            this._output.Add(sendToPipeline);
         }
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection) {
             if (!enumerateCollection) {
-                this.output.Add(sendToPipeline);
+                this._output.Add(sendToPipeline);
             }
             else {
                 IEnumerator enumerator = LanguagePrimitives.GetEnumerator(sendToPipeline);
                 if (enumerator != null) {
                     while (enumerator.MoveNext()) {
-                        this.output.Add(enumerator.Current);
+                        this._output.Add(enumerator.Current);
                     }
                 }
                 else {
-                    this.output.Add(sendToPipeline);
+                    this._output.Add(sendToPipeline);
                 }
             }
         }
