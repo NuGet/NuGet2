@@ -14,6 +14,13 @@
           <ButtonText>Package Manager Console</ButtonText>
         </Strings>
       </Menu>
+      <Menu guid="guidToolsGroup" id="idLibraryPackageManager" type="Menu" priority="0x500">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OTHER2" />
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Library Package Ma&amp;nager</ButtonText>
+        </Strings>
+      </Menu>
     </Menus>
     
     <Groups>
@@ -26,11 +33,13 @@
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup" priority="0x2000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
       </Group>
+      <Group guid="guidToolsGroup" id="idToolsGroup" priority="0x100">
+        <Parent guid="guidToolsGroup" id="idLibraryPackageManager" />
+      </Group>
     </Groups>
     
     <Buttons>
       <Button guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
         <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
         <Strings>
           <ButtonText>Package Manager C&amp;onsole</ButtonText>
@@ -41,7 +50,7 @@
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup"/>
         <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
         <Strings>
-          <ButtonText>&amp;Manage package sources</ButtonText>
+          <ButtonText>&amp;Package Manager Settings</ButtonText>
         </Strings>
       </Button>
       
@@ -92,6 +101,22 @@
   </VisibilityConstraints>
 
   <CommandPlacements>
+    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0xF200">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+    
       <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
       </CommandPlacement>
@@ -134,7 +159,11 @@
       <IDSymbol name="bmpClearConsole" value="2" />
       <IDSymbol name="bmpSourceSettings" value="3" />
     </GuidSymbol>
-    
+    <GuidSymbol name="guidToolsGroup" value="{C0D88179-5D25-4982-BFE6-EC5FD59AC103}">
+      <IDSymbol name="idLibraryPackageManager" value="0x100" />
+      <IDSymbol name="idToolsGroup" value="0x200" />
+    </GuidSymbol>
+                
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
         <IDSymbol name="cmdidAddPackages" value="0x0100" />

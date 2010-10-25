@@ -80,6 +80,10 @@ namespace NuPack.Tools {
             command.Visible = HasActiveLoadedSupportedProject;
         }
 
+        private void ShowSettingsWindow(object sender, EventArgs args) {
+            ShowOptionPage(typeof(NuPack.Dialog.ToolsOptionsUI.ToolsOptionsPage));
+        }
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initilaization code that rely on services provided by VisualStudio.
@@ -104,6 +108,10 @@ namespace NuPack.Tools {
                 CommandID menuCommandID = new CommandID(GuidList.guidNuPackDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
                 OleMenuCommand menuItem = new OleMenuCommand(ShowAddPackageDialog, null, BeforeQueryStatusForAddPackageDialog, menuCommandID);
                 mcs.AddCommand(menuItem);
+
+                CommandID settingsCommandID = new CommandID(GuidList.guidNuPackConsoleCmdSet, (int)PkgCmdIDList.cmdidSourceSettings);
+                OleMenuCommand settingsMenuCommand = new OleMenuCommand(ShowSettingsWindow, settingsCommandID);
+                mcs.AddCommand(settingsMenuCommand);
             }
         }
 

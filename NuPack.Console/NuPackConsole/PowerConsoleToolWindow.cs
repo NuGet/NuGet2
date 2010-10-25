@@ -69,9 +69,6 @@ namespace NuPackConsole.Implementation {
 
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (mcs != null) {
-                CommandID sourceSettingsCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSourceSettings);
-                mcs.AddCommand(new OleMenuCommand(SourceSettings_Exec, sourceSettingsCommandID));
-
                 // Get list command for the Feed combo
                 CommandID sourcesListCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSourcesList);
                 mcs.AddCommand(new OleMenuCommand(SourcesList_Exec, sourcesListCommandID));
@@ -261,17 +258,6 @@ namespace NuPackConsole.Implementation {
             if (WpfConsole != null) {
                 WpfConsole.Dispatcher.ClearConsole();
             }
-        }
-
-        void SourceSettings_Exec(object sender, EventArgs e) {
-            // this is the GUID that is defined in the NuPack.Dialog project, inside file ToolsOptionsPage.cs
-            string targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
-            var command = new CommandID(
-                VSConstants.GUID_VSStandardCommandSet97,
-                VSConstants.cmdidToolsOptions);
-
-            var mcs = GetService(typeof(IMenuCommandService)) as MenuCommandService;
-            mcs.GlobalInvoke(command, targetGUID);
         }
 
         HostInfo ActiveHostInfo {
