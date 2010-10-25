@@ -43,7 +43,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         protected virtual IVsPackageManager PackageManager {
             get {
                 if (_packageManager == null) {
-                    _packageManager = GetPackageManager();
+                    _packageManager = CreatePackageManager();
                 }
 
                 return _packageManager;
@@ -98,7 +98,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected IVsPackageManager GetPackageManager() {
+        protected IVsPackageManager CreatePackageManager() {
             if (DTE == null) {
                 throw new InvalidOperationException("DTE isn't loaded.");
             }
@@ -111,7 +111,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             return new VsPackageManager(DTE);
         }
 
-        protected IVsPackageManager GetPackageManager(string source) {
+        protected IVsPackageManager CreatePackageManager(string source) {
             // prepare a PackageManager instance for use throughout the command execution lifetime
             if (DTE == null) {
                 throw new InvalidOperationException("DTE isn't loaded.");

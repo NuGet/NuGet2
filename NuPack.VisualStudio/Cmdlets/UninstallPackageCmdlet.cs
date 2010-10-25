@@ -19,7 +19,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             : base(solutionManager, repositoryFactory, dte) {
 
             if (packageManager != null) {
-                PackageManager = packageManager;
+                base.PackageManager = packageManager;
             }
         }
 

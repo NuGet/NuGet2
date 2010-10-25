@@ -18,7 +18,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             : base(solutionManager, repositoryFactory, dte) {
 
             if (packageManager != null) {
-                PackageManager = packageManager;
+                base.PackageManager = packageManager;
             }
         }
 
@@ -38,7 +38,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
 
             if (!String.IsNullOrEmpty(Source)) {
-                PackageManager = GetPackageManager(Source);
+                PackageManager = CreatePackageManager(Source);
             }
 
             IProjectManager projectManager = ProjectManager;
