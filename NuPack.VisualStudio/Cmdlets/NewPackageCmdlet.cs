@@ -72,9 +72,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             string specFilePath = specFile.FileNames[0];
             
 
-            var builder = NuPack.PackageBuilder.ReadFrom(specFilePath, Path.GetDirectoryName(specFilePath));
-            builder.Modified = DateTime.Now;
-            builder.Created = DateTime.Now;
+            var builder = new NuPack.PackageBuilder(specFilePath);
             
             // Get the output file path
             string outputFile = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);

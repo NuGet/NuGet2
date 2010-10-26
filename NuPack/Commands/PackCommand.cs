@@ -39,9 +39,8 @@
                 }
             }
 
-            PackageBuilder builder = PackageBuilder.ReadFrom(nuspecFile, BasePath ?? Path.GetDirectoryName(nuspecFile));
-            builder.Created = DateTime.Now;
-            builder.Modified = DateTime.Now;
+            PackageBuilder builder = new PackageBuilder(nuspecFile, BasePath ?? Path.GetDirectoryName(nuspecFile));
+
             var outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
 
             // Remove the output file or the package spec might try to include it (which is default behavior)

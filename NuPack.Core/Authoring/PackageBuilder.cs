@@ -15,11 +15,17 @@ namespace NuPack {
         internal const string ManifestRelationType = "manifest";
 
         public PackageBuilder(string path)
+            : this(path, Path.GetDirectoryName(path)) {
+
+        }
+
+        public PackageBuilder(string path, string basePath)
             : this() {
             using (Stream stream = File.OpenRead(path)) {
-                ReadManifest(stream, Path.GetDirectoryName(path));
+                ReadManifest(stream, basePath);
             }
         }
+
 
         public PackageBuilder(Stream stream, string basePath)
             : this() {
