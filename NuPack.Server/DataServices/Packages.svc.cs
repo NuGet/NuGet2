@@ -36,16 +36,9 @@ namespace NuPack.Server.DataServices {
 
             HttpRequestBase request = new HttpRequestWrapper(HttpContext.Current.Request);
             DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
+
             if (request.IsUnmodified(lastModified)) {
                 throw new DataServiceException(304, null);
-            }
-
-            // Stick the version header in the response
-            args.OperationContext.ResponseHeaders[PackageUtility.FeedVersionHeader] = PackageUtility.ODataFeedVersion;
-
-            // Try to determine if this is a request for the feed version
-            if (args.OperationContext.RequestHeaders[PackageUtility.FeedVersionHeader] != null) {
-                throw new DataServiceException(200, null);
             }
 
             HttpCachePolicy cachePolicy = HttpContext.Current.Response.Cache;
