@@ -1,10 +1,20 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuPack.Test {
     [TestClass]
     public class PackageBuilderTest {
+        [TestMethod]
+        public void SaveThrowsIfRequiredPropertiesAreMissing() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder();
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version, id, authors, description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+        }
+
         [TestMethod]
         public void PackageBuilderThrowsIfXmlIsMalformed() {
             // Arrange
@@ -32,7 +42,7 @@ namespace NuPack.Test {
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
-            
+
             string badSpec1 = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <version>2.5</version>
@@ -40,7 +50,7 @@ namespace NuPack.Test {
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
-            
+
             string badSpec2 = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -71,7 +81,7 @@ namespace NuPack.Test {
     <version>2.5</version>
     <authors><author>Velio Ivanov</author></authors>
   </metadata></package>";
-            
+
             // Act
             var packageBuilder = new PackageBuilder(spec.AsStream(), null);
 

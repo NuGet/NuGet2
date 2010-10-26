@@ -33,7 +33,8 @@ namespace NuPack {
                     Id = metadata.Id,
                     Version = GetVersionString(metadata.Version),
                     Title = metadata.Title,
-                    Authors = String.Join(",", metadata.Authors),
+                    Authors = metadata.Authors == null ||
+                              !metadata.Authors.Any() ? null : String.Join(",", metadata.Authors),
                     LicenseUrl = metadata.LicenseUrl != null ? metadata.LicenseUrl.OriginalString : null,
                     ProjectUrl = metadata.ProjectUrl != null ? metadata.ProjectUrl.OriginalString : null,
                     IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString : null,

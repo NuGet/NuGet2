@@ -130,27 +130,17 @@ namespace NuPack {
         }
 
         private void ReadManifest(Stream stream, string basePath) {
-            // Create the schema set
-            var schemaSet = new XmlSchemaSet();
-            using (Stream schemaStream = GetSchemaStream()) {
-                schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
-            }
-
+            // Load an xml document
             XDocument document = XDocument.Load(stream);
-            // Add the namespace to the document so we can validate it against the xsd
-            EnsureNamespace(document.Root);
 
-            // Validate the document
-            document.Validate(schemaSet, (sender, e) => {
-                if (e.Severity == XmlSeverityType.Error) {
-                    // Throw an exception if there is a validation error
-                    throw new InvalidOperationException(e.Message);
-                }
-            });
+            // Validate the manifest
+            ValidateManifest(document);
 
             // Remove the Deserialize the document
-            var serializer = new XmlSerializer(typeof(Manifest));
             document.Root.Name = document.Root.Name.LocalName;
+
+            // Deserialize the document and extract the metadata
+            var serializer = new XmlSerializer(typeof(Manifest));
             Manifest manifest = (Manifest)serializer.Deserialize(document.CreateReader());
             IPackageMetadata metadata = manifest.Metadata;
 
@@ -178,6 +168,25 @@ namespace NuPack {
                     }
                 }
             }
+        }
+
+        private static void ValidateManifest(XDocument document) {
+            // Create the schema set
+            var schemaSet = new XmlSchemaSet();
+            using (Stream schemaStream = GetSchemaStream()) {
+                schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
+            }
+
+            // Add the namespace to the document so we can validate it against the xsd
+            EnsureNamespace(document.Root);
+
+            // Validate the document
+            document.Validate(schemaSet, (sender, e) => {
+                if (e.Severity == XmlSeverityType.Error) {
+                    // Throw an exception if there is a validation error
+                    throw new InvalidOperationException(e.Message);
+                }
+            });
         }
 
         private static Stream GetSchemaStream() {
@@ -213,10 +222,14 @@ namespace NuPack {
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
 
             using (Stream stream = packagePart.GetStream()) {
-                // TODO: Validate xsd
                 var serializer = new XmlSerializer(typeof(Manifest));
                 Manifest manifest = Manifest.Create(this);
                 serializer.Serialize(stream, manifest);
+            }
+
+            // Validate the document
+            using (Stream stream = packagePart.GetStream()) {
+                ValidateManifest(XDocument.Load(stream));
             }
         }
 
