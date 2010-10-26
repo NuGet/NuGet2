@@ -23,7 +23,7 @@ namespace NuPack.Dialog.PackageManagerUI {
         private void OnViewLicenseTermsRequestNavigate(object sender, RoutedEventArgs e) {
             Hyperlink hyperlink = (Hyperlink)sender;
             var licenseUrl = hyperlink.NavigateUri;
-            UriHelper.OpenLicenseLink(licenseUrl);
+            UriHelper.OpenExternalLink(licenseUrl);
         }
     }
 }

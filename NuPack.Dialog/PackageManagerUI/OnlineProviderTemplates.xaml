@@ -23,7 +23,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Image Style="{StaticResource TileImageStyle}" Source="{StaticResource BitmapImage_DefaultIcon}">
+            <Image Style="{StaticResource TileImageStyle}" Source="{Binding PackageIdentity.IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}" Width="32" Height="32" Stretch="Fill" StretchDirection="DownOnly">
             </Image>
 
             <StackPanel Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
@@ -106,8 +106,15 @@
 
                 <!-- View License link -->
                 <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
-                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}">
-                            <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
+                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <!-- Project Url -->
+                <TextBlock Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Hyperlink NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Run Text="{x:Static resources:Resources.Dialog_MoreInfo}" />
                     </Hyperlink>
                 </TextBlock>
 

@@ -7,6 +7,6 @@ namespace NuPack.Dialog.PackageManagerUI {
 
         public readonly static RoutedCommand ShowOptionsPage = new RoutedCommand();
         public readonly static RoutedCommand FocusOnSearchBox = new RoutedCommand();
-        public readonly static RoutedCommand OpenLicenseLink = new RoutedCommand();
+        public readonly static RoutedCommand OpenExternalLink = new RoutedCommand();
     }
 }

@@ -52,7 +52,7 @@
             Executed="ExecutedShowOptionsPage" />
         
         <CommandBinding 
-            Command="{x:Static self:PackageManagerWindowCommands.OpenLicenseLink}"
+            Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}"
             Executed="ExecuteOpenLicenseLink" />
         
         <CommandBinding

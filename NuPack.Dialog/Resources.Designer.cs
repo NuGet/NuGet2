@@ -115,6 +115,15 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More Information.
+        /// </summary>
+        public static string Dialog_MoreInfo {
+            get {
+                return ResourceManager.GetString("Dialog_MoreInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to (none).
         /// </summary>
         public static string Dialog_NoDependencyLabel {

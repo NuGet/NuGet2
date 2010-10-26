@@ -3,7 +3,11 @@
 namespace NuPack.Dialog.PackageManagerUI {
     internal static class UriHelper {
 
-        public static void OpenLicenseLink(Uri licenseUrl) {
+        public static void OpenExternalLink(Uri licenseUrl) {
+            if (licenseUrl == null) {
+                return;
+            }
+
             // mitigate security risk
             if (licenseUrl.IsFile || licenseUrl.IsLoopback || licenseUrl.IsUnc) {
                 return;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
@@ -116,18 +117,11 @@ namespace NuPack.Dialog.PackageManagerUI {
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {
-            VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
-                return;
+            Hyperlink hyperlink = e.OriginalSource as Hyperlink;
+            if (hyperlink != null && hyperlink.NavigateUri != null) {
+                UriHelper.OpenExternalLink(hyperlink.NavigateUri);
+                e.Handled = true;
             }
-
-            PackageItem selectedItem = control.SelectedExtension as PackageItem;
-            if (selectedItem == null) {
-                return;
-            }
-
-            UriHelper.OpenLicenseLink(selectedItem.LicenseUrl);
-            e.Handled = true;
         }
 
         private void ExecuteSetFocusOnSearchBox(object sender, ExecutedRoutedEventArgs e) {
