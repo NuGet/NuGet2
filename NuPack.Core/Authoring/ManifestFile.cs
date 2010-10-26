@@ -3,10 +3,10 @@
 namespace NuPack {
     [XmlType("file", Namespace = Constants.ManifestSchemaNamespace)]
     public class ManifestFile {
-        [XmlElement("src")]
+        [XmlAttribute("src")]
         public string Source { get; set; }
 
-        [XmlElement("target")]
+        [XmlAttribute("target")]
         public string Target { get; set; }
     }
 }

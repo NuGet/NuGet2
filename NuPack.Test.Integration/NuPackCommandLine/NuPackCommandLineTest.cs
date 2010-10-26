@@ -1,9 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace NuPack.Test.Integration.NuPackCommandLine {
-
-    using System;
-    using System.IO;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [TestClass]
     public class NuPackCommandLineTest {
 
@@ -18,7 +19,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, string.Empty, true);
             // Assert
             Assert.AreEqual(0, result.Item1);
-            Assert.AreEqual(true, result.Item2.Contains("usage: NuPack <command> [args] [options]"));
+            Assert.IsTrue(result.Item2.Contains("usage: NuPack <command> [args] [options]"));
         }
 
         [TestMethod]
@@ -82,7 +83,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
 
             //Assert
             Assert.AreEqual(0, result.Item1);
-            Assert.AreEqual(true, result.Item2.Contains("Successfully created package"));
+            Assert.IsTrue(result.Item2.Contains("Successfully created package"));
         }
 
         [TestMethod]
@@ -101,6 +102,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             if (File.Exists(nuspecFile)) {
                 File.Delete(nuspecFile);
             }
+
             if (File.Exists(expectedPackage)) {
                 File.Delete(expectedPackage);
             }
@@ -112,9 +114,59 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
 
             //Assert
             Assert.AreEqual(0, result.Item1);
-            Assert.AreEqual(true, result.Item2.Contains("Successfully created package"));
-            Assert.AreEqual(true, File.Exists(expectedPackage));
+            Assert.IsTrue(result.Item2.Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+        }
 
+        [TestMethod]
+        public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
+            // Arrange
+            const string folder = @".\specific_files\";
+            if (!Directory.Exists(folder)) {
+                Directory.CreateDirectory(folder);
+            }
+            string nuspecFile = Path.Combine(folder, "SpecWithFiles.nuspec");
+            string expectedPackage = Path.Combine(folder, "test.1.1.1.nupkg");
+            if (File.Exists(nuspecFile)) {
+                File.Delete(nuspecFile);
+            }
+
+            if (File.Exists(expectedPackage)) {
+                File.Delete(expectedPackage);
+            }
+
+            File.WriteAllText(Path.Combine(folder, "file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine(folder, "file2.txt"), "file 2");
+            File.WriteAllText(Path.Combine(folder, "file3.txt"), "file 3");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test</id>
+    <version>1.1.1</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            // Act
+            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+
+            // Assert
+            Assert.AreEqual(0, result.Item1);
+            Assert.IsTrue(result.Item2.Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt" });
+        }
+
+        private void VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
+            var package = new ZipPackage(packageFile);
+            var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToList();
+            CollectionAssert.AreEqual(expectedFiles.OrderBy(f => f).ToList(), files);
         }
     }
 }
