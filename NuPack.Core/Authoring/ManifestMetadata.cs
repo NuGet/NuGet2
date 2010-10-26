@@ -96,6 +96,9 @@ namespace NuPack {
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
+                if (Dependencies == null) {
+                    return Enumerable.Empty<PackageDependency>();
+                }
                 return from dependency in Dependencies
                        select PackageDependency.CreateDependency(dependency.Id,
                                                                  Utility.ParseOptionalVersion(dependency.MinVersion),
