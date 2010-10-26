@@ -83,7 +83,7 @@
         public override void AddPackage(IPackage package) {
             string packageFilePath = GetPackageFilePath(package);
 
-            FileSystem.AddFileWithCheck(packageFilePath, stream => PackageBuilder.Save(package, stream));
+            FileSystem.AddFileWithCheck(packageFilePath, package.GetStream);
         }
 
         public override void RemovePackage(IPackage package) {
@@ -97,7 +97,7 @@
             // If this is the last package delete the package directory
             if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
                 !FileSystem.GetDirectoriesSafe(String.Empty).Any()) {
-                    FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
+                FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
             }
         }
 

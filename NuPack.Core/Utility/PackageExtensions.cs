@@ -55,7 +55,7 @@
             return !package.GetFiles().Any() && package.Dependencies.Any();
         }
 
-        public static string GetFullName(this IPackage package) {
+        public static string GetFullName(this IPackageMetadata package) {
             return package.Id + " " + package.Version;
         }
 
@@ -77,7 +77,7 @@
         /// </summary>
         private static Expression<Func<IPackage, bool>> BuildSearchExpression(IEnumerable<string> searchTerms) {
             Debug.Assert(searchTerms != null);
-            var parameterExpression = Expression.Parameter(typeof(IPackage));
+            var parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
             // package.Id.ToLower().Contains(term1) || package.Id.ToLower().Contains(term2)  ...
             Expression condition = (from term in searchTerms
                                     from property in _packagePropertiesToSearch

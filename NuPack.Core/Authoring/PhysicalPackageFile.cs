@@ -24,7 +24,7 @@ namespace NuPack {
             }
         }
 
-        public Stream Open() {
+        public Stream GetStream() {
             return File.OpenRead(SourcePath);
         }
 

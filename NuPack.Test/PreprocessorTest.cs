@@ -17,7 +17,7 @@ namespace NuPack.Test {
             mockProjectSystem.Setup(m => m.GetPropertyValue("token")).Returns("token value");
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(m => m.Path).Returns("foo.bar.pp");
-            mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
+            mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
 
             // Act
             processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object);
@@ -36,7 +36,7 @@ namespace NuPack.Test {
             mockProjectSystem.Object.AddFile("foo.bar", GetStream("hello"));
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(m => m.Path).Returns("foo.bar.pp");
-            mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
+            mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
 
             // Act
             processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object);
@@ -52,7 +52,7 @@ namespace NuPack.Test {
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(m => m.Path).Returns("foo.bar.pp");           
-            mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
+            mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
 
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object), "The replacement token 'token' has no value.");
@@ -67,7 +67,7 @@ namespace NuPack.Test {
             mockProjectSystem.Object.AddFile("foo.bar", GetStream("test token value"));
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(m => m.Path).Returns("foo.bar.pp");
-            mockFile.Setup(m => m.Open()).Returns(() => GetStream("test $token$"));
+            mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
 
             // Act
             processor.RevertFile(mockFile.Object, "foo.bar", Enumerable.Empty<IPackageFile>(), mockProjectSystem.Object);

@@ -1,30 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuPack.Test {
     [TestClass]
     public class PackageBuilderTest {
-        [TestMethod]
-        public void ReadingPackageBuilderFromPackageCopiesAllPropertiesAndFiles() {
-            // Arrange
-            var package = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "c" });
-
-            // Act
-            PackageBuilder builder = PackageBuilder.ReadFrom(package);
-
-            // Assert
-            Assert.AreEqual(package.Id, builder.Id);
-            Assert.AreEqual(package.Language, builder.Language);
-            Assert.AreEqual(package.Version, builder.Version);
-            Assert.AreEqual(package.Description, builder.Description);
-            Assert.AreEqual(package.Category, builder.Category);
-            Assert.AreEqual(package.LicenseUrl, builder.LicenseUrl);
-            CollectionAssert.AreEqual(package.Dependencies.ToList(), builder.Dependencies);
-            CollectionAssert.AreEqual(package.GetFiles().ToList(), builder.Files);
-        }
-
         [TestMethod]
         public void PackageBuilderThrowsIfXmlIsMalformed() {
             // Arrange
@@ -34,10 +14,10 @@ namespace NuPack.Test {
             string spec4 = @"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>";
 
             // Act and Assert
-            ExceptionAssert.Throws<XmlException>(() => PackageBuilder.ReadFrom(spec1.AsStream()));
-            ExceptionAssert.Throws<XmlException>(() => PackageBuilder.ReadFrom(spec2.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec3.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec4.AsStream()));
+            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null));
+            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null));
         }
 
 
@@ -93,14 +73,14 @@ namespace NuPack.Test {
   </metadata></package>";
             
             // Act
-            var packageBuilder = PackageBuilder.ReadFrom(spec.AsStream());
+            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
 
             // Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec1.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec2.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec3.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec4.AsStream()));
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(badSpec5.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec1.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec2.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec3.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec4.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec5.AsStream(), null));
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
 
@@ -113,9 +93,7 @@ namespace NuPack.Test {
   <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors>
-      <author>Velio Ivanov</author>
-    </authors>
+    <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
@@ -124,7 +102,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            PackageBuilder builder = PackageBuilder.ReadFrom(spec.AsStream());
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
 
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
@@ -156,7 +134,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
         }
 
         [TestMethod]
@@ -178,7 +156,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
         }
 
         [TestMethod]
@@ -189,9 +167,7 @@ namespace NuPack.Test {
   <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors>
-      <author>Velio Ivanov</author>
-    </authors>
+    <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
     <licenseUrl>this-is-a-malformed-url</licenseUrl>
@@ -200,7 +176,7 @@ namespace NuPack.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<UriFormatException>(() => PackageBuilder.ReadFrom(spec.AsStream()));
+            ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null));
         }
     }
 }

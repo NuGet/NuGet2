@@ -44,7 +44,7 @@ namespace NuPack {
         }
 
         private static XElement GetXml(IPackageFile file) {
-            using (Stream stream = file.Open()) {
+            using (Stream stream = file.GetStream()) {
                 return XElement.Load(stream);
             }
         }

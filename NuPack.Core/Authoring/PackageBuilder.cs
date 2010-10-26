@@ -1,42 +1,38 @@
-﻿namespace NuPack {
-    using System;
-    using System.Collections.ObjectModel;
-    using System.IO;
-    using System.IO.Packaging;
-    using System.Xml.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Packaging;
+using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
-    public class PackageBuilder {
+namespace NuPack {
+    public class PackageBuilder : IPackageBuilder {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
+
+        public PackageBuilder(string path)
+            : this() {
+            using (Stream stream = File.OpenRead(path)) {
+                ReadManifest(stream, Path.GetDirectoryName(path));
+            }
+        }
+
+        public PackageBuilder(Stream stream, string basePath)
+            : this() {
+            ReadManifest(stream, basePath);
+        }
 
         public PackageBuilder() {
             Files = new Collection<IPackageFile>();
             Dependencies = new Collection<PackageDependency>();
-            Keywords = new Collection<string>();
             Authors = new Collection<string>();
         }
 
         public string Id {
-            get;
-            set;
-        }
-
-        public string Description {
-            get;
-            set;
-        }
-
-        public Collection<string> Authors {
-            get;
-            private set;
-        }
-
-        public Collection<string> Keywords {
-            get;
-            private set;
-        }
-
-        public string Category {
             get;
             set;
         }
@@ -46,12 +42,17 @@
             set;
         }
 
-        public DateTime Created {
+        public string Title {
             get;
             set;
         }
 
-        public string Language {
+        public Collection<string> Authors {
+            get;
+            private set;
+        }
+
+        public Uri IconUrl {
             get;
             set;
         }
@@ -61,17 +62,27 @@
             set;
         }
 
+        public Uri ProjectUrl {
+            get;
+            set;
+        }
+
         public bool RequireLicenseAcceptance {
             get;
             set;
         }
 
-        public DateTime Modified {
+        public string Description {
             get;
             set;
         }
 
-        public string LastModifiedBy {
+        public string Summary {
+            get;
+            set;
+        }
+
+        public string Language {
             get;
             set;
         }
@@ -86,8 +97,16 @@
             private set;
         }
 
-        public static void Save(IPackage package, Stream stream) {
-            ReadFrom(package).Save(stream);
+        IEnumerable<string> IPackageMetadata.Authors {
+            get {
+                return Authors;
+            }
+        }
+
+        IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
+            get {
+                return Dependencies;
+            }
         }
 
         public void Save(Stream stream) {
@@ -96,59 +115,86 @@
                 WriteFiles(package);
 
                 // Copy the metadata properties back to the package
-                package.PackageProperties.Category = Category;
-                package.PackageProperties.Created = Created;
-                package.PackageProperties.Creator = String.Join(", ", Authors);
+                package.PackageProperties.Creator = String.Join(",", Authors);
                 package.PackageProperties.Description = Description;
                 package.PackageProperties.Identifier = Id;
                 package.PackageProperties.Version = Version.ToString();
-                package.PackageProperties.Keywords = String.Join(", ", Keywords);
-                package.PackageProperties.LastModifiedBy = LastModifiedBy;
-                package.PackageProperties.Modified = Modified;
                 package.PackageProperties.Language = Language;
             }
         }
 
-        public static PackageBuilder ReadFrom(Stream stream) {
-            XmlManifestReader reader = new XmlManifestReader(XDocument.Load(stream));
-            PackageBuilder builder = new PackageBuilder();
-            reader.ReadContentTo(builder);
-            return builder;
+        private void ReadManifest(Stream stream, string basePath) {
+            // Create the schema set
+            var schemaSet = new XmlSchemaSet();
+            using (Stream schemaStream = GetSchemaStream()) {
+                schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
+            }
+
+            XDocument document = XDocument.Load(stream);
+            // Add the namespace to the document so we can validate it against the xsd
+            EnsureNamespace(document.Root);
+
+            // Validate the document
+            document.Validate(schemaSet, (sender, e) => {
+                if (e.Severity == XmlSeverityType.Error) {
+                    // Throw an exception if there is a validation error
+                    throw new InvalidOperationException(e.Message);
+                }
+            });
+
+            // Remove the Deserialize the document
+            var serializer = new XmlSerializer(typeof(Manifest));
+            document.Root.Name = document.Root.Name.LocalName;
+            Manifest manifest = (Manifest)serializer.Deserialize(document.CreateReader());
+            IPackageMetadata metadata = manifest.Metadata;
+
+            Id = metadata.Id;
+            Version = metadata.Version;
+            Title = metadata.Title;
+            Authors.AddRange(metadata.Authors);
+            IconUrl = metadata.IconUrl;
+            LicenseUrl = metadata.LicenseUrl;
+            ProjectUrl = metadata.ProjectUrl;
+            RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
+            Description = metadata.Description;
+            Summary = metadata.Summary;
+            Language = metadata.Language;
+            Dependencies.AddRange(metadata.Dependencies);
+
+            // If there's no base path then ignore the files node
+            if (basePath != null) {
+                if (manifest.Files == null || !manifest.Files.Any()) {
+                    AddFiles(basePath, @"**\*.*", null);
+                }
+                else {
+                    foreach (var file in manifest.Files) {
+                        AddFiles(basePath, file.Source, file.Target);
+                    }
+                }
+            }
         }
 
-        public static PackageBuilder ReadFrom(string path, string basePath) {
-            XmlManifestReader reader = new XmlManifestReader(path, basePath);
-            PackageBuilder builder = new PackageBuilder();
-            reader.ReadContentTo(builder);
-            return builder;
+        private static Stream GetSchemaStream() {
+            return typeof(PackageBuilder).Assembly.GetManifestResourceStream("NuPack.Authoring.nuspec.xsd");
         }
 
-        public static PackageBuilder ReadFrom(IPackage package) {
-            PackageBuilder packageBuilder = new PackageBuilder();
+        private static void EnsureNamespace(XElement element) {
+            // This method recursively goes through all descendants and makes sure it's in the nuspec namespace.
+            // Namespaces are hard to type by hand so we don't want to require it, but we can 
+            // transform the document in memory before validation if the namespace wasn't specified.
+            if (String.IsNullOrEmpty(element.Name.NamespaceName)) {
+                element.Name = FullyQualifyName(element.Name.LocalName);
+            }
 
-            // Copy meta data
-            packageBuilder.Authors.AddRange(package.Authors);
-            packageBuilder.Category = package.Category;
-            packageBuilder.Created = package.Created;
-            packageBuilder.Description = package.Description;
-            packageBuilder.Id = package.Id;
-            packageBuilder.Keywords.AddRange(package.Keywords);
-            packageBuilder.Version = package.Version;
-            packageBuilder.LastModifiedBy = package.LastModifiedBy;
-            packageBuilder.Language = package.Language;
-            packageBuilder.Modified = package.Modified;
-            packageBuilder.LicenseUrl = package.LicenseUrl;
+            foreach (var childElement in element.Descendants()) {
+                if (String.IsNullOrEmpty(childElement.Name.NamespaceName)) {
+                    childElement.Name = FullyQualifyName(childElement.Name.LocalName);
+                }
+            }
+        }
 
-            // Copy dependencies
-            packageBuilder.Dependencies.AddRange(package.Dependencies);
-
-            // Copy files
-            packageBuilder.Files.AddRange(package.GetFiles());
-
-            // Remove the manifest file
-            packageBuilder.Files.RemoveAll(file => Utility.IsManifest(file.Path));
-
-            return packageBuilder;
+        private static XName FullyQualifyName(string name) {
+            return XName.Get(name, Constants.ManifestSchemaNamespace);
         }
 
         private void WriteManifest(Package package) {
@@ -161,26 +207,41 @@
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
 
             using (Stream stream = packagePart.GetStream()) {
-                var writer = new XmlManifestWriter(this);
-                writer.Save(stream);
-            }
-
-            // We need to reopen the stream after we've written the manifest so we can validate it
-            using (Stream stream = packagePart.GetStream()) {
-                XmlManifestReader.ValidateSchema(XDocument.Load(stream));
+                // TODO: Validate xsd
+                var serializer = new XmlSerializer(typeof(Manifest));
+                Manifest manifest = Manifest.Create(this);
+                serializer.Serialize(stream, manifest);
             }
         }
 
         private void WriteFiles(Package package) {
-            foreach (var file in Files) {
-                using (Stream stream = file.Open()) {
+            // Add files that might not come from expanding files on disk
+            foreach (IPackageFile file in Files) {
+                using (Stream stream = file.GetStream()) {
                     CreatePart(package, file.Path, stream);
                 }
             }
         }
 
-        private static void CreatePart(Package package, string packagePath, Stream sourceStream) {
-            Uri uri = UriHelper.CreatePartUri(packagePath);
+        private void AddFiles(string basePath, string source, string destination) {
+            PathSearchFilter searchFilter = PathResolver.ResolvePath(basePath, source);
+            foreach (var file in Directory.EnumerateFiles(searchFilter.SearchDirectory,
+                                                          searchFilter.SearchPattern,
+                                                          searchFilter.SearchOption)) {
+                var destinationPath = PathResolver.ResolvePackagePath(source, basePath, file, destination);
+                Files.Add(new PhysicalPackageFile {
+                    SourcePath = file,
+                    TargetPath = destinationPath
+                });
+            }
+        }
+
+        private static void CreatePart(Package package, string path, Stream sourceStream) {
+            if (Utility.IsManifest(path)) {
+                return;
+            }
+
+            Uri uri = UriHelper.CreatePartUri(path);
 
             // Create the part
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);

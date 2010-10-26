@@ -33,8 +33,13 @@
     <Compile Include="..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="Authoring\IPackageBuilder.cs" />
+    <Compile Include="Authoring\ManifestDependency.cs" />
+    <Compile Include="Authoring\ManifestFile.cs" />
+    <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
+    <Compile Include="Packages\IPackageMetadata.cs" />
     <Compile Include="PackageWalker\DependencyResolver.cs" />
     <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
     <Compile Include="PackageWalker\IDependentsResolver.cs" />
@@ -58,8 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authoring\PathSearchFilter.cs" />
-    <Compile Include="Authoring\XmlManifestWriter.cs" />
-    <Compile Include="Feed\PackageFeedDependency.cs" />
     <Compile Include="Logging\NullLogger.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="PackageOperationEventArgs.cs" />
@@ -68,7 +71,7 @@
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
     <Compile Include="Authoring\PackageBuilder.cs" />
     <Compile Include="Authoring\PathResolver.cs" />
-    <Compile Include="Authoring\XmlManifestReader.cs" />
+    <Compile Include="Authoring\Manifest.cs" />
     <Compile Include="PackageSource\PackageSource.cs" />
     <Compile Include="Packages\DataServicePackage.cs" />
     <Compile Include="Packages\DefaultPackagePathResolver.cs" />
@@ -82,7 +85,6 @@
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Packages\FeedPackage.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
@@ -104,13 +106,9 @@
     <Compile Include="Utility\ProjectSystemExtensions.cs" />
     <Compile Include="Utility\StreamExtensions.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
-    <Compile Include="Repositories\AtomFeedPackageRepository.cs" />
     <Compile Include="ProjectSystem\ProjectSystem.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
-    <Compile Include="Feed\PackageSyndicationFeed.cs" />
-    <Compile Include="Feed\PackageSyndicationItem.cs" />
     <Compile Include="ProjectSystem\FileBasedProjectSystem.cs" />
-    <Compile Include="Packages\LazyPackage.cs" />
     <Compile Include="Repositories\IPackageRepository.cs" />
     <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\IPackageFile.cs" />

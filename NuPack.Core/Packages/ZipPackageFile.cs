@@ -28,7 +28,7 @@
             }
         }
 
-        public Stream Open() {
+        public Stream GetStream() {
             return _streamFactory();
         }
 

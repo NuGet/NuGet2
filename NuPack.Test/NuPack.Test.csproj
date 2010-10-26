@@ -39,7 +39,6 @@
     <Compile Include="..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AtomFeedPackageRepositoryTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
     <Compile Include="DependencyManagerTest.cs" />
     <Compile Include="NuPackCommandLine\CommandAttributeTests.cs" />
@@ -65,8 +64,6 @@
     <Compile Include="UriHelperTest.cs" />
     <Compile Include="UtilityTest.cs" />
     <Compile Include="XmlExtensionsTest.cs" />
-    <Compile Include="XmlManifestReaderTest.cs" />
-    <Compile Include="XmlManifestWriterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">

@@ -1,16 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<package>
-  <metadata>
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Castle.Core</id>
     <version>1.2.0</version>
-    <authors>
-      <author>Jonathon Rossi &amp; Krzysztof Kozmic</author>
-    </authors>
+    <authors>Jonathon Rossi &amp; Krzysztof Kozmic</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Core of the castle project</description>
-    <language>en-US</language>
+    <summary>Core of the castle project</summary>
+    <dependencies>
+      <dependency id="log4net" />
+      <dependency id="NLog" minVersion="1.0" />
+    </dependencies>
   </metadata>
-  <dependencies>
-    <dependency id="log4net" />
-    <dependency id="NLog" minversion="1.0" />
-  </dependencies>
 </package>

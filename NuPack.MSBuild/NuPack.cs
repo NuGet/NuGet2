@@ -53,26 +53,25 @@ namespace NuPack.MSBuild {
 
             try {
                 IPackageBuilder packageBuilder = _packageBuilderFactory.CreateFrom(specFilePath);
-                packageBuilder.Created = DateTime.Now;
-                packageBuilder.Modified = packageBuilder.Created;
                 packageBuilder.Files.RemoveAll(file => _fileExtensionsToIgnore.Contains(Path.GetExtension(file.Path)));
 
-                string packageFile = string.Format(
+                string packageFile = String.Format(
                     "{0}.{1}{2}",
                     packageBuilder.Id,
                     packageBuilder.Version,
                     Constants.PackageExtension);
                 string packageFilePath = Path.Combine(packageDir, packageFile);
 
-                Log.LogMessage(string.Format(
+                Log.LogMessage(String.Format(
                     Resources.NuPackResources.CreatingPackage,
                     _fileSystem.GetFullPath(specFilePath),
                     _fileSystem.GetFullPath(packageFilePath)));
-                
-                using (Stream stream = _fileSystem.CreateFile(packageFilePath))
+
+                using (Stream stream = _fileSystem.CreateFile(packageFilePath)) {
                     packageBuilder.Save(stream);
-                
-                Log.LogMessage(string.Format(
+                }
+
+                Log.LogMessage(String.Format(
                     Resources.NuPackResources.CreatedPackage,
                     _fileSystem.GetFullPath(specFilePath),
                     _fileSystem.GetFullPath(packageFilePath)));

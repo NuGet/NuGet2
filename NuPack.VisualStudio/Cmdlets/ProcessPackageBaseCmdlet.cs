@@ -165,7 +165,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected void WriteDisclaimerText(IPackage package) {
+        protected void WriteDisclaimerText(IPackageMetadata package) {
             if (package.RequireLicenseAcceptance) {
                 string message = String.Format(
                     CultureInfo.CurrentCulture,

@@ -11,6 +11,7 @@
 
             _context.SendingRequest += OnSendingRequest;
             _context.ReadingEntity += OnReadingEntity;
+            _context.IgnoreMissingProperties = true;
         }
 
         private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {

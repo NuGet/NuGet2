@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.MSBuild;
 using NuPack.Authoring;
-using System.Collections.ObjectModel;
 
 namespace NuPack.Test.MSBuild {
     [TestClass]
@@ -62,26 +60,6 @@ namespace NuPack.Test.MSBuild {
 
             packageBuilderStub.Verify(x => x.Save(packageStreamStub.Object));
             Assert.IsTrue(actualResut);
-        }
-
-        [TestMethod]
-        public void WillSetThePackagesCreatedDate() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
-
-            bool actualResut = task.Execute();
-
-            packageBuilderStub.VerifySet(x => x.Created = It.IsAny<DateTime>());
-        }
-
-        [TestMethod]
-        public void WillSetThePackagesModifiedDate() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
-
-            bool actualResut = task.Execute();
-
-            packageBuilderStub.VerifySet(x => x.Modified = x.Created);
         }
 
         [TestMethod]

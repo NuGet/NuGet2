@@ -156,9 +156,7 @@ namespace NuPack.Test.Integration.MSBuild {
   <metadata>
     <id>Fnord</id>
     <version>1.2.3</version>
-    <authors>
-      <author>John Doe</author>
-    </authors>
+    <authors>John Doe</authors>
     <description>Lorem ipsum.</description>
     <language>en-US</language>
   </metadata>
