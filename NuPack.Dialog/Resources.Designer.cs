@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuPack.Dialog {
+namespace NuGet.Dialog {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuPack.Dialog {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPack.Dialog.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.Dialog.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -268,7 +268,7 @@ namespace NuPack.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to By clicking “I Accept,” you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click “I Decline”..
+        ///   Looks up a localized string similar to By clicking &quot;I Accept,&quot; you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click &quot;I Decline.&quot;.
         /// </summary>
         public static string License_LicenseText {
             get {

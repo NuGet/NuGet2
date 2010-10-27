@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
@@ -8,7 +8,7 @@
     using System.Runtime.Versioning;
     using System.Xml.Linq;
     using Microsoft.Internal.Web.Utils;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public class ProjectManager : IProjectManager {
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
@@ -134,7 +134,7 @@
             if (package == null) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
-                    NuPackResources.UnknownPackage, packageId));
+                    NuGetResources.UnknownPackage, packageId));
             }
 
             AddPackageReference(package, ignoreDependencies);
@@ -160,7 +160,7 @@
             if (operation.Action == PackageAction.Install) {
                 // If the package is already installed, then skip it
                 if (packageExists) {
-                    Logger.Log(MessageLevel.Info, NuPackResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
+                    Logger.Log(MessageLevel.Info, NuGetResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
                 }
                 else {
                     AddPackageReferenceToProject(operation.Package);
@@ -194,7 +194,7 @@
 
                 // If this assembly is already referenced by the project then skip it
                 if (Project.ReferenceExists(assemblyReference.Name)) {
-                    Logger.Log(MessageLevel.Warning, NuPackResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
+                    Logger.Log(MessageLevel.Warning, NuGetResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
                     continue;
                 }
 
@@ -204,7 +204,7 @@
             // Add package to local repository
             LocalRepository.AddPackage(package);
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
             OnPackageReferenceAdded(args);
         }
 
@@ -226,7 +226,7 @@
             if (package == null) {
                 throw new InvalidOperationException(String.Format(
                     CultureInfo.CurrentCulture,
-                    NuPackResources.UnknownPackage, packageId));
+                    NuGetResources.UnknownPackage, packageId));
             }
 
             RemovePackageReference(package, forceRemove, removeDependencies);
@@ -283,7 +283,7 @@
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
             OnPackageReferenceRemoved(args);
         }
 
@@ -304,15 +304,15 @@
             if (!LocalRepository.Exists(packageId)) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
-                    NuPackResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
+                    NuGetResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
             }
 
-            Logger.Log(MessageLevel.Debug, NuPackResources.Debug_LookingForUpdates, packageId);
+            Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
 
             IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
 
             if (package == null) {
-                Logger.Log(MessageLevel.Info, NuPackResources.Log_NoUpdatesAvailable, packageId);
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
             }
             else {
                 UpdatePackageReference(package, updateDependencies);
@@ -364,7 +364,7 @@
             if (compatibleAssemblyReferences == null) {
                 throw new InvalidOperationException(
                            String.Format(CultureInfo.CurrentCulture,
-                           NuPackResources.UnableToFindCompatibleReference, Project.TargetFramework));
+                           NuGetResources.UnableToFindCompatibleReference, Project.TargetFramework));
             }
 
             return compatibleAssemblyReferences;

@@ -1,20 +1,20 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Management.Automation;
 using EnvDTE;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
 
     /// <summary>
-    /// This is the base class for all NuPack cmdlets.
+    /// This is the base class for all NuGet cmdlets.
     /// </summary>
-    public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
+    public abstract class NuGetBaseCmdlet : PSCmdlet, ILogger {
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
 
-        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
+        protected NuGetBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
         }
@@ -56,7 +56,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         }
 
         /// <summary>
-        /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuPackBaseCmdlet.
+        /// Derived classess must implement this method instead of ProcessRecord(), which is sealed by NuGetBaseCmdlet.
         /// </summary>
         protected abstract void ProcessRecordCore();
 

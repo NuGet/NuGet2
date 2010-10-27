@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
 
-namespace NuPackConsole.Implementation.PowerConsole {
+namespace NuGetConsole.Implementation.PowerConsole {
     /// <summary>
     /// Managed some user settings.
     /// </summary>
@@ -20,7 +20,7 @@ namespace NuPackConsole.Implementation.PowerConsole {
         /// <summary>
         /// Default active host.
         /// </summary>
-        const string DefActiveHost = "NuPackConsole.Host.PowerShell";
+        const string DefActiveHost = "NuGetConsole.Host.PowerShell";
 
         /// <summary>
         /// Get default active host user settings.

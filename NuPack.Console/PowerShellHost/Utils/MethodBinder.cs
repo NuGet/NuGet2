@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace NuPackConsole.Host {
+namespace NuGetConsole.Host {
     /// <summary>
     /// A simple method binder to call interface methods.
     /// </summary>

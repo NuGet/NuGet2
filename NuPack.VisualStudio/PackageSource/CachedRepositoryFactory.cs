@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public class CachedRepositoryFactory : IPackageRepositoryFactory {
         private static readonly IPackageRepositoryFactory _instance = new CachedRepositoryFactory(PackageRepositoryFactory.Default);
 

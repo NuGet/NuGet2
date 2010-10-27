@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     public class NullLogger : ILogger {
         private static readonly ILogger _instance = new NullLogger();
 

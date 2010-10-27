@@ -1,7 +1,7 @@
-﻿using System.Windows.Automation.Peers;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
     /// <summary>
     /// This control exists only for providing automation/accessibility support for the TextBlock
     /// class when inside a DataTemplate.

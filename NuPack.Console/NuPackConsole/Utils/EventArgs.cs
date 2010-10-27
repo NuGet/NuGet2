@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     class EventArgs<T> : EventArgs {
         public T Arg { get; private set; }
 

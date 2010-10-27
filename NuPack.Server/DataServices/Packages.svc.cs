@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Data.Services;
 using System.Data.Services.Common;
 using System.Data.Services.Providers;
 using System.IO;
 using System.Web;
 using Ninject;
-using NuPack.Server.Infrastructure;
+using NuGet.Server.Infrastructure;
 
-namespace NuPack.Server.DataServices {
+namespace NuGet.Server.DataServices {
     // Disabled for live service
     // [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {       

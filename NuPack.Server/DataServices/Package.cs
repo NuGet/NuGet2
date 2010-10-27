@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Data.Services.Common;
 using System.Linq;
 
-namespace NuPack.Server.DataServices {
+namespace NuGet.Server.DataServices {
     [DataServiceKey("Id", "Version")]
     [EntityPropertyMapping("Id", SyndicationItemProperty.Title, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using NuPack.VisualStudio;
+using NuGet.VisualStudio;
 
-namespace NuPack.Dialog.ToolsOptionsUI {
+namespace NuGet.Dialog.ToolsOptionsUI {
     /// <summary>
     /// Represents the Tools - Options - Package Manager dialog
     /// </summary>

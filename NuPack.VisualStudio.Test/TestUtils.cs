@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,7 +7,7 @@ using Castle.DynamicProxy.Generators;
 using EnvDTE;
 using Moq;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     internal static class TestUtils {
         private static readonly Func<bool> actionWrapper = () => { AttributesToAvoidReplicating.Add<TypeIdentifierAttribute>(); return true; };
         private static readonly Lazy<bool> lazyAction = new Lazy<bool>(actionWrapper);

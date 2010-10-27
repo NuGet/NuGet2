@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     [TestClass]
     public class PathResolverTest {
         private const string _basePath = @"X:\abc\efg";

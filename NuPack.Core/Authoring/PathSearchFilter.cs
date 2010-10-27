@@ -1,6 +1,6 @@
-﻿using System.IO;
+using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     internal class PathSearchFilter {
         public PathSearchFilter(string searchDirectory, string searchPattern, SearchOption searchOption) {
             SearchDirectory = searchDirectory;

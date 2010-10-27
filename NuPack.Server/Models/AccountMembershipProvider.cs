@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
-namespace NuPack.Server.Models {
+namespace NuGet.Server.Models {
     public class AccountMembershipService : IMembershipService {
         private readonly MembershipProvider _provider;
 

@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Specialized;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Server.Infrastructure;
+using NuGet.Server.Infrastructure;
 
-namespace NuPack.Test.Server.Infrastructure {
+namespace NuGet.Test.Server.Infrastructure {
     [TestClass]
     public class ConditionalGetResultTest {
         [TestMethod]

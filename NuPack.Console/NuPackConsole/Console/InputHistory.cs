@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
     /// <summary>
     /// Simple console input history manager.
     /// </summary>

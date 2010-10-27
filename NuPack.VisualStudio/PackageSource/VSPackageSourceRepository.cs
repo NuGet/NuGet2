@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public class VsPackageSourceRepository : IPackageRepository {
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;

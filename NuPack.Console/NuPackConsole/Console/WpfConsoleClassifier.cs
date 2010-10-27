@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
     class WpfConsoleClassifier : ObjectWithFactory<WpfConsoleService>, IClassifier {
         ITextBuffer TextBuffer { get; set; }
         ComplexCommandSpans _commandLineSpans = new ComplexCommandSpans();

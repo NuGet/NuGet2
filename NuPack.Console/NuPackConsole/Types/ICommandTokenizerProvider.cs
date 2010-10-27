@@ -1,4 +1,4 @@
-﻿namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// ICommandTokenizer provider (syntax highlighting).
     /// 

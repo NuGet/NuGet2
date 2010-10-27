@@ -1,7 +1,7 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 
-namespace NuPack {
+namespace NuGet {
     public static class StreamExtensions {
         public static string ReadToEnd(this Stream stream) {
             using (var streamReader = new StreamReader(stream)) {

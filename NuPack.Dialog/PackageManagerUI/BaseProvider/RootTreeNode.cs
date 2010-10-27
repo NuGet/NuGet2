@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
     /// <summary>
     /// Base implementation of IVsExtensionsTreeNode
     /// </summary>

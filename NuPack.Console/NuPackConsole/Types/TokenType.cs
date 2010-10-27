@@ -1,4 +1,4 @@
-﻿namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// General token types expected by PowerConsole.
     /// </summary>

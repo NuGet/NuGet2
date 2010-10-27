@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     [TestClass]
     public class PackageBuilderTest {
         [TestMethod]

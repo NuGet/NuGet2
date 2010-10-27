@@ -1,6 +1,6 @@
-﻿using System.IO;
+using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     public sealed class PhysicalPackageFile : IPackageFile {        
         /// <summary>
         /// Path on disk

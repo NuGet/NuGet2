@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace NuPack {
+namespace NuGet {
     public class PackageBuilder : IPackageBuilder {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
@@ -190,7 +190,7 @@ namespace NuPack {
         }
 
         private static Stream GetSchemaStream() {
-            return typeof(PackageBuilder).Assembly.GetManifestResourceStream("NuPack.Authoring.nuspec.xsd");
+            return typeof(PackageBuilder).Assembly.GetManifestResourceStream("NuGet.Authoring.nuspec.xsd");
         }
 
         private static void EnsureNamespace(XElement element) {

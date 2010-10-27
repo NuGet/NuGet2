@@ -1,8 +1,8 @@
-﻿<ResourceDictionary
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:self="clr-namespace:NuPack.Dialog.PackageManagerUI"
-    xmlns:resources="clr-namespace:NuPack.Dialog"
+    xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
+    xmlns:resources="clr-namespace:NuGet.Dialog"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
     <ResourceDictionary.MergedDictionaries>

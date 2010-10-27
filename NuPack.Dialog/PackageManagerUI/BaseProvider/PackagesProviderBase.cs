@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
-using NuPack.Dialog.PackageManagerUI;
-using NuPack.VisualStudio;
+using NuGet.Dialog.PackageManagerUI;
+using NuGet.VisualStudio;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
     /// <summary>
     /// IVsExtensionsProvider implementation responsible for gathering
-    /// a list of packages from a package feed which will be shown in the Add NuPack dialog.
+    /// a list of packages from a package feed which will be shown in the Add NuGet dialog.
     /// </summary>
     internal abstract class PackagesProviderBase : VsExtensionsProvider {
 

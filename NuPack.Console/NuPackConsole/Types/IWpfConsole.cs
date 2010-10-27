@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Interface to access more properties of wpf console.
     /// </summary>

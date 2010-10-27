@@ -15,12 +15,12 @@
         <ZipExe>$(NuPackRoot)\Tools\7zip4.65\7z.exe</ZipExe>
         <ILMergeExe>$(NuPackRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
-        <ILMergeFileFinalName>NuPack.exe</ILMergeFileFinalName>
+        <ILMergeFileFinalName>NuGet.exe</ILMergeFileFinalName>
         <ILMergeInternalizeIgnoreFile>$(NuPackRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
         <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
         <MSBuildBuildDirectory>$(NuPackRoot)\NuPack.MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
         <MSBuildDropDirectory>$(NuPackDropDirectory)\MSBuild</MSBuildDropDirectory>
-        <MSBuildILMergeFileFinalName>NuPack.MSBuild.dll</MSBuildILMergeFileFinalName>
+        <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
 
     <Target Name="Go" DependsOnTargets="Build; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
@@ -56,7 +56,7 @@
         <ItemGroup>
             <ExeOutputItems Exclude="$(ExeBuildDirectory)\**\*.pdb" Include="$(ExeBuildDirectory)\**\*.*" />
         </ItemGroup>
-        <Message Text="Copying the NuPack Console output to $(ExeDropDirectory)" />
+        <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExeOutputItems)" DestinationFiles="@(ExeOutputItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
@@ -64,7 +64,7 @@
         <ItemGroup>
             <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
         </ItemGroup>
-        <Message Text="Copying the NuPack Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
+        <Message Text="Copying the NuGet Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
     
@@ -72,7 +72,7 @@
         <ItemGroup>
             <ServerOutputItems Include="$(ServerBuildDirectory)\**\*.*" Exclude="$(ServerBuildDirectory)\**\*.cs*;$(ServerBuildDirectory)\obj\**\*.*;$(ServerBuildDirectory)\Packages\**\*.*"/>
         </ItemGroup>
-        <Message Text="Copying the NuPack Server output to $(ServerDropDirectory)" />
+        <Message Text="Copying the NuGet Server output to $(ServerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\www\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Exec Command="$(ZipExe) a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
     </Target>
@@ -81,7 +81,7 @@
       <ItemGroup>
         <MSBuildOutputItems Exclude="$(MSBuildBuildDirectory)\**\*.pdb" Include="$(MSBuildBuildDirectory)\**\*.*" />
       </ItemGroup>
-      <Message Text="Copying NuPack.MSBuild.dll output to $(MSBuildDropDirectory)" />
+      <Message Text="Copying NuGet.MSBuild.dll output to $(MSBuildDropDirectory)" />
       <Copy ContinueOnError="false" SourceFiles="@(MSBuildOutputItems)" DestinationFiles="@(MSBuildOutputItems ->'$(MSBuildDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
     
@@ -108,7 +108,7 @@
   
     <Target Name="ILMergeMSBuild">
       <ItemGroup>
-        <MSBuildILMergeItems Include="$(MSBuildDropDirectory)\NuPack.Core.dll" />
+        <MSBuildILMergeItems Include="$(MSBuildDropDirectory)\NuGet.Core.dll" />
       </ItemGroup>
       <MakeDir Directories="$(ILMergeArtifactDirectory)" Condition="!Exists('$(ILMergeArtifactDirectory)')" />
       <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
     /// <summary>
     /// This command installs the specified package into the specified project.
     /// </summary>
@@ -11,7 +11,7 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class InstallPackageCmdlet : ProcessPackageBaseCmdlet {
 
         public InstallPackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
         public InstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

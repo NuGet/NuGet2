@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
-using NuPack.Resources;
+using NuGet.Resources;
 
-namespace NuPack {
+namespace NuGet {
     public sealed class DependencyResolver : PackageWalker {
         private HashSet<IPackage> _dependencies;
         private readonly IPackageRepository _sourceRepository;
@@ -27,7 +27,7 @@ namespace NuPack {
         protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                 String.Format(CultureInfo.CurrentCulture,
-                NuPackResources.UnableToResolveDependency, dependency));
+                NuGetResources.UnableToResolveDependency, dependency));
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {

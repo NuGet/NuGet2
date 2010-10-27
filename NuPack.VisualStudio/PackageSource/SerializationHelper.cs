@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
 
     internal static class SerializationHelper {
         

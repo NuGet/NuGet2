@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
 
     /// <summary>
     /// This command uninstalls the specified package from the specified project.
@@ -12,7 +12,7 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
 
         public UninstallPackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
         public UninstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

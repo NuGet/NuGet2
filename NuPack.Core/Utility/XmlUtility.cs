@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System.IO;
     using System.Xml.Linq;
 

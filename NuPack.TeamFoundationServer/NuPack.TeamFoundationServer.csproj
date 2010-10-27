@@ -5,8 +5,8 @@
     <ProjectGuid>{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPack.TeamFoundationServer</RootNamespace>
-    <AssemblyName>NuPack.TeamFoundationServer</AssemblyName>
+    <RootNamespace>NuGet.TeamFoundationServer</RootNamespace>
+    <AssemblyName>NuGet.TeamFoundationServer</AssemblyName>
     <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>

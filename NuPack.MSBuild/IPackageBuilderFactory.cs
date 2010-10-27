@@ -1,7 +1,7 @@
-﻿using System;
-using NuPack.Authoring;
+using System;
+using NuGet.Authoring;
 
-namespace NuPack.Authoring {
+namespace NuGet.Authoring {
     public interface IPackageBuilderFactory {
         IPackageBuilder CreateFrom(string path);
     }

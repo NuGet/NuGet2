@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.ServiceModel.Syndication;
 using System.Web.Mvc;
 using System.Xml;
 
-namespace NuPack.Server.Controllers {
+namespace NuGet.Server.Controllers {
     public class SyndicationFeedResult : ActionResult {
         private SyndicationFeed _feed;
         private Func<SyndicationFeed, SyndicationFeedFormatter> _formatterFactory;

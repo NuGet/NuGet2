@@ -1,11 +1,11 @@
-﻿namespace NuPack {
+namespace NuGet {
 
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Globalization;
     using System.Reflection;
-    using NuPack.Common;
+    using NuGet.Common;
 
     [Export(typeof(ICommandManager))]
     public class CommandManager : ICommandManager {
@@ -44,7 +44,7 @@
                 foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true)) {
                     if (!propInfo.CanWrite) {
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                            NuPackResources.OptionInvalidWithoutSetter, command.GetType().FullName + "." + propInfo.Name));
+                            NuGetResources.OptionInvalidWithoutSetter, command.GetType().FullName + "." + propInfo.Name));
                     }
                     result.Add(attr, propInfo);
                 }

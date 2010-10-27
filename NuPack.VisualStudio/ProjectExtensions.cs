@@ -1,4 +1,4 @@
-﻿namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;

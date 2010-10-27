@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Management.Automation.Host;
 
-namespace NuPackConsole.Host.PowerShell.Implementation
+namespace NuGetConsole.Host.PowerShell.Implementation
 {
     class MyHostRawUserInterface : PSHostRawUserInterface
     {

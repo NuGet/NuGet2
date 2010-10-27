@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NuPack {
+namespace NuGet {
     public interface IPackageMetadata {
         string Id { get; }
         Version Version { get; }

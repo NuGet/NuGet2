@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-[assembly: AssemblyTitle("NuPack.Server")]
-[assembly: AssemblyDescription("Sample Web Application used to host a read-only NuPack feed")]
+[assembly: AssemblyTitle("NuGet.Server")]
+[assembly: AssemblyDescription("Sample Web Application used to host a read-only NuGet feed")]

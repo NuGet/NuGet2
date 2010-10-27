@@ -1,4 +1,4 @@
-﻿namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// MEF interface for host provider. PowerConsole host providers must export this
     /// interface implementation and decorate it with a HostName attribute.

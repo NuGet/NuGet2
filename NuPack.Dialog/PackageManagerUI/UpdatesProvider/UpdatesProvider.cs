@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using NuPack.Dialog.PackageManagerUI;
-using NuPack.VisualStudio;
+using NuGet.Dialog.PackageManagerUI;
+using NuGet.VisualStudio;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
     internal class UpdatesProvider : PackagesProviderBase {
 
         public UpdatesProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)

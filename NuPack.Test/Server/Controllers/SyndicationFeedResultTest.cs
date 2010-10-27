@@ -1,19 +1,19 @@
-﻿using System;
+using System;
 using System.ServiceModel.Syndication;
 using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Server.Controllers;
+using NuGet.Server.Controllers;
 using System.IO;
 
-namespace NuPack.Test.Server.Controllers {
+namespace NuGet.Test.Server.Controllers {
     [TestClass]
     public class SyndicationFeedResultTest {
         [TestMethod]
         public void ExecuteResultSyndicatesFeedWithFormatter() {
             // Arrange
             var items = new SyndicationItem[] { 
-                new SyndicationItem("test title", "Some Content", new Uri("http://nupack.com/feed/1"))
+                new SyndicationItem("test title", "Some Content", new Uri("http://NuGet.com/feed/1"))
             };
             var feed = new SyndicationFeed(items);
             var formatter = new Atom10FeedFormatter(feed);

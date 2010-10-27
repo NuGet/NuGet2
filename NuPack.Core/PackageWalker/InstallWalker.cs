@@ -1,9 +1,9 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public class InstallWalker : PackageWalker, IPackageOperationResolver {
         private bool _ignoreDependencies;
@@ -65,16 +65,16 @@
 
             if (package != null) {
                 // We have it installed locally
-                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_DependencyAlreadyInstalled, dependency);
+                Logger.Log(MessageLevel.Debug, NuGetResources.Debug_DependencyAlreadyInstalled, dependency);
             }
             else {
                 // We didn't resolve the dependency so try to retrieve it from the source
-                Logger.Log(MessageLevel.Info, NuPackResources.Log_AttemptingToRetrievePackageFromSource, dependency);
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
                 package = SourceRepository.FindPackage(dependency);
 
                 if (package != null) {
-                    Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageRetrieveSuccessfully);
+                    Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageRetrieveSuccessfully);
                 }
             }
 
@@ -84,7 +84,7 @@
         protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                 String.Format(CultureInfo.CurrentCulture,
-                NuPackResources.UnableToResolveDependency, dependency));
+                NuGetResources.UnableToResolveDependency, dependency));
         }
 
         protected override bool OnBeforeResolveDependency(PackageDependency dependency) {

@@ -1,9 +1,9 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Documents;
 
 using Microsoft.VisualStudio.PlatformUI;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
     /// <summary>
     /// Interaction logic for LicenseAcceptanceWindow.xaml
     /// </summary>

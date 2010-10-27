@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.ComponentModel.Composition;
-using NuPackConsole.Host.PowerShell.Implementation;
+using NuGetConsole.Host.PowerShell.Implementation;
 
-namespace NuPackConsole.Host.PowerShellProvider {
+namespace NuGetConsole.Host.PowerShellProvider {
 
     [Export(typeof(ICommandTokenizerProvider))]
     [HostName(PowerShellHostProvider.HostName)]

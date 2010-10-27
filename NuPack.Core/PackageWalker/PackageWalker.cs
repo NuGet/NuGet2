@@ -1,10 +1,10 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public abstract class PackageWalker {
         private readonly Dictionary<IPackage, PackageWalkInfo> _packageLookup = new Dictionary<IPackage, PackageWalkInfo>();
@@ -77,7 +77,7 @@
 
                             throw new InvalidOperationException(
                                String.Format(CultureInfo.CurrentCulture,
-                               NuPackResources.CircularDependencyDetected, String.Join(" => ",
+                               NuGetResources.CircularDependencyDetected, String.Join(" => ",
                                packages.Select(p => p.GetFullName()))));
                         }
 
@@ -106,13 +106,13 @@
                     // If we ended up with both that means we found a dependency only packges
                     // that has a mix of solution and project level packages
                     if (parentInfo.Target == PackageTargets.Both) {
-                        throw new InvalidOperationException(NuPackResources.DependencyOnlyCannotMixDependencies);
+                        throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);
                     }
                 }
 
                 // Solution packages can't depend on project level packages
                 if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
-                    throw new InvalidOperationException(NuPackResources.ExternalPackagesCannotDependOnProjectLevelPackages);
+                    throw new InvalidOperationException(NuGetResources.ExternalPackagesCannotDependOnProjectLevelPackages);
                 }
             }
 

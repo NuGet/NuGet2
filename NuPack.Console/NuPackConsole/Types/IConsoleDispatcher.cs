@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// IConsoleDispatcher dispatches and executes console command line inputs on the host.
     /// </summary>

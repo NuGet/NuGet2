@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test.Mocks;
+using NuGet.Test.Mocks;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     [TestClass]
     public class LocalPackageRepositoryTest {
         [TestMethod]

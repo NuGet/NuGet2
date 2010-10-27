@@ -3,8 +3,8 @@
   <Import Project="..\..\Build\NuPack.Settings.targets" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <RootNamespace>NuPackConsole</RootNamespace>
-    <AssemblyName>NuPack.Console</AssemblyName>
+    <RootNamespace>NuGetConsole</RootNamespace>
+    <AssemblyName>NuGet.Console</AssemblyName>
     <ProjectGuid>{50E33DA2-AF14-486D-81B8-BD8409744A38}</ProjectGuid>
     <CreateVsixContainer>False</CreateVsixContainer>
     <DeployExtension>False</DeployExtension>

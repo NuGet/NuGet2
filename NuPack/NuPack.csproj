@@ -5,8 +5,8 @@
     <ProjectGuid>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPack</RootNamespace>
-    <AssemblyName>NuPack</AssemblyName>
+    <RootNamespace>NuGet</RootNamespace>
+    <AssemblyName>NuGet</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework" />
@@ -33,10 +33,10 @@
     <Compile Include="..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Common\NuPackResources.Designer.cs">
+    <Compile Include="Common\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>NuPackResources.resx</DependentUpon>
+      <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Common\Utility.cs" />
     <Compile Include="ICommandManager.cs" />
@@ -57,9 +57,9 @@
       <Link>Common\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Common\NuPackResources.resx">
+    <EmbeddedResource Include="Common\NuGetResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>NuPackResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

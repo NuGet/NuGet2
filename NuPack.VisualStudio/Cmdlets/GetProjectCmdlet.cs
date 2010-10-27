@@ -1,6 +1,6 @@
-﻿using System.Management.Automation;
+using System.Management.Automation;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.

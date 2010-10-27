@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Text;
@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
     public interface ITextFormatClassifier {
         IClassificationType GetClassificationType(Color? foreground, Color? background);
     }

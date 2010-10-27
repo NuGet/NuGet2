@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     static class CommonExtensionMethods {
         public static void Raise(this EventHandler ev, object sender = null, EventArgs e = default(EventArgs)) {
             if (ev != null) {

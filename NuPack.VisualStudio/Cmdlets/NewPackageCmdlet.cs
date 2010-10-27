@@ -1,24 +1,24 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
 
     /// <summary>
     /// This command creates new package file.
     /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
-    public class NewPackageCmdlet : NuPackBaseCmdlet {
+    public class NewPackageCmdlet : NuGetBaseCmdlet {
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
         public NewPackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
         public NewPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
@@ -72,7 +72,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             string specFilePath = specFile.FileNames[0];
             
 
-            var builder = new NuPack.PackageBuilder(specFilePath);
+            var builder = new NuGet.PackageBuilder(specFilePath);
             
             // Get the output file path
             string outputFile = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);

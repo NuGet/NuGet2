@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Linq;
 
-namespace NuPackConsole.Host {
+namespace NuGetConsole.Host {
     
     /// <summary>
     /// Common ITabExpansion based command expansion implementation.

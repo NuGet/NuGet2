@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +6,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Win32;
 using System.IO;
 
-namespace NuPack.Test.Integration.MSBuild {
+namespace NuGet.Test.Integration.MSBuild {
     [TestClass]
-    public class NuPackTaskIntegrationTest {
+    public class NuGetTaskIntegrationTest {
         static string _absolutePackageDir = Path.GetFullPath(@"..\..\..\_package");
         static string _absolutePackageSourceDir = Path.GetFullPath(@"..\..\..\_package_source");
         static string _msBuildPath;
@@ -35,8 +35,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillCreateAPackageWhenTheSpecFileIsRelativeToTheWorkingDir() {
-            string nuPackTaskXml = CreateTaskXml();
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = CreateTaskXml();
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -45,8 +45,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillCreateAPackageWhenThePackageDirIsRelativeToTheWorkingDir() {
-            string nuPackTaskXml = CreateTaskXml();
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = CreateTaskXml();
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -55,8 +55,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillCreateAPackageWhenThePackageDirHasAnAbsolutePath() {
-            string nuPackTaskXml = CreateTaskXml(packageDir: _absolutePackageDir);
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = CreateTaskXml(packageDir: _absolutePackageDir);
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -65,8 +65,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillCreateAPackageWhenTheSpecFileHasAnAbsolutePath() {
-            string nuPackTask = CreateTaskXml(packageSourceDir: _absolutePackageSourceDir);
-            CreatePackageSourceAndBuildFile(nuPackTask, packageSourceDir: _absolutePackageSourceDir);
+            string NuGetTask = CreateTaskXml(packageSourceDir: _absolutePackageSourceDir);
+            CreatePackageSourceAndBuildFile(NuGetTask, packageSourceDir: _absolutePackageSourceDir);
 
             string result = ExecuteTask();
 
@@ -75,19 +75,19 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillLogAnErrorWhenTheSpecFilesIsMissing() {
-            string nuPackTaskXml = "<NuPack />";
-            CreatePackageSourceAndBuildFile(nuPackTaskXml, packageSourceDir: _absolutePackageSourceDir);
+            string NuGetTaskXml = "<NuGet />";
+            CreatePackageSourceAndBuildFile(NuGetTaskXml, packageSourceDir: _absolutePackageSourceDir);
 
             string result = ExecuteTask();
 
-            Assert.IsTrue(result.Contains(@"The ""NuPack"" task was not given a value for the required parameter ""SpecFile"""));
+            Assert.IsTrue(result.Contains(@"The ""NuGet"" task was not given a value for the required parameter ""SpecFile"""));
             Assert.IsTrue(result.Contains("Build FAILED."));
         }
 
         [TestMethod]
         public void WillLogAnErrorWhenTheSpecFileIsBad() {
-            string nuPackTaskXml = CreateTaskXml(packageSourceDir: "aBadPath");
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = CreateTaskXml(packageSourceDir: "aBadPath");
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -97,8 +97,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillLogAnErrorWhenThePackageDirIsBad() {
-            string nuPackTaskXml = CreateTaskXml(packageDir: "aBadPath");
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = CreateTaskXml(packageDir: "aBadPath");
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -108,8 +108,8 @@ namespace NuPack.Test.Integration.MSBuild {
 
         [TestMethod]
         public void WillLogMessagesWhenAPackageIsCreated() {
-            string nuPackTaskXml = CreateTaskXml();
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = CreateTaskXml();
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -128,8 +128,8 @@ namespace NuPack.Test.Integration.MSBuild {
         [TestMethod]
         public void WillLogErrorWhenAnUnexpectedErrorHappens() {
             File.WriteAllText(Path.Combine(_packageSourceDir, "bad.nuspec"), "badSpecContents");
-            string nuPackTaskXml = string.Format(@"<NuPack SpecFile=""..\{0}\bad.nuspec"" />", _packageSourceDir);
-            CreatePackageSourceAndBuildFile(nuPackTaskXml);
+            string NuGetTaskXml = string.Format(@"<NuGet SpecFile=""..\{0}\bad.nuspec"" />", _packageSourceDir);
+            CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
@@ -140,16 +140,16 @@ namespace NuPack.Test.Integration.MSBuild {
                     Path.GetFullPath(Path.Combine(_packageDir, _packageFile)))));
         }
 
-        static string CreatePackageSourceAndBuildFile(string nuPackTaskXml, string packageSourceDir = _packageSourceDir) {
+        static string CreatePackageSourceAndBuildFile(string NuGetTaskXml, string packageSourceDir = _packageSourceDir) {
             var buildFileContents = string.Format(
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
     <UsingTask
-        AssemblyFile=""..\NuPack.MSBuild.dll""
-        TaskName=""NuPack.MSBuild.NuPack"" />
+        AssemblyFile=""..\NuGet.MSBuild.dll""
+        TaskName=""NuGet.MSBuild.NuGet"" />
     <Target Name=""Package"">
         {0}
     </Target>
-</Project>", nuPackTaskXml);
+</Project>", NuGetTaskXml);
             var specFileContents =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -176,7 +176,7 @@ namespace NuPack.Test.Integration.MSBuild {
 
         static string CreateTaskXml(string packageSourceDir = _packageSourceDir, string packageDir = _packageDir) {
             return string.Format(
-                @"<NuPack SpecFile=""{0}{1}\fnord.nuspec"" PackageDir=""{2}{3}"" />",
+                @"<NuGet SpecFile=""{0}{1}\fnord.nuspec"" PackageDir=""{2}{3}"" />",
                 packageSourceDir.StartsWith(".") ? @"..\" : "",
                 packageSourceDir,
                 packageDir.StartsWith(".") ? @"..\" : "",

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
 
     internal class WpfConsoleKeyProcessor : OleCommandFilter {
 

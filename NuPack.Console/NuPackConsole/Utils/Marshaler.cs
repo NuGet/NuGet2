@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Microsoft.VisualStudio.Shell;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     class Marshaler<T> {
         protected readonly T _impl;
 

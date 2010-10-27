@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -6,9 +6,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Ninject;
 using Ninject.Activation;
-using NuPack.Server.Infrastructure;
+using NuGet.Server.Infrastructure;
 
-namespace NuPack.Test.Server.Infrastructure {
+namespace NuGet.Test.Server.Infrastructure {
     [TestClass]
     public class NinjectControllerFactoryTest {
         [TestMethod]

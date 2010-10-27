@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public interface IVsDependencyResolver {
         void Resolve(IPackage package);
         IEnumerable<PackageOperation> ProjectOperations { get; }

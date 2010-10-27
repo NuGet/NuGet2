@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test;
-using NuPack.VisualStudio.Cmdlets;
+using NuGet.Test;
+using NuGet.VisualStudio.Cmdlets;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class GetPackageCmdletTest {
         [TestMethod]

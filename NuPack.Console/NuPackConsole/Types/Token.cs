@@ -1,4 +1,4 @@
-﻿namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// A token type used by command tokenizer.
     /// </summary>

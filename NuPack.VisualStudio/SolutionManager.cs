@@ -1,4 +1,4 @@
-﻿namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -144,7 +144,7 @@
         }
 
         private void SetDefaultProject() {
-            // when a new solution opens, we set its startup project as the default project in NuPack Console
+            // when a new solution opens, we set its startup project as the default project in NuGet Console
             var solutionBuild = (SolutionBuild2)_dte.Solution.SolutionBuild;
             if (solutionBuild.StartupProjects != null) {
                 IEnumerable<object> startupProjects = solutionBuild.StartupProjects;

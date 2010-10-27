@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPack {
+namespace NuGet {
     public interface IProjectManager {
         IPackageRepository LocalRepository { get; }
         ILogger Logger { get; set; }

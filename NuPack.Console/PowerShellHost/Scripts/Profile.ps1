@@ -1,4 +1,4 @@
-﻿#
+#
 # PowerConsole profile
 #
 
@@ -106,7 +106,7 @@ function Get-Interface
         [type]$InterfaceType
     )
     
-    [NuPackConsole.Host.PowerShell.Implementation.PSTypeWrapper]::GetInterface($Object, $InterfaceType)
+    [NuGetConsole.Host.PowerShell.Implementation.PSTypeWrapper]::GetInterface($Object, $InterfaceType)
 }
 
 <#

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     internal static class PathResolver {
         public static PathSearchFilter ResolvePath(string basePath, string source) {
             basePath = basePath ?? String.Empty;

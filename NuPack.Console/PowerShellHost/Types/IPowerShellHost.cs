@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 
-namespace NuPackConsole.Host.PowerShell {
+namespace NuGetConsole.Host.PowerShell {
     public interface IPowerShellHost {
         void Initialize();
         bool IsAsync { get; }

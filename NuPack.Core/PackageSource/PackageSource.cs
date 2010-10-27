@@ -1,7 +1,7 @@
-﻿﻿using System;
+using System;
 using System.Runtime.Serialization;
 
-namespace NuPack {
+namespace NuGet {
 
     [DataContract]
     public class PackageSource : IEquatable<PackageSource> {

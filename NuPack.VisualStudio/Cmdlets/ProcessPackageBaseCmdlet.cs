@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
 
     /// <summary>
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
-    public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
+    public abstract class ProcessPackageBaseCmdlet : NuGetBaseCmdlet {
         private IProjectManager _projectManager;
 
         protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

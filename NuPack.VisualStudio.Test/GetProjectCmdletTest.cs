@@ -1,10 +1,10 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuPack.VisualStudio.Cmdlets;
+using NuGet.VisualStudio.Cmdlets;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class GetProjectCmdletTest {
         [TestMethod]

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuPack.Common {
+namespace NuGet.Common {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace NuPack.Common {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class NuPackResources {
+    internal class NuGetResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal NuPackResources() {
+        internal NuGetResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace NuPack.Common {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPack.Common.NuPackResources", typeof(NuPackResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.Common.NuGetResources", typeof(NuGetResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -124,7 +124,7 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creates a NuPack package based on the provided NuSpec file..
+        ///   Looks up a localized string similar to Creates a NuGet package based on the provided NuSpec file..
         /// </summary>
         internal static string PackageCommandDescription {
             get {
@@ -133,7 +133,7 @@ namespace NuPack.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory for the created NuPack file.
+        ///   Looks up a localized string similar to Specifies the directory for the created NuGet file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
             get {

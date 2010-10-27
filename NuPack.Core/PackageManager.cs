@@ -1,10 +1,10 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
     using Microsoft.Internal.Web.Utils;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public class PackageManager : IPackageManager {
         private ILogger _logger;
@@ -125,7 +125,7 @@
             if (package == null) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
-                    NuPackResources.UnknownPackage, packageId));
+                    NuGetResources.UnknownPackage, packageId));
             }
             else {               
                 InstallPackage(package, ignoreDependencies);
@@ -151,7 +151,7 @@
             if (operation.Action == PackageAction.Install) {
                 // If the package is already installed, then skip it
                 if (packageExists) {
-                    Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
+                    Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
                 }
                 else {
                     ExecuteInstall(operation.Package);
@@ -176,7 +176,7 @@
 
             LocalRepository.AddPackage(package);
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageInstalledSuccessfully, package.GetFullName());
 
             OnInstalled(args);
         }
@@ -210,7 +210,7 @@
             if (package == null) {
                 throw new InvalidOperationException(String.Format(
                     CultureInfo.CurrentCulture,
-                    NuPackResources.UnknownPackage, packageId));
+                    NuGetResources.UnknownPackage, packageId));
             }
 
             UninstallPackage(package, forceRemove, removeDependencies);
@@ -244,7 +244,7 @@
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            Logger.Log(MessageLevel.Info, NuPackResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
 
             OnUninstalled(args);
         }

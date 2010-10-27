@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Threading;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation {
     class MyHost : PSHost {
         PowerShellHost _host;
         string _name;

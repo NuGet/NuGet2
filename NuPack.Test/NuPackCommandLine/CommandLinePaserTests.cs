@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace NuPack.Test.NuPackCommandLine {
+namespace NuGet.Test.NuGetCommandLine {
     [TestClass]
     public class CommandLinePaserTests {
         [TestMethod]
@@ -125,7 +125,7 @@ namespace NuPack.Test.NuPackCommandLine {
         [TestMethod]
         public void ParseCommandLine_ReturnsNullIfNextItemInCommandLineIsEmptyString() {
             CommandLineParser parser = new CommandLineParser(new Mock<ICommandManager>().Object);
-            string input = "NuPack";
+            string input = "NuGet";
             // Act
             ICommand actualCommand = parser.ParseCommandLine(input);
             // Assert
@@ -138,7 +138,7 @@ namespace NuPack.Test.NuPackCommandLine {
             var cmdMgr = new Mock<ICommandManager>();
             cmdMgr.Setup(cm => cm.GetCommand(It.IsAny<string>())).Returns<ICommand>(null);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            string input = "NuPack SomeUnknownCommand SomeArgs";
+            string input = "NuGet SomeUnknownCommand SomeArgs";
             string expectedExceptionMessage = "Unknown command: 'SomeUnknownCommand'";
             // Act & Assert
             ExceptionAssert.Throws<CommandLineException>(() => parser.ParseCommandLine(input), expectedExceptionMessage);

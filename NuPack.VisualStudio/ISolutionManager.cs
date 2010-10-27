@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using EnvDTE;
 using System.Diagnostics.CodeAnalysis;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public interface ISolutionManager {
         string DefaultProjectName { get; set; }
 

@@ -5,8 +5,8 @@
     <ProjectGuid>{3840480F-EA53-4CD4-8155-7CA579CB8E37}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPack.VisualStudio.Test</RootNamespace>
-    <AssemblyName>NuPack.VisualStudio.Test</AssemblyName>
+    <RootNamespace>NuGet.VisualStudio.Test</RootNamespace>
+    <AssemblyName>NuGet.VisualStudio.Test</AssemblyName>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <ItemGroup>

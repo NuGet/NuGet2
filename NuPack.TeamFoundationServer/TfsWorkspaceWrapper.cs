@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace NuPack.TeamFoundationServer {
+namespace NuGet.TeamFoundationServer {
     public class TfsWorkspaceWrapper : ITfsWorkspace {
         private readonly Workspace _workspace;
         public TfsWorkspaceWrapper(Workspace workspace) {

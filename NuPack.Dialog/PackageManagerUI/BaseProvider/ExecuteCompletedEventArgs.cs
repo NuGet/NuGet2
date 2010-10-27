@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
 
     public class ExecuteCompletedEventArgs : AsyncCompletedEventArgs {
         private IEnumerable<IPackage> _results;

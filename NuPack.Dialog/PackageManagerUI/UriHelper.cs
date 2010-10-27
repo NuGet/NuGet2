@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
     internal static class UriHelper {
 
         public static void OpenExternalLink(Uri licenseUrl) {

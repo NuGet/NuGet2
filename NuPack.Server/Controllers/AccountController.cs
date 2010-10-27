@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 using System.Web.Security;
-using NuPack.Server.Models;
+using NuGet.Server.Models;
 
-namespace NuPack.Server.Controllers {
+namespace NuGet.Server.Controllers {
 
     [HandleError]
     public class AccountController : Controller {

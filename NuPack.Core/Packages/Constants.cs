@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     public static class Constants {
         public static readonly string PackageExtension = ".nupkg";
         public static readonly string ManifestExtension = ".nuspec";

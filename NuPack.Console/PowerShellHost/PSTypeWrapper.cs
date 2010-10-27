@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Management.Automation;
 using System.Reflection;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation {
     /// <summary>
     /// This class helps provide Get-Interface for PowerShell host.
     /// 

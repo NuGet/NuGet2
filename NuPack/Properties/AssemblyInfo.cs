@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-[assembly: AssemblyTitle("NuPack")]
-[assembly: AssemblyDescription("NuPack Command Line Tool")]
+[assembly: AssemblyTitle("NuGet")]
+[assembly: AssemblyDescription("NuGet Command Line Tool")]

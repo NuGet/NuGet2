@@ -1,4 +1,4 @@
-﻿namespace NuPackConsole.Implementation.PowerConsole {
+namespace NuGetConsole.Implementation.PowerConsole {
     /// <summary>
     /// Host MEF metadata viewer.
     /// </summary>

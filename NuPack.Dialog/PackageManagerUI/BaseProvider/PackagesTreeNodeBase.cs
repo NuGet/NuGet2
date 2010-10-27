@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
     internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
 
         private delegate void ExecuteDelegate(int pageNumber, int itemsPerPage, AsyncOperation async);

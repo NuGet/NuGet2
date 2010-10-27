@@ -1,10 +1,10 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public class ProjectInstallWalker : InstallWalker {
         public ProjectInstallWalker(IPackageRepository localRepository,
@@ -49,7 +49,7 @@
             else if (package.Version < installedPackage.Version) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
-                    NuPackResources.NewerVersionAlreadyReferenced, package.Id));
+                    NuGetResources.NewerVersionAlreadyReferenced, package.Id));
             }
             else if (package.Version > installedPackage.Version) {
                 // Turn warnings off, since were forcing uninstall
@@ -84,11 +84,11 @@
         private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents) {
             if (dependents.Count() == 1) {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                       NuPackResources.ConflictErrorWithDependent, package.GetFullName(), resolvedPackage.GetFullName(), dependents.Single().GetFullName()));
+                       NuGetResources.ConflictErrorWithDependent, package.GetFullName(), resolvedPackage.GetFullName(), dependents.Single().GetFullName()));
             }
 
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                        NuPackResources.ConflictErrorWithDependents, package.GetFullName(), resolvedPackage.GetFullName(), String.Join(", ",
+                        NuGetResources.ConflictErrorWithDependents, package.GetFullName(), resolvedPackage.GetFullName(), String.Join(", ",
                         dependents.Select(d => d.GetFullName()))));
 
         }

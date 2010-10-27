@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test.NuPackCommandLine {
+namespace NuGet.Test.NuGetCommandLine {
     [TestClass]
     public class CommandLineUtilityTests {
         [TestMethod]
@@ -127,7 +127,7 @@ namespace NuPack.Test.NuPackCommandLine {
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => CommandLineUtility.GetLocalizedString(resourceType, "DoesntExist"),
-                "The resource type 'NuPack.Test.NuPackCommandLine.CommandLineUtilityTests+MockResourceType' does not have an accessible static property named 'DoesntExist'.");
+                "The resource type 'NuGet.Test.NuGetCommandLine.CommandLineUtilityTests+MockResourceType' does not have an accessible static property named 'DoesntExist'.");
         }
 
         [TestMethod]
@@ -136,7 +136,7 @@ namespace NuPack.Test.NuPackCommandLine {
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => CommandLineUtility.GetLocalizedString(resourceType, "NotValid"),
-                "The property 'NotValid' on resource type 'NuPack.Test.NuPackCommandLine.CommandLineUtilityTests+MockResourceType' is not a string type.");
+                "The property 'NotValid' on resource type 'NuGet.Test.NuGetCommandLine.CommandLineUtilityTests+MockResourceType' is not a string type.");
         }
 
         [TestMethod]
@@ -145,7 +145,7 @@ namespace NuPack.Test.NuPackCommandLine {
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => CommandLineUtility.GetLocalizedString(resourceType, "NoGet"),
-                "The resource type 'NuPack.Test.NuPackCommandLine.CommandLineUtilityTests+MockResourceType' does not have an accessible get for the 'NoGet' property.");
+                "The resource type 'NuGet.Test.NuGetCommandLine.CommandLineUtilityTests+MockResourceType' does not have an accessible get for the 'NoGet' property.");
         }
 
         [TestMethod]

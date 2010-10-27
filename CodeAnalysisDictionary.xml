@@ -1,10 +1,10 @@
-﻿<Dictionary>
+<Dictionary>
   <Words>
     <Unrecognized>
     </Unrecognized>
     <Recognized>
       <Word>Nu</Word>
-      <Word>NuPack</Word>
+      <Word>NuGet</Word>
       <Word>Tokenizer</Word>
       <Word>Info</Word>
       <Word>dte</Word>
@@ -18,7 +18,7 @@
       <Term PreferredAlternate=""></Term>
     </Deprecated>
     <Compound>
-      <Term CompoundAlternate="NuPack">nupack</Term>
+      <Term CompoundAlternate="NuGet">NuGet</Term>
       <Term CompoundAlternate="ConsoleDispatcher">ConsoleDispatcher</Term>
       <Term CompoundAlternate="PowerShell">PowerShell</Term>
       <Term CompoundAlternate="WebSite">WebSite</Term>

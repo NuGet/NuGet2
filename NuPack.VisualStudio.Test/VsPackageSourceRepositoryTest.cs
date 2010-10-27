@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test;
-using NuPack.Test.Mocks;
+using NuGet.Test;
+using NuGet.Test.Mocks;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class VsPackageSourceRepositoryTest {
         [TestMethod]

@@ -1,4 +1,4 @@
-﻿namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// An object produced by a factory.
     /// </summary>

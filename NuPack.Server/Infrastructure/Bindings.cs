@@ -1,8 +1,8 @@
-﻿using Ninject.Modules;
-using NuPack.Server.Models;
+using Ninject.Modules;
+using NuGet.Server.Models;
 using System.Web.Security;
 
-namespace NuPack.Server.Infrastructure {
+namespace NuGet.Server.Infrastructure {
     public class Bindings : NinjectModule {
         public override void Load() {
             var packageStore = new FileBasedPackageStore(PackageUtility.PackagePhysicalPath);

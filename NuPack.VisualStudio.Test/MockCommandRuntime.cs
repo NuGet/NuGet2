@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     public class MockCommandRuntime : ICommandRuntime {
         private readonly List<object> _output;
 

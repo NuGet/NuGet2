@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     static class ExtensionMethods {
 
         public static SnapshotPoint GetEnd(this ITextSnapshot snapshot) {
@@ -35,7 +35,7 @@ namespace NuPackConsole {
             IntPtr varIn = IntPtr.Zero;
             try {
                 if (args != null) {
-                    varIn = Marshal.AllocHGlobal(NuPackConsole.NativeMethods.VariantSize);
+                    varIn = Marshal.AllocHGlobal(NuGetConsole.NativeMethods.VariantSize);
                     Marshal.GetNativeVariantForObject(args, varIn);
                 }
 
@@ -44,7 +44,7 @@ namespace NuPackConsole {
             }
             finally {
                 if (varIn != IntPtr.Zero) {
-                    NuPackConsole.NativeMethods.VariantClear(varIn);
+                    NuGetConsole.NativeMethods.VariantClear(varIn);
                     Marshal.FreeHGlobal(varIn);
                 }
             }

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows.Data;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
 
     public class StringCollectionsToStringConverter : IValueConverter {
 

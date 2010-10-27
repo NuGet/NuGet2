@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("NuPack.MSBuild")]
-[assembly: AssemblyDescription("MSBuild task for NuPack.")]
+[assembly: AssemblyTitle("NuGet.MSBuild")]
+[assembly: AssemblyDescription("MSBuild task for NuGet.")]
 [assembly: CLSCompliant(true)]

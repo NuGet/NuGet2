@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace NuPack.TeamFoundationServer {
+namespace NuGet.TeamFoundationServer {
     public class TfsFileSystem : FileBasedProjectSystem {
         public TfsFileSystem(Workspace workspace, string path)
             : this(new TfsWorkspaceWrapper(workspace), path) {

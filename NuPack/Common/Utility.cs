@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
 
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.Globalization;
     using System.Reflection;
     using Microsoft.Internal.Web.Utils;
-    using NuPack.Common;
+    using NuGet.Common;
 
     public static class CommandLineUtility {
         public static Type RemoveNullableFromType(Type type) {
@@ -42,7 +42,7 @@
             }
 
             throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                NuPackResources.UnableToConvertTypeError, value.GetType(), type));
+                NuGetResources.UnableToConvertTypeError, value.GetType(), type));
         }
 
         public static bool TypeAllowsNull(Type type) {
@@ -68,18 +68,18 @@
 
                 if (property == null) {
                     throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuPackResources.ResourceTypeDoesNotHaveProperty, resourceType, resourceName));
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, resourceName));
                 }
 
                 if (property.PropertyType != typeof(string)) {
                     throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuPackResources.ResourcePropertyNotStringType, resourceName, resourceType));
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyNotStringType, resourceName, resourceType));
                 }
 
                 MethodInfo getMethod = property.GetGetMethod(true);
                 if ((getMethod == null) || (!getMethod.IsAssembly && !getMethod.IsPublic)) {
                     throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuPackResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, resourceName));
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, resourceName));
                 }
 
                 _cachedResourceStrings[resourceName] = (string)property.GetValue(null, null);

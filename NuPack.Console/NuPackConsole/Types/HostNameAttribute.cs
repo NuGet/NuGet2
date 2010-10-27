@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.ComponentModel.Composition;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Specifies a MEF host name metadata to uniquely identify a host type. This is
     /// required for a host provider to be recognized by PowerConsole. PowerConsole

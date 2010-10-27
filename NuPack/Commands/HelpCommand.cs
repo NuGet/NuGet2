@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
 
     using System;
     using System.Collections.Generic;
@@ -6,10 +6,10 @@
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
-    using NuPack.Common;
+    using NuGet.Common;
 
     [Export(typeof(ICommand))]
-    [Command(typeof(NuPackResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
+    [Command(typeof(NuGetResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
         UsageSummaryResourceName = "HelpCommandUsageDecription", UsageDescriptionResourceName = "HelpCommandUsageDecription")]
     public class HelpCommand : ICommand {
         private readonly string _commandExe;
@@ -116,7 +116,7 @@
             ICommand command = _commandManager.GetCommand(commandName);
 
             if (command == null) {
-                throw new CommandLineException(NuPackResources.UnknowCommandError, commandName);
+                throw new CommandLineException(NuGetResources.UnknowCommandError, commandName);
             }
 
             CommandAttribute attribute = _commandManager.GetCommandAttribute(command);

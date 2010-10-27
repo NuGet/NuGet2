@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Media;
@@ -11,7 +11,7 @@ using EditorDefGuidList = Microsoft.VisualStudio.Editor.DefGuidList;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using IServiceProvider = System.IServiceProvider;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
     interface IPrivateWpfConsole : IWpfConsole {
         SnapshotPoint? InputLineStart { get; }
         void BeginInputLine();

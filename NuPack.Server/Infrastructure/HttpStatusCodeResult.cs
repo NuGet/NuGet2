@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 
-namespace NuPack.Server.Infrastructure {
+namespace NuGet.Server.Infrastructure {
     //TODO: Remove when upgraded to MVC 3.
     public class HttpStatusCodeResult : ActionResult {
 

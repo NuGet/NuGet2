@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
     class WpfConsoleCompletionSource : ObjectWithFactory<WpfConsoleService>, ICompletionSource {
         ITextBuffer TextBuffer { get; set; }
 

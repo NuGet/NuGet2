@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Microsoft.Internal.Web.Utils;
 
-namespace NuPack {
+namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
         private static readonly IPackageRepositoryFactory _default = new PackageRepositoryFactory();
 

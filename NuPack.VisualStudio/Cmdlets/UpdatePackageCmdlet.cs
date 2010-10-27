@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Management.Automation;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
 
     /// <summary>
     /// This project updates the specfied package to the specfied project.
@@ -12,7 +12,7 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class UpdatePackageCmdlet : ProcessPackageBaseCmdlet {
 
         public UpdatePackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
         public UpdatePackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

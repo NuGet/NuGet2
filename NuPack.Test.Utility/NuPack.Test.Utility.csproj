@@ -5,8 +5,8 @@
     <ProjectGuid>{F016882A-C798-4446-BB75-D3C393A38B32}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPack.Test.Utility</RootNamespace>
-    <AssemblyName>NuPack.Test.Utility</AssemblyName>
+    <RootNamespace>NuGet.Test.Utility</RootNamespace>
+    <AssemblyName>NuGet.Test.Utility</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Common\CommonAssemblyInfo.cs">

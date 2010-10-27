@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     public class FileSystemWrapper : IExtendedFileSystem {
         public ILogger Logger {
             get {

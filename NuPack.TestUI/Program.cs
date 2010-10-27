@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 
-namespace NuPack.TestUI {
+namespace NuGet.TestUI {
     static class Program {
         /// <summary>
         /// The main entry point for the application.

@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Internal.Web.Utils {
+namespace Microsoft.Internal.Web.Utils {
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;

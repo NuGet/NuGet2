@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-[assembly: AssemblyTitle("NuPack.TeamFoundationServer")]
-[assembly: AssemblyDescription("Provides source control bindings for packages installed via NuPack")]
+[assembly: AssemblyTitle("NuGet.TeamFoundationServer")]
+[assembly: AssemblyDescription("Provides source control bindings for packages installed via NuGet")]

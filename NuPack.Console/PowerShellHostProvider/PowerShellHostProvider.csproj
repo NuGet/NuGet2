@@ -5,8 +5,8 @@
     <ProjectGuid>{A5E7AEB3-738F-4C39-A459-00F90483B2FE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPackConsole.Host.PowerShellProvider</RootNamespace>
-    <AssemblyName>NuPackConsole.Host.PowerShellProvider</AssemblyName>
+    <RootNamespace>NuGetConsole.Host.PowerShellProvider</RootNamespace>
+    <AssemblyName>NuGetConsole.Host.PowerShellProvider</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuPack.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>

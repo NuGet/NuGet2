@@ -1,10 +1,10 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using Microsoft.Internal.Web.Utils;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public class FileBasedProjectSystem : ProjectSystem {
         private const string BinDir = "bin";
@@ -45,10 +45,10 @@
             string folderPath = Path.GetDirectoryName(path);
 
             if (!String.IsNullOrEmpty(folderPath)) {
-                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_AddedFileToFolder, Path.GetFileName(path), folderPath);
+                Logger.Log(MessageLevel.Debug, NuGetResources.Debug_AddedFileToFolder, Path.GetFileName(path), folderPath);
             }
             else {
-                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_AddedFile, Path.GetFileName(path));
+                Logger.Log(MessageLevel.Debug, NuGetResources.Debug_AddedFile, Path.GetFileName(path));
             }
         }
 
@@ -62,10 +62,10 @@
                 File.Delete(path);
                 string folderPath = Path.GetDirectoryName(path);
                 if (!String.IsNullOrEmpty(folderPath)) {
-                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
                 }
                 else {
-                    Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
+                    Logger.Log(MessageLevel.Debug, NuGetResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
             catch (FileNotFoundException) {
@@ -85,7 +85,7 @@
             try {
                 path = GetFullPath(path);
                 Directory.Delete(path, recursive);
-                Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
+                Logger.Log(MessageLevel.Debug, NuGetResources.Debug_RemovedFolder, path);
             }
             catch (DirectoryNotFoundException) {
 

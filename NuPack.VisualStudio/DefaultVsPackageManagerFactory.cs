@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using EnvDTE;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public class DefaultVsPackageManagerFactory : IVsPackageManagerFactory {
         private static readonly Lazy<DefaultVsPackageManagerFactory> _instance = new Lazy<DefaultVsPackageManagerFactory>(() => 
             new DefaultVsPackageManagerFactory(DTEExtensions.DTE, CachedRepositoryFactory.Instance));

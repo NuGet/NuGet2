@@ -1,4 +1,4 @@
-﻿namespace NuPack.Test.Mocks {
+namespace NuGet.Test.Mocks {
     using System;
     using System.Collections.Generic;
     using System.IO;

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Text;
 
-namespace NuPackConsole.Host {
+namespace NuGetConsole.Host {
     /// <summary>
     /// Represents a complex (multi-line) command. This class builds a complex
     /// command and provides helpers to check command completeness.

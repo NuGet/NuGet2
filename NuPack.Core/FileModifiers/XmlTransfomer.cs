@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace NuPack {
+namespace NuGet {
     internal class XmlTransfomer : IPackageFileTransformer {
         private readonly IDictionary<XName, Action<XElement, XElement>> _nodeActions;
         public XmlTransfomer(IDictionary<XName, Action<XElement, XElement>> nodeActions) {

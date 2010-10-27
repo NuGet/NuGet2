@@ -1,7 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
 
     /// <summary>
     /// This class represents a tree node under the Updates tab

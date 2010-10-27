@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPack.Server.Infrastructure {
+namespace NuGet.Server.Infrastructure {
     public interface IPackageStore {
         DateTimeOffset GetLastModified(string packageFileName);
 

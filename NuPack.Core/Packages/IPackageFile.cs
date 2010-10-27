@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace NuPack {    
+namespace NuGet {    
     public interface IPackageFile {
         string Path {
             get;

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-[assembly: AssemblyTitle("NuPack.TestUI")]
-[assembly: AssemblyDescription("Test UI for NuPack")]
+[assembly: AssemblyTitle("NuGet.TestUI")]
+[assembly: AssemblyDescription("Test UI for NuGet")]

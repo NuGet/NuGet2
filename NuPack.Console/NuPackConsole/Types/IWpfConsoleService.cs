@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Service for creating and working with new IWpfConsole. This is for hosts that
     /// create and manage their own command window with custom editor ContentType.

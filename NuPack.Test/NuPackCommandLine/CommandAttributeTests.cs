@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test.NuPackCommandLine {
+namespace NuGet.Test.NuGetCommandLine {
     [TestClass]
     public class CommandAttributeTests {
         [TestMethod]

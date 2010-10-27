@@ -1,6 +1,6 @@
-﻿using System.Xml.Serialization;
+using System.Xml.Serialization;
 
-namespace NuPack {
+namespace NuGet {
     [XmlType("dependency", Namespace = Constants.ManifestSchemaNamespace)]
     public class ManifestDependency {
         [XmlAttribute("id")]

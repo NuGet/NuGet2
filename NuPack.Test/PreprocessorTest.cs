@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test.Mocks;
+using NuGet.Test.Mocks;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     [TestClass]
     public class PreprocessorTest {        
         [TestMethod]

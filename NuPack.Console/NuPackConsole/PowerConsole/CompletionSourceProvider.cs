@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.Composition;
+using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
-using NuPackConsole.Implementation.Console;
+using NuGetConsole.Implementation.Console;
 
-namespace NuPackConsole.Implementation.PowerConsole {
+namespace NuGetConsole.Implementation.PowerConsole {
 
     [Export(typeof(ICompletionSourceProvider))]
     [ContentType(PowerConsoleWindow.ContentType)]

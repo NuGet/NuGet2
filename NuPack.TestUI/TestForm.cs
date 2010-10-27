@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using NuPack.Dialog.ToolsOptionsUI;
+using NuGet.Dialog.ToolsOptionsUI;
 
-namespace NuPack.TestUI {
+namespace NuGet.TestUI {
     public partial class TestForm : Form {
         private MockPackageSourceProvider _packageSourceProvider = new MockPackageSourceProvider();
         private ToolsOptionsControl _optionsControl;
@@ -13,7 +13,7 @@ namespace NuPack.TestUI {
             InitializeComponent();
 
             var list = new List<PackageSource> {
-                                                   new PackageSource("NuPack official package source",
+                                                   new PackageSource("NuGet official package source",
                                                                      "http://go.microsoft.com/fwlink/?LinkID=199193"),
                                                    new PackageSource("My Package Source",
                                                                      @"C:\Path\To\My\Packages")

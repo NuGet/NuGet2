@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace NuPack {
+namespace NuGet {
     [XmlType("metadata", Namespace = Constants.ManifestSchemaNamespace)]
     public class ManifestMetadata : IPackageMetadata {
         [XmlElement("id")]

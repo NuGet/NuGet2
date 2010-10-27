@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -14,10 +14,10 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 
-using NuPackConsole.Implementation.Console;
-using NuPackConsole.Implementation.PowerConsole;
+using NuGetConsole.Implementation.Console;
+using NuGetConsole.Implementation.PowerConsole;
 
-namespace NuPackConsole.Implementation {
+namespace NuGetConsole.Implementation {
     /// <summary>
     /// This class implements the tool window.
     /// </summary>
@@ -61,7 +61,7 @@ namespace NuPackConsole.Implementation {
             this.Caption = Resources.ToolWindowTitle;
             this.BitmapResourceID = 301;
             this.BitmapIndex = 0;
-            this.ToolBar = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.idToolbar);
+            this.ToolBar = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.idToolbar);
         }
 
         protected override void Initialize() {
@@ -70,23 +70,23 @@ namespace NuPackConsole.Implementation {
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (mcs != null) {
                 // Get list command for the Feed combo
-                CommandID sourcesListCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSourcesList);
+                CommandID sourcesListCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidSourcesList);
                 mcs.AddCommand(new OleMenuCommand(SourcesList_Exec, sourcesListCommandID));
 
                 // invoke command for the Feed combo
-                CommandID sourcesCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidSources);
+                CommandID sourcesCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidSources);
                 mcs.AddCommand(new OleMenuCommand(Sources_Exec, sourcesCommandID));
 
                 // get default project command
-                CommandID projectsListCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidProjectsList);
+                CommandID projectsListCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidProjectsList);
                 mcs.AddCommand(new OleMenuCommand(ProjectsList_Exec, projectsListCommandID));
 
                 // invoke command for the Default project combo
-                CommandID projectsCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidProjects);
+                CommandID projectsCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidProjects);
                 mcs.AddCommand(new OleMenuCommand(Projects_Exec, projectsCommandID));
 
                 // clear console command
-                CommandID clearHostCommandID = new CommandID(GuidList.guidNuPackCmdSet, PkgCmdIDList.cmdidClearHost);
+                CommandID clearHostCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidClearHost);
                 mcs.AddCommand(new OleMenuCommand(ClearHost_Exec, clearHostCommandID));
             }
         }
@@ -143,7 +143,7 @@ namespace NuPackConsole.Implementation {
             
             if (!IsToolbarEnabled) {
                 // disbale all buttons on the toolbar
-                if (pguidCmdGroup == GuidList.guidNuPackCmdSet) {
+                if (pguidCmdGroup == GuidList.guidNuGetCmdSet) {
                     prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_SUPPORTED;
                     return VSConstants.S_OK;
                 }

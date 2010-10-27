@@ -1,6 +1,6 @@
-﻿using EnvDTE80;
+using EnvDTE80;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation {
 
     public static class PowerShellHostService {
 

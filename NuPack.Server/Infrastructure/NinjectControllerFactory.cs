@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Ninject;
 
-namespace NuPack.Server.Infrastructure {
+namespace NuGet.Server.Infrastructure {
     public class NinjectControllerFactory : DefaultControllerFactory {
         IKernel _kernel;
 

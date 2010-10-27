@@ -1,8 +1,8 @@
-﻿namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using EnvDTE;
-    using NuPack.VisualStudio.Resources;
+    using NuGet.VisualStudio.Resources;
 
     internal class WebSiteProjectSystem : VsProjectSystem {
         public WebSiteProjectSystem(Project project)

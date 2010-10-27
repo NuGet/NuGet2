@@ -5,8 +5,8 @@
     <ProjectGuid>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPack</RootNamespace>
-    <AssemblyName>NuPack.Core</AssemblyName>
+    <RootNamespace>NuGet</RootNamespace>
+    <AssemblyName>NuGet.Core</AssemblyName>
     <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
@@ -17,9 +17,9 @@
       <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\NuPackResources.resx">
+    <EmbeddedResource Include="Resources\NuGetResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>NuPackResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -98,10 +98,10 @@
     <Compile Include="Utility\PackageRepositoryExtensions.cs" />
     <Compile Include="Utility\FileSystemExtensions.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
-    <Compile Include="Resources\NuPackResources.Designer.cs">
+    <Compile Include="Resources\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>NuPackResources.resx</DependentUpon>
+      <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Utility\ProjectSystemExtensions.cs" />
     <Compile Include="Utility\StreamExtensions.cs" />

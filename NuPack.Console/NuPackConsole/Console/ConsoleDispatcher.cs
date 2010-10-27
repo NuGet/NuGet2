@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.VisualStudio.Text;
 
-namespace NuPackConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console {
     interface IPrivateConsoleDispatcher : IConsoleDispatcher {
         event EventHandler<EventArgs<Tuple<SnapshotSpan, bool>>> ExecuteInputLine;
         void PostInputLine(InputLine inputLine);

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     [TestClass]
     public class UtilityTest {
         [TestMethod]

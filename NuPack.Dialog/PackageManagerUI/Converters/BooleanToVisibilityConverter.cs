@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Data;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
     /// <summary>
     /// This BooleanToVisibility converter allows us to override the converted value when
     /// the bound value is false.

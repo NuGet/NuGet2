@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole.Host.PowerShellProvider {
+namespace NuGetConsole.Host.PowerShellProvider {
 
     /// <summary>
     /// This host is used when PowerShell 2.0 runtime is not installed in the system. It's basically a no-op host.

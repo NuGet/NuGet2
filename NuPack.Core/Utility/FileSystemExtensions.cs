@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using NuPack.Resources;
+using NuGet.Resources;
 
-namespace NuPack {
+namespace NuGet {
     internal static class FileSystemExtensions {
         internal static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files) {
             AddFiles(fileSystem, files, String.Empty);
@@ -107,7 +107,7 @@ namespace NuPack {
                 }
                 else {
                     // This package installed a file that was modified so warn the user
-                    fileSystem.Logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileModified, path);
+                    fileSystem.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileModified, path);
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace NuPack {
         internal static void AddFileWithCheck(this IFileSystem fileSystem, string path, Func<Stream> streamFactory) {
             // Don't overwrite file if it exists if force wasn't set to true
             if (fileSystem.FileExists(path)) {
-                fileSystem.Logger.Log(MessageLevel.Warning, NuPackResources.Warning_FileAlreadyExists, path);
+                fileSystem.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
             }
             else {
                 using (Stream stream = streamFactory()) {

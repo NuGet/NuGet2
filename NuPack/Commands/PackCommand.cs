@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
 
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
 
 
     [Export(typeof(ICommand))]
-    [Command(typeof(NuPackResources), "pack", "PackageCommandDescription", MinArgs = 0, MaxArgs = 1,
+    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MinArgs = 0, MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : ICommand {
         private static readonly HashSet<string> _exclude =
@@ -17,10 +17,10 @@
 
         public List<string> Arguments { get; set; }
 
-        [Option(typeof(NuPackResources), "PackageCommandOutputDirDescription", AltName = "o")]
+        [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription", AltName = "o")]
         public string OutputDirectory { get; set; }
 
-        [Option(typeof(NuPackResources), "PackageCommandBasePathDescription", AltName = "b")]
+        [Option(typeof(NuGetResources), "PackageCommandBasePathDescription", AltName = "b")]
         public string BasePath { get; set; }
 
         public void Execute() {
@@ -35,7 +35,7 @@
                     nuspecFile = possibleNuspecFiles[0];
                 }
                 else {
-                    throw new CommandLineException(NuPackResources.PackageCommandSpecifyNuSpecFileError);
+                    throw new CommandLineException(NuGetResources.PackageCommandSpecifyNuSpecFileError);
                 }
             }
 
@@ -52,7 +52,7 @@
                 builder.Save(stream);
             }
 
-            Console.WriteLine(NuPackResources.PackageCommandSuccess, outputPath);
+            Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
         }
 
         private static string[] GetNuSpecFilesInDirectory() {

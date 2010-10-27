@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     public static class Capture {
         public static Exception Exception(Action act) {
             Exception ex = null;

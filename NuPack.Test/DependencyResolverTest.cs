@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuPack.Test.Mocks;
+using NuGet.Test.Mocks;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
 
     [TestClass]
     public class DependencyResolverTest {

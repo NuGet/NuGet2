@@ -5,8 +5,8 @@
     <ProjectGuid>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuPack.Dialog</RootNamespace>
-    <AssemblyName>NuPack.Dialog</AssemblyName>
+    <RootNamespace>NuGet.Dialog</RootNamespace>
+    <AssemblyName>NuGet.Dialog</AssemblyName>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>

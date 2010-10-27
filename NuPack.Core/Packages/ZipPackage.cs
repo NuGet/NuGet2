@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Serialization;
 using Microsoft.Internal.Web.Utils;
-using NuPack.Resources;
+using NuGet.Resources;
 
-namespace NuPack {
+namespace NuGet {
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
         private const string AssemblyReferencesExtension = ".dll";
@@ -127,13 +127,13 @@ namespace NuPack {
                 PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
 
                 if (relationshipType == null) {
-                    throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
+                    throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
                 }
 
                 PackagePart manifestPart = package.GetPart(relationshipType.TargetUri);
 
                 if (manifestPart == null) {
-                    throw new InvalidOperationException(NuPackResources.PackageDoesNotContainManifest);
+                    throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
                 }
 
                 using (Stream manifestStream = manifestPart.GetStream()) {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -6,7 +6,7 @@ using System.Management.Automation.Host;
 using System.Security;
 using System.Windows.Media;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation {
     class MyHostUI : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
 

@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPack.Tools
+namespace NuGet.Tools
 {
     static class PkgCmdIDList
     {

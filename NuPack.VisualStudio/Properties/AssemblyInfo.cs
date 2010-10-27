@@ -1,7 +1,7 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("NuPack.VisualStudio")]
-[assembly: AssemblyDescription("API for automating Visual Studio via NuPack")]
+[assembly: AssemblyTitle("NuGet.VisualStudio")]
+[assembly: AssemblyDescription("API for automating Visual Studio via NuGet")]
 
-[assembly: InternalsVisibleTo("NuPack.VisualStudio.Test")]
+[assembly: InternalsVisibleTo("NuGet.VisualStudio.Test")]

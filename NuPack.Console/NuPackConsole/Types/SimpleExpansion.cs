@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-namespace NuPackConsole {
+using System.Collections.Generic;
+namespace NuGetConsole {
     /// <summary>
     /// Simple command expansion result.
     /// </summary>

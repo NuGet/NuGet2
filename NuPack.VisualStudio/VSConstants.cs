@@ -1,4 +1,4 @@
-﻿namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     internal static class VsConstants {
         internal const string WebSiteProjectKind = "{E24C65DC-7377-472B-9ABA-BC803B73C61A}";
         internal const string CsharpProjectKind = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}";

@@ -1,21 +1,21 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Authoring;
+using NuGet.Authoring;
 
-namespace NuPack.Test.MSBuild {
+namespace NuGet.Test.MSBuild {
     [TestClass]
-    public class NuPackTaskUnitTest {
+    public class NuGetTaskUnitTest {
         [TestMethod]
         public void WillLogAnErrorWhenTheSpecFileIsEmpty() {
             string actualMessage = null;
             var fileSystemStub = new Mock<IExtendedFileSystem>();
             var buildEngineStub = new Mock<IBuildEngine>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(fileSystemStub: fileSystemStub, buildEngineStub: buildEngineStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(fileSystemStub: fileSystemStub, buildEngineStub: buildEngineStub);
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
@@ -35,7 +35,7 @@ namespace NuPack.Test.MSBuild {
             string actualMessage = null;
             var fileSystemStub = new Mock<IExtendedFileSystem>();
             var buildEngineStub = new Mock<IBuildEngine>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(fileSystemStub: fileSystemStub, buildEngineStub: buildEngineStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(fileSystemStub: fileSystemStub, buildEngineStub: buildEngineStub);
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
@@ -54,7 +54,7 @@ namespace NuPack.Test.MSBuild {
         public void WillCreatePackageUsingSpecFileAndWorkingDirectory() {
             var packageStreamStub = new Mock<Stream>();
             var packageBuilderStub = new Mock<IPackageBuilder>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, packageStreamStub: packageStreamStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, packageStreamStub: packageStreamStub);
 
             bool actualResut = task.Execute();
 
@@ -67,7 +67,7 @@ namespace NuPack.Test.MSBuild {
             var packageBuilderStub = new Mock<IPackageBuilder>();
             var packageFileStub = new Mock<IPackageFile>();
             packageFileStub.Setup(x => x.Path).Returns("/aFile.nuspec");
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
             packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
 
             bool actualResut = task.Execute();
@@ -80,7 +80,7 @@ namespace NuPack.Test.MSBuild {
             var packageBuilderStub = new Mock<IPackageBuilder>();
             var packageFileStub = new Mock<IPackageFile>();
             packageFileStub.Setup(x => x.Path).Returns("/aFile.nupkg");
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
             packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
 
             bool actualResut = task.Execute();
@@ -93,7 +93,7 @@ namespace NuPack.Test.MSBuild {
             var packageBuilderStub = new Mock<IPackageBuilder>();
             var packageFileStub = new Mock<IPackageFile>();
             packageFileStub.Setup(x => x.Path).Returns("/lib/aFile.dll");
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
             packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
 
             bool actualResut = task.Execute();
@@ -105,7 +105,7 @@ namespace NuPack.Test.MSBuild {
         public void WillLogMessagesBeforeAndAfterPackageCreation() {
             Queue<string> actualMessages = new Queue<string>();
             var buildEngineStub = new Mock<IBuildEngine>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub);
             buildEngineStub
                 .Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()))
                 .Callback<BuildMessageEventArgs>(e => actualMessages.Enqueue(e.Message));
@@ -121,7 +121,7 @@ namespace NuPack.Test.MSBuild {
             string actualMessage = null;
             var packageBuilderStub = new Mock<IPackageBuilder>();
             var buildEngineStub = new Mock<IBuildEngine>();
-            NuPack.MSBuild.NuPack task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, buildEngineStub: buildEngineStub);
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, buildEngineStub: buildEngineStub);
             packageBuilderStub.Setup(x => x.Save(It.IsAny<Stream>())).Throws(new Exception());
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
@@ -133,7 +133,7 @@ namespace NuPack.Test.MSBuild {
             Assert.IsFalse(actualResut);
         }
 
-        static NuPack.MSBuild.NuPack CreateTaskWithDefaultStubs(
+        static NuGet.MSBuild.NuGet CreateTaskWithDefaultStubs(
             Mock<IExtendedFileSystem> fileSystemStub = null,
             Mock<IPackageBuilderFactory> packageBuilderFactoryStub = null,
             Mock<IPackageBuilder> packageBuilderStub = null,
@@ -173,7 +173,7 @@ namespace NuPack.Test.MSBuild {
                 .Setup(x => x.CreateFile("/thePackageId.1.0.nupkg"))
                 .Returns(packageStreamStub.Object);
 
-            var task = new global::NuPack.MSBuild.NuPack(fileSystemStub.Object, packageBuilderFactoryStub.Object);
+            var task = new global::NuGet.MSBuild.NuGet(fileSystemStub.Object, packageBuilderFactoryStub.Object);
 
             task.BuildEngine = buildEngineStub.Object;
             task.SpecFile = "thePackageId.nuspec";

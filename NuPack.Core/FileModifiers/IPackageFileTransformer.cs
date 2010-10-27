@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     public interface IPackageFileTransformer {
         /// <summary>
         /// Transforms the file

@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     internal static class UtilityMethods {
         public static void ThrowIfArgumentNull<T>(T arg) {
             if (arg == null) {

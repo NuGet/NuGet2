@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 
-namespace NuPack.Server.Infrastructure {
+namespace NuGet.Server.Infrastructure {
     public class FileBasedPackageStore : IPackageStore {
         string _rootDirectory;
 

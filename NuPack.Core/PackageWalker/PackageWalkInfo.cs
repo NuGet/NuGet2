@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     public class PackageWalkInfo {
         public PackageWalkInfo(PackageTargets initialTarget) {
             InitialTarget = initialTarget;

@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     public class PackageOperation {
         public PackageOperation(IPackage package, PackageAction action) {
             Package = package;

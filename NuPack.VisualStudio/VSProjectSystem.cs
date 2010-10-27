@@ -1,4 +1,4 @@
-﻿namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Runtime.Versioning;
     using EnvDTE;
-    using NuPack.VisualStudio.Resources;
+    using NuGet.VisualStudio.Resources;
 
     public class VsProjectSystem : FileBasedProjectSystem {
         private const string BinDir = "bin";

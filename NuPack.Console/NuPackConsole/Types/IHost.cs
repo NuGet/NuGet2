@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Represents a command host that executes user input commands (synchronously).
     /// </summary>

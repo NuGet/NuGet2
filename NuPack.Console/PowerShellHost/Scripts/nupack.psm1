@@ -138,7 +138,7 @@ function ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
 }
 
 function ExecuteInitScripts() {
-    $packageManager = New-Object "NuPack.VisualStudio.VsPackageManager" $dte
+    $packageManager = New-Object "NuGet.VisualStudio.VsPackageManager" $dte
     $repository = $packageManager.LocalRepository
     $localPackages = $repository.GetPackages()
 

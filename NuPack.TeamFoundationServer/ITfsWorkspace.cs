@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace NuPack.TeamFoundationServer {
+namespace NuGet.TeamFoundationServer {
     public interface ITfsWorkspace {
         bool PendEdit(string fullPath);
         bool PendAdd(string fullPath);

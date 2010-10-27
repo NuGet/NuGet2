@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuPack.VisualStudio.Resources {
+namespace NuGet.VisualStudio.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuPack.VisualStudio.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPack.VisualStudio.Resources.VsResources", typeof(VsResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.VisualStudio.Resources.VsResources", typeof(VsResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -142,7 +142,7 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies..
+        ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies..
         /// </summary>
         public static string Console_DisclaimerText {
             get {
@@ -205,7 +205,7 @@ namespace NuPack.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuPack is not responsible for, nor does it grant any licenses to, third-party packages..
+        ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages..
         /// </summary>
         public static string Dialog_DisclaimerText {
             get {

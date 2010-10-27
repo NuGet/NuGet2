@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public static class DTEExtensions {
 
         public static DTE DTE { 

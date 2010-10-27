@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     public interface IExtendedFileSystem : IFileSystem {
         Stream CreateFile(string path);
         string GetCurrentDirectory();

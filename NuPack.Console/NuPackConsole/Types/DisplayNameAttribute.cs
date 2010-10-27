@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.ComponentModel.Composition;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Specifies a MEF DisplayName metadata.
     /// </summary>

@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test.Mocks;
-using NuPack.VisualStudio;
+using NuGet.Test.Mocks;
+using NuGet.VisualStudio;
 
-namespace NuPack.Test.VisualStudio {
+namespace NuGet.Test.VisualStudio {
     [TestClass]
     public class VsPackageManagerTest {
         [TestMethod]

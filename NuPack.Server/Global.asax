@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="NuPack.Server.MvcApplication" Language="C#" %>
+<%@ Application Codebehind="Global.asax.cs" Inherits="NuGet.Server.MvcApplication" Language="C#" %>

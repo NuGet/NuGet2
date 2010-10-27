@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public interface IPackageSourceProvider {
         PackageSource ActivePackageSource { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

@@ -1,9 +1,9 @@
-﻿namespace NuPack {
+namespace NuGet {
 
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using NuPack.Common;
+    using NuGet.Common;
 
     public class CommandLineParser {
         private ICommandManager _commandManager;
@@ -54,7 +54,7 @@
                 }
 
                 if (propInfo == null) {
-                    throw new CommandLineException(NuPackResources.UnknownOptionError, option);
+                    throw new CommandLineException(NuGetResources.UnknownOptionError, option);
                 }
 
                 if (propInfo.PropertyType == typeof(bool)) {
@@ -65,14 +65,14 @@
                 }
 
                 if (value == String.Empty) {
-                    throw new CommandLineException(NuPackResources.MissingOptionValueError, option);
+                    throw new CommandLineException(NuGetResources.MissingOptionValueError, option);
                 }
 
                 try {
                     propInfo.SetValue(command, CommandLineUtility.ChangeType(value, propInfo.PropertyType), null);
                 }
                 catch {
-                    throw new CommandLineException(NuPackResources.InvalidOptionValueError, option, value);
+                    throw new CommandLineException(NuGetResources.InvalidOptionValueError, option, value);
                 }
             }
 
@@ -80,11 +80,11 @@
             command.Arguments = arguments;
 
             if (ArgCountTooHigh(command)) {
-                throw new CommandLineException(NuPackResources.TooManyArgsError);
+                throw new CommandLineException(NuGetResources.TooManyArgsError);
             }
 
             else if (ArgCountTooLow(command)) {
-                throw new CommandLineException(NuPackResources.TooFewArgsError);
+                throw new CommandLineException(NuGetResources.TooFewArgsError);
             }
 
             return command;
@@ -103,7 +103,7 @@
             // Get the command based on the name
             ICommand cmd = _commandManager.GetCommand(cmdName);
             if (cmd == null) {
-                throw new CommandLineException(NuPackResources.UnknowCommandError, cmdName);
+                throw new CommandLineException(NuGetResources.UnknowCommandError, cmdName);
             }
 
             return ExtractOptions(cmd, commandLine);

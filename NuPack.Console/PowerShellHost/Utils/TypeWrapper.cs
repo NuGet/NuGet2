@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NuPackConsole.Host {
+namespace NuGetConsole.Host {
     /// <summary>
     /// This class wraps an object so that it can only be accessed through an interface.
     /// This simulates COM QueryInterface (Get-Interface).

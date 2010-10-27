@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.Design;
 using System.Globalization;
 using System.Reflection;
@@ -8,13 +8,13 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuPack.Dialog.PackageManagerUI;
-using NuPack.Dialog.ToolsOptionsUI;
-using NuPack.VisualStudio;
-using NuPack.VisualStudio.Resources;
-using NuPackConsole.Implementation;
+using NuGet.Dialog.PackageManagerUI;
+using NuGet.Dialog.ToolsOptionsUI;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
+using NuGetConsole.Implementation;
 
-namespace NuPack.Tools {
+namespace NuGet.Tools {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
     /// </summary>
@@ -28,9 +28,9 @@ namespace NuPack.Tools {
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
-    [Guid(GuidList.guidNuPackPkgString)]
-    public sealed class NuPackPackage : Microsoft.VisualStudio.Shell.Package {
-        public NuPackPackage() {
+    [Guid(GuidList.guidNuGetPkgString)]
+    public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
+        public NuGetPackage() {
         }
 
         private void ShowToolWindow(object sender, EventArgs e) {
@@ -59,7 +59,7 @@ namespace NuPack.Tools {
                 catch (TargetInvocationException exception) {
                     MessageBox.Show(
                         (exception.InnerException ?? exception).Message,
-                        NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                 }
@@ -69,7 +69,7 @@ namespace NuPack.Tools {
                 string projectName = project != null ? project.Name : String.Empty;
                 MessageBox.Show(
                     String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName),
-                    NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
@@ -81,7 +81,7 @@ namespace NuPack.Tools {
         }
 
         private void ShowSettingsWindow(object sender, EventArgs args) {
-            ShowOptionPage(typeof(NuPack.Dialog.ToolsOptionsUI.ToolsOptionsPage));
+            ShowOptionPage(typeof(NuGet.Dialog.ToolsOptionsUI.ToolsOptionsPage));
         }
 
         /// <summary>
@@ -100,16 +100,16 @@ namespace NuPack.Tools {
             if ( null != mcs )
             {
                 // Create the command for the tool window
-                CommandID toolwndCommandID = new CommandID(GuidList.guidNuPackConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
+                CommandID toolwndCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand( menuToolWin );
 
                 // Create the command for the menu item.
-                CommandID menuCommandID = new CommandID(GuidList.guidNuPackDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
+                CommandID menuCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
                 OleMenuCommand menuItem = new OleMenuCommand(ShowAddPackageDialog, null, BeforeQueryStatusForAddPackageDialog, menuCommandID);
                 mcs.AddCommand(menuItem);
 
-                CommandID settingsCommandID = new CommandID(GuidList.guidNuPackConsoleCmdSet, (int)PkgCmdIDList.cmdidSourceSettings);
+                CommandID settingsCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidSourceSettings);
                 OleMenuCommand settingsMenuCommand = new OleMenuCommand(ShowSettingsWindow, settingsCommandID);
                 mcs.AddCommand(settingsMenuCommand);
             }

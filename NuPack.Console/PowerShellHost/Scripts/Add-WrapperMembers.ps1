@@ -25,14 +25,14 @@ function GetInvoker
             
             $o = New-Object PSObject
             Add-Member -InputObject $o -MemberType ScriptMethod -Name Invoke -Value {
-                    [NuPackConsole.Host.PowerShell.Implementation.PSTypeWrapper]::InvokeMethod($t, $m, $args)
+                    [NuGetConsole.Host.PowerShell.Implementation.PSTypeWrapper]::InvokeMethod($t, $m, $args)
                 }.GetNewClosure()
             return $o
         }.GetNewClosure()
     }
     
     return {
-        [NuPackConsole.Host.PowerShell.Implementation.PSTypeWrapper]::InvokeMethod($Target, $Method, $args)
+        [NuGetConsole.Host.PowerShell.Implementation.PSTypeWrapper]::InvokeMethod($Target, $Method, $args)
     }.GetNewClosure()
 }
 

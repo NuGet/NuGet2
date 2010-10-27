@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
 
-namespace NuPack.Dialog.ToolsOptionsUI {
+namespace NuGet.Dialog.ToolsOptionsUI {
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Interoperability", 
         "CA1408:DoNotUseAutoDualClassInterfaceType")]

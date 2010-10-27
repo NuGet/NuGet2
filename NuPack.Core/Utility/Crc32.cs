@@ -1,4 +1,4 @@
-﻿/* ****************************************************************************
+/* ****************************************************************************
  *
  * Copyright (c) Microsoft Corporation. 
  *
@@ -17,7 +17,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace NuPack {
+namespace NuGet {
     internal static class Crc32 {
 
         // Table for CRC calculation

@@ -1,5 +1,5 @@
-﻿using System;
-namespace NuPack {
+using System;
+namespace NuGet {
     public interface IPackageManager {
         IFileSystem FileSystem { get; set; }
         IPackageRepository LocalRepository { get; }

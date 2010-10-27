@@ -1,8 +1,8 @@
-﻿// PkgCmdID.cs
+// PkgCmdID.cs
 // MUST match PkgCmdID.h
 using System;
 
-namespace NuPackConsole.Implementation {
+namespace NuGetConsole.Implementation {
     static class PkgCmdIDList {
         public const int idToolbar = 0x1010;
         public const int cmdidPowerConsole = 0x0100;

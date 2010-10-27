@@ -1,10 +1,10 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
-    using NuPack.Resources;
+    using NuGet.Resources;
 
     public class UninstallWalker : PackageWalker, IPackageOperationResolver {
         public UninstallWalker(IPackageRepository repository,
@@ -103,17 +103,17 @@
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
-            Logger.Log(MessageLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
+            Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UninstallingPackageWillBreakDependents, package.GetFullName(), String.Join(", ", dependents.Select(d => d.GetFullName())));
         }
 
         protected virtual InvalidOperationException CreatePackageHasDependentsException(IPackage package, IEnumerable<IPackage> dependents) {
             if (dependents.Count() == 1) {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                       NuPackResources.PackageHasDependent, package.GetFullName(), dependents.Single().GetFullName()));
+                       NuGetResources.PackageHasDependent, package.GetFullName(), dependents.Single().GetFullName()));
             }
 
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                        NuPackResources.PackageHasDependents, package.GetFullName(), String.Join(", ",
+                        NuGetResources.PackageHasDependents, package.GetFullName(), String.Join(", ",
                         dependents.Select(d => d.GetFullName()))));
 
         }
@@ -121,7 +121,7 @@
         protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                                 String.Format(CultureInfo.CurrentCulture,
-                                NuPackResources.UnableToLocateDependency,
+                                NuGetResources.UnableToLocateDependency,
                                 dependency));
         }
 
@@ -135,7 +135,7 @@
 
                 foreach (var pair in SkippedPackages) {
                     if (!packages.Contains(pair.Key)) {
-                        Logger.Log(MessageLevel.Warning, NuPackResources.Warning_UninstallingPackageWillBreakDependents,
+                        Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UninstallingPackageWillBreakDependents,
                                    pair.Key,
                                    String.Join(", ", pair.Value.Select(p => p.GetFullName())));
                     }

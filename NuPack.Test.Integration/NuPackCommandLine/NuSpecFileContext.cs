@@ -1,4 +1,4 @@
-﻿namespace NuPack.Test.Integration.NuPackCommandLine {
+namespace NuGet.Test.Integration.NuGetCommandLine {
     
     public class NuSpecFileContext {
     

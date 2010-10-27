@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.Composition;
+using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using NuPackConsole.Implementation.Console;
+using NuGetConsole.Implementation.Console;
 
-namespace NuPackConsole.Implementation.PowerConsole {
+namespace NuGetConsole.Implementation.PowerConsole {
 
     [Export(typeof(IClassifierProvider))]
     [ContentType(PowerConsoleWindow.ContentType)]

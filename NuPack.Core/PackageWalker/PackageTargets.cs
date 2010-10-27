@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace NuPack {
+namespace NuGet {
     [Flags]
     public enum PackageTargets {
         None = 0,

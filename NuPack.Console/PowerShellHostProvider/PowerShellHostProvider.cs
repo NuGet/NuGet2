@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 using System.ComponentModel.Composition;
 using System.Runtime.CompilerServices;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
-using NuPackConsole.Host.PowerShell;
-using NuPackConsole.Host.PowerShell.Implementation;
+using NuGetConsole.Host.PowerShell;
+using NuGetConsole.Host.PowerShell.Implementation;
 
-namespace NuPackConsole.Host.PowerShellProvider {
+namespace NuGetConsole.Host.PowerShellProvider {
     [Export(typeof(IHostProvider))]
     [HostName(PowerShellHostProvider.HostName)]
-    [DisplayName("NuPack Provider")]
+    [DisplayName("NuGet Provider")]
     internal class PowerShellHostProvider : IHostProvider {
         /// <summary>
         /// PowerConsole host name of PowerShell host.
@@ -18,7 +18,7 @@ namespace NuPackConsole.Host.PowerShellProvider {
         /// <remarks>
         /// Note: PowerConsole\Impl\PowerConsole\Settings.cs copies this name as default host. Keep in sync.
         /// </remarks>
-        public const string HostName = "NuPackConsole.Host.PowerShell";
+        public const string HostName = "NuGetConsole.Host.PowerShell";
 
         /// <summary>
         /// This PowerShell host name. Used for PowerShell "$host".

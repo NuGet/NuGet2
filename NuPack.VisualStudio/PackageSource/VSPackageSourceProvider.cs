@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EnvDTE;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     // REVIEW: Does this need to have a dictionary? Do we ever get more than one instance of dte?
     public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=204820";
@@ -62,7 +62,7 @@ namespace NuPack.VisualStudio {
                 ActivePackageSource = packageSource;
             }
             else if (_settingsManager.IsFirstRunning) {
-                packageSource = new PackageSource("NuPack official package source", DefaultPackageSource);
+                packageSource = new PackageSource("NuGet official package source", DefaultPackageSource);
                 AddPackageSource(packageSource);
                 _settingsManager.IsFirstRunning = false;
             }

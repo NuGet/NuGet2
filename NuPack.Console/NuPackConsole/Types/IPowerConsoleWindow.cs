@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// MEF interface to interact with the PowerConsole tool window.
     /// </summary>

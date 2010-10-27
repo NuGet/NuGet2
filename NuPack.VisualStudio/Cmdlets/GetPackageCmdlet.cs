@@ -1,23 +1,23 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio.Cmdlets {
+namespace NuGet.VisualStudio.Cmdlets {
 
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = "Default")]
-    public class GetPackageCmdlet : NuPackBaseCmdlet {
+    public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
 
         public GetPackageCmdlet()
             : this(CachedRepositoryFactory.Instance, 
                    VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE), 
-                   NuPack.VisualStudio.SolutionManager.Current,
+                   NuGet.VisualStudio.SolutionManager.Current,
                    DefaultVsPackageManagerFactory.Instance) {
         }
 

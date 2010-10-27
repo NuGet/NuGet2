@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     public interface IPackage : IPackageMetadata  {        
         IEnumerable<IPackageAssemblyReference> AssemblyReferences { get; }
 

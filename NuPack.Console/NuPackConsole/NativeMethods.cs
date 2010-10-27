@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     internal static class NativeMethods {
 
         // Size of VARIANTs in 32 bit systems

@@ -1,8 +1,8 @@
-﻿namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     using System;
     using System.Globalization;
     using EnvDTE;
-    using NuPack.VisualStudio.Resources;
+    using NuGet.VisualStudio.Resources;
 
     public static class ProjectSystemFactory {
         public static VsProjectSystem CreateProjectSystem(Project project) {            

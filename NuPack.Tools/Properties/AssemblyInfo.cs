@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-[assembly: AssemblyTitle("NuPack.Tools")]
+[assembly: AssemblyTitle("NuGet.Tools")]
 [assembly: AssemblyDescription("Visual Studio Extensibility Package (vsix)")]

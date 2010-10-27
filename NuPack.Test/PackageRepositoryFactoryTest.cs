@@ -1,7 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     [TestClass]
     public class PackageRepositoryFactoryTest {
         [TestMethod]

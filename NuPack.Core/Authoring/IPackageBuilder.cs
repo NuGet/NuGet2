@@ -1,7 +1,7 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.IO;
 
-namespace NuPack {
+namespace NuGet {
     public interface IPackageBuilder : IPackageMetadata {
         Collection<IPackageFile> Files { get; }
         void Save(Stream stream);

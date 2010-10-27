@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Web;
 using System.Globalization;
 
-namespace NuPack.Server {
+namespace NuGet.Server {
     public static class HttpContextExtensions {
         public static bool IsUnmodified(this HttpRequestBase request, DateTimeOffset resourceLastModified) {
             DateTimeOffset ifModifiedSince;

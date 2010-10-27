@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace NuPack {
+namespace NuGet {
     // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
     public static class ProjectSystemExtensions {
         public static void AddFiles(this ProjectSystem project, 

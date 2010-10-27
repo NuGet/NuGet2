@@ -1,9 +1,9 @@
-﻿namespace NuPack.Test {
+namespace NuGet.Test {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using NuPack.Test.Mocks;
+    using NuGet.Test.Mocks;
     using Moq;
 
     [TestClass]

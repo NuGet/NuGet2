@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Interface for command line tokenizer (syntax highlighting).
     /// </summary>

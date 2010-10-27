@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Web;
 using System.Web.Hosting;
 
-namespace NuPack.Server {
+namespace NuGet.Server {
     public class PackageUtility {
         internal static string PackagePhysicalPath = HostingEnvironment.MapPath("~/Packages");
 

@@ -1,6 +1,6 @@
-﻿using NuPack.Dialog.ToolsOptionsUI;
+using NuGet.Dialog.ToolsOptionsUI;
 
-namespace NuPack.TestUI
+namespace NuGet.TestUI
 {
     partial class TestForm
     {

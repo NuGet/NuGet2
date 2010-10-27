@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test;
-using NuPack.VisualStudio.Cmdlets;
+using NuGet.Test;
+using NuGet.VisualStudio.Cmdlets;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class NewPackageCmdletTest {
         [TestMethod]
@@ -68,7 +68,7 @@ namespace NuPack.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void RemoveExcludedFilesRemovesManifestAndOtherNuPackageFiles() {
+        public void RemoveExcludedFilesRemovesManifestAndOtherNuGetageFiles() {
             // Arrange
             var packageBuilder = new PackageBuilder();
             var files = new[] { "somefile.nuspec", @"\foo\bar\somefile.nupkg", @"\baz\1.cs" };

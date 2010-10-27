@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace NuPack {
+namespace NuGet {
     public static class CollectionExtensions {
 
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> items) {

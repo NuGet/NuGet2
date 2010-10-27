@@ -1,4 +1,4 @@
-﻿namespace NuPack.Test.Integration {
+namespace NuGet.Test.Integration {
 
     using System;
     using System.Diagnostics;

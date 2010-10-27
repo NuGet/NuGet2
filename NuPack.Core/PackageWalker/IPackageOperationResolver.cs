@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace NuPack {
+namespace NuGet {
     public interface IPackageOperationResolver {
         IEnumerable<PackageOperation> ResolveOperations(IPackage package);
     }

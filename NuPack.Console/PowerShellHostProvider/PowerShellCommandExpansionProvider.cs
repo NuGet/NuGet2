@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.Composition;
+using System.ComponentModel.Composition;
 
-namespace NuPackConsole.Host.PowerShellProvider {
+namespace NuGetConsole.Host.PowerShellProvider {
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Performance",
         "CA1812:AvoidUninstantiatedInternalClasses",

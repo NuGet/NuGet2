@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
-using NuPack.Server.Infrastructure;
+using NuGet.Server.Infrastructure;
 
-namespace NuPack.Server.Controllers {
+namespace NuGet.Server.Controllers {
     public class PackagesController : Controller {
         private readonly IPackageStore _fileSystem;
         private readonly IPackageRepository _repository;

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace NuPack {
+namespace NuGet {
     public static class PackageRepositoryExtensions {
 
         public static bool Exists(this IPackageRepository repository, IPackageMetadata package) {

@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
-using NuPack.Resources;
+using NuGet.Resources;
 
-namespace NuPack {
+namespace NuGet {
     /// <summary>
     /// Simple token replacement system for content files.
     /// </summary>
@@ -34,7 +34,7 @@ namespace NuPack {
             string propertyName = match.Groups["propertyName"].Value;
             var value = projectSystem.GetPropertyValue(propertyName);
             if (value == null) {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuPackResources.TokenHasNoValue, propertyName));
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.TokenHasNoValue, propertyName));
             }
             return value;
         }

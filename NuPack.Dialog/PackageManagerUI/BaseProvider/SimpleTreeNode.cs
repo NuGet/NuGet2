@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
-namespace NuPack.Dialog.Providers {
+namespace NuGet.Dialog.Providers {
 
     /// <summary>
     /// This tree node lists all packages from a fixed repository.

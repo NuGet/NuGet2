@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -139,10 +139,10 @@
     <value>The Base Path of the files defined in the nuspec file.</value>
   </data>
   <data name="PackageCommandDescription" xml:space="preserve">
-    <value>Creates a NuPack package based on the provided NuSpec file.</value>
+    <value>Creates a NuGet package based on the provided NuSpec file.</value>
   </data>
   <data name="PackageCommandOutputDirDescription" xml:space="preserve">
-    <value>Specifies the directory for the created NuPack file</value>
+    <value>Specifies the directory for the created NuGet file</value>
   </data>
   <data name="PackageCommandSpecifyNuSpecFileError" xml:space="preserve">
     <value>Please specify a nuspec file to use.</value>

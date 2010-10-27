@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.ComponentModel.Composition;
 using EnvDTE80;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using NuPack.VisualStudio;
+using NuGet.VisualStudio;
 
-namespace NuPack.TeamFoundationServer {
+namespace NuGet.TeamFoundationServer {
     [Export(typeof(ISourceControlFileSystemProvider))]
     public class TfsSourceControlFileSystemProvider : ISourceControlFileSystemProvider {
         private const string TfsProviderName = "{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}";

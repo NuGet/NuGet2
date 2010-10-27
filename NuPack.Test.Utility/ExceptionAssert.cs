@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Microsoft.Internal.Web.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test {
+namespace NuGet.Test {
     public static class ExceptionAssert {
         private const string ArgumentExceptionMessageFormat = "{0}\r\nParameter name: {1}";
 

@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Management.Automation;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuPack.Test;
-using NuPack.VisualStudio.Cmdlets;
+using NuGet.Test;
+using NuGet.VisualStudio.Cmdlets;
 
-namespace NuPack.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class InstallPackageCmdletTest {
         [TestMethod]

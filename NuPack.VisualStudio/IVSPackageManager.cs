@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using EnvDTE;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     public interface IVsPackageManager : IPackageManager {
         IProjectManager GetProjectManager(Project project);
 

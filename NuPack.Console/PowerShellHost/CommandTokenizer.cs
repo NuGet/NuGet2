@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Management.Automation;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation {
     public class CommandTokenizer : ICommandTokenizer {
         public IEnumerable<Token> Tokenize(string[] lines) {
             Collection<PSParseError> errors;

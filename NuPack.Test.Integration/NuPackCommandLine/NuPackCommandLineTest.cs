@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test.Integration.NuPackCommandLine {
+namespace NuGet.Test.Integration.NuGetCommandLine {
     [TestClass]
     public class NuPackCommandLineTest {
         private const string NoSpecsfolder = @".\nospecs\";
@@ -68,7 +68,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
         [TestMethod]
         public void PackageCommand_CreatesPackageWhenPassingNoArgsAndThereOneNuSpecFile() {
             //Arrange
-            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");            
+            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
 
             //Act
@@ -99,7 +99,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
         public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
-            string expectedPackage = Path.Combine(SpecificFilesFolder, "test.1.1.1.nupkg");            
+            string expectedPackage = Path.Combine(SpecificFilesFolder, "test.1.1.1.nupkg");
             File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
             File.WriteAllText(Path.Combine(SpecificFilesFolder, "file2.txt"), "file 2");
             File.WriteAllText(Path.Combine(SpecificFilesFolder, "file3.txt"), "file 3");

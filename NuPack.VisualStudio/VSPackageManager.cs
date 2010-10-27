@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -7,10 +7,10 @@ using System.Linq;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.ComponentModelHost;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPack.VisualStudio {
-    // TODO: Move this class into the NuPack.Core and change the name
+namespace NuGet.VisualStudio {
+    // TODO: Move this class into the NuGet.Core and change the name
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private const string SolutionRepositoryDirectory = "packages";
         private readonly Dictionary<Project, IProjectManager> _projectManagers = null;

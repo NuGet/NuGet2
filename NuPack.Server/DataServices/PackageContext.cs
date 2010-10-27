@@ -1,6 +1,6 @@
-﻿using System.Linq;
+using System.Linq;
 
-namespace NuPack.Server.DataServices {
+namespace NuGet.Server.DataServices {
     public class PackageContext {
         private IPackageRepository _repository;
         public PackageContext(IPackageRepository repository) {

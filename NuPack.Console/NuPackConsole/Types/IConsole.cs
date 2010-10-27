@@ -1,6 +1,6 @@
-﻿using System.Windows.Media;
+using System.Windows.Media;
 
-namespace NuPackConsole {
+namespace NuGetConsole {
     /// <summary>
     /// Represents a console (editor) which a user interacts with.
     /// </summary>

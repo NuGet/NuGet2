@@ -4,8 +4,8 @@
   <PropertyGroup>
     <ProjectGuid>{D3106412-E3AF-4CB6-B6D3-3664465B491F}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>NuPack.Test</RootNamespace>
-    <AssemblyName>NuPack.Test</AssemblyName>
+    <RootNamespace>NuGet.Test</RootNamespace>
+    <AssemblyName>NuGet.Test</AssemblyName>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <ItemGroup>

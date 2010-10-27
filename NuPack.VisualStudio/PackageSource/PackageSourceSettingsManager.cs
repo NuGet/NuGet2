@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +6,10 @@ using EnvDTE;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Settings;
 
-namespace NuPack.VisualStudio {
+namespace NuGet.VisualStudio {
     internal class PackageSourceSettingsManager {
 
-        private const string SettingsRoot = "NuPack";
+        private const string SettingsRoot = "NuGet";
         private const string PackageSourcesSettingProperty = "PackageSources";
         private const string ActivePackageSourceSettingProperty = "ActivePackageSource";
         private const string IsFirstTimeSettingsProperty = "FirstTime";

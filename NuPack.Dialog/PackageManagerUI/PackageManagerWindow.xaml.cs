@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
-using NuPack.Dialog.Providers;
-using NuPack.VisualStudio;
+using NuGet.Dialog.Providers;
+using NuGet.VisualStudio;
 using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
 
     public partial class PackageManagerWindow : DialogWindow, ILicenseWindowOpener {
 
@@ -100,7 +100,7 @@ namespace NuPack.Dialog.PackageManagerUI {
                 catch (Exception exception) {
                     MessageBox.Show(
                         (exception.InnerException ?? exception).Message,
-                        NuPack.Dialog.Resources.Dialog_MessageBoxTitle,
+                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                 }

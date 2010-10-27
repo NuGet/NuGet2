@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     public enum MessageLevel {
         Info,
         Warning,

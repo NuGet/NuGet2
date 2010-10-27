@@ -1,5 +1,5 @@
-﻿using System.Windows.Forms;
-namespace NuPack.Dialog.ToolsOptionsUI {
+using System.Windows.Forms;
+namespace NuGet.Dialog.ToolsOptionsUI {
     partial class ToolsOptionsControl {
         /// <summary> 
         /// Required designer variable.

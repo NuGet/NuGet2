@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
+using System.Windows.Input;
 
-namespace NuPack.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI {
 
     public static class PackageManagerWindowCommands {        
         public readonly static RoutedCommand PackageOperationCommand = new RoutedCommand();

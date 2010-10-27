@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Reflection;
 using Microsoft.Win32;
 
-namespace NuPackConsole.Host.PowerShell {
+namespace NuGetConsole.Host.PowerShell {
     internal enum SuggestionMatchType {
         Command = 0,
         Error = 1,

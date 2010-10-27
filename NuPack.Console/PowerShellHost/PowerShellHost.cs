@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -7,10 +7,10 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using EnvDTE80;
-using NuPack.VisualStudio;
-using NuPack.VisualStudio.Resources;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
-namespace NuPackConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation {
 
     internal abstract class PowerShellHost : IPowerShellHost, IPathExpansion, IDisposable, IHost {
         public IConsole Console { get; private set; }
@@ -57,8 +57,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
         private void LoadStartupScripts() {
             string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.psm1");
-            string vsPath = Path.Combine(extensionLocation, @"NuPack.VisualStudio.dll");
+            string npackPath = Path.Combine(extensionLocation, @"Scripts\NuGet.psm1");
+            string vsPath = Path.Combine(extensionLocation, @"NuGet.VisualStudio.dll");
 
             Invoke("Set-ExecutionPolicy RemoteSigned -Scope Process -Force", null, false);
             Invoke("Import-Module '" + profilePath + "'", null, false);
@@ -81,8 +81,8 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             //
             //string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             //string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            //string npackPath = Path.Combine(extensionLocation, @"Scripts\nupack.psm1");
-            //string vsPath = Path.Combine(extensionLocation, @"NuPack.VisualStudio.dll");
+            //string npackPath = Path.Combine(extensionLocation, @"Scripts\NuGet.psm1");
+            //string vsPath = Path.Combine(extensionLocation, @"NuGet.VisualStudio.dll");
             //initialSessionState.ImportPSModule(new string[] { profilePath, npackPath, vsPath });
 
             _myHost = new MyHost(this, _name, _privateData);
@@ -109,7 +109,7 @@ namespace NuPackConsole.Host.PowerShell.Implementation {
             using (var powerShell = System.Management.Automation.PowerShell.Create()) {
                 powerShell.Runspace = runspace;
 
-                PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuPack");
+                PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuGet");
                 foreach (PSCommand command in profileCommands) {
                     try {
                         powerShell.Commands = command;

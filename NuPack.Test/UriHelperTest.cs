@@ -1,4 +1,4 @@
-﻿namespace NuPack.Test {
+namespace NuGet.Test {
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 

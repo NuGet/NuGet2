@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System;
     using System.Diagnostics;
     using System.IO.Packaging;

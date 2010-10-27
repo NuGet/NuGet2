@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuPack.Test.NuPackCommandLine {
+namespace NuGet.Test.NuGetCommandLine {
     [TestClass]
     public class CommandManagerTests {
         [TestMethod]
@@ -69,7 +69,7 @@ namespace NuPack.Test.NuPackCommandLine {
             CommandManager cm = new CommandManager();
             ICommand cmd = new MockCommandBadOption();
             cm.RegisterCommand(cmd);
-            string expectedErrorText = "[option] on 'NuPack.Test.NuPackCommandLine.CommandManagerTests+MockCommandBadOption.Message' is invalid without a setter.";
+            string expectedErrorText = "[option] on 'NuGet.Test.NuGetCommandLine.CommandManagerTests+MockCommandBadOption.Message' is invalid without a setter.";
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cm.GetCommandOptions(cmd), expectedErrorText);
         }

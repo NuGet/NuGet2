@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Web;
 using System.Web.Mvc;
 
-namespace NuPack.Server.Infrastructure {
+namespace NuGet.Server.Infrastructure {
     public class ConditionalGetResult : ActionResult {
         public ConditionalGetResult(DateTimeOffset lastModified, Func<ActionResult> actionResult) {
             LastModified = lastModified;

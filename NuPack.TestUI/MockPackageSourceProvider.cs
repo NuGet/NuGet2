@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using NuPack.VisualStudio;
+using NuGet.VisualStudio;
 
-namespace NuPack.TestUI {
+namespace NuGet.TestUI {
     class MockPackageSourceProvider : IPackageSourceProvider {
         private IList<PackageSource> _packageSources = new List<PackageSource>();
 

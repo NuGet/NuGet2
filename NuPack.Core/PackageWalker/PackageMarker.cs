@@ -1,4 +1,4 @@
-﻿namespace NuPack {
+namespace NuGet {
     using System.Collections.Generic;
 
     public class PackageMarker {

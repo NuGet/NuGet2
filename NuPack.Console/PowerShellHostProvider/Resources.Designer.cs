@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuPackConsole.Host.PowerShellProvider {
+namespace NuGetConsole.Host.PowerShellProvider {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NuPackConsole.Host.PowerShellProvider {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuPackConsole.Host.PowerShellProvider.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGetConsole.Host.PowerShellProvider.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

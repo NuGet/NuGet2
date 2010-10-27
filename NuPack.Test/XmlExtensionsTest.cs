@@ -1,4 +1,4 @@
-﻿namespace NuPack.Test {
+namespace NuGet.Test {
     using System;
     using System.Collections.Generic;
     using System.Linq;
