@@ -52,6 +52,7 @@
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Runtime.Serialization" />
@@ -122,9 +123,9 @@
     <Compile Include="Packages\ZipPackageFile.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Authoring\nuspec.xsd">
+    <None Include="Authoring\nuspec.xsd">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
     <None Include="Class diagrams\Packages.cd" />
     <None Include="Class diagrams\PackageWalkers.cd" />
     <None Include="Class diagrams\Repositories.cd" />

@@ -1,21 +1,27 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Serialization;
+using NuGet.Resources;
 
 namespace NuGet {
-    [XmlType("metadata", Namespace = Constants.ManifestSchemaNamespace)]
-    public class ManifestMetadata : IPackageMetadata {
+    [XmlType("metadata")]
+    public class ManifestMetadata : IPackageMetadata, IValidatableObject {
+        [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("id")]
         public string Id { get; set; }
 
+        [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("version")]
         public string Version { get; set; }
 
         [XmlElement("title")]
         public string Title { get; set; }
 
+        [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("authors")]
         public string Authors { get; set; }
 
@@ -34,6 +40,7 @@ namespace NuGet {
         [XmlElement("requireLicenseAcceptance")]
         public bool RequireLicenseAcceptance { get; set; }
 
+        [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("description")]
         public string Description { get; set; }
 
@@ -104,6 +111,27 @@ namespace NuGet {
                                                                  Utility.ParseOptionalVersion(dependency.MinVersion),
                                                                  Utility.ParseOptionalVersion(dependency.MaxVersion),
                                                                  Utility.ParseOptionalVersion(dependency.Version));
+            }
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
+            if (LicenseUrl == String.Empty) {
+                yield return new ValidationResult(
+                    String.Format(CultureInfo.CurrentCulture, NuPackResources.Manifest_UriCannotBeEmpty, "LicenseUrl"));
+            }
+
+            if (IconUrl == String.Empty) {
+                yield return new ValidationResult(
+                    String.Format(CultureInfo.CurrentCulture, NuPackResources.Manifest_UriCannotBeEmpty, "IconUrl"));
+            }
+
+            if (ProjectUrl == String.Empty) {
+                yield return new ValidationResult(
+                    String.Format(CultureInfo.CurrentCulture, NuPackResources.Manifest_UriCannotBeEmpty, "ProjectUrl"));
+            }
+
+            if (RequireLicenseAcceptance && String.IsNullOrWhiteSpace(LicenseUrl)) {
+                yield return new ValidationResult(NuPackResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl);
             }
         }
     }

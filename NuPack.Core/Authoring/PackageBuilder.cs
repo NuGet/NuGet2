@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -130,18 +130,8 @@ namespace NuGet {
         }
 
         private void ReadManifest(Stream stream, string basePath) {
-            // Load an xml document
-            XDocument document = XDocument.Load(stream);
-
-            // Validate the manifest
-            ValidateManifest(document);
-
-            // Remove the Deserialize the document
-            document.Root.Name = document.Root.Name.LocalName;
-
             // Deserialize the document and extract the metadata
-            var serializer = new XmlSerializer(typeof(Manifest));
-            Manifest manifest = (Manifest)serializer.Deserialize(document.CreateReader());
+            Manifest manifest = Manifest.ReadFrom(stream);
             IPackageMetadata metadata = manifest.Metadata;
 
             Id = metadata.Id;
@@ -170,48 +160,6 @@ namespace NuGet {
             }
         }
 
-        private static void ValidateManifest(XDocument document) {
-            // Create the schema set
-            var schemaSet = new XmlSchemaSet();
-            using (Stream schemaStream = GetSchemaStream()) {
-                schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
-            }
-
-            // Add the namespace to the document so we can validate it against the xsd
-            EnsureNamespace(document.Root);
-
-            // Validate the document
-            document.Validate(schemaSet, (sender, e) => {
-                if (e.Severity == XmlSeverityType.Error) {
-                    // Throw an exception if there is a validation error
-                    throw new InvalidOperationException(e.Message);
-                }
-            });
-        }
-
-        private static Stream GetSchemaStream() {
-            return typeof(PackageBuilder).Assembly.GetManifestResourceStream("NuGet.Authoring.nuspec.xsd");
-        }
-
-        private static void EnsureNamespace(XElement element) {
-            // This method recursively goes through all descendants and makes sure it's in the nuspec namespace.
-            // Namespaces are hard to type by hand so we don't want to require it, but we can 
-            // transform the document in memory before validation if the namespace wasn't specified.
-            if (String.IsNullOrEmpty(element.Name.NamespaceName)) {
-                element.Name = FullyQualifyName(element.Name.LocalName);
-            }
-
-            foreach (var childElement in element.Descendants()) {
-                if (String.IsNullOrEmpty(childElement.Name.NamespaceName)) {
-                    childElement.Name = FullyQualifyName(childElement.Name.LocalName);
-                }
-            }
-        }
-
-        private static XName FullyQualifyName(string name) {
-            return XName.Get(name, Constants.ManifestSchemaNamespace);
-        }
-
         private void WriteManifest(Package package) {
             Uri uri = UriHelper.CreatePartUri(Id + Constants.ManifestExtension);
 
@@ -222,14 +170,8 @@ namespace NuGet {
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
 
             using (Stream stream = packagePart.GetStream()) {
-                var serializer = new XmlSerializer(typeof(Manifest));
                 Manifest manifest = Manifest.Create(this);
-                serializer.Serialize(stream, manifest);
-            }
-
-            // Validate the document
-            using (Stream stream = packagePart.GetStream()) {
-                ValidateManifest(XDocument.Load(stream));
+                manifest.Save(stream);
             }
         }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Xml.Serialization;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
@@ -137,8 +136,8 @@ namespace NuGet {
                 }
 
                 using (Stream manifestStream = manifestPart.GetStream()) {
-                    var serializer = new XmlSerializer(typeof(Manifest));
-                    IPackageMetadata metadata = ((Manifest)serializer.Deserialize(manifestStream)).Metadata;
+                    Manifest manifest = Manifest.ReadFrom(manifestStream);
+                    IPackageMetadata metadata = manifest.Metadata;
 
                     Id = metadata.Id;
                     Version = metadata.Version;

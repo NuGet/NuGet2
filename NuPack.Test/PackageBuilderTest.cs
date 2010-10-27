@@ -1,6 +1,6 @@
-using System;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test {
@@ -12,7 +12,10 @@ namespace NuGet.Test {
             PackageBuilder builder = new PackageBuilder();
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version, id, authors, description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<ValidationException>(() => builder.Save(new MemoryStream()), @"Id is required.
+Version is required.
+Authors is required.
+Description is required.");
         }
 
         [TestMethod]
@@ -24,10 +27,16 @@ namespace NuGet.Test {
             string spec4 = @"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>";
 
             // Act and Assert
-            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null));
-            ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec1.AsStream(), null), "There is an error in XML document (1, 1).");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec2.AsStream(), null), "There is an error in XML document (0, 0).");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec3.AsStream(), null), @"Id is required.
+Version is required.
+Authors is required.
+Description is required.");
+           ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec4.AsStream(), null), @"Id is required.
+Version is required.
+Authors is required.
+Description is required.");
         }
 
 
@@ -38,7 +47,7 @@ namespace NuGet.Test {
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors><author>Velio Ivanov</author></authors>
+    <authors>Velio Ivanov</authors>
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
@@ -46,7 +55,7 @@ namespace NuGet.Test {
             string badSpec1 = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <version>2.5</version>
-    <authors><author>Velio Ivanov</author></authors>
+    <authors>Velio Ivanov</authors>
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
@@ -54,7 +63,7 @@ namespace NuGet.Test {
             string badSpec2 = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
-    <authors><author>Velio Ivanov</author></authors>
+    <authors>Velio Ivanov</authors>
     <language>en-us</language>    
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
@@ -71,29 +80,50 @@ namespace NuGet.Test {
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors><author>Velio Ivanov</author></authors>
+    <authors>Velio Ivanov</authors>
     <language>en-us</language>
   </metadata></package>";
 
-            string badSpec5 = @"<?xml version=""1.0"" encoding=""utf-8""?>
+            string badDependencies = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors><author>Velio Ivanov</author></authors>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <dependencies>
+        <dependency />
+    </dependencies>
   </metadata></package>";
+
+            string missingFileSource = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <dependencies>
+        <dependency id=""foo"" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file />
+  </files>
+</package>";
 
             // Act
             var packageBuilder = new PackageBuilder(spec.AsStream(), null);
 
             // Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec1.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec2.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec3.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec4.AsStream(), null));
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(badSpec5.AsStream(), null));
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec1.AsStream(), null), "Id is required.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec2.AsStream(), null), "Version is required.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec3.AsStream(), null), "Authors is required.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec4.AsStream(), null), "Description is required.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badDependencies.AsStream(), null), "Dependency Id is required.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(missingFileSource.AsStream(), null), "Source is required.");       
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
-
 
         [TestMethod]
         public void ReadingPackageBuilderFromStreamCopiesMetadata() {
@@ -103,6 +133,7 @@ namespace NuGet.Test {
   <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
+    <title>Some awesome package</title>
     <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
@@ -117,6 +148,7 @@ namespace NuGet.Test {
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
             Assert.AreEqual(new Version(2, 5), builder.Version);
+            Assert.AreEqual("Some awesome package", builder.Title);
             Assert.AreEqual(1, builder.Authors.Count);
             Assert.AreEqual("Velio Ivanov", builder.Authors[0]);
             Assert.AreEqual("en-US", builder.Language);
@@ -133,18 +165,16 @@ namespace NuGet.Test {
   <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors>
-      <author>Velio Ivanov</author>
-    </authors>
+    <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
     <licenseUrl></licenseUrl>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
   </metadata>
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
         }
 
         [TestMethod]
@@ -155,18 +185,37 @@ namespace NuGet.Test {
   <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
-    <authors>
-      <author>Velio Ivanov</author>
-    </authors>
+    <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
     <licenseUrl>    </licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  </metadata>
+</package>";
+
+            // Act
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
+        }
+
+        [TestMethod]
+        public void PackageBuilderRequireLicenseAcceptedWithoutLicenseUrlThrows() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+    <licenseUrl></licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
   </metadata>
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), @"LicenseUrl cannot be empty.
+Enabling license acceptance requires a license url.");
         }
 
         [TestMethod]
@@ -186,7 +235,7 @@ namespace NuGet.Test {
 </package>";
 
             // Act
-            ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null));
+            ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null), "Invalid URI: The format of the URI could not be determined.");
         }
     }
 }
