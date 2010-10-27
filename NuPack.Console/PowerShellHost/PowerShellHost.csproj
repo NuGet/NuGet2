@@ -67,7 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Add-WrapperMembers.ps1" />
-    <None Include="Scripts\nupack.psm1" />
+    <None Include="Scripts\nuget.psm1" />
     <None Include="Scripts\Profile.ps1" />
   </ItemGroup>
   <ItemGroup>
