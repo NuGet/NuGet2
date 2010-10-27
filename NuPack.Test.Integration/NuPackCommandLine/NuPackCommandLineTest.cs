@@ -12,7 +12,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private const string TwoSpecsFolder = @".\twospecs\";
         private const string OutputFolder = @".\output\";
         private const string SpecificFilesFolder = @".\specific_files\";
-        private const string NupackExePath = @".\NuPack.exe";
+        private const string NupackExePath = @".\NuGet.exe";
 
         [TestInitialize]
         public void Initialize() {
@@ -37,7 +37,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
 
             // Assert
             Assert.AreEqual(0, result.Item1);
-            Assert.IsTrue(result.Item2.Contains("usage: NuPack <command> [args] [options]"));
+            Assert.IsTrue(result.Item2.Contains("usage: NuGet <command> [args] [options]"));
         }
 
         [TestMethod]

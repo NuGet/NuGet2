@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <NuPackRoot>$(MSBuildProjectDirectory)\..</NuPackRoot>
-    <NuPackConsoleExe>$(NuPackRoot)\NuPack\bin\Debug\NuPack.exe</NuPackConsoleExe>
+    <NuPackConsoleExe>$(NuPackRoot)\NuPack\bin\Debug\NuGet.exe</NuPackConsoleExe>
     <PackagesDirectory>$(NuPackRoot)\PackageSources</PackagesDirectory>
     <ServerPackagesDirectory>$(NuPackRoot)\NuPack.Server\Packages</ServerPackagesDirectory>
   </PropertyGroup>
