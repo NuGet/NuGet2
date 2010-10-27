@@ -110,5 +110,5 @@
         </Setter>
     </Style>
 
-    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/NuGet.Dialog;component/PackageManagerUI/PreviewImage.png" />
+    <BitmapImage x:Key="BitmapImage_DefaultIcon" UriSource="pack://application:,,,/NuGet.Dialog;component/PackageManagerUI/packageicon.png" />
 </ResourceDictionary>

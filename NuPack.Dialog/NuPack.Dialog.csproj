@@ -190,11 +190,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="..\NuPack.Tools\Resources\PreviewImage.png">
-      <Link>PackageManagerUI\PreviewImage.png</Link>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>NuPack.Core</Name>
@@ -210,6 +205,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="PackageManagerUI\packageicon.png" />
     <Content Include="Resources\checkmark.png" />
   </ItemGroup>
   <ItemGroup>
