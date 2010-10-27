@@ -12,7 +12,9 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void NewPackageCmdletThrowsIfNoSolutionIsClosed() {
             // Arrange
-            var cmdlet = new NewPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false, defaultProjectName: null), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
+            var cmdlet = new NewPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false, defaultProjectName: null), packageManagerFactory.Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "The current environment doesn't have a solution open.");
@@ -22,8 +24,10 @@ namespace NuPack.VisualStudio.Test {
         public void NewPackageCmdletThrowsIfProjectSpecifiedDoesNotExist() {
             // Arrange
             var project = "does-not-exist";
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "test", projects: new[] { TestUtils.GetProject("test") });
-            var cmdlet = new NewPackageCmdlet(solutionManager, new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE());
+            var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
             cmdlet.Project = project;
 
             // Act and Assert
@@ -35,9 +39,11 @@ namespace NuPack.VisualStudio.Test {
         public void NewPackageCmdletThrowsIfSpecFileDoesNotExistAndSpecParameterDoesNotExist() {
             // Arrange
             var projectName = "test";
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "test.cs", "assembly.info", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
-            var cmdlet = new NewPackageCmdlet(solutionManager, new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE());
+            var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
             cmdlet.Project = projectName;
 
             // Act and Assert
@@ -49,9 +55,11 @@ namespace NuPack.VisualStudio.Test {
         public void NewPackageCmdletThrowsIfMultipleSpecFilesExistAndSpecParameterDoesNotExist() {
             // Arrange
             var projectName = "test";
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "foo.nuspec", "bar.nuspec", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
-            var cmdlet = new NewPackageCmdlet(solutionManager, new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE());
+            var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
             cmdlet.Project = projectName;
 
             // Act and Assert

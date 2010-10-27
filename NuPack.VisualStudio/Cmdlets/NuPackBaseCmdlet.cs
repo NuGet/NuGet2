@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Management.Automation;
 using EnvDTE;
@@ -11,17 +12,11 @@ namespace NuPack.VisualStudio.Cmdlets {
     public abstract class NuPackBaseCmdlet : PSCmdlet, ILogger {
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
-        private readonly IPackageRepositoryFactory _repositoryFactory;
-        private readonly DTE _dte;
+        private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
 
-        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte) :
-            this(solutionManager, repositoryFactory, dte, packageManager: null) { }
-
-        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte, IVsPackageManager packageManager) {
+        protected NuPackBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
             _solutionManager = solutionManager;
-            _dte = dte;
-            _packageManager = packageManager;
-            _repositoryFactory = repositoryFactory;
+            _vsPackageManagerFactory = vsPackageManagerFactory;
         }
 
         protected ISolutionManager SolutionManager {
@@ -30,9 +25,9 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected DTE DTE {
+        protected IVsPackageManagerFactory PackageManagerFactory {
             get {
-                return _dte;
+                return _vsPackageManagerFactory;
             }
         }
 
@@ -40,7 +35,7 @@ namespace NuPack.VisualStudio.Cmdlets {
         /// Gets an instance of VSPackageManager to be used throughout the execution of this command.
         /// </summary>
         /// <value>The package manager.</value>
-        protected virtual IVsPackageManager PackageManager {
+        protected internal IVsPackageManager PackageManager {
             get {
                 if (_packageManager == null) {
                     _packageManager = CreatePackageManager();
@@ -48,15 +43,9 @@ namespace NuPack.VisualStudio.Cmdlets {
 
                 return _packageManager;
             }
-            set {
-                _packageManager = value;
-            }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification = "We want to display friendly message to the console.")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to display friendly message to the console.")]
         protected sealed override void ProcessRecord() {
             try {
                 ProcessRecordCore();
@@ -98,36 +87,16 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected IVsPackageManager CreatePackageManager() {
-            if (DTE == null) {
-                throw new InvalidOperationException("DTE isn't loaded.");
-            }
-
+        protected virtual IVsPackageManager CreatePackageManager() {
             if (!SolutionManager.IsSolutionOpen) {
                 return null;
             }
 
-            // prepare a PackageManager instance for use throughout the command execution lifetime
-            return new VsPackageManager(DTE);
+            return PackageManagerFactory.CreatePackageManager();
         }
 
-        protected IVsPackageManager CreatePackageManager(string source) {
-            // prepare a PackageManager instance for use throughout the command execution lifetime
-            if (DTE == null) {
-                throw new InvalidOperationException("DTE isn't loaded.");
-            }
 
-            if (!SolutionManager.IsSolutionOpen) {
-                return null;
-            }
-
-            return new VsPackageManager(DTE, _repositoryFactory.CreateRepository(source));
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Usage",
-            "CA2201:DoNotRaiseReservedExceptionTypes",
-            Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
+        [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
         protected void WriteError(string message) {
             if (!String.IsNullOrEmpty(message)) {
                 WriteError(new Exception(message));

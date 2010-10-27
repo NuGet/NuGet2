@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using EnvDTE;
 using NuPack.VisualStudio.Resources;
 
 namespace NuPack.VisualStudio.Cmdlets {
@@ -16,15 +15,17 @@ namespace NuPack.VisualStudio.Cmdlets {
         private readonly IPackageSourceProvider _packageSourceProvider;
 
         public GetPackageCmdlet()
-            : this(CachedRepositoryFactory.Instance,
-                   VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
+            : this(CachedRepositoryFactory.Instance, 
+                   VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE), 
                    NuPack.VisualStudio.SolutionManager.Current,
-                   DTEExtensions.DTE,
-                   packageManager: null /* this would be lazily created */) {
+                   DefaultVsPackageManagerFactory.Instance) {
         }
 
-        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider, ISolutionManager solutionManager, DTE dte, IVsPackageManager packageManager)
-            : base(solutionManager, repositoryFactory, dte, packageManager) {
+        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory, 
+                                IPackageSourceProvider packageSourceProvider, 
+                                ISolutionManager solutionManager, 
+                                IVsPackageManagerFactory packageManagerFactory)
+            : base(solutionManager, packageManagerFactory) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }

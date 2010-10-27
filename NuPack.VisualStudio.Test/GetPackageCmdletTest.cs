@@ -135,7 +135,10 @@ namespace NuPack.VisualStudio.Test {
         }
 
         private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
-            return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), TestUtils.GetDTE(), GetPackageManager());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
+            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object) { CallBase = true };
+            return cmdlet.Object;
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

@@ -12,7 +12,9 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void InstallPackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange
-            var cmdlet = new InstallPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), null);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
+            var cmdlet = new InstallPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
@@ -20,42 +22,61 @@ namespace NuPack.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void InstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
+        public void InstallPackageCmdletUsesPackageManangerWithSourceIfSpecified() {
             // Arrange
-            var id = "my-id";
-            var version = new Version("2.8");
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             var vsPackageManager = new MockVsPackageManager();
-            var cmdlet = new InstallPackageCmdlet(TestUtils.GetSolutionManager(), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), vsPackageManager);
-            cmdlet.Id = id;
-            cmdlet.Version = version;
+            var sourceVsPackageManager = new MockVsPackageManager();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager("somesource")).Returns(sourceVsPackageManager);
+            var cmdlet = new Mock<InstallPackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            cmdlet.Object.Source = "somesource";
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
 
             // Act
-            cmdlet.GetResults();
+            cmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual(vsPackageManager.PackageId, id);
-            Assert.AreEqual(vsPackageManager.Version, version);
+            Assert.AreSame(sourceVsPackageManager, cmdlet.Object.PackageManager);
+        }
+
+        [TestMethod]
+        public void InstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
+            // Arrange
+            var vsPackageManager = new MockVsPackageManager();
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var cmdlet = new Mock<InstallPackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+
+            // Act
+            cmdlet.Object.Execute();
+
+            // Assert
+            Assert.AreEqual("my-id", vsPackageManager.PackageId);
+            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
         }
 
         [TestMethod]
         public void InstallPackageCmdletPassesIgnoreDependencySwitchCorrectly() {
             // Arrange
-            var id = "my-id";
-            var version = new Version("2.8");
-            var ignoreDependencies = true;
             var vsPackageManager = new MockVsPackageManager();
-            var cmdlet = new InstallPackageCmdlet(TestUtils.GetSolutionManager(), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), vsPackageManager);
-            cmdlet.Id = id;
-            cmdlet.Version = version;
-            cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: ignoreDependencies);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var cmdlet = new Mock<InstallPackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
 
             // Act
-            cmdlet.GetResults();
+            cmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual(vsPackageManager.PackageId, id);
-            Assert.AreEqual(vsPackageManager.Version, version);
-            Assert.AreEqual(vsPackageManager.IgnoreDependencies, ignoreDependencies);
+            Assert.AreEqual("my-id", vsPackageManager.PackageId);
+            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
+            Assert.IsTrue(vsPackageManager.IgnoreDependencies);
         }
 
         private class MockVsPackageManager : VsPackageManager {

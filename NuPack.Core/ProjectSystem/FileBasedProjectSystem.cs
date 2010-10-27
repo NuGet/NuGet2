@@ -68,9 +68,6 @@
                     Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
-            catch (UnauthorizedAccessException) {
-
-            }
             catch (FileNotFoundException) {
 
             }
@@ -89,9 +86,6 @@
                 path = GetFullPath(path);
                 Directory.Delete(path, recursive);
                 Logger.Log(MessageLevel.Debug, NuPackResources.Debug_RemovedFolder, path);
-            }
-            catch (UnauthorizedAccessException) {
-
             }
             catch (DirectoryNotFoundException) {
 

@@ -63,11 +63,13 @@
     <Compile Include="Cmdlets\ProcessPackageBaseCmdlet.cs" />
     <Compile Include="Cmdlets\UninstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
+    <Compile Include="DefaultVsPackageManagerFactory.cs" />
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ISolutionManager.cs" />
     <Compile Include="ISourceControlFileSystemProvider.cs" />
     <Compile Include="IVsPackageManager.cs" />
+    <Compile Include="IVsPackageManagerFactory.cs" />
     <Compile Include="PackageSource\CachedRepositoryFactory.cs" />
     <Compile Include="PackageSource\IPackageSourceProvider.cs" />
     <Compile Include="PackageSource\PackageSourceSettingsManager.cs" />

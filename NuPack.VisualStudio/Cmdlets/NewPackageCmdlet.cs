@@ -18,11 +18,11 @@ namespace NuPack.VisualStudio.Cmdlets {
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
         public NewPackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, CachedRepositoryFactory.Instance, DTEExtensions.DTE) {
+            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
-        public NewPackageCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte)
-            : base(solutionManager, repositoryFactory, dte) {
+        public NewPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+            : base(solutionManager, packageManagerFactory) {
         }
 
         [Parameter(Position = 0)]

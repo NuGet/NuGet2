@@ -92,7 +92,7 @@
             FileSystem.DeleteFileSafe(packageFilePath);
 
             // Delete the package directory if any
-            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: true);
+            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: false);
 
             // If this is the last package delete the package directory
             if (!FileSystem.GetFilesSafe(String.Empty).Any() &&

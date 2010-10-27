@@ -12,15 +12,11 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class UpdatePackageCmdlet : ProcessPackageBaseCmdlet {
 
         public UpdatePackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, CachedRepositoryFactory.Instance, DTEExtensions.DTE, packageManager: null) {
+            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
-        public UpdatePackageCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte, VsPackageManager packageManager)
-            : base(solutionManager, repositoryFactory, dte) {
-
-            if (packageManager != null) {
-                base.PackageManager = packageManager;
-            }
+        public UpdatePackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+            : base(solutionManager, packageManagerFactory) {
         }
 
         [Parameter(Position = 2)]
@@ -32,14 +28,17 @@ namespace NuPack.VisualStudio.Cmdlets {
         [Parameter(Position = 4)]
         public string Source { get; set; }
 
+        protected override IVsPackageManager CreatePackageManager() {
+            if (!String.IsNullOrEmpty(Source)) {
+                return PackageManagerFactory.CreatePackageManager(Source);
+            }
+            return base.CreatePackageManager();
+        }
+
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
                 WriteError(VsResources.Cmdlet_NoSolution);
                 return;
-            }
-
-            if (!String.IsNullOrEmpty(Source)) {
-                PackageManager = CreatePackageManager(Source);
             }
 
             IProjectManager projectManager = ProjectManager;

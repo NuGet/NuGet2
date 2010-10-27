@@ -12,7 +12,9 @@ namespace NuPack.VisualStudio.Test {
         [TestMethod]
         public void UninstallPackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange
-            var uninstallCmdlet = new UninstallPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), null);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
+            var uninstallCmdlet = new UninstallPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => uninstallCmdlet.GetResults(),
@@ -25,16 +27,18 @@ namespace NuPack.VisualStudio.Test {
             var id = "my-id";
             var version = new Version("2.8");
             var vsPackageManager = new MockVsPackageManager();
-            var uninstallCmdlet = new UninstallPackageCmdlet(TestUtils.GetSolutionManager(), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), vsPackageManager);
-            uninstallCmdlet.Id = id;
-            uninstallCmdlet.Version = version;
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var uninstallCmdlet = new Mock<UninstallPackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            uninstallCmdlet.Object.Id = id;
+            uninstallCmdlet.Object.Version = version;
 
             // Act
-            uninstallCmdlet.GetResults();
+            uninstallCmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual(vsPackageManager.PackageId, id);
-            Assert.AreEqual(vsPackageManager.Version, version);
+            Assert.AreEqual("my-id", vsPackageManager.PackageId);
+            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
         }
 
         [TestMethod]
@@ -44,44 +48,45 @@ namespace NuPack.VisualStudio.Test {
             var version = new Version("2.8");
             var forceSwitch = true;
             var vsPackageManager = new MockVsPackageManager();
-            var uninstallCmdlet = new UninstallPackageCmdlet(TestUtils.GetSolutionManager(), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), vsPackageManager);
-            uninstallCmdlet.Id = id;
-            uninstallCmdlet.Version = version;
-            uninstallCmdlet.Force = new SwitchParameter(forceSwitch);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var uninstallCmdlet = new Mock<UninstallPackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            uninstallCmdlet.Object.Id = id;
+            uninstallCmdlet.Object.Version = version;
+            uninstallCmdlet.Object.Force = new SwitchParameter(forceSwitch);
 
             // Act
-            uninstallCmdlet.GetResults();
+            uninstallCmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual(vsPackageManager.PackageId, id);
-            Assert.AreEqual(vsPackageManager.Version, version);
-            Assert.AreEqual(vsPackageManager.ForceRemove, forceSwitch);
+            Assert.AreEqual("my-id", vsPackageManager.PackageId);
+            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
+            Assert.IsTrue(vsPackageManager.ForceRemove);
         }
 
         [TestMethod]
         public void UninstallPackageCmdletPassesRemoveDependencyCorrectly() {
             // Arrange
-            var id = "my-id";
-            var version = new Version("2.8");
-            var removeDependencies = true;
             var vsPackageManager = new MockVsPackageManager();
-            var uninstallCmdlet = new UninstallPackageCmdlet(TestUtils.GetSolutionManager(), new Mock<IPackageRepositoryFactory>().Object, TestUtils.GetDTE(), vsPackageManager);
-            uninstallCmdlet.Id = id;
-            uninstallCmdlet.Version = version;
-            uninstallCmdlet.RemoveDependencies = new SwitchParameter(removeDependencies);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var uninstallCmdlet = new Mock<UninstallPackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            uninstallCmdlet.Object.Id = "my-id";
+            uninstallCmdlet.Object.Version = new Version("2.8");
+            uninstallCmdlet.Object.RemoveDependencies = new SwitchParameter(true);
 
             // Act
-            uninstallCmdlet.GetResults();
+            uninstallCmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual(vsPackageManager.PackageId, id);
-            Assert.AreEqual(vsPackageManager.Version, version);
-            Assert.AreEqual(vsPackageManager.RemoveDependencies, removeDependencies);
+            Assert.AreEqual("my-id", vsPackageManager.PackageId);
+            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
+            Assert.IsTrue(vsPackageManager.RemoveDependencies);
         }
 
         private class MockVsPackageManager : VsPackageManager {
 
-            public MockVsPackageManager() 
+            public MockVsPackageManager()
                 : base(TestUtils.GetSolutionManager(), new Mock<IPackageRepository>().Object,
                 new Mock<IFileSystem>().Object, new Mock<IPackageRepository>().Object) {
             }

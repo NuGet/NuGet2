@@ -12,15 +12,11 @@ namespace NuPack.VisualStudio.Cmdlets {
     public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
 
         public UninstallPackageCmdlet()
-            : this(NuPack.VisualStudio.SolutionManager.Current, CachedRepositoryFactory.Instance, DTEExtensions.DTE, packageManager: null) {
+            : this(NuPack.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
         }
 
-        public UninstallPackageCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte, VsPackageManager packageManager)
-            : base(solutionManager, repositoryFactory, dte) {
-
-            if (packageManager != null) {
-                base.PackageManager = packageManager;
-            }
+        public UninstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+            : base(solutionManager, packageManagerFactory) {
         }
 
         [Parameter(Position = 2)]

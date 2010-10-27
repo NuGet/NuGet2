@@ -14,26 +14,16 @@ namespace NuPack.VisualStudio.Cmdlets {
     public abstract class ProcessPackageBaseCmdlet : NuPackBaseCmdlet {
         private IProjectManager _projectManager;
 
+        protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+            : base(solutionManager, packageManagerFactory) {
+        }
+
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public string Id { get; set; }
 
         [Parameter(Position = 1)]
         public string Project { get; set; }
-
-        protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory, DTE dte)
-            : base(solutionManager, repositoryFactory, dte) {
-        }
-
-        protected override IVsPackageManager PackageManager {
-            get {
-                return base.PackageManager;
-            }
-            set {
-                base.PackageManager = value;
-                _projectManager = null;
-            }
-        }
-
+        
         protected IProjectManager ProjectManager {
             get {
                 if (_projectManager == null) {
@@ -114,7 +104,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             ExecuteScript(e.InstallPath, "init.ps1", e.Package, null);
         }
 
-        private void AddToolsFolderToEnvironmentPath(string installPath) {
+        protected virtual void AddToolsFolderToEnvironmentPath(string installPath) {
             string toolsPath = Path.Combine(installPath, "tools");
             if (Directory.Exists(toolsPath)) {
                 var envPath = (string)GetVariableValue("env:path");
@@ -141,7 +131,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, project);
         }
 
-        protected void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project) {
+        protected virtual void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project) {
             string toolsPath = Path.Combine(rootPath, "tools");
             string fullPath = Path.Combine(toolsPath, scriptFileName);
             if (File.Exists(fullPath)) {
@@ -165,7 +155,7 @@ namespace NuPack.VisualStudio.Cmdlets {
             }
         }
 
-        protected void WriteDisclaimerText(IPackageMetadata package) {
+        protected virtual void WriteDisclaimerText(IPackageMetadata package) {
             if (package.RequireLicenseAcceptance) {
                 string message = String.Format(
                     CultureInfo.CurrentCulture,
