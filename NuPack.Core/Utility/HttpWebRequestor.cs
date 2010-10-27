@@ -40,11 +40,8 @@
             });
         }
 
-        public static Stream GetResponseStream(Uri uri) {
-            WebRequest request = WebRequest.Create(uri);
-            InitializeRequest(request);
-
-            WebResponse response = request.GetResponse();
+        public static Stream GetResponseStream(Uri uri) {           
+            WebResponse response = GetResponse(uri);
 
             return response.GetResponseStream();
         }
@@ -57,7 +54,7 @@
         }
 
         public static Uri GetRedirectedUri(Uri uri) {
-            WebResponse response = HttpWebRequestor.GetResponse(uri);
+            WebResponse response = GetResponse(uri);
             return response.ResponseUri;
         }
 
