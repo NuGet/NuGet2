@@ -7,7 +7,7 @@
 
     // REVIEW: This class isn't super clean. Maybe this object should be passed around instead
     // of being static
-    public static class HttpWebRequestor {
+    internal static class HttpWebRequestor {
         public static ZipPackage DownloadPackage(Uri uri) {
             return DownloadPackage(uri, useCache: true);
         }
@@ -47,6 +47,18 @@
             WebResponse response = request.GetResponse();
 
             return response.GetResponseStream();
+        }
+
+        public static WebResponse GetResponse(Uri uri) {
+            WebRequest request = WebRequest.Create(uri);
+            InitializeRequest(request);
+
+            return request.GetResponse();
+        }
+
+        public static Uri GetRedirectedUri(Uri uri) {
+            WebResponse response = HttpWebRequestor.GetResponse(uri);
+            return response.ResponseUri;
         }
 
         internal static void InitializeRequest(WebRequest request) {

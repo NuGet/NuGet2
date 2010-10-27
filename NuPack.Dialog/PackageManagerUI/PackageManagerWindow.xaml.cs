@@ -40,7 +40,7 @@ namespace NuPack.Dialog.PackageManagerUI {
             var updatesProvider = new UpdatesProvider(packageManager, projectManager, Resources);
             explorer.Providers.Add(updatesProvider);
 
-            var onlineProvider = new OnlineProvider(packageManager, projectManager, Resources, PackageRepositoryFactory.Default, VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE));
+            var onlineProvider = new OnlineProvider(packageManager, projectManager, Resources, CachedRepositoryFactory.Instance, VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE));
             explorer.Providers.Add(onlineProvider);
 
             var installedProvider = new InstalledProvider(packageManager, projectManager, Resources);

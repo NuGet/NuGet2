@@ -20,7 +20,8 @@ namespace NuPack {
             if (uri.IsFile) {
                 return new LocalPackageRepository(uri.LocalPath);
             }
-            return new DataServicePackageRepository(uri);
+            // Make sure we get resolve any fwlinks before creating the repository
+            return new DataServicePackageRepository(HttpWebRequestor.GetRedirectedUri(uri));
         }
     }
 }

@@ -7,16 +7,34 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace NuPack.Test.Integration.NuPackCommandLine {
     [TestClass]
     public class NuPackCommandLineTest {
+        private const string NoSpecsfolder = @".\nospecs\";
+        private const string OneSpecfolder = @".\onespec\";
+        private const string TwoSpecsFolder = @".\twospecs\";
+        private const string OutputFolder = @".\output\";
+        private const string SpecificFilesFolder = @".\specific_files\";
+        private const string NupackExePath = @".\NuPack.exe";
 
-        private const string nupackExePath = @".\NuPack.exe";
+        [TestInitialize]
+        public void Initialize() {
+            DeleteDirs();
+
+            Directory.CreateDirectory(NoSpecsfolder);
+            Directory.CreateDirectory(OneSpecfolder);
+            Directory.CreateDirectory(TwoSpecsFolder);
+            Directory.CreateDirectory(SpecificFilesFolder);
+            Directory.CreateDirectory(OutputFolder);
+        }
+
+        [TestCleanup]
+        public void Cleanup() {
+            DeleteDirs();
+        }
 
         [TestMethod]
         public void NuPackCommandLine_ShowsHelpIfThereIsNoCommand() {
-            // Arrange
-            const string folder = @".\nospecs\";
-            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
             // Act
-            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, string.Empty, true);
+            Tuple<int, string> result = CommandRunner.Run(NupackExePath, NoSpecsfolder, string.Empty, true);
+
             // Assert
             Assert.AreEqual(0, result.Item1);
             Assert.IsTrue(result.Item2.Contains("usage: NuPack <command> [args] [options]"));
@@ -24,11 +42,8 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
 
         [TestMethod]
         public void PackageCommand_ThrowsWhenPassingNoArgsAndThereAreNoNuSpecFiles() {
-            // Arrange
-            const string folder = @".\nospecs\";
-            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
             // Act
-            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(NupackExePath, NoSpecsfolder, "pack", true);
             // Assert
             Assert.AreEqual(1, result.Item1);
             Assert.AreEqual("Please specify a nuspec file to use.", result.Item2.Trim());
@@ -37,25 +52,13 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
         [TestMethod]
         public void PackageCommand_ThrowsWhenPassingNoArgsAndThereIsMoreThanOneNuSpecFile() {
             // Arrange
-            const string folder = @".\twospecs\";
-            if (!Directory.Exists(folder)) {
-                Directory.CreateDirectory(folder);
-            }
-
-            string nuspecFile = Path.Combine(folder, "antlr.nuspec");
-            if (File.Exists(nuspecFile)) {
-                File.Delete(nuspecFile);
-            }
-            File.AppendAllText(nuspecFile, NuSpecFileContext.FileContents);
-
-            string nuspecFile2 = Path.Combine(folder, "antlr2.nuspec");
-            if (File.Exists(nuspecFile2)) {
-                File.Delete(nuspecFile2);
-            }
-            File.AppendAllText(nuspecFile2, NuSpecFileContext.FileContents);
+            string nuspecFile = Path.Combine(TwoSpecsFolder, "antlr.nuspec");
+            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            string nuspecFile2 = Path.Combine(TwoSpecsFolder, "antlr2.nuspec");
+            File.WriteAllText(nuspecFile2, NuSpecFileContext.FileContents);
 
             // Act
-            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(NupackExePath, TwoSpecsFolder, "pack", true);
 
             // Assert
             Assert.AreEqual(1, result.Item1);
@@ -65,21 +68,11 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
         [TestMethod]
         public void PackageCommand_CreatesPackageWhenPassingNoArgsAndThereOneNuSpecFile() {
             //Arrange
-            const string folder = @".\onespec\";
-
-            if (!Directory.Exists(folder)) {
-                Directory.CreateDirectory(folder);
-            }
-
-            string nuspecFile = Path.Combine(folder, "antlr.nuspec");
-            if (File.Exists(nuspecFile)) {
-                File.Delete(nuspecFile);
-            }
-
-            File.AppendAllText(nuspecFile, NuSpecFileContext.FileContents);
+            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");            
+            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
 
             //Act
-            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(NupackExePath, OneSpecfolder, "pack", true);
 
             //Assert
             Assert.AreEqual(0, result.Item1);
@@ -89,28 +82,12 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
         [TestMethod]
         public void PackageCommand_CreatesPackageWhenPassingBasePath() {
             //Arrange
-            if (!Directory.Exists(@".\onespec\")) {
-                Directory.CreateDirectory(@".\onespec\");
-            }
-            if (!Directory.Exists(@".\output\")) {
-                Directory.CreateDirectory(@".\output\");
-            }
-
-            string nuspecFile = Path.Combine(@".\onespec\", "Antlr.nuspec");
-            string expectedPackage = @".\output\Antlr.3.1.1.nupkg";
-
-            if (File.Exists(nuspecFile)) {
-                File.Delete(nuspecFile);
-            }
-
-            if (File.Exists(expectedPackage)) {
-                File.Delete(expectedPackage);
-            }
-
-            File.AppendAllText(nuspecFile, NuSpecFileContext.FileContents);
+            string nuspecFile = Path.Combine(OneSpecfolder, "Antlr.nuspec");
+            string expectedPackage = Path.Combine(OutputFolder, "Antlr.3.1.1.nupkg");
+            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
 
             //Act
-            Tuple<int, string> result = CommandRunner.Run(nupackExePath, @".\onespec\", "pack -o " + @"..\output\", true);
+            Tuple<int, string> result = CommandRunner.Run(NupackExePath, OneSpecfolder, "pack -o " + @"..\output\", true);
 
             //Assert
             Assert.AreEqual(0, result.Item1);
@@ -120,24 +97,12 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
 
         [TestMethod]
         public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
-            // Arrange
-            const string folder = @".\specific_files\";
-            if (!Directory.Exists(folder)) {
-                Directory.CreateDirectory(folder);
-            }
-            string nuspecFile = Path.Combine(folder, "SpecWithFiles.nuspec");
-            string expectedPackage = Path.Combine(folder, "test.1.1.1.nupkg");
-            if (File.Exists(nuspecFile)) {
-                File.Delete(nuspecFile);
-            }
-
-            if (File.Exists(expectedPackage)) {
-                File.Delete(expectedPackage);
-            }
-
-            File.WriteAllText(Path.Combine(folder, "file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(folder, "file2.txt"), "file 2");
-            File.WriteAllText(Path.Combine(folder, "file3.txt"), "file 3");
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string expectedPackage = Path.Combine(SpecificFilesFolder, "test.1.1.1.nupkg");            
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file2.txt"), "file 2");
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file3.txt"), "file 3");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -153,7 +118,7 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
 </package>");
 
             // Act
-            Tuple<int, string> result = CommandRunner.Run(nupackExePath, folder, "pack", true);
+            Tuple<int, string> result = CommandRunner.Run(NupackExePath, SpecificFilesFolder, "pack", true);
 
             // Assert
             Assert.AreEqual(0, result.Item1);
@@ -167,6 +132,33 @@ namespace NuPack.Test.Integration.NuPackCommandLine {
             var package = new ZipPackage(packageFile);
             var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToList();
             CollectionAssert.AreEqual(expectedFiles.OrderBy(f => f).ToList(), files);
+        }
+
+        private static void DeleteDirs() {
+            DeleteDir(NoSpecsfolder);
+            DeleteDir(OneSpecfolder);
+            DeleteDir(TwoSpecsFolder);
+            DeleteDir(SpecificFilesFolder);
+            DeleteDir(OutputFolder);
+        }
+
+        private static void DeleteDir(string directory) {
+            try {
+                if (Directory.Exists(directory)) {
+                    foreach (var file in Directory.GetFiles(directory)) {
+                        try {
+                            File.Delete(file);
+                        }
+                        catch (FileNotFoundException) {
+
+                        }
+                    }
+                    Directory.Delete(directory, recursive: true);
+                }
+            }
+            catch (DirectoryNotFoundException) {
+
+            }
         }
     }
 }
