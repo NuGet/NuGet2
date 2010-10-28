@@ -1,8 +1,6 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Collections;
 
 namespace NuGet {
     internal class AggregateEnumerable<TElement> : IEnumerable<TElement> {
@@ -28,7 +26,7 @@ namespace NuGet {
         private class AggregateEnumerator<T> : IEnumerator<T> {
             private IEnumerable<IEnumerator<T>> _subQueries;
             private IEqualityComparer<T> _equalityComparer;
-            private PriorityQueue<T, T> _queue;            
+            private PriorityQueue<T, T> _queue;
 
             public AggregateEnumerator(IEnumerable<IEnumerator<T>> subQueries,
                                        IEqualityComparer<T> equalityComparer,
@@ -59,23 +57,29 @@ namespace NuGet {
             }
 
             public bool MoveNext() {
-                // Check each sub queries' enumerator and if there is more then add it to the queue
-                foreach (var query in _subQueries) {
-                    if (query.MoveNext()) {
-                        _queue.Enqueue(query.Current, query.Current);
+                do {
+                    // Check each sub queries' enumerator and if there is more then add it to the queue
+                    // in priority order
+                    foreach (var query in _subQueries) {
+                        if (query.MoveNext()) {
+                            _queue.Enqueue(query.Current, query.Current);
+                        }
+                    }
+
+                    if (!_queue.IsEmpty) {
+                        // Remove duplicates
+                        T nextElement = _queue.Dequeue();
+                        if (Current == null || !_equalityComparer.Equals(Current, nextElement)) {
+                            // When we find the an element that's not a duplicate of the current
+                            // return it and move on
+                            Current = nextElement;
+                            return true;
+                        }
                     }
                 }
+                while (!_queue.IsEmpty);
 
-                // Remove duplicates if necessary
-                while (!_queue.IsEmpty) {
-                    T newElement = _queue.Dequeue();
-                    if (Current == null || !_equalityComparer.Equals(Current, newElement)) {
-                        Current = newElement;
-                        break;
-                    }
-                }
-
-                return !_queue.IsEmpty;
+                return false;
             }
 
             public void Reset() {
@@ -88,34 +92,38 @@ namespace NuGet {
             }
 
             // Small priority queue class
-            private class PriorityQueue<P, V> {
-                private SortedDictionary<P, Queue<V>> _list;
+            private class PriorityQueue<TPriority, TValue> {
+                private SortedDictionary<TPriority, Queue<TValue>> _list;
 
-                public PriorityQueue(IComparer<P> comparer) {
-                    _list = new SortedDictionary<P, Queue<V>>(comparer);
+                public PriorityQueue(IComparer<TPriority> comparer) {
+                    _list = new SortedDictionary<TPriority, Queue<TValue>>(comparer);
                 }
 
-                public void Enqueue(P priority, V value) {
-                    Queue<V> queue;
+                public void Enqueue(TPriority priority, TValue value) {
+                    Queue<TValue> queue;
                     if (!_list.TryGetValue(priority, out queue)) {
-                        queue = new Queue<V>();
+                        queue = new Queue<TValue>();
                         _list.Add(priority, queue);
                     }
                     queue.Enqueue(value);
                 }
 
-                public V Dequeue() {
-                    // will throw if there isn’t any first element!
-                    var pair = _list.First();
-                    var v = pair.Value.Dequeue();
-                    if (pair.Value.Count == 0) {// nothing left of the top priority.
+                public TValue Dequeue() {
+                    // Will throw if there isn’t any first element!
+                    KeyValuePair<TPriority, Queue<TValue>> pair = _list.First();
+                    TValue value = pair.Value.Dequeue();
+
+                    // Nothing left of the top priority.
+                    if (pair.Value.Count == 0) {
                         _list.Remove(pair.Key);
                     }
-                    return v;
+                    return value;
                 }
 
                 public bool IsEmpty {
-                    get { return !_list.Any(); }
+                    get {
+                        return !_list.Any();
+                    }
                 }
 
                 public void Clear() {

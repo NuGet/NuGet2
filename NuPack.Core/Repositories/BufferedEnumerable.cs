@@ -36,9 +36,9 @@ namespace NuGet {
         private class BufferedEnumerator<T> : IEnumerator<T> {
             private readonly int _bufferSize;
             private IQueryable<T> _source;
-            private List<T> _cache;
-            private bool _sourceEmpty;
-            private int _index = -1;
+            private IEnumerator<T> _cachedEnumerator;
+            private bool _hasItems = true;
+            private int _cached = 0;
 
             public BufferedEnumerator(IQueryable<T> source, int bufferSize) {
                 _source = source;
@@ -47,24 +47,20 @@ namespace NuGet {
 
             public T Current {
                 get {
-                    if (_index < _cache.Count) {
-                        return _cache[_index];
-                    }
-                    // REVIEW: throw?
-                    return default(T);
+                    return _cachedEnumerator.Current;
                 }
             }
 
-            private bool NeedMore {
+            private bool Empty {
                 get {
-                    return _cache == null || (_index == _cache.Count - 1);
+                    return _hasItems && (_cachedEnumerator == null || !_cachedEnumerator.MoveNext());
                 }
             }
 
             public void Dispose() {
                 _source = null;
-                _index = -1;
-                _cache = null;
+                _cachedEnumerator.Dispose();
+                _cachedEnumerator = null;
             }
 
             object IEnumerator.Current {
@@ -73,46 +69,31 @@ namespace NuGet {
                 }
             }
 
-            public bool MoveNext() {
-                if (NeedMore) {
-                    // If the source is empty then bail
-                    if (_sourceEmpty) {
-                        return false;
-                    }
+            public bool MoveNext() {               
+                if (Empty) {
+                    // Request a page
+                    _cachedEnumerator = _source.Skip(_cached).Take(_bufferSize).GetEnumerator();
+                   
+                    // Increment the amount of items cached
+                    _cached += _bufferSize;
 
-                    // See if we need to query again
-                    // If this is the first query then initialize the local cache
-                    if (_cache == null) {
-                        _cache = new List<T>(_bufferSize);
-                    }
-
-                    // Execute a query
-                    IList<T> items = _source.Skip(_cache.Count).Take(_bufferSize).ToList();
-
-                    // No items in the original query then bail
-                    if (!items.Any()) {
-                        return false;
-                    }
-
-                    _sourceEmpty = items.Count < _bufferSize;
-
-                    // Update our cache
-                    _cache.AddRange(items);
+                    // See if we have anymore items after the last query
+                    _hasItems = _cachedEnumerator.MoveNext();
                 }
 
-                _index++;
-                return true;
+                // We can keep going unless the source said we're empty
+                return _hasItems;
             }
 
             public void Reset() {
-                _sourceEmpty = false;
-                _cache = null;
-                _index = -1;
+                _cached = 0;
+                _hasItems = true;
+                _cachedEnumerator.Reset();
             }
 
             public override string ToString() {
                 return _source.ToString();
             }
         }
-    }    
+    }
 }
