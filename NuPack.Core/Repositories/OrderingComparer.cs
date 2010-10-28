@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using NuGet.Resources;
 
 namespace NuGet {
     internal class OrderingComparer<TElement> : ExpressionVisitor, IComparer<TElement> {
@@ -64,7 +65,7 @@ namespace NuGet {
             }
 
             if (!_orderings.Any()) {
-                // TODO: Throw
+                throw new InvalidOperationException(NuGetResources.AggregateQueriesRequireOrder);
             }
 
             int value = 0;
@@ -72,7 +73,10 @@ namespace NuGet {
                 IComparable left = ordering.Extractor(x);
                 IComparable right = ordering.Extractor(y);
 
-                // TODO: Handle null
+                // Skip if both values are null
+                if (left == null && right == null) {
+                    continue;
+                }
 
                 value = left.CompareTo(right);
                 if (value != 0) {

@@ -61,6 +61,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Aggregate queries require at least one OrderBy..
+        /// </summary>
+        internal static string AggregateQueriesRequireOrder {
+            get {
+                return ResourceManager.GetString("AggregateQueriesRequireOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to read feed contents. Verify that the feed conforms to the Atom Syndication format..
         /// </summary>
         internal static string AtomFeedPackageRepo_InvalidFeedContent {

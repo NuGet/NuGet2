@@ -291,4 +291,7 @@
   <data name="Warning_UninstallingPackageWillBreakDependents1" xml:space="preserve">
     <value>Removing '{0}' might cause '{1}' to be broken</value>
   </data>
+  <data name="AggregateQueriesRequireOrder" xml:space="preserve">
+    <value>Aggregate queries require at least one OrderBy.</value>
+  </data>
 </root>
