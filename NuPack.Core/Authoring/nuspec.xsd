@@ -16,30 +16,9 @@
                             <xs:element name="version" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="title" maxOccurs="1" minOccurs="0" type="xs:string" />
                             <xs:element name="authors" maxOccurs="1" minOccurs="1" />
-                            <xs:element name="licenseUrl" maxOccurs="1" minOccurs="0">
-                                <xs:simpleType>
-                                    <xs:restriction base="xs:anyURI">
-                                        <xs:whiteSpace value="collapse" />
-                                        <xs:minLength value="1" />
-                                    </xs:restriction>
-                                </xs:simpleType>
-                            </xs:element>
-                            <xs:element name="projectUrl" maxOccurs="1" minOccurs="0">
-                                <xs:simpleType>
-                                    <xs:restriction base="xs:anyURI">
-                                        <xs:whiteSpace value="collapse" />
-                                        <xs:minLength value="1" />
-                                    </xs:restriction>
-                                </xs:simpleType>
-                            </xs:element>
-                            <xs:element name="iconUrl" maxOccurs="1" minOccurs="0">
-                                <xs:simpleType>
-                                    <xs:restriction base="xs:anyURI">
-                                        <xs:whiteSpace value="collapse" />
-                                        <xs:minLength value="1" />
-                                    </xs:restriction>
-                                </xs:simpleType>
-                            </xs:element>
+                            <xs:element name="licenseUrl" maxOccurs="1" minOccurs="0" />                                
+                            <xs:element name="projectUrl" maxOccurs="1" minOccurs="0" />                                
+                            <xs:element name="iconUrl" maxOccurs="1" minOccurs="0" />                                
                             <xs:element name="requireLicenseAcceptance" maxOccurs="1" minOccurs="0" type="xs:boolean" />
                             <xs:element name="description" maxOccurs="1" minOccurs="1" type="xs:string" />
                             <xs:element name="summary" maxOccurs="1" minOccurs="0" type="xs:string" />
