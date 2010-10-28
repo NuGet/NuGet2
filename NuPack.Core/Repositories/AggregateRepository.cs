@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace NuPack {
+namespace NuGet {
     public class AggregateRepository : PackageRepositoryBase {
         private readonly IEnumerable<IPackageRepository> _repositories;
         public AggregateRepository(IEnumerable<IPackageRepository> repositories) {
