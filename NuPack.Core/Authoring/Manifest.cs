@@ -7,8 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 
-namespace NuPack {
+namespace NuGet {
     [XmlType("package")]
     public class Manifest {
         public Manifest() {
@@ -33,8 +34,16 @@ namespace NuPack {
         }
 
         public static Manifest ReadFrom(Stream stream) {
+            // Read the document
+            XDocument document = XDocument.Load(stream);
+
+            // Remove the schema namespace
+            foreach (var e in document.Descendants()) {
+                e.Name = e.Name.LocalName;
+            }
+
             var serializer = new XmlSerializer(typeof(Manifest));
-            var manifest = (Manifest)serializer.Deserialize(stream);
+            var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
 
             // Validate before returning
             Validate(manifest);

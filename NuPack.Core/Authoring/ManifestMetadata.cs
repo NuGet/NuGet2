@@ -117,21 +117,21 @@ namespace NuGet {
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
             if (LicenseUrl == String.Empty) {
                 yield return new ValidationResult(
-                    String.Format(CultureInfo.CurrentCulture, NuPackResources.Manifest_UriCannotBeEmpty, "LicenseUrl"));
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_UriCannotBeEmpty, "LicenseUrl"));
             }
 
             if (IconUrl == String.Empty) {
                 yield return new ValidationResult(
-                    String.Format(CultureInfo.CurrentCulture, NuPackResources.Manifest_UriCannotBeEmpty, "IconUrl"));
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_UriCannotBeEmpty, "IconUrl"));
             }
 
             if (ProjectUrl == String.Empty) {
                 yield return new ValidationResult(
-                    String.Format(CultureInfo.CurrentCulture, NuPackResources.Manifest_UriCannotBeEmpty, "ProjectUrl"));
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_UriCannotBeEmpty, "ProjectUrl"));
             }
 
             if (RequireLicenseAcceptance && String.IsNullOrWhiteSpace(LicenseUrl)) {
-                yield return new ValidationResult(NuPackResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl);
+                yield return new ValidationResult(NuGetResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl);
             }
         }
     }

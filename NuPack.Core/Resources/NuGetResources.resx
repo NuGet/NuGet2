@@ -207,6 +207,18 @@
   <data name="Log_UpdatingToSpecificVersion" xml:space="preserve">
     <value>Updating '{0}' to version '{1}'</value>
   </data>
+  <data name="Manifest_DependencyIdRequired" xml:space="preserve">
+    <value>Dependency Id is required.</value>
+  </data>
+  <data name="Manifest_RequiredMetadataMissing" xml:space="preserve">
+    <value>{0} is required.</value>
+  </data>
+  <data name="Manifest_RequireLicenseAcceptanceRequiresLicenseUrl" xml:space="preserve">
+    <value>Enabling license acceptance requires a license url.</value>
+  </data>
+  <data name="Manifest_UriCannotBeEmpty" xml:space="preserve">
+    <value>{0} cannot be empty.</value>
+  </data>
   <data name="NewerVersionAlreadyReferenced" xml:space="preserve">
     <value>Already referencing a newer version of '{0}'</value>
   </data>

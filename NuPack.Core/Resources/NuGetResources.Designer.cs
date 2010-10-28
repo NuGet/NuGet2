@@ -331,6 +331,42 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dependency Id is required..
+        /// </summary>
+        internal static string Manifest_DependencyIdRequired {
+            get {
+                return ResourceManager.GetString("Manifest_DependencyIdRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is required..
+        /// </summary>
+        internal static string Manifest_RequiredMetadataMissing {
+            get {
+                return ResourceManager.GetString("Manifest_RequiredMetadataMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enabling license acceptance requires a license url..
+        /// </summary>
+        internal static string Manifest_RequireLicenseAcceptanceRequiresLicenseUrl {
+            get {
+                return ResourceManager.GetString("Manifest_RequireLicenseAcceptanceRequiresLicenseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} cannot be empty..
+        /// </summary>
+        internal static string Manifest_UriCannotBeEmpty {
+            get {
+                return ResourceManager.GetString("Manifest_UriCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Already referencing a newer version of &apos;{0}&apos;.
         /// </summary>
         internal static string NewerVersionAlreadyReferenced {
