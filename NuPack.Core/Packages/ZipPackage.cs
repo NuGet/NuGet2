@@ -168,5 +168,9 @@ namespace NuGet {
             return !_excludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
                    !Utility.IsManifest(path);
         }
+
+        public override string ToString() {
+            return this.GetFullName();
+        }
     }
 }

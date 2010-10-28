@@ -119,5 +119,9 @@ namespace NuGet {
         internal void InitializeDownloader(Func<IPackage> downloader) {
             _package = new Lazy<IPackage>(downloader, isThreadSafe: false);
         }
+
+        public override string ToString() {
+            return this.GetFullName();
+        }
     }
 }

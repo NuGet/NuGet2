@@ -47,8 +47,13 @@
     <Compile Include="PackageWalker\PackageOperation.cs" />
     <Compile Include="PackageWalker\PackageTargets.cs" />
     <Compile Include="PackageWalker\PackageWalkInfo.cs" />
+    <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
+    <Compile Include="Repositories\BufferedEnumerable.cs" />
+    <Compile Include="Repositories\ExpressionRewriter.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
+    <Compile Include="Repositories\AggregateEnumerable.cs" />
+    <Compile Include="Repositories\OrderingComparer.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
@@ -106,6 +111,7 @@
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Utility\ProjectSystemExtensions.cs" />
+    <Compile Include="Utility\QueryableHelper.cs" />
     <Compile Include="Utility\StreamExtensions.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\ProjectSystem.cs" />
