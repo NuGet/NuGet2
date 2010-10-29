@@ -35,18 +35,6 @@ namespace NuGet.Dialog.Test {
 
         [TestMethod]
         public void RootNodeIsPopulatedWithCorrectNumberOfNodes() {
-            //var packageA = PackageUtility.CreatePackage("A", "1.0");
-            //var packageB = PackageUtility.CreatePackage("B", "2.0");
-
-            //var sourceRepository = new MockPackageRepository();
-            //sourceRepository.AddPackage(packageA);
-            //sourceRepository.AddPackage(packageB);
-
-            // Arrange
-            //var projectManager = new Mock<IProjectManager>();
-            //projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
-            //projectManager.Setup(p => p.SourceRepository).Returns(new MockPackageRepository());
-
             var provider = CreateOnlineProvider();
 
             // Act

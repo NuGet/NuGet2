@@ -78,9 +78,11 @@ namespace NuGet.Dialog.Test {
             Assert.AreEqual("All", provider.ExtensionsTree.Nodes[0].Name);
         }
 
+        [TestMethod]
         public void SearchMethodCreatesNewTreeNode() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
+            provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
 
             // Act
             IVsExtensionsTreeNode searchNode = provider.Search("hello");
