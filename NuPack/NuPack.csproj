@@ -28,11 +28,14 @@
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Common\ConsoleWriter.cs" />
+    <Compile Include="Common\IConsoleWriter.cs" />
     <Compile Include="Common\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
