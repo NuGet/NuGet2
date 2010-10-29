@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NuGet {
     internal class AggregateEnumerable<TElement> : IEnumerable<TElement> {
@@ -17,8 +18,8 @@ namespace NuGet {
         }
 
         public IEnumerator<TElement> GetEnumerator() {
-            return new AggregateEnumerator<TElement>(_subQueries.Select(q => q.GetEnumerator()).ToList(), 
-                                                     _equlityComparer, 
+            return new AggregateEnumerator<TElement>(_subQueries.Select(q => q.GetEnumerator()).ToList(),
+                                                     _equlityComparer,
                                                      _comparer);
         }
 
@@ -61,13 +62,30 @@ namespace NuGet {
 
             public bool MoveNext() {
                 do {
-                    // TODO: Execute move next in parallel?
-                    
+                    // Run tasks in parallel
+                    var subQueryTasks = (from q in _subQueries
+                                         select Task.Factory.StartNew(
+                                                             () => q.MoveNext() ?
+                                                                   new {
+                                                                       Empty = false,
+                                                                       Value = q.Current
+                                                                   } 
+                                                                   :
+                                                                   new {
+                                                                       Empty = true,
+                                                                       Value = default(T)
+                                                                   }
+                                                             )
+                                         ).ToArray();
+
+                    // Wait for everything to complete
+                    Task.WaitAll(subQueryTasks);
+
                     // Check each sub queries' enumerator and if there is more then add it to the queue
                     // in priority order
-                    foreach (var query in _subQueries) {
-                        if (query.MoveNext()) {
-                            _queue.Enqueue(query.Current);
+                    foreach (var task in subQueryTasks) {
+                        if (!task.Result.Empty) {
+                            _queue.Enqueue(task.Result.Value);
                         }
                     }
 
