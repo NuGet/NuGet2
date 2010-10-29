@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Microsoft.Internal.Web.Utils;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
@@ -27,7 +29,7 @@ namespace NuGet.Dialog.Providers {
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<EventArgs> PageDataChanged;
 
-        internal PackagesTreeNodeBase(IVsExtensionsTreeNode parent, PackagesProviderBase provider) {
+        protected PackagesTreeNodeBase(IVsExtensionsTreeNode parent, PackagesProviderBase provider) {
             Debug.Assert(provider != null);
 
             Parent = parent;
@@ -99,7 +101,7 @@ namespace NuGet.Dialog.Providers {
         public IList<IVsExtension> Extensions {
             get {
                 if (_extensions == null) {
-                    _extensions = new ObservableCollection<IVsExtension>();
+                    EnsureExtensionCollection();
                     LoadPage(1);
                 }
                 else if (_activeQueryStateCancelled) {
@@ -185,13 +187,15 @@ namespace NuGet.Dialog.Providers {
             Justification = "We want to show the error message in the message pane rather than blowing up VS.")]
         public void LoadPage(int pageNumber) {
             if (pageNumber < 1) {
-                throw new ArgumentOutOfRangeException("pageNumber");
+                throw new ArgumentOutOfRangeException("pageNumber", String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
             }
 
             Trace.WriteLine("Dialog loading page: " + pageNumber);
             if (_loadingInProgress) {
                 return;
             }
+
+            EnsureExtensionCollection();
 
             ShowProgressPane();
 
@@ -202,6 +206,12 @@ namespace NuGet.Dialog.Providers {
             AsyncOperation async = AsyncOperationManager.CreateOperation(null);
             ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
             worker.BeginInvoke(pageNumber, ItemsPerPage, async, null, null);
+        }
+
+        private void EnsureExtensionCollection() {
+            if (_extensions == null) {
+                _extensions = new ObservableCollection<IVsExtension>();
+            }
         }
 
         /// <summary>
@@ -278,7 +288,14 @@ namespace NuGet.Dialog.Providers {
                 Exception exception = args.Error;
                 ShowMessagePane((exception.InnerException ?? exception).Message);
             }
+
+            if (QueryExecutionCallback != null) {
+                QueryExecutionCallback();
+            }
         }
+
+        // this is for unit testing
+        internal Action QueryExecutionCallback { get; set; }
 
         protected void OnNotifyPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {

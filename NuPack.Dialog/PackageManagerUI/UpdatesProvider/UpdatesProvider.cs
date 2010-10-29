@@ -90,7 +90,14 @@ namespace NuGet.Dialog.Providers {
                 PackageItem item = (PackageItem)e.Result;
                 item.UpdateEnabledStatus();
             }
+
+            if (UpdateCompletedCallback != null) {
+                UpdateCompletedCallback();
+            }
         }
+
+        // hook for unit test
+        internal Action UpdateCompletedCallback { get; set; }
 
         public override IVsExtension CreateExtension(IPackage package) {
             return new PackageItem(this, package, null) {

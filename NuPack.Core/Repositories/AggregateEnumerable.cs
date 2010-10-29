@@ -6,20 +6,15 @@ using System.Threading.Tasks;
 namespace NuGet {
     internal class AggregateEnumerable<TElement> : IEnumerable<TElement> {
         private readonly IEnumerable<IEnumerable<TElement>> _subQueries;
-        private readonly IEqualityComparer<TElement> _equlityComparer;
         private readonly IComparer<TElement> _comparer;
 
-        public AggregateEnumerable(IEnumerable<IEnumerable<TElement>> subQueries,
-                                   IEqualityComparer<TElement> equlityComparer,
-                                   IComparer<TElement> comparer) {
+        public AggregateEnumerable(IEnumerable<IEnumerable<TElement>> subQueries, IComparer<TElement> comparer) {
             _subQueries = subQueries;
-            _equlityComparer = equlityComparer;
             _comparer = comparer;
         }
 
         public IEnumerator<TElement> GetEnumerator() {
             return new AggregateEnumerator<TElement>(_subQueries.Select(q => q.GetEnumerator()).ToList(),
-                                                     _equlityComparer,
                                                      _comparer);
         }
 
@@ -29,14 +24,11 @@ namespace NuGet {
 
         private class AggregateEnumerator<T> : IEnumerator<T> {
             private IEnumerable<IEnumerator<T>> _subQueries;
-            private IEqualityComparer<T> _equalityComparer;
             private PriorityQueue<T> _queue;
 
             public AggregateEnumerator(IEnumerable<IEnumerator<T>> subQueries,
-                                       IEqualityComparer<T> equalityComparer,
                                        IComparer<T> comparer) {
                 _subQueries = subQueries;
-                _equalityComparer = equalityComparer;
                 _queue = new PriorityQueue<T>(comparer);
             }
 
@@ -50,7 +42,6 @@ namespace NuGet {
                     query.Dispose();
                 }
                 _subQueries = null;
-                _equalityComparer = null;
                 _queue = null;
             }
 

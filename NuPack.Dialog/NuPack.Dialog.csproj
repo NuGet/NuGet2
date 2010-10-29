@@ -106,6 +106,9 @@
     <Compile Include="..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Common\CommonResources.cs">
+      <Link>CommonResources.cs</Link>
+    </Compile>
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -159,6 +162,10 @@
     <Compile Include="PackageManagerUI\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\Common\CommonResources.resx">
+      <Link>CommonResources.resx</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

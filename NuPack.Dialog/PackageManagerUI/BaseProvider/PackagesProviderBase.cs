@@ -20,6 +20,10 @@ namespace NuGet.Dialog.Providers {
         private object _detailViewDataTemplate;
 
         protected PackagesProviderBase(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources) {
+            if (packageManager == null) {
+                throw new ArgumentNullException("packageManager");
+            }
+
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
             }
@@ -57,7 +61,7 @@ namespace NuGet.Dialog.Providers {
         /// <summary>
         /// Gets the root node of the tree
         /// </summary>
-        protected virtual IVsExtensionsTreeNode RootNode {
+        protected IVsExtensionsTreeNode RootNode {
             get;
             set;
         }

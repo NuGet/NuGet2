@@ -7,3 +7,4 @@ using System.Runtime.CompilerServices;
 [assembly: CLSCompliant(false)]
 
 [assembly: InternalsVisibleTo("NuGet.TestUI")]
+[assembly: InternalsVisibleTo("NuGet.Dialog.Test")]

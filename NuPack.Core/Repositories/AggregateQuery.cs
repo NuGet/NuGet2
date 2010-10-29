@@ -37,9 +37,7 @@ namespace NuGet {
 
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
-            var aggregateQuery = new AggregateEnumerable<T>(subQueries,
-                                                            _equalityComparer,
-                                                            new OrderingComparer<T>(Expression)).AsQueryable();
+            var aggregateQuery = new AggregateEnumerable<T>(subQueries, new OrderingComparer<T>(Expression)).AsQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
             return aggregateQuery.Provider.CreateQuery<T>(aggregateExpression).GetEnumerator();

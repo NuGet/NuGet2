@@ -37,7 +37,7 @@ namespace NuGet.Dialog.Providers {
         public override bool RefreshOnNodeSelection {
             get {
                 // only refresh if the current node doesn't have any extensions
-                return (SelectedNode.Extensions.Count == 0);
+                return (SelectedNode == null || SelectedNode.Extensions.Count == 0);
             }
         }
 
@@ -103,6 +103,10 @@ namespace NuGet.Dialog.Providers {
                 PackageItem item = (PackageItem)e.Result;
                 item.UpdateEnabledStatus();
             }
+
+            if (InstallCompletedCallback != null) {
+                InstallCompletedCallback();
+            }
         }
 
         public override bool CanExecute(PackageItem item) {
@@ -115,5 +119,8 @@ namespace NuGet.Dialog.Providers {
                 CommandName = Resources.Dialog_InstallButton
             };
         }
+
+        // hook for unit test
+        internal Action InstallCompletedCallback { get; set; }
     }
 }
