@@ -28,7 +28,7 @@ namespace NuGet {
 
                 // Push the sort expression on the stack so we can compare later
                 _orderings.Push(new Ordering<TElement> {
-                    Descending = node.Method.Name.EndsWith("Descending"),
+                    Descending = node.Method.Name.EndsWith("Descending", StringComparison.OrdinalIgnoreCase),
                     Extractor = lambda.Compile()
                 });
 

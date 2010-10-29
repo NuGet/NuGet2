@@ -26,14 +26,14 @@ namespace NuGet {
         private class AggregateEnumerator<T> : IEnumerator<T> {
             private IEnumerable<IEnumerator<T>> _subQueries;
             private IEqualityComparer<T> _equalityComparer;
-            private PriorityQueue<T, T> _queue;
+            private PriorityQueue<T> _queue;
 
             public AggregateEnumerator(IEnumerable<IEnumerator<T>> subQueries,
                                        IEqualityComparer<T> equalityComparer,
                                        IComparer<T> comparer) {
                 _subQueries = subQueries;
                 _equalityComparer = equalityComparer;
-                _queue = new PriorityQueue<T, T>(comparer);
+                _queue = new PriorityQueue<T>(comparer);
             }
 
             public T Current {
@@ -62,7 +62,7 @@ namespace NuGet {
                     // in priority order
                     foreach (var query in _subQueries) {
                         if (query.MoveNext()) {
-                            _queue.Enqueue(query.Current, query.Current);
+                            _queue.Enqueue(query.Current);
                         }
                     }
 
@@ -92,25 +92,25 @@ namespace NuGet {
             }
 
             // Small priority queue class
-            private class PriorityQueue<TPriority, TValue> {
-                private SortedDictionary<TPriority, Queue<TValue>> _list;
+            private class PriorityQueue<TValue> {
+                private SortedDictionary<TValue, Queue<TValue>> _list;
 
-                public PriorityQueue(IComparer<TPriority> comparer) {
-                    _list = new SortedDictionary<TPriority, Queue<TValue>>(comparer);
+                public PriorityQueue(IComparer<TValue> comparer) {
+                    _list = new SortedDictionary<TValue, Queue<TValue>>(comparer);
                 }
 
-                public void Enqueue(TPriority priority, TValue value) {
+                public void Enqueue(TValue value) {
                     Queue<TValue> queue;
-                    if (!_list.TryGetValue(priority, out queue)) {
+                    if (!_list.TryGetValue(value, out queue)) {
                         queue = new Queue<TValue>();
-                        _list.Add(priority, queue);
+                        _list.Add(value, queue);
                     }
                     queue.Enqueue(value);
                 }
 
                 public TValue Dequeue() {
                     // Will throw if there isn’t any first element!
-                    KeyValuePair<TPriority, Queue<TValue>> pair = _list.First();
+                    KeyValuePair<TValue, Queue<TValue>> pair = _list.First();
                     TValue value = pair.Value.Dequeue();
 
                     // Nothing left of the top priority.

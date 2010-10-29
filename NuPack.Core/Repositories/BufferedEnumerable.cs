@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace NuGet {
@@ -9,6 +10,7 @@ namespace NuGet {
     /// This is usefult when alot of data can be returned from an IQueryable source, but
     /// you don't want to do it all at once.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Collection isn't correct")]
     public class BufferedEnumerable<TElement> : IEnumerable<TElement> {
         private readonly IQueryable<TElement> _source;
         private readonly int _bufferSize;
