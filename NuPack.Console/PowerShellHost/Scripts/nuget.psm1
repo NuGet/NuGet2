@@ -171,13 +171,7 @@ if (IsSolutionOpen) {
 
 # assign aliases to package cmdlets
 
-New-Alias 'nnp' 'New-Package'
-New-Alias 'nep' 'Get-Package'
-New-Alias 'nip' 'Install-Package'
-New-Alias 'nup' 'Uninstall-Package'
-New-Alias 'npp' 'Update-Package'
-
 New-Alias 'List-Package' 'Get-Package'
 
 # export public functions and aliases 
-Export-ModuleMember -Function 'Get-ProjectNames','TabExpansion' -Alias 'nnp','nep','nip','nup','npp','List-Package'
+Export-ModuleMember -Function 'Get-ProjectNames','TabExpansion' -Alias 'List-Package'
