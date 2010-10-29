@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -14,17 +15,19 @@ namespace NuGet {
     public class BufferedEnumerable<TElement> : IEnumerable<TElement> {
         private readonly IQueryable<TElement> _source;
         private readonly int _bufferSize;
+        private readonly List<TElement> _cache;
 
         public BufferedEnumerable(IQueryable<TElement> source, int bufferSize) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
+            _cache = new List<TElement>(bufferSize);
             _source = source;
             _bufferSize = bufferSize;
         }
 
         public IEnumerator<TElement> GetEnumerator() {
-            return new BufferedEnumerator<TElement>(_source, _bufferSize);
+            return new BufferedEnumerator<TElement>(_cache, _source, _bufferSize);
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -37,32 +40,34 @@ namespace NuGet {
 
         private class BufferedEnumerator<T> : IEnumerator<T> {
             private readonly int _bufferSize;
-            private IQueryable<T> _source;
-            private IEnumerator<T> _cachedEnumerator;
-            private bool _hasItems = true;
-            private int _cached = 0;
 
-            public BufferedEnumerator(IQueryable<T> source, int bufferSize) {
+            private IQueryable<T> _source;
+            private List<T> _cache;
+            private bool _hasItems = true;
+            private int _index = -1;
+
+            public BufferedEnumerator(List<T> cache, IQueryable<T> source, int bufferSize) {
+                _cache = cache;
                 _source = source;
                 _bufferSize = bufferSize;
             }
 
             public T Current {
                 get {
-                    return _cachedEnumerator.Current;
+                    Debug.Assert(_index < _cache.Count);
+                    return _cache[_index];
                 }
             }
 
-            private bool Empty {
+            private bool IsEmpty {
                 get {
-                    return _hasItems && (_cachedEnumerator == null || !_cachedEnumerator.MoveNext());
+                    return _hasItems && (_index == _cache.Count - 1);
                 }
             }
 
             public void Dispose() {
                 _source = null;
-                _cachedEnumerator.Dispose();
-                _cachedEnumerator = null;
+                _cache = null;
             }
 
             object IEnumerator.Current {
@@ -71,26 +76,27 @@ namespace NuGet {
                 }
             }
 
-            public bool MoveNext() {               
-                if (Empty) {
+            public bool MoveNext() {
+                if (IsEmpty) {
                     // Request a page
-                    _cachedEnumerator = _source.Skip(_cached).Take(_bufferSize).GetEnumerator();
-                   
-                    // Increment the amount of items cached
-                    _cached += _bufferSize;
+                    List<T> items = _source.Skip(_cache.Count)
+                                           .Take(_bufferSize)
+                                           .ToList();
 
                     // See if we have anymore items after the last query
-                    _hasItems = _cachedEnumerator.MoveNext();
+                    _hasItems = _bufferSize == items.Count;
+
+                    // Add it to the cache
+                    _cache.AddRange(items);
                 }
 
+                _index++;
                 // We can keep going unless the source said we're empty
-                return _hasItems;
+                return _index < _cache.Count;
             }
 
             public void Reset() {
-                _cached = 0;
-                _hasItems = true;
-                _cachedEnumerator.Reset();
+                _index = -1;
             }
 
             public override string ToString() {

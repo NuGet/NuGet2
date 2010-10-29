@@ -5,9 +5,7 @@ using System.Linq.Expressions;
 using NuGet.Resources;
 
 namespace NuGet {
-    internal class OrderingComparer<TElement> : ExpressionVisitor, IComparer<TElement> {
-        private static readonly string[] _orderMethods = new[] { "OrderBy", "ThenBy", "OrderByDescending", "ThenByDescending" };
-        
+    internal class OrderingComparer<TElement> : ExpressionVisitor, IComparer<TElement> {        
         private readonly Expression _expression;        
         private readonly Dictionary<ParameterExpression, ParameterExpression> _parameters = new Dictionary<ParameterExpression, ParameterExpression>();
         
@@ -19,7 +17,7 @@ namespace NuGet {
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node) {
-            if (_orderMethods.Any(m => QueryableHelper.IsQueryableMethod(node, m))) {
+            if (QueryableHelper.IsOrderingMethod(node)) {
                 _inOrderExpression = true;
 
                 // The lambdas are wrapped in a unary expression

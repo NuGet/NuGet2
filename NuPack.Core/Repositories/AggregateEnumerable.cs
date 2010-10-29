@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace NuGet {
     internal class AggregateEnumerable<TElement> : IEnumerable<TElement> {
-        private readonly IEnumerable<IEnumerator<TElement>> _subQueries;
+        private readonly IEnumerable<IEnumerable<TElement>> _subQueries;
         private readonly IEqualityComparer<TElement> _equlityComparer;
         private readonly IComparer<TElement> _comparer;
 
-        public AggregateEnumerable(IEnumerable<IEnumerator<TElement>> subQueries,
+        public AggregateEnumerable(IEnumerable<IEnumerable<TElement>> subQueries,
                                    IEqualityComparer<TElement> equlityComparer,
                                    IComparer<TElement> comparer) {
             _subQueries = subQueries;
@@ -17,12 +17,15 @@ namespace NuGet {
         }
 
         public IEnumerator<TElement> GetEnumerator() {
-            return new AggregateEnumerator<TElement>(_subQueries, _equlityComparer, _comparer);
+            return new AggregateEnumerator<TElement>(_subQueries.Select(q => q.GetEnumerator()).ToList(), 
+                                                     _equlityComparer, 
+                                                     _comparer);
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
+
         private class AggregateEnumerator<T> : IEnumerator<T> {
             private IEnumerable<IEnumerator<T>> _subQueries;
             private IEqualityComparer<T> _equalityComparer;
@@ -58,6 +61,8 @@ namespace NuGet {
 
             public bool MoveNext() {
                 do {
+                    // TODO: Execute move next in parallel?
+                    
                     // Check each sub queries' enumerator and if there is more then add it to the queue
                     // in priority order
                     foreach (var query in _subQueries) {
@@ -67,14 +72,8 @@ namespace NuGet {
                     }
 
                     if (!_queue.IsEmpty) {
-                        // Remove duplicates
-                        T nextElement = _queue.Dequeue();
-                        if (Current == null || !_equalityComparer.Equals(Current, nextElement)) {
-                            // When we find the an element that's not a duplicate of the current
-                            // return it and move on
-                            Current = nextElement;
-                            return true;
-                        }
+                        Current = _queue.DequeueMin();
+                        return true;
                     }
                 }
                 while (!_queue.IsEmpty);
@@ -93,41 +92,30 @@ namespace NuGet {
 
             // Small priority queue class
             private class PriorityQueue<TValue> {
-                private SortedDictionary<TValue, Queue<TValue>> _list;
+                private SortedSet<TValue> _set;
 
                 public PriorityQueue(IComparer<TValue> comparer) {
-                    _list = new SortedDictionary<TValue, Queue<TValue>>(comparer);
+                    _set = new SortedSet<TValue>(comparer);
                 }
 
                 public void Enqueue(TValue value) {
-                    Queue<TValue> queue;
-                    if (!_list.TryGetValue(value, out queue)) {
-                        queue = new Queue<TValue>();
-                        _list.Add(value, queue);
-                    }
-                    queue.Enqueue(value);
+                    _set.Add(value);
                 }
 
-                public TValue Dequeue() {
-                    // Will throw if there isn’t any first element!
-                    KeyValuePair<TValue, Queue<TValue>> pair = _list.First();
-                    TValue value = pair.Value.Dequeue();
-
-                    // Nothing left of the top priority.
-                    if (pair.Value.Count == 0) {
-                        _list.Remove(pair.Key);
-                    }
-                    return value;
+                public TValue DequeueMin() {
+                    TValue min = _set.Min;
+                    _set.Remove(min);
+                    return min;
                 }
 
                 public bool IsEmpty {
                     get {
-                        return !_list.Any();
+                        return !_set.Any();
                     }
                 }
 
                 public void Clear() {
-                    _list.Clear();
+                    _set.Clear();
                 }
             }
         }

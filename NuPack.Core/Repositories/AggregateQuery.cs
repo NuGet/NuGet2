@@ -1,51 +1,44 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NuGet {
-    [DebuggerDisplay("{Queries}")]
     internal class AggregateQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
+        private const int QueryCacheSize = 30;
+
         private readonly IEnumerable<IQueryable<T>> _queryables;
         private readonly IEqualityComparer<T> _equalityComparer;
         private readonly Expression _expression;
-        private const int QueryCacheSize = 50;
 
-        public AggregateQuery(IEnumerable<IQueryable<T>> queryables, IEqualityComparer<T> equalityComparer) {
+        private readonly IEnumerable<IEnumerable<T>> _subQueries;
+
+        public AggregateQuery(IEnumerable<IQueryable<T>> queryables,
+                              IEqualityComparer<T> equalityComparer) {
             _queryables = queryables;
             _expression = Expression.Constant(this);
             _equalityComparer = equalityComparer;
         }
 
-        private AggregateQuery(IEnumerable<IQueryable<T>> queryables, IEqualityComparer<T> equalityComparer, Expression expression) {
+        private AggregateQuery(IEnumerable<IQueryable<T>> queryables,
+                               IEnumerable<IEnumerable<T>> subQueries,
+                               IEqualityComparer<T> equalityComparer,
+                               Expression expression) {
             _queryables = queryables;
             _expression = expression;
             _equalityComparer = equalityComparer;
+            _subQueries = subQueries;
         }
 
-#if DEBUG
-        public IEnumerable<T>[] Queries {
-            get {
-                return _queryables.Select(GetSubQuery).ToArray();
-            }
-        }
-#endif
         public IEnumerator<T> GetEnumerator() {
-            // TODO: Handle exceptions per linq provider
-
-            // For each IQueryable<T> in our list, we apply each expression
-            // and run them in parallel using PLINQ.
-            IEnumerable<IEnumerator<T>> subQueries = _queryables.Select(q => GetSubQuery(q).GetEnumerator())
-                                                                .AsParallel()
-                                                                .ToList();
+            var subQueries = _subQueries ?? GetSubQueries(Expression);
 
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
-            var aggregateQuery = new AggregateEnumerable<T>(subQueries, 
-                                                            _equalityComparer, 
+            var aggregateQuery = new AggregateEnumerable<T>(subQueries,
+                                                            _equalityComparer,
                                                             new OrderingComparer<T>(Expression)).AsQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
@@ -109,17 +102,29 @@ namespace NuGet {
         public object Execute(Expression expression) {
             return Execute<object>(expression);
         }
+ 
+        private IEnumerable<IEnumerable<T>> GetSubQueries(Expression expression) {
+            return _queryables.Select(q => GetSubQuery(q, expression)).ToList();
+        }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
             var queryType = typeof(AggregateQuery<>).MakeGenericType(elementType);
             var ctor = queryType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Single();
-            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, expression });
+
+            var subQueries = _subQueries;
+
+            // Only update subqueries for ordering and where clauses
+            if (QueryableHelper.IsQueryableMethod(expression, "Where") ||
+                QueryableHelper.IsOrderingMethod(expression)) {
+                subQueries = GetSubQueries(expression);
+            }
+
+            return (IQueryable)ctor.Invoke(new object[] { _queryables, subQueries, _equalityComparer, expression });
         }
 
-        private IEnumerable<T> GetSubQuery(IQueryable queryable) {
+        private static IEnumerable<T> GetSubQuery(IQueryable queryable, Expression expression) {
             // Create the query and only get up to the query cache size
-            return new BufferedEnumerable<T>(queryable.Provider.CreateQuery<T>(Rewrite(queryable, Expression)),
-                                           QueryCacheSize);
+            return new BufferedEnumerable<T>(queryable.Provider.CreateQuery<T>(Rewrite(queryable, expression)), QueryCacheSize);
         }
 
         private static TResult Execute<TResult>(IQueryable queryable, Expression expression) {
@@ -144,7 +149,7 @@ namespace NuGet {
         private static Expression Rewrite(IQueryable queryable, Expression expression) {
             // Remove all take an skip andtake expression from individual linq providers
             return new ExpressionRewriter(queryable, new[] { "Skip", 
-                                                              "Take" }).Visit(expression);
+                                                             "Take" }).Visit(expression);
         }
 
         private static Type FindGenericType(Type definition, Type type) {
