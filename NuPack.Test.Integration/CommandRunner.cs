@@ -30,7 +30,7 @@ namespace NuGet.Test.Integration {
 
 
                 if (waitForExit) {
-                    p.WaitForExit(1000);
+                    p.WaitForExit(5000);
                 }
                 if (p.HasExited) {
                     exitCode = p.ExitCode;
