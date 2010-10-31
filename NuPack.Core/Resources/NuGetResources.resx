@@ -280,7 +280,7 @@
     <value>Skipping '{0}' because it was modified</value>
   </data>
   <data name="Warning_PackageSkippedBecauseItIsInUse" xml:space="preserve">
-    <value>Package '{0}' skipped, because it is in use by '{1}'</value>
+    <value>'{0}' skipped, because it is in use by '{1}'</value>
   </data>
   <data name="Warning_RemovingPackageReferenceWillBreakDependents" xml:space="preserve">
     <value>Removing '{0}' might cause '{1}' to be broken</value>

@@ -53,9 +53,7 @@ namespace NuGet {
             }
             else if (package.Version > installedPackage.Version) {
                 // Turn warnings off, since were forcing uninstall
-                IPackageOperationResolver resolver = new UninstallWalker(Repository, DependentsResolver, Logger, !IgnoreDependencies, forceRemove: true) {
-                    LogWarnings = false
-                };
+                IPackageOperationResolver resolver = new UninstallWalker(Repository, DependentsResolver, NullLogger.Instance, !IgnoreDependencies, forceRemove: true);
 
                 foreach (var operation in resolver.ResolveOperations(installedPackage)) {
                     Operations.Add(operation);

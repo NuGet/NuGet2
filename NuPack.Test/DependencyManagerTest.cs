@@ -423,7 +423,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesThrowsIfDependencyInUse() {
+        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesExcludesDependencyIfDependencyInUse() {
             // Arrange
             var localRepository = new MockPackageRepository();
 
@@ -456,7 +456,13 @@ namespace NuGet.Test {
                                                                forceRemove: false);
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to uninstall 'C 1.0' because 'D 1.0' depends on it");
+            var packages = resolver.ResolveOperations(packageA)
+                                   .ToDictionary(p => p.Package.Id);
+
+            // Assert            
+            Assert.AreEqual(2, packages.Count);
+            Assert.IsNotNull(packages["A"]);
+            Assert.IsNotNull(packages["B"]);
         }
 
         [TestMethod]
@@ -464,6 +470,7 @@ namespace NuGet.Test {
             // Arrange
             var localRepository = new MockPackageRepository();
 
+            // A 1.0 -> [B, C]
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     PackageDependency.CreateDependency("B"),
@@ -472,6 +479,8 @@ namespace NuGet.Test {
 
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
             IPackage packageC = PackageUtility.CreatePackage("C", "1.0");
+
+            // D -> [C]
             IPackage packageD = PackageUtility.CreatePackage("D", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                 PackageDependency.CreateDependency("C"),

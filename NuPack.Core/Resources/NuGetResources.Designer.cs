@@ -556,7 +556,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package &apos;{0}&apos; skipped, because it is in use by &apos;{1}&apos;.
+        ///   Looks up a localized string similar to &apos;{0}&apos; skipped, because it is in use by &apos;{1}&apos;.
         /// </summary>
         internal static string Warning_PackageSkippedBecauseItIsInUse {
             get {

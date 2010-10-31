@@ -1,12 +1,15 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.Linq;
-    using NuGet.Resources;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using NuGet.Resources;
 
+namespace NuGet {
     public class UninstallWalker : PackageWalker, IPackageOperationResolver {
+        private IDictionary<IPackage, IEnumerable<IPackage>> _forcedRemoved = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
+        private IDictionary<IPackage, IEnumerable<IPackage>> _skippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
+        private bool _removeDependencies;
+
         public UninstallWalker(IPackageRepository repository,
                                IDependentsResolver dependentsResolver,
                                ILogger logger,
@@ -25,11 +28,9 @@ namespace NuGet {
             Logger = logger;
             Repository = repository;
             DependentsResolver = dependentsResolver;
-            RemoveDependencies = removeDependencies;
             Force = forceRemove;
-            SkippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageComparer.IdAndVersionComparer);
             Operations = new Stack<PackageOperation>();
-            LogWarnings = true;
+            _removeDependencies = removeDependencies;
         }
 
         protected ILogger Logger {
@@ -44,7 +45,7 @@ namespace NuGet {
 
         protected override bool IgnoreDependencies {
             get {
-                return !RemoveDependencies;
+                return !_removeDependencies;
             }
         }
 
@@ -53,24 +54,9 @@ namespace NuGet {
             set;
         }
 
-        public bool RemoveDependencies {
-            get;
-            private set;
-        }
-
         public bool Force {
             get;
             private set;
-        }
-
-        public bool LogWarnings {
-            get;
-            set;
-        }
-
-        private IDictionary<IPackage, IEnumerable<IPackage>> SkippedPackages {
-            get;
-            set;
         }
 
         protected IDependentsResolver DependentsResolver {
@@ -83,15 +69,31 @@ namespace NuGet {
             IEnumerable<IPackage> dependents = GetDependents(package);
             if (dependents.Any()) {
                 if (Force) {
-                    // We're going to uninstall this package even though other packages depend on it
-                    // Warn the user of the other packages that might break as a result and continue processing the package
-                    SkippedPackages[package] = dependents;
+                    // We're going to uninstall this package even though other packages depend on it                    
+                    _forcedRemoved[package] = dependents;
                 }
                 else {
                     // We're not ignoring dependents so raise an error telling the user what the dependents are
                     throw CreatePackageHasDependentsException(package, dependents);
                 }
             }
+        }
+
+        protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
+            if (!Force) {                
+                IEnumerable<IPackage> dependents = GetDependents(dependency);
+
+                // If this isn't a force remove and other packages depend on this dependency
+                // then skip this entire dependency tree
+                if (dependents.Any()) {
+                    _skippedPackages[dependency] = dependents;
+
+                    // Don't look any further
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         protected override void OnAfterDependencyWalk(IPackage package) {
@@ -129,17 +131,18 @@ namespace NuGet {
             Operations.Clear();
             Walk(package);
 
-            if (LogWarnings) {
-                var packages = new HashSet<IPackage>(from o in Operations
-                                                     select o.Package, PackageComparer.IdAndVersionComparer);
+            // Log warnings for packages that were forcibly removed
+            foreach (var pair in _forcedRemoved) {
+                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UninstallingPackageWillBreakDependents,
+                           pair.Key,
+                           String.Join(", ", pair.Value.Select(p => p.GetFullName())));
+            }
 
-                foreach (var pair in SkippedPackages) {
-                    if (!packages.Contains(pair.Key)) {
-                        Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UninstallingPackageWillBreakDependents,
-                                   pair.Key,
-                                   String.Join(", ", pair.Value.Select(p => p.GetFullName())));
-                    }
-                }
+            // Log warnings for dependencies that were skipped
+            foreach (var pair in _skippedPackages) {
+                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_PackageSkippedBecauseItIsInUse,
+                           pair.Key,
+                           String.Join(", ", pair.Value.Select(p => p.GetFullName())));
             }
 
             return Operations;

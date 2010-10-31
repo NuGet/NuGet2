@@ -235,7 +235,7 @@ namespace NuGet {
         protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
             Execute(package, new UninstallWalker(LocalRepository,
                                                  new DependentsWalker(LocalRepository),
-                                                 Logger,
+                                                 NullLogger.Instance,
                                                  removeDependencies,
                                                  force));
         }
