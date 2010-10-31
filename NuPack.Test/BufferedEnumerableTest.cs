@@ -25,9 +25,9 @@ namespace NuGet.Test {
         [TestMethod]
         public void BufferedEnumeratorTakingLessThanBufferSizeOnlyQueriesSourceOnce() {
             // Arrange
-            var cache = new List<int>();
+            var state = new BufferedEnumerable<int>.QueryState<int>(5);
             var query = Enumerable.Range(0, 10000).AsQueryable();
-            var e = new BufferedEnumerable<int>.BufferedEnumerator<int>(cache, query, 5);
+            var e = new BufferedEnumerable<int>.BufferedEnumerator<int>(state, query, 5);
             e.Reset();
 
             // Act
@@ -36,15 +36,15 @@ namespace NuGet.Test {
             }
 
             // Assert
-            Assert.AreEqual(5, cache.Count);
+            Assert.AreEqual(5, state.Cache.Count);
         }
 
         [TestMethod]
         public void BufferedEnumeratorTakingMoreThanBufferSizeQueriesSourceMoreThanOnce() {
             // Arrange
-            var cache = new List<int>();
+            var state = new BufferedEnumerable<int>.QueryState<int>(5);
             var query = Enumerable.Range(0, 10000).AsQueryable();
-            var e = new BufferedEnumerable<int>.BufferedEnumerator<int>(cache, query, 5);
+            var e = new BufferedEnumerable<int>.BufferedEnumerator<int>(state, query, 5);
             e.Reset();
 
             // Act
@@ -53,16 +53,16 @@ namespace NuGet.Test {
             }
 
             // Assert
-            Assert.AreEqual(10, cache.Count);
+            Assert.AreEqual(10, state.Cache.Count);
         }
 
 
         [TestMethod]
         public void IfNoMoreItemsInSourceSetsIsEmpty() {
             // Arrange
-            var cache = new List<int>();
+            var state = new BufferedEnumerable<int>.QueryState<int>(5);
             var query = Enumerable.Range(0, 5).AsQueryable();
-            var e = new BufferedEnumerable<int>.BufferedEnumerator<int>(cache, query, 1);
+            var e = new BufferedEnumerable<int>.BufferedEnumerator<int>(state, query, 1);
             e.Reset();
 
             // Act
@@ -72,7 +72,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsTrue(e.IsEmpty);
-            Assert.AreEqual(5, cache.Count);
+            Assert.AreEqual(5, state.Cache.Count);
         }
     }
 }
