@@ -12,9 +12,9 @@ namespace NuGet.VisualStudio {
     public static class ProjectExtensions {
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
-        private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectKind, 
-                                                                          VsConstants.CsharpProjectKind, 
-                                                                          VsConstants.VbProjectKind };
+        private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectTypeGuid, 
+                                                                          VsConstants.CsharpProjectTypeGuid, 
+                                                                          VsConstants.VbProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
         // Get the ProjectItems for a folder path
@@ -140,13 +140,9 @@ namespace NuGet.VisualStudio {
             return project.Kind != null &&
                    _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
         }
-
-        public static bool IsWebSite(this Project project) {
-            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectKind, StringComparison.OrdinalIgnoreCase);
-        }
-
+ 
         public static bool IsUnloaded(this Project project) {
-            return VsConstants.UnloadedProjectKind.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+            return VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
         public static IVsHierarchy GetVsHierarchy(this Project project) {

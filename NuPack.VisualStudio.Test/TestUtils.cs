@@ -12,7 +12,7 @@ namespace NuGet.VisualStudio.Test {
         private static readonly Func<bool> actionWrapper = () => { AttributesToAvoidReplicating.Add<TypeIdentifierAttribute>(); return true; };
         private static readonly Lazy<bool> lazyAction = new Lazy<bool>(actionWrapper);
 
-        public static Project GetProject(string name, string kind = VsConstants.CsharpProjectKind, IEnumerable<string> projectFiles = null) {
+        public static Project GetProject(string name, string kind = VsConstants.CsharpProjectTypeGuid, IEnumerable<string> projectFiles = null) {
             Debug.Assert(lazyAction.Value, "Lazy action must have been initialized by now");
 
             Mock<Project> project = new Mock<Project>();
