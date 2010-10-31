@@ -33,7 +33,7 @@ namespace NuGet.Test {
         public void AddingPackageReferenceThrowsExceptionPackageReferenceIsNotAdded() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new Mock<ProjectSystem>();
+            var projectSystem = new Mock<ProjectSystem>() { CallBase = true };
             projectSystem.Setup(m => m.AddFile("file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
@@ -281,6 +281,48 @@ namespace NuGet.Test {
             // Assert
             Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"fileA"));
             Assert.IsTrue(mockProjectSystem.FileExists(@"commonFile"));
+        }
+
+        [TestMethod]
+        public void AddPackageWithUnsupportedFilesSkipsUnsupportedFiles() {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            projectSystem.Setup(m => m.IsSupportedFile("unsupported")).Returns(false);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "unsupported" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.AreEqual(3, projectSystem.Object.Paths.Count);
+            Assert.IsTrue(projectSystem.Object.FileExists("a"));
+            Assert.IsTrue(projectSystem.Object.FileExists("b"));
+            Assert.IsTrue(projectSystem.Object.FileExists("packages.config"));
+            Assert.IsFalse(projectSystem.Object.FileExists("unsupported"));
+        }
+
+        [TestMethod]
+        public void AddPackageWithUnsupportedTransformFileSkipsUnsupportedFile() {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            projectSystem.Setup(m => m.IsSupportedFile("unsupported")).Returns(false);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "unsupported.pp" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.AreEqual(3, projectSystem.Object.Paths.Count);
+            Assert.IsTrue(projectSystem.Object.FileExists("a"));
+            Assert.IsTrue(projectSystem.Object.FileExists("b"));
+            Assert.IsTrue(projectSystem.Object.FileExists("packages.config"));
+            Assert.IsFalse(projectSystem.Object.FileExists("unsupported"));
         }
 
         [TestMethod]
@@ -720,7 +762,7 @@ namespace NuGet.Test {
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
                                                                         PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
-                                                                    }, content: new[] { "afile"});
+                                                                    }, content: new[] { "afile" });
 
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "Bfile" });
             IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0", content: new[] { "Cfile" });

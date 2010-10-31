@@ -1,12 +1,14 @@
-namespace NuGet.VisualStudio {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using EnvDTE;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
 
+namespace NuGet.VisualStudio {
     public static class ProjectExtensions {
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
@@ -147,5 +149,32 @@ namespace NuGet.VisualStudio {
             return VsConstants.UnloadedProjectKind.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static IVsHierarchy GetVsHierarchy(this Project project) {
+            IVsHierarchy hierarchy;
+
+            // Get the vs solution
+            IVsSolution solution = project.DTE.QueryService<IVsSolution>();
+            int hr = solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy);
+
+            if (hr != VsConstants.S_OK) {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
+            return hierarchy;
+        }
+
+        public static IEnumerable<string> GetProjectTypeGuids(this Project project) {
+            // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
+            var aggregatableProject = (IVsAggregatableProject)project.GetVsHierarchy();
+
+            string projectTypeGuids;
+            int hr = aggregatableProject.GetAggregateProjectTypeGuids(out projectTypeGuids);
+
+            if (hr != VsConstants.S_OK) {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
+            return projectTypeGuids.Split(';');
+        }
     }
 }

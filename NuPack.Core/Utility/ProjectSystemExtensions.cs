@@ -8,8 +8,8 @@ using System.Linq;
 namespace NuGet {
     // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
     public static class ProjectSystemExtensions {
-        public static void AddFiles(this ProjectSystem project, 
-                                    IEnumerable<IPackageFile> files, 
+        public static void AddFiles(this ProjectSystem project,
+                                    IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers) {
             foreach (IPackageFile file in files) {
                 // Remove the redundant folder from the path
@@ -22,19 +22,21 @@ namespace NuGet {
                     // Remove the extension to get the target path
                     path = RemoveExtension(path);
 
-                    // If the transform was done then continue
-                    transformer.TransformFile(file, path, project);
+                    if (project.IsSupportedFile(path)) {
+                        // If the transform was done then continue
+                        transformer.TransformFile(file, path, project);
+                    }
                 }
-                else {
+                else if (project.IsSupportedFile(path)) {
                     project.AddFileWithCheck(path, file.GetStream);
                 }
             }
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        public static void DeleteFiles(this ProjectSystem project, 
-                                       IEnumerable<IPackageFile> files, 
-                                       IEnumerable<IPackage> otherPackages, 
+        public static void DeleteFiles(this ProjectSystem project,
+                                       IEnumerable<IPackageFile> files,
+                                       IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers) {
 
             // First get all directories that contain files
@@ -81,7 +83,7 @@ namespace NuGet {
                 // If the directory is empty then delete it
                 if (!project.GetFilesSafe(dirPath).Any() &&
                     !project.GetDirectoriesSafe(dirPath).Any()) {
-                        project.DeleteDirectorySafe(dirPath, recursive: false);
+                    project.DeleteDirectorySafe(dirPath, recursive: false);
                 }
             }
         }

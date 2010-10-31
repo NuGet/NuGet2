@@ -1,13 +1,13 @@
-namespace NuGet.VisualStudio {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.Versioning;
-    using EnvDTE;
-    using NuGet.VisualStudio.Resources;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
+using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
+namespace NuGet.VisualStudio {
     public class VsProjectSystem : FileBasedProjectSystem {
         private const string BinDir = "bin";
 
@@ -148,7 +148,7 @@ namespace NuGet.VisualStudio {
                    select p.Name;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail when checking for existance")]
         public override bool ReferenceExists(string name) {
             try {
                 // Get the reference name without extension
@@ -167,6 +167,14 @@ namespace NuGet.VisualStudio {
                 return property.Value;
             }
             return null;
+        }
+
+        public override bool IsSupportedFile(string path) {
+            if (Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase)) {
+                return false;
+            }
+
+            return base.IsSupportedFile(path);
         }
 
         private void EnsureCheckedOutIfExists(string path) {

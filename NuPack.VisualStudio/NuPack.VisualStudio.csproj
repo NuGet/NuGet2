@@ -44,6 +44,8 @@
     <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -88,6 +90,7 @@
     </Compile>
     <Compile Include="VsConstants.cs" />
     <Compile Include="VsPackageManager.cs" />
+    <Compile Include="WebProjectSystem.cs" />
     <Compile Include="WebSiteProjectSystem.cs" />
     <Compile Include="VsProjectSystem.cs" />
   </ItemGroup>

@@ -1,10 +1,10 @@
-namespace NuGet.VisualStudio {
-    using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using EnvDTE;
-    using NuGet.VisualStudio.Resources;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
-    internal class WebSiteProjectSystem : VsProjectSystem {
+namespace NuGet.VisualStudio {
+    internal class WebSiteProjectSystem : WebProjectSystem {
         public WebSiteProjectSystem(Project project)
             : base(project) {
         }

@@ -1,9 +1,9 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Runtime.Versioning;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Versioning;
 
+namespace NuGet {
     public abstract class ProjectSystem : IFileSystem {
         private FrameworkName _targetFramework;
         private ILogger _logger;
@@ -53,6 +53,9 @@ namespace NuGet {
         public abstract IEnumerable<string> GetFiles(string path);
         public abstract IEnumerable<string> GetDirectories(string path);
         public abstract Stream OpenFile(string path);
-        public abstract void RemoveReference(string name);        
+        public abstract void RemoveReference(string name);
+        public virtual bool IsSupportedFile(string path) {
+            return true;
+        }
     }
 }

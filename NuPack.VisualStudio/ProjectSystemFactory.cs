@@ -1,11 +1,12 @@
-namespace NuGet.VisualStudio {
-    using System;
-    using System.Globalization;
-    using EnvDTE;
-    using NuGet.VisualStudio.Resources;
+using System;
+using System.Globalization;
+using System.Linq;
+using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
+namespace NuGet.VisualStudio {
     public static class ProjectSystemFactory {
-        public static VsProjectSystem CreateProjectSystem(Project project) {            
+        public static ProjectSystem CreateProjectSystem(Project project) {            
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
@@ -16,9 +17,13 @@ namespace NuGet.VisualStudio {
                     VsResources.DTE_ProjectUnsupported, project.Name));
             }
             
-            // Pick a project system based on the type of project
+            // Websites are special project types so we treat those specially
             if (project.IsWebSite()) {
                 return new WebSiteProjectSystem(project);
+            }
+
+            if (project.GetProjectTypeGuids().Contains(VsConstants.WebApplicationProjectTypeGuid, StringComparer.OrdinalIgnoreCase)) {
+                return new WebProjectSystem(project);
             }
 
             // If it's not a web site we assume it's a regular VS project
