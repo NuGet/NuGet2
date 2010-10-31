@@ -40,6 +40,8 @@
     <Compile Include="..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AggregateRepositoryTest.cs" />
+    <Compile Include="BufferedEnumerableTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
     <Compile Include="DependencyManagerTest.cs" />
     <Compile Include="NuPackCommandLine\CommandAttributeTests.cs" />
@@ -58,7 +60,6 @@
     <Compile Include="FileSystemExtensionsTest.cs" />
     <Compile Include="PackageManagerTest.cs" />
     <Compile Include="Server\Controllers\PackagesControllerTest.cs" />
-    <Compile Include="Server\Controllers\SyndicationFeedResultTest.cs" />
     <Compile Include="Server\Infrastructure\ConditionalGetResultTest.cs" />
     <Compile Include="Server\Infrastructure\NinjectControllerFactoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

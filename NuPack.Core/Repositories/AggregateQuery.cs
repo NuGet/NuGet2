@@ -10,25 +10,23 @@ namespace NuGet {
         private const int QueryCacheSize = 30;
 
         private readonly IEnumerable<IQueryable<T>> _queryables;
-        private readonly IEqualityComparer<T> _equalityComparer;
         private readonly Expression _expression;
-
+        private readonly IEqualityComparer<T> _equalityComparer;
         private readonly IEnumerable<IEnumerable<T>> _subQueries;
 
-        public AggregateQuery(IEnumerable<IQueryable<T>> queryables,
-                              IEqualityComparer<T> equalityComparer) {
+        public AggregateQuery(IEnumerable<IQueryable<T>> queryables, IEqualityComparer<T> equalityComparer) {
             _queryables = queryables;
-            _expression = Expression.Constant(this);
             _equalityComparer = equalityComparer;
+            _expression = Expression.Constant(this);
         }
 
         private AggregateQuery(IEnumerable<IQueryable<T>> queryables,
-                               IEnumerable<IEnumerable<T>> subQueries,
                                IEqualityComparer<T> equalityComparer,
+                               IEnumerable<IEnumerable<T>> subQueries,
                                Expression expression) {
             _queryables = queryables;
-            _expression = expression;
             _equalityComparer = equalityComparer;
+            _expression = expression;
             _subQueries = subQueries;
         }
 
@@ -37,7 +35,7 @@ namespace NuGet {
 
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
-            var aggregateQuery = new AggregateEnumerable<T>(subQueries, new OrderingComparer<T>(Expression)).AsQueryable();
+            var aggregateQuery = new AggregateEnumerable<T>(subQueries, _equalityComparer, new OrderingComparer<T>(Expression)).AsQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
             return aggregateQuery.Provider.CreateQuery<T>(aggregateExpression).GetEnumerator();
@@ -117,7 +115,7 @@ namespace NuGet {
                 subQueries = GetSubQueries(expression);
             }
 
-            return (IQueryable)ctor.Invoke(new object[] { _queryables, subQueries, _equalityComparer, expression });
+            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression });
         }
 
         private static IEnumerable<T> GetSubQuery(IQueryable queryable, Expression expression) {

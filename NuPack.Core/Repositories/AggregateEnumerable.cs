@@ -6,15 +6,20 @@ using System.Threading.Tasks;
 namespace NuGet {
     internal class AggregateEnumerable<TElement> : IEnumerable<TElement> {
         private readonly IEnumerable<IEnumerable<TElement>> _subQueries;
+        private readonly IEqualityComparer<TElement> _equalityComparer;
         private readonly IComparer<TElement> _comparer;
 
-        public AggregateEnumerable(IEnumerable<IEnumerable<TElement>> subQueries, IComparer<TElement> comparer) {
+        public AggregateEnumerable(IEnumerable<IEnumerable<TElement>> subQueries,
+                                   IEqualityComparer<TElement> equalityComparer,
+                                   IComparer<TElement> comparer) {
             _subQueries = subQueries;
+            _equalityComparer = equalityComparer;
             _comparer = comparer;
         }
 
         public IEnumerator<TElement> GetEnumerator() {
             return new AggregateEnumerator<TElement>(_subQueries.Select(q => q.GetEnumerator()).ToList(),
+                                                     _equalityComparer,
                                                      _comparer);
         }
 
@@ -27,9 +32,10 @@ namespace NuGet {
             private PriorityQueue<T> _queue;
 
             public AggregateEnumerator(IEnumerable<IEnumerator<T>> subQueries,
+                                       IEqualityComparer<T> equalityComparer,
                                        IComparer<T> comparer) {
                 _subQueries = subQueries;
-                _queue = new PriorityQueue<T>(comparer);
+                _queue = new PriorityQueue<T>(comparer, equalityComparer);
             }
 
             public T Current {
@@ -60,7 +66,7 @@ namespace NuGet {
                                                                    new {
                                                                        Empty = false,
                                                                        Value = q.Current
-                                                                   } 
+                                                                   }
                                                                    :
                                                                    new {
                                                                        Empty = true,
@@ -81,7 +87,7 @@ namespace NuGet {
                     }
 
                     if (!_queue.IsEmpty) {
-                        Current = _queue.DequeueMin();
+                        Current = _queue.Dequeue();
                         return true;
                     }
                 }
@@ -99,32 +105,48 @@ namespace NuGet {
                 _queue.Clear();
             }
 
-            // Small priority queue class
             private class PriorityQueue<TValue> {
-                private SortedSet<TValue> _set;
+                private readonly SortedDictionary<TValue, HashSet<TValue>> _lookup;
+                private readonly IEqualityComparer<TValue> _equalityComparer;
 
-                public PriorityQueue(IComparer<TValue> comparer) {
-                    _set = new SortedSet<TValue>(comparer);
+                public PriorityQueue(IComparer<TValue> comparer,
+                                     IEqualityComparer<TValue> equalityComparer) {
+                    _equalityComparer = equalityComparer;
+                    _lookup = new SortedDictionary<TValue, HashSet<TValue>>(comparer);
                 }
 
                 public void Enqueue(TValue value) {
-                    _set.Add(value);
+                    HashSet<TValue> queue;
+                    if (!_lookup.TryGetValue(value, out queue)) {
+                        queue = new HashSet<TValue>(_equalityComparer);
+                        _lookup.Add(value, queue);
+                    }
+                    queue.Add(value);
                 }
 
-                public TValue DequeueMin() {
-                    TValue min = _set.Min;
-                    _set.Remove(min);
-                    return min;
+                public TValue Dequeue() {
+                    // Will throw if there isn't any first element!
+                    var pair = _lookup.First();
+                    var value = pair.Value.First();
+
+                    // Remove the item from the set
+                    pair.Value.Remove(value);
+
+                    // Nothing left of the top priority
+                    if (pair.Value.Count == 0) {
+                        _lookup.Remove(pair.Key);
+                    }
+                    return value;
                 }
 
                 public bool IsEmpty {
                     get {
-                        return !_set.Any();
+                        return !_lookup.Any();
                     }
                 }
 
                 public void Clear() {
-                    _set.Clear();
+                    _lookup.Clear();
                 }
             }
         }

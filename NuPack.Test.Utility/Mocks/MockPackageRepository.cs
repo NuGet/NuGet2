@@ -1,8 +1,9 @@
-namespace NuGet.Test.Mocks {
-    using System.Collections.Generic;
-    using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
-    public class MockPackageRepository : PackageRepositoryBase {
+namespace NuGet.Test.Mocks {    
+    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage> {
         public MockPackageRepository() {
             Packages = new Dictionary<string, List<IPackage>>();
         }
@@ -18,7 +19,7 @@ namespace NuGet.Test.Mocks {
 
         public override IQueryable<IPackage> GetPackages() {
             return Packages.Values.SelectMany(p => p).AsQueryable();
-        }        
+        }
 
         public override void RemovePackage(IPackage package) {
             List<IPackage> packages;
@@ -38,6 +39,50 @@ namespace NuGet.Test.Mocks {
                 Packages.Add(id, packages);
             }
             packages.Add(package);
+        }
+
+        public void Add(IPackage item) {
+            AddPackage(item);
+        }
+
+        public void Clear() {
+            Packages.Clear();
+        }
+
+        public bool Contains(IPackage item) {
+            return this.Exists(item);
+        }
+
+        public void CopyTo(IPackage[] array, int arrayIndex) {
+            throw new System.NotImplementedException();
+        }
+
+        public int Count {
+            get {
+                return GetPackages().Count();
+            }
+        }
+
+        public bool IsReadOnly {
+            get {
+                return false;
+            }
+        }
+
+        public bool Remove(IPackage item) {
+            if (this.Exists(item)) {
+                RemovePackage(item);
+                return true;
+            }
+            return false;
+        }
+
+        public IEnumerator<IPackage> GetEnumerator() {
+            return GetPackages().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
     }
 }

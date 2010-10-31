@@ -61,7 +61,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PackagesController.cs" />
-    <Compile Include="Controllers\SyndicationFeedResult.cs" />
     <Compile Include="DataServices\Package.cs" />
     <Compile Include="DataServices\PackageContext.cs" />
     <Compile Include="DateTimeExtensions.cs" />

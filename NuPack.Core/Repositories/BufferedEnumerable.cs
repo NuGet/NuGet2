@@ -38,7 +38,7 @@ namespace NuGet {
             return _source.ToString();
         }
 
-        private class BufferedEnumerator<T> : IEnumerator<T> {
+        internal class BufferedEnumerator<T> : IEnumerator<T> {
             private readonly int _bufferSize;
 
             private IQueryable<T> _source;
@@ -59,7 +59,7 @@ namespace NuGet {
                 }
             }
 
-            private bool IsEmpty {
+            internal bool IsEmpty {
                 get {
                     return _hasItems && (_index == _cache.Count - 1);
                 }
