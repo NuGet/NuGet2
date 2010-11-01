@@ -68,7 +68,7 @@ function TabExpansionForAddPackage([string]$secondLastWord, [int]$tokenCount, [s
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (Get-Package -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
+        (Get-Package -Remote -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
@@ -82,7 +82,7 @@ function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount,
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
         if (IsSolutionOpen) {
-            (Get-Package -Installed -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
+            (Get-Package -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
         }
     }
     elseif (($secondLastWord -eq '-project') -or 
