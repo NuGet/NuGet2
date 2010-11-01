@@ -37,6 +37,7 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Coverage' ">
         <OutputPath>bin\Coverage\</OutputPath>
         <Coverage>true</Coverage>
+        <DefineConstants>$(DefineConstants);CODE_COVERAGE</DefineConstants> 
     </PropertyGroup>
 
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
