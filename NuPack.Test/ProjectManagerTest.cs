@@ -409,6 +409,37 @@ namespace NuGet.Test {
 </configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
+
+        [TestMethod]
+        public void RemovePackageWithUnsupportedTransformFileDoesNothing() {
+            // Arrange
+            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            mockProjectSystem.Setup(m => m.IsSupportedFile("web.config")).Returns(false);
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem.Object);
+            var package = new Mock<IPackage>();
+            package.Setup(m => m.Id).Returns("A");
+            package.Setup(m => m.Version).Returns(new Version("1.0"));
+            var file = new Mock<IPackageFile>();
+            file.Setup(m => m.Path).Returns(@"content\web.config.transform");
+            file.Setup(m => m.GetStream()).Returns(() =>
+@"<configuration>
+    <system.web>
+        <compilation debug=""true"" targetFramework=""4.0"" />
+    </system.web>
+</configuration>
+".AsStream());
+            package.Setup(m => m.GetFiles()).Returns(new[] { file.Object });
+            mockRepository.AddPackage(package.Object);
+            projectManager.LocalRepository.AddPackage(package.Object);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.IsFalse(mockProjectSystem.Object.FileExists("web.config"));
+        }
+
         [TestMethod]
         public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty() {
             // Arrange

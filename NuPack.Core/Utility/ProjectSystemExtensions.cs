@@ -68,14 +68,17 @@ namespace NuGet {
                         // Remove the extension to get the target path
                         path = RemoveExtension(path);
 
-                        var matchingFiles = from p in otherPackages
-                                            from otherFile in p.GetContentFiles()
-                                            where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
-                                            select otherFile;
+                        if (project.IsSupportedFile(path)) {
 
-                        transformer.RevertFile(file, path, matchingFiles, project);
+                            var matchingFiles = from p in otherPackages
+                                                from otherFile in p.GetContentFiles()
+                                                where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
+                                                select otherFile;
+
+                            transformer.RevertFile(file, path, matchingFiles, project);
+                        }
                     }
-                    else {
+                    else if(project.IsSupportedFile(path)) {
                         project.DeleteFileSafe(path, file.GetStream);
                     }
                 }

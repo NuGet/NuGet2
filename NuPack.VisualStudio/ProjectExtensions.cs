@@ -145,7 +145,7 @@ namespace NuGet.VisualStudio {
             return VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
-        public static IVsHierarchy GetVsHierarchy(this Project project) {
+        public static IVsHierarchy ToVsHierarchy(this Project project) {
             IVsHierarchy hierarchy;
 
             // Get the vs solution
@@ -161,7 +161,7 @@ namespace NuGet.VisualStudio {
 
         public static IEnumerable<string> GetProjectTypeGuids(this Project project) {
             // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
-            var aggregatableProject = (IVsAggregatableProject)project.GetVsHierarchy();
+            var aggregatableProject = (IVsAggregatableProject)project.ToVsHierarchy();
 
             string projectTypeGuids;
             int hr = aggregatableProject.GetAggregateProjectTypeGuids(out projectTypeGuids);
