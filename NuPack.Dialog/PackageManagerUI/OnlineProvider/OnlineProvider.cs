@@ -73,7 +73,8 @@ namespace NuGet.Dialog.Providers {
 
             // display license window if necessary
             DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity).Where(p => p.RequireLicenseAcceptance);
+            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
+                                                          .Where(p => p.RequireLicenseAcceptance && !ProjectManager.LocalRepository.Exists(p));
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
