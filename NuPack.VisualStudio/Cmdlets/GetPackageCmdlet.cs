@@ -67,18 +67,7 @@ namespace NuGet.VisualStudio.Cmdlets {
 
             IPackageRepository repository;
             if (Remote.IsPresent || Updates.IsPresent) {
-                if (!String.IsNullOrEmpty(Source)) {
-                    repository = _repositoryFactory.CreateRepository(Source);
-                }
-                else if (SolutionManager.IsSolutionOpen) {
-                    repository = PackageManager.SourceRepository;
-                }
-                else if (!String.IsNullOrEmpty(ActivePackageSource)) {
-                    repository = _repositoryFactory.CreateRepository(ActivePackageSource);
-                }
-                else {
-                    throw new InvalidOperationException(VsResources.NoActivePackageSource);
-                }
+                repository = GetRemoteRepository();
             }
             else {
                 repository = PackageManager.LocalRepository;
@@ -89,6 +78,28 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
             else {
                 WritePackagesFromRepository(repository, Filter);
+            }
+        }
+
+        /// <summary>
+        /// Determines the remote repository to be used based on the state of the solution and the Source parameter
+        /// </summary>
+        private IPackageRepository GetRemoteRepository() {
+            if (!String.IsNullOrEmpty(Source)) {
+                // If a Source parameter is explicitly specified, use it
+                return _repositoryFactory.CreateRepository(Source);
+            }
+            else if (SolutionManager.IsSolutionOpen) {
+                // If the solution is open, retrieve the cached repository instance
+                return PackageManager.SourceRepository;
+            }
+            else if (!String.IsNullOrEmpty(ActivePackageSource)) {
+                // No solution available. Use the repository Url to create a new repository
+                return _repositoryFactory.CreateRepository(ActivePackageSource);
+            }
+            else {
+                // No active source has been specified. 
+                throw new InvalidOperationException(VsResources.NoActivePackageSource);
             }
         }
 
