@@ -42,6 +42,7 @@
     <Compile Include="VsPackageManagerTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />
     <Compile Include="TestUtils.cs" />
+    <Compile Include="VsProjectSystemTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">

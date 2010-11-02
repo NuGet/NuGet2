@@ -162,9 +162,14 @@ namespace NuGet.VisualStudio {
         }
 
         public override dynamic GetPropertyValue(string propertyName) {
-            Property property = Project.Properties.Item(propertyName);
-            if (property != null) {
-                return property.Value;
+            try {
+                Property property = Project.Properties.Item(propertyName);
+                if (property != null) {
+                    return property.Value;
+                }
+            }
+            catch(ArgumentException) {
+                // If the property doesn't exist this will throw an argument exception
             }
             return null;
         }

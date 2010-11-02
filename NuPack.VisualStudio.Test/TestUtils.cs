@@ -12,7 +12,10 @@ namespace NuGet.VisualStudio.Test {
         private static readonly Func<bool> actionWrapper = () => { AttributesToAvoidReplicating.Add<TypeIdentifierAttribute>(); return true; };
         private static readonly Lazy<bool> lazyAction = new Lazy<bool>(actionWrapper);
 
-        public static Project GetProject(string name, string kind = VsConstants.CsharpProjectTypeGuid, IEnumerable<string> projectFiles = null) {
+        public static Project GetProject(string name,
+                                         string kind = VsConstants.CsharpProjectTypeGuid,
+                                         IEnumerable<string> projectFiles = null,
+                                         Func<string, Property> propertyGetter = null) {
             Debug.Assert(lazyAction.Value, "Lazy action must have been initialized by now");
 
             Mock<Project> project = new Mock<Project>();
@@ -22,9 +25,13 @@ namespace NuGet.VisualStudio.Test {
             project.SetupGet(p => p.Kind).Returns(kind);
 
             Mock<Properties> properties = new Mock<Properties>();
+            if (propertyGetter != null) {
+                properties.Setup(p => p.Item(It.IsAny<string>())).Returns<string>(propertyGetter);
+            }
+
             Mock<Property> fullName = new Mock<Property>();
             fullName.Setup(c => c.Value).Returns(name);
-            properties.Setup(p => p.Item(It.IsAny<string>())).Returns(fullName.Object);
+            properties.Setup(p => p.Item("FullPath")).Returns(fullName.Object);            
             project.SetupGet(p => p.Properties).Returns(properties.Object);
             if (projectFiles != null) {
 
