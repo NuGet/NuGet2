@@ -97,9 +97,15 @@ namespace NuGet.VisualStudio {
         }
 
         public static T GetPropertyValue<T>(this Project project, string propertyName) {
-            Property property = project.Properties.Item(propertyName);
-            if (property != null) {
-                return (T)property.Value;
+            try {
+                Property property = project.Properties.Item(propertyName);
+                if (property != null) {
+                    // REVIEW: Should this cast or convert?
+                    return (T)property.Value;
+                }
+            }
+            catch (ArgumentException) {
+
             }
             return default(T);
         }

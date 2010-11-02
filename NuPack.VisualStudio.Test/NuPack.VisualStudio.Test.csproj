@@ -35,6 +35,7 @@
     <Compile Include="InstallPackageCmdletTest.cs" />
     <Compile Include="MockCommandRuntime.cs" />
     <Compile Include="NewPackageCmdletTest.cs" />
+    <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetProjectCmdletTest.cs" />
     <Compile Include="UninstallPackageCmdletTest.cs" />
