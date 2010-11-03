@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 namespace NuGet.Dialog.Providers {
     internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
 
-        private delegate void ExecuteDelegate(int pageNumber, int itemsPerPage, AsyncOperation async);
+        private delegate void ExecuteDelegate(int pageNumber, int itemsPerPage, AsyncOperation asyncOperation);
 
         // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
@@ -203,9 +203,9 @@ namespace NuGet.Dialog.Providers {
             _loadingInProgress = true;
             _activeQueryStateCancelled = false;
 
-            AsyncOperation async = AsyncOperationManager.CreateOperation(null);
+            AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(null);
             ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
-            worker.BeginInvoke(pageNumber, ItemsPerPage, async, null, null);
+            worker.BeginInvoke(pageNumber, ItemsPerPage, asyncOperation, null, null);
         }
 
         private void EnsureExtensionCollection() {
@@ -229,7 +229,7 @@ namespace NuGet.Dialog.Providers {
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We want to show error message inside the dialog, rather than blowing up VS.")]
-        private void ExecuteAsync(int pageNumber, int itemsPerPage, AsyncOperation async) {
+        private void ExecuteAsync(int pageNumber, int itemsPerPage, AsyncOperation asyncOperation) {
             ExecuteCompletedEventArgs eventArgs = null;
             int totalCount = 0;
 
@@ -251,7 +251,7 @@ namespace NuGet.Dialog.Providers {
                 Debug.WriteLine(ex);
             }
 
-            async.PostOperationCompleted(new SendOrPostCallback(QueryExecutionCompleted), eventArgs);
+            asyncOperation.PostOperationCompleted(new SendOrPostCallback(QueryExecutionCompleted), eventArgs);
         }
 
         private void QueryExecutionCompleted(object data) {

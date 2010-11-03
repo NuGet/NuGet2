@@ -1,9 +1,7 @@
 using System;
 
-namespace NuGet.Tools
-{
-    static class GuidList
-    {
+namespace NuGet.Tools {
+    static class GuidList {
         public const string guidNuGetPkgString = "F7D0E7A3-C60B-422A-BFAE-CEED36ADE7D2";
 
         public const string guidNuGetConsoleCmdSetString = "1E8A55F6-C18D-407F-91C8-94B02AE1CED6";
