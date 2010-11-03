@@ -60,7 +60,8 @@ namespace NuGet.Dialog.Providers {
 
             // display license window if necessary
             DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity).Where(p => p.RequireLicenseAcceptance);
+            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
+                                                          .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
@@ -89,6 +90,13 @@ namespace NuGet.Dialog.Providers {
             if (e.Error == null) {
                 PackageItem item = (PackageItem)e.Result;
                 item.UpdateEnabledStatus();
+            }
+            else {
+                MessageBox.Show(
+                    (e.Error.InnerException ?? e.Error).Message,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
 
             if (UpdateCompletedCallback != null) {
