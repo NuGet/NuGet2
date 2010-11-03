@@ -71,28 +71,33 @@ namespace NuGet.Dialog.Providers {
                 return;
             }
 
-            // display license window if necessary
-            DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
-                                                          .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
-            if (licensePackages.Any()) {
-                bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
-                if (!accepted) {
-                    return;
-                }
-            }
-
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(DoInstallAsync);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnInstallCompleted);
-            worker.RunWorkerAsync(item);
+            worker.RunWorkerAsync(new ExecuteOperationState(item, licenseWindowOpener));
         }
 
         private void DoInstallAsync(object sender, DoWorkEventArgs e) {
-            PackageItem item = (PackageItem)e.Argument;
+            var state = (ExecuteOperationState)e.Argument;
+
+            PackageItem item = state.Item;
+
+            // display license window if necessary
+            DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
+            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
+                                                          .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
+
+            if (licensePackages.Any()) {
+                bool accepted = state.LicenseWindowOpener.ShowLicenseWindow(licensePackages);
+                if (!accepted) {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
             PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
             e.Result = item;
         }
@@ -101,15 +106,13 @@ namespace NuGet.Dialog.Providers {
             OperationCoordinator.IsBusy = false;
 
             if (e.Error == null) {
-                PackageItem item = (PackageItem)e.Result;
-                item.UpdateEnabledStatus();
+                if (!e.Cancelled) {
+                    PackageItem item = (PackageItem)e.Result;
+                    item.UpdateEnabledStatus();
+                }
             }
             else {
-                MessageBox.Show(
-                    (e.Error.InnerException ?? e.Error).Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageHelper.ShowErrorMessage(e.Error);
             }
 
             if (InstallCompletedCallback != null) {

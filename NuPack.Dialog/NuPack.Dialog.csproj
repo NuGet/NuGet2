@@ -118,7 +118,9 @@
     <Compile Include="PackageManagerUI\BaseProvider\ExecuteCompletedEventArgs.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\ExecuteOperationState.cs" />
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\MessageHelper.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>

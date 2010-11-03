@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -37,22 +38,40 @@ namespace NuGet.Dialog.Providers {
             return ProjectManager.LocalRepository.Exists(item.PackageIdentity);
         }
 
-        // TODO: consider doing uninstall asynchronously on background thread if perf is bad, which is unlikely
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope")]
         public override void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             if (OperationCoordinator.IsBusy) {
                 return;
             }
 
-            try {
-                OperationCoordinator.IsBusy = true;
-                PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
+            OperationCoordinator.IsBusy = true;
 
-                if (SelectedNode != null) {
-                    SelectedNode.Extensions.Remove(item);
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnUninstallCompleted);
+            worker.DoWork += new DoWorkEventHandler(DoUninstallAsync);
+            worker.RunWorkerAsync(item);
+        }
+
+        private void DoUninstallAsync(object sender, DoWorkEventArgs e) {
+            PackageItem item = (PackageItem)e.Argument;
+            PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
+            e.Result = item;
+        }
+
+        private void OnUninstallCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            OperationCoordinator.IsBusy = false;
+
+            if (e.Error == null) {
+                if (!e.Cancelled) {
+                    if (SelectedNode != null) {
+                        SelectedNode.Extensions.Remove((IVsExtension)e.Result);
+                    }
                 }
             }
-            finally {
-                OperationCoordinator.IsBusy = false;
+            else {
+                MessageHelper.ShowErrorMessage(e.Error);
             }
         }
 

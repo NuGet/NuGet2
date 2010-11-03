@@ -98,11 +98,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                     provider.Execute(selectedItem, this);
                 }
                 catch (Exception exception) {
-                    MessageBox.Show(
-                        (exception.InnerException ?? exception).Message,
-                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                    MessageHelper.ShowErrorMessage(exception);
                 }
             }
         }
@@ -128,7 +124,17 @@ namespace NuGet.Dialog.PackageManagerUI {
             explorer.SetFocusOnSearchBox();
         }
 
-        bool ILicenseWindowOpener.ShowLicenseWindow(IEnumerable<IPackage> dataContext) {
+        bool ILicenseWindowOpener.ShowLicenseWindow(IEnumerable<IPackage> packages) {
+            if (Dispatcher.CheckAccess()) {
+                return ShowLicenseWindow(packages);
+            }
+            else {
+                object result = Dispatcher.Invoke(new Func<object, bool>(ShowLicenseWindow), packages);
+                return (bool)result;
+            }
+        }
+
+        private bool ShowLicenseWindow(object dataContext) {
             var licenseWidow = new LicenseAcceptanceWindow() {
                 Owner = this,
                 DataContext = dataContext
