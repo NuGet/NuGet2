@@ -7,7 +7,7 @@ namespace NuGet {
     using System.Linq;
     using System.Reflection;
 
-    public class PackageAuthoring {
+    public class Program {
         private HelpCommand _helpCommand;
         public HelpCommand HelpCommand {
             get {
@@ -35,7 +35,7 @@ namespace NuGet {
 
         public static int Main(string[] args) {
             // Import Dependecies  
-            var p = new PackageAuthoring();
+            var p = new Program();
             p.Initialize();
 
             // Add commands to the manager
