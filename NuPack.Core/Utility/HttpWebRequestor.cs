@@ -1,6 +1,7 @@
 namespace NuGet {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.IO;
     using System.Net;
     using System.Net.Cache;
@@ -65,7 +66,7 @@ namespace NuGet {
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null) {
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
-                string userAgent = String.Format(UserAgent, version, Environment.OSVersion);
+                string userAgent = String.Format(CultureInfo.InvariantCulture, UserAgent, version, Environment.OSVersion);
                 httpRequest.UserAgent = userAgent;
             }
             request.CachePolicy = new HttpRequestCachePolicy();
