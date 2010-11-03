@@ -4,10 +4,13 @@ namespace NuGet {
     using System.IO;
     using System.Net;
     using System.Net.Cache;
+    using System.Reflection;
 
     // REVIEW: This class isn't super clean. Maybe this object should be passed around instead
     // of being static
     internal static class HttpWebRequestor {
+        const string UserAgent = "VS-Package-Installer/{0} ({1})";
+
         public static ZipPackage DownloadPackage(Uri uri) {
             return DownloadPackage(uri, useCache: true);
         }
@@ -40,7 +43,7 @@ namespace NuGet {
             });
         }
 
-        public static Stream GetResponseStream(Uri uri) {           
+        public static Stream GetResponseStream(Uri uri) {
             WebResponse response = GetResponse(uri);
 
             return response.GetResponseStream();
@@ -59,6 +62,12 @@ namespace NuGet {
         }
 
         internal static void InitializeRequest(WebRequest request) {
+            var httpRequest = request as HttpWebRequest;
+            if (httpRequest != null) {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                string userAgent = String.Format(UserAgent, version, Environment.OSVersion);
+                httpRequest.UserAgent = userAgent;
+            }
             request.CachePolicy = new HttpRequestCachePolicy();
             request.UseDefaultCredentials = true;
             if (request.Proxy != null) {
