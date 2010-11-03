@@ -1,6 +1,9 @@
-﻿
-using System;
-namespace NuGet.Common {
+﻿namespace NuGet.Common {
+
+    using System;
+    using System.ComponentModel.Composition;
+
+    [Export(typeof(IConsoleWriter))]
     public class ConsoleWriter : IConsoleWriter {
 
         public int CursorLeft {
@@ -48,6 +51,10 @@ namespace NuGet.Common {
             }
         }
 
+        public void Write(object value) {
+            Console.Write(value);
+        }
+
         public void Write(string value) {
             Console.Write(value);
         }
@@ -58,6 +65,10 @@ namespace NuGet.Common {
 
         public void WriteLine() {
             Console.WriteLine();
+        }
+
+        public void WriteLine(object value) {
+            Console.WriteLine(value);
         }
 
         public void WriteLine(string value) {
