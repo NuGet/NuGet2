@@ -10,7 +10,7 @@ namespace NuGet {
     // REVIEW: This class isn't super clean. Maybe this object should be passed around instead
     // of being static
     internal static class HttpWebRequestor {
-        const string UserAgent = "Package-Installer/{0} ({1})";
+        private const string UserAgent = "Package-Installer/{0} ({1})";
 
         public static ZipPackage DownloadPackage(Uri uri) {
             return DownloadPackage(uri, useCache: true);
