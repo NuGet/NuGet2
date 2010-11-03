@@ -133,11 +133,6 @@
           <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
       </CommandPlacement>
   </CommandPlacements>
-
-  <KeyBindings>
-    <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" key2="Z" />
-    <KeyBinding guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" editor="guidVSStd97" mod1="Control" key1="W" mod2="Control" key2="Z" />
-  </KeyBindings>
   
   <Symbols>
     <GuidSymbol name="guidPowerConsolePkg" value="{F7D0E7A3-C60B-422A-BFAE-CEED36ADE7D2}" />    
