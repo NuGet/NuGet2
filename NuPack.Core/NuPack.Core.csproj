@@ -54,6 +54,7 @@
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Repositories\AggregateEnumerable.cs" />
     <Compile Include="Repositories\OrderingComparer.cs" />
+    <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />

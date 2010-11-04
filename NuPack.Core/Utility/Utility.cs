@@ -80,8 +80,7 @@ namespace NuGet {
         internal static Version GetDefaultTargetFrameworkVersion() {
             // We need to parse the version name out from the mscorlib's assembly name since
             // we can't call GetName() in medium trust
-            string assemblyFullName = typeof(string).Assembly.FullName;
-            return new AssemblyName(assemblyFullName).Version;
+            return typeof(string).Assembly.GetNameSafe().Version;
         }
 
         internal static bool IsManifest(string path) {

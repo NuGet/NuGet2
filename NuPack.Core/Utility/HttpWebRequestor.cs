@@ -65,7 +65,7 @@ namespace NuGet {
         internal static void InitializeRequest(WebRequest request) {
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null) {
-                var version = new AssemblyName(typeof(HttpWebRequestor).FullName).Version;
+                var version = typeof(HttpWebRequestor).Assembly.GetNameSafe().Version;
                 string userAgent = String.Format(CultureInfo.InvariantCulture, UserAgent, version, Environment.OSVersion);
                 httpRequest.UserAgent = userAgent;
             }
