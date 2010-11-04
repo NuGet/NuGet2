@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -15,17 +14,20 @@ namespace NuGet.Dialog.Providers {
     internal class OnlineProvider : PackagesProviderBase {
         private IPackageRepositoryFactory _packageRepositoryFactory;
         private IPackageSourceProvider _packageSourceProvider;
+        private Func<IPackageRepository, IVsPackageManager> _packageManagerCreator;
 
         public OnlineProvider(
             IVsPackageManager packageManager, 
             IProjectManager projectManager, 
             ResourceDictionary resources, 
             IPackageRepositoryFactory packageRepositoryFactory, 
-            IPackageSourceProvider packageSourceProvider) :
+            IPackageSourceProvider packageSourceProvider,
+            Func<IPackageRepository, IVsPackageManager> packageManagerCreator) :
             base(packageManager, projectManager, resources) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
+            _packageManagerCreator = packageManagerCreator;
         }
 
         public override string Name {
@@ -54,7 +56,8 @@ namespace NuGet.Dialog.Providers {
                 PackagesTreeNodeBase node = null;
                 try {
                     IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source.Source);
-                    node = new SimpleTreeNode(this, source.Name, RootNode, repository);
+                    var packageManager = _packageManagerCreator(repository);
+                    node = new OnlineTreeNode(this, source.Name, RootNode, packageManager);
                 }
                 catch (Exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
@@ -65,12 +68,33 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
-            // display license window if necessary
-            DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
-                                                          .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
+        protected internal IVsPackageManager ActivePackageManager {
+            get {
+                if (SelectedNode == null) {
+                    return null;
+                }
+                else if (SelectedNode.IsSearchResultsNode) {
+                    PackagesSearchNode searchNode = (PackagesSearchNode)SelectedNode;
+                    OnlineTreeNode baseNode = searchNode.BaseNode as OnlineTreeNode;
+                    return (baseNode != null) ? baseNode.PackageManager : null;
+                }
+                else {
+                    var selectedNode = SelectedNode as OnlineTreeNode;
+                    return (selectedNode != null) ? selectedNode.PackageManager : null;
+                }
+            }
+       }
 
+        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+            var activePackageManager = ActivePackageManager;
+            if (activePackageManager == null) {
+                return false;
+            }
+
+            DependencyResolver helper = new DependencyResolver(activePackageManager.SourceRepository);
+            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
+                                                          .Where(p => p.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(p));
+            // display license window if necessary
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
@@ -78,7 +102,7 @@ namespace NuGet.Dialog.Providers {
                 }
             }
 
-            PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
+            activePackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
             return true;
         }
 

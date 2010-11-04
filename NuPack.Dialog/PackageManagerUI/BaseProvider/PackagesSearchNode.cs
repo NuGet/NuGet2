@@ -9,6 +9,12 @@ namespace NuGet.Dialog.Providers {
         private readonly string _searchText;
         private readonly PackagesTreeNodeBase _baseNode;
 
+        public PackagesTreeNodeBase BaseNode {
+            get {
+                return _baseNode;
+            }
+        }
+
         public PackagesSearchNode(PackagesProviderBase provider, IVsExtensionsTreeNode parent, PackagesTreeNodeBase baseNode, string searchText) :
             base(parent, provider) {
 

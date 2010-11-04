@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
@@ -13,7 +12,6 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Test {
     [TestClass]
     public class OnlineProviderTest {
-
 
         [TestMethod]
         public void NamePropertyIsCorrect() {
@@ -35,6 +33,7 @@ namespace NuGet.Dialog.Test {
 
         [TestMethod]
         public void RootNodeIsPopulatedWithCorrectNumberOfNodes() {
+            // Arrange
             var provider = CreateOnlineProvider();
 
             // Act
@@ -110,8 +109,16 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
 
             var provider = CreateOnlineProvider(packageManager.Object, projectManager.Object);
+            var extensionTree = provider.ExtensionsTree;
 
-            var extensionB = new PackageItem(provider, packageB, null);
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA);
+            firstTreeNode.Repository.AddPackage(packageB);
+            firstTreeNode.Repository.AddPackage(packageC);
+
+            provider.SelectedNode = firstTreeNode;
+            IVsPackageManager activePackageManager = provider.ActivePackageManager;
+            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
@@ -120,10 +127,12 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                packageManager.Verify(p => p.InstallPackage(projectManager.Object, "B", new Version("2.0"), false), Times.Once());
+                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, "B", new Version("2.0"), false), Times.Once());
 
                 manualEvent.Set();
             };
+
+            var extensionB = new PackageItem(provider, packageB, null);
 
             // Act
             provider.Execute(extensionB, mockLicenseWindowOpener.Object);
@@ -139,7 +148,11 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null) {
 
             if (packageManager == null) {
-                packageManager = new Mock<IVsPackageManager>().Object;
+                var packageManagerMock = new Mock<IVsPackageManager>();
+                var sourceRepository = new MockPackageRepository();
+                packageManagerMock.Setup(p => p.SourceRepository).Returns(sourceRepository);
+
+                packageManager = packageManagerMock.Object;
             }
 
             if (projectManager == null) {
@@ -168,7 +181,8 @@ namespace NuGet.Dialog.Test {
                 projectManager, 
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
-                packageSourceProvider);
+                packageSourceProvider,
+                (repository) => packageManager);
         }
     }
 }

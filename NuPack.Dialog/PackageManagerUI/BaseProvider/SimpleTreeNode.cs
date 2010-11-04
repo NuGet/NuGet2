@@ -12,6 +12,12 @@ namespace NuGet.Dialog.Providers {
         private readonly IPackageRepository _repository;
         private readonly string _category;
 
+        public IPackageRepository Repository {
+            get {
+                return _repository;
+            }
+        }
+
         public SimpleTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent, IPackageRepository repository) : 
             base(parent, provider) {
 

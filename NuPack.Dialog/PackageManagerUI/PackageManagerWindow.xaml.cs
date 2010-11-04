@@ -40,7 +40,13 @@ namespace NuGet.Dialog.PackageManagerUI {
             var updatesProvider = new UpdatesProvider(packageManager, projectManager, Resources);
             explorer.Providers.Add(updatesProvider);
 
-            var onlineProvider = new OnlineProvider(packageManager, projectManager, Resources, CachedRepositoryFactory.Instance, VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE));
+            var onlineProvider = new OnlineProvider(
+                packageManager, 
+                projectManager, 
+                Resources, 
+                CachedRepositoryFactory.Instance, 
+                VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
+                repository => new VsPackageManager(DTEExtensions.DTE, repository));
             explorer.Providers.Add(onlineProvider);
 
             var installedProvider = new InstalledProvider(packageManager, projectManager, Resources);
