@@ -17,13 +17,12 @@ namespace NuGet.Dialog.Providers {
         private Func<IPackageRepository, IVsPackageManager> _packageManagerCreator;
 
         public OnlineProvider(
-            IVsPackageManager packageManager, 
             IProjectManager projectManager, 
             ResourceDictionary resources, 
             IPackageRepositoryFactory packageRepositoryFactory, 
             IPackageSourceProvider packageSourceProvider,
             Func<IPackageRepository, IVsPackageManager> packageManagerCreator) :
-            base(packageManager, projectManager, resources) {
+            base(projectManager, resources) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
@@ -56,8 +55,7 @@ namespace NuGet.Dialog.Providers {
                 PackagesTreeNodeBase node = null;
                 try {
                     IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source.Source);
-                    var packageManager = _packageManagerCreator(repository);
-                    node = new OnlineTreeNode(this, source.Name, RootNode, packageManager);
+                    node = new SimpleTreeNode(this, source.Name, RootNode, repository);
                 }
                 catch (Exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
@@ -68,25 +66,23 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected internal IVsPackageManager ActivePackageManager {
-            get {
-                if (SelectedNode == null) {
-                    return null;
-                }
-                else if (SelectedNode.IsSearchResultsNode) {
-                    PackagesSearchNode searchNode = (PackagesSearchNode)SelectedNode;
-                    OnlineTreeNode baseNode = searchNode.BaseNode as OnlineTreeNode;
-                    return (baseNode != null) ? baseNode.PackageManager : null;
-                }
-                else {
-                    var selectedNode = SelectedNode as OnlineTreeNode;
-                    return (selectedNode != null) ? selectedNode.PackageManager : null;
-                }
+        protected internal IVsPackageManager GetActivePackageManager() {
+            if (SelectedNode == null) {
+                return null;
+            }
+            else if (SelectedNode.IsSearchResultsNode) {
+                PackagesSearchNode searchNode = (PackagesSearchNode)SelectedNode;
+                SimpleTreeNode baseNode = (SimpleTreeNode)searchNode.BaseNode;
+                return _packageManagerCreator(baseNode.Repository);
+            }
+            else {
+                var selectedNode = SelectedNode as SimpleTreeNode;
+                return (selectedNode != null) ? _packageManagerCreator(selectedNode.Repository) : null;
             }
        }
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
-            var activePackageManager = ActivePackageManager;
+            var activePackageManager = GetActivePackageManager();
             if (activePackageManager == null) {
                 return false;
             }

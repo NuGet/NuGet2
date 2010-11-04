@@ -13,20 +13,11 @@ namespace NuGet.Dialog.Test {
     public class PackagesProviderBaseTest {
 
         [TestMethod]
-        public void CtorThrowsIfPackageManagerArgumentIsNull() {
-            ResourceDictionary resources = new ResourceDictionary();
-
-            ExceptionAssert.ThrowsArgNull(
-                () => new ConcretePackagesProvider(null, new Mock<IProjectManager>().Object, resources),
-                "packageManager");
-        }
-
-        [TestMethod]
         public void CtorThrowsIfProjectManagerArgumentIsNull() {
             ResourceDictionary resources = new ResourceDictionary();
 
             ExceptionAssert.ThrowsArgNull(
-                () => new ConcretePackagesProvider(new Mock<IVsPackageManager>().Object, null, resources),
+                () => new ConcretePackagesProvider(null, resources),
                 "projectManager");
         }
 
@@ -122,11 +113,11 @@ namespace NuGet.Dialog.Test {
         private class ConcretePackagesProvider : PackagesProviderBase {
 
             public ConcretePackagesProvider(ResourceDictionary resources) :
-                this(new Mock<IVsPackageManager>().Object, new Mock<IProjectManager>().Object, resources) {
+                this(new Mock<IProjectManager>().Object, resources) {
             }
 
-            public ConcretePackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources) :
-                base(packageManager, projectManager, resources) {
+            public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
+                base(projectManager, resources) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {

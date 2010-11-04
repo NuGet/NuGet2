@@ -117,7 +117,7 @@ namespace NuGet.Dialog.Test {
             firstTreeNode.Repository.AddPackage(packageC);
 
             provider.SelectedNode = firstTreeNode;
-            IVsPackageManager activePackageManager = provider.ActivePackageManager;
+            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
             Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
@@ -177,7 +177,6 @@ namespace NuGet.Dialog.Test {
             }
 
             return new OnlineProvider(
-                packageManager, 
                 projectManager, 
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,

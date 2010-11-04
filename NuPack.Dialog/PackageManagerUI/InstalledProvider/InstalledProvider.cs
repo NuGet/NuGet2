@@ -11,8 +11,11 @@ namespace NuGet.Dialog.Providers {
     /// </summary>
     internal class InstalledProvider : PackagesProviderBase {
 
+        private IVsPackageManager _packageManager;
+
         public InstalledProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
-            : base(packageManager, projectManager, resources) {
+            : base(projectManager, resources) {
+            _packageManager = packageManager;
         }
 
         public override string Name {
@@ -39,7 +42,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
-            PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
+            _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
             return true;
         }
 

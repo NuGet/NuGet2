@@ -19,10 +19,7 @@ namespace NuGet.Dialog.Providers {
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
 
-        protected PackagesProviderBase(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources) {
-            if (packageManager == null) {
-                throw new ArgumentNullException("packageManager");
-            }
+        protected PackagesProviderBase(IProjectManager projectManager, ResourceDictionary resources) {
 
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
@@ -34,18 +31,12 @@ namespace NuGet.Dialog.Providers {
 
             _resources = resources;
             ProjectManager = projectManager;
-            PackageManager = packageManager;
         }
 
         public virtual bool RefreshOnNodeSelection {
             get {
                 return false;
             }
-        }
-
-        protected IVsPackageManager PackageManager {
-            get;
-            private set;
         }
 
         protected IProjectManager ProjectManager {

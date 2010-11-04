@@ -121,7 +121,6 @@
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\MessageHelper.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlineTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>

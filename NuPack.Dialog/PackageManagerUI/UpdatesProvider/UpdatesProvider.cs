@@ -10,8 +10,12 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Providers {
     internal class UpdatesProvider : PackagesProviderBase {
 
+        private IVsPackageManager _packageManager;
+
         public UpdatesProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
-            : base(packageManager, projectManager, resources) {
+            : base(projectManager, resources) {
+
+            _packageManager = packageManager;
         }
 
         public override string Name {
@@ -32,7 +36,7 @@ namespace NuGet.Dialog.Providers {
                 Resources.Dialog_RootNodeAll,
                 RootNode,
                 ProjectManager.LocalRepository,
-                PackageManager.SourceRepository);
+                _packageManager.SourceRepository);
 
             RootNode.Nodes.Add(allNode);
         }
@@ -52,9 +56,9 @@ namespace NuGet.Dialog.Providers {
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             // display license window if necessary
-            DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
+            DependencyResolver helper = new DependencyResolver(_packageManager.SourceRepository);
             IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
-                                                          .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
+                                                          .Where(p => p.RequireLicenseAcceptance && !_packageManager.LocalRepository.Exists(p));
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
@@ -62,7 +66,7 @@ namespace NuGet.Dialog.Providers {
                 }
             }
 
-            PackageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true);
+            _packageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true);
             return true;
         }
 

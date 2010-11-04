@@ -12,7 +12,7 @@ namespace NuGet.Dialog.Test {
         }
 
         public MockPackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager)
-            : base(packageManager, projectManager, new ResourceDictionary()) {
+            : base(projectManager, new ResourceDictionary()) {
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {

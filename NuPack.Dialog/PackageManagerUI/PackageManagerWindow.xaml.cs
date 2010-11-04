@@ -41,7 +41,6 @@ namespace NuGet.Dialog.PackageManagerUI {
             explorer.Providers.Add(updatesProvider);
 
             var onlineProvider = new OnlineProvider(
-                packageManager, 
                 projectManager, 
                 Resources, 
                 CachedRepositoryFactory.Instance, 
