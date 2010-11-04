@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -144,6 +145,42 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        public virtual void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+            if (OperationCoordinator.IsBusy) {
+                return;
+            }
+
+            // disable all operations while this install is in progress
+            OperationCoordinator.IsBusy = true;
+
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += (o, e) => {
+                bool succeeded = ExecuteCore(item, licenseWindowOpener);
+                e.Cancel = !succeeded;
+                e.Result = item;
+            };
+            worker.RunWorkerCompleted += OnRunWorkerCompleted;
+            worker.RunWorkerAsync(item);
+        }
+
+        private void OnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            OperationCoordinator.IsBusy = false;
+
+            if (e.Error == null) {
+                if (!e.Cancelled) {
+                    OnExecuteCompleted((PackageItem)e.Result);
+                }
+            }
+            else {
+                MessageHelper.ShowErrorMessage(e.Error);
+            }
+
+            if (ExecuteCompletedCallback != null) {
+                ExecuteCompletedCallback();
+            }
+        }
+
         protected virtual void FillRootNodes() {
         }
 
@@ -151,6 +188,18 @@ namespace NuGet.Dialog.Providers {
 
         public abstract bool CanExecute(PackageItem item);
 
-        public abstract void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener);
+        /// <summary>
+        /// This method is called on background thread.
+        /// </summary>
+        /// <returns><c>true</c> if the method succeeded. <c>false</c> otherwise.</returns>
+        protected virtual bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+            return true;
+        }
+
+        protected virtual void OnExecuteCompleted(PackageItem item) {
+        }
+
+        // hook for unit test
+        internal Action ExecuteCompletedCallback { get; set; }
     }
 }

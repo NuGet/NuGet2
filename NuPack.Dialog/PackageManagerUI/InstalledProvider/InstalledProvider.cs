@@ -38,40 +38,14 @@ namespace NuGet.Dialog.Providers {
             return ProjectManager.LocalRepository.Exists(item.PackageIdentity);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability",
-            "CA2000:Dispose objects before losing scope")]
-        public override void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
-            if (OperationCoordinator.IsBusy) {
-                return;
-            }
-
-            OperationCoordinator.IsBusy = true;
-
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnUninstallCompleted);
-            worker.DoWork += new DoWorkEventHandler(DoUninstallAsync);
-            worker.RunWorkerAsync(item);
-        }
-
-        private void DoUninstallAsync(object sender, DoWorkEventArgs e) {
-            PackageItem item = (PackageItem)e.Argument;
+        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             PackageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
-            e.Result = item;
+            return true;
         }
 
-        private void OnUninstallCompleted(object sender, RunWorkerCompletedEventArgs e) {
-            OperationCoordinator.IsBusy = false;
-
-            if (e.Error == null) {
-                if (!e.Cancelled) {
-                    if (SelectedNode != null) {
-                        SelectedNode.Extensions.Remove((IVsExtension)e.Result);
-                    }
-                }
-            }
-            else {
-                MessageHelper.ShowErrorMessage(e.Error);
+        protected override void OnExecuteCompleted(PackageItem item) {
+            if (SelectedNode != null) {
+                SelectedNode.Extensions.Remove((IVsExtension)item);
             }
         }
 

@@ -50,64 +50,25 @@ namespace NuGet.Dialog.Providers {
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability",
-            "CA2000:Dispose objects before losing scope")]
-        public override void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
-            if (OperationCoordinator.IsBusy) {
-                return;
-            }
-
-            // disable all other operations while this update is in progress
-            OperationCoordinator.IsBusy = true;
-
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnUpdateCompleted);
-            worker.DoWork += new DoWorkEventHandler(DoUpdateAsync);
-            worker.RunWorkerAsync(new ExecuteOperationState(item, licenseWindowOpener));
-        }
-
-        private void DoUpdateAsync(object sender, DoWorkEventArgs e) {
-            var state = (ExecuteOperationState)e.Argument;
-
-            PackageItem item = state.Item;
-
+        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             // display license window if necessary
             DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
             IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
                                                           .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
             if (licensePackages.Any()) {
-                bool accepted = state.LicenseWindowOpener.ShowLicenseWindow(licensePackages);
+                bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
-                    e.Cancel = true;
-                    return;
+                    return false;
                 }
             }
 
             PackageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true);
-            e.Result = item;
+            return true;
         }
 
-        private void OnUpdateCompleted(object sender, RunWorkerCompletedEventArgs e) {
-            OperationCoordinator.IsBusy = false;
-
-            if (e.Error == null) {
-                if (!e.Cancelled) {
-                    PackageItem item = (PackageItem)e.Result;
-                    item.UpdateEnabledStatus();
-                }
-            }
-            else {
-                MessageHelper.ShowErrorMessage(e.Error);
-            }
-
-            if (UpdateCompletedCallback != null) {
-                UpdateCompletedCallback();
-            }
+        protected override void OnExecuteCompleted(PackageItem item) {
+            item.UpdateEnabledStatus();
         }
-
-        // hook for unit test
-        internal Action UpdateCompletedCallback { get; set; }
 
         public override IVsExtension CreateExtension(IPackage package) {
             return new PackageItem(this, package, null) {

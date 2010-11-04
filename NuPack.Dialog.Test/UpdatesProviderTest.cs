@@ -138,7 +138,7 @@ namespace NuGet.Dialog.Test {
 
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
-            provider.UpdateCompletedCallback = delegate {
+            provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
                 packageManager.Verify(p => p.UpdatePackage(projectManager.Object, "A", new Version("2.0"), true), Times.Once());

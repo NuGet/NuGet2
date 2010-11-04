@@ -65,59 +65,25 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public override void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
-            if (OperationCoordinator.IsBusy) {
-                return;
-            }
-
-            // disable all operations while this install is in progress
-            OperationCoordinator.IsBusy = true;
-
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(DoInstallAsync);
-            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnInstallCompleted);
-            worker.RunWorkerAsync(new ExecuteOperationState(item, licenseWindowOpener));
-        }
-
-        private void DoInstallAsync(object sender, DoWorkEventArgs e) {
-            var state = (ExecuteOperationState)e.Argument;
-
-            PackageItem item = state.Item;
-
+        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
             // display license window if necessary
             DependencyResolver helper = new DependencyResolver(PackageManager.SourceRepository);
             IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
                                                           .Where(p => p.RequireLicenseAcceptance && !PackageManager.LocalRepository.Exists(p));
 
             if (licensePackages.Any()) {
-                bool accepted = state.LicenseWindowOpener.ShowLicenseWindow(licensePackages);
+                bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
-                    e.Cancel = true;
-                    return;
+                    return false;
                 }
             }
 
             PackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
-            e.Result = item;
+            return true;
         }
 
-        private void OnInstallCompleted(object sender, RunWorkerCompletedEventArgs e) {
-            OperationCoordinator.IsBusy = false;
-
-            if (e.Error == null) {
-                if (!e.Cancelled) {
-                    PackageItem item = (PackageItem)e.Result;
-                    item.UpdateEnabledStatus();
-                }
-            }
-            else {
-                MessageHelper.ShowErrorMessage(e.Error);
-            }
-
-            if (InstallCompletedCallback != null) {
-                InstallCompletedCallback();
-            }
+        protected override void OnExecuteCompleted(PackageItem item) {
+            item.UpdateEnabledStatus();
         }
 
         public override bool CanExecute(PackageItem item) {
@@ -130,8 +96,5 @@ namespace NuGet.Dialog.Providers {
                 CommandName = Resources.Dialog_InstallButton
             };
         }
-
-        // hook for unit test
-        internal Action InstallCompletedCallback { get; set; }
     }
 }
