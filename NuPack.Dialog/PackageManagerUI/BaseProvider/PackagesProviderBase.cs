@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
@@ -9,12 +8,12 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
-    /// IVsExtensionsProvider implementation responsible for gathering
-    /// a list of packages from a package feed which will be shown in the Add NuGet dialog.
+    /// Base class for all tree node types.
     /// </summary>
     internal abstract class PackagesProviderBase : VsExtensionsProvider {
 
-        private IVsExtensionsTreeNode _searchNode;
+        private PackagesTreeNodeBase _searchNode;
+        private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
 
         private object _mediumIconDataTemplate;
@@ -105,44 +104,52 @@ namespace NuGet.Dialog.Providers {
                 return null;
             }
 
-            if (_searchNode != null) {
-                // dispose any search results
-                RootNode.Nodes.Remove(_searchNode);
-                _searchNode = null;
-            }
+            RemoveSearchNode();
 
-            if (!string.IsNullOrEmpty(searchTerms)) {
-                _searchNode = new PackagesSearchNode(this, this.RootNode, SelectedNode, searchTerms) {
-                    IsSelected = true
-                };
-                
-                RootNode.Nodes.Add(_searchNode);
+            if (!String.IsNullOrEmpty(searchTerms) && SelectedNode != null) {
+                _searchNode = new PackagesSearchNode(this, this.RootNode, SelectedNode, searchTerms);
+                AddSearchNode();
             }
 
             return _searchNode;
         }
 
+        private void RemoveSearchNode() {
+            if (_searchNode != null) {
+                // dispose any search results
+                RootNode.Nodes.Remove(_searchNode);
+                _searchNode = null;
+
+                if (_lastSelectedNode != null) {
+                    SelectNode(_lastSelectedNode);
+                }
+            }
+        }
+
+        private void AddSearchNode() {
+            if (_searchNode != null && !RootNode.Nodes.Contains(_searchNode)) {
+                // remember the currently selected node so that when search term is cleared, we can restore it.
+                _lastSelectedNode = SelectedNode;
+
+                RootNode.Nodes.Add(_searchNode);
+                SelectNode(_searchNode);
+            }
+        }
+
+        private void SelectNode(PackagesTreeNodeBase node) {
+            node.IsSelected = true;
+            SelectedNode = node;
+        }
+
         private void CreateExtensionsTree() {
             // The user may have done a search before we finished getting the category list; temporarily remove it
-            if (_searchNode != null) {
-                RootNode.Nodes.Remove(_searchNode);
-            }
+            RemoveSearchNode();
 
             // give subclass a chance to populate the child nodes under Root node
             FillRootNodes();
 
-            if (_searchNode != null) {
-                // Re-add the search node and select it if the user was doing a search
-                RootNode.Nodes.Add(_searchNode);
-                _searchNode.IsSelected = true;
-            }
-            else {
-                // If they weren't doing a search, select the first category.
-                var firstChild = RootNode.Nodes.FirstOrDefault();
-                if (firstChild != null) {
-                    firstChild.IsSelected = true;
-                }
-            }
+            // Re-add the search node and select it if the user was doing a search
+            AddSearchNode();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
