@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -23,6 +24,24 @@ namespace NuGet {
 
         public static bool IsOrderingMethod(Expression expression) {
             return _orderMethods.Any(method => IsQueryableMethod(expression, method));
+        }
+
+        public static Type FindGenericType(Type definition, Type type) {
+            while ((type != null) && (type != typeof(object))) {
+                if (type.IsGenericType && (type.GetGenericTypeDefinition() == definition)) {
+                    return type;
+                }
+                if (definition.IsInterface) {
+                    foreach (Type interfaceType in type.GetInterfaces()) {
+                        Type genericType = FindGenericType(definition, interfaceType);
+                        if (genericType != null) {
+                            return genericType;
+                        }
+                    }
+                }
+                type = type.BaseType;
+            }
+            return null;
         }
     }
 }

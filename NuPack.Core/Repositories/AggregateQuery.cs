@@ -73,7 +73,7 @@ namespace NuGet {
                 throw new ArgumentNullException("expression");
             }
 
-            Type elementType = FindGenericType(typeof(IQueryable<>), expression.Type);
+            Type elementType = QueryableHelper.FindGenericType(typeof(IQueryable<>), expression.Type);
 
             if (elementType == null) {
                 throw new ArgumentException(String.Empty, "expression");
@@ -179,24 +179,6 @@ namespace NuGet {
             // Remove all take an skip andtake expression from individual linq providers
             return new ExpressionRewriter(queryable, new[] { "Skip", 
                                                              "Take" }).Visit(expression);
-        }
-
-        private static Type FindGenericType(Type definition, Type type) {
-            while ((type != null) && (type != typeof(object))) {
-                if (type.IsGenericType && (type.GetGenericTypeDefinition() == definition)) {
-                    return type;
-                }
-                if (definition.IsInterface) {
-                    foreach (Type interfaceType in type.GetInterfaces()) {
-                        Type genericType = FindGenericType(definition, interfaceType);
-                        if (genericType != null) {
-                            return genericType;
-                        }
-                    }
-                }
-                type = type.BaseType;
-            }
-            return null;
         }
     }
 }

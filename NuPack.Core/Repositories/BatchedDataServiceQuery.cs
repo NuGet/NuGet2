@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NuGet {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification="Type is an IQueryable and by convention should end with the term Query")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification="Type is an IQueryable and by convention should end with the term Query")]
     public class BatchedDataServiceQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
         private readonly DataServiceContext _context;
         private readonly IQueryable<T> _query;
@@ -22,6 +23,7 @@ namespace NuGet {
         }
 
         public IEnumerator<T> GetEnumerator() {
+            // REVIEW: Should we batch only if we're over the url limit?
             var request = (DataServiceRequest)_query;
             return _context.ExecuteBatch(request)
                            .Cast<QueryOperationResponse>()
@@ -67,7 +69,7 @@ namespace NuGet {
                 throw new ArgumentNullException("expression");
             }
 
-            Type elementType = FindGenericType(typeof(IQueryable<>), expression.Type);
+            Type elementType = QueryableHelper.FindGenericType(typeof(IQueryable<>), expression.Type);
 
             if (elementType == null) {
                 throw new ArgumentException(String.Empty, "expression");
@@ -89,24 +91,6 @@ namespace NuGet {
             var ctor = queryType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Single();
 
             return (IQueryable)ctor.Invoke(new object[] { _context, InnerProvider.CreateQuery<T>(expression) });
-        }
-
-        private static Type FindGenericType(Type definition, Type type) {
-            while ((type != null) && (type != typeof(object))) {
-                if (type.IsGenericType && (type.GetGenericTypeDefinition() == definition)) {
-                    return type;
-                }
-                if (definition.IsInterface) {
-                    foreach (Type interfaceType in type.GetInterfaces()) {
-                        Type genericType = FindGenericType(definition, interfaceType);
-                        if (genericType != null) {
-                            return genericType;
-                        }
-                    }
-                }
-                type = type.BaseType;
-            }
-            return null;
         }
     }
 }
