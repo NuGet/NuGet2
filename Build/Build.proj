@@ -78,7 +78,7 @@
     
     <Target Name="CopyServerOutputToDropDirectory">
         <ItemGroup>
-            <ServerOutputItems Include="$(ServerBuildDirectory)\**\*.*" Exclude="$(ServerBuildDirectory)\**\*.cs*;$(ServerBuildDirectory)\obj\**\*.*;$(ServerBuildDirectory)\Packages\**\*.*"/>
+            <ServerOutputItems Include="$(ServerBuildDirectory)\**\*.*" Exclude="$(ServerBuildDirectory)\**\*.cs;$(ServerBuildDirectory)\**\*.csp*;$(ServerBuildDirectory)\obj\**\*.*;$(ServerBuildDirectory)\Packages\**\*.*"/>
         </ItemGroup>
         <Message Text="Copying the NuGet Server output to $(ServerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\www\%(RecursiveDir)%(Filename)%(Extension)')" />
