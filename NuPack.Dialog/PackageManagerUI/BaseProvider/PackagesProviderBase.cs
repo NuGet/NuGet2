@@ -127,7 +127,7 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        private void SelectNode(PackagesTreeNodeBase node) {
+        protected void SelectNode(PackagesTreeNodeBase node) {
             node.IsSelected = true;
             SelectedNode = node;
         }

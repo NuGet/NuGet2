@@ -59,8 +59,7 @@ namespace NuGet.Dialog.Providers {
 
                     // pre-select the active package source by default
                     if (source.Equals(_packageSourceProvider.ActivePackageSource)) {
-                        node.IsSelected = true;
-                        SelectedNode = node;
+                        SelectNode(node);
                     }
                 }
                 catch (Exception) {
