@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
@@ -21,6 +22,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             : base(F1Keyword) {
 
             InitializeComponent();
+
+            InsertDisclaimerElement();
 
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
@@ -159,6 +162,52 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void OnDialogWindowClosed(object sender, EventArgs e) {
             explorer.Providers.Clear();
+        }
+
+        /// <summary>
+        /// HACK HACK: Insert the disclaimer element into the correct place inside the Explorer control. 
+        /// We don't want to bring in the whole control template of the extension explorer control.
+        /// </summary>
+        private void InsertDisclaimerElement() {
+            Grid grid = LogicalTreeHelper.FindLogicalNode(explorer, "resGrid") as Grid;
+            if (grid != null) {
+
+                // m_Providers is the name of the expander provider control (the one on the leftmost column)
+                UIElement providerExpander = FindChildElementByNameOrType(grid, "m_Providers", typeof(ProviderExpander));
+                if (providerExpander != null) {
+                    // remove disclaimer text and provider extpander from their current parents
+                    grid.Children.Remove(providerExpander);
+                    LayoutRoot.Children.Remove(DisclaimerText);
+
+                    // create the inner grid which will host disclaimer text and the provider extender
+                    Grid innerGrid = new Grid();
+                    innerGrid.RowDefinitions.Add(new RowDefinition());
+                    innerGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(0, GridUnitType.Auto) });
+
+                    innerGrid.Children.Add(providerExpander);
+
+                    Grid.SetRow(DisclaimerText, 1);
+                    innerGrid.Children.Add(DisclaimerText);
+
+                    // add the inner grid to the first column of the original grid
+                    grid.Children.Add(innerGrid);
+                }
+            }
+        }
+
+        private UIElement FindChildElementByNameOrType(Grid parent, string childName, Type childType) {
+            UIElement element = parent.FindName(childName) as UIElement;
+            if (element != null) {
+                return element;
+            }
+            else {
+                foreach (UIElement child in parent.Children) {
+                    if (childType.IsInstanceOfType(child)) {
+                        return child;
+                    }
+                }
+                return null;
+            }
         }
     }
 }

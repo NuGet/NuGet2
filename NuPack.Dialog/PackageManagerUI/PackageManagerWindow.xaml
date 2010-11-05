@@ -64,7 +64,7 @@
         <KeyBinding Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
     </Window.InputBindings>
 
-    <Grid>
+    <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto"/>
@@ -84,13 +84,16 @@
                 CategorySelectionChanged="OnCategorySelectionChanged" />
         </Border>
 
-        <Border Grid.Row="0"
-                Width="220"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Bottom"
-                BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" 
-                BorderThickness="0,2,0,0"
-                Padding="8">
+        <Border 
+            x:Name="DisclaimerText"
+            Grid.Row="0"
+            Width="220"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Background="White"
+            BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" 
+            BorderThickness="0,2,0,0"
+            Padding="8">
             <TextBlock 
                 Text="{x:Static resx:VsResources.Dialog_DisclaimerText}" 
                 TextWrapping="Wrap" />
