@@ -56,6 +56,12 @@ namespace NuGet.Dialog.Providers {
                 try {
                     IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source.Source);
                     node = new SimpleTreeNode(this, source.Name, RootNode, repository);
+
+                    // pre-select the active package source by default
+                    if (source.Equals(_packageSourceProvider.ActivePackageSource)) {
+                        node.IsSelected = true;
+                        SelectedNode = node;
+                    }
                 }
                 catch (Exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
