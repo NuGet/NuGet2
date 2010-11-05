@@ -160,7 +160,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             var sourcesList = (IEnumerable<PackageSource>) _allPackageSources.List;
 
             // check to see if name has already been added
-            bool hasName = sourcesList.Any(ps => String.Compare(name, ps.Name, true) == 0);
+            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.InvariantCultureIgnoreCase));
             if (hasName) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName);
                 SelectAndFocus(NewPackageName);
@@ -168,7 +168,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             }
 
             // check to see if source has already been added
-            bool hasSource = sourcesList.Any(ps => String.Compare(source, ps.Source, true) == 0);
+            bool hasSource = sourcesList.Any(ps => String.Equals(source, ps.Source, StringComparison.InvariantCultureIgnoreCase));
             if (hasSource) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource);
                 SelectAndFocus(NewPackageSource);
