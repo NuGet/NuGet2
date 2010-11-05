@@ -1,8 +1,8 @@
-namespace NuGet {
-    using System;
-    using System.Data.Services.Client;
-    using System.Linq;
+using System;
+using System.Data.Services.Client;
+using System.Linq;
 
+namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly DataServiceContext _context;
 
@@ -28,7 +28,7 @@ namespace NuGet {
 
         public override IQueryable<IPackage> GetPackages() {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return _context.CreateQuery<DataServicePackage>("Packages");
+            return new BatchedDataServiceQuery<DataServicePackage>(_context, "Packages");
         }
     }
 }

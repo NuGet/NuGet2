@@ -49,6 +49,7 @@
     <Compile Include="PackageWalker\PackageWalkInfo.cs" />
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
+    <Compile Include="Repositories\BatchedDataServiceQuery.cs" />
     <Compile Include="Repositories\BufferedEnumerable.cs" />
     <Compile Include="Repositories\ExpressionRewriter.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
