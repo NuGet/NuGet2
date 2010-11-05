@@ -53,8 +53,8 @@
     <Compile Include="Repositories\BufferedEnumerable.cs" />
     <Compile Include="Repositories\ExpressionRewriter.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
-    <Compile Include="Repositories\AggregateEnumerable.cs" />
     <Compile Include="Repositories\OrderingComparer.cs" />
+    <Compile Include="Repositories\PriorityQueue.cs" />
     <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />

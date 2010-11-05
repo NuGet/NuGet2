@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace NuGet {
     internal class AggregateQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
@@ -18,6 +19,7 @@ namespace NuGet {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
             _expression = Expression.Constant(this);
+            _subQueries = GetSubQueries(_expression);
         }
 
         private AggregateQuery(IEnumerable<IQueryable<T>> queryables,
@@ -31,11 +33,9 @@ namespace NuGet {
         }
 
         public IEnumerator<T> GetEnumerator() {
-            var subQueries = _subQueries ?? GetSubQueries(Expression);
-
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
-            var aggregateQuery = new AggregateEnumerable<T>(subQueries, _equalityComparer, new OrderingComparer<T>(Expression)).AsQueryable();
+            var aggregateQuery = GetAggregateEnumerable().AsQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
             return aggregateQuery.Provider.CreateQuery<T>(aggregateExpression).GetEnumerator();
@@ -98,9 +98,42 @@ namespace NuGet {
         public object Execute(Expression expression) {
             return Execute<object>(expression);
         }
- 
+
+        private IEnumerable<T> GetAggregateEnumerable() {
+            var queue = new PriorityQueue<T>(new OrderingComparer<T>(Expression), _equalityComparer);
+            var subQueryEnumerators = _subQueries.Select(query => query.GetEnumerator()).ToList();
+            bool empty = false;
+
+            while (!empty) {
+                // Run tasks in parallel
+                var tasks = (from e in subQueryEnumerators
+                             select Task.Factory.StartNew(() => e.MoveNext() ? new { Empty = false, Value = e.Current }
+                                                                             : new { Empty = true, Value = default(T) })
+                             ).ToArray();
+
+                // Wait for everything to complete
+                Task.WaitAll(tasks);
+
+                // Check each sub queries' enumerator and if there is more then add it to the queue
+                foreach (var task in tasks) {
+                    if (!task.Result.Empty) {
+                        queue.Enqueue(task.Result.Value);
+                    }
+                }
+
+                if (!queue.IsEmpty) {
+                    // Return the item in the front of the queue
+                    yield return queue.Dequeue();
+                }
+                else {
+                    empty = tasks.All(t => t.Result.Empty);
+                }
+
+            }
+        }
+
         private IEnumerable<IEnumerable<T>> GetSubQueries(Expression expression) {
-            return _queryables.Select(q => GetSubQuery(q, expression)).ToList();
+            return _queryables.Select(query => GetSubQuery(query, expression)).ToList();
         }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
