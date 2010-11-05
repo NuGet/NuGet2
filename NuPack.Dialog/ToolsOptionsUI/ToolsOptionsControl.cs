@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.ToolsOptionsUI {
@@ -33,7 +34,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             NewPackageName.TextChanged += (o, e) => UpdateUI();
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
             PackageSourcesListView.ItemSelectionChanged += (o, e) => UpdateUI();
-
+            NewPackageName.Focus();
             UpdateUI();
         }
 
@@ -77,9 +78,18 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         /// Persist the package sources, which was add/removed via the Options page, to the VS Settings store.
         /// This gets called when users click OK button.
         /// </summary>
-        internal void ApplyChangedSettings() {
+        internal bool ApplyChangedSettings() {
+            // if user presses Enter after filling in Name/Source but doesn't click Add
+            // the options will be closed without adding the source, try adding before closing
+            // Only apply if nothing was added
+            TryAddSourceResults result = TryAddSource();
+            if (result != TryAddSourceResults.NothingAdded) {
+                return false;
+            }
+
             _packageSourceProvider.SetPackageSources((IEnumerable<PackageSource>)_allPackageSources.DataSource);
             _packageSourceProvider.ActivePackageSource = _activePackageSource;
+            return true;
         }
 
         /// <summary>
@@ -91,8 +101,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
 
             _allPackageSources = null;
             _activePackageSource = null;
-            NewPackageName.Text = String.Empty;
-            NewPackageSource.Text = String.Empty;
+            ClearNameSource();
             UpdateUI();
         }
 
@@ -118,30 +127,80 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         }
 
         private void OnAddButtonClick(object sender, EventArgs e) {
-            var name = NewPackageName.Text;
-            var source = NewPackageSource.Text;
-            if (!String.IsNullOrWhiteSpace(source)) {
-                source = source.Trim();
+            TryAddSource();
+        }
 
-                var newPackageSource = new PackageSource(name, source);
-                if (_allPackageSources.Contains(newPackageSource)) {
-                    return;
-                }
-
-                _allPackageSources.Add(newPackageSource);
-
-                // if the collection contains only the package source that we just added, 
-                // make it the default package source
-                if (_activePackageSource == null && _allPackageSources.Count == 1) {
-                    _activePackageSource = newPackageSource;
-                }
-
-                BindData();
-
-                // now clear the text boxes
-                NewPackageName.Text = String.Empty;
-                NewPackageSource.Text = String.Empty;
+        private TryAddSourceResults TryAddSource() {
+            var name = NewPackageName.Text.Trim();
+            var source = NewPackageSource.Text.Trim();
+            if (String.IsNullOrWhiteSpace(name) && String.IsNullOrWhiteSpace(source)) {
+                return TryAddSourceResults.NothingAdded;
             }
+            
+            // validate name
+            if (String.IsNullOrWhiteSpace(name)) {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameRequired);
+                SelectAndFocus(NewPackageName);
+                return TryAddSourceResults.InvalidSource;                
+            }
+
+            // validate source
+            if (String.IsNullOrWhiteSpace(source)) {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_SourceRequried);
+                SelectAndFocus(NewPackageSource);
+                return TryAddSourceResults.InvalidSource;
+            }
+
+            if (!(PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source))) {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_InvalidSource);
+                SelectAndFocus(NewPackageSource);
+                return TryAddSourceResults.InvalidSource;                
+            }
+
+            var sourcesList = (IEnumerable<PackageSource>) _allPackageSources.List;
+
+            // check to see if name has already been added
+            bool hasName = sourcesList.Any(ps => String.Compare(name, ps.Name, true) == 0);
+            if (hasName) {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName);
+                SelectAndFocus(NewPackageName);
+                return TryAddSourceResults.SourceAlreadyAdded;
+            }
+
+            // check to see if source has already been added
+            bool hasSource = sourcesList.Any(ps => String.Compare(source, ps.Source, true) == 0);
+            if (hasSource) {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource);
+                SelectAndFocus(NewPackageSource);
+                return TryAddSourceResults.SourceAlreadyAdded;
+            }
+
+            var newPackageSource = new PackageSource(name, source);
+            _allPackageSources.Add(newPackageSource);
+
+            // if the collection contains only the package source that we just added, 
+            // make it the default package source
+            if (_activePackageSource == null && _allPackageSources.Count == 1) {
+                _activePackageSource = newPackageSource;
+            }
+
+            BindData();
+
+            // now clear the text boxes
+            ClearNameSource();
+
+            return TryAddSourceResults.SourceAdded;
+        }
+
+        private void SelectAndFocus(TextBox textBox) {
+            textBox.Focus();
+            textBox.SelectAll();
+        }
+
+        private void ClearNameSource() {
+            NewPackageName.Text = String.Empty;
+            NewPackageSource.Text = String.Empty;
+            NewPackageName.Focus();
         }
 
         private void OnDefaultPackageSourceButtonClick(object sender, EventArgs e) {
@@ -167,5 +226,12 @@ namespace NuGet.Dialog.ToolsOptionsUI {
                 PackageSourcesContextMenu.Show(PackageSourcesListView, e.Location);
             }
         }
+    }
+
+    internal enum TryAddSourceResults {
+        NothingAdded = 0,
+        SourceAdded = 1,
+        InvalidSource = 2,
+        SourceAlreadyAdded = 3
     }
 }

@@ -88,6 +88,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>VsResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Utility\PathValidator.cs" />
     <Compile Include="VsConstants.cs" />
     <Compile Include="VsPackageManager.cs" />
     <Compile Include="WebProjectSystem.cs" />

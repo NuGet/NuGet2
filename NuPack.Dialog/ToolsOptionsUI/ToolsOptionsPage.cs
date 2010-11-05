@@ -37,7 +37,10 @@ namespace NuGet.Dialog.ToolsOptionsUI {
 
         protected override void OnApply(PageApplyEventArgs e) {
             // Do not need to call base.OnApply() here.
-            this.OptionsControl.ApplyChangedSettings();
+            bool wasApplied = this.OptionsControl.ApplyChangedSettings();
+            if (!wasApplied) {
+                e.ApplyBehavior = ApplyKind.CancelNoNavigate;
+            }
         }
 
         protected override void OnClosed(EventArgs e) {

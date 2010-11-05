@@ -284,5 +284,59 @@ namespace NuGet.Dialog {
                 return ResourceManager.GetString("License_ViewLicense", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source specified is invalid. Please provide a valid source..
+        /// </summary>
+        public static string ShowWarning_InvalidSource {
+            get {
+                return ResourceManager.GetString("ShowWarning_InvalidSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name specified cannot be empty. Please provide a valid name..
+        /// </summary>
+        public static string ShowWarning_NameRequired {
+            get {
+                return ResourceManager.GetString("ShowWarning_NameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source specified cannot be empty. Please provide a valid source..
+        /// </summary>
+        public static string ShowWarning_SourceRequried {
+            get {
+                return ResourceManager.GetString("ShowWarning_SourceRequried", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Visual Studio.
+        /// </summary>
+        public static string ShowWarning_Title {
+            get {
+                return ResourceManager.GetString("ShowWarning_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name specified has already been added to the list of available package sources. Please provide a unique name..
+        /// </summary>
+        public static string ShowWarning_UniqueName {
+            get {
+                return ResourceManager.GetString("ShowWarning_UniqueName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source specified has already been added to the list of available package sources. Please provide a unique source..
+        /// </summary>
+        public static string ShowWarning_UniqueSource {
+            get {
+                return ResourceManager.GetString("ShowWarning_UniqueSource", resourceCulture);
+            }
+        }
     }
 }

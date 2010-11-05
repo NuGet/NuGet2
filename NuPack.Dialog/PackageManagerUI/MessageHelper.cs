@@ -12,5 +12,15 @@ namespace NuGet.Dialog.PackageManagerUI {
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+
+        public static void ShowWarningMessage(string message) {
+            MessageBox.Show(
+                message, 
+                NuGet.Dialog.Resources.Dialog_MessageBoxTitle, 
+                MessageBoxButton.OK, 
+                MessageBoxImage.Warning);
+        }
+
+
     }
 }

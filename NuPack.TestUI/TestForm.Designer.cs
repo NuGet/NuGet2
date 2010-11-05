@@ -32,12 +32,13 @@ namespace NuGet.TestUI
         {
             this.OkButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.theCancelButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // OkButton
             // 
             this.OkButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.OkButton.Location = new System.Drawing.Point(376, 227);
+            this.OkButton.Location = new System.Drawing.Point(295, 227);
             this.OkButton.Name = "OkButton";
             this.OkButton.Size = new System.Drawing.Size(75, 23);
             this.OkButton.TabIndex = 0;
@@ -53,15 +54,27 @@ namespace NuGet.TestUI
             this.panel1.Size = new System.Drawing.Size(463, 221);
             this.panel1.TabIndex = 1;
             // 
+            // theCancelButton
+            // 
+            this.theCancelButton.Location = new System.Drawing.Point(377, 228);
+            this.theCancelButton.Name = "theCancelButton";
+            this.theCancelButton.Size = new System.Drawing.Size(75, 23);
+            this.theCancelButton.TabIndex = 2;
+            this.theCancelButton.Text = "Cancel";
+            this.theCancelButton.UseVisualStyleBackColor = true;
+            this.theCancelButton.Click += new System.EventHandler(this.theCancelButton_Click);
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(463, 262);
+            this.Controls.Add(this.theCancelButton);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.OkButton);
             this.Name = "TestForm";
             this.Text = "TestForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TestForm_FormClosing);
             this.ResumeLayout(false);
 
         }
@@ -70,6 +83,7 @@ namespace NuGet.TestUI
 
         private System.Windows.Forms.Button OkButton;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button theCancelButton;
 
     }
 }
