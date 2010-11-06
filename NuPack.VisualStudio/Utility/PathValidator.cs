@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -13,6 +14,7 @@ namespace NuGet.VisualStudio {
         /// </remarks>
         /// <param name="path">The path to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw during detection")]
         public static bool IsValidLocalPath(string path) {
             try {
                 return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:") && Path.IsPathRooted(path);
@@ -32,9 +34,10 @@ namespace NuGet.VisualStudio {
         /// </remarks>
         /// <param name="path">The path to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw during detection")]
         public static bool IsValidUncPath(string path) {
             try {            
-                var result = Path.GetFullPath(path);
+                Path.GetFullPath(path);
                 return Regex.IsMatch(path.Trim(), @"^\\");
             }
             catch {
@@ -47,11 +50,12 @@ namespace NuGet.VisualStudio {
         /// </summary>
         /// <param name="url">The url to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "We're trying to validate that a stirng is infct a uri")]
         public static bool IsValidUrl(string url) {
             Uri result;
             
             // Make sure url starts with protocol:// because Uri.TryCreate() returns true for local and UNC paths even if badly formed.
-            return Regex.IsMatch(url, @"^\w+://", RegexOptions.IgnoreCase) && System.Uri.TryCreate(url, UriKind.Absolute, out result);
+            return Regex.IsMatch(url, @"^\w+://", RegexOptions.IgnoreCase) && Uri.TryCreate(url, UriKind.Absolute, out result);
         }
     }
 }
