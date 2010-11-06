@@ -5,7 +5,7 @@ namespace NuGet.VisualStudio {
     public static class DTEExtensions {
         public static Project GetActiveProject(this _DTE dte) {
             if (dte == null) {
-                throw new ArgumentException("dte");
+                throw new ArgumentNullException("dte");
             }
 
             Project activeProject = null;

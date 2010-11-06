@@ -17,7 +17,7 @@ namespace NuGet.VisualStudio {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly ISolutionManager _solutionManager;
         private readonly DTE _dte;
-        private readonly IComponentModel _componenModel;
+        private readonly IComponentModel _componentModel;
 
         private IFileSystem _solutionFileSystem;
         private IPackageRepository _solutionRepository;
@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio {
         public VsPackageManagerFactory(DTE dte,
                                        ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,
-                                       IComponentModel componenModel) {
+                                       IComponentModel componentModel) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
             }
@@ -36,11 +36,11 @@ namespace NuGet.VisualStudio {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
-            if (componenModel == null) {
-                throw new ArgumentNullException("componenModel");
+            if (componentModel == null) {
+                throw new ArgumentNullException("componentModel");
             }
 
-            _componenModel = componenModel;
+            _componentModel = componentModel;
             _dte = dte;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
@@ -83,7 +83,7 @@ namespace NuGet.VisualStudio {
 
         private IFileSystem GetFileSystem() {
             // Get the source control providers
-            var providers = _componenModel.GetExtensions<ISourceControlFileSystemProvider>();
+            var providers = _componentModel.GetExtensions<ISourceControlFileSystemProvider>();
 
             // Get the packages path
             string path = Path.Combine(Path.GetDirectoryName(_dte.Solution.FullName), "packages");

@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace NuGet.VisualStudio {
-    public class ServiceLocator {
+    public static class ServiceLocator {
         private static CompositionContainer _container;
         private static IEnumerable<Func<Type, object>> _fallBackServiceLocators;
 
@@ -81,6 +81,7 @@ namespace NuGet.VisualStudio {
 
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The caller is responsible for disposing this")]
         private static IServiceProvider GetServiceProvider(_DTE dte) {
             IServiceProvider serviceProvider = new ServiceProvider(dte as VsServiceProvider);
             Debug.Assert(serviceProvider != null, "Service provider is null");
