@@ -151,6 +151,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your machine group policy or user group policy disables execution of PowerShell script. Adjust your group policy settings to allow execution of PowerShell scripts..
+        /// </summary>
+        public static string Console_GroupPolicyError {
+            get {
+                return ResourceManager.GetString("Console_GroupPolicyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added file &apos;{0}&apos; to project &apos;{1}&apos;.
         /// </summary>
         public static string Debug_AddedFileToProject {

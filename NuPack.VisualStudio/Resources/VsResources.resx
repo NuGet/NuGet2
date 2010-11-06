@@ -186,4 +186,7 @@
   <data name="Cmdlet_TooManySpecFiles" xml:space="preserve">
     <value>More than one .nuspec files were found.</value>
   </data>
+  <data name="Console_GroupPolicyError" xml:space="preserve">
+    <value>Your machine group policy or user group policy disables execution of PowerShell script. Adjust your group policy settings to allow execution of PowerShell scripts.</value>
+  </data>
 </root>

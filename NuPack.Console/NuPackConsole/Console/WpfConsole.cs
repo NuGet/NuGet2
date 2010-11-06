@@ -276,6 +276,7 @@ namespace NuGetConsole.Implementation.Console {
             public void Clear() {
                 Invoke(() => _impl.Clear());
             }
+
             #endregion
 
             #region IWpfConsole
@@ -435,7 +436,7 @@ namespace NuGetConsole.Implementation.Console {
             // Raise event
             ConsoleCleared.Raise(this);
         }
- 
+
         public void ClearConsole() {
             if (_inputLineStart != null) {
                 Dispatcher.ClearConsole();

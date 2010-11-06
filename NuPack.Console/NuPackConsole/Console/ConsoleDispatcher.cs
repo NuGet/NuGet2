@@ -30,7 +30,6 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         #region IConsoleDispatcher
-        public event EventHandler Starting;
 
         public void Start() {
             // Only Start once
@@ -48,8 +47,12 @@ namespace NuGetConsole.Implementation.Console {
                     _dispatcher = new SyncHostConsoleDispatcher(this);
                 }
 
-                this.Starting.Raise(this);
-                _dispatcher.Start();
+                // gives the host a chance to do initialization works before the console starts accepting user inputs
+                host.Initialize();
+
+                if (host.IsCommandEnabled) {
+                    _dispatcher.Start();
+                }
             }
         }
 

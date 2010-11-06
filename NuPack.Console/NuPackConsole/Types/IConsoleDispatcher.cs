@@ -5,10 +5,6 @@ namespace NuGetConsole {
     /// IConsoleDispatcher dispatches and executes console command line inputs on the host.
     /// </summary>
     public interface IConsoleDispatcher {
-        /// <summary>
-        /// Occurs right before the console dispatcher starting dispatching inputs.
-        /// </summary>
-        event EventHandler Starting;
 
         /// <summary>
         /// Start dispatching console command line inputs.

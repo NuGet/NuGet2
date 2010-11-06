@@ -13,6 +13,11 @@ namespace NuGetConsole {
         bool IsCommandEnabled { get; }
 
         /// <summary>
+        /// Do initialization work before the console accepts user inputs.
+        /// </summary>
+        void Initialize(); 
+
+        /// <summary>
         /// Get the current command prompt used by this host.
         /// </summary>
         string Prompt { get; }

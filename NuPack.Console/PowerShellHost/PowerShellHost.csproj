@@ -37,6 +37,7 @@
     <Compile Include="..\NuPackConsole\Utils\UtilityMethods.cs">
       <Link>Utils\UtilityMethods.cs</Link>
     </Compile>
+    <Compile Include="PowerShellCommandHelper.cs" />
     <Compile Include="PSTypeWrapper.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="CommandTokenizer.cs" />

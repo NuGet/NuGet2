@@ -18,6 +18,9 @@ namespace NuGetConsole.Host.PowerShellProvider {
             }
         }
 
+        public void Initialize() {
+        }
+
         public string Prompt {
             get {
                 return String.Empty;

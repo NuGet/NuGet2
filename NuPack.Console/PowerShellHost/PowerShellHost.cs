@@ -9,6 +9,7 @@ using System.Management.Automation.Runspaces;
 using EnvDTE80;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
+using Microsoft.PowerShell;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
@@ -20,6 +21,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private Runspace _myRunSpace;
         private MyHost _myHost;
         private VsPackageSourceProvider _packageSourceProvider;
+        private PowerShellCommandHelper _commandHelper;
 
         protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -30,12 +32,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             _packageSourceProvider = VsPackageSourceProvider.GetSourceProvider(dte);
             _name = name;
             _privateData = privateData;
+            _commandHelper = new PowerShellCommandHelper(this);
+            IsCommandEnabled = true;
         }
 
         public bool IsCommandEnabled {
-            get {
-                return true;
-            }
+            get;
+            private set;
         }
 
         public void Initialize() {
@@ -43,27 +46,55 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             // load user profile scripts before the command prompt shows up. It also helps with 
             // tab expansion right from the beginning
             SetupRunspace();
-            LoadStartupScripts();
-            DisplayDisclaimerText();
-            LoadProfilesIntoRunspace(_myRunSpace);
+            bool successful = LoadStartupScripts();
+            if (successful) {
+                DisplayDisclaimerText();
+                LoadProfilesIntoRunspace(_myRunSpace);
+            }
+            else {
+                IsCommandEnabled = false;
+                DisplayGroupPolicyError();
+            }
         }
 
         private void DisplayDisclaimerText() {
-
             _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
             _myHost.UI.WriteLine();
         }
 
-        private void LoadStartupScripts() {
+        private void DisplayGroupPolicyError() {
+            _myHost.UI.WriteErrorLine(VsResources.Console_GroupPolicyError);
+        }
+
+        private bool LoadStartupScripts() {
+            ExecutionPolicy policy = _commandHelper.GetEffectiveExecutionPolicy();
+            if (policy != ExecutionPolicy.Unrestricted &&
+                policy != ExecutionPolicy.RemoteSigned &&
+                policy != ExecutionPolicy.Bypass) {
+
+                ExecutionPolicy machinePolicy = _commandHelper.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
+                if (machinePolicy != ExecutionPolicy.Undefined) {
+                    return false;
+                }
+
+                ExecutionPolicy userPolicy = _commandHelper.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
+                if (userPolicy != ExecutionPolicy.Undefined) {
+                    return false;
+                }
+
+                _commandHelper.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
+            }
+
             string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
             string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
             string npackPath = Path.Combine(extensionLocation, @"Scripts\NuGet.psm1");
             string vsPath = Path.Combine(extensionLocation, @"NuGet.VisualStudio.dll");
 
-            Invoke("Set-ExecutionPolicy RemoteSigned -Scope Process -Force", null, false);
-            Invoke("Import-Module '" + profilePath + "'", null, false);
-            Invoke("Import-Module '" + npackPath + "'", null, false);
-            Invoke("Import-Module '" + vsPath + "'", null, false);
+            _commandHelper.ImportModule(profilePath);
+            _commandHelper.ImportModule(npackPath);
+            _commandHelper.ImportModule(vsPath);
+
+            return true;
         }
 
         private void SetupRunspace() {
@@ -163,7 +194,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
             else {
                 // Add this one piece into history. ExecuteHost adds the last piece.
-                AddHistory(command, DateTime.Now);
+                _commandHelper.AddHistory(command, DateTime.Now);
             }
 
             return false; // constructing multi-line command
@@ -176,16 +207,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         protected abstract bool ExecuteHost(string fullCommand, string command);
 
         protected void AddHistory(string command, DateTime startExecutionTime) {
-            // PowerShell.exe doesn't add empty commands into execution history. Do the same.
-            if (!string.IsNullOrEmpty(command) && !string.IsNullOrEmpty(command.Trim())) {
-                DateTime endExecutionTime = DateTime.Now;
-                PSObject historyInfo = new PSObject();
-                historyInfo.Properties.Add(new PSNoteProperty("CommandLine", command), true);
-                historyInfo.Properties.Add(new PSNoteProperty("ExecutionStatus", PipelineState.Completed), true);
-                historyInfo.Properties.Add(new PSNoteProperty("StartExecutionTime", startExecutionTime), true);
-                historyInfo.Properties.Add(new PSNoteProperty("EndExecutionTime", endExecutionTime), true);
-                Invoke("$input | Add-History", historyInfo, outputResults: false);
-            }
+            _commandHelper.AddHistory(command, startExecutionTime);
         }
 
         protected void ReportError(ErrorRecord record) {

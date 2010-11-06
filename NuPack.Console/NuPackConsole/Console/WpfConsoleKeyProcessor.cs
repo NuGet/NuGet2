@@ -86,6 +86,10 @@ namespace NuGetConsole.Implementation.Console {
         protected override int InternalExec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
             int hr = OLECMDERR_E_NOTSUPPORTED;
 
+            if (!WpfConsole.Host.IsCommandEnabled) {
+                return hr;
+            }
+
             if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97) {
                 Debug.Print("Exec: GUID_VSStandardCommandSet97: {0}", (VSConstants.VSStd97CmdID)nCmdID);
 

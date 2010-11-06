@@ -50,13 +50,6 @@ namespace NuGetConsole.Host.PowerShellProvider {
                 /*isAsync*/false,
                 new Commander(console));
 
-            console.Dispatcher.Starting += (sender, e) => {
-                IPowerShellHost psHost = host as IPowerShellHost;
-                if (psHost != null) {
-                    psHost.Initialize();
-                }
-            };
-
             return host;
         }
 
