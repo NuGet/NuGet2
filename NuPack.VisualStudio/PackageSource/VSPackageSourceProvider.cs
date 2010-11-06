@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EnvDTE;
+using System.Linq;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
@@ -9,8 +10,10 @@ namespace NuGet.VisualStudio {
     public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=204820";
 
+        private static readonly PackageSource AggregateSource = new PackageSource("All", "(Aggregate source)") { IsAggregate = true };
+
         private PackageSourceSettingsManager _settingsManager;
-        private HashSet<PackageSource> _packageSources;
+        private List<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
         private static readonly ConcurrentDictionary<_DTE, VsPackageSourceCacheItem> _cache = new ConcurrentDictionary<_DTE, VsPackageSourceCacheItem>();
@@ -42,15 +45,17 @@ namespace NuGet.VisualStudio {
         }
 
         private void DeserializePackageSources() {
-            string propertyString = _settingsManager.PackageSourcesString;
+            string propertyString = _settingsManager.PackageSourcesString; 
 
             if (!String.IsNullOrEmpty(propertyString)) {
-                _packageSources = SerializationHelper.Deserialize<HashSet<PackageSource>>(propertyString);
+                _packageSources = SerializationHelper.Deserialize<List<PackageSource>>(propertyString);
             }
 
             if (_packageSources == null) {
-                _packageSources = new HashSet<PackageSource>();
+                _packageSources = new List<PackageSource>();
             }
+
+            _packageSources.Insert(0, AggregateSource);
         }
 
         private void DeserializeActivePackageSource() {
@@ -90,6 +95,11 @@ namespace NuGet.VisualStudio {
             Justification = "This method is potentially expensive because we are retrieving data from VS settings store.")]
         public IEnumerable<PackageSource> GetPackageSources() {
             return _packageSources;
+
+            //yield return AggregateSource;
+
+            //foreach (var p in _packageSources)
+            //    yield return p;
         }
 
         public void AddPackageSource(PackageSource source) {
@@ -140,7 +150,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void PersistPackageSources() {
-            _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources);
+            _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources.Where(p => !p.IsAggregate));
         }
 
         private class VsPackageSourceCacheItem {
@@ -150,6 +160,6 @@ namespace NuGet.VisualStudio {
             }
             public VsPackageSourceProvider Provider { get; private set; }
             public IPackageRepository Repository { get; private set; }
-        }        
+        }
     }
 }

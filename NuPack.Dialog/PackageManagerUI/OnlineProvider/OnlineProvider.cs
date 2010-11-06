@@ -54,7 +54,7 @@ namespace NuGet.Dialog.Providers {
             foreach (var source in packageSources) {
                 PackagesTreeNodeBase node = null;
                 try {
-                    IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source.Source);
+                    IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source);
                     node = new SimpleTreeNode(this, source.Name, RootNode, repository);
 
                     // pre-select the active package source by default

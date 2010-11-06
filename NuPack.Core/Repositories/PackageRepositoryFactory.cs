@@ -11,12 +11,12 @@ namespace NuGet {
             }
         }
 
-        public IPackageRepository CreateRepository(string source) {
-            if (String.IsNullOrEmpty(source)) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
+        public IPackageRepository CreateRepository(PackageSource source) {
+            if (source == null) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageSource");
             }
 
-            Uri uri = new Uri(source);
+            Uri uri = new Uri(source.Source);
             if (uri.IsFile) {
                 return new LocalPackageRepository(uri.LocalPath);
             }

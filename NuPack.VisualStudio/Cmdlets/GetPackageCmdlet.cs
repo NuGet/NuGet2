@@ -50,10 +50,10 @@ namespace NuGet.VisualStudio.Cmdlets {
         [Parameter(ParameterSetName="Updates")]
         public string Source { get; set; }
 
-        private string ActivePackageSource {
+        private PackageSource ActivePackageSource {
             get {
                 if (_packageSourceProvider.ActivePackageSource != null) {
-                    return _packageSourceProvider.ActivePackageSource.Source;
+                    return _packageSourceProvider.ActivePackageSource;
                 }
                 return null;
             }
@@ -87,13 +87,13 @@ namespace NuGet.VisualStudio.Cmdlets {
         private IPackageRepository GetRemoteRepository() {
             if (!String.IsNullOrEmpty(Source)) {
                 // If a Source parameter is explicitly specified, use it
-                return _repositoryFactory.CreateRepository(Source);
+                return _repositoryFactory.CreateRepository(new PackageSource(Source, Source));
             }
             else if (SolutionManager.IsSolutionOpen) {
                 // If the solution is open, retrieve the cached repository instance
                 return PackageManager.SourceRepository;
             }
-            else if (!String.IsNullOrEmpty(ActivePackageSource)) {
+            else if (ActivePackageSource != null) {
                 // No solution available. Use the repository Url to create a new repository
                 return _repositoryFactory.CreateRepository(ActivePackageSource);
             }

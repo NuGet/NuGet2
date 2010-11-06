@@ -1,5 +1,5 @@
 namespace NuGet {
     public interface IPackageRepositoryFactory {
-        IPackageRepository CreateRepository(string source);
+        IPackageRepository CreateRepository(PackageSource packageSource);
     }
 }

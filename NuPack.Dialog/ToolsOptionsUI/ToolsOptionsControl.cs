@@ -43,7 +43,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
                                 !String.IsNullOrWhiteSpace(NewPackageSource.Text);
 
             defaultButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
-            removeButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
+            removeButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0 && !((PackageSource)PackageSourcesListView.SelectedItems[0].Tag).IsAggregate;
         }
 
         public void BindData() {

@@ -32,7 +32,7 @@ namespace NuGet.VisualStudio {
         }
 
         public IVsPackageManager CreatePackageManager(string source) {
-            return new VsPackageManager(_dte, _repositoryFactory.CreateRepository(source));
+            return new VsPackageManager(_dte, _repositoryFactory.CreateRepository(new PackageSource(source, source)));
         }
     }
 }

@@ -93,6 +93,7 @@ namespace NuGet {
         private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
             return from p in repository.GetPackages()
                    where p.Id.ToLower() == packageId.ToLower()
+                   orderby p.Id
                    select p;
         }
     }

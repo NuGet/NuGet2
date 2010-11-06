@@ -234,7 +234,7 @@ namespace NuGet.Dialog.Providers {
             int totalCount = 0;
 
             try {
-                IQueryable<IPackage> query = GetPackages();
+                IQueryable<IPackage> query = GetPackages().OrderBy(p => p.Id);
 
                 // This should execute the query
                 totalCount = query.Count();

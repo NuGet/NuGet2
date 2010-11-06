@@ -24,7 +24,7 @@ namespace NuGet.VisualStudio {
                 if (_packageSourceProvider.ActivePackageSource == null) {
                     throw new InvalidOperationException(VsResources.NoActivePackageSource);
                 }
-                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
+                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource);
             }
         }
 
