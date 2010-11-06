@@ -39,7 +39,7 @@ namespace NuGet {
                                .SelectMany(o => o.Cast<T>())
                                .GetEnumerator();
             }
-            return request.Execute().Cast<T>().GetEnumerator();
+            return _query.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
