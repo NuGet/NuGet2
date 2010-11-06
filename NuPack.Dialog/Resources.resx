@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -191,5 +191,23 @@
   </data>
   <data name="License_ViewLicense" xml:space="preserve">
     <value>View License Terms</value>
+  </data>
+  <data name="ShowWarning_InvalidSource" xml:space="preserve">
+    <value>The source specified is invalid. Please provide a valid source.</value>
+  </data>
+  <data name="ShowWarning_NameRequired" xml:space="preserve">
+    <value>The name specified cannot be empty. Please provide a valid name.</value>
+  </data>
+  <data name="ShowWarning_SourceRequried" xml:space="preserve">
+    <value>The source specified cannot be empty. Please provide a valid source.</value>
+  </data>
+  <data name="ShowWarning_Title" xml:space="preserve">
+    <value>Visual Studio</value>
+  </data>
+  <data name="ShowWarning_UniqueName" xml:space="preserve">
+    <value>The name specified has already been added to the list of available package sources. Please provide a unique name.</value>
+  </data>
+  <data name="ShowWarning_UniqueSource" xml:space="preserve">
+    <value>The source specified has already been added to the list of available package sources. Please provide a unique source.</value>
   </data>
 </root>
