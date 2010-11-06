@@ -17,12 +17,16 @@ namespace NuGet.VisualStudio {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly ISolutionManager _solutionManager;
         private readonly DTE _dte;
+        private readonly IComponentModel _componenModel;
 
         private IFileSystem _solutionFileSystem;
         private IPackageRepository _solutionRepository;
 
         [ImportingConstructor]
-        public VsPackageManagerFactory(DTE dte, ISolutionManager solutionManager, IPackageRepositoryFactory repositoryFactory) {
+        public VsPackageManagerFactory(DTE dte,
+                                       ISolutionManager solutionManager,
+                                       IPackageRepositoryFactory repositoryFactory,
+                                       IComponentModel componenModel) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
             }
@@ -32,7 +36,11 @@ namespace NuGet.VisualStudio {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
+            if (componenModel == null) {
+                throw new ArgumentNullException("componenModel");
+            }
 
+            _componenModel = componenModel;
             _dte = dte;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
@@ -69,18 +77,13 @@ namespace NuGet.VisualStudio {
             return CreatePackageManager(_repositoryFactory.CreateRepository(new PackageSource(source, source)));
         }
 
-        public IVsPackageManager CreatePackageManager(IPackageRepository repository) {            
+        public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
             return new VsPackageManager(_solutionManager, repository, SolutionFileSystem, SolutionRepository);
         }
-        
+
         private IFileSystem GetFileSystem() {
-            // Get the component model service from dte                               
-            var componentModel = _dte.GetService<IComponentModel>(typeof(SComponentModel));
-
-            Debug.Assert(componentModel != null, "Component model service is null");
-
             // Get the source control providers
-            var providers = componentModel.GetExtensions<ISourceControlFileSystemProvider>();
+            var providers = _componenModel.GetExtensions<ISourceControlFileSystemProvider>();
 
             // Get the packages path
             string path = Path.Combine(Path.GetDirectoryName(_dte.Solution.FullName), "packages");

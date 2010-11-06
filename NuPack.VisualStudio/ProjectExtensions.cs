@@ -153,9 +153,9 @@ namespace NuGet.VisualStudio {
 
         public static IVsHierarchy ToVsHierarchy(this Project project) {
             IVsHierarchy hierarchy;
-
+          
             // Get the vs solution
-            IVsSolution solution = project.DTE.QueryService<IVsSolution>();
+            IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
             int hr = solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy);
 
             if (hr != VsConstants.S_OK) {

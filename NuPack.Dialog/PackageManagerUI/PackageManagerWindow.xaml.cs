@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -13,13 +14,20 @@ using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuGet.Dialog.PackageManagerUI {
 
+    [PartCreationPolicy(CreationPolicy.NonShared)]
+    [Export]
     public partial class PackageManagerWindow : DialogWindow, ILicenseWindowOpener {
 
         private const string F1Keyword = "vs.ExtensionManager";
 
         private readonly DTEPackage _ownerPackage;
 
-        public PackageManagerWindow(DTEPackage ownerPackage)
+        [ImportingConstructor]
+        public PackageManagerWindow(DTEPackage ownerPackage,
+                                    DTE dte,
+                                    IVsPackageManagerFactory packageManagerFactory,
+                                    IPackageRepositoryFactory repositoryFactory,
+                                    IPackageSourceProvider packageSourceProvider)
             : base(F1Keyword) {
 
             InitializeComponent();
@@ -29,12 +37,15 @@ namespace NuGet.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            SetupProviders(ServiceLocator.GetInstance<DTE>(),
-                           ServiceLocator.GetInstance<IVsPackageManagerFactory>());
+            SetupProviders(dte, packageManagerFactory, repositoryFactory, packageSourceProvider);
         }
 
-        private void SetupProviders(DTE dte, IVsPackageManagerFactory factory) {
-            IVsPackageManager packageManager = factory.CreatePackageManager();
+        private void SetupProviders(DTE dte,
+                                    IVsPackageManagerFactory packageManagerFactory,
+                                    IPackageRepositoryFactory packageRepositoryFactory,
+                                    IPackageSourceProvider packageSourceProvider) {
+
+            IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
 
             IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
@@ -48,9 +59,9 @@ namespace NuGet.Dialog.PackageManagerUI {
             var onlineProvider = new OnlineProvider(
                 projectManager,
                 Resources,
-                ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
-                ServiceLocator.GetInstance<IPackageSourceProvider>(),
-                ServiceLocator.GetInstance<IVsPackageManagerFactory>());
+                packageRepositoryFactory,
+                packageSourceProvider,
+                packageManagerFactory);
 
             explorer.Providers.Add(onlineProvider);
 

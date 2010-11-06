@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Shell.Settings;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IPackageSourceSettingsManager))]
-    public class PackageSourceSettingsManager : IPackageSourceSettingsManager {
+    public class VsPackageSourceSettingsManager : IPackageSourceSettingsManager {
         private const string SettingsRoot = "NuGet";
         private const string PackageSourcesSettingProperty = "PackageSources";
         private const string ActivePackageSourceSettingProperty = "ActivePackageSource";
@@ -15,7 +15,7 @@ namespace NuGet.VisualStudio {
         private readonly IServiceProvider _serviceProvider;
 
         [ImportingConstructor]
-        public PackageSourceSettingsManager(IServiceProvider serviceProvider) {
+        public VsPackageSourceSettingsManager(IServiceProvider serviceProvider) {
             if (serviceProvider == null) {
                 throw new ArgumentNullException("serviceProvider");
             }
