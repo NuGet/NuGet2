@@ -103,5 +103,9 @@ namespace NuGet {
 
             return (IQueryable)ctor.Invoke(new object[] { _context, InnerProvider.CreateQuery<T>(expression) });
         }
+
+        public override string ToString() {
+            return _query.ToString();
+        }
     }
 }

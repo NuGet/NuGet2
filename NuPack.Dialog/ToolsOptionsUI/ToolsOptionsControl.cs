@@ -27,7 +27,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         }
 
         public ToolsOptionsControl()
-            : this(VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE)) {
+            : this(ServiceLocator.GetInstance<IPackageSourceProvider>()) {
         }
 
         private void SetupDataBindings() {

@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
-using EnvDTE;
 using System.Diagnostics.CodeAnalysis;
+using EnvDTE;
 
 namespace NuGet.VisualStudio {
     public interface ISolutionManager {
+        event EventHandler SolutionOpened;
+        event EventHandler SolutionClosing;
+
         string DefaultProjectName { get; set; }
 
         Project GetProject(string projectName);

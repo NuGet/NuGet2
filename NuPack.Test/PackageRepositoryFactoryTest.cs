@@ -19,7 +19,7 @@ namespace NuGet.Test {
             var factory = PackageRepositoryFactory.Default;
 
             // Act and Assert
-            Assert.IsTrue(paths.Select(factory.CreateRepository)
+            Assert.IsTrue(paths.Select(p => factory.CreateRepository(new PackageSource(p, p)))
                                .All(p => p is LocalPackageRepository));
         }
     }

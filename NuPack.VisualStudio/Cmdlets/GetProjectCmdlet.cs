@@ -8,9 +8,9 @@ namespace NuGet.VisualStudio.Cmdlets {
     [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = "Single")]
     public class GetProjectCmdlet : Cmdlet {
         private readonly ISolutionManager _solutionManager;
-        
+
         public GetProjectCmdlet()
-            : this(SolutionManager.Current) {
+            : this(ServiceLocator.GetInstance<ISolutionManager>()) {
 
         }
 

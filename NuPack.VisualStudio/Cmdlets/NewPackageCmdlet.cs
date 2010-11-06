@@ -18,7 +18,8 @@ namespace NuGet.VisualStudio.Cmdlets {
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
         public NewPackageCmdlet()
-            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(ServiceLocator.GetInstance<ISolutionManager>(), 
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public NewPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

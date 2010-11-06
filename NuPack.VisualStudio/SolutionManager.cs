@@ -1,25 +1,24 @@
 namespace NuGet.VisualStudio {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.Composition;
     using System.IO;
     using System.Linq;
     using EnvDTE;
     using EnvDTE80;
 
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    [Export(typeof(ISolutionManager))]
     public class SolutionManager : ISolutionManager {
-        private static readonly Lazy<SolutionManager> _instance = new Lazy<SolutionManager>(() => new SolutionManager(DTEExtensions.DTE));
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;
 
         private Dictionary<string, Project> _projectCache;
+        private EventHandler _solutionOpened;
+        private EventHandler _solutionClosing;
 
-        // REVIEW: Instance would be more appropriate than Current
-        public static SolutionManager Current {
-            get {
-                return _instance.Value;
-            }
-        }
 
+        [ImportingConstructor]
         private SolutionManager(DTE dte) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
@@ -43,6 +42,24 @@ namespace NuGet.VisualStudio {
         public string DefaultProjectName {
             get;
             set;
+        }
+
+        public event EventHandler SolutionOpened {
+            add {
+                _solutionOpened += value;
+            }
+            remove {
+                _solutionOpened -= value;
+            }
+        }
+
+        public event EventHandler SolutionClosing {
+            add {
+                _solutionClosing += value;
+            }
+            remove {
+                _solutionClosing -= value;
+            }
         }
 
         /// <summary>
@@ -85,9 +102,12 @@ namespace NuGet.VisualStudio {
         }
 
 
-        private void OnBeforeClosing() {
+        private void OnBeforeClosing() {            
             DefaultProjectName = null;
             _projectCache = null;
+            if (_solutionClosing != null) {
+                _solutionClosing(this, EventArgs.Empty);
+            }
         }
 
         private void OnProjectRenamed(Project project, string oldName) {
@@ -133,6 +153,9 @@ namespace NuGet.VisualStudio {
         private void OnSolutionOpened() {
             EnsureProjectCache();
             SetDefaultProject();
+            if (_solutionOpened != null) {
+                _solutionOpened(this, EventArgs.Empty);
+            }
         }
 
         private void EnsureProjectCache() {

@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio.Test {
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IPackageSourceProvider>();
             mockSourceProvider.Setup(m => m.ActivePackageSource).Returns((PackageSource)null);
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
             var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
 
             // Act & Assert
@@ -37,9 +37,10 @@ namespace NuGet.VisualStudio.Test {
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IPackageSourceProvider>();
             var mockRepository = new MockPackageRepository();
+            var source = new PackageSource("foo", "bar");
             mockRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
-            mockSourceProvider.Setup(m => m.ActivePackageSource).Returns(new PackageSource("foo", "bar"));
-            mockRepositoryFactory.Setup(m => m.CreateRepository("bar")).Returns(mockRepository);
+            mockSourceProvider.Setup(m => m.ActivePackageSource).Returns(source);
+            mockRepositoryFactory.Setup(m => m.CreateRepository(source)).Returns(mockRepository);
             var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
 
             // Act

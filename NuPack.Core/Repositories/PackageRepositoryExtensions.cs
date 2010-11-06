@@ -63,6 +63,7 @@ namespace NuGet {
             // These are the packages that we need to look at for potential updates.
             IDictionary<string, IPackage> sourcePackages = sourceRepository.GetPackages()
                                                                            .Where(filterExpression)
+                                                                           .OrderBy(p => p.Id)
                                                                            .AsEnumerable()
                                                                            .GroupBy(package => package.Id)
                                                                            .ToDictionary(package => package.Key,

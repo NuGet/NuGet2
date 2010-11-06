@@ -2,6 +2,7 @@ using System;
 using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
+using NuGet.VisualStudio;
 
 namespace NuGet.VisualStudio.Cmdlets {
     /// <summary>
@@ -11,7 +12,8 @@ namespace NuGet.VisualStudio.Cmdlets {
     public class InstallPackageCmdlet : ProcessPackageBaseCmdlet {
 
         public InstallPackageCmdlet()
-            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(ServiceLocator.GetInstance<ISolutionManager>(),
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public InstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

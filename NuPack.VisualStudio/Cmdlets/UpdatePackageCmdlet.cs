@@ -12,7 +12,8 @@ namespace NuGet.VisualStudio.Cmdlets {
     public class UpdatePackageCmdlet : ProcessPackageBaseCmdlet {
 
         public UpdatePackageCmdlet()
-            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(ServiceLocator.GetInstance<ISolutionManager>(),
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public UpdatePackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

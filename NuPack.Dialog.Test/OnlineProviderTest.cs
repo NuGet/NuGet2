@@ -98,7 +98,7 @@ namespace NuGet.Dialog.Test {
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageC);
             sourceRepository.AddPackage(packageB);
-            
+
             var localRepository = new MockPackageRepository();
             localRepository.AddPackage(packageA);
 
@@ -142,11 +142,11 @@ namespace NuGet.Dialog.Test {
         }
 
         private static OnlineProvider CreateOnlineProvider(
-            IVsPackageManager packageManager = null, 
+            IVsPackageManager packageManager = null,
             IProjectManager projectManager = null,
             IPackageRepositoryFactory repositoryFactory = null,
             IPackageSourceProvider packageSourceProvider = null) {
-
+           
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
                 var sourceRepository = new MockPackageRepository();
@@ -161,7 +161,7 @@ namespace NuGet.Dialog.Test {
 
             if (repositoryFactory == null) {
                 var repositoryFactoryMock = new Mock<IPackageRepositoryFactory>();
-                repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
+                repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
                 repositoryFactory = repositoryFactoryMock.Object;
             }
 
@@ -176,12 +176,15 @@ namespace NuGet.Dialog.Test {
                 packageSourceProvider = packageSourceProviderMock.Object;
             }
 
+            var factory = new Mock<IVsPackageManagerFactory>();
+            factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>())).Returns(packageManager);
+
             return new OnlineProvider(
-                projectManager, 
+                projectManager,
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
                 packageSourceProvider,
-                (repository) => packageManager);
+                factory.Object);
         }
     }
 }

@@ -14,19 +14,19 @@ namespace NuGet.Dialog.Providers {
     internal class OnlineProvider : PackagesProviderBase {
         private IPackageRepositoryFactory _packageRepositoryFactory;
         private IPackageSourceProvider _packageSourceProvider;
-        private Func<IPackageRepository, IVsPackageManager> _packageManagerCreator;
+        private IVsPackageManagerFactory _packageManagerFactory;
 
         public OnlineProvider(
             IProjectManager projectManager, 
             ResourceDictionary resources, 
             IPackageRepositoryFactory packageRepositoryFactory, 
             IPackageSourceProvider packageSourceProvider,
-            Func<IPackageRepository, IVsPackageManager> packageManagerCreator) :
+            IVsPackageManagerFactory packageManagerFactory) :
             base(projectManager, resources) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
-            _packageManagerCreator = packageManagerCreator;
+            _packageManagerFactory = packageManagerFactory;
         }
 
         public override string Name {
@@ -78,11 +78,11 @@ namespace NuGet.Dialog.Providers {
             else if (SelectedNode.IsSearchResultsNode) {
                 PackagesSearchNode searchNode = (PackagesSearchNode)SelectedNode;
                 SimpleTreeNode baseNode = (SimpleTreeNode)searchNode.BaseNode;
-                return _packageManagerCreator(baseNode.Repository);
+                return _packageManagerFactory.CreatePackageManager(baseNode.Repository);
             }
             else {
                 var selectedNode = SelectedNode as SimpleTreeNode;
-                return (selectedNode != null) ? _packageManagerCreator(selectedNode.Repository) : null;
+                return (selectedNode != null) ? _packageManagerFactory.CreatePackageManager(selectedNode.Repository) : null;
             }
        }
 

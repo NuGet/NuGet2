@@ -10,35 +10,8 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
-    // TODO: Move this class into the NuGet.Core and change the name
     public class VsPackageManager : PackageManager, IVsPackageManager {
-        private const string SolutionRepositoryDirectory = "packages";
         private readonly Dictionary<Project, IProjectManager> _projectManagers = null;
-
-        private static SolutionEvents _solutionEvents;
-        private static IFileSystem _solutionFileSystem;
-        private static IPackageRepository _solutionRepository;
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public VsPackageManager(DTE dte) :
-            this(dte, VsPackageSourceProvider.GetRepository(dte)) {
-        }
-
-        /// <summary>
-        /// This overload is called from Powershell script
-        /// </summary>
-        /// <param name="dte"></param>
-        public VsPackageManager(object dte) :
-            this((DTE)dte) {
-        }
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "dte", Justification = "dte is the vs automation object")]
-        public VsPackageManager(DTE dte, IPackageRepository sourceRepository) :
-            this(SolutionManager.Current,
-                sourceRepository,
-                GetFileSystem(dte),
-                GetSolutionRepository(dte)) {
-        }
 
         public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
@@ -121,85 +94,6 @@ namespace NuGet.VisualStudio {
                 projectManager.Logger = logger;
                 projectManager.Project.Logger = logger;
             }
-        }
-
-        private static IPackageRepository GetSolutionRepository(DTE dte) {
-            EnsureSolutionRepository(dte);
-            return _solutionRepository;
-        }
-
-        private static IFileSystem GetFileSystem(DTE dte) {
-            EnsureSolutionRepository(dte);
-            return _solutionFileSystem;
-        }
-
-        private static void EnsureSolutionRepository(DTE dte) {
-            if (_solutionRepository == null) {
-                EnsureSolutionEventBindings(dte);
-                _solutionFileSystem = CreateFileSystem(dte);
-                _solutionRepository = new LocalPackageRepository(new DefaultPackagePathResolver(_solutionFileSystem), _solutionFileSystem);
-            }
-        }
-
-        private static void EnsureSolutionEventBindings(DTE dte) {
-            if (_solutionEvents == null) {
-                // Keep a reference to SolutionEvents so that it doesn't get GC'ed. Otherwise, we won't receive events.
-                _solutionEvents = dte.Events.SolutionEvents;
-                _solutionEvents.BeforeClosing += OnSolutionClosing;
-            }
-        }
-
-        private static void OnSolutionClosing() {
-            _solutionFileSystem = null;
-            _solutionRepository = null;
-        }
-
-        private static IFileSystem CreateFileSystem(DTE dte) {
-            // Get the component model service from dte                               
-            var componentModel = dte.GetService<IComponentModel>(typeof(SComponentModel));
-
-            Debug.Assert(componentModel != null, "Component model service is null");
-
-            // Get the source control providers
-            var providers = componentModel.GetExtensions<ISourceControlFileSystemProvider>();
-
-            // Get the packages path
-            string path = Path.Combine(Path.GetDirectoryName(dte.Solution.FullName), "packages");
-            IFileSystem fileSystem = null;
-
-            var sourceControl = (SourceControl2)dte.SourceControl;
-            if (providers.Any() && sourceControl != null) {
-                SourceControlBindings binding = null;
-                try {
-                    // Get the binding for this solution
-                    binding = sourceControl.GetBindings(dte.Solution.FullName);
-                }
-                catch (NotImplementedException) {
-                    // Some source control providers don't bother to implement this.
-                    // TFS might be the only one using it
-                }
-
-                if (binding != null) {
-                    fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
-                                          .Where(fs => fs != null)
-                                          .FirstOrDefault();
-                }
-            }
-
-            return fileSystem ?? new FileBasedProjectSystem(path);
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
-            try {
-                return provider.GetFileSystem(path, binding);
-            }
-            catch {
-                // Ignore exceptions that can happen when some binaries are missing. e.g. TfsSourceControlFileSystemProvider
-                // would throw a jitting error if TFS is not installed
-            }
-
-            return null;
         }
 
         private IProjectManager CreateProjectManager(Project project) {

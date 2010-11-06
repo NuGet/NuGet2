@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using EnvDTE;
 using EnvDTE80;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
@@ -20,15 +21,19 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private object _privateData;
         private Runspace _myRunSpace;
         private MyHost _myHost;
-        private VsPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly ISolutionManager _solutionManager;
 
-        protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, object privateData) {
+        protected PowerShellHost(IConsole console, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
 
             this.Console = console;
             this.IsAsync = isAsync;
 
-            _packageSourceProvider = VsPackageSourceProvider.GetSourceProvider(dte);
+            // TODO: Take these as ctor arguments
+            _packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
+            _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
+
             _name = name;
             _privateData = privateData;
             IsCommandEnabled = true;
@@ -100,9 +105,17 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 return;
             }
 
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+            IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
+
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
             initialSessionState.Variables.Add(
-                new SessionStateVariableEntry("DTE", (DTE2)DTEExtensions.DTE, "Visual Studio DTE automation object",
+                new SessionStateVariableEntry("DTE", (DTE2)dte, "Visual Studio DTE automation object",
+                    ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
+
+
+            initialSessionState.Variables.Add(
+                new SessionStateVariableEntry("packageManagerFactory", packageManagerFactory, "Package Manager Factory",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
             // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
@@ -247,19 +260,19 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         public string DefaultProject {
             get {
-                Debug.Assert(SolutionManager.Current != null);
-                return SolutionManager.Current.DefaultProjectName;
+                Debug.Assert(_solutionManager != null);
+                return _solutionManager.DefaultProjectName;
             }
             set {
-                Debug.Assert(SolutionManager.Current != null);
-                SolutionManager.Current.DefaultProjectName = value;
+                Debug.Assert(_solutionManager != null);
+                _solutionManager.DefaultProjectName = value;
             }
         }
 
         public string[] GetAvailableProjects() {
-            Debug.Assert(SolutionManager.Current != null);
+            Debug.Assert(_solutionManager != null);
 
-            return (from p in SolutionManager.Current.GetProjects()
+            return (from p in _solutionManager.GetProjects()
                     select p.Name).ToArray();
         }
 
@@ -352,7 +365,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
     class SyncPowerShellHost : PowerShellHost {
         public SyncPowerShellHost(IConsole console, DTE2 dte, string name, object privateData)
-            : base(console, dte, name, false, privateData) {
+            : base(console, name, false, privateData) {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -379,7 +392,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public event EventHandler ExecuteEnd;
 
         public AsyncPowerShellHost(IConsole console, DTE2 dte, string name, object privateData)
-            : base(console, dte, name, true, privateData) {
+            : base(console, name, true, privateData) {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]

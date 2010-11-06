@@ -30,6 +30,7 @@ namespace NuGet.Tools {
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
+        private DTE _dte;
         public NuGetPackage() {
         }
 
@@ -65,7 +66,7 @@ namespace NuGet.Tools {
                 }
             }
             else {
-                Project project = DTEExtensions.DTE.GetActiveProject();
+                Project project = _dte.GetActiveProject();
                 string projectName = project != null ? project.Name : String.Empty;
                 MessageBox.Show(
                     String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName),
@@ -88,21 +89,21 @@ namespace NuGet.Tools {
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initilaization code that rely on services provided by VisualStudio.
         /// </summary>
-        protected override void Initialize()
-        {
+        protected override void Initialize() {
             base.Initialize();
 
-            // set it here so that the rest of the extension can access the DTE
-            DTEExtensions.DTE = (DTE)GetService(typeof(SDTE));
+            _dte = (DTE)GetService(typeof(SDTE));
+
+            // Initialize the service locator
+            ServiceLocator.Initialize(_dte);
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if ( null != mcs )
-            {
+            if (null != mcs) {
                 // Create the command for the tool window
                 CommandID toolwndCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
-                mcs.AddCommand( menuToolWin );
+                mcs.AddCommand(menuToolWin);
 
                 // Create the command for the menu item.
                 CommandID menuCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
@@ -121,7 +122,7 @@ namespace NuGet.Tools {
         /// </summary>
         private bool HasActiveLoadedSupportedProject {
             get {
-                Project project = DTEExtensions.DTE.GetActiveProject();
+                Project project = _dte.GetActiveProject();
                 return (project != null && !project.IsUnloaded() && project.IsSupported());
             }
         }

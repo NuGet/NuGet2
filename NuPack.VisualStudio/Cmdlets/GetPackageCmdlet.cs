@@ -9,16 +9,16 @@ namespace NuGet.VisualStudio.Cmdlets {
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName="Default")]
+    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = "Default")]
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
 
         public GetPackageCmdlet()
-            : this(CachedRepositoryFactory.Instance,
-                   VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
-                   NuGet.VisualStudio.SolutionManager.Current,
-                   DefaultVsPackageManagerFactory.Instance) {
+            : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                   ServiceLocator.GetInstance<IPackageSourceProvider>(),
+                   ServiceLocator.GetInstance<ISolutionManager>(),
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
@@ -47,17 +47,8 @@ namespace NuGet.VisualStudio.Cmdlets {
         public SwitchParameter Updates { get; set; }
 
         [Parameter(Position = 2, ParameterSetName = "Remote")]
-        [Parameter(ParameterSetName="Updates")]
+        [Parameter(ParameterSetName = "Updates")]
         public string Source { get; set; }
-
-        private PackageSource ActivePackageSource {
-            get {
-                if (_packageSourceProvider.ActivePackageSource != null) {
-                    return _packageSourceProvider.ActivePackageSource;
-                }
-                return null;
-            }
-        }
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen && (!Remote.IsPresent || Updates.IsPresent)) {
@@ -93,9 +84,9 @@ namespace NuGet.VisualStudio.Cmdlets {
                 // If the solution is open, retrieve the cached repository instance
                 return PackageManager.SourceRepository;
             }
-            else if (ActivePackageSource != null) {
+            else if (_packageSourceProvider.ActivePackageSource != null) {
                 // No solution available. Use the repository Url to create a new repository
-                return _repositoryFactory.CreateRepository(ActivePackageSource);
+                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource);
             }
             else {
                 // No active source has been specified. 
@@ -108,7 +99,7 @@ namespace NuGet.VisualStudio.Cmdlets {
                 WritePackages(repository.GetPackages(filter.Split()));
             }
             else {
-                WritePackages(repository.GetPackages());
+                WritePackages(repository.GetPackages().OrderBy(p => p.Id));
             }
         }
 

@@ -12,7 +12,8 @@ namespace NuGet.VisualStudio.Cmdlets {
     public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
 
         public UninstallPackageCmdlet()
-            : this(NuGet.VisualStudio.SolutionManager.Current, DefaultVsPackageManagerFactory.Instance) {
+            : this(ServiceLocator.GetInstance<ISolutionManager>(),
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public UninstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)

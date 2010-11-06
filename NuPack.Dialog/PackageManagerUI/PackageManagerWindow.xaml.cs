@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.Providers;
@@ -28,12 +29,13 @@ namespace NuGet.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            SetupProviders();
+            SetupProviders(ServiceLocator.GetInstance<DTE>(),
+                           ServiceLocator.GetInstance<IVsPackageManagerFactory>());
         }
 
-        private void SetupProviders() {
-            VsPackageManager packageManager = new VsPackageManager(DTEExtensions.DTE);
-            EnvDTE.Project activeProject = DTEExtensions.DTE.GetActiveProject();
+        private void SetupProviders(DTE dte, IVsPackageManagerFactory factory) {
+            IVsPackageManager packageManager = factory.CreatePackageManager();
+            Project activeProject = dte.GetActiveProject();
 
             IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
 
@@ -44,11 +46,12 @@ namespace NuGet.Dialog.PackageManagerUI {
             explorer.Providers.Add(updatesProvider);
 
             var onlineProvider = new OnlineProvider(
-                projectManager, 
-                Resources, 
-                CachedRepositoryFactory.Instance, 
-                VsPackageSourceProvider.GetSourceProvider(DTEExtensions.DTE),
-                repository => new VsPackageManager(DTEExtensions.DTE, repository));
+                projectManager,
+                Resources,
+                ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                ServiceLocator.GetInstance<IPackageSourceProvider>(),
+                ServiceLocator.GetInstance<IVsPackageManagerFactory>());
+
             explorer.Providers.Add(onlineProvider);
 
             var installedProvider = new InstalledProvider(packageManager, projectManager, Resources);

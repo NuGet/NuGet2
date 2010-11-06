@@ -214,7 +214,7 @@ namespace NuGet.VisualStudio.Test {
             var packages = new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
-            repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foo"))).Returns(repository.Object);
 
             return repositoryFactory.Object;
         }

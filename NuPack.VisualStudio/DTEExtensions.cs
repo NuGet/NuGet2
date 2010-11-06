@@ -8,12 +8,6 @@ using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace NuGet.VisualStudio {
     public static class DTEExtensions {
-
-        public static DTE DTE {
-            get;
-            set;
-        }
-
         public static T GetService<T>(this _DTE dte, Type serviceType)
             where T : class {
             // Get the service provider from dte            
