@@ -46,7 +46,7 @@ namespace NuGet.VisualStudio {
         private IFileSystem SolutionFileSystem {
             get {
                 if (_solutionFileSystem == null) {
-                    _solutionFileSystem = CreateFileSystem();
+                    _solutionFileSystem = GetFileSystem();
                 }
                 return _solutionFileSystem;
             }
@@ -72,15 +72,8 @@ namespace NuGet.VisualStudio {
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {            
             return new VsPackageManager(_solutionManager, repository, SolutionFileSystem, SolutionRepository);
         }
-
+        
         private IFileSystem GetFileSystem() {
-            if (_solutionFileSystem == null) {
-                _solutionFileSystem = CreateFileSystem();
-            }
-            return _solutionFileSystem;
-        }
-
-        private IFileSystem CreateFileSystem() {
             // Get the component model service from dte                               
             var componentModel = _dte.GetService<IComponentModel>(typeof(SComponentModel));
 

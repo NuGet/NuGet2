@@ -17,11 +17,11 @@ namespace NuGet.VisualStudio {
             _repositoryFactory = repositoryFactory;
         }
 
-        public IPackageRepository CreateRepository(PackageSource source) {
+        public IPackageRepository CreateRepository(PackageSource packageSource) {
             IPackageRepository repository;
-            if (!_repositoryCache.TryGetValue(source, out repository)) {
-                repository = _repositoryFactory.CreateRepository(source);
-                _repositoryCache.TryAdd(source, repository);
+            if (!_repositoryCache.TryGetValue(packageSource, out repository)) {
+                repository = _repositoryFactory.CreateRepository(packageSource);
+                _repositoryCache.TryAdd(packageSource, repository);
             }
             return repository;
         }

@@ -16,7 +16,7 @@ namespace NuGet.VisualStudio {
         private PackageSource _activePackageSource;
 
         [ImportingConstructor]
-        private VsPackageSourceProvider(IPackageSourceSettingsManager settingsManager) {
+        public VsPackageSourceProvider(IPackageSourceSettingsManager settingsManager) {
             _settingsManager = settingsManager;
 
             DeserializePackageSources();

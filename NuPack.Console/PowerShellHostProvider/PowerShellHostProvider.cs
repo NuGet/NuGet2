@@ -24,11 +24,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
         /// This PowerShell host name. Used for PowerShell "$host".
         /// </summary>
         public const string PowerConsoleHostName = "Package Manager Host";
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "MEF")]
-        [Import(typeof(SVsServiceProvider))]
-        internal IServiceProvider ServiceProvider { get; set; }
-
+ 
         public IHost CreateHost(IConsole console) {
             bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
             if (isPowerShell2Installed) {
@@ -40,15 +36,9 @@ namespace NuGetConsole.Host.PowerShellProvider {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IHost CreatePowerShellHost(IConsole console) {
+        private static IHost CreatePowerShellHost(IConsole console) {
 
-            DTE2 dte = (DTE2)ServiceProvider.GetService(typeof(DTE));
-            IHost host = PowerShellHostService.CreateHost(
-                console,
-                dte,
-                PowerConsoleHostName,
-                /*isAsync*/false,
-                new Commander(console));
+            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, /*isAsync*/false, new Commander(console));
 
             return host;
         }

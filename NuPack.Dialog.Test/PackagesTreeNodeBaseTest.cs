@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
+using System.Linq;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
@@ -174,8 +175,14 @@ namespace NuGet.Dialog.Test {
 
                 // the loaded extensions should be from 10 to 19 (because they are on page 2)
                 IList<IVsExtension> extentions = node.Extensions;
+                var expected = Enumerable.Range(0, numberOfPackages)
+                                         .Select(i => "A" + i)
+                                         .OrderBy(s => s)
+                                         .Skip(10)
+                                         .ToArray();
+
                 for (int i = 0; i < 10; i++) {
-                    Assert.AreEqual("A" + (i + 10), extentions[i].Name);
+                    Assert.AreEqual(expected[i], extentions[i].Name);
                 }
 
                 resetEvent.Set();

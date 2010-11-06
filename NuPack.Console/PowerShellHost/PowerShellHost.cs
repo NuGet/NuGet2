@@ -364,7 +364,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     }
 
     class SyncPowerShellHost : PowerShellHost {
-        public SyncPowerShellHost(IConsole console, DTE2 dte, string name, object privateData)
+        public SyncPowerShellHost(IConsole console, string name, object privateData)
             : base(console, name, false, privateData) {
         }
 
@@ -391,7 +391,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     class AsyncPowerShellHost : PowerShellHost, IAsyncHost {
         public event EventHandler ExecuteEnd;
 
-        public AsyncPowerShellHost(IConsole console, DTE2 dte, string name, object privateData)
+        public AsyncPowerShellHost(IConsole console, string name, object privateData)
             : base(console, name, true, privateData) {
         }
 

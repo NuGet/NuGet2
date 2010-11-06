@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using EnvDTE;
 
 namespace NuGet.VisualStudio {
@@ -12,6 +12,7 @@ namespace NuGet.VisualStudio {
             _container = container;
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public static void Initialize(DTE dte) {
             if (_instance != null) {
                 return;
