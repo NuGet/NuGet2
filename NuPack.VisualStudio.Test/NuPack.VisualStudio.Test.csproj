@@ -42,6 +42,7 @@
     <Compile Include="UninstallPackageCmdletTest.cs" />
     <Compile Include="UpdatePackageCmdletTest.cs" />
     <Compile Include="VsPackageManagerTest.cs" />
+    <Compile Include="VsPackageSourceProviderTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />
     <Compile Include="TestUtils.cs" />
     <Compile Include="VsProjectSystemTest.cs" />

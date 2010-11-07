@@ -8,7 +8,7 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=204820";
-        private static readonly PackageSource AggregateSource = new PackageSource("All", "(Aggregate source)") { IsAggregate = true };
+        internal static readonly PackageSource AggregateSource = new PackageSource("All", "(Aggregate source)") { IsAggregate = true };
 
         private readonly IPackageSourceSettingsManager _settingsManager;
 
@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio {
             }
             set {
                 if (value != null && !_packageSources.Contains(value)) {
-                    throw new ArgumentException(VsResources.PackageSource_Invalid);
+                    throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
                 }
 
                 _activePackageSource = value;
@@ -48,7 +48,6 @@ namespace NuGet.VisualStudio {
         }
 
         public void AddPackageSource(PackageSource source) {
-
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -108,6 +107,9 @@ namespace NuGet.VisualStudio {
             if (_packageSources == null) {
                 _packageSources = new List<PackageSource>();
                 _packageSources.Add(AggregateSource);
+            }
+            else if (!_packageSources.Contains(AggregateSource)) {
+                _packageSources.Insert(0, AggregateSource);
             }
         }
 
