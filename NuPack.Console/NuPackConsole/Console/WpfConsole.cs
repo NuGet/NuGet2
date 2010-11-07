@@ -226,8 +226,6 @@ namespace NuGetConsole.Implementation.Console {
             return null;
         }
 
-        #region Marshaler
-
         _Marshaler _marshaler;
         _Marshaler Marshaler {
             get {
@@ -247,7 +245,6 @@ namespace NuGetConsole.Implementation.Console {
                 : base(impl) {
             }
 
-            #region IConsole
             public IHost Host {
                 get { return Invoke(() => _impl.Host); }
                 set { Invoke(() => { _impl.Host = value; }); }
@@ -277,9 +274,6 @@ namespace NuGetConsole.Implementation.Console {
                 Invoke(() => _impl.Clear());
             }
 
-            #endregion
-
-            #region IWpfConsole
             public object Content {
                 get { return Invoke(() => _impl.Content); }
             }
@@ -287,9 +281,7 @@ namespace NuGetConsole.Implementation.Console {
             public object VsTextView {
                 get { return Invoke(() => _impl.VsTextView); }
             }
-            #endregion
-
-            #region IPrivateWpfConsole
+            
             public SnapshotPoint? InputLineStart {
                 get { return Invoke(() => _impl.InputLineStart); }
             }
@@ -305,12 +297,8 @@ namespace NuGetConsole.Implementation.Console {
             public InputHistory InputHistory {
                 get { return Invoke(() => _impl.InputHistory); }
             }
-            #endregion
         }
 
-        #endregion
-
-        #region IConsole
         IHost _host;
         public IHost Host {
             get {
@@ -443,11 +431,6 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-
-        #endregion
-
-        #region IWpfConsole
-
         IVsTextView _view;
         public IVsTextView VsTextView {
             get {
@@ -497,7 +480,5 @@ namespace NuGetConsole.Implementation.Console {
                 return WpfTextViewHost.HostControl;
             }
         }
-
-        #endregion
     }
 }

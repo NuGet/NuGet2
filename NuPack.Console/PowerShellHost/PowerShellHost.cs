@@ -21,7 +21,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private Runspace _myRunSpace;
         private MyHost _myHost;
         private VsPackageSourceProvider _packageSourceProvider;
-        private PowerShellCommandHelper _commandHelper;
 
         protected PowerShellHost(IConsole console, DTE2 dte, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -32,7 +31,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             _packageSourceProvider = VsPackageSourceProvider.GetSourceProvider(dte);
             _name = name;
             _privateData = privateData;
-            _commandHelper = new PowerShellCommandHelper(this);
             IsCommandEnabled = true;
         }
 
@@ -67,22 +65,22 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private bool LoadStartupScripts() {
-            ExecutionPolicy policy = _commandHelper.GetEffectiveExecutionPolicy();
+            ExecutionPolicy policy = this.GetEffectiveExecutionPolicy();
             if (policy != ExecutionPolicy.Unrestricted &&
                 policy != ExecutionPolicy.RemoteSigned &&
                 policy != ExecutionPolicy.Bypass) {
 
-                ExecutionPolicy machinePolicy = _commandHelper.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
+                ExecutionPolicy machinePolicy = this.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
                 if (machinePolicy != ExecutionPolicy.Undefined) {
                     return false;
                 }
 
-                ExecutionPolicy userPolicy = _commandHelper.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
+                ExecutionPolicy userPolicy = this.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
                 if (userPolicy != ExecutionPolicy.Undefined) {
                     return false;
                 }
 
-                _commandHelper.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
+                this.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
             }
 
             string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
@@ -90,9 +88,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             string npackPath = Path.Combine(extensionLocation, @"Scripts\NuGet.psm1");
             string vsPath = Path.Combine(extensionLocation, @"NuGet.VisualStudio.dll");
 
-            _commandHelper.ImportModule(profilePath);
-            _commandHelper.ImportModule(npackPath);
-            _commandHelper.ImportModule(vsPath);
+            this.ImportModule(profilePath);
+            this.ImportModule(npackPath);
+            this.ImportModule(vsPath);
 
             return true;
         }
@@ -194,7 +192,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
             else {
                 // Add this one piece into history. ExecuteHost adds the last piece.
-                _commandHelper.AddHistory(command, DateTime.Now);
+                this.AddHistory(command, DateTime.Now);
             }
 
             return false; // constructing multi-line command
@@ -205,10 +203,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         protected abstract bool ExecuteHost(string fullCommand, string command);
-
-        protected void AddHistory(string command, DateTime startExecutionTime) {
-            _commandHelper.AddHistory(command, startExecutionTime);
-        }
 
         protected void ReportError(ErrorRecord record) {
             Pipeline pipeline = CreatePipeline("$input", false);
@@ -376,7 +370,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 Debug.Print(x.ToString());
             }
 
-            AddHistory(command, startExecutionTime);
+            this.AddHistory(command, startExecutionTime);
             return true;
         }
     }
@@ -398,7 +392,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                         case PipelineState.Completed:
                         case PipelineState.Failed:
                         case PipelineState.Stopped:
-                            AddHistory(command, startExecutionTime);
+                            this.AddHistory(command, startExecutionTime);
                             ExecuteEnd.Raise(this, EventArgs.Empty);
                             break;
                     }
