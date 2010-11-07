@@ -3,9 +3,9 @@ using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
-        private static readonly IPackageRepositoryFactory _default = new PackageRepositoryFactory();
+        private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
 
-        public static IPackageRepositoryFactory Default {
+        public static PackageRepositoryFactory Default {
             get {
                 return _default;
             }

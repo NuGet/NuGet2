@@ -133,7 +133,7 @@ namespace NuGet {
         }
 
         private IEnumerable<IEnumerable<T>> GetSubQueries(Expression expression) {
-            return _queryables.Select(query => GetSubQuery(query, expression)).ToList();
+            return _queryables.Select(query => GetSubQuery(query, expression));
         }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
@@ -152,8 +152,12 @@ namespace NuGet {
         }
 
         private static IEnumerable<T> GetSubQuery(IQueryable queryable, Expression expression) {
+            expression = Rewrite(queryable, expression);
+
+            IQueryable<T> newQuery = queryable.Provider.CreateQuery<T>(expression);
+
             // Create the query and only get up to the query cache size
-            return new BufferedEnumerable<T>(queryable.Provider.CreateQuery<T>(Rewrite(queryable, expression)), QueryCacheSize);
+            return new BufferedEnumerable<T>(newQuery, QueryCacheSize);
         }
 
         private static TResult Execute<TResult>(IQueryable queryable, Expression expression) {
