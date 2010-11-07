@@ -40,6 +40,10 @@ namespace NuGet.Test.Mocks {
             Deleted.Add(path);
         }
 
+        public override string GetFullPath(string path) {
+            return path;
+        }
+
         public override IEnumerable<string> GetFiles(string path) {
             return Paths.Select(f => f.Key)
                         .Where(f => Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase));
@@ -119,5 +123,7 @@ namespace NuGet.Test.Mocks {
         public override DateTimeOffset GetLastModified(string path) {
             return DateTime.Now;
         }
+
+        
     }
 }

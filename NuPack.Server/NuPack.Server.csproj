@@ -70,11 +70,14 @@
     <Compile Include="HttpContextExtensions.cs" />
     <Compile Include="Infrastructure\Bindings.cs" />
     <Compile Include="Infrastructure\ConditionalGetResult.cs" />
+    <Compile Include="Infrastructure\IServerPackageRepository.cs" />
+    <Compile Include="Infrastructure\ServerPackageRepository.cs" />
     <Compile Include="Infrastructure\FileBasedPackageStore.cs" />
     <Compile Include="Infrastructure\IPackageStore.cs" />
     <Compile Include="Infrastructure\HttpStatusCodeResult.cs" />
     <Compile Include="Infrastructure\NinjectBootstrapper.cs" />
     <Compile Include="Infrastructure\NinjectControllerFactory.cs" />
+    <Compile Include="Infrastructure\DerivedPackageData.cs" />
     <Compile Include="Models\AccountMembershipProvider.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="DataServices\Packages.svc.cs">

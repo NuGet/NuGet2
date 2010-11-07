@@ -1,6 +1,7 @@
 using System;
 using System.Data.Services.Common;
 using System.Linq;
+using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server.DataServices {
     [DataServiceKey("Id", "Version")]
@@ -10,7 +11,7 @@ namespace NuGet.Server.DataServices {
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [HasStream]
     public class Package {
-        public Package(IPackage package) {
+        public Package(IPackage package, DerivedPackageData derivedData) {
             Id = package.Id;
             Version = package.Version.ToString();
             Title = package.Title;
@@ -30,6 +31,8 @@ namespace NuGet.Server.DataServices {
             Language = package.Language;
             Dependencies = String.Join(",", from d in package.Dependencies
                                             select ConvertDependency(d));
+            PackageHash = derivedData.PackageHash;
+            PackageSize = derivedData.PackageSize;
         }
 
         public string Id {

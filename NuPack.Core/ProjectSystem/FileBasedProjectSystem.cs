@@ -23,7 +23,7 @@ namespace NuGet {
             }
         }
 
-        protected string GetFullPath(string path) {
+        public override string GetFullPath(string path) {
             return Path.Combine(Root, path);
         }
 

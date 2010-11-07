@@ -1,9 +1,9 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
+namespace NuGet {
     public class LocalPackageRepository : PackageRepositoryBase {
         private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
 
@@ -37,6 +37,27 @@ namespace NuGet {
 
         public override IQueryable<IPackage> GetPackages() {
             return GetPackages(OpenPackage).AsQueryable();
+        }
+
+        public override void AddPackage(IPackage package) {
+            string packageFilePath = GetPackageFilePath(package);
+
+            FileSystem.AddFileWithCheck(packageFilePath, package.GetStream);
+        }
+
+        public override void RemovePackage(IPackage package) {
+            // Delete the package file
+            string packageFilePath = GetPackageFilePath(package);
+            FileSystem.DeleteFileSafe(packageFilePath);
+
+            // Delete the package directory if any
+            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: false);
+
+            // If this is the last package delete the package directory
+            if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
+                !FileSystem.GetDirectoriesSafe(String.Empty).Any()) {
+                FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
+            }
         }
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage) {
@@ -80,28 +101,7 @@ namespace NuGet {
             }
         }
 
-        public override void AddPackage(IPackage package) {
-            string packageFilePath = GetPackageFilePath(package);
-
-            FileSystem.AddFileWithCheck(packageFilePath, package.GetStream);
-        }
-
-        public override void RemovePackage(IPackage package) {
-            // Delete the package file
-            string packageFilePath = GetPackageFilePath(package);
-            FileSystem.DeleteFileSafe(packageFilePath);
-
-            // Delete the package directory if any
-            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: false);
-
-            // If this is the last package delete the package directory
-            if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
-                !FileSystem.GetDirectoriesSafe(String.Empty).Any()) {
-                FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
-            }
-        }
-
-        private IPackage OpenPackage(string path) {
+        protected virtual IPackage OpenPackage(string path) {
             return new ZipPackage(() => FileSystem.OpenFile(path));
         }
 

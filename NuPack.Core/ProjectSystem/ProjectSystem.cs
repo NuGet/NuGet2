@@ -42,6 +42,7 @@ namespace NuGet {
         public abstract void DeleteDirectory(string path, bool recursive);
         public abstract bool DirectoryExists(string path);
         public abstract bool FileExists(string path);
+        public abstract string GetFullPath(string path);
         public abstract DateTimeOffset GetLastModified(string path);
         public abstract bool ReferenceExists(string name);
 

@@ -5,9 +5,9 @@ using NuGet.Server.Infrastructure;
 namespace NuGet.Server.Controllers {
     public class PackagesController : Controller {
         private readonly IPackageStore _fileSystem;
-        private readonly IPackageRepository _repository;
+        private readonly IServerPackageRepository _repository;
 
-        public PackagesController(IPackageStore fileSystem, IPackageRepository repository) {
+        public PackagesController(IPackageStore fileSystem, IServerPackageRepository repository) {
             _fileSystem = fileSystem;
             _repository = repository;
         }

@@ -10,6 +10,7 @@ namespace NuGet {
         IEnumerable<string> GetFiles(string path);
         IEnumerable<string> GetFiles(string path, string filter);
         IEnumerable<string> GetDirectories(string path);
+        string GetFullPath(string path);
         void DeleteFile(string path);
         bool FileExists(string path);
         bool DirectoryExists(string path);

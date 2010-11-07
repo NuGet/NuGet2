@@ -13,7 +13,7 @@ namespace NuGet.Test.Server.Controllers {
             // Arrange
             var dateLastModified = DateTimeOffset.Now;
             var store = new Mock<IPackageStore>();
-            var repository = new Mock<IPackageRepository>();
+            var repository = new Mock<IServerPackageRepository>();
             store.Setup(f => f.GetLastModified(It.IsAny<string>())).Returns(dateLastModified);
             var controller = new PackagesController(store.Object, repository.Object);
             var context = new Mock<ControllerContext>();
@@ -31,7 +31,7 @@ namespace NuGet.Test.Server.Controllers {
             // Arrange
             var dateLastModified = DateTime.UtcNow;
             var store = new Mock<IPackageStore>();
-            var repository = new Mock<IPackageRepository>();
+            var repository = new Mock<IServerPackageRepository>();
             store.Setup(f => f.GetFullPath("NuGet.nupkg")).Returns(@"c:\packages\NuGet.nupkg");
             var controller = new PackagesController(store.Object, repository.Object);
             var context = new Mock<ControllerContext>();

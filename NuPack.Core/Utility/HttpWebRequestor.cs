@@ -6,6 +6,7 @@ namespace NuGet {
     using System.Net;
     using System.Net.Cache;
     using System.Reflection;
+    using NuGet.Resources;
 
     // REVIEW: This class isn't super clean. Maybe this object should be passed around instead
     // of being static
@@ -13,14 +14,14 @@ namespace NuGet {
         private const string UserAgent = "Package-Installer/{0} ({1})";
 
         public static ZipPackage DownloadPackage(Uri uri) {
-            return DownloadPackage(uri, useCache: true);
+            return DownloadPackage(uri, verifyCallback: null, useCache: true);
         }
 
         [SuppressMessage(
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
             Justification = "We can't dispose an object if we want to return it.")]
-        public static ZipPackage DownloadPackage(Uri uri, bool useCache) {
+        public static ZipPackage DownloadPackage(Uri uri, Func<byte[], bool> verifyCallback, bool useCache) {
             byte[] cachedBytes = null;
             return new ZipPackage(() => {
                 if (useCache && cachedBytes != null) {
@@ -32,6 +33,11 @@ namespace NuGet {
                     var memoryStream = new MemoryStream();
                     // Copy the stream
                     responseStream.CopyTo(memoryStream);
+                    // Call the validator if its available
+                    if (verifyCallback != null && !verifyCallback(memoryStream.ToArray())) {
+                        throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
+                    }
+
                     // Move it back to the beginning
                     memoryStream.Seek(0, SeekOrigin.Begin);
 

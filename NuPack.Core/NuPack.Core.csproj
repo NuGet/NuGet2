@@ -90,6 +90,7 @@
     <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
     <Compile Include="Utility\HttpWebRequestor.cs" />
+    <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
@@ -114,6 +115,7 @@
     </Compile>
     <Compile Include="Utility\ProjectSystemExtensions.cs" />
     <Compile Include="Utility\QueryableHelper.cs" />
+    <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Utility\StreamExtensions.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\ProjectSystem.cs" />
