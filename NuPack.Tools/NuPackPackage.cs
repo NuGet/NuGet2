@@ -96,7 +96,6 @@ namespace NuGet.Tools {
             ServiceLocator.Initialize(this, typeof(PackageManagerWindow).Assembly, 
                                             typeof(ServiceLocator).Assembly);
 
-            IServiceProvider p = ServiceLocator.GetInstance<IServiceProvider>();
             _dte = ServiceLocator.GetInstance<DTE>();
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
