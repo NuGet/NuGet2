@@ -6,26 +6,20 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using Microsoft.PowerShell;
 
-namespace NuGetConsole.Host.PowerShell {
-    internal class PowerShellCommandHelper {
+namespace NuGetConsole.Host.PowerShell.Implementation {
 
-        private IPowerShellHost _host;
+    internal static class PowerShellHostExtensions {
 
-        public PowerShellCommandHelper(IPowerShellHost host) {
-            Debug.Assert(host != null);
-            _host = host;
+        public static ExecutionPolicy GetEffectiveExecutionPolicy(this PowerShellHost host) {
+            return GetExecutionPolicy(host, "Get-ExecutionPolicy");
         }
 
-        public ExecutionPolicy GetEffectiveExecutionPolicy() {
-            return GetExecutionPolicy("Get-ExecutionPolicy");
+        public static ExecutionPolicy GetExecutionPolicy(this PowerShellHost host, ExecutionPolicyScope scope) {
+            return GetExecutionPolicy(host, "Get-ExecutionPolicy -Scope " + scope);
         }
 
-        public ExecutionPolicy GetExecutionPolicy(ExecutionPolicyScope scope) {
-            return GetExecutionPolicy("Get-ExecutionPolicy -Scope " + scope);
-        }
-
-        private ExecutionPolicy GetExecutionPolicy(string command) {
-            Collection<PSObject> results = _host.Invoke(command, null, false);
+        private static ExecutionPolicy GetExecutionPolicy(PowerShellHost host, string command) {
+            Collection<PSObject> results = host.Invoke(command, null, false);
             if (results.Count > 0) {
                 return (ExecutionPolicy)results[0].BaseObject;
             }
@@ -34,25 +28,25 @@ namespace NuGetConsole.Host.PowerShell {
             }
         }
 
-        public void SetExecutionPolicy(ExecutionPolicy policy, ExecutionPolicyScope scope) {
+        public static void SetExecutionPolicy(this PowerShellHost host, ExecutionPolicy policy, ExecutionPolicyScope scope) {
             string command = string.Format(CultureInfo.InvariantCulture, "Set-ExecutionPolicy {0} -Scope {1} -Force", policy.ToString(), scope.ToString());
-            _host.Invoke(command, null, false);
+            host.Invoke(command, null, false);
         }
 
-        public void ImportModule(string modulePath) {
-            _host.Invoke("Import-Module '" + modulePath + "'", null, false);
+        public static void ImportModule(this PowerShellHost host, string modulePath) {
+            host.Invoke("Import-Module '" + modulePath + "'", null, false);
         }
 
-        public void AddHistory(string command, DateTime startExecutionTime) {
+        public static void AddHistory(this PowerShellHost host, string command, DateTime startExecutionTime) {
             // PowerShell.exe doesn't add empty commands into execution history. Do the same.
-            if (!string.IsNullOrEmpty(command) && !string.IsNullOrEmpty(command.Trim())) {
+            if (!String.IsNullOrWhiteSpace(command)) {
                 DateTime endExecutionTime = DateTime.Now;
                 PSObject historyInfo = new PSObject();
                 historyInfo.Properties.Add(new PSNoteProperty("CommandLine", command), true);
                 historyInfo.Properties.Add(new PSNoteProperty("ExecutionStatus", PipelineState.Completed), true);
                 historyInfo.Properties.Add(new PSNoteProperty("StartExecutionTime", startExecutionTime), true);
                 historyInfo.Properties.Add(new PSNoteProperty("EndExecutionTime", endExecutionTime), true);
-                _host.Invoke("$input | Add-History", historyInfo, outputResults: false);
+                host.Invoke("$input | Add-History", historyInfo, outputResults: false);
             }
         }
     }
