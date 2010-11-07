@@ -23,7 +23,7 @@
         <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
 
-    <Target Name="Go" DependsOnTargets="Build; ReportFxCopResults; RunTests; BuildPackages; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
     </Target>
 
     <Target Name="Build">
@@ -36,11 +36,7 @@
         <MSBuild Projects="$(NuPackRoot)\NuPack.VisualStudio.Test\NuPack.VisualStudio.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuPackRoot)\NuPack.MSBuild.Test\NuPack.MSBuild.Test.csproj" Targets="RunTests" />
     </Target>
-
-    <Target Name="BuildPackages">        
-        <MSBuild Projects="$(NuPackRoot)\Build\PackageBuild.proj" Targets="BuildPackages" />
-    </Target>
-
+    
     <Target Name="ReportFxCopResults">
         <ItemGroup>
             <FxCopOutputItems Include="$(NuPackRoot)\**\*.dll.CodeAnalysisLog.xml" />
