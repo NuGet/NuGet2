@@ -42,6 +42,7 @@
     </Compile>
     <Compile Include="AggregateRepositoryTest.cs" />
     <Compile Include="BufferedEnumerableTest.cs" />
+    <Compile Include="CryptoHashProviderTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
     <Compile Include="DependencyManagerTest.cs" />
     <Compile Include="NuPackCommandLine\CommandAttributeTests.cs" />
