@@ -295,6 +295,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The name and source specified cannot be empty. Please provide a valid name and source..
+        /// </summary>
+        public static string ShowWarning_NameAndSourceRequired {
+            get {
+                return ResourceManager.GetString("ShowWarning_NameAndSourceRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The name specified cannot be empty. Please provide a valid name..
         /// </summary>
         public static string ShowWarning_NameRequired {

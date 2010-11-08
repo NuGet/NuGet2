@@ -14,13 +14,16 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         public static void ShowWarningMessage(string message) {
-            MessageBox.Show(
-                message, 
-                NuGet.Dialog.Resources.Dialog_MessageBoxTitle, 
-                MessageBoxButton.OK, 
-                MessageBoxImage.Warning);
+            ShowWarningMessage(message, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
         }
 
+        public static void ShowWarningMessage(string message, string title) {
+            MessageBox.Show(
+                message,
+                title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
 
     }
 }

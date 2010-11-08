@@ -195,6 +195,9 @@
   <data name="ShowWarning_InvalidSource" xml:space="preserve">
     <value>The source specified is invalid. Please provide a valid source.</value>
   </data>
+  <data name="ShowWarning_NameAndSourceRequired" xml:space="preserve">
+    <value>The name and source specified cannot be empty. Please provide a valid name and source.</value>
+  </data>
   <data name="ShowWarning_NameRequired" xml:space="preserve">
     <value>The name specified cannot be empty. Please provide a valid name.</value>
   </data>
