@@ -139,7 +139,7 @@
     <value>More Information</value>
   </data>
   <data name="Dialog_NoDependencyLabel" xml:space="preserve">
-    <value>(none)</value>
+    <value>No Dependencies</value>
   </data>
   <data name="Dialog_OnlineProvider" xml:space="preserve">
     <value>Online</value>

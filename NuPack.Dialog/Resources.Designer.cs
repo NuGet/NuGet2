@@ -124,7 +124,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to (none).
+        ///   Looks up a localized string similar to No Dependencies.
         /// </summary>
         public static string Dialog_NoDependencyLabel {
             get {

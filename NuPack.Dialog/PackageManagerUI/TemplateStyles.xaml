@@ -78,11 +78,10 @@
         <Setter  Property="TextWrapping" Value="Wrap" />
         <Setter  Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
-    <Style  x:Key="DetailDependenciesTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
-        <Setter  Property="Margin" Value="0,8,0,8" />
-        <Setter  Property="MaxHeight" Value="200" />
-        <Setter  Property="TextWrapping" Value="NoWrap" />
-        <Setter  Property="TextTrimming" Value="CharacterEllipsis" />
+    <Style  x:Key="NoDependencyTextBoxStyle" TargetType="{x:Type self:TextBlockControl}" BasedOn="{StaticResource DetailDescriptionTextBoxStyle}">
+        <Setter Property="FontStyle" Value="Italic" />
+    </Style>
+    <Style  x:Key="DetailDependenciesTextBoxStyle" TargetType="{x:Type self:TextBlockControl}" BasedOn="{StaticResource DetailDescriptionTextBoxStyle}">
     </Style>
     <Style  x:Key="DetailImageStyle" TargetType="{x:Type Image}">
         <Setter  Property="Width" Value="200" />

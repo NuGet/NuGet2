@@ -135,7 +135,7 @@
                     x:Name="NoneLabel"
                     Margin="25,5,0,0"
                     Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource invertedCountConverter}}"
-                    Style="{StaticResource DetailDescriptionTextBoxStyle}" 
+                    Style="{StaticResource NoDependencyTextBoxStyle}" 
                     Text="{x:Static resources:Resources.Dialog_NoDependencyLabel}">
                 </self:TextBlockControl>
 
