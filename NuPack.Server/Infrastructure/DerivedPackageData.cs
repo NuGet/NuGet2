@@ -4,5 +4,6 @@ namespace NuGet.Server.Infrastructure {
         public long PackageSize { get; set; }
 
         public string PackageHash { get; set; }
+
     }
 }

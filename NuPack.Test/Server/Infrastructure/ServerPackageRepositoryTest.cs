@@ -1,0 +1,47 @@
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NuGet.Test.Mocks;
+using Moq;
+using System.Linq;
+using System.IO;
+using NuGet.Server.Infrastructure;
+using System;
+
+namespace NuGet.Test.Server.Infrastructure {
+    [TestClass]
+    public class ServerPackageRepositoryTest {
+        [TestMethod]
+        public void ServerPackageRepositoryReadsDerivedData() {
+            // Arrange
+            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            var package = new PackageBuilder() { Id = "Test", Version = new System.Version("1.0"), Description = "Description" };
+            package.Authors.Add("Test Author");
+            var memoryStream = new MemoryStream();
+            package.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            mockProjectSystem.Object.AddFile("foo.nupkg");
+            mockProjectSystem.Setup(c => c.OpenFile(It.IsAny<string>())).Returns(() => new MemoryStream(memoryStream.ToArray()));
+            var serverRepository = new ServerPackageRepository(new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
+            serverRepository.HashProvider = GetHashProvider();
+
+            // Act
+            var packages = serverRepository.GetPackagesWithDerivedData();
+            
+            // Assert
+            byte[] data = memoryStream.ToArray();
+            Assert.AreEqual(data.Length, packages.Single().PackageSize);
+            CollectionAssert.AreEquivalent(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash));
+            Assert.AreEqual(data.Length, packages.Single().PackageSize);
+        }
+
+        private static IHashProvider GetHashProvider() {
+            var hashProvider = new Mock<IHashProvider>();
+            hashProvider.Setup(c => c.CalculateHash(It.IsAny<byte[]>())).Returns((byte[] value) => value.Select(Invert).ToArray());
+            
+            return hashProvider.Object;
+        }
+
+        private static byte Invert(byte value) {
+            return (byte)~value;
+        }
+    }
+}

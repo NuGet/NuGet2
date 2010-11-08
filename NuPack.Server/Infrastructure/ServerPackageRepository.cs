@@ -13,6 +13,10 @@ namespace NuGet.Server.Infrastructure {
             : base(path) {
         }
 
+        public ServerPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem)
+            : base(pathResolver, fileSystem) {
+        }
+
         [Inject]
         public IHashProvider HashProvider { get; set; }
 
@@ -28,7 +32,7 @@ namespace NuGet.Server.Infrastructure {
         }
 
         private DerivedPackageData CalculateDerivedData(string path) {
-            byte[] fileBytes = File.ReadAllBytes(path);
+            byte[] fileBytes = FileSystem.OpenFile(path).ReadAllBytes();
             return new DerivedPackageData {
                 PackageSize = fileBytes.Length,
                 PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes))

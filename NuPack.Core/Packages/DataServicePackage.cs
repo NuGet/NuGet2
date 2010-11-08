@@ -72,9 +72,11 @@ namespace NuGet {
             set;
         }
 
+        public string PackageHash { get; set; }
+
         IEnumerable<string> IPackageMetadata.Authors {
             get {
-                if(String.IsNullOrEmpty(Authors)) {
+                if (String.IsNullOrEmpty(Authors)) {
                     return Enumerable.Empty<string>();
                 }
                 return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -107,7 +109,7 @@ namespace NuGet {
                 return _package.Value.AssemblyReferences;
             }
         }
-       
+
         public IEnumerable<IPackageFile> GetFiles() {
             return _package.Value.GetFiles();
         }
@@ -123,5 +125,6 @@ namespace NuGet {
         public override string ToString() {
             return this.GetFullName();
         }
+
     }
 }
