@@ -1,0 +1,88 @@
+﻿namespace NuGet.Test.NuPackCommandLine.Commands {
+
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+    using NuGet.Commands;
+    using NuGet.Test.Mocks;
+
+    [TestClass]
+    public class ListCommandTests {
+
+        [TestMethod]
+        public void GetPackagesUsesSourceIfDefined() {
+            // Arrange
+            IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
+            ListCommand cmd = new ListCommand(factory);
+            cmd.Source = "http://NotDefault";
+
+            // Act
+            IQueryable<IPackage> packages = cmd.GetPackages();
+
+            // Assert
+            Assert.AreEqual("CustomUrlUsed", packages.First().Id);
+
+        }
+
+        [TestMethod]
+        public void GetPackagesUsesDefaultSourceIfNoSourceDefined() {
+            // Arrange
+            IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
+            ListCommand cmd = new ListCommand(factory);
+
+            // Act
+            IQueryable<IPackage> packages = cmd.GetPackages();
+
+            // Assert
+            Assert.AreEqual(3, packages.Count());
+            Assert.AreEqual("DefaultUrlUsed", packages.First().Id);
+
+        }
+
+        [TestMethod]
+        public void GetPackageUsesSearchTermsIfPresent() {
+            // Arrange
+            IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
+            ListCommand cmd = new ListCommand(factory);
+            List<string> searchTerms = new List<string>();
+            searchTerms.Add("SearchPackage");
+            searchTerms.Add("AnotherTerm");
+            cmd.Arguments = searchTerms;
+
+            // Act
+            IQueryable<IPackage> packages = cmd.GetPackages();
+
+            // Assert
+            Assert.AreEqual(2, packages.Count());
+            Assert.AreEqual("SearchPackage", packages.First().Id);
+            Assert.AreEqual("AnotherTerm", packages.Last().Id);
+
+        }
+
+        public IPackageRepositoryFactory CreatePackageRepositoryFactory() {
+            //Default Repository
+            MockPackageRepository defaultPackageRepository = new MockPackageRepository();
+            var packageA = PackageUtility.CreatePackage("DefaultUrlUsed", "1.0");
+            defaultPackageRepository.AddPackage(packageA);
+            var packageC = PackageUtility.CreatePackage("SearchPackage", "1.0");
+            defaultPackageRepository.AddPackage(packageC);
+            var packageD = PackageUtility.CreatePackage("AnotherTerm", "1.0");
+            defaultPackageRepository.AddPackage(packageD);
+
+            //Nondefault Reposritory (Custom URL)
+            MockPackageRepository nondefaultPackageRepository = new MockPackageRepository();
+            var packageB = PackageUtility.CreatePackage("CustomUrlUsed", "1.0");
+            nondefaultPackageRepository.AddPackage(packageB);
+
+            //Setup Factory
+            string defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=204820";
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<string>(s => s.Equals(defaultFeedUrl)))).Returns(defaultPackageRepository);
+            packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<string>(s => !s.Equals(defaultFeedUrl)))).Returns(nondefaultPackageRepository);
+
+            //Return the Factory
+            return packageRepositoryFactory.Object;
+        }
+    }
+}

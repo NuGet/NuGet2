@@ -23,8 +23,8 @@ namespace NuGet {
         [Option(typeof(NuGetResources), "PackageCommandBasePathDescription", AltName = "b")]
         public string BasePath { get; set; }
 
-        [Import(typeof(IConsoleWriter))]
-        public IConsoleWriter Console { get; set; }
+        [Import(typeof(IConsole))]
+        public IConsole Console { get; set; }
 
         public void Execute() {
             string nuspecFile;

@@ -106,11 +106,11 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display a detailed list of information for each package..
+        ///   Looks up a localized string similar to No packages found..
         /// </summary>
-        internal static string ListCommandDetailedListDescription {
+        internal static string ListCommandNoPackages {
             get {
-                return ResourceManager.GetString("ListCommandDetailedListDescription", resourceCulture);
+                return ResourceManager.GetString("ListCommandNoPackages", resourceCulture);
             }
         }
         
@@ -138,6 +138,15 @@ namespace NuGet.Common {
         internal static string ListCommandUsageSummary {
             get {
                 return ResourceManager.GetString("ListCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display a detailed list of information for each package..
+        /// </summary>
+        internal static string ListCommandVerboseListDescription {
+            get {
+                return ResourceManager.GetString("ListCommandVerboseListDescription", resourceCulture);
             }
         }
         

@@ -132,8 +132,8 @@
   <data name="ListCommandDescription" xml:space="preserve">
     <value>Displays a list of packages at a given source. If no source is define the default feed is used.</value>
   </data>
-  <data name="ListCommandDetailedListDescription" xml:space="preserve">
-    <value>Display a detailed list of information for each package.</value>
+  <data name="ListCommandNoPackages" xml:space="preserve">
+    <value>No packages found.</value>
   </data>
   <data name="ListCommandSourceDescription" xml:space="preserve">
     <value>The location to look for packages.</value>
@@ -143,6 +143,9 @@
   </data>
   <data name="ListCommandUsageSummary" xml:space="preserve">
     <value>[search terms] [options]</value>
+  </data>
+  <data name="ListCommandVerboseListDescription" xml:space="preserve">
+    <value>Display a detailed list of information for each package.</value>
   </data>
   <data name="MissingOptionValueError" xml:space="preserve">
     <value>Missing option value for: '{0}'</value>

@@ -50,7 +50,15 @@ namespace NuGet {
                 parsedCommand.Execute();
             }
             catch (Exception e) {
-                Console.WriteLine(e.Message);
+                var currentColor = ConsoleColor.Gray;
+                try {
+                    currentColor = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Error.WriteLine(e.Message);
+                }
+                finally {
+                    Console.ForegroundColor = currentColor;
+                }
                 return 1;
             }
             return 0;

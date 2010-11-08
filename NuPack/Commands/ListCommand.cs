@@ -7,19 +7,25 @@
     using NuGet.Common;
 
     [Export(typeof(ICommand))]
-    [Command(typeof(NuGetResources), "list", "ListCommandDescription", MaxArgs = 1, AltName = "l",
+    [Command(typeof(NuGetResources), "list", "ListCommandDescription", AltName = "l",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : ICommand {
         private const string _defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=204820";
 
-
         [Option(typeof(NuGetResources), "ListCommandSourceDescription", AltName = "s")]
         public string Source { get; set; }
-        [Option(typeof(NuGetResources), "ListCommandDetailedListDescription", AltName = "dl")]
-        public bool DetailedList { get; set; }
+        [Option(typeof(NuGetResources), "ListCommandVerboseListDescription", AltName = "v")]
+        public bool Verbose { get; set; }
         public List<string> Arguments { get; set; }
-        [Import(typeof(IConsoleWriter))]
-        public IConsoleWriter Console { get; set; }
+        [Import(typeof(IConsole))]
+        public IConsole Console { get; set; }
+        public IPackageRepositoryFactory packageRepositoryFactory { get; set; }
+
+        public ListCommand() : this(PackageRepositoryFactory.Default) { }
+
+        public ListCommand(IPackageRepositoryFactory packageFactory) {
+            packageRepositoryFactory = packageFactory;
+        }
 
         public IQueryable<IPackage> GetPackages() {
             var feedUrl = _defaultFeedUrl;
@@ -27,9 +33,9 @@
                 feedUrl = Source;
             }
 
-            var packageRepository = PackageRepositoryFactory.Default.CreateRepository(feedUrl);
+            var packageRepository = packageRepositoryFactory.CreateRepository(feedUrl);
 
-            if (Arguments.Count > 0) {
+            if (Arguments != null && Arguments.Any()) {
                 return packageRepository.GetPackages(Arguments.ToArray());
             }
 
@@ -38,10 +44,10 @@
 
         public void Execute() {
 
-            var packages = GetPackages();
+            IEnumerable<IPackage> packages = GetPackages();
 
-            if (packages != null && packages.Count() > 0) {
-                if (DetailedList) {
+            if (packages != null && packages.Any()) {
+                if (Verbose) {
                     /***********************************************
                      * Package-Name
                      *  1.0.0.2010
@@ -69,7 +75,7 @@
                 }
             }
             else {
-                Console.WriteLine("No packages found.");
+                Console.WriteLine(NuGetResources.ListCommandNoPackages);
             }
         }
     }

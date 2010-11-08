@@ -30,8 +30,8 @@ namespace NuGet {
             }
         }
 
-        [Import(typeof(IConsoleWriter))]
-        public IConsoleWriter Console { get; set; }
+        [Import(typeof(IConsole))]
+        public IConsole Console { get; set; }
 
         [ImportingConstructor]
         public HelpCommand(ICommandManager commandManager)
