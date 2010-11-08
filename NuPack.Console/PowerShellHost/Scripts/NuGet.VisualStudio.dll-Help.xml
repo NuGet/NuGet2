@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<helpItems schema="maml">
+
+  <!-- Install-Package command -->
+  <command:command
+      xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+      xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10"
+      xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+
+    <command:details>
+      <command:name>
+        Install-Package
+      </command:name>
+      <maml:description>
+        <maml:para>Install a NuGet package</maml:para>
+      </maml:description>
+      <maml:copyright>
+        <maml:para></maml:para>
+      </maml:copyright>
+      <command:verb>Install</command:verb>
+      <command:noun>Package</command:noun>
+      <dev:version></dev:version>
+    </command:details>
+
+    <maml:description>
+      <maml:para>Install a NuGet package.</maml:para>
+    </maml:description>
+
+    <!-- Cmdlet syntax section-->
+    <command:syntax>
+
+    </command:syntax>
+
+    <!-- Cmdlet parameter section  -->
+    <command:parameters>
+    </command:parameters>
+
+    <!-- Link section  -->
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online version:</maml:linkText>
+        <maml:uri>http://nuget.codeplex.com</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Install-Package</maml:linkText>
+        <maml:uri/>
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+
+</helpItems>
