@@ -3,10 +3,7 @@ namespace NuGet.Common {
 
     public interface IConsole {
         int CursorLeft { get; set; }
-        int CursorTop { get; set; }
-        string Title { get; set; }
         TextWriter Error { get; }
-        int WindowHeight { get; set; }
         int WindowWidth { get; set; }
 
         void Write(object value);

@@ -9,43 +9,26 @@
 
         public int CursorLeft {
             get {
-                return System.Console.CursorLeft;
+                try {
+                    return System.Console.CursorLeft;
+                }
+                catch (IOException) {
+                    return 0;
+                }
             }
             set {
                 System.Console.CursorLeft = value;
             }
         }
 
-        public int CursorTop {
-            get {
-                return System.Console.CursorTop;
-            }
-            set {
-                System.Console.CursorTop = value;
-            }
-        }
-
-        public string Title {
-            get {
-                return System.Console.Title;
-            }
-            set {
-                System.Console.Title = value;
-            }
-        }
-
-        public int WindowHeight {
-            get {
-                return System.Console.WindowHeight;
-            }
-            set {
-                System.Console.WindowHeight = value;
-            }
-        }
-
         public int WindowWidth {
             get {
-                return System.Console.WindowWidth;
+                try {
+                    return System.Console.WindowWidth;
+                }
+                catch (IOException) {
+                    return 60;
+                }
             }
             set {
                 System.Console.WindowWidth = value;
