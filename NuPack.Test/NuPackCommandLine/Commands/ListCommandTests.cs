@@ -78,8 +78,8 @@
             //Setup Factory
             string defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=204820";
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<string>(s => s.Equals(defaultFeedUrl)))).Returns(defaultPackageRepository);
-            packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<string>(s => !s.Equals(defaultFeedUrl)))).Returns(nondefaultPackageRepository);
+            packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<PackageSource>(s => s.Source.Equals(defaultFeedUrl)))).Returns(defaultPackageRepository);
+            packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<PackageSource>(s => !s.Source.Equals(defaultFeedUrl)))).Returns(nondefaultPackageRepository);
 
             //Return the Factory
             return packageRepositoryFactory.Object;

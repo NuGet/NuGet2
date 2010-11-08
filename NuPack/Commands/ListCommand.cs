@@ -33,7 +33,7 @@
                 feedUrl = Source;
             }
 
-            var packageRepository = packageRepositoryFactory.CreateRepository(feedUrl);
+            var packageRepository = packageRepositoryFactory.CreateRepository(new PackageSource("feed", feedUrl));
 
             if (Arguments != null && Arguments.Any()) {
                 return packageRepository.GetPackages(Arguments.ToArray());
