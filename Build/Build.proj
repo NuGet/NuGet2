@@ -29,6 +29,10 @@
             <Find>&lt;Version&gt;(?&lt;major&gt;\d+)\.(?&lt;minor&gt;\d+)\.\d+\.(?&lt;revision&gt;\d+)&lt;/Version&gt;</Find>
             <ReplaceWith>&lt;Version&gt;$(BUILD_NUMBER)&lt;/Version&gt;</ReplaceWith>
         </RegexTransform>
+        <RegexTransform Include="$(NuPackRoot)\Common\CommonAssemblyInfo.cs">
+            <Find>(?&lt;major&gt;\d+)\.(?&lt;minor&gt;\d+)\.\d+\.(?&lt;revision&gt;\d+)</Find>
+            <ReplaceWith>$(BUILD_NUMBER)</ReplaceWith>
+        </RegexTransform>
     </ItemGroup>
 
     <Target Name="Go" DependsOnTargets="UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
