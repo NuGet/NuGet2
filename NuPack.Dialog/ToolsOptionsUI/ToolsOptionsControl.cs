@@ -39,9 +39,6 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         }
 
         public void UpdateUI() {
-            addButton.Enabled = !String.IsNullOrWhiteSpace(NewPackageName.Text) &&
-                                !String.IsNullOrWhiteSpace(NewPackageSource.Text);
-
             defaultButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
             removeButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0 && !((PackageSource)PackageSourcesListView.SelectedItems[0].Tag).IsAggregate;
         }
@@ -127,7 +124,11 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         }
 
         private void OnAddButtonClick(object sender, EventArgs e) {
-            TryAddSource();
+            TryAddSourceResults result = TryAddSource();
+            if (result == TryAddSourceResults.NothingAdded) {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameAndSourceRequired, Resources.ShowWarning_Title);
+                SelectAndFocus(NewPackageName);
+            }        
         }
 
         private TryAddSourceResults TryAddSource() {
@@ -139,20 +140,20 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             
             // validate name
             if (String.IsNullOrWhiteSpace(name)) {
-                MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameRequired);
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
                 return TryAddSourceResults.InvalidSource;                
             }
 
             // validate source
             if (String.IsNullOrWhiteSpace(source)) {
-                MessageHelper.ShowWarningMessage(Resources.ShowWarning_SourceRequried);
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_SourceRequried, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
                 return TryAddSourceResults.InvalidSource;
             }
 
             if (!(PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source))) {
-                MessageHelper.ShowWarningMessage(Resources.ShowWarning_InvalidSource);
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_InvalidSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
                 return TryAddSourceResults.InvalidSource;                
             }
@@ -162,7 +163,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             // check to see if name has already been added
             bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (hasName) {
-                MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName);
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
                 return TryAddSourceResults.SourceAlreadyAdded;
             }
@@ -170,7 +171,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             // check to see if source has already been added
             bool hasSource = sourcesList.Any(ps => String.Equals(source, ps.Source, StringComparison.OrdinalIgnoreCase));
             if (hasSource) {
-                MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource);
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
                 return TryAddSourceResults.SourceAlreadyAdded;
             }
