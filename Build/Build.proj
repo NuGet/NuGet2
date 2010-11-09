@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildProjectDirectory)\Build.tasks" />
     <PropertyGroup>
        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
         <NuPackRoot>$(MSBuildProjectDirectory)\..</NuPackRoot>
@@ -22,8 +23,19 @@
         <MSBuildDropDirectory>$(NuPackDropDirectory)\MSBuild</MSBuildDropDirectory>
         <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <RegexTransform Include="$(NuPackRoot)\NuPack.Tools\source.extension.vsixmanifest">
+            <Find>&lt;Version&gt;(?&lt;major&gt;\d+)\.(?&lt;minor&gt;\d+)\.\d+\.(?&lt;revision&gt;\d+)&lt;/Version&gt;</Find>
+            <ReplaceWith>&lt;Version&gt;${major}.${minor}.$(BUILD_NUMBER).${revision}&lt;/Version&gt;</ReplaceWith>
+        </RegexTransform>
+    </ItemGroup>
 
-    <Target Name="Go" DependsOnTargets="Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
+    </Target>
+    
+    <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
+        <RegexTransform Items="@(RegexTransform)" />
     </Target>
 
     <Target Name="Build">
