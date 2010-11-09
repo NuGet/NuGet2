@@ -95,12 +95,11 @@ namespace NuGet.VisualStudio.Cmdlets {
         }
 
         private void WritePackagesFromRepository(IPackageRepository repository, string filter) {
+            var packages = repository.GetPackages();
             if (!String.IsNullOrEmpty(filter)) {
-                WritePackages(repository.GetPackages(filter.Split()));
+                packages = packages.Find(filter.Split());
             }
-            else {
-                WritePackages(repository.GetPackages().OrderBy(p => p.Id));
-            }
+            WritePackages(packages.OrderBy(p => p.Id));
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
