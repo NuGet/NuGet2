@@ -25,9 +25,9 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <RegexTransform Include="$(NuPackRoot)\NuPack.Tools\source.extension.vsixmanifest">
+        <RegexTransform Include="$(NuPackRoot)\NuPack.Tools\source.extension.vsixmanifest">        
             <Find>&lt;Version&gt;(?&lt;major&gt;\d+)\.(?&lt;minor&gt;\d+)\.\d+\.(?&lt;revision&gt;\d+)&lt;/Version&gt;</Find>
-            <ReplaceWith>&lt;Version&gt;${major}.${minor}.$(BUILD_NUMBER).${revision}&lt;/Version&gt;</ReplaceWith>
+            <ReplaceWith>&lt;Version&gt;$(BUILD_NUMBER)&lt;/Version&gt;</ReplaceWith>
         </RegexTransform>
     </ItemGroup>
 
