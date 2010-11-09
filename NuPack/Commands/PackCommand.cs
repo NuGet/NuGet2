@@ -9,7 +9,7 @@ namespace NuGet {
 
 
     [Export(typeof(ICommand))]
-    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MinArgs = 0, MaxArgs = 1,
+    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", AltName = "p", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : ICommand {
         private static readonly HashSet<string> _exclude =
@@ -22,6 +22,9 @@ namespace NuGet {
 
         [Option(typeof(NuGetResources), "PackageCommandBasePathDescription", AltName = "b")]
         public string BasePath { get; set; }
+
+        [Import(typeof(IConsole))]
+        public IConsole Console { get; set; }
 
         public void Execute() {
             string nuspecFile;

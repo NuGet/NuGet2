@@ -28,11 +28,14 @@
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Common\Console.cs" />
+    <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -40,7 +43,7 @@
     </Compile>
     <Compile Include="Common\Utility.cs" />
     <Compile Include="ICommandManager.cs" />
-    <Compile Include="PackageAuthoring.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Common\CommonResources.cs">
       <Link>Common\CommonResources.cs</Link>

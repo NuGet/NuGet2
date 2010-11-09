@@ -30,6 +30,9 @@ namespace NuGet {
             }
         }
 
+        [Import(typeof(IConsole))]
+        public IConsole Console { get; set; }
+
         [ImportingConstructor]
         public HelpCommand(ICommandManager commandManager)
             : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, null) {
@@ -81,31 +84,7 @@ namespace NuGet {
             Console.Write(" {0, -" + maxWidth + "}   ", GetCommandText(commandAttribute));
             // Starting index of the description
             int descriptionPadding = maxWidth + 4;
-            PrintJustified(descriptionPadding, commandAttribute.GetDescription());
-        }
-
-        private void PrintJustified(int startIndex, string text) {
-            PrintJustified(startIndex, text, GetConsoleWidth());
-        }
-
-        private void PrintJustified(int startIndex, string text, int maxWidth) {
-            if (maxWidth > startIndex) {
-                maxWidth = maxWidth - startIndex - 1;
-            }
-
-            while (text.Length > 0) {
-                // Trim whitespace at the beginning
-                text = text.TrimStart();
-                // Calculate the number of chars to print based on the width of the console
-                int length = Math.Min(text.Length, maxWidth);
-                // Text we can print without overflowing the console.
-                string content = text.Substring(0, length);
-                int leftPadding = startIndex + length - GetConsoleCursorLeft();
-                // Print it with the correct padding
-                Console.WriteLine("{0," + leftPadding + "}", content);
-                // Get the next substring to be printed
-                text = text.Substring(content.Length);
-            }
+            Console.PrintJustified(descriptionPadding, commandAttribute.GetDescription());
         }
 
         private string GetCommandText(CommandAttribute commandAttribute) {
@@ -134,7 +113,7 @@ namespace NuGet {
 
             if (attribute.GetUsageDescription() != null) {
                 int padding = 5;
-                PrintJustified(padding, attribute.GetUsageDescription(), GetConsoleWidth() - padding);
+                Console.PrintJustified(padding, attribute.GetUsageDescription());
                 Console.WriteLine();
             }
 
@@ -153,39 +132,11 @@ namespace NuGet {
                 foreach (var o in options) {
                     Console.Write(" {0, -" + (maxOptionWidth + 2) + "}", o.Value.Name);
                     Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", "(" + o.Key.AltName + ")");
-                    PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
+                    Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
 
                 }
                 Console.WriteLine();
             }
-        }
-
-        /* Until we can abstract the Console Object we need to catch IOException 
-         * (the exception that happens if the property has not been set) which 
-         * is thrown from WindowWidth and CursorLeft when there is no window aka 
-         * in the integration tests. We can later change this so that we can 
-         * pass in our own console object and keep these errors from being thrown. */
-
-        private static int GetConsoleWidth() {
-            int maxWidth;
-            try {
-                maxWidth = Console.WindowWidth;
-            }
-            catch (System.IO.IOException) {
-                maxWidth = 60;
-            }
-            return maxWidth;
-        }
-
-        private static int GetConsoleCursorLeft() {
-            int cursorLeft;
-            try {
-                cursorLeft = Console.CursorLeft;
-            }
-            catch (System.IO.IOException) {
-                cursorLeft = 0;
-            }
-            return cursorLeft;
         }
 
         private static string GetAltText(string altNameText) {

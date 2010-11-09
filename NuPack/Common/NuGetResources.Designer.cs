@@ -97,6 +97,60 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is define the default feed is used..
+        /// </summary>
+        internal static string ListCommandDescription {
+            get {
+                return ResourceManager.GetString("ListCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No packages found..
+        /// </summary>
+        internal static string ListCommandNoPackages {
+            get {
+                return ResourceManager.GetString("ListCommandNoPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The location to look for packages..
+        /// </summary>
+        internal static string ListCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("ListCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify optional search terms..
+        /// </summary>
+        internal static string ListCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("ListCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [search terms] [options].
+        /// </summary>
+        internal static string ListCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("ListCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display a detailed list of information for each package..
+        /// </summary>
+        internal static string ListCommandVerboseListDescription {
+            get {
+                return ResourceManager.GetString("ListCommandVerboseListDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
         /// </summary>
         internal static string MissingOptionValueError {

@@ -49,6 +49,7 @@
     <Compile Include="NuPackCommandLine\CommandLinePaserTests.cs" />
     <Compile Include="NuPackCommandLine\CommandLineUtilityTests.cs" />
     <Compile Include="NuPackCommandLine\CommandManagerTests.cs" />
+    <Compile Include="NuPackCommandLine\Commands\ListCommandTests.cs" />
     <Compile Include="NuPackCommandLine\OptionAttributeTests.cs" />
     <Compile Include="FileBasedProjectSystemTest.cs" />
     <Compile Include="LocalPackageRepositoryTest.cs" />
