@@ -149,7 +149,7 @@
       <IDSymbol name="cmdidProjects" value="0x0500" />
       <IDSymbol name="cmdidProjectsList" value="0x0510" />
     </GuidSymbol>
-    <GuidSymbol name="guidToolbarImages" value="{8124159b-5cc6-40b8-b330-db13a86b57c2}" >
+    <GuidSymbol name="guidToolbarImages" value="{C96A41A9-81D8-4F67-A344-E4BED01FBAEC}" >
       <IDSymbol name="bmpPowerConsole" value="1" />
       <IDSymbol name="bmpClearConsole" value="2" />
       <IDSymbol name="bmpSourceSettings" value="3" />
