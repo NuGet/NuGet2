@@ -7,7 +7,7 @@ using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     public static class VsProjectSystemFactory {
-        private static Dictionary<string, Func<Project, VsProjectSystem>> _factories = new Dictionary<string, Func<Project, VsProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
+        private static Dictionary<string, Func<Project, IProjectSystem>> _factories = new Dictionary<string, Func<Project, IProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
             { VsConstants.WebApplicationProjectTypeGuid , project => new WebProjectSystem(project) },
             { VsConstants.WebSiteProjectTypeGuid , project => new WebSiteProjectSystem(project) },
         };

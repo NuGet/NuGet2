@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio.Cmdlets {
                 IEnumerable<BindingRedirect> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath, domain);
                 
                 // Create a project system for this package
-                ProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
+                IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
                 // Create a binding redirect manager over the configuration
                 var manager = new BindingRedirectManager(projectSystem, project.GetConfigurationFile());
