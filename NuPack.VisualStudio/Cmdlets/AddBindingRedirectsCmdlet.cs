@@ -36,17 +36,17 @@ namespace NuGet.VisualStudio.Cmdlets {
             AppDomain domain = AppDomain.CreateDomain("domain");
 
             try {
-                // Get the project's output pth
+                // Get the project's output path
                 string outputPath = project.GetOutputPath();
 
                 // Get the binding redirects from the output path
-                IEnumerable<BindingRedirect> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath, domain);
+                IEnumerable<AssemblyBinding> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath, domain);
                 
-                // Create a project system for this package
-                IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
+                // Create a project system
+                IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
                 // Create a binding redirect manager over the configuration
-                var manager = new BindingRedirectManager(projectSystem, project.GetConfigurationFile());
+                var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
 
                 // Add the redirects
                 manager.AddBindingRedirects(redirects);

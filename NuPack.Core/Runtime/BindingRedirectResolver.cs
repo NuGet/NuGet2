@@ -9,7 +9,7 @@ namespace NuGet.Runtime {
         /// Returns a list of assemblies that need binding redirects for a set of assemblies in a path.
         /// </summary>
         /// <param name="path">The directory where assemblies are.</param>
-        public static IEnumerable<BindingRedirect> GetBindingRedirects(string path) {
+        public static IEnumerable<AssemblyBinding> GetBindingRedirects(string path) {
             return GetBindingRedirects(path, AppDomain.CurrentDomain);
         }
 
@@ -18,7 +18,7 @@ namespace NuGet.Runtime {
         /// </summary>        
         /// <param name="path">The directory where assemblies are.</param>
         /// <param name="domain">The application domain to load the assemblies into.</param>
-        public static IEnumerable<BindingRedirect> GetBindingRedirects(string path, AppDomain domain) {
+        public static IEnumerable<AssemblyBinding> GetBindingRedirects(string path, AppDomain domain) {
             if (path == null) {
                 throw new ArgumentNullException("path");
             }
@@ -27,14 +27,14 @@ namespace NuGet.Runtime {
                 throw new ArgumentNullException("domain");
             }
 
-            return GetBindingRedirects(GetDiskAssemblies(path, domain));
+            return GetBindingRedirects(GetAssemblies(path, domain));
         }
 
         /// <summary>
         /// Returns a list of assemblies that need binding redirects.
         /// </summary>
         /// <param name="assemblies">List assemblies to analyze for binding redirects</param>
-        public static IEnumerable<BindingRedirect> GetBindingRedirects(IEnumerable<IAssembly> assemblies) {
+        public static IEnumerable<AssemblyBinding> GetBindingRedirects(IEnumerable<IAssembly> assemblies) {
             if (assemblies == null) {
                 throw new ArgumentNullException("assemblies");
             }
@@ -46,7 +46,6 @@ namespace NuGet.Runtime {
 
             // For each available assembly
             foreach (IAssembly assembly in assemblies) {
-                // Skip the first reference since it's the assembly itself
                 foreach (IAssembly referenceAssembly in assembly.ReferencedAssemblies) {
                     Tuple<string, string> key = GetUniqueKey(referenceAssembly);
                     IAssembly targetAssembly;
@@ -58,7 +57,7 @@ namespace NuGet.Runtime {
                 }
             }
 
-            return redirectAssemblies.Select(a => new BindingRedirect(a));
+            return redirectAssemblies.Select(a => new AssemblyBinding(a));
         }
 
         /// <summary>
@@ -68,7 +67,7 @@ namespace NuGet.Runtime {
             return Tuple.Create(assembly.Name, assembly.PublicKeyToken);
         }
 
-        private static IEnumerable<IAssembly> GetDiskAssemblies(string path, AppDomain domain) {
+        private static IEnumerable<IAssembly> GetAssemblies(string path, AppDomain domain) {
             foreach (var assemblyFile in Directory.GetFiles(path, "*.dll")) {
                 yield return RemoteAssembly.LoadAssembly(assemblyFile, domain);
             }

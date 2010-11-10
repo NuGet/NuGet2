@@ -74,7 +74,6 @@ namespace NuGet.Runtime {
                 return crossDomainAssembly;
             }
 
-            // We never shut down the main app domain so just return the assembly
             var assembly = new RemoteAssembly();
             assembly.Load(path);
             return assembly;

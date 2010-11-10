@@ -58,7 +58,7 @@
     <Compile Include="Repositories\PriorityQueue.cs" />
     <Compile Include="Runtime\AppDomainExtensions.cs" />
     <Compile Include="Runtime\AssemblyNameExtensions.cs" />
-    <Compile Include="Runtime\BindingRedirect.cs" />
+    <Compile Include="Runtime\AssemblyBinding.cs" />
     <Compile Include="Runtime\BindingRedirectManager.cs" />
     <Compile Include="Runtime\BindingRedirectResolver.cs" />
     <Compile Include="Runtime\IAssembly.cs" />
@@ -97,6 +97,7 @@
     <Compile Include="ProjectManager.cs" />
     <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
+    <Compile Include="Utility\HashCodeCombiner.cs" />
     <Compile Include="Utility\HttpWebRequestor.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\PackageComparer.cs" />

@@ -41,7 +41,9 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AggregateRepositoryTest.cs" />
+    <Compile Include="BindingRedirectManagerTest.cs" />
     <Compile Include="BindingRedirectResolverTest.cs" />
+    <Compile Include="AssemblyBindingTest.cs" />
     <Compile Include="BufferedEnumerableTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
