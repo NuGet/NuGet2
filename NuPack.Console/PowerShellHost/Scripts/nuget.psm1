@@ -1,5 +1,5 @@
 # make sure we stop on exceptions
-$ErrorActionPreference = "Stop"
+#$ErrorActionPreference = "Stop"
 
 # Backup the original tab expansion function
 if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
@@ -27,7 +27,7 @@ function global:TabExpansion($line, $lastWord) {
         }
     
         { $_ -eq 'Install-Package' -or $_ -eq 'nip' } {
-            $choices = TabExpansionForAddPackage $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForAddPackage $line $secondLastToken $tokens.length $filter
         }
 
         { $_ -eq 'Uninstall-Package' -or $_ -eq 'nup' } {
@@ -63,12 +63,20 @@ function TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount, [s
     }
 }
 
-function TabExpansionForAddPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
+function TabExpansionForAddPackage([string]$line, [string]$secondLastWord, [int]$tokenCount, [string]$filter) {
     if ($filter.StartsWith('-')) {
        # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        (Get-Package -Remote -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
+        # Determine if a Source param is present
+        $source = ""
+        if ($line -match "-Source(\s+)([^\s]+)") {
+            $source = $matches[2]
+            Find-Package -Remote -Source $source -Filter $filter -ea 'SilentlyContinue' | Group-Object ID | ForEach-Object { $_.Name }
+        }
+        else {
+            Find-Package -Remote -Filter $filter -ea 'SilentlyContinue' | Group-Object ID | ForEach-Object { $_.Name }
+        }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
@@ -82,7 +90,7 @@ function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount,
     }
     elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
         if (IsSolutionOpen) {
-            (Get-Package -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
+            (Find-Package -Filter $filter -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name } 
         }
     }
     elseif (($secondLastWord -eq '-project') -or 

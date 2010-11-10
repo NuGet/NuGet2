@@ -31,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CmdletExtensions.cs" />
+    <Compile Include="FindPackageCmdletTest.cs" />
     <Compile Include="GetPackageCmdletTest.cs" />
     <Compile Include="InstallPackageCmdletTest.cs" />
     <Compile Include="MockCommandRuntime.cs" />

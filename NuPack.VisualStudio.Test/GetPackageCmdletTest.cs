@@ -204,8 +204,7 @@ namespace NuGet.VisualStudio.Test {
         private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object) { CallBase = true };
-            return cmdlet.Object;
+            return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

@@ -64,12 +64,14 @@ namespace NuGet.VisualStudio.Cmdlets {
                 repository = PackageManager.LocalRepository;
             }
 
+            IEnumerable<IPackage> packages;
             if (Updates.IsPresent) {
-                ShowUpdatePackages(repository, Filter);
+                packages = FilterPackagesForUpdate(repository);
             }
             else {
-                WritePackagesFromRepository(repository, Filter);
+                packages = FilterPackages(repository);
             }
+            WritePackages(packages);
         }
 
         /// <summary>
@@ -94,12 +96,21 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
         }
 
-        private void WritePackagesFromRepository(IPackageRepository repository, string filter) {
-            var packages = repository.GetPackages();
-            if (!String.IsNullOrEmpty(filter)) {
-                packages = packages.Find(filter.Split());
+        protected virtual IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository) {
+            var packages = sourceRepository.GetPackages();
+            if (!String.IsNullOrEmpty(Filter)) {
+                packages = packages.Find(Filter.Split());
             }
-            WritePackages(packages.OrderBy(p => p.Id));
+            return packages.OrderBy(p => p.Id);
+        }
+
+        protected virtual IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
+            IPackageRepository localRepository = PackageManager.LocalRepository;
+            var packagesToUpdate = localRepository.GetPackages();
+            if (!String.IsNullOrEmpty(Filter)) {
+                packagesToUpdate = packagesToUpdate.Find(Filter.Split());
+            }
+            return localRepository.GetUpdates(sourceRepository, packagesToUpdate);
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
@@ -111,11 +122,6 @@ namespace NuGet.VisualStudio.Cmdlets {
                         };
 
             WriteObject(query, enumerateCollection: true);
-        }
-
-        private void ShowUpdatePackages(IPackageRepository repository, string filter) {
-            IEnumerable<IPackage> updates = PackageManager.LocalRepository.GetUpdates(repository, filter);
-            WritePackages(updates);
         }
     }
 }

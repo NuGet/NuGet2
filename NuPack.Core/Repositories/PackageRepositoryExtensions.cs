@@ -40,22 +40,22 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Looks up packages that contains one or more searchTerm in its metadata
+        /// Returns packages from the source repository that are later versions to any package in the current repository.
         /// </summary>
-        public static IQueryable<IPackage> GetPackages(this IPackageRepository repository, params string[] searchTerms) {
-            return repository.GetPackages().Find(searchTerms);
+        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository) {
+            return GetUpdates(repository, sourceRepository, repository.GetPackages());
         }
 
-        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository, params string[] searchTerms) {
-            List<IPackage> packages = repository.GetPackages(searchTerms).ToList();
+        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository, IEnumerable<IPackage> packages) {
+            List<IPackage> packageList = packages.ToList();
 
-            if (!packages.Any()) {
+            if (!packageList.Any()) {
                 yield break;
             }
 
             // Filter packages by what we currently have installed
             ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
-            Expression expressionBody = packages.Select(package => GetCompareExpression(parameterExpression, package))
+            Expression expressionBody = packageList.Select(package => GetCompareExpression(parameterExpression, package))
                                                 .Aggregate(Expression.OrElse);
 
             var filterExpression = Expression.Lambda<Func<IPackage, bool>>(expressionBody, parameterExpression);
@@ -69,7 +69,7 @@ namespace NuGet {
                                                                            .ToDictionary(package => package.Key,
                                                                                          package => package.OrderByDescending(p => p.Version).First());
 
-            foreach (IPackage package in packages) {
+            foreach (IPackage package in packageList) {
                 IPackage newestAvailablePackage;
                 if (sourcePackages.TryGetValue(package.Id, out newestAvailablePackage) &&
                     newestAvailablePackage.Version > package.Version) {

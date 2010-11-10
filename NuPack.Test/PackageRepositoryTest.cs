@@ -131,13 +131,13 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void GetPackagesReturnsPackagesWithTerm() {
+        public void FindPackagesReturnsPackagesWithTerm() {
             // Arrange
             var term = "B xaml";
             var repo = GetRemoteRepository();
 
             // Act
-            var packages = repo.GetPackages(term.Split());
+            var packages = repo.GetPackages().Find(term.Split());
 
             // Assert
             Assert.AreEqual(packages.Count(), 2);
@@ -147,26 +147,26 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void GetPackagesReturnsEmptyCollectionWhenNoPackageContainsTerm() {
+        public void FindPackagesReturnsEmptyCollectionWhenNoPackageContainsTerm() {
             // Arrange
             var term = "does-not-exist";
             var repo = GetRemoteRepository();
 
             // Act
-            var packages = repo.GetPackages(term.Split());
+            var packages = repo.GetPackages().Find(term.Split());
 
             // Assert
             Assert.IsFalse(packages.Any());
         }
 
         [TestMethod]
-        public void GetPackagesReturnsAllPackagesWhenSearchTermIsNullOrEmpty() {
+        public void FindPackagesReturnsAllPackagesWhenSearchTermIsNullOrEmpty() {
             // Arrange
             var repo = GetLocalRepository();
 
             // Act
-            var packages1 = repo.GetPackages(String.Empty);
-            var packages2 = repo.GetPackages(null);
+            var packages1 = repo.GetPackages().Find(String.Empty);
+            var packages2 = repo.GetPackages().Find(null);
             var packages3 = repo.GetPackages();
 
             // Assert
