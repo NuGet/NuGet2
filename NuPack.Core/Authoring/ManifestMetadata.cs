@@ -10,6 +10,8 @@ using NuGet.Resources;
 namespace NuGet {
     [XmlType("metadata")]
     public class ManifestMetadata : IPackageMetadata, IValidatableObject {
+        private string _owners;
+
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("id")]
         public string Id { get; set; }
@@ -24,6 +26,17 @@ namespace NuGet {
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("authors")]
         public string Authors { get; set; }
+
+        [XmlElement("owners")]
+        public string Owners {
+            get {
+                // Fallback to authors
+                return _owners ?? Authors;
+            }
+            set {
+                _owners = value;
+            }
+        }
 
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Xml deserialziation can't handle uris")]
         [XmlElement("licenseUrl")]
@@ -98,6 +111,15 @@ namespace NuGet {
                     return Enumerable.Empty<string>();
                 }
                 return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+
+        IEnumerable<string> IPackageMetadata.Owners {
+            get {
+                if (String.IsNullOrEmpty(Owners)) {
+                    return Enumerable.Empty<string>();
+                }
+                return Owners.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
 

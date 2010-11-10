@@ -32,6 +32,11 @@ namespace NuGet {
             set;
         }
 
+        public string Owners {
+            get;
+            set;
+        }
+
         public Uri IconUrl {
             get;
             set;
@@ -80,6 +85,15 @@ namespace NuGet {
                     return Enumerable.Empty<string>();
                 }
                 return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+
+        IEnumerable<string> IPackageMetadata.Owners {
+            get {
+                if (String.IsNullOrEmpty(Owners)) {
+                    return Enumerable.Empty<string>();
+                }
+                return Owners.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
 

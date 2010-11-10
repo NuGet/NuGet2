@@ -54,6 +54,11 @@ namespace NuGet {
             set;
         }
 
+        public IEnumerable<string> Owners {
+            get;
+            set;
+        }
+
         public Uri IconUrl {
             get;
             set;
@@ -143,6 +148,7 @@ namespace NuGet {
                     Version = metadata.Version;
                     Title = metadata.Title;
                     Authors = metadata.Authors;
+                    Owners = metadata.Owners;
                     IconUrl = metadata.IconUrl;
                     LicenseUrl = metadata.LicenseUrl;
                     ProjectUrl = metadata.ProjectUrl;

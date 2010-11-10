@@ -36,6 +36,7 @@ namespace NuGet {
             Files = new Collection<IPackageFile>();
             Dependencies = new Collection<PackageDependency>();
             Authors = new Collection<string>();
+            Owners = new Collection<string>();
         }
 
         public string Id {
@@ -54,6 +55,11 @@ namespace NuGet {
         }
 
         public Collection<string> Authors {
+            get;
+            private set;
+        }
+
+        public Collection<string> Owners {
             get;
             private set;
         }
@@ -109,6 +115,13 @@ namespace NuGet {
             }
         }
 
+        IEnumerable<string> IPackageMetadata.Owners {
+            get {
+                return Owners;
+            }
+        }
+        
+
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
                 return Dependencies;
@@ -138,6 +151,7 @@ namespace NuGet {
             Version = metadata.Version;
             Title = metadata.Title;
             Authors.AddRange(metadata.Authors);
+            Owners.AddRange(metadata.Owners);
             IconUrl = metadata.IconUrl;
             LicenseUrl = metadata.LicenseUrl;
             ProjectUrl = metadata.ProjectUrl;

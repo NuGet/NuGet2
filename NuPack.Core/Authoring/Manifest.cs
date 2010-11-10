@@ -6,8 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using System.Xml.Serialization;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace NuGet {
     [XmlType("package")]
@@ -54,17 +54,17 @@ namespace NuGet {
         public static Manifest Create(IPackageMetadata metadata) {
             return new Manifest {
                 Metadata = new ManifestMetadata {
-                    Id = metadata.Id,
+                    Id = metadata.Id.SafeTrim(),
                     Version = GetVersionString(metadata.Version),
-                    Title = metadata.Title,
-                    Authors = metadata.Authors == null ||
-                              !metadata.Authors.Any() ? null : String.Join(",", metadata.Authors),
+                    Title = metadata.Title.SafeTrim(),
+                    Authors = GetCommaSeparatedString(metadata.Authors),
+                    Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
                     LicenseUrl = metadata.LicenseUrl != null ? metadata.LicenseUrl.OriginalString : null,
                     ProjectUrl = metadata.ProjectUrl != null ? metadata.ProjectUrl.OriginalString : null,
                     IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString : null,
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
-                    Description = metadata.Description,
-                    Summary = metadata.Summary,
+                    Description = metadata.Description.SafeTrim(),
+                    Summary = metadata.Summary.SafeTrim(),
                     Dependencies = metadata.Dependencies == null ||
                                    !metadata.Dependencies.Any() ? null :
                                    (from d in metadata.Dependencies
@@ -76,6 +76,13 @@ namespace NuGet {
                                     }).ToList()
                 }
             };
+        }
+
+        private static string GetCommaSeparatedString(IEnumerable<string> values) {
+            if (values == null || !values.Any()) {
+                return null;
+            }
+            return String.Join(",", values);
         }
 
         private static void Validate(Manifest manifest) {

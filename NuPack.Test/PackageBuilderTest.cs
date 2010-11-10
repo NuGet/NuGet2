@@ -8,6 +8,67 @@ namespace NuGet.Test {
     [TestClass]
     public class PackageBuilderTest {
         [TestMethod]
+        public void OwnersFallsBackToAuthorsIfNoneSpecified() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Description"
+            };
+            builder.Authors.Add("David");
+            var ms = new MemoryStream();
+
+            // Act
+            Manifest.Create(builder).Save(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0""?>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>David</authors>
+    <owners>David</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Description</description>
+  </metadata>
+</package>", ms.ReadToEnd());
+        }
+
+        [TestMethod]
+        public void FieldsAreTrimmed() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "                 A                 ",
+                Version = new Version("1.0"),
+                Description = "Descriptions                                         ",
+                Summary = "                            Summary"
+            };
+            builder.Authors.Add("David");
+            builder.Owners.Add("John");
+            var ms = new MemoryStream();
+
+            // Act
+            Manifest.Create(builder).Save(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0""?>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>David</authors>
+    <owners>John</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <summary>Summary</summary>
+  </metadata>
+</package>", ms.ReadToEnd());
+        }
+
+        [TestMethod]
         public void SaveThrowsIfRequiredPropertiesAreMissing() {
             // Arrange
             PackageBuilder builder = new PackageBuilder();
@@ -34,7 +95,7 @@ Description is required.");
 Version is required.
 Authors is required.
 Description is required.");
-           ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec4.AsStream(), null), @"Id is required.
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec4.AsStream(), null), @"Id is required.
 Version is required.
 Authors is required.
 Description is required.");
@@ -122,7 +183,7 @@ Description is required.");
             ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec3.AsStream(), null), "Authors is required.");
             ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec4.AsStream(), null), "Description is required.");
             ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badDependencies.AsStream(), null), "Dependency Id is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(missingFileSource.AsStream(), null), "Source is required.");       
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(missingFileSource.AsStream(), null), "Source is required.");
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
 
@@ -152,6 +213,7 @@ Description is required.");
             Assert.AreEqual("Some awesome package", builder.Title);
             Assert.AreEqual(1, builder.Authors.Count);
             Assert.AreEqual("Velio Ivanov", builder.Authors[0]);
+            Assert.AreEqual("Velio Ivanov", builder.Owners[0]);
             Assert.AreEqual("en-US", builder.Language);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
@@ -168,6 +230,7 @@ Description is required.");
     <version>2.5</version>
     <title>Some awesome package</title>
     <authors>Velio Ivanov</authors>
+    <owners>John Doe</owners>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
@@ -184,6 +247,8 @@ Description is required.");
             Assert.AreEqual("Some awesome package", builder.Title);
             Assert.AreEqual(1, builder.Authors.Count);
             Assert.AreEqual("Velio Ivanov", builder.Authors[0]);
+            Assert.AreEqual(1, builder.Owners.Count);
+            Assert.AreEqual("John Doe", builder.Owners[0]);
             Assert.AreEqual("en-US", builder.Language);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);

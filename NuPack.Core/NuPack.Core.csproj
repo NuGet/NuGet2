@@ -125,6 +125,7 @@
     <Compile Include="Utility\QueryableHelper.cs" />
     <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Utility\StreamExtensions.cs" />
+    <Compile Include="Utility\StringExtensions.cs" />
     <Compile Include="Utility\Utility.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\IProjectSystem.cs" />

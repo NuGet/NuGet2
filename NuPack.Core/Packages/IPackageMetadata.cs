@@ -6,7 +6,8 @@ namespace NuGet {
         string Id { get; }
         Version Version { get; }
         string Title { get; }
-        IEnumerable<string> Authors { get; }       
+        IEnumerable<string> Authors { get; }
+        IEnumerable<string> Owners { get; }
         Uri IconUrl { get; }
         Uri LicenseUrl { get; }
         Uri ProjectUrl { get; }
