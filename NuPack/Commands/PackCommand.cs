@@ -17,14 +17,18 @@ namespace NuGet {
 
         public List<string> Arguments { get; set; }
 
+        public IConsole Console { get; private set; }
+
         [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription", AltName = "o")]
         public string OutputDirectory { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandBasePathDescription", AltName = "b")]
         public string BasePath { get; set; }
 
-        [Import(typeof(IConsole))]
-        public IConsole Console { get; set; }
+        [ImportingConstructor]
+        public PackCommand(IConsole console) {
+            Console = console;
+        }
 
         public void Execute() {
             string nuspecFile;

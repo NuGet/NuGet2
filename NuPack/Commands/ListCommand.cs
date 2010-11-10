@@ -14,17 +14,28 @@
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription", AltName = "s")]
         public string Source { get; set; }
+
         [Option(typeof(NuGetResources), "ListCommandVerboseListDescription", AltName = "v")]
         public bool Verbose { get; set; }
+
         public List<string> Arguments { get; set; }
-        [Import(typeof(IConsole))]
-        public IConsole Console { get; set; }
-        public IPackageRepositoryFactory packageRepositoryFactory { get; set; }
 
-        public ListCommand() : this(PackageRepositoryFactory.Default) { }
+        public IConsole Console { get; private set; }
 
-        public ListCommand(IPackageRepositoryFactory packageFactory) {
-            packageRepositoryFactory = packageFactory;
+        public IPackageRepositoryFactory RepositoryFactory { get; private set; }
+
+        [ImportingConstructor]
+        public ListCommand(IPackageRepositoryFactory packageRepositoryFactory, IConsole console) {
+            if (console == null) {
+                throw new ArgumentNullException("console");
+            }
+
+            if (packageRepositoryFactory == null) {
+                throw new ArgumentNullException("packageRepositoryFactory");
+            }
+
+            Console = console;
+            RepositoryFactory = packageRepositoryFactory;
         }
 
         public IQueryable<IPackage> GetPackages() {
@@ -33,7 +44,7 @@
                 feedUrl = Source;
             }
 
-            var packageRepository = packageRepositoryFactory.CreateRepository(new PackageSource("feed", feedUrl));
+            var packageRepository = RepositoryFactory.CreateRepository(new PackageSource("feed", feedUrl));
 
             if (Arguments != null && Arguments.Any()) {
                 return packageRepository.GetPackages().Find(Arguments.ToArray());
