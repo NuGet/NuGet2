@@ -96,6 +96,10 @@ namespace NuGet.VisualStudio {
                    select p;
         }
 
+        public static string GetFullPath(this Project project) {
+            return project.GetPropertyValue<string>("FullPath");
+        }
+
         public static T GetPropertyValue<T>(this Project project, string propertyName) {
             try {
                 Property property = project.Properties.Item(propertyName);
@@ -142,6 +146,11 @@ namespace NuGet.VisualStudio {
             return null;
         }
 
+        public static bool IsWebProject(this Project project) {
+            var types = new HashSet<string>(project.GetProjectTypeGuids(), StringComparer.OrdinalIgnoreCase);
+            return types.Contains(VsConstants.WebSiteProjectTypeGuid) || types.Contains(VsConstants.WebApplicationProjectTypeGuid);
+        }
+
         public static bool IsSupported(this Project project) {
             return project.Kind != null &&
                    _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
@@ -149,6 +158,11 @@ namespace NuGet.VisualStudio {
  
         public static bool IsUnloaded(this Project project) {
             return VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static string GetOutputPath(this Project project) {
+            string outputPath = project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
+            return Path.Combine(project.GetFullPath(), outputPath);
         }
 
         public static IVsHierarchy ToVsHierarchy(this Project project) {

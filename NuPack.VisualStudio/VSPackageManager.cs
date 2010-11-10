@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio {
         }
 
         private IProjectManager CreateProjectManager(Project project) {
-            return new ProjectManager(LocalRepository, PathResolver, ProjectSystemFactory.CreateProjectSystem(project));
+            return new ProjectManager(LocalRepository, PathResolver, VsProjectSystemFactory.CreateProjectSystem(project));
         }
 
         private IEnumerable<IProjectManager> GetProjectsWithPackage(string packageId, Version version) {

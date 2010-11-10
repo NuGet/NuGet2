@@ -56,6 +56,13 @@
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Repositories\OrderingComparer.cs" />
     <Compile Include="Repositories\PriorityQueue.cs" />
+    <Compile Include="Runtime\AppDomainExtensions.cs" />
+    <Compile Include="Runtime\AssemblyNameExtensions.cs" />
+    <Compile Include="Runtime\BindingRedirect.cs" />
+    <Compile Include="Runtime\BindingRedirectManager.cs" />
+    <Compile Include="Runtime\BindingRedirectResolver.cs" />
+    <Compile Include="Runtime\IAssembly.cs" />
+    <Compile Include="Runtime\RemoteAssembly.cs" />
     <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
@@ -147,6 +154,7 @@
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

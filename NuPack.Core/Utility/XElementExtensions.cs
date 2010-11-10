@@ -114,6 +114,17 @@ namespace NuGet {
             return false;
         }
 
+        public static void RemoveAttributes(this XElement element, Func<XAttribute, bool> condition) {
+            element.Attributes()
+                   .Where(condition)
+                   .ToList()
+                   .Remove();
+
+            element.Descendants()
+                   .ToList()
+                   .ForEach(e => RemoveAttributes(e, condition));
+        }
+
         private static bool AttributeEquals(XAttribute source, XAttribute target) {
             if (source == null && target == null) {
                 return true;

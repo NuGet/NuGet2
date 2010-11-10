@@ -14,7 +14,7 @@ namespace NuGet.VisualStudio {
         private FrameworkName _targetFramework;
 
         public VsProjectSystem(Project project)
-            : base(project.GetPropertyValue<string>("FullPath")) {
+            : base(project.GetFullPath()) {
             Project = project;
         }
 
