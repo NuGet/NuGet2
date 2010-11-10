@@ -1,5 +1,5 @@
 # make sure we stop on exceptions
-#$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 # Backup the original tab expansion function
 if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
