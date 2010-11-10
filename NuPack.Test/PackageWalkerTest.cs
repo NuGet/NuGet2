@@ -7,7 +7,7 @@ namespace NuGet.Test {
     using Moq;
 
     [TestClass]
-    public class DependencyManagerTest {
+    public class PackageWalkerTest {
         [TestMethod]
         public void ReverseDependencyWalkerUsersVersionAndIdToDetermineVisited() {
             // Arrange

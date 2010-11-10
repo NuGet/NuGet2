@@ -47,7 +47,7 @@
     <Compile Include="BufferedEnumerableTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
-    <Compile Include="DependencyManagerTest.cs" />
+    <Compile Include="PackageWalkerTest.cs" />
     <Compile Include="Mocks\MockAssembly.cs" />
     <Compile Include="NuPackCommandLine\CommandAttributeTests.cs" />
     <Compile Include="NuPackCommandLine\CommandLinePaserTests.cs" />
