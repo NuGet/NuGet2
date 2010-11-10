@@ -207,7 +207,7 @@ namespace NuGet.Dialog.Providers {
                 uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
             }
             catch (InvalidOperationException) {
-                // FromCurrentSynchronizationContext() fails when running unit test
+                // FromCurrentSynchronizationContext() fails when running from unit test
                 uiScheduler = TaskScheduler.Default;
             }
 
