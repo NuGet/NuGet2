@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Internal.Web.Utils;
 using System.IO;
+using System.Linq;
+using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
 namespace NuGet {
     public class PhysicalFileSystem : IFileSystem {
         private readonly string _root;
+        private ILogger _logger;
 
         public PhysicalFileSystem(string root) {
             if (String.IsNullOrEmpty(root)) {
@@ -18,10 +18,19 @@ namespace NuGet {
         }
 
         public string Root {
-            get { return _root; }
+            get {
+                return _root;
+            }
         }
 
-        public virtual ILogger Logger { get; set; }
+        public ILogger Logger {
+            get {
+                return _logger ?? NullLogger.Instance;
+            }
+            set {
+                _logger = value;
+            }
+        }
 
         public virtual string GetFullPath(string path) {
             return Path.Combine(Root, path);
