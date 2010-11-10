@@ -6,13 +6,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Internal.Web.Utils;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
-
-        private delegate void ExecuteDelegate(int pageNumber, int itemsPerPage, AsyncOperation asyncOperation);
 
         // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
@@ -25,6 +25,7 @@ namespace NuGet.Dialog.Providers {
         private bool _isSelected;
         private bool _activeQueryStateCancelled;
         private bool _loadingInProgress;
+        private CancellationTokenSource _currentCancellationSource;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<EventArgs> PageDataChanged;
@@ -181,10 +182,6 @@ namespace NuGet.Dialog.Providers {
         /// Loads the packages in the specified page.
         /// </summary>
         /// <param name="pageNumber"></param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification = "We want to show the error message in the message pane rather than blowing up VS.")]
         public void LoadPage(int pageNumber) {
             if (pageNumber < 1) {
                 throw new ArgumentOutOfRangeException("pageNumber", String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
@@ -203,9 +200,19 @@ namespace NuGet.Dialog.Providers {
             _loadingInProgress = true;
             _activeQueryStateCancelled = false;
 
-            AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(null);
-            ExecuteDelegate worker = new ExecuteDelegate(ExecuteAsync);
-            worker.BeginInvoke(pageNumber, ItemsPerPage, asyncOperation, null, null);
+            _currentCancellationSource = new CancellationTokenSource();
+
+            TaskScheduler uiScheduler = null;
+            try {
+                uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            }
+            catch (InvalidOperationException) {
+                // FromCurrentSynchronizationContext() fails when running unit test
+                uiScheduler = TaskScheduler.Default;
+            }
+
+            Task.Factory.StartNew((state) => ExecuteAsync(pageNumber, _currentCancellationSource.Token), _currentCancellationSource, _currentCancellationSource.Token).
+                ContinueWith(QueryExecutionCompleted, uiScheduler);
         }
 
         private void EnsureExtensionCollection() {
@@ -219,7 +226,12 @@ namespace NuGet.Dialog.Providers {
         /// </summary>
         private void CancelCurrentExtensionQuery() {
             Trace.WriteLine("Cancelling pending extensions query.");
-            _activeQueryStateCancelled = true;
+
+            if (_currentCancellationSource != null) {
+                _currentCancellationSource.Cancel();
+                _loadingInProgress = false;
+                _activeQueryStateCancelled = true;
+            }
         }
 
         /// <summary>
@@ -229,42 +241,48 @@ namespace NuGet.Dialog.Providers {
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We want to show error message inside the dialog, rather than blowing up VS.")]
-        private void ExecuteAsync(int pageNumber, int itemsPerPage, AsyncOperation asyncOperation) {
-            ExecuteCompletedEventArgs eventArgs = null;
-            int totalCount = 0;
+        private LoadPageResult ExecuteAsync(int pageNumber, CancellationToken token) {
+            token.ThrowIfCancellationRequested();
 
-            try {
-                IQueryable<IPackage> query = GetPackages().OrderBy(p => p.Id);
+            IQueryable<IPackage> query = GetPackages().OrderBy(p => p.Id);
 
-                // This should execute the query
-                totalCount = query.Count();
+            token.ThrowIfCancellationRequested();
 
-                IQueryable<IPackage> pageQuery = query.Skip((pageNumber - 1) * itemsPerPage).Take(itemsPerPage);
-                IEnumerable<IPackage> packages = pageQuery.ToList();
+            // This should execute the query
+            int totalCount = query.Count();
 
-                eventArgs = new ExecuteCompletedEventArgs(null, false, null, packages, pageNumber, totalCount);
-            }
-            catch (Exception ex) {
-                totalCount = 0;
-                eventArgs = new ExecuteCompletedEventArgs(ex, false, null, null, pageNumber, totalCount);
+            token.ThrowIfCancellationRequested();
 
-                Debug.WriteLine(ex);
-            }
+            IQueryable<IPackage> pageQuery = query.Skip((pageNumber - 1) * ItemsPerPage).Take(ItemsPerPage);
+            IEnumerable<IPackage> packages = pageQuery.ToList();
 
-            asyncOperation.PostOperationCompleted(new SendOrPostCallback(QueryExecutionCompleted), eventArgs);
+            token.ThrowIfCancellationRequested();
+
+            return new LoadPageResult(packages, pageNumber, totalCount);
         }
 
-        private void QueryExecutionCompleted(object data) {
+        private void QueryExecutionCompleted(Task<LoadPageResult> task) {
+
+            var cancellationSource = (CancellationTokenSource)task.AsyncState;
+            if (cancellationSource != _currentCancellationSource) {
+                return;
+            }
+
             _loadingInProgress = false;
 
-            var args = (ExecuteCompletedEventArgs)data;
-
-            if (_activeQueryStateCancelled) {
+            if (task.IsCanceled) {
                 _activeQueryStateCancelled = false;
                 HideProgressPane();
             }
-            else if (args.Error == null) {
-                IEnumerable<IPackage> packages = args.Results;
+            else if (task.IsFaulted) {
+                // show error message in the Message pane
+                Exception exception = task.Exception;
+                ShowMessagePane((exception.InnerException ?? exception).Message);
+            }
+            else {
+                LoadPageResult result = task.Result;
+
+                IEnumerable<IPackage> packages = result.Packages;
 
                 _extensions.Clear();
                 foreach (IPackage package in packages) {
@@ -275,18 +293,13 @@ namespace NuGet.Dialog.Providers {
                     _extensions[0].IsSelected = true;
                 }
 
-                int totalPages = (args.TotalCount + ItemsPerPage - 1) / ItemsPerPage;
-                int pageNumber = args.PageNumber;
+                int totalPages = (result.TotalCount + ItemsPerPage - 1) / ItemsPerPage;
+                int pageNumber = result.PageNumber;
 
                 TotalPages = Math.Max(1, totalPages);
                 CurrentPage = Math.Max(1, pageNumber);
 
                 HideProgressPane();
-            }
-            else {
-                // show error message in the Message pane
-                Exception exception = args.Error;
-                ShowMessagePane((exception.InnerException ?? exception).Message);
             }
 
             if (QueryExecutionCallback != null) {
