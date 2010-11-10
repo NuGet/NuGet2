@@ -48,6 +48,15 @@ namespace NuGet {
             // Validate before returning
             Validate(manifest);
 
+            // Trim fields in case they have extra whitespace
+            manifest.Metadata.Id = manifest.Metadata.Id.SafeTrim();
+            manifest.Metadata.Title = manifest.Metadata.Title.SafeTrim();
+            manifest.Metadata.Authors = manifest.Metadata.Authors.SafeTrim();
+            manifest.Metadata.Owners = manifest.Metadata.Owners.SafeTrim();
+            manifest.Metadata.Description = manifest.Metadata.Description.SafeTrim();
+            manifest.Metadata.Summary = manifest.Metadata.Summary.SafeTrim();
+            manifest.Metadata.Language = manifest.Metadata.Language.SafeTrim();
+
             return manifest;
         }
 
@@ -65,6 +74,7 @@ namespace NuGet {
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
                     Description = metadata.Description.SafeTrim(),
                     Summary = metadata.Summary.SafeTrim(),
+                    Language = metadata.Language.SafeTrim(),
                     Dependencies = metadata.Dependencies == null ||
                                    !metadata.Dependencies.Any() ? null :
                                    (from d in metadata.Dependencies

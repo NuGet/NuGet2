@@ -37,13 +37,14 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void FieldsAreTrimmed() {
+        public void CreatePackageTrimsExtraWhitespace() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "                 A                 ",
                 Version = new Version("1.0"),
                 Description = "Descriptions                                         ",
-                Summary = "                            Summary"
+                Summary = "                            Summary",
+                Language = "     en-us   "
             };
             builder.Authors.Add("David");
             builder.Owners.Add("John");
@@ -64,6 +65,7 @@ namespace NuGet.Test {
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <summary>Summary</summary>
+    <language>en-us</language>
   </metadata>
 </package>", ms.ReadToEnd());
         }
@@ -193,9 +195,9 @@ Description is required.");
             string spec = @"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
     <metadata>
-    <id>Artem.XmlProviders</id>
+    <id>Artem.XmlProviders  </id>
     <version>2.5</version>
-    <title>Some awesome package</title>
+    <title>Some awesome package       </title>
     <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
