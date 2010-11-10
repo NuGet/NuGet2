@@ -1,12 +1,13 @@
-namespace NuGet.VisualStudio {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using System.IO;
-    using System.Linq;
-    using EnvDTE;
-    using EnvDTE80;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using EnvDTE;
+using EnvDTE80;
 
+namespace NuGet.VisualStudio {    
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(ISolutionManager))]
     public class SolutionManager : ISolutionManager {
@@ -42,6 +43,17 @@ namespace NuGet.VisualStudio {
         public string DefaultProjectName {
             get;
             set;
+        }
+
+        public Project DefaultProject {
+            get {
+                if (String.IsNullOrEmpty(DefaultProjectName)) {
+                    return null;
+                }
+                Project project = GetProject(DefaultProjectName);
+                Debug.Assert(project != null, "Invalid default project");
+                return project;
+            }
         }
 
         public event EventHandler SolutionOpened {

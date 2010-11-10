@@ -10,6 +10,9 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio {
     public static class ProjectExtensions {
+        private const string WebConfig = "web.config";
+        private const string AppConfig = "app.config";
+
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
         private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectTypeGuid, 
@@ -74,6 +77,11 @@ namespace NuGet.VisualStudio {
             }
 
             return projectItem != null;
+        }
+
+        // TODO: Return null for library projects
+        public static string GetConfigurationFile(this Project project) {
+            return project.IsWebProject() ? WebConfig : AppConfig;
         }
 
         private static ProjectItem GetProjectItem(ProjectItems projectItems, string name) {
@@ -155,7 +163,7 @@ namespace NuGet.VisualStudio {
             return project.Kind != null &&
                    _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
         }
- 
+
         public static bool IsUnloaded(this Project project) {
             return VsConstants.UnloadedProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
@@ -167,7 +175,7 @@ namespace NuGet.VisualStudio {
 
         public static IVsHierarchy ToVsHierarchy(this Project project) {
             IVsHierarchy hierarchy;
-          
+
             // Get the vs solution
             IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
             int hr = solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy);

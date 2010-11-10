@@ -9,6 +9,7 @@ namespace NuGet.VisualStudio {
         event EventHandler SolutionClosing;
 
         string DefaultProjectName { get; set; }
+        Project DefaultProject { get; }
 
         Project GetProject(string projectName);
 

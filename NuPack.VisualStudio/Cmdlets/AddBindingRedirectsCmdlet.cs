@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
 using EnvDTE;
 using NuGet.Runtime;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio.Cmdlets {
     [Cmdlet(VerbsCommon.Add, "BindingRedirects")]
-    public class AddBindingRedirectsCmdlet : Cmdlet {
-        private const string WebConfig = "web.config";
-        private const string AppConfig = "app.config";
-
+    public class AddBindingRedirectsCmdlet : Cmdlet {        
         private readonly ISolutionManager _solutionManager;
 
         public AddBindingRedirectsCmdlet()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
-
         }
 
         public AddBindingRedirectsCmdlet(ISolutionManager solutionManager) {
@@ -22,10 +21,16 @@ namespace NuGet.VisualStudio.Cmdlets {
         }
 
         [Parameter(Position = 0)]
-        public string Name { get; set; }
+        public string Project { get; set; }
 
         protected override void ProcessRecord() {
-            Project project = _solutionManager.GetProject(Name ?? _solutionManager.DefaultProjectName);
+            if (!_solutionManager.IsSolutionOpen) {
+                WriteError(VsResources.Cmdlet_NoSolution);
+                return;
+            }
+
+            // Get the specified project
+            Project project = GetProject();
 
             // Create a new app domain so we don't load the assemblies into the host app domain
             AppDomain domain = AppDomain.CreateDomain("domain");
@@ -34,24 +39,53 @@ namespace NuGet.VisualStudio.Cmdlets {
                 // Get the project's output pth
                 string outputPath = project.GetOutputPath();
 
+                // Get the binding redirects from the output path
+                IEnumerable<BindingRedirect> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath, domain);
+                
                 // Create a project system for this package
                 ProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
-                IEnumerable<BindingRedirect> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath, domain);
 
-                string configFile = AppConfig;
-                if (project.IsWebProject()) {
-                    configFile = WebConfig;
-                }
+                // Create a binding redirect manager over the configuration
+                var manager = new BindingRedirectManager(projectSystem, project.GetConfigurationFile());
 
-                var manager = new BindingRedirectManager(projectSystem, configFile);
-
+                // Add the redirects
                 manager.AddBindingRedirects(redirects);
 
+                // Print out what we did
                 WriteObject(redirects, enumerateCollection: true);
             }
             finally {
                 AppDomain.Unload(domain);
             }
+        }
+
+        [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
+        protected void WriteError(string message) {
+            if (!String.IsNullOrEmpty(message)) {
+                WriteError(new Exception(message));
+            }
+        }
+
+        protected void WriteError(Exception exception) {
+            WriteError(new ErrorRecord(exception, String.Empty, ErrorCategory.NotSpecified, null));
+        }
+
+        private Project GetProject() {
+            Debug.Assert(_solutionManager.IsSolutionOpen);
+
+            Project project = null;
+            if (!String.IsNullOrEmpty(Project)) {
+                project = _solutionManager.GetProject(Project);
+            }
+
+            // If project is null fall back to the default project
+            project = project ?? _solutionManager.DefaultProject;
+
+            if (project == null) {
+                throw new InvalidOperationException(VsResources.Cmdlet_MissingProjectParameter);
+            }
+
+            return project;
         }
     }
 }
