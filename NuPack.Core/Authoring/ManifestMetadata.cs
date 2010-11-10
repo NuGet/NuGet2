@@ -108,9 +108,9 @@ namespace NuGet {
                 }
                 return from dependency in Dependencies
                        select PackageDependency.CreateDependency(dependency.Id,
-                                                                 Utility.ParseOptionalVersion(dependency.MinVersion),
-                                                                 Utility.ParseOptionalVersion(dependency.MaxVersion),
-                                                                 Utility.ParseOptionalVersion(dependency.Version));
+                                                                 VersionUtility.ParseOptionalVersion(dependency.MinVersion),
+                                                                 VersionUtility.ParseOptionalVersion(dependency.MaxVersion),
+                                                                 VersionUtility.ParseOptionalVersion(dependency.Version));
             }
         }
 

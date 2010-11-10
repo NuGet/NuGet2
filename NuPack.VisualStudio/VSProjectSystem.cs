@@ -8,7 +8,7 @@ using EnvDTE;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
-    public class VsProjectSystem : FileBasedProjectSystem {
+    public class VsProjectSystem : PhysicalFileSystem, IProjectSystem {
         private const string BinDir = "bin";
 
         private FrameworkName _targetFramework;
@@ -23,16 +23,16 @@ namespace NuGet.VisualStudio {
             private set;
         }
 
-        public override string ProjectName {
+        public virtual string ProjectName {
             get {
                 return Project.Name;
             }
         }
 
-        public override FrameworkName TargetFramework {
+        public FrameworkName TargetFramework {
             get {
                 if (_targetFramework == null) {
-                    _targetFramework = GetTargetFramework() ?? base.TargetFramework;
+                    _targetFramework = GetTargetFramework() ?? VersionUtility.DefaultTargetFramework;
                 }
                 return _targetFramework;
             }
@@ -73,7 +73,7 @@ namespace NuGet.VisualStudio {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
-        public override void AddReference(string referencePath) {
+        public virtual void AddReference(string referencePath) {
             try {
                 string name = Path.GetFileNameWithoutExtension(referencePath);
 
@@ -88,7 +88,7 @@ namespace NuGet.VisualStudio {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
-        public override void RemoveReference(string name) {
+        public virtual void RemoveReference(string name) {
             try {
                 // Get the reference name without extension
                 string referenceName = Path.GetFileNameWithoutExtension(name);
@@ -149,7 +149,7 @@ namespace NuGet.VisualStudio {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail when checking for existance")]
-        public override bool ReferenceExists(string name) {
+        public virtual bool ReferenceExists(string name) {
             try {
                 // Get the reference name without extension
                 string referenceName = Path.GetFileNameWithoutExtension(name);
@@ -161,7 +161,7 @@ namespace NuGet.VisualStudio {
             return false;
         }
 
-        public override dynamic GetPropertyValue(string propertyName) {
+        public virtual dynamic GetPropertyValue(string propertyName) {
             try {
                 Property property = Project.Properties.Item(propertyName);
                 if (property != null) {
@@ -174,12 +174,8 @@ namespace NuGet.VisualStudio {
             return null;
         }
 
-        public override bool IsSupportedFile(string path) {
-            if (Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase)) {
-                return false;
-            }
-
-            return base.IsSupportedFile(path);
+        public virtual bool IsSupportedFile(string path) {
+            return !(Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase));
         }
 
         private void EnsureCheckedOutIfExists(string path) {

@@ -192,7 +192,7 @@ namespace NuGet.Test {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new Mock<ProjectSystem>();
+            var projectSystem = new Mock<IProjectSystem>();
             projectSystem.Setup(m => m.AddFile(@"A.1.0\content\file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
             PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);

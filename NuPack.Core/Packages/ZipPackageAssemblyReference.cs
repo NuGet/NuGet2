@@ -21,7 +21,7 @@ namespace NuGet {
             // Get the target framework string if specified
             string targetFrameworkString = System.IO.Path.GetDirectoryName(path).Trim(System.IO.Path.DirectorySeparatorChar);
             if (!String.IsNullOrEmpty(targetFrameworkString)) {
-                _targetFramework = Utility.ParseFrameworkName(targetFrameworkString);
+                _targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkString);
             }
         }
 

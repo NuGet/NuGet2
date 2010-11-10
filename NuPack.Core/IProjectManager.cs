@@ -5,7 +5,7 @@ namespace NuGet {
         IPackageRepository LocalRepository { get; }
         ILogger Logger { get; set; }
         IPackagePathResolver PathResolver { get; }
-        ProjectSystem Project { get; }
+        IProjectSystem Project { get; }
         IPackageRepository SourceRepository { get; }
 
         event EventHandler<PackageOperationEventArgs> PackageReferenceAdded;

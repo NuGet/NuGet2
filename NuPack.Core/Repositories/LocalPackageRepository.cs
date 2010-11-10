@@ -9,7 +9,7 @@ namespace NuGet {
 
         public LocalPackageRepository(string physicalPath)
             : this(new DefaultPackagePathResolver(physicalPath),
-                   new FileBasedProjectSystem(physicalPath)) {
+                   new PhysicalFileSystem(physicalPath)) {
         }
 
         public LocalPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem) {

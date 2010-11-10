@@ -33,7 +33,7 @@ namespace NuGet.Test {
         public void AddingPackageReferenceThrowsExceptionPackageReferenceIsNotAdded() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new Mock<ProjectSystem>() { CallBase = true };
+            var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             projectSystem.Setup(m => m.AddFile("file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);

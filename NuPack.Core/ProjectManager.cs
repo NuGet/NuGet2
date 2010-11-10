@@ -24,14 +24,14 @@ namespace NuGet {
             { ".pp", new Preprocessor() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project) :
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project) :
             this(sourceRepository,
                  pathResolver,
                  project,
                  new PackageReferenceRepository(project, sourceRepository)) {
         }
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, ProjectSystem project, IPackageRepository localRepository) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository) {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
@@ -66,7 +66,7 @@ namespace NuGet {
             private set;
         }
 
-        public ProjectSystem Project {
+        public IProjectSystem Project {
             get;
             private set;
         }

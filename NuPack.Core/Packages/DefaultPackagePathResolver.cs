@@ -6,7 +6,7 @@ namespace NuGet {
         private readonly IFileSystem _fileSystem;
         
         public DefaultPackagePathResolver(string path)
-            : this(new FileBasedProjectSystem(path)) {
+            : this(new PhysicalFileSystem(path)) {
         }
 
         public DefaultPackagePathResolver(IFileSystem fileSystem) {

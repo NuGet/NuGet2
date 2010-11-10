@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test {
     [TestClass]
-    public class UtilityTest {
+    public class VersionUtilityTest {
         [TestMethod]
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames() {
             // Arrange
@@ -12,7 +12,7 @@ namespace NuGet.Test {
             Version version40 = new Version("4.0.0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => Utility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
@@ -28,7 +28,7 @@ namespace NuGet.Test {
             Version version40 = new Version("4.0.0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => Utility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
@@ -43,7 +43,7 @@ namespace NuGet.Test {
             Version version20 = new Version("2.0");
 
             // Act
-            var frameworkName = Utility.ParseFrameworkName("NETCF20");
+            var frameworkName = VersionUtility.ParseFrameworkName("NETCF20");
 
             // Assert
             Assert.AreEqual("NETCF", frameworkName.Identifier);
@@ -56,7 +56,7 @@ namespace NuGet.Test {
             Version version20 = new Version("2.0");
 
             // Act
-            var frameworkName = Utility.ParseFrameworkName("20");
+            var frameworkName = VersionUtility.ParseFrameworkName("20");
 
             // Assert
             Assert.AreEqual(".NETFramework", frameworkName.Identifier);
@@ -70,7 +70,7 @@ namespace NuGet.Test {
             Version version40 = new Version("4.0");
 
             // Act
-            var frameworkNames = versionFormats.Select(fmt => Utility.ParseFrameworkName(fmt));
+            var frameworkNames = versionFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
@@ -82,7 +82,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess() {            
             // Act
-            var frameworkName = Utility.ParseFrameworkName("NET41235");
+            var frameworkName = VersionUtility.ParseFrameworkName("NET41235");
 
             // Assert
             Assert.AreEqual(".NETFramework", frameworkName.Identifier);
@@ -92,11 +92,11 @@ namespace NuGet.Test {
         [TestMethod]
         public void ParseFrameworkNameInvalidVersionFormatUsesDefaultVersion() {
             // Act
-            var frameworkName = Utility.ParseFrameworkName("NET4.1.4.5.5");
+            var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5");
 
             // Assert
             Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(Utility.GetDefaultTargetFrameworkVersion(), frameworkName.Version);
+            Assert.AreEqual(VersionUtility.DefaultTargetFrameworkVersion, frameworkName.Version);
         }
     }
 }

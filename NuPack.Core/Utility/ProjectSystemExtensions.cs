@@ -8,7 +8,7 @@ using System.Linq;
 namespace NuGet {
     // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
     public static class ProjectSystemExtensions {
-        public static void AddFiles(this ProjectSystem project,
+        public static void AddFiles(this IProjectSystem project,
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers) {
             foreach (IPackageFile file in files) {
@@ -34,7 +34,7 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        public static void DeleteFiles(this ProjectSystem project,
+        public static void DeleteFiles(this IProjectSystem project,
                                        IEnumerable<IPackageFile> files,
                                        IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers) {

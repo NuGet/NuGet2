@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace NuGet.TeamFoundationServer {
-    public class TfsFileSystem : FileBasedProjectSystem {
+    public class TfsFileSystem : PhysicalFileSystem {
         public TfsFileSystem(Workspace workspace, string path)
             : this(new TfsWorkspaceWrapper(workspace), path) {
         }

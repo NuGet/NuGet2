@@ -108,7 +108,7 @@ namespace NuGet.VisualStudio {
                 }
             }
 
-            return fileSystem ?? new FileBasedProjectSystem(path);
+            return fileSystem ?? new PhysicalFileSystem(path);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]

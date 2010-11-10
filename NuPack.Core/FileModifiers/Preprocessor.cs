@@ -12,7 +12,7 @@ namespace NuGet {
     public class Preprocessor : IPackageFileTransformer {
         private static readonly Regex _tokenRegex = new Regex(@"\$(?<propertyName>\w+)\$");
 
-        public void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem) {
+        public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem) {
             if (!projectSystem.FileExists(targetPath)) {
                 using (Stream stream = Process(file, projectSystem).AsStream()) {
                     projectSystem.AddFile(targetPath, stream);
@@ -20,17 +20,17 @@ namespace NuGet {
             }
         }
 
-        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem) {
+        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem) {
             Func<Stream> streamFactory = () => Process(file, projectSystem).AsStream();
             FileSystemExtensions.DeleteFileSafe(projectSystem, targetPath, streamFactory);
         }
         
-        private static string Process(IPackageFile file, ProjectSystem projectSystem) {
+        private static string Process(IPackageFile file, IProjectSystem projectSystem) {
             string text = file.GetStream().ReadToEnd();
             return _tokenRegex.Replace(text, match => ReplaceToken(match, projectSystem));
         }
 
-        private static string ReplaceToken(Match match, ProjectSystem projectSystem) {
+        private static string ReplaceToken(Match match, IProjectSystem projectSystem) {
             string propertyName = match.Groups["propertyName"].Value;
             var value = projectSystem.GetPropertyValue(propertyName);
             if (value == null) {

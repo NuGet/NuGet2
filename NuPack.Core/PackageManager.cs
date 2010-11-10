@@ -15,7 +15,7 @@ namespace NuGet {
         private event EventHandler<PackageOperationEventArgs> _packageUninstalled;
 
         public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, string path)
-            : this(sourceRepository, pathResolver, new FileBasedProjectSystem(path)) {
+            : this(sourceRepository, pathResolver, new PhysicalFileSystem(path)) {
         }
 
         public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem) :

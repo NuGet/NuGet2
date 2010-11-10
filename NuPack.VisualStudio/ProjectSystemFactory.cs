@@ -7,13 +7,13 @@ using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     public static class ProjectSystemFactory {
-        private static Dictionary<string, Func<Project, ProjectSystem>> _factories = new Dictionary<string, Func<Project, ProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
+        private static Dictionary<string, Func<Project, IProjectSystem>> _factories = new Dictionary<string, Func<Project, IProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
             { VsConstants.WebApplicationProjectTypeGuid , project => new WebProjectSystem(project) },
             { VsConstants.WebSiteProjectTypeGuid , project => new WebSiteProjectSystem(project) },
         };
 
 
-        public static ProjectSystem CreateProjectSystem(Project project) {            
+        public static IProjectSystem CreateProjectSystem(Project project) {            
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio {
 
             // Try to get a factory for the project type guid            
             foreach (var guid in project.GetProjectTypeGuids()) {
-                Func<Project, ProjectSystem> factory;
+                Func<Project, IProjectSystem> factory;
                 if (_factories.TryGetValue(guid, out factory)) {
                     return factory(project);
                 }

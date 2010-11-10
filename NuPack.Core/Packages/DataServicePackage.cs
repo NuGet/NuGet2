@@ -89,9 +89,9 @@ namespace NuGet {
                        let parts = d.Split(':')
                        where parts.Length == 4
                        select PackageDependency.CreateDependency(parts[0],
-                                                                 Utility.ParseOptionalVersion(parts[1]),
-                                                                 Utility.ParseOptionalVersion(parts[2]),
-                                                                 Utility.ParseOptionalVersion(parts[3]));
+                                                                 VersionUtility.ParseOptionalVersion(parts[1]),
+                                                                 VersionUtility.ParseOptionalVersion(parts[2]),
+                                                                 VersionUtility.ParseOptionalVersion(parts[3]));
             }
         }
 

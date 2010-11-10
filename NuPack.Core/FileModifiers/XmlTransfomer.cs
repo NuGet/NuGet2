@@ -13,7 +13,7 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void TransformFile(IPackageFile file, string targetPath, ProjectSystem projectSystem) {
+        public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem) {
             // Get the xml fragment
             XElement xmlFragment = GetXml(file);
 
@@ -26,7 +26,7 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, ProjectSystem projectSystem) {
+        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem) {
             // Get the xml snippet
             XElement xmlFragment = GetXml(file);
 

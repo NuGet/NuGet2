@@ -1,37 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Internal.Web.Utils;
+using System.IO;
+using NuGet.Resources;
+
 namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using Microsoft.Internal.Web.Utils;
-    using NuGet.Resources;
+    public class PhysicalFileSystem : IFileSystem {
+        private readonly string _root;
 
-    public class FileBasedProjectSystem : ProjectSystem {
-        private const string BinDir = "bin";
-        private string _root;
-
-        public FileBasedProjectSystem(string root) {
+        public PhysicalFileSystem(string root) {
             if (String.IsNullOrEmpty(root)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "root");
             }
             _root = root;
         }
 
-        public override string Root {
-            get {
-                return _root;
-            }
+        public string Root {
+            get { return _root; }
         }
 
-        public override string GetFullPath(string path) {
+        public virtual ILogger Logger { get; set; }
+
+        public virtual string GetFullPath(string path) {
             return Path.Combine(Root, path);
         }
 
-        protected virtual string GetReferencePath(string name) {
-            return Path.Combine(BinDir, name);
-        }
-
-        public override void AddFile(string path, Stream stream) {
+        public virtual void AddFile(string path, Stream stream) {
             EnsureDirectory(Path.GetDirectoryName(path));
 
             using (Stream outputStream = File.Create(GetFullPath(path))) {
@@ -52,7 +48,7 @@ namespace NuGet {
             }
         }
 
-        public override void DeleteFile(string path) {
+        public virtual void DeleteFile(string path) {
             if (!FileExists(path)) {
                 return;
             }
@@ -73,11 +69,11 @@ namespace NuGet {
             }
         }
 
-        public void DeleteDirectory(string path) {
+        public virtual void DeleteDirectory(string path) {
             DeleteDirectory(path, recursive: false);
         }
 
-        public override void DeleteDirectory(string path, bool recursive) {
+        public virtual void DeleteDirectory(string path, bool recursive) {
             if (!DirectoryExists(path)) {
                 return;
             }
@@ -92,46 +88,11 @@ namespace NuGet {
             }
         }
 
-        public override void AddReference(string referencePath) {
-            // Copy to bin by default
-            string src = referencePath;
-            string referenceName = Path.GetFileName(referencePath);
-            string dest = GetFullPath(GetReferencePath(referenceName));
-
-            // Ensure the destination path exists
-            Directory.CreateDirectory(Path.GetDirectoryName(dest));
-
-            // Copy the reference over
-            File.Copy(src, dest, overwrite: true);
-        }
-
-        public override void RemoveReference(string name) {
-            DeleteFile(GetReferencePath(name));
-
-            // Delete the bin directory if this was the last reference
-            if (!GetFiles(BinDir).Any()) {
-                DeleteDirectory(BinDir);
-            }
-        }
-
-        public override dynamic GetPropertyValue(string propertyName) {
-            if(propertyName == null) {
-                return null;
-            }
-
-            // Return empty string for the root namespace of this project.
-            if (propertyName.Equals("RootNamespace", StringComparison.OrdinalIgnoreCase)) {
-                return String.Empty;
-            }
-
-            return base.GetPropertyValue(propertyName);
-        }
-
-        public override IEnumerable<string> GetFiles(string path) {
+        public virtual IEnumerable<string> GetFiles(string path) {
             return GetFiles(path, "*.*");
         }
 
-        public override IEnumerable<string> GetFiles(string path, string filter) {
+        public virtual IEnumerable<string> GetFiles(string path, string filter) {
             path = EnsureTrailingSlash(GetFullPath(path));
             try {
                 if (!Directory.Exists(path)) {
@@ -150,7 +111,7 @@ namespace NuGet {
             return Enumerable.Empty<string>();
         }
 
-        public override IEnumerable<string> GetDirectories(string path) {
+        public virtual IEnumerable<string> GetDirectories(string path) {
             try {
                 path = EnsureTrailingSlash(GetFullPath(path));
                 if (!Directory.Exists(path)) {
@@ -163,37 +124,32 @@ namespace NuGet {
 
             }
             catch (DirectoryNotFoundException) {
-                
+
             }
 
             return Enumerable.Empty<string>();
         }
 
-        public override DateTimeOffset GetLastModified(string path) {
+        public virtual DateTimeOffset GetLastModified(string path) {
             if (DirectoryExists(path)) {
                 return new DirectoryInfo(GetFullPath(path)).LastWriteTimeUtc;
             }
             return new FileInfo(GetFullPath(path)).LastWriteTimeUtc;
         }
 
-        public override bool FileExists(string path) {
+        public virtual bool FileExists(string path) {
             path = GetFullPath(path);
             return File.Exists(path);
         }
 
-        public override bool DirectoryExists(string path) {
+        public virtual bool DirectoryExists(string path) {
             path = GetFullPath(path);
             return Directory.Exists(path);
         }
 
-        public override Stream OpenFile(string path) {
+        public virtual Stream OpenFile(string path) {
             path = GetFullPath(path);
             return File.OpenRead(path);
-        }
-
-        public override bool ReferenceExists(string name) {
-            string path = GetReferencePath(name);
-            return FileExists(path);
         }
 
         protected string MakeRelativePath(string fullPath) {

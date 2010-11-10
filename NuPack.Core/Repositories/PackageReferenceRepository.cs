@@ -12,7 +12,7 @@ namespace NuGet {
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase {
-        public PackageReferenceRepository(ProjectSystem project, IPackageRepository sourceRepository) {
+        public PackageReferenceRepository(IProjectSystem project, IPackageRepository sourceRepository) {
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
@@ -23,7 +23,7 @@ namespace NuGet {
             SourceRepository = sourceRepository;
         }
 
-        private ProjectSystem Project {
+        private IProjectSystem Project {
             get;
             set;
         }
