@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace NuGet.Test {
     [TestClass]
@@ -78,13 +79,26 @@ namespace NuGet.Test {
         [TestMethod]
         public void SaveThrowsIfRequiredPropertiesAreMissing() {
             // Arrange
-            PackageBuilder builder = new PackageBuilder();
+            var builder = new PackageBuilder();
+            builder.Files.Add(new Mock<IPackageFile>().Object);
 
             // Act & Assert
             ExceptionAssert.Throws<ValidationException>(() => builder.Save(new MemoryStream()), @"Id is required.
 Version is required.
 Authors is required.
 Description is required.");
+        }
+
+        [TestMethod]
+        public void SaveThrowsIfNoFilesOrDependencies() {
+            // Arrange
+            var builder = new PackageBuilder();
+            builder.Id = "A";
+            builder.Version = new Version("1.0");
+            builder.Description = "Description";
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "Cannot create a package that has no dependencies nor content.");
         }
 
         [TestMethod]

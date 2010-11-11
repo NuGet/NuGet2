@@ -14,6 +14,10 @@ namespace NuGet.Test.Server.Infrastructure {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var package = new PackageBuilder() { Id = "Test", Version = new System.Version("1.0"), Description = "Description" };
+            var mockFile = new Mock<IPackageFile>();
+            mockFile.Setup(m => m.Path).Returns("foo");
+            mockFile.Setup(m => m.GetStream()).Returns(new MemoryStream());
+            package.Files.Add(mockFile.Object);
             package.Authors.Add("Test Author");
             var memoryStream = new MemoryStream();
             package.Save(memoryStream);

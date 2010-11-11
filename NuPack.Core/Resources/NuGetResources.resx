@@ -300,4 +300,7 @@
   <data name="TagMissingHash" xml:space="preserve">
     <value>The '{0}' tag is missing a #</value>
   </data>
+  <data name="CannotCreateEmptyPackage" xml:space="preserve">
+    <value>Cannot create a package that has no dependencies nor content.</value>
+  </data>
 </root>

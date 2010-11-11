@@ -88,6 +88,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot create a package that has no dependencies nor content..
+        /// </summary>
+        internal static string CannotCreateEmptyPackage {
+            get {
+                return ResourceManager.GetString("CannotCreateEmptyPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Circular dependency detected &apos;{0}&apos;.
         /// </summary>
         internal static string CircularDependencyDetected {

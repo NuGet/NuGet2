@@ -70,6 +70,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
 
             //Act
             Tuple<int, string> result = CommandRunner.Run(NupackExePath, OneSpecfolder, "pack", true);
@@ -84,6 +85,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "Antlr.nuspec");
             string expectedPackage = Path.Combine(OutputFolder, "Antlr.3.1.1.nupkg");
+            File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
 
             //Act

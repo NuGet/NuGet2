@@ -140,6 +140,11 @@ namespace NuGet {
         }
 
         public void Save(Stream stream) {
+            // Throw if the package doesn't contain any dependencies nor content
+            if (!Files.Any() && !Dependencies.Any()) {
+                throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
+            }
+
             using (Package package = Package.Open(stream, FileMode.Create)) {
                 WriteManifest(package);
                 WriteFiles(package);
