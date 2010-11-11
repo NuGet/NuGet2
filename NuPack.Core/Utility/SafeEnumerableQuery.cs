@@ -15,7 +15,7 @@ namespace NuGet {
     /// then remove all compiler generated closures from the expression before compilation.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Type is an IQueryable and by convention should end with the term Query")]
-    public class SafeEnumerableQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
+    internal class SafeEnumerableQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
         private readonly IQueryable _enumerableQuery;
         private readonly Expression _expression;
 
@@ -32,7 +32,7 @@ namespace NuGet {
             _expression = expression;
         }
 
-        public IEnumerator<T> GetEnumerator() { 
+        public IEnumerator<T> GetEnumerator() {
             // Create the new query and return the enumerator
             return InnerProvider.CreateQuery<T>(InnerExpression).GetEnumerator();
         }
@@ -116,41 +116,6 @@ namespace NuGet {
 
         public override string ToString() {
             return _enumerableQuery.ToString();
-        }
-
-        /// <summary>
-        /// This class walks an expression tree and replaces compiler generated closure member accesses with thier value.
-        /// </summary>
-        private class ClosureEvaluator : ExpressionVisitor {
-            protected override Expression VisitMember(MemberExpression node) {
-                if (IsGeneratedClosureMember(node)) {
-                    var constantExpression = (ConstantExpression)node.Expression;
-                    var fieldInfo = (FieldInfo)node.Member;
-                    // Evaluate the closure member
-                    return Expression.Constant(fieldInfo.GetValue(constantExpression.Value));
-                }
-                return base.VisitMember(node);
-            }
-
-            protected override Expression VisitConstant(ConstantExpression node) {
-                return base.VisitConstant(node);
-            }
-
-            private static bool IsGeneratedClosureMember(MemberExpression node) {
-                // Closure types are internal classes that are compiler generated
-                return node.Expression != null &&
-                       node.Member != null &&
-                       node.Expression.NodeType == ExpressionType.Constant &&
-                       node.Member.MemberType == MemberTypes.Field &&
-                       !node.Expression.Type.IsVisible &&
-                       IsCompilerGenerated(node.Expression.Type);
-            }
-
-            private static bool IsCompilerGenerated(Type type) {
-                return type.GetCustomAttributes(inherit: true)
-                           .OfType<CompilerGeneratedAttribute>()
-                           .Any();
-            }
         }
     }
 }

@@ -45,7 +45,7 @@
     <Compile Include="BindingRedirectResolverTest.cs" />
     <Compile Include="AssemblyBindingTest.cs" />
     <Compile Include="BufferedEnumerableTest.cs" />
-    <Compile Include="SafeEnumerableQueryTest.cs" />
+    <Compile Include="ClosureEvaluatorTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
     <Compile Include="PackageWalkerTest.cs" />
@@ -65,6 +65,7 @@
     <Compile Include="ProjectManagerTest.cs" />
     <Compile Include="FileSystemExtensionsTest.cs" />
     <Compile Include="PackageManagerTest.cs" />
+    <Compile Include="SecurityTest.cs" />
     <Compile Include="Server\Controllers\PackagesControllerTest.cs" />
     <Compile Include="Server\Infrastructure\ConditionalGetResultTest.cs" />
     <Compile Include="Server\Infrastructure\NinjectControllerFactoryTest.cs" />
