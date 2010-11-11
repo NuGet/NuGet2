@@ -37,6 +37,7 @@
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
     <Compile Include="Packages\IPackageMetadata.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Utility\PackageUtility.cs" />
+    <Compile Include="Utility\SafeEnumerableQuery.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\IProjectSystem.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />

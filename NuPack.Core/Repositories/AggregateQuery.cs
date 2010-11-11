@@ -35,7 +35,7 @@ namespace NuGet {
         public IEnumerator<T> GetEnumerator() {
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
-            var aggregateQuery = GetAggregateEnumerable().AsQueryable();
+            var aggregateQuery = GetAggregateEnumerable().AsSafeQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
             return aggregateQuery.Provider.CreateQuery<T>(aggregateExpression).GetEnumerator();
@@ -84,7 +84,7 @@ namespace NuGet {
 
         public TResult Execute<TResult>(Expression expression) {
             var results = (from queryable in _queryables
-                           select Execute<TResult>(queryable, expression)).AsQueryable();
+                           select Execute<TResult>(queryable, expression)).AsSafeQueryable();
 
             if (QueryableUtility.IsQueryableMethod(expression, "Count")) {
                 // HACK: This is in correct since we aren't removing duplicates but count is mostly for paging

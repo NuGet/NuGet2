@@ -26,6 +26,10 @@ namespace NuGet {
             return _orderMethods.Any(method => IsQueryableMethod(expression, method));
         }
 
+        public static Expression ReplaceQueryableExpression(IQueryable query, Expression expression) {
+            return new ExpressionRewriter(query).Visit(expression);
+        }
+
         public static Type FindGenericType(Type definition, Type type) {
             while ((type != null) && (type != typeof(object))) {
                 if (type.IsGenericType && (type.GetGenericTypeDefinition() == definition)) {
@@ -42,6 +46,22 @@ namespace NuGet {
                 type = type.BaseType;
             }
             return null;
+        }
+
+        private class ExpressionRewriter : ExpressionVisitor {
+            private readonly IQueryable _query;
+            
+            public ExpressionRewriter(IQueryable query) {
+                _query = query;
+            }
+
+            protected override Expression VisitConstant(ConstantExpression node) {
+                // Replace the query at the root of the expression
+                if (typeof(IQueryable).IsAssignableFrom(node.Type)) {
+                    return _query.Expression;
+                }
+                return base.VisitConstant(node);
+            }
         }
     }
 }

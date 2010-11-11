@@ -65,7 +65,7 @@ namespace NuGet {
                            where package != null
                            select package;
             }
-            return packages.AsQueryable();
+            return packages.AsSafeQueryable();
         }
 
         public override void AddPackage(IPackage package) {

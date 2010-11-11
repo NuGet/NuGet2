@@ -45,6 +45,7 @@
     <Compile Include="BindingRedirectResolverTest.cs" />
     <Compile Include="AssemblyBindingTest.cs" />
     <Compile Include="BufferedEnumerableTest.cs" />
+    <Compile Include="SafeEnumerableQueryTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
     <Compile Include="PackageWalkerTest.cs" />
