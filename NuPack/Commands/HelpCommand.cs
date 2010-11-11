@@ -29,17 +29,16 @@ namespace NuGet {
                 return null;
             }
         }
-
-        [Import(typeof(IConsole))]
-        public IConsole Console { get; set; }
+        public IConsole Console { get; private set; }
 
         [ImportingConstructor]
-        public HelpCommand(ICommandManager commandManager)
-            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, null) {
+        public HelpCommand(ICommandManager commandManager, IConsole console)
+            : this(commandManager, console, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, null) {
         }
 
-        public HelpCommand(ICommandManager commandManager, string commandExe, string productName, string helpUrl) {
+        public HelpCommand(ICommandManager commandManager, IConsole console, string commandExe, string productName, string helpUrl) {
             _commandManager = commandManager;
+            Console = console;
             _commandExe = commandExe;
             _productName = productName;
             _helpUrl = helpUrl;

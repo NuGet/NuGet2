@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using NuGet.Commands;
+    using NuGet.Common;
     using NuGet.Test.Mocks;
 
     [TestClass]
@@ -14,7 +15,8 @@
         public void GetPackagesUsesSourceIfDefined() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
-            ListCommand cmd = new ListCommand(factory);
+            IConsole console = new Mock<IConsole>().Object;
+            ListCommand cmd = new ListCommand(factory, console);
             cmd.Source = "http://NotDefault";
 
             // Act
@@ -29,7 +31,8 @@
         public void GetPackagesUsesDefaultSourceIfNoSourceDefined() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
-            ListCommand cmd = new ListCommand(factory);
+            IConsole console = new Mock<IConsole>().Object;
+            ListCommand cmd = new ListCommand(factory, console);
 
             // Act
             IQueryable<IPackage> packages = cmd.GetPackages();
@@ -44,7 +47,8 @@
         public void GetPackageUsesSearchTermsIfPresent() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
-            ListCommand cmd = new ListCommand(factory);
+            IConsole console = new Mock<IConsole>().Object;
+            ListCommand cmd = new ListCommand(factory, console);
             List<string> searchTerms = new List<string>();
             searchTerms.Add("SearchPackage");
             searchTerms.Add("AnotherTerm");

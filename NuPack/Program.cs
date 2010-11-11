@@ -27,10 +27,10 @@ namespace NuGet {
         public void Initialize() {
             using (AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(Assembly.GetExecutingAssembly()))) {
                 using (var container = new CompositionContainer(catalog)) {
+                    container.ComposeExportedValue<IPackageRepositoryFactory>(PackageRepositoryFactory.Default);
                     container.ComposeParts(this);
                 }
             }
-
         }
 
         public static int Main(string[] args) {
