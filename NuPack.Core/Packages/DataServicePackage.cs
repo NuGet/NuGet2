@@ -72,12 +72,20 @@ namespace NuGet {
             set;
         }
 
+        public string Tags {
+            get;
+            set;
+        }
+
         public string Dependencies {
             get;
             set;
         }
 
-        public string PackageHash { get; set; }
+        public string PackageHash {
+            get;
+            set;
+        }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {

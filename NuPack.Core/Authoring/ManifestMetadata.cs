@@ -63,6 +63,9 @@ namespace NuGet {
         [XmlElement("language")]
         public string Language { get; set; }
 
+        [XmlElement("tags")]
+        public string Tags { get; set; }
+
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlArray("dependencies")]

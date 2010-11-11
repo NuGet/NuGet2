@@ -56,6 +56,7 @@ namespace NuGet {
             manifest.Metadata.Description = manifest.Metadata.Description.SafeTrim();
             manifest.Metadata.Summary = manifest.Metadata.Summary.SafeTrim();
             manifest.Metadata.Language = manifest.Metadata.Language.SafeTrim();
+            manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
 
             return manifest;
         }
@@ -68,9 +69,10 @@ namespace NuGet {
                     Title = metadata.Title.SafeTrim(),
                     Authors = GetCommaSeparatedString(metadata.Authors),
                     Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
-                    LicenseUrl = metadata.LicenseUrl != null ? metadata.LicenseUrl.OriginalString : null,
-                    ProjectUrl = metadata.ProjectUrl != null ? metadata.ProjectUrl.OriginalString : null,
-                    IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString : null,
+                    Tags = String.IsNullOrEmpty(metadata.Tags) ? null : metadata.Tags.SafeTrim(),
+                    LicenseUrl = metadata.LicenseUrl != null ? metadata.LicenseUrl.OriginalString.SafeTrim() : null,
+                    ProjectUrl = metadata.ProjectUrl != null ? metadata.ProjectUrl.OriginalString.SafeTrim() : null,
+                    IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString.SafeTrim() : null,
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
                     Description = metadata.Description.SafeTrim(),
                     Summary = metadata.Summary.SafeTrim(),
@@ -79,7 +81,7 @@ namespace NuGet {
                                    !metadata.Dependencies.Any() ? null :
                                    (from d in metadata.Dependencies
                                     select new ManifestDependency {
-                                        Id = d.Id,
+                                        Id = d.Id.SafeTrim(),
                                         MinVersion = GetVersionString(d.MinVersion),
                                         MaxVersion = GetVersionString(d.MaxVersion),
                                         Version = GetVersionString(d.Version)

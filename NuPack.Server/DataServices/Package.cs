@@ -29,6 +29,13 @@ namespace NuGet.Server.DataServices {
             Description = package.Description;
             Summary = package.Summary;
             Language = package.Language;
+            Tags = package.Tags ?? "";
+
+            // Ensure tags end with an empty " " so we can do contains filtering reliably
+            if (!String.IsNullOrEmpty(Tags)) {
+                Tags += " ";
+            }
+
             Dependencies = String.Join(",", from d in package.Dependencies
                                             select ConvertDependency(d));
             PackageHash = derivedData.PackageHash;

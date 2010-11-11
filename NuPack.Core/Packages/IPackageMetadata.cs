@@ -15,6 +15,7 @@ namespace NuGet {
         string Description { get; }
         string Summary { get; }
         string Language { get; }
+        string Tags { get; }
         IEnumerable<PackageDependency> Dependencies { get; }
     }
 }

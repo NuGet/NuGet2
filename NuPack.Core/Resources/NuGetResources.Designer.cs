@@ -493,6 +493,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; tag is missing a #.
+        /// </summary>
+        internal static string TagMissingHash {
+            get {
+                return ResourceManager.GetString("TagMissingHash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The replacement token &apos;{0}&apos; has no value..
         /// </summary>
         internal static string TokenHasNoValue {

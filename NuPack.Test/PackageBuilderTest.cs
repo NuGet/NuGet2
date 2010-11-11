@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Xml;
@@ -44,10 +45,13 @@ namespace NuGet.Test {
                 Version = new Version("1.0"),
                 Description = "Descriptions                                         ",
                 Summary = "                            Summary",
-                Language = "     en-us   "
+                Language = "     en-us   ",
             };
             builder.Authors.Add("David");
             builder.Owners.Add("John");
+            builder.Tags.Add("t1");
+            builder.Tags.Add("t2");
+            builder.Tags.Add("t3");
             var ms = new MemoryStream();
 
             // Act
@@ -66,6 +70,7 @@ namespace NuGet.Test {
     <description>Descriptions</description>
     <summary>Summary</summary>
     <language>en-us</language>
+    <tags>#t1 #t2 #t3</tags>
   </metadata>
 </package>", ms.ReadToEnd());
         }
@@ -189,6 +194,28 @@ Description is required.");
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
 
+
+        [TestMethod]
+        public void ReadingPackageWithWrongTagsFormatFails() {
+            // Arrange
+            string spec = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+    <metadata>
+    <id>Artem.XmlProviders  </id>
+    <version>2.5</version>
+    <title>Some awesome package       </title>
+    <authors>Velio Ivanov</authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+    <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
+    <tags>doo gar</tags>
+  </metadata>
+</package>";
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The 'doo' tag is missing a #");
+        }
+
         [TestMethod]
         public void ReadingManifestWithNamespaceBuilderFromStreamCopiesMetadata() {
             // Arrange
@@ -203,19 +230,27 @@ Description is required.");
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <tags>#t1      #t2    #foo-bar</tags>
   </metadata>
 </package>";
 
             // Act
             PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            var authors = builder.Authors.ToList();
+            var owners = builder.Owners.ToList();
+            var tags = builder.Tags.ToList();
 
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
             Assert.AreEqual(new Version(2, 5), builder.Version);
             Assert.AreEqual("Some awesome package", builder.Title);
             Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", builder.Authors[0]);
-            Assert.AreEqual("Velio Ivanov", builder.Owners[0]);
+            Assert.AreEqual("Velio Ivanov", authors[0]);
+            Assert.AreEqual("Velio Ivanov", owners[0]);
+            Assert.AreEqual(3, builder.Tags.Count);
+            Assert.AreEqual("t1", tags[0]);
+            Assert.AreEqual("t2", tags[1]);
+            Assert.AreEqual("foo-bar", tags[2]);
             Assert.AreEqual("en-US", builder.Language);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
@@ -242,15 +277,17 @@ Description is required.");
 
             // Act
             PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
-
+            var authors = builder.Authors.ToList();
+            var owners = builder.Owners.ToList();
+           
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
             Assert.AreEqual(new Version(2, 5), builder.Version);
             Assert.AreEqual("Some awesome package", builder.Title);
             Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", builder.Authors[0]);
+            Assert.AreEqual("Velio Ivanov", authors[0]);
             Assert.AreEqual(1, builder.Owners.Count);
-            Assert.AreEqual("John Doe", builder.Owners[0]);
+            Assert.AreEqual("John Doe", owners[0]);
             Assert.AreEqual("en-US", builder.Language);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
@@ -276,13 +313,14 @@ Description is required.");
 
             // Act
             PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            var authors = builder.Authors.ToList();
 
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
             Assert.AreEqual(new Version(2, 5), builder.Version);
             Assert.AreEqual("Some awesome package", builder.Title);
             Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", builder.Authors[0]);
+            Assert.AreEqual("Velio Ivanov", authors[0]);
             Assert.AreEqual("en-US", builder.Language);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);

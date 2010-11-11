@@ -297,4 +297,7 @@
   <data name="PackageContentsVerifyError" xml:space="preserve">
     <value>Failed to download package correctly. The contents of the package could not be verified. </value>
   </data>
+  <data name="TagMissingHash" xml:space="preserve">
+    <value>The '{0}' tag is missing a #</value>
+  </data>
 </root>

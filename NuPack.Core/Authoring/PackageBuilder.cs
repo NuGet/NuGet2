@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Schema;
-using System.Xml.Serialization;
+using NuGet.Resources;
 
 namespace NuGet {
     public class PackageBuilder : IPackageBuilder {
@@ -35,8 +34,9 @@ namespace NuGet {
         public PackageBuilder() {
             Files = new Collection<IPackageFile>();
             Dependencies = new Collection<PackageDependency>();
-            Authors = new Collection<string>();
-            Owners = new Collection<string>();
+            Authors = new HashSet<string>();
+            Owners = new HashSet<string>();
+            Tags = new HashSet<string>();
         }
 
         public string Id {
@@ -54,12 +54,12 @@ namespace NuGet {
             set;
         }
 
-        public Collection<string> Authors {
+        public ISet<string> Authors {
             get;
             private set;
         }
 
-        public Collection<string> Owners {
+        public ISet<string> Owners {
             get;
             private set;
         }
@@ -99,6 +99,11 @@ namespace NuGet {
             set;
         }
 
+        public ISet<string> Tags {
+            get;
+            private set;
+        }
+
         public Collection<PackageDependency> Dependencies {
             get;
             private set;
@@ -120,7 +125,13 @@ namespace NuGet {
                 return Owners;
             }
         }
-        
+
+        string IPackageMetadata.Tags {
+            get {
+                return String.Join(" ", Tags.Select(t => "#" + t));
+            }
+        }
+
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
@@ -139,6 +150,7 @@ namespace NuGet {
                 package.PackageProperties.Identifier = Id;
                 package.PackageProperties.Version = Version.ToString();
                 package.PackageProperties.Language = Language;
+                package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
             }
         }
 
@@ -159,6 +171,11 @@ namespace NuGet {
             Description = metadata.Description;
             Summary = metadata.Summary;
             Language = metadata.Language;
+
+            if (metadata.Tags != null) {
+                Tags.AddRange(ParseHashTags(metadata.Tags));
+            }
+
             Dependencies.AddRange(metadata.Dependencies);
 
             // If there's no base path then ignore the files node
@@ -222,6 +239,23 @@ namespace NuGet {
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);
             using (Stream stream = packagePart.GetStream()) {
                 sourceStream.CopyTo(stream);
+            }
+        }
+
+        /// <summary>
+        /// Tags come in this format. #tag1 #tag2 #tag3 etc..
+        /// </summary>
+        private IEnumerable<string> ParseHashTags(string tags) {
+            Debug.Assert(tags != null);
+            foreach (var tag in tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)) {
+                string normalizedTag = tag.Trim();
+                
+                if (!normalizedTag.StartsWith("#")) {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.TagMissingHash, normalizedTag));
+                }
+                // Remove the hash from the tag
+                yield return normalizedTag.Substring(1);
             }
         }
     }

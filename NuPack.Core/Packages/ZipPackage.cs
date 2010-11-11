@@ -94,6 +94,11 @@ namespace NuGet {
             set;
         }
 
+        public string Tags {
+            get;
+            set;
+        }
+
         public IEnumerable<PackageDependency> Dependencies {
             get;
             set;
@@ -156,7 +161,13 @@ namespace NuGet {
                     Description = metadata.Description;
                     Summary = metadata.Summary;
                     Language = metadata.Language;
+                    Tags = metadata.Tags ?? "";
                     Dependencies = metadata.Dependencies;
+
+                    // Ensure tags end with an empty " " so we can do contains filtering reliably
+                    if (!String.IsNullOrEmpty(Tags)) {
+                        Tags += " ";
+                    }
                 }
             }
         }
