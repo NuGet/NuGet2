@@ -72,6 +72,7 @@
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
+    <Compile Include="Utility\ZipPackageFactory.cs" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -104,12 +105,14 @@
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
     <Compile Include="Utility\ClosureEvaluator.cs" />
     <Compile Include="Utility\HashCodeCombiner.cs" />
-    <Compile Include="Utility\HttpWebRequestor.cs" />
+    <Compile Include="Utility\HttpClient.cs" />
+    <Compile Include="Utility\IPackageFactory.cs" />
+    <Compile Include="Utility\PackageDownloader.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\PackageEqualityComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Utility\GlobalSuppressions.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />

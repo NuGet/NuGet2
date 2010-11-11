@@ -1,9 +1,9 @@
 using System;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
         private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
+        PackageDownloader _packageDownloader = new PackageDownloader(new HttpClient());
 
         public static PackageRepositoryFactory Default {
             get {
@@ -16,7 +16,6 @@ namespace NuGet {
                 throw new ArgumentNullException("packageSource");
             }
 
-
             if (packageSource.IsAggregate) {
                 throw new NotSupportedException();
             }
@@ -26,7 +25,7 @@ namespace NuGet {
                 return new LocalPackageRepository(uri.LocalPath);
             }
             // Make sure we get resolve any fwlinks before creating the repository
-            return new DataServicePackageRepository(HttpWebRequestor.GetRedirectedUri(uri));
+            return new DataServicePackageRepository(_packageDownloader.GetRedirectedUri(uri));
         }
     }
 }

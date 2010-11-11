@@ -36,19 +36,18 @@ namespace NuGet {
         private Func<IPackage> DownloadAndVerifyPackage(DataServicePackage package) {
             if (!String.IsNullOrEmpty(package.PackageHash)) {
                 byte[] hashBytes = Convert.FromBase64String(package.PackageHash);
-                return () => HttpWebRequestor.DownloadPackage(_context.GetReadStreamUri(package), (data) => _hashProvider.VerifyHash(data, hashBytes),
-                    useCache: true);
+                return () => _packageDownloader.DownloadPackage(_context.GetReadStreamUri(package), hashBytes, useCache: true);
             }
             else {
                 // REVIEW: This is the only way (I know) to download the package on demand
                 // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
-                return () => HttpWebRequestor.DownloadPackage(_context.GetReadStreamUri(package));
+                return () => _packageDownloader.DownloadPackage(_context.GetReadStreamUri(package));
             }
         }
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             // Initialize the request
-            HttpWebRequestor.InitializeRequest(e.Request);
+            _packageDownloader.InitializeRequest(e.Request);
         }
 
         public override IQueryable<IPackage> GetPackages() {
