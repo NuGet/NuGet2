@@ -15,7 +15,7 @@ namespace NuGet {
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node) {
-            if (_methodsToExclude.Any(method => QueryableHelper.IsQueryableMethod(node, method))) {
+            if (_methodsToExclude.Any(method => QueryableUtility.IsQueryableMethod(node, method))) {
                 return Visit(node.Arguments[0]);
             }
             return base.VisitMethodCall(node);

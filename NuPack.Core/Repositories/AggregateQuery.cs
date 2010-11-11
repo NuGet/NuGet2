@@ -73,7 +73,7 @@ namespace NuGet {
                 throw new ArgumentNullException("expression");
             }
 
-            Type elementType = QueryableHelper.FindGenericType(typeof(IQueryable<>), expression.Type);
+            Type elementType = QueryableUtility.FindGenericType(typeof(IQueryable<>), expression.Type);
 
             if (elementType == null) {
                 throw new ArgumentException(String.Empty, "expression");
@@ -86,7 +86,7 @@ namespace NuGet {
             var results = (from queryable in _queryables
                            select Execute<TResult>(queryable, expression)).AsQueryable();
 
-            if (QueryableHelper.IsQueryableMethod(expression, "Count")) {
+            if (QueryableUtility.IsQueryableMethod(expression, "Count")) {
                 // HACK: This is in correct since we aren't removing duplicates but count is mostly for paging
                 // so we don't care *that* much
                 return (TResult)(object)results.Cast<int>().Sum();
@@ -143,8 +143,8 @@ namespace NuGet {
             var subQueries = _subQueries;
 
             // Only update subqueries for ordering and where clauses
-            if (QueryableHelper.IsQueryableMethod(expression, "Where") ||
-                QueryableHelper.IsOrderingMethod(expression)) {
+            if (QueryableUtility.IsQueryableMethod(expression, "Where") ||
+                QueryableUtility.IsOrderingMethod(expression)) {
                 subQueries = GetSubQueries(expression);
             }
 

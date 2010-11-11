@@ -7,7 +7,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void CreatePartUriCreatesUriFromPath() {
             // Act
-            Uri uri = UriHelper.CreatePartUri(@"a\b\c.txt");
+            Uri uri = UriUtility.CreatePartUri(@"a\b\c.txt");
 
             // Assert
             Assert.AreEqual(new Uri("/a/b/c.txt", UriKind.Relative), uri); 
@@ -19,7 +19,7 @@ namespace NuGet.Test {
             Uri uri = new Uri("/a/b.txt", UriKind.Relative);
 
             // Act
-            string path = UriHelper.GetPath(uri);
+            string path = UriUtility.GetPath(uri);
 
             // Assert
             Assert.AreEqual(@"a\b.txt", path);

@@ -29,7 +29,7 @@ namespace NuGet {
         }
 
         protected override PackageMarker CreateMarker() {
-            return new PackageMarker(PackageComparer.IdAndVersionComparer);
+            return new PackageMarker(PackageEqualityComparer.IdAndVersionComparer);
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
@@ -41,7 +41,7 @@ namespace NuGet {
 
             HashSet<IPackage> values;
             if (!DependentsLookup.TryGetValue(dependency, out values)) {
-                values = new HashSet<IPackage>(PackageComparer.IdAndVersionComparer);
+                values = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersionComparer);
                 DependentsLookup[dependency] = values;
             }
 
@@ -53,7 +53,7 @@ namespace NuGet {
 
         public IEnumerable<IPackage> GetDependents(IPackage package) {
             if (DependentsLookup == null) {
-                DependentsLookup = new Dictionary<IPackage, HashSet<IPackage>>(PackageComparer.IdAndVersionComparer);
+                DependentsLookup = new Dictionary<IPackage, HashSet<IPackage>>(PackageEqualityComparer.IdAndVersionComparer);
                 foreach (IPackage p in Repository.GetPackages()) {
                     Walk(p);
                 }

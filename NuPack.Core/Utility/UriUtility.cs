@@ -1,8 +1,8 @@
-namespace NuGet {
-    using System;
-    using System.IO.Packaging;
+using System;
+using System.IO.Packaging;
 
-    internal static class UriHelper {
+namespace NuGet {    
+    internal static class UriUtility {
         internal static string GetPath(Uri uri) {
             string path = uri.GetComponents(UriComponents.SerializationInfoString, UriFormat.Unescaped);
             if (path.StartsWith("/", StringComparison.Ordinal)) {

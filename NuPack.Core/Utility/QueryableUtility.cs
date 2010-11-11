@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NuGet {
-    internal static class QueryableHelper {
+    internal static class QueryableUtility {
         private static readonly string[] _orderMethods = new[] { "OrderBy", "ThenBy", "OrderByDescending", "ThenByDescending" };       
         private static readonly MethodInfo[] _methods = typeof(Queryable).GetMethods(BindingFlags.Public | BindingFlags.Static);
 

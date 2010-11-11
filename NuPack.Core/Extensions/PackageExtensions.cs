@@ -1,11 +1,12 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
+namespace NuGet {
     public static class PackageExtensions {
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description" };
 
@@ -85,7 +86,7 @@ namespace NuGet {
             return Expression.Lambda<Func<IPackage, bool>>(condition, parameterExpression);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower",
+        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower",
             Justification = "The expression is remoted using Odata which does not support the culture parameter")]
         private static Expression BuildExpressionForTerm(ParameterExpression packageParameterExpression, string term, string propertyName) {
             MethodInfo stringContains = typeof(String).GetMethod("Contains");

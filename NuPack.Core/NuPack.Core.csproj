@@ -56,15 +56,15 @@
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Repositories\OrderingComparer.cs" />
     <Compile Include="Repositories\PriorityQueue.cs" />
-    <Compile Include="Runtime\AppDomainExtensions.cs" />
-    <Compile Include="Runtime\AssemblyNameExtensions.cs" />
+    <Compile Include="Extensions\AppDomainExtensions.cs" />
+    <Compile Include="Extensions\AssemblyNameExtensions.cs" />
     <Compile Include="Runtime\AssemblyBinding.cs" />
     <Compile Include="Runtime\BindingRedirectManager.cs" />
     <Compile Include="Runtime\BindingRedirectResolver.cs" />
     <Compile Include="Runtime\IAssembly.cs" />
     <Compile Include="Runtime\RemoteAssembly.cs" />
-    <Compile Include="Utility\AssemblyExtensions.cs" />
-    <Compile Include="Utility\CollectionExtensions.cs" />
+    <Compile Include="Extensions\AssemblyExtensions.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Reference Include="System" />
@@ -100,7 +100,7 @@
     <Compile Include="Utility\HashCodeCombiner.cs" />
     <Compile Include="Utility\HttpWebRequestor.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
-    <Compile Include="Utility\PackageComparer.cs" />
+    <Compile Include="Utility\PackageEqualityComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -113,21 +113,21 @@
     <Compile Include="PackageWalker\UninstallWalker.cs" />
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="Repositories\PackageReferenceRepository.cs" />
-    <Compile Include="Utility\PackageExtensions.cs" />
+    <Compile Include="Extensions\PackageExtensions.cs" />
     <Compile Include="Repositories\PackageRepositoryExtensions.cs" />
-    <Compile Include="Utility\FileSystemExtensions.cs" />
+    <Compile Include="Extensions\FileSystemExtensions.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
     <Compile Include="Resources\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Utility\ProjectSystemExtensions.cs" />
-    <Compile Include="Utility\QueryableHelper.cs" />
+    <Compile Include="Extensions\ProjectSystemExtensions.cs" />
+    <Compile Include="Utility\QueryableUtility.cs" />
     <Compile Include="Utility\CryptoHashProvider.cs" />
-    <Compile Include="Utility\StreamExtensions.cs" />
-    <Compile Include="Utility\StringExtensions.cs" />
-    <Compile Include="Utility\Utility.cs" />
+    <Compile Include="Extensions\StreamExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Utility\PackageUtility.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\IProjectSystem.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
@@ -138,9 +138,9 @@
     <Compile Include="Utility\Crc32.cs" />
     <Compile Include="Repositories\LocalPackageRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\UriHelper.cs" />
+    <Compile Include="Utility\UriUtility.cs" />
     <Compile Include="Utility\VersionUtility.cs" />
-    <Compile Include="Utility\XElementExtensions.cs" />
+    <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Packages\ZipPackageFile.cs" />
   </ItemGroup>
   <ItemGroup>

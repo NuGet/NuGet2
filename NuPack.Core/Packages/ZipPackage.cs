@@ -174,16 +174,16 @@ namespace NuGet {
 
         private static bool IsAssemblyReference(PackagePart part) {
             // Assembly references are in lib/ and have a .dll extension
-            var path = UriHelper.GetPath(part.Uri);
+            var path = UriUtility.GetPath(part.Uri);
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
                    Path.GetExtension(path).Equals(AssemblyReferencesExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsPackageFile(PackagePart part) {
-            string path = UriHelper.GetPath(part.Uri);
+            string path = UriUtility.GetPath(part.Uri);
             // We exclude any opc files and the manifest file (.nuspec)
             return !_excludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
-                   !Utility.IsManifest(path);
+                   !PackageUtility.IsManifest(path);
         }
 
         public override string ToString() {

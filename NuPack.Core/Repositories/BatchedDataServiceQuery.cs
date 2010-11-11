@@ -80,7 +80,7 @@ namespace NuGet {
                 throw new ArgumentNullException("expression");
             }
 
-            Type elementType = QueryableHelper.FindGenericType(typeof(IQueryable<>), expression.Type);
+            Type elementType = QueryableUtility.FindGenericType(typeof(IQueryable<>), expression.Type);
 
             if (elementType == null) {
                 throw new ArgumentException(String.Empty, "expression");

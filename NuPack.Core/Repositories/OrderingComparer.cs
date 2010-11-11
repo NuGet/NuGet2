@@ -17,7 +17,7 @@ namespace NuGet {
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node) {
-            if (QueryableHelper.IsOrderingMethod(node)) {
+            if (QueryableUtility.IsOrderingMethod(node)) {
                 _inOrderExpression = true;
 
                 // The lambdas are wrapped in a unary expression

@@ -197,7 +197,7 @@ namespace NuGet {
         }
 
         private void WriteManifest(Package package) {
-            Uri uri = UriHelper.CreatePartUri(Id + Constants.ManifestExtension);
+            Uri uri = UriUtility.CreatePartUri(Id + Constants.ManifestExtension);
 
             // Create the manifest relationship
             package.CreateRelationship(uri, TargetMode.Internal, Constants.SchemaNamespace + ManifestRelationType);
@@ -234,11 +234,11 @@ namespace NuGet {
         }
 
         private static void CreatePart(Package package, string path, Stream sourceStream) {
-            if (Utility.IsManifest(path)) {
+            if (PackageUtility.IsManifest(path)) {
                 return;
             }
 
-            Uri uri = UriHelper.CreatePartUri(path);
+            Uri uri = UriUtility.CreatePartUri(path);
 
             // Create the part
             PackagePart packagePart = package.CreatePart(uri, DefaultContentType, CompressionOption.Maximum);

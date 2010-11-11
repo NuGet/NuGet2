@@ -76,7 +76,7 @@ namespace NuGet {
                                              select o.Package;
 
             return DependentsResolver.GetDependents(package)
-                                     .Except(packages, PackageComparer.IdAndVersionComparer);
+                                     .Except(packages, PackageEqualityComparer.IdAndVersionComparer);
         }
 
         private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents) {

@@ -3,11 +3,11 @@ namespace NuGet {
 
     public class PackageMarker {
         public PackageMarker()
-            : this(PackageComparer.IdComparer) {
+            : this(PackageEqualityComparer.IdComparer) {
         }
 
-        public PackageMarker(IEqualityComparer<IPackage> comparer) {
-            Visited = new Dictionary<IPackage, VisitedState>(comparer);
+        public PackageMarker(IEqualityComparer<IPackage> equalityComparer) {
+            Visited = new Dictionary<IPackage, VisitedState>(equalityComparer);
         }
 
         private IDictionary<IPackage, VisitedState> Visited {

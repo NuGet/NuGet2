@@ -18,7 +18,7 @@ namespace NuGet {
                     buffer = stream.ToArray();
                 }
             }
-            _path = UriHelper.GetPath(part.Uri);            
+            _path = UriUtility.GetPath(part.Uri);            
             _streamFactory = () => new MemoryStream(buffer);
         }
 
