@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -22,9 +23,27 @@ namespace NuGet {
                 var constantExpression = (ConstantExpression)node.Expression;
                 var fieldInfo = (FieldInfo)node.Member;
                 // Evaluate the closure member
-                return Expression.Constant(fieldInfo.GetValue(constantExpression.Value));
+                return Expression.Constant(GetValue(node, fieldInfo, constantExpression.Value));
             }
             return base.VisitMember(node);
+        }
+
+        private object GetValue(MemberExpression node, FieldInfo fieldInfo, object obj) {
+            if (_checkAssemly) {
+                Type parentType = node.Expression.Type.DeclaringType;
+                Debug.Assert(parentType != null, "Not in a compiler generated closure type");
+
+                // Since the closure class is private sealed, we're going to look for an eval method on that class
+                // where it's ok to look up field info.
+                MethodInfo evalMethodInfo = parentType.GetMethod("Eval", BindingFlags.NonPublic | BindingFlags.Static);
+                Debug.Assert(evalMethodInfo != null, "Eval method cannot be found. Please add and Eval(FieldInfo info, object value) to " + parentType.FullName);
+
+                // Invoke that method
+                return evalMethodInfo.Invoke(null, new object[] { fieldInfo, obj });
+            }
+
+            // This only happens in the unit test
+            return fieldInfo.GetValue(obj);
         }
 
         protected override Expression VisitConstant(ConstantExpression node) {

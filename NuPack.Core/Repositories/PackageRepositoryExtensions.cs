@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace NuGet {
     public static class PackageRepositoryExtensions {
-
         public static bool Exists(this IPackageRepository repository, IPackageMetadata package) {
             return repository.Exists(package.Id, package.Version);
         }
@@ -96,6 +96,12 @@ namespace NuGet {
                    where p.Id.ToLower() == packageId.ToLower()
                    orderby p.Id
                    select p;
+        }
+
+        // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
+        // within this class
+        internal static object Eval(FieldInfo fieldInfo, object obj) {
+            return fieldInfo.GetValue(obj);
         }
     }
 }
