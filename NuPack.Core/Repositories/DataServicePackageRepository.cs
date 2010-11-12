@@ -5,24 +5,22 @@ using System.Linq;
 namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly IDataServiceContext _context;
-        private readonly IHashProvider _hashProvider;
         private readonly PackageDownloader _packageDownloader;
 
         public DataServicePackageRepository(Uri serviceRoot)
-            : this(new DataServiceContextWrapper(serviceRoot), new CryptoHashProvider(), new PackageDownloader(new HttpClient())) {
+            : this(new DataServiceContextWrapper(serviceRoot), new PackageDownloader()) {
         }
 
-        public DataServicePackageRepository(IDataServiceContext context, IHashProvider hashProvider, PackageDownloader packageDownloader) {
+        public DataServicePackageRepository(Uri serviceRoot, IHttpClient httpClient)
+            : this(new DataServiceContextWrapper(serviceRoot), new PackageDownloader(httpClient)) {
+        }
+
+        public DataServicePackageRepository(IDataServiceContext context, PackageDownloader packageDownloader) {
             if (context == null) {
                 throw new ArgumentNullException("context");
             }
 
-            if (hashProvider == null) {
-                throw new ArgumentNullException("hashProvider");
-            }
-
             _context = context;
-            _hashProvider = hashProvider;
             _packageDownloader = packageDownloader;
 
             _context.SendingRequest += OnSendingRequest;

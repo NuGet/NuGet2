@@ -9,7 +9,7 @@ namespace NuGet {
         }
 
         WebRequest CreateRequest(Uri uri);
-
         void InitializeRequest(WebRequest request);
+        Uri GetRedirectedUri(Uri uri);
     }
 }

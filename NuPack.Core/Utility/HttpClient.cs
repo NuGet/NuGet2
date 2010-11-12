@@ -27,5 +27,14 @@ namespace NuGet {
                 request.Proxy.Credentials = CredentialCache.DefaultCredentials;
             }
         }
+
+        public Uri GetRedirectedUri(Uri uri) {
+            WebRequest request = CreateRequest(uri);
+            WebResponse response = request.GetResponse();
+            if (response == null) {
+                return null;
+            }
+            return response.ResponseUri;
+        }
     }
 }

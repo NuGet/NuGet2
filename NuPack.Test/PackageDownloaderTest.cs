@@ -8,12 +8,6 @@ namespace NuGet.Test {
     [TestClass]
     public class PackageDownloaderTest {
         [TestMethod]
-        public void CtorWithNullHttpClientThrowsArgumentNullException() {
-            // Arrange, Act, Assert
-            ExceptionAssert.Throws<ArgumentNullException>(() => new PackageDownloader(null));
-        }
-
-        [TestMethod]
         public void CtorSetsUserAgent() {
             // Arrange
             var httpClient = new Mock<IHttpClient>();
@@ -59,10 +53,10 @@ namespace NuGet.Test {
             Func<Stream> streamFactory = null;
             var packageFactory = new Mock<IPackageFactory>();
             packageFactory.Setup(f => f.CreatePackage(It.IsAny<Func<Stream>>())).Returns(new Mock<IPackage>().Object).Callback<Func<Stream>>(sf => streamFactory = sf);
-            var downloader = new PackageDownloader(httpClient.Object, packageFactory.Object, null);
+            var downloader = new PackageDownloader(httpClient.Object, packageFactory.Object, new Mock<IHashProvider>().Object);
 
             // Act
-            downloader.DownloadPackage(new Uri("http://example.com"), new byte[] { }, useCache: true);
+            downloader.DownloadPackage(new Uri("http://example.com"), null, useCache: true);
 
             // Assert
             var stream = streamFactory(); // HttpClient is invoked

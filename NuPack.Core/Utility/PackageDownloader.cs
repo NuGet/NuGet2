@@ -13,22 +13,22 @@ namespace NuGet {
         private IPackageFactory _packageFactory = null;
         private IHashProvider _hashProvider = null;
 
+        public PackageDownloader()
+            : this(null) {
+        }
+
         public PackageDownloader(IHttpClient httpClient)
             : this(httpClient, null, null) {
         }
 
         public PackageDownloader(IHttpClient httpClient, IPackageFactory packageFactory, IHashProvider hashProvider) {
-            if (httpClient == null) {
-                throw new ArgumentNullException("httpClient");
-            }
-
-            _httpClient = httpClient;
+            _httpClient = httpClient ?? new HttpClient();
             _packageFactory = packageFactory ?? new ZipPackageFactory();
-            _hashProvider = hashProvider;
+            _hashProvider = hashProvider ?? new CryptoHashProvider();
 
             var version = typeof(PackageDownloader).Assembly.GetNameSafe().Version;
             string userAgent = String.Format(CultureInfo.InvariantCulture, UserAgent, version, Environment.OSVersion);
-            httpClient.UserAgent = userAgent;
+            _httpClient.UserAgent = userAgent;
         }
 
         public IPackage DownloadPackage(Uri uri) {
@@ -53,11 +53,10 @@ namespace NuGet {
                     // Copy the stream
                     responseStream.CopyTo(memoryStream);
 
-                    IHashProvider hashProvider = _hashProvider;
                     byte[] streamBytes = null;
-                    if (packageHash != null && hashProvider != null) {
+                    if (packageHash != null) {
                         streamBytes = memoryStream.ToArray();
-                        if (!hashProvider.VerifyHash(streamBytes, packageHash)) {
+                        if (!_hashProvider.VerifyHash(streamBytes, packageHash)) {
                             throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
                         }
                     }
@@ -83,11 +82,6 @@ namespace NuGet {
         WebResponse GetResponse(Uri uri) {
             WebRequest request = _httpClient.CreateRequest(uri);
             return request.GetResponse();
-        }
-
-        public Uri GetRedirectedUri(Uri uri) {
-            WebResponse response = GetResponse(uri);
-            return response.ResponseUri;
         }
 
         public void InitializeRequest(WebRequest request) {

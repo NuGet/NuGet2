@@ -3,7 +3,13 @@ using System;
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
         private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
-        PackageDownloader _packageDownloader = new PackageDownloader(new HttpClient());
+        private IHttpClient _httpClient;
+
+        public PackageRepositoryFactory() : this(new HttpClient()) { }
+
+        public PackageRepositoryFactory(IHttpClient httpClient) {
+            _httpClient = httpClient;
+        }
 
         public static PackageRepositoryFactory Default {
             get {
@@ -25,7 +31,7 @@ namespace NuGet {
                 return new LocalPackageRepository(uri.LocalPath);
             }
             // Make sure we get resolve any fwlinks before creating the repository
-            return new DataServicePackageRepository(_packageDownloader.GetRedirectedUri(uri));
+            return new DataServicePackageRepository(_httpClient.GetRedirectedUri(uri), _httpClient);
         }
     }
 }
