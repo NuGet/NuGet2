@@ -14,10 +14,8 @@ namespace NuGet.TestUI {
             InitializeComponent();
 
             var list = new List<PackageSource> {
-                                                   new PackageSource("NuGet official package source",
-                                                                     "http://go.microsoft.com/fwlink/?LinkID=199193"),
-                                                   new PackageSource("My Package Source",
-                                                                     @"C:\Path\To\My\Packages")
+                                                   new PackageSource("http://go.microsoft.com/fwlink/?LinkID=199193", "NuGet official package source"),
+                                                   new PackageSource(@"C:\Path\To\My\Packages", "My Package Source")
                                                };
             _packageSourceProvider.SetPackageSources(list);
             _packageSourceProvider.ActivePackageSource = list[1];

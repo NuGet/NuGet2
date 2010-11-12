@@ -169,8 +169,8 @@ namespace NuGet.Dialog.Test {
                 var packageSourceProviderMock = new Mock<IPackageSourceProvider>();
                 packageSourceProviderMock.Setup(p => p.GetPackageSources()).Returns(
                         new PackageSource[2] {
-                            new PackageSource("One", "Test1"),
-                            new PackageSource("Two", "Test2")
+                            new PackageSource("Test1", "One"),
+                            new PackageSource("Test2", "Two")
                         }
                     );
                 packageSourceProvider = packageSourceProviderMock.Object;

@@ -176,7 +176,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
                 return TryAddSourceResults.SourceAlreadyAdded;
             }
 
-            var newPackageSource = new PackageSource(name, source);
+            var newPackageSource = new PackageSource(source, name);
             _allPackageSources.Add(newPackageSource);
 
             // if the collection contains only the package source that we just added, 

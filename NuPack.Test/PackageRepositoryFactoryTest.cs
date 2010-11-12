@@ -14,7 +14,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void CreateRepositoryThrowsIfAggregateRepository() {
             // Act & Assert
-            ExceptionAssert.Throws<NotSupportedException>(() => PackageRepositoryFactory.Default.CreateRepository(new PackageSource("a", "b") { IsAggregate = true }));
+            ExceptionAssert.Throws<NotSupportedException>(() => PackageRepositoryFactory.Default.CreateRepository(new PackageSource("b", "a") { IsAggregate = true }));
         }
 
         [TestMethod]

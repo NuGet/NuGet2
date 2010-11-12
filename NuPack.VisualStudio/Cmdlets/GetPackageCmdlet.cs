@@ -80,7 +80,7 @@ namespace NuGet.VisualStudio.Cmdlets {
         private IPackageRepository GetRemoteRepository() {
             if (!String.IsNullOrEmpty(Source)) {
                 // If a Source parameter is explicitly specified, use it
-                return _repositoryFactory.CreateRepository(new PackageSource(Source, Source));
+                return _repositoryFactory.CreateRepository(Source);
             }
             else if (SolutionManager.IsSolutionOpen) {
                 // If the solution is open, retrieve the cached repository instance

@@ -15,7 +15,11 @@ namespace NuGet {
         [DataMember]
         public string Source { get; private set; }
 
-        public PackageSource(string name, string source) {
+        public PackageSource(string source) 
+            : this(source, source) {
+        }
+
+        public PackageSource(string source, string name) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -26,6 +30,10 @@ namespace NuGet {
 
             Name = name;
             Source = source;
+        }
+
+        public static implicit operator PackageSource(string source) {
+            return new PackageSource(source);
         }
 
         public bool Equals(PackageSource other) {

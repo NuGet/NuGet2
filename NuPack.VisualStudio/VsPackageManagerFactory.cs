@@ -74,7 +74,7 @@ namespace NuGet.VisualStudio {
         }
 
         public IVsPackageManager CreatePackageManager(string source) {
-            return CreatePackageManager(_repositoryFactory.CreateRepository(new PackageSource(source, source)));
+            return CreatePackageManager(_repositoryFactory.CreateRepository(source));
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {

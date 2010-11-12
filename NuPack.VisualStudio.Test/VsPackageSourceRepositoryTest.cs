@@ -37,7 +37,7 @@ namespace NuGet.VisualStudio.Test {
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IPackageSourceProvider>();
             var mockRepository = new MockPackageRepository();
-            var source = new PackageSource("foo", "bar");
+            var source = new PackageSource("bar", "foo");
             mockRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
             mockSourceProvider.Setup(m => m.ActivePackageSource).Returns(source);
             mockRepositoryFactory.Setup(m => m.CreateRepository(source)).Returns(mockRepository);
