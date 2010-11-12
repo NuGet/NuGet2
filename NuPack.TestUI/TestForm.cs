@@ -14,8 +14,15 @@ namespace NuGet.TestUI {
             InitializeComponent();
 
             var list = new List<PackageSource> {
-                                                   new PackageSource("http://go.microsoft.com/fwlink/?LinkID=199193", "NuGet official package source"),
-                                                   new PackageSource(@"C:\Path\To\My\Packages", "My Package Source")
+                                                   new PackageSource("Aggregate source", "All") { IsAggregate = true },
+                                                   new PackageSource("http://go.microsoft.com/fwlink/?LinkID=199193",
+                                                                     "NuGet official package source"),
+                                                   new PackageSource(@"C:\Path\To\My\Packages",
+                                                                     "My Package Source"),
+                                                   new PackageSource(@"C:\Test", 
+                                                                     "Test"),
+                                                   new PackageSource(@"C:\Test2", 
+                                                                     "Test2")
                                                };
             _packageSourceProvider.SetPackageSources(list);
             _packageSourceProvider.ActivePackageSource = list[1];

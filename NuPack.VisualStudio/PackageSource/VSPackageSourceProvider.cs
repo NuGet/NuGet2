@@ -89,6 +89,9 @@ namespace NuGet.VisualStudio {
                     _packageSources.Add(s);
                 }
             }
+            if (!_packageSources.Contains(AggregateSource)) {
+                _packageSources.Insert(0, AggregateSource);
+            }
 
             PersistPackageSources();
         }
