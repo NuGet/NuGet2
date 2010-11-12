@@ -5,6 +5,9 @@ namespace NuGet {
         public static readonly string ContentDirectory = "content";
         public static readonly string PackageReferenceFile = "packages.config";
 
+
+        internal const string PackageServiceEntitySetName = "Packages";
+
         internal const string ManifestSchemaNamespace = SchemaNamespace + "nuspec.xsd";
         internal const string SchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/";
     }

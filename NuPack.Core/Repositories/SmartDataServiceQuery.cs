@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
     /// <summary>
@@ -16,30 +17,37 @@ namespace NuGet {
     /// A formalized max-length is not specified, so we use 4k as per the analysis in http://www.boutell.com/newfaq/misc/urllength.html and only switch to batch queries when the url 
     /// exceeds this limit.
     /// </remarks>
-    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification="Type is an IQueryable and by convention should end with the term Query")]
-    public class BatchedDataServiceQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
-        private const int MaxUrlLength = 4000;
-        private readonly DataServiceContext _context;
-        private readonly IQueryable<T> _query;
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Type is an IQueryable and by convention should end with the term Query")]
+    public class SmartDataServiceQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
+        private readonly IDataServiceContext _context;
+        private readonly IDataServiceQuery _query;
 
-        public BatchedDataServiceQuery(DataServiceContext context, string entitySetName)
-            : this(context, context.CreateQuery<T>(entitySetName)) {
+        public SmartDataServiceQuery(IDataServiceContext context, string entitySetName) {
+            if (context == null) {
+                throw new ArgumentNullException("context");
+            }
+            if (String.IsNullOrEmpty(entitySetName)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "entitySetName");
+            }
+            _context = context;
+            _query = context.CreateQuery<T>(entitySetName);
+            Expression = Expression.Constant(this);
         }
 
-        private BatchedDataServiceQuery(DataServiceContext context, IQueryable<T> query) {
+        private SmartDataServiceQuery(IDataServiceContext context, IDataServiceQuery query, Expression expression) {
             _context = context;
             _query = query;
+            Expression = expression;
         }
 
         public IEnumerator<T> GetEnumerator() {
-            var request = (DataServiceQuery)_query;
-            if (request.RequestUri.OriginalString.Length >= MaxUrlLength) {
-                return _context.ExecuteBatch(request)
-                               .Cast<QueryOperationResponse>()
-                               .SelectMany(o => o.Cast<T>())
-                               .GetEnumerator();
+            DataServiceRequest request = _query.GetRequest(Expression);
+
+            if (_query.RequiresBatch(Expression)) {                
+                return _context.ExecuteBatch<T>(request).GetEnumerator();
             }
-            return _query.GetEnumerator();
+
+            return _query.GetEnumerator<T>(Expression);
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -53,20 +61,13 @@ namespace NuGet {
         }
 
         public Expression Expression {
-            get {
-                return _query.Expression;
-            }
+            get;
+            private set;
         }
 
         public IQueryProvider Provider {
             get {
                 return this;
-            }
-        }
-
-        internal IQueryProvider InnerProvider {
-            get {
-                return _query.Provider;
             }
         }
 
@@ -90,18 +91,18 @@ namespace NuGet {
         }
 
         public TResult Execute<TResult>(Expression expression) {
-            return InnerProvider.Execute<TResult>(expression);
+            return _query.Execute<TResult>(expression);
         }
 
         public object Execute(Expression expression) {
-            return InnerProvider.Execute(expression);
+            return _query.Execute(expression);
         }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
-            var queryType = typeof(BatchedDataServiceQuery<>).MakeGenericType(elementType);
+            var queryType = typeof(SmartDataServiceQuery<>).MakeGenericType(elementType);
             var ctor = queryType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Single();
 
-            return (IQueryable)ctor.Invoke(new object[] { _context, InnerProvider.CreateQuery<T>(expression) });
+            return (IQueryable)ctor.Invoke(new object[] { _context, _query, expression });
         }
 
         public override string ToString() {

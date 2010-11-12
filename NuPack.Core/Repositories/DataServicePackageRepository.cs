@@ -1,28 +1,32 @@
 using System;
-using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
-        private readonly DataServiceContext _context;
+        private readonly IDataServiceContext _context;
+        private readonly IHashProvider _hashProvider;
 
-        public DataServicePackageRepository(Uri serviceRepository)
-            : this(serviceRepository, new CryptoHashProvider()) {
-
+        public DataServicePackageRepository(Uri serviceRoot)
+            : this(new DataServiceContextWrapper(serviceRoot), new CryptoHashProvider()) {
         }
 
-        public DataServicePackageRepository(Uri serviceRoot, IHashProvider hashProvider) {
-            _context = new DataServiceContext(serviceRoot);
-            HashProvider = hashProvider;
+        public DataServicePackageRepository(IDataServiceContext context, IHashProvider hashProvider) {
+            if (context == null) {
+                throw new ArgumentNullException("context");
+            }
+
+            if (hashProvider == null) {
+                throw new ArgumentNullException("hashProvider");
+            }
+
+            _context = context;
+            _hashProvider = hashProvider;
 
             _context.SendingRequest += OnSendingRequest;
             _context.ReadingEntity += OnReadingEntity;
             _context.IgnoreMissingProperties = true;
         }
-
-        public IHashProvider HashProvider { get; set; }
 
         private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {
             var package = (DataServicePackage)e.Entity;
@@ -32,7 +36,7 @@ namespace NuGet {
         private Func<IPackage> DownloadAndVerifyPackage(DataServicePackage package) {
             if (!String.IsNullOrEmpty(package.PackageHash)) {
                 byte[] hashBytes = Convert.FromBase64String(package.PackageHash);
-                return () => HttpWebRequestor.DownloadPackage(_context.GetReadStreamUri(package), (data) => HashProvider.VerifyHash(data, hashBytes), 
+                return () => HttpWebRequestor.DownloadPackage(_context.GetReadStreamUri(package), (data) => _hashProvider.VerifyHash(data, hashBytes),
                     useCache: true);
             }
             else {
@@ -49,7 +53,7 @@ namespace NuGet {
 
         public override IQueryable<IPackage> GetPackages() {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return new BatchedDataServiceQuery<DataServicePackage>(_context, "Packages");
+            return new SmartDataServiceQuery<DataServicePackage>(_context, Constants.PackageServiceEntitySetName);
         }
     }
 }

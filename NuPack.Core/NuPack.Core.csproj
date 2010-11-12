@@ -51,9 +51,13 @@
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
-    <Compile Include="Repositories\BatchedDataServiceQuery.cs" />
+    <Compile Include="Repositories\SmartDataServiceQuery.cs" />
     <Compile Include="Repositories\BufferedEnumerable.cs" />
+    <Compile Include="Repositories\DataServiceContextWrapper.cs" />
+    <Compile Include="Repositories\DataServiceQueryWrapper.cs" />
     <Compile Include="Repositories\ExpressionRewriter.cs" />
+    <Compile Include="Repositories\IDataServiceContext.cs" />
+    <Compile Include="Repositories\IDataServiceQuery.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
     <Compile Include="Repositories\OrderingComparer.cs" />
     <Compile Include="Repositories\PriorityQueue.cs" />
