@@ -7,8 +7,6 @@ using NuGet.Resources;
 
 namespace NuGet {
 
-    // REVIEW: This class isn't super clean. Maybe this object should be passed around instead
-    // of being static
     public class PackageDownloader {
         private const string UserAgent = "Package-Installer/{0} ({1})";
         private IHttpClient _httpClient;
@@ -56,8 +54,12 @@ namespace NuGet {
                     responseStream.CopyTo(memoryStream);
 
                     IHashProvider hashProvider = _hashProvider;
-                    if (packageHash != null && hashProvider != null && !hashProvider.VerifyHash(memoryStream.ToArray(), packageHash)) {
-                        throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
+                    byte[] streamBytes = null;
+                    if (packageHash != null && hashProvider != null) {
+                        streamBytes = memoryStream.ToArray();
+                        if (!hashProvider.VerifyHash(streamBytes, packageHash)) {
+                            throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
+                        }
                     }
 
                     // Move it back to the beginning
@@ -65,7 +67,7 @@ namespace NuGet {
 
                     if (useCache) {
                         // Cache the bytes for this package
-                        cachedBytes = memoryStream.ToArray();
+                        cachedBytes = streamBytes ?? memoryStream.ToArray();
                     }
 
                     return memoryStream;
