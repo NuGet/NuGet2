@@ -40,8 +40,8 @@ namespace NuGet {
             }
         }
 
-        public IDataServiceQuery CreateQuery<T>(string entitySetName) {
-            return new DataServiceQueryWrapper(_context.CreateQuery<T>(entitySetName));
+        public IDataServiceQuery<T> CreateQuery<T>(string entitySetName) {
+            return new DataServiceQueryWrapper<T>(_context.CreateQuery<T>(entitySetName));
         }
 
         public IEnumerable<T> ExecuteBatch<T>(DataServiceRequest request) {

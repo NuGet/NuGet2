@@ -9,8 +9,8 @@ namespace NuGet {
         event EventHandler<SendingRequestEventArgs> SendingRequest;
         event EventHandler<ReadingWritingEntityEventArgs> ReadingEntity;
 
-        IDataServiceQuery CreateQuery<T>(string entitySetName);
-        IEnumerable<T> ExecuteBatch<T>(DataServiceRequest query);
+        IDataServiceQuery<T> CreateQuery<T>(string entitySetName);
+        IEnumerable<T> ExecuteBatch<T>(DataServiceRequest request);
 
         Uri GetReadStreamUri(object entity);
     }

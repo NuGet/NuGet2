@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace NuGet {
-    public class DataServiceQueryWrapper : IDataServiceQuery {
+    public class DataServiceQueryWrapper<T> : IDataServiceQuery<T> {
         private const int MaxUrlLength = 4000;
 
         private readonly DataServiceQuery _query;
@@ -24,16 +25,24 @@ namespace NuGet {
             return (DataServiceRequest)_query.Provider.CreateQuery(GetInnerExpression(expression));
         }
 
-        public IEnumerator<T> GetEnumerator<T>(Expression expression) {
-            return _query.Provider.CreateQuery<T>(GetInnerExpression(expression)).GetEnumerator();
-        }
-
-        public T Execute<T>(Expression expression) {
-            return _query.Provider.Execute<T>(GetInnerExpression(expression));
+        public TResult Execute<TResult>(Expression expression) {
+            return _query.Provider.Execute<TResult>(GetInnerExpression(expression));
         }
 
         public object Execute(Expression expression) {
             return _query.Provider.Execute(GetInnerExpression(expression));
+        }
+
+        public IDataServiceQuery<TElement> CreateQuery<TElement>(Expression expression) {
+            expression = GetInnerExpression(expression);
+
+            var query = (DataServiceQuery)_query.Provider.CreateQuery<TElement>(expression);
+
+            return new DataServiceQueryWrapper<TElement>(query);
+        }
+
+        public IEnumerator<T> GetEnumerator() {
+            return ((IQueryable<T>)_query).GetEnumerator();
         }
 
         private Expression GetInnerExpression(Expression expression) {

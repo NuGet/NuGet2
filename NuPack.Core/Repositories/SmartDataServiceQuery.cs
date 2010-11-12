@@ -43,11 +43,11 @@ namespace NuGet {
         public IEnumerator<T> GetEnumerator() {
             DataServiceRequest request = _query.GetRequest(Expression);
 
-            if (_query.RequiresBatch(Expression)) {                
+            if (_query.RequiresBatch(Expression)) {
                 return _context.ExecuteBatch<T>(request).GetEnumerator();
             }
 
-            return _query.GetEnumerator<T>(Expression);
+            return _query.CreateQuery<T>(Expression).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
