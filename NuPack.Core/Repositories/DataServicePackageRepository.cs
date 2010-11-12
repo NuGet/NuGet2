@@ -6,12 +6,13 @@ namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly IDataServiceContext _context;
         private readonly IHashProvider _hashProvider;
+        private readonly PackageDownloader _packageDownloader;
 
         public DataServicePackageRepository(Uri serviceRoot)
-            : this(new DataServiceContextWrapper(serviceRoot), new CryptoHashProvider()) {
+            : this(new DataServiceContextWrapper(serviceRoot), new CryptoHashProvider(), new PackageDownloader(new HttpClient())) {
         }
 
-        public DataServicePackageRepository(IDataServiceContext context, IHashProvider hashProvider) {
+        public DataServicePackageRepository(IDataServiceContext context, IHashProvider hashProvider, PackageDownloader packageDownloader) {
             if (context == null) {
                 throw new ArgumentNullException("context");
             }
@@ -22,6 +23,7 @@ namespace NuGet {
 
             _context = context;
             _hashProvider = hashProvider;
+            _packageDownloader = packageDownloader;
 
             _context.SendingRequest += OnSendingRequest;
             _context.ReadingEntity += OnReadingEntity;
