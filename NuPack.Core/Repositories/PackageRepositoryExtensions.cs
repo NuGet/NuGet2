@@ -19,6 +19,11 @@ namespace NuGet {
             return repository.FindPackage(packageId, null, null, version) != null;
         }
 
+        public static bool TryFindPackage(this IPackageRepository repository, string packageId, Version version, out IPackage package) {
+            package = repository.FindPackage(packageId, version);
+            return package != null;
+        }
+
         public static IPackage FindPackage(this IPackageRepository repository, string packageId) {
             return FindPackage(repository, packageId, exactVersion: null, minVersion: null, maxVersion: null);
         }

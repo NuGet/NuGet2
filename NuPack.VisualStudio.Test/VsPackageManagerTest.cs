@@ -16,7 +16,7 @@ namespace NuGet.Test.VisualStudio {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
 
-            var localRepository = new MockPackageRepository();
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
@@ -40,7 +40,7 @@ namespace NuGet.Test.VisualStudio {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
 
-            var localRepository = new MockPackageRepository();
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
@@ -57,39 +57,12 @@ namespace NuGet.Test.VisualStudio {
         }
 
         [TestMethod]
-        public void UninstallPackageWithMultipleProjectReferencesUninstallsFromTargetProjectButNotPackageManagerOrOtherProjects() {
-            // Arrange
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
-
-            var localRepository = new MockPackageRepository();
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
-            localRepository.AddPackage(package);
-            sourceRepository.AddPackage(package);
-
-            IProjectManager projectWithPackage = CreateProjectManagerWithPackage(package);
-            IProjectManager otherProjectWithPackage = CreateProjectManagerWithPackage(package);
-            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository, new[] { otherProjectWithPackage });
-
-            // Act
-            packageManager.UninstallPackage(projectWithPackage, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
-
-            // Assert
-            Assert.IsFalse(projectWithPackage.LocalRepository.Exists(package));
-            Assert.IsTrue(otherProjectWithPackage.LocalRepository.Exists(package));
-            Assert.IsTrue(packageManager.LocalRepository.Exists(package));
-        }
-
-        [TestMethod]
         public void UninstallPackageWithOneProjectReferencesUninstallsFromTargetProjectAndPackageManager() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
 
-            var localRepository = new MockPackageRepository();
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
@@ -123,7 +96,7 @@ namespace NuGet.Test.VisualStudio {
             public MockVsPackageManager(ISolutionManager solutionManager,
                                         IPackageRepository sourceRepository,
                                         IFileSystem fileSystem,
-                                        IPackageRepository localRepository,
+                                        ISharedPackageRepository localRepository,
                                         IEnumerable<IProjectManager> projectManagers) :
                 base(solutionManager, sourceRepository, fileSystem, localRepository) {
                 _projectManagers = projectManagers;

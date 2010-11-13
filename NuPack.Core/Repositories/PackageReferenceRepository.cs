@@ -1,42 +1,49 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Xml.Linq;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
+namespace NuGet {
     /// <summary>
     /// This repository implementation keeps track of packages that are referenced in a project but
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase {
-        public PackageReferenceRepository(IProjectSystem project, IPackageRepository sourceRepository) {
-            if (project == null) {
-                throw new ArgumentNullException("project");
+        private const string PackageReferenceFile = "packages.config";
+
+        public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
+            if (fileSystem == null) {
+                throw new ArgumentNullException("fileSystem");
             }
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
-            Project = project;
+            FileSystem = fileSystem;
             SourceRepository = sourceRepository;
         }
 
-        private IProjectSystem Project {
+        private IFileSystem FileSystem {
             get;
             set;
         }
 
-        private IPackageRepository SourceRepository {
+        private ISharedPackageRepository SourceRepository {
             get;
             set;
+        }
+
+        private string PackageReferenceFileFullPath {
+            get {
+                return FileSystem.GetFullPath(PackageReferenceFile);
+            }
         }
 
         private XDocument GetDocument(bool createIfNotExists = false) {
             // If the file exists then open and return it
-            if (Project.FileExists(Constants.PackageReferenceFile)) {
-                using (Stream stream = Project.OpenFile(Constants.PackageReferenceFile)) {
+            if (FileSystem.FileExists(PackageReferenceFile)) {
+                using (Stream stream = FileSystem.OpenFile(PackageReferenceFile)) {
                     return XDocument.Load(stream);
                 }
             }
@@ -51,31 +58,62 @@ namespace NuGet {
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            IEnumerable<IPackage> packages;
+            return GetPackagesCore().AsQueryable();
+        }
 
+        private IEnumerable<IPackage> GetPackagesCore() {
             XDocument document = GetDocument();
+
             if (document == null) {
-                packages = Enumerable.Empty<IPackage>();
+                yield break;
             }
             else {
-                packages = from packageElement in document.Root.Elements("package")
-                           let id = packageElement.Attribute("id").Value
-                           let version = Version.Parse(packageElement.Attribute("version").Value)
-                           let package = SourceRepository.FindPackage(id, version)
-                           where package != null
-                           select package;
+                foreach (var e in document.Root.Elements("package").ToList()) {
+                    string id = e.GetOptionalAttributeValue("id");
+                    Version version = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"));
+                    IPackage package = null;
+
+                    if (String.IsNullOrEmpty(id) || version == null) {
+                        // If required attributes are missing then remove the element
+                        e.Remove();
+                    }
+                    else if (!SourceRepository.TryFindPackage(id, version, out package)) {
+                        // Remove bad entries
+                        DeleteEntry(document, id, version);
+                    }
+                    else {
+                        yield return package;
+                    }
+                }
+
+                SaveDocument(document);
             }
-            return packages.AsSafeQueryable();
         }
 
         public override void AddPackage(IPackage package) {
             XDocument document = GetDocument(createIfNotExists: true);
 
+            AddEntry(document, package.Id, package.Version);
+        }
+
+        private void AddEntry(XDocument document, string id, Version version) {
+            XElement element = FindEntry(document, id, version);
+
+            if (element != null) {
+                element.Remove();
+            }
+
             document.Root.Add(new XElement("package",
-                                            new XAttribute("id", package.Id),
-                                            new XAttribute("version", package.Version)));
+                                  new XAttribute("id", id),
+                                  new XAttribute("version", version)));
 
             SaveDocument(document);
+
+            // Notify the source repository every time we add a new package to the repository.
+            // This doesn't really need to happen on every package add, but this is over agressive
+            // to combat scenarios where the 2 repositories get out of sync. If this repository is already 
+            // registered in the source then this will be ignored
+            SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
         }
 
         public override void RemovePackage(IPackage package) {
@@ -86,21 +124,23 @@ namespace NuGet {
                 return;
             }
 
-            XElement packageElement = (from e in document.Root.Elements("package")
-                                       let id = e.Attribute("id").Value
-                                       let version = Version.Parse(e.Attribute("version").Value)
-                                       where package.Id.Equals(id, StringComparison.OrdinalIgnoreCase) &&
-                                             package.Version.Equals(version)
-                                       select e).FirstOrDefault();
+            DeleteEntry(document, package.Id, package.Version);
+        }
 
-            Debug.Assert(packageElement != null, "Unable to find package in package file");
+        private void DeleteEntry(XDocument document, string id, Version version) {
+            XElement packageElement = FindEntry(document, id, version);
 
-            // Remove the element from the xml dom
-            packageElement.Remove();
+            if (packageElement != null) {
+                // Remove the element from the xml dom
+                packageElement.Remove();
+            }
 
             // Remove the file if there are no more elements
             if (!document.Root.HasElements) {
-                Project.DeleteFile(Constants.PackageReferenceFile);
+                FileSystem.DeleteFile(PackageReferenceFile);
+
+                // Remove the repository from the source
+                SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
             }
             else {
                 // Otherwise save the updated document
@@ -108,8 +148,18 @@ namespace NuGet {
             }
         }
 
+        private static XElement FindEntry(XDocument document, string id, Version version) {
+            return (from e in document.Root.Elements("package")
+                    let entryId = e.GetOptionalAttributeValue("id")
+                    let entryVersion = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
+                    where entryId != null && entryVersion != null
+                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) &&
+                          version.Equals(entryVersion)
+                    select e).FirstOrDefault();
+        }
+
         private void SaveDocument(XDocument document) {
-            Project.AddFile(Constants.PackageReferenceFile, document.Save);
+            FileSystem.AddFile(PackageReferenceFile, document.Save);
         }
     }
 }

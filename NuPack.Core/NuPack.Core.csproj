@@ -59,10 +59,12 @@
     <Compile Include="Repositories\IDataServiceContext.cs" />
     <Compile Include="Repositories\IDataServiceQuery.cs" />
     <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
+    <Compile Include="Repositories\ISharedPackageRepository.cs" />
     <Compile Include="Repositories\OrderingComparer.cs" />
     <Compile Include="Repositories\PriorityQueue.cs" />
     <Compile Include="Extensions\AppDomainExtensions.cs" />
     <Compile Include="Extensions\AssemblyNameExtensions.cs" />
+    <Compile Include="Repositories\SharedPackageRepository.cs" />
     <Compile Include="Runtime\AssemblyBinding.cs" />
     <Compile Include="Runtime\BindingRedirectManager.cs" />
     <Compile Include="Runtime\BindingRedirectResolver.cs" />
@@ -133,6 +135,7 @@
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Extensions\ProjectSystemExtensions.cs" />
+    <Compile Include="Utility\PathUtility.cs" />
     <Compile Include="Utility\QueryableUtility.cs" />
     <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />

@@ -134,9 +134,9 @@ namespace NuGet {
 
         public virtual void InstallPackage(IPackage package, bool ignoreDependencies) {
             Execute(package, new InstallWalker(LocalRepository,
-                                                      SourceRepository,
-                                                      Logger,
-                                                      ignoreDependencies));
+                                               SourceRepository,
+                                               Logger,
+                                               ignoreDependencies));
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {
@@ -232,7 +232,7 @@ namespace NuGet {
                                                  forceRemove));
         }
 
-        private void ExecuteUninstall(IPackage package) {
+        protected virtual void ExecuteUninstall(IPackage package) {
             PackageOperationEventArgs args = CreateOperation(package);
             OnUninstalling(args);
 

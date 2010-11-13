@@ -80,7 +80,7 @@ namespace NuGet.VisualStudio.Test {
 
         private static IVsPackageManager GetPackageManager() {
             var fileSystem = new Mock<IFileSystem>();
-            var localRepo = new Mock<IPackageRepository>();
+            var localRepo = new Mock<ISharedPackageRepository>();
             var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("Pack2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 

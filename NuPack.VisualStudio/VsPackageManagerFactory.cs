@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace NuGet.VisualStudio {
         private readonly IComponentModel _componentModel;
 
         private IFileSystem _solutionFileSystem;
-        private IPackageRepository _solutionRepository;
+        private ISharedPackageRepository _solutionRepository;
 
         [ImportingConstructor]
         public VsPackageManagerFactory(DTE dte,
@@ -60,10 +59,10 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private IPackageRepository SolutionRepository {
+        private ISharedPackageRepository SolutionRepository {
             get {
                 if (_solutionRepository == null) {
-                    _solutionRepository = new LocalPackageRepository(new DefaultPackagePathResolver(SolutionFileSystem), SolutionFileSystem);
+                    _solutionRepository = new SharedPackageRepository(new DefaultPackagePathResolver(SolutionFileSystem), SolutionFileSystem);
                 }
                 return _solutionRepository;
             }
@@ -110,7 +109,7 @@ namespace NuGet.VisualStudio {
 
             return fileSystem ?? new PhysicalFileSystem(path);
         }
-
+        
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
             try {

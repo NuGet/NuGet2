@@ -1,24 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.ComponentModelHost;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly Dictionary<Project, IProjectManager> _projectManagers = null;
+        private readonly ISharedPackageRepository _localRepository;
 
         public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
                                 IFileSystem fileSystem,
-                                IPackageRepository localRepository) :
+                                ISharedPackageRepository localRepository) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository) {
 
+            _localRepository = localRepository;
             _projectManagers = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
         }
 
@@ -57,23 +53,13 @@ namespace NuGet.VisualStudio {
         public virtual void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
-            var projectsWithPackage = GetProjectsWithPackage(packageId, version);
-
             // If we've specified a version then we've probably trying to remove a specific version of
             // a solution level package (since we allow side by side there)
             if (projectManager != null && projectManager.LocalRepository.Exists(packageId) && version == null) {
                 projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
+            }
 
-                if (!projectsWithPackage.Any()) {
-                    UninstallPackage(packageId, version, forceRemove, removeDependencies);
-                }
-            }
-            else if (!projectsWithPackage.Any()) {
-                UninstallPackage(packageId, version, forceRemove, removeDependencies);
-            }
-            else {
-                logger.Log(MessageLevel.Warning, VsResources.PackageCannotBeRemovedBecauseItIsInUse, packageId, String.Join(", ", projectsWithPackage.Select(p => p.Project.ProjectName)));
-            }
+            UninstallPackage(packageId, version, forceRemove, removeDependencies);
         }
 
         public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies) {
@@ -83,6 +69,13 @@ namespace NuGet.VisualStudio {
         // REVIEW: Do we even need this method?
         public virtual void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
             InstallPackage(projectManager, id, version, !updateDependencies, logger);
+        }
+
+        protected override void ExecuteUninstall(IPackage package) {
+            // Check if the package is in use before removing it
+            if (!_localRepository.IsReferenced(package.Id, package.Version)) {
+                base.ExecuteUninstall(package);
+            }
         }
 
         private void InitializeLogger(ILogger logger, IProjectManager projectManager) {
@@ -97,14 +90,7 @@ namespace NuGet.VisualStudio {
         }
 
         private IProjectManager CreateProjectManager(Project project) {
-            return new ProjectManager(LocalRepository, PathResolver, VsProjectSystemFactory.CreateProjectSystem(project));
-        }
-
-        private IEnumerable<IProjectManager> GetProjectsWithPackage(string packageId, Version version) {
-            return from projectManager in ProjectManagers
-                   let package = projectManager.LocalRepository.FindPackage(packageId)
-                   where package != null && (version == null || (version != null && package.Version.Equals(version)))
-                   select projectManager;
+            return new ProjectManager(_localRepository, PathResolver, VsProjectSystemFactory.CreateProjectSystem(project));
         }
     }
 }

@@ -1,13 +1,13 @@
-namespace NuGet.Test {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.Versioning;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-    using NuGet.Test.Mocks;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using NuGet.Test.Mocks;
 
+namespace NuGet.Test {
     [TestClass]
     public class ProjectManagerTest {
         [TestMethod]
@@ -36,7 +36,7 @@ namespace NuGet.Test {
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             projectSystem.Setup(m => m.AddFile("file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
             sourceRepository.AddPackage(packageA);
 
@@ -52,7 +52,7 @@ namespace NuGet.Test {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { @"foo\bar\file.pp" });
             sourceRepository.AddPackage(packageA);
 
@@ -69,7 +69,7 @@ namespace NuGet.Test {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B")
@@ -106,7 +106,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             var packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "a.file" });
             var packageB = PackageUtility.CreatePackage("B", "1.0",
                                                         content: null,
@@ -140,7 +140,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             var package = PackageUtility.CreatePackage("foo", "1.2.33", content: new[] { "file1" });
             projectManager.LocalRepository.AddPackage(package);
             sourceRepository.AddPackage(package);
@@ -155,9 +155,10 @@ namespace NuGet.Test {
         [TestMethod]
         public void AddPackageReferenceAddsContentAndReferencesProjectSystem() {
             // Arrange
-            MockProjectSystem projectSystem = new MockProjectSystem();
-            MockPackageRepository mockRepository = new MockPackageRepository();
-            ProjectManager projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             var packageA = PackageUtility.CreatePackage("A", "1.0",
                                                         new[] { "contentFile" },
                                                         new[] { "reference.dll" },
@@ -169,19 +170,20 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(2, projectSystem.Paths.Count);
+            Assert.AreEqual(1, projectSystem.Paths.Count);
             Assert.AreEqual(1, projectSystem.References.Count);
             Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
             Assert.IsTrue(projectSystem.FileExists(@"contentFile"));
-            Assert.IsTrue(projectSystem.FileExists(@"packages.config"));
+            Assert.IsTrue(localRepository.Exists("A"));
         }
 
         [TestMethod]
         public void AddPackageReferenceAddingPackageWithDuplicateReferenceSkipsReference() {
             // Arrange
-            MockProjectSystem projectSystem = new MockProjectSystem();
-            MockPackageRepository mockRepository = new MockPackageRepository();
-            ProjectManager projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             var packageA = PackageUtility.CreatePackage("A", "1.0",
                                                         assemblyReferences: new[] { "reference.dll" });
             var packageB = PackageUtility.CreatePackage("B", "1.0",
@@ -195,11 +197,12 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("B");
 
             // Assert
-            Assert.AreEqual(1, projectSystem.Paths.Count);
+            Assert.AreEqual(0, projectSystem.Paths.Count);
             Assert.AreEqual(1, projectSystem.References.Count);
             Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
             Assert.IsTrue(projectSystem.References.ContainsValue(@"C:\MockFileSystem\A.1.0\reference.dll"));
-            Assert.IsTrue(projectSystem.FileExists(@"packages.config"));
+            Assert.IsTrue(localRepository.Exists("A"));
+            Assert.IsTrue(localRepository.Exists("B"));
         }
 
         [TestMethod]
@@ -207,7 +210,7 @@ namespace NuGet.Test {
             // Arrange
             var projectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             var packageA = PackageUtility.CreatePackage("A", "1.0",
                                                         new[] { "contentFile" },
                                                         new[] { "reference.dll" },
@@ -235,7 +238,7 @@ namespace NuGet.Test {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
             projectManager.PackageReferenceRemoving += (sender, e) => {
@@ -262,7 +265,7 @@ namespace NuGet.Test {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { "fileA", "commonFile" });
 
@@ -286,10 +289,11 @@ namespace NuGet.Test {
         [TestMethod]
         public void AddPackageWithUnsupportedFilesSkipsUnsupportedFiles() {
             // Arrange            
+            var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             projectSystem.Setup(m => m.IsSupportedFile("unsupported")).Returns(false);
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "unsupported" });
             sourceRepository.AddPackage(packageA);
 
@@ -297,10 +301,10 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(3, projectSystem.Object.Paths.Count);
+            Assert.AreEqual(2, projectSystem.Object.Paths.Count);
             Assert.IsTrue(projectSystem.Object.FileExists("a"));
             Assert.IsTrue(projectSystem.Object.FileExists("b"));
-            Assert.IsTrue(projectSystem.Object.FileExists("packages.config"));
+            Assert.IsTrue(localRepository.Exists("A"));
             Assert.IsFalse(projectSystem.Object.FileExists("unsupported"));
         }
 
@@ -308,9 +312,10 @@ namespace NuGet.Test {
         public void AddPackageWithUnsupportedTransformFileSkipsUnsupportedFile() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             projectSystem.Setup(m => m.IsSupportedFile("unsupported")).Returns(false);
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "unsupported.pp" });
             sourceRepository.AddPackage(packageA);
 
@@ -318,10 +323,10 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(3, projectSystem.Object.Paths.Count);
+            Assert.AreEqual(2, projectSystem.Object.Paths.Count);
             Assert.IsTrue(projectSystem.Object.FileExists("a"));
             Assert.IsTrue(projectSystem.Object.FileExists("b"));
-            Assert.IsTrue(projectSystem.Object.FileExists("packages.config"));
+            Assert.IsTrue(localRepository.Exists("A"));
             Assert.IsFalse(projectSystem.Object.FileExists("unsupported"));
         }
 
@@ -337,7 +342,7 @@ namespace NuGet.Test {
     </system.web>
 </configuration>
 ".AsStream());
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
             package.Setup(m => m.Version).Returns(new Version("1.0"));
@@ -380,7 +385,7 @@ namespace NuGet.Test {
     </system.web>
 </configuration>
 ".AsStream());
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
             package.Setup(m => m.Version).Returns(new Version("1.0"));
@@ -416,7 +421,7 @@ namespace NuGet.Test {
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             mockProjectSystem.Setup(m => m.IsSupportedFile("web.config")).Returns(false);
             var mockRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem.Object);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem.Object, new MockPackageRepository());
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
             package.Setup(m => m.Version).Returns(new Version("1.0"));
@@ -445,7 +450,7 @@ namespace NuGet.Test {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem);
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
 
@@ -466,7 +471,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                     PackageDependency.CreateDependency("B", version:new Version("1.0"))
@@ -514,7 +519,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A",
@@ -569,7 +574,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), @"C:\MockFileSystem\ does not reference 'A'.");
@@ -580,7 +585,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0");
@@ -602,7 +607,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -634,7 +639,7 @@ namespace NuGet.Test {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -676,7 +681,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [C >= 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -722,7 +727,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -786,7 +791,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
@@ -840,7 +845,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", version:new Version("1.0"))
@@ -862,7 +867,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage package10 = PackageUtility.CreatePackage("NetFramework", "1.0", content: new[] { "1.0f" });
             projectManager.LocalRepository.AddPackage(package10);
             sourceRepository.AddPackage(package10);
@@ -889,7 +894,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             var package10 = PackageUtility.CreatePackage("NetFramework", "1.0", new[] { "file.dll" });
             projectManager.LocalRepository.AddPackage(package10);
             sourceRepository.AddPackage(package10);
@@ -913,7 +918,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
@@ -940,7 +945,7 @@ namespace NuGet.Test {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
@@ -977,7 +982,7 @@ namespace NuGet.Test {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, new MockPackageRepository());
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
@@ -1094,7 +1099,7 @@ namespace NuGet.Test {
 
         private ProjectManager CreateProjectManager() {
             var projectSystem = new MockProjectSystem();
-            return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem);
+            return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
         }
     }
 }

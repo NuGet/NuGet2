@@ -25,7 +25,7 @@ namespace NuGet {
             { ".pp", new Preprocessor() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project) :
+        public ProjectManager(ISharedPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project) :
             this(sourceRepository,
                  pathResolver,
                  project,
