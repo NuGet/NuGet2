@@ -52,7 +52,7 @@ namespace NuGet {
 
         public override IQueryable<IPackage> GetPackages() {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return new SmartDataServiceQuery<DataServicePackage>(_context, Constants.PackageServiceEntitySetName);
+            return new SmartDataServiceQuery<DataServicePackage>(_context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
         }
     }
 }

@@ -5,6 +5,7 @@ namespace NuGet {
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.Versioning;
     using System.Xml.Linq;
     using Microsoft.Internal.Web.Utils;
@@ -250,9 +251,9 @@ namespace NuGet {
             }
 
             // Get other packages
-            var otherPackages = from p in LocalRepository.GetPackages()
-                                where p.Id != package.Id
-                                select p;
+            IEnumerable<IPackage> otherPackages = from p in LocalRepository.GetPackages()
+                                                  where p.Id != package.Id
+                                                  select p;
 
             // Get other references
             var otherAssemblyReferences = from p in otherPackages
@@ -411,6 +412,12 @@ namespace NuGet {
             public int GetHashCode(IPackageFile obj) {
                 return obj.Path.GetHashCode();
             }
+        }
+
+        // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
+        // within this class
+        internal static object Eval(FieldInfo fieldInfo, object obj) {
+            return fieldInfo.GetValue(obj);
         }
     }
 }
