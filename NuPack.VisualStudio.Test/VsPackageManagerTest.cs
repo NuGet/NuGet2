@@ -71,7 +71,7 @@ namespace NuGet.Test.VisualStudio {
             sourceRepository.AddPackage(package);
 
             IProjectManager projectWithPackage = CreateProjectManagerWithPackage(package);
-            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository, Enumerable.Empty<IProjectManager>());
+            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository);
 
             // Act
             packageManager.UninstallPackage(projectWithPackage, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
@@ -90,22 +90,12 @@ namespace NuGet.Test.VisualStudio {
                                       localRepository);
         }
 
-        private class MockVsPackageManager : VsPackageManager {
-            private IEnumerable<IProjectManager> _projectManagers;
-
+        private class MockVsPackageManager : VsPackageManager {        
             public MockVsPackageManager(ISolutionManager solutionManager,
                                         IPackageRepository sourceRepository,
                                         IFileSystem fileSystem,
-                                        ISharedPackageRepository localRepository,
-                                        IEnumerable<IProjectManager> projectManagers) :
+                                        ISharedPackageRepository localRepository) :
                 base(solutionManager, sourceRepository, fileSystem, localRepository) {
-                _projectManagers = projectManagers;
-            }
-
-            protected override IEnumerable<IProjectManager> ProjectManagers {
-                get {
-                    return _projectManagers;
-                }
             }
         }
     }

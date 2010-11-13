@@ -189,4 +189,13 @@
   <data name="Console_GroupPolicyError" xml:space="preserve">
     <value>Your machine group policy or user group policy disables execution of PowerShell script. Adjust your group policy settings to allow execution of PowerShell scripts.</value>
   </data>
+  <data name="SolutionDirectoryNotAvailable" xml:space="preserve">
+    <value>Unable to locate the solution directory. Please ensure that the solution has been saved.</value>
+  </data>
+  <data name="Cmdlet_ListingPackages" xml:space="preserve">
+    <value>Listing packages from '{0}'.</value>
+  </data>
+  <data name="InvalidConfigurationFile" xml:space="preserve">
+    <value>Error reading '{0}'.</value>
+  </data>
 </root>

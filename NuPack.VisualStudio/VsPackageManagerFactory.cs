@@ -1,71 +1,44 @@
 using System;
 using System.ComponentModel.Composition;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IVsPackageManagerFactory))]
     public class VsPackageManagerFactory : IVsPackageManagerFactory {
-        private const string SolutionRepositoryDirectory = "packages";
-
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly ISolutionManager _solutionManager;
-        private readonly DTE _dte;
-        private readonly IComponentModel _componentModel;
+        private readonly ISourceControlResolver _sourceControlResolver;
+        private readonly IRepositorySettings _repositorySettings;
 
-        private IFileSystem _solutionFileSystem;
-        private ISharedPackageRepository _solutionRepository;
+        private RepositoryInfo _repositoryInfo;
 
         [ImportingConstructor]
-        public VsPackageManagerFactory(DTE dte,
-                                       ISolutionManager solutionManager,
+        public VsPackageManagerFactory(ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,
-                                       IComponentModel componentModel) {
-            if (dte == null) {
-                throw new ArgumentNullException("dte");
+                                       ISourceControlResolver sourceControlResolver,
+                                       IRepositorySettings repositorySettings) {
+            if (solutionManager == null) {
+                throw new ArgumentNullException("solutionManager");
             }
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
-            if (solutionManager == null) {
-                throw new ArgumentNullException("solutionManager");
+            if (sourceControlResolver == null) {
+                throw new ArgumentNullException("sourceControlResolver");
             }
-            if (componentModel == null) {
-                throw new ArgumentNullException("componentModel");
+            if (repositorySettings == null) {
+                throw new ArgumentNullException("repositorySettings");
             }
 
-            _componentModel = componentModel;
-            _dte = dte;
+            _sourceControlResolver = sourceControlResolver;
+            _repositorySettings = repositorySettings;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
 
             _solutionManager.SolutionClosing += (sender, e) => {
-                _solutionFileSystem = null;
-                _solutionRepository = null;
+                _repositoryInfo = null;
             };
-        }
 
-        private IFileSystem SolutionFileSystem {
-            get {
-                if (_solutionFileSystem == null) {
-                    _solutionFileSystem = GetFileSystem();
-                }
-                return _solutionFileSystem;
-            }
-        }
-
-        private ISharedPackageRepository SolutionRepository {
-            get {
-                if (_solutionRepository == null) {
-                    _solutionRepository = new SharedPackageRepository(new DefaultPackagePathResolver(SolutionFileSystem), SolutionFileSystem);
-                }
-                return _solutionRepository;
-            }
         }
 
         public IVsPackageManager CreatePackageManager() {
@@ -77,50 +50,35 @@ namespace NuGet.VisualStudio {
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
-            return new VsPackageManager(_solutionManager, repository, SolutionFileSystem, SolutionRepository);
+            RepositoryInfo info = GetRepositoryInfo();
+
+            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository);
         }
 
-        private IFileSystem GetFileSystem() {
-            // Get the source control providers
-            var providers = _componentModel.GetExtensions<ISourceControlFileSystemProvider>();
+        private RepositoryInfo GetRepositoryInfo() {
+            // Update the path if it needs updating
+            string path = _repositorySettings.RepositoryPath;
 
-            // Get the packages path
-            string path = Path.Combine(Path.GetDirectoryName(_dte.Solution.FullName), "packages");
-            IFileSystem fileSystem = null;
+            if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path)) {                
+                IFileSystem fileSystem = _sourceControlResolver.GetFileSystem(path);
+                ISharedPackageRepository repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
 
-            var sourceControl = (SourceControl2)_dte.SourceControl;
-            if (providers.Any() && sourceControl != null) {
-                SourceControlBindings binding = null;
-                try {
-                    // Get the binding for this solution
-                    binding = sourceControl.GetBindings(_dte.Solution.FullName);
-                }
-                catch (NotImplementedException) {
-                    // Some source control providers don't bother to implement this.
-                    // TFS might be the only one using it
-                }
-
-                if (binding != null) {
-                    fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
-                                          .Where(fs => fs != null)
-                                          .FirstOrDefault();
-                }
+                _repositoryInfo = new RepositoryInfo(path, fileSystem, repository);
             }
 
-            return fileSystem ?? new PhysicalFileSystem(path);
+            return _repositoryInfo;
         }
-        
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
-            try {
-                return provider.GetFileSystem(path, binding);
-            }
-            catch {
-                // Ignore exceptions that can happen when some binaries are missing. e.g. TfsSourceControlFileSystemProvider
-                // would throw a jitting error if TFS is not installed
+
+        private class RepositoryInfo {            
+            public RepositoryInfo(string path, IFileSystem fileSystem, ISharedPackageRepository repository) {
+                Path = path;
+                FileSystem = fileSystem;
+                Repository = repository;
             }
 
-            return null;
+            public IFileSystem FileSystem { get; private set; }
+            public string Path { get; private set; }
+            public ISharedPackageRepository Repository { get; private set; }
         }
     }
 }

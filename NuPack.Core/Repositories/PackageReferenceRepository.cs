@@ -22,6 +22,8 @@ namespace NuGet {
             }
             FileSystem = fileSystem;
             SourceRepository = sourceRepository;
+
+            SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
         }
 
         private IFileSystem FileSystem {
@@ -159,7 +161,15 @@ namespace NuGet {
         }
 
         private void SaveDocument(XDocument document) {
-            FileSystem.AddFile(PackageReferenceFile, document.Save);
+            ILogger logger = FileSystem.Logger;
+            try {
+                // Don't log anything when saving the xml file
+                FileSystem.Logger = null;
+                FileSystem.AddFile(PackageReferenceFile, document.Save);
+            }
+            finally {
+                FileSystem.Logger = logger;
+            }
         }
     }
 }

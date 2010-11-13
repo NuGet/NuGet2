@@ -12,14 +12,16 @@ namespace NuGet.VisualStudio.Cmdlets {
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                   ServiceLocator.GetInstance<IRepositorySettings>()) {
         }
 
         public FindPackage(IPackageRepositoryFactory repositoryFactory,
-                                IPackageSourceProvider packageSourceProvider,
-                                ISolutionManager solutionManager,
-                                IVsPackageManagerFactory packageManagerFactory)
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory) {
+                          IPackageSourceProvider packageSourceProvider,
+                          ISolutionManager solutionManager,
+                          IVsPackageManagerFactory packageManagerFactory,
+                          IRepositorySettings settings)
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, settings) {
         }
 
         protected override IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository) {
@@ -37,6 +39,10 @@ namespace NuGet.VisualStudio.Cmdlets {
                 packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
             return localRepository.GetUpdates(sourceRepository, packagesToUpdate);
+        }
+
+        protected override void Log(MessageLevel level, string formattedMessage) {
+            // We don't want this cmdlet to print anything
         }
     }
 }

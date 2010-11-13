@@ -79,6 +79,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Listing packages from &apos;{0}&apos;..
+        /// </summary>
+        public static string Cmdlet_ListingPackages {
+            get {
+                return ResourceManager.GetString("Cmdlet_ListingPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing Project parameter or invalid project name..
         /// </summary>
         public static string Cmdlet_MissingProjectParameter {
@@ -250,6 +259,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
+        /// </summary>
+        public static string InvalidConfigurationFile {
+            get {
+                return ResourceManager.GetString("InvalidConfigurationFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to retrieve package list because no source was specified..
         /// </summary>
         public static string NoActivePackageSource {
@@ -273,6 +291,15 @@ namespace NuGet.VisualStudio.Resources {
         public static string PackageSource_Invalid {
             get {
                 return ResourceManager.GetString("PackageSource_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to locate the solution directory. Please ensure that the solution has been saved..
+        /// </summary>
+        public static string SolutionDirectoryNotAvailable {
+            get {
+                return ResourceManager.GetString("SolutionDirectoryNotAvailable", resourceCulture);
             }
         }
     }

@@ -39,7 +39,7 @@ namespace NuGet {
                 return path2;
             }
 
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             for (int i = index; i < path1Segments.Length; i++) {
                 if (!Path.HasExtension(path1Segments[i])) {
                     builder.Append(@"..\");

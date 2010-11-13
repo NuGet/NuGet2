@@ -64,7 +64,9 @@ namespace NuGet.VisualStudio.Test {
         private static FindPackage BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            return new FindPackage(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
+            var mockRepositorySettings = new Mock<IRepositorySettings>();
+            mockRepositorySettings.Setup(m => m.RepositoryPath).Returns("Some path");
+            return new FindPackage(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object, mockRepositorySettings.Object);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 
 namespace NuGet {    
-    internal static class XElementExtensions {
+    public static class XElementExtensions {
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "We don't care about base types")]
         public static string GetOptionalAttributeValue(this XElement element, string localName, string namespaceName = null) {
             XAttribute attr = null;

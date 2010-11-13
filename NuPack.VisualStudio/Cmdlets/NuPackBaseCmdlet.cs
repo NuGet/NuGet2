@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Management.Automation;
-using EnvDTE;
+using System.Reflection;
 
 namespace NuGet.VisualStudio.Cmdlets {
 
@@ -51,7 +51,7 @@ namespace NuGet.VisualStudio.Cmdlets {
                 ProcessRecordCore();
             }
             catch (Exception ex) {
-                WriteError(ex.InnerException ?? ex);
+                WriteError(ex);
             }
         }
 
@@ -71,7 +71,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             EndProcessing();
         }
 
-        protected void Log(MessageLevel level, string formattedMessage) {
+        protected virtual void Log(MessageLevel level, string formattedMessage) {
             switch (level) {
                 case MessageLevel.Debug:
                     WriteVerbose(formattedMessage);
@@ -104,6 +104,10 @@ namespace NuGet.VisualStudio.Cmdlets {
         }
 
         protected void WriteError(Exception exception) {
+            // Only unwrap target invocation exceptions
+            if (exception is TargetInvocationException) {
+                exception = exception.InnerException;
+            }
             WriteError(new ErrorRecord(exception, String.Empty, ErrorCategory.NotSpecified, null));
         }
 

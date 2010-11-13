@@ -25,13 +25,6 @@ namespace NuGet {
             { ".pp", new Preprocessor() }
         };
 
-        public ProjectManager(ISharedPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project) :
-            this(sourceRepository,
-                 pathResolver,
-                 project,
-                 new PackageReferenceRepository(project, sourceRepository)) {
-        }
-
         public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository) {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");

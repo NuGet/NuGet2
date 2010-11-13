@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio.Resources;
@@ -13,25 +14,34 @@ namespace NuGet.VisualStudio.Cmdlets {
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IRepositorySettings _settings;
 
         public GetPackageCmdlet()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                   ServiceLocator.GetInstance<IRepositorySettings>()) {
         }
 
         public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
-                                IVsPackageManagerFactory packageManagerFactory)
+                                IVsPackageManagerFactory packageManagerFactory,
+                                IRepositorySettings settings)
             : base(solutionManager, packageManagerFactory) {
+
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
             if (packageSourceProvider == null) {
                 throw new ArgumentNullException("packageSourceProvider");
             }
+            if (settings == null) {
+                throw new ArgumentNullException("settings");
+            }
+
+            _settings = settings;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
         }
@@ -50,6 +60,12 @@ namespace NuGet.VisualStudio.Cmdlets {
         [Parameter(ParameterSetName = "Updates")]
         public string Source { get; set; }
 
+        private bool Local {
+            get {
+                return !(Remote.IsPresent || Updates.IsPresent);
+            }
+        }
+
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen && (!Remote.IsPresent || Updates.IsPresent)) {
                 WriteError(VsResources.Cmdlet_NoSolution);
@@ -57,7 +73,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
 
             IPackageRepository repository;
-            if (Remote.IsPresent || Updates.IsPresent) {
+            if (!Local) {
                 repository = GetRemoteRepository();
             }
             else {
@@ -120,6 +136,10 @@ namespace NuGet.VisualStudio.Cmdlets {
                             Version = p.Version,
                             Description = p.Description
                         };
+
+            if (Local) {
+                Log(MessageLevel.Info, String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ListingPackages, _settings.RepositoryPath));
+            }
 
             WriteObject(query, enumerateCollection: true);
         }

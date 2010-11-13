@@ -7,7 +7,7 @@ using System.Linq;
 using EnvDTE;
 using EnvDTE80;
 
-namespace NuGet.VisualStudio {    
+namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(ISolutionManager))]
     public class SolutionManager : ISolutionManager {
@@ -83,6 +83,16 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public string SolutionDirectory {
+            get {
+                if (!IsSolutionOpen || String.IsNullOrEmpty(_dte.Solution.FullName)) {
+                    return null;
+                }
+
+                return Path.GetDirectoryName(_dte.Solution.FullName);
+            }
+        }
+
         /// <summary>
         /// Gets a list of supported projects currently loaded in the solution
         /// </summary>
@@ -114,7 +124,7 @@ namespace NuGet.VisualStudio {
         }
 
 
-        private void OnBeforeClosing() {            
+        private void OnBeforeClosing() {
             DefaultProjectName = null;
             _projectCache = null;
             if (_solutionClosing != null) {

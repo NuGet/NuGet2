@@ -8,6 +8,8 @@ namespace NuGet.VisualStudio {
         event EventHandler SolutionOpened;
         event EventHandler SolutionClosing;
 
+        string SolutionDirectory { get; }
+
         string DefaultProjectName { get; set; }
         Project DefaultProject { get; }
 

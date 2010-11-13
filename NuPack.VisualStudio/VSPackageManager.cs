@@ -5,29 +5,19 @@ using EnvDTE;
 
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
-        private readonly Dictionary<Project, IProjectManager> _projectManagers = null;
-        private readonly ISharedPackageRepository _localRepository;
+        private readonly ISharedPackageRepository _sharedRepository;
 
         public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
                                 IFileSystem fileSystem,
-                                ISharedPackageRepository localRepository) :
-            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository) {
+                                ISharedPackageRepository sharedRepository) :
+            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
-            _localRepository = localRepository;
-            _projectManagers = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
-        }
-
-        protected virtual IEnumerable<IProjectManager> ProjectManagers {
-            get {
-                return _projectManagers.Values;
-            }
+            _sharedRepository = sharedRepository;
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
-            IProjectManager projectManager;
-            _projectManagers.TryGetValue(project, out projectManager);
-            return projectManager;
+            return CreateProjectManager(project);
         }
 
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
@@ -73,7 +63,7 @@ namespace NuGet.VisualStudio {
 
         protected override void ExecuteUninstall(IPackage package) {
             // Check if the package is in use before removing it
-            if (!_localRepository.IsReferenced(package.Id, package.Version)) {
+            if (!_sharedRepository.IsReferenced(package.Id, package.Version)) {
                 base.ExecuteUninstall(package);
             }
         }
@@ -90,7 +80,14 @@ namespace NuGet.VisualStudio {
         }
 
         private IProjectManager CreateProjectManager(Project project) {
-            return new ProjectManager(_localRepository, PathResolver, VsProjectSystemFactory.CreateProjectSystem(project));
+            // Create the projet system
+            IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
+
+            // Create the project manager with the shared repository
+            return new ProjectManager(_sharedRepository, 
+                                      PathResolver, 
+                                      projectSystem, 
+                                      new PackageReferenceRepository(projectSystem, _sharedRepository));
         }
     }
 }
