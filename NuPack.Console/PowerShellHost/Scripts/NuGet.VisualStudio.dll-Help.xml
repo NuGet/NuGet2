@@ -78,7 +78,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Project</maml:name>
         <maml:description>
-          <maml:para>Specifies the project to install the package into. If ommitted, the default project is chosen.</maml:para>
+          <maml:para>Specifies the project to install the package into. If ommitted, the active project is chosen.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -87,7 +87,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the URL for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -170,7 +170,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the Package Source. Typically the URL to an OData service or the path to a directory that contains a set of packages.</maml:para>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -191,7 +191,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Filter</maml:name>
         <maml:description>
-          <maml:para>Specifies a filter string used to narrow down the list of packages returned. The filter is searched for in the package ID and in the description.</maml:para>
+          <maml:para>Specifies a filter string used to narrow down the list of packages returned. The filter is searched for in the package Id and in the description.</maml:para>
         </maml:description>
       </command:parameter>
     </command:parameters>
@@ -382,7 +382,7 @@
       <command:parameter required="false" position="named">
         <maml:name>UpdateDependencies</maml:name>
         <maml:description>
-          <maml:para>Updates all of the package’s dependencies to the latest version.</maml:para>
+          <maml:para>Updates all of the package’s dependencies to the latest version. True by default.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
@@ -397,7 +397,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the URL for the package source containing the package to update. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
