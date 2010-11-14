@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
+using NuGet.Resources;
 
 namespace NuGet {
     public class SharedPackageRepository : LocalPackageRepository, ISharedPackageRepository {
@@ -38,7 +41,7 @@ namespace NuGet {
             return GetRepositoryPaths().Select(CreateRepository);
         }
 
-        private IEnumerable<string> GetRepositoryPaths() {
+        internal IEnumerable<string> GetRepositoryPaths() {
             // The store file is in this format
             // <repositories>
             //     <repository path="..\packages.config" />
@@ -61,8 +64,8 @@ namespace NuGet {
             foreach (var entry in entries.ToList()) {
                 string path = NormalizePath(entry.Path);
 
-                if (String.IsNullOrEmpty(path) || 
-                    !FileSystem.FileExists(path) || 
+                if (String.IsNullOrEmpty(path) ||
+                    !FileSystem.FileExists(path) ||
                     !paths.Add(path)) {
                     // Remove invalid entries from the document
                     entry.Element.Remove();
@@ -96,7 +99,7 @@ namespace NuGet {
         private void DeleteEntry(string path) {
             // Get the relative path
             path = NormalizePath(path);
- 
+
             // Remove the repository from the document
             XDocument document = GetStoreDocument();
 
@@ -108,10 +111,8 @@ namespace NuGet {
 
             if (element != null) {
                 element.Remove();
+                SaveDocument(document);
             }
-
-            // REVIEW: Should we remove the file if no projects reference this repository?
-            SaveDocument(document);
         }
 
         private static IEnumerable<XElement> GetRepositoryElements(XDocument document) {
@@ -141,20 +142,28 @@ namespace NuGet {
         }
 
         private XDocument GetStoreDocument(bool createIfNotExists = false) {
-            // If the file exists then open and return it
-            if (FileSystem.FileExists(StoreFilePath)) {
-                using (Stream stream = FileSystem.OpenFile(StoreFilePath)) {
-                    return XDocument.Load(stream);
+            try {
+                // If the file exists then open and return it
+                if (FileSystem.FileExists(StoreFilePath)) {
+                    using (Stream stream = FileSystem.OpenFile(StoreFilePath)) {
+                        return XDocument.Load(stream);
+                    }
                 }
-            }
 
-            // If it doesn't exist and we're creating a new file then return a
-            // document with an empty packages node
-            if (createIfNotExists) {
-                return new XDocument(new XElement("repositories"));
-            }
+                // If it doesn't exist and we're creating a new file then return a
+                // document with an empty packages node
+                if (createIfNotExists) {
+                    return new XDocument(new XElement("repositories"));
+                }
 
-            return null;
+                return null;
+            }
+            catch (XmlException e) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                                  NuGetResources.ErrorReadingFile,
+                                  FileSystem.GetFullPath(StoreFilePath)), e);
+            }
         }
 
         private string NormalizePath(string path) {
@@ -163,13 +172,9 @@ namespace NuGet {
             }
 
             if (Path.IsPathRooted(path)) {
-                return GetRelativePath(path);
+                return PathUtility.GetRelativePath(FileSystem.Root, path);
             }
             return path;
-        }
-
-        private string GetRelativePath(string path) {
-            return PathUtility.GetRelativePath(FileSystem.Root, path);
         }
     }
 }

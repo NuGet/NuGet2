@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
+using NuGet.Resources;
 
 namespace NuGet {
     /// <summary>
@@ -43,24 +46,30 @@ namespace NuGet {
         }
 
         private XDocument GetDocument(bool createIfNotExists = false) {
-            // If the file exists then open and return it
-            if (FileSystem.FileExists(PackageReferenceFile)) {
-                using (Stream stream = FileSystem.OpenFile(PackageReferenceFile)) {
-                    return XDocument.Load(stream);
+            try {
+                // If the file exists then open and return it
+                if (FileSystem.FileExists(PackageReferenceFile)) {
+                    using (Stream stream = FileSystem.OpenFile(PackageReferenceFile)) {
+                        return XDocument.Load(stream);
+                    }
                 }
-            }
 
-            // If it doesn't exist and we're creating a new file then return a
-            // document with an empty packages node
-            if (createIfNotExists) {
-                return new XDocument(new XElement("packages"));
-            }
+                // If it doesn't exist and we're creating a new file then return a
+                // document with an empty packages node
+                if (createIfNotExists) {
+                    return new XDocument(new XElement("packages"));
+                }
 
-            return null;
+                return null;
+            }
+            catch (XmlException e) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, PackageReferenceFileFullPath), e);
+            }
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return GetPackagesCore().AsQueryable();
+            return GetPackagesCore().AsSafeQueryable();
         }
 
         private IEnumerable<IPackage> GetPackagesCore() {
@@ -72,7 +81,8 @@ namespace NuGet {
             else {
                 foreach (var e in document.Root.Elements("package").ToList()) {
                     string id = e.GetOptionalAttributeValue("id");
-                    Version version = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"));
+                    string versionString = e.GetOptionalAttributeValue("version");
+                    Version version = VersionUtility.ParseOptionalVersion(versionString);
                     IPackage package = null;
 
                     if (String.IsNullOrEmpty(id) || version == null) {
@@ -130,11 +140,11 @@ namespace NuGet {
         }
 
         private void DeleteEntry(XDocument document, string id, Version version) {
-            XElement packageElement = FindEntry(document, id, version);
+            XElement element = FindEntry(document, id, version);
 
-            if (packageElement != null) {
+            if (element != null) {
                 // Remove the element from the xml dom
-                packageElement.Remove();
+                element.Remove();
             }
 
             // Remove the file if there are no more elements

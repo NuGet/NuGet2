@@ -16,16 +16,8 @@ namespace NuGet {
                 throw new ArgumentNullException("path2");
             }
 
-            if (path1.StartsWith(@"\\", StringComparison.Ordinal)) {
-                path1 = path1.Substring(2);
-            }
-
-            if (path2.StartsWith(@"\\", StringComparison.Ordinal)) {
-                path2 = path2.Substring(2);
-            }
-
-            string[] path1Segments = path1.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] path2Segments = path2.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] path1Segments = path1.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            string[] path2Segments = path2.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
 
             int index = 0;
             while (index < Math.Min(path1Segments.Length, path2Segments.Length)) {
@@ -48,10 +40,10 @@ namespace NuGet {
 
             for (int i = index; i < path2Segments.Length; i++) {
                 builder.Append(path2Segments[i]);
-                builder.Append('\\');
+                builder.Append(Path.DirectorySeparatorChar);
             }
 
-            return builder.ToString().Trim(new char[] { '\\' });
+            return builder.ToString().Trim(Path.DirectorySeparatorChar);
 
         }
     }

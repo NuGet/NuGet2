@@ -250,20 +250,20 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
+        /// </summary>
+        public static string ErrorReadingFile {
+            get {
+                return ResourceManager.GetString("ErrorReadingFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device..
         /// </summary>
         public static string InstallSuccessDisclaimerText {
             get {
                 return ResourceManager.GetString("InstallSuccessDisclaimerText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
-        /// </summary>
-        public static string InvalidConfigurationFile {
-            get {
-                return ResourceManager.GetString("InvalidConfigurationFile", resourceCulture);
             }
         }
         

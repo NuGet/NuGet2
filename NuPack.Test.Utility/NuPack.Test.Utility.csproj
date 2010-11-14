@@ -27,6 +27,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mocks\MockFileSystem.cs" />
     <Compile Include="Mocks\MockPackageRepository.cs" />
     <Compile Include="Mocks\MockProjectSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -189,7 +188,9 @@ namespace NuGet.VisualStudio.Test {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object) { CallBase = true }.Object;
+            var repositorySettings = new Mock<IRepositorySettings>();
+            repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
+            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, repositorySettings.Object) { CallBase = true }.Object;
             cmdlet.Remote = new SwitchParameter(isPresent: true);
 
             // Act and Assert
@@ -230,7 +231,7 @@ namespace NuGet.VisualStudio.Test {
                                          PackageUtility.CreatePackage("P2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
-            return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object);
+            return new VsPackageManager(remoteRepo.Object, fileSystem.Object, localRepo.Object);
         }
 
         private static IPackageSourceProvider GetSourceProvider() {

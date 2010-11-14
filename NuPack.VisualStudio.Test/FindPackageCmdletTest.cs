@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
 using System.Linq;
+using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.VisualStudio.Cmdlets;
 using Moq;
 using NuGet.Test;
-using System.Management.Automation;
+using NuGet.VisualStudio.Cmdlets;
 
 namespace NuGet.VisualStudio.Test {
     [TestClass]
@@ -90,7 +88,7 @@ namespace NuGet.VisualStudio.Test {
                                          PackageUtility.CreatePackage("Pack2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
-            return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object);
+            return new VsPackageManager(remoteRepo.Object, fileSystem.Object, localRepo.Object);
         }
 
         private static IPackageSourceProvider GetSourceProvider() {

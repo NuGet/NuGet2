@@ -7,8 +7,7 @@ namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
 
-        public VsPackageManager(ISolutionManager solutionManager,
-                                IPackageRepository sourceRepository,
+        public VsPackageManager(IPackageRepository sourceRepository,
                                 IFileSystem fileSystem,
                                 ISharedPackageRepository sharedRepository) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
@@ -17,7 +16,14 @@ namespace NuGet.VisualStudio {
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
-            return CreateProjectManager(project);
+            // Create the projet system
+            IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
+
+            // Create the project manager with the shared repository
+            return new ProjectManager(_sharedRepository,
+                                      PathResolver,
+                                      projectSystem,
+                                      new PackageReferenceRepository(projectSystem, _sharedRepository));
         }
 
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
@@ -77,17 +83,6 @@ namespace NuGet.VisualStudio {
                 projectManager.Logger = logger;
                 projectManager.Project.Logger = logger;
             }
-        }
-
-        private IProjectManager CreateProjectManager(Project project) {
-            // Create the projet system
-            IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
-
-            // Create the project manager with the shared repository
-            return new ProjectManager(_sharedRepository, 
-                                      PathResolver, 
-                                      projectSystem, 
-                                      new PackageReferenceRepository(projectSystem, _sharedRepository));
         }
     }
 }

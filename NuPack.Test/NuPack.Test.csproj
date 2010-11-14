@@ -43,6 +43,9 @@
     </Compile>
     <Compile Include="AggregateRepositoryTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
+    <Compile Include="PackageReferenceRepositoryTest.cs" />
+    <Compile Include="PathUtilityTest.cs" />
+    <Compile Include="SharedRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />
     <Compile Include="BindingRedirectManagerTest.cs" />
     <Compile Include="BindingRedirectResolverTest.cs" />

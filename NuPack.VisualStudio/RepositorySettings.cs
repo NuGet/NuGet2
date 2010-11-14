@@ -17,23 +17,40 @@ namespace NuGet.VisualStudio {
         private readonly ISolutionManager _solutionManager;
 
         private string _configurationPath;
+        private IFileSystem _fileSystem;
 
         [ImportingConstructor]
-        public RepositorySettings(ISolutionManager solutionManager) {
+        public RepositorySettings(ISolutionManager solutionManager)
+            : this(solutionManager, null) {
+        }
+
+        public RepositorySettings(ISolutionManager solutionManager, IFileSystem fileSystem) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
+
+            _fileSystem = fileSystem;
             _solutionManager = solutionManager;
 
             _solutionManager.SolutionClosing += (sender, e) => {
                 // Kill our configuration cache when someone closes the solution
                 _configurationPath = null;
+                _fileSystem = fileSystem;
             };
         }
 
         public string RepositoryPath {
             get {
                 return GetRepositoryPath();
+            }
+        }
+
+        private IFileSystem FileSystem {
+            get {
+                if (_fileSystem == null) {
+                    _fileSystem = new PhysicalFileSystem(_solutionManager.SolutionDirectory);
+                }
+                return _fileSystem;
             }
         }
 
@@ -75,7 +92,7 @@ namespace NuGet.VisualStudio {
                 // Start from the solution directory and try to find a nuget.config in the list of candidates
                 _configurationPath = (from directory in GetConfigurationDirectories(_solutionManager.SolutionDirectory)
                                       let configPath = Path.Combine(directory, NuGetConfig)
-                                      where File.Exists(configPath)
+                                      where FileSystem.FileExists(configPath)
                                       select configPath).FirstOrDefault();
             }
 
@@ -93,7 +110,7 @@ namespace NuGet.VisualStudio {
             }
 
             // If we have a configuration file path cached. We only do the directory walk if the file no longer exists
-            return !File.Exists(_configurationPath);
+            return !FileSystem.FileExists(_configurationPath);
         }
 
         /// <summary>
@@ -103,7 +120,7 @@ namespace NuGet.VisualStudio {
         private string GetRepositoryPathFromConfig(string path) {
             try {
                 XDocument document = null;
-                using (Stream stream = File.OpenRead(path)) {
+                using (Stream stream = FileSystem.OpenFile(path)) {
                     document = XDocument.Load(stream);
                 }
 
@@ -118,8 +135,8 @@ namespace NuGet.VisualStudio {
 
                 // If we were unable to parse the configuration file then show an error
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, 
-                                  VsResources.InvalidConfigurationFile, path), e);
+                    String.Format(CultureInfo.CurrentCulture,
+                                  VsResources.ErrorReadingFile, path), e);
             }
         }
 

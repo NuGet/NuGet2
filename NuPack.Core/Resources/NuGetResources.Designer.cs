@@ -214,6 +214,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
+        /// </summary>
+        internal static string ErrorReadingFile {
+            get {
+                return ResourceManager.GetString("ErrorReadingFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to External packages cannot depend on packages that target projects..
         /// </summary>
         internal static string ExternalPackagesCannotDependOnProjectLevelPackages {

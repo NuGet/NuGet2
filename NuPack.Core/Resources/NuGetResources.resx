@@ -303,4 +303,7 @@
   <data name="CannotCreateEmptyPackage" xml:space="preserve">
     <value>Cannot create a package that has no dependencies nor content.</value>
   </data>
+  <data name="ErrorReadingFile" xml:space="preserve">
+    <value>Error reading '{0}'.</value>
+  </data>
 </root>

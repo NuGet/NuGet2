@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
@@ -13,15 +10,12 @@ namespace NuGet.Test.VisualStudio {
         [TestMethod]
         public void InstallPackageInstallsIntoProjectAndPackageManager() {
             // Arrange
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
-
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
-            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(sourceRepository, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -37,14 +31,11 @@ namespace NuGet.Test.VisualStudio {
         [TestMethod]
         public void InstallPackgeWithNullProjectManagerOnlyInstallsIntoPackageManager() {
             // Arrange
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
-
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(sourceRepository, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -57,46 +48,23 @@ namespace NuGet.Test.VisualStudio {
         }
 
         [TestMethod]
-        public void UninstallPackageWithOneProjectReferencesUninstallsFromTargetProjectAndPackageManager() {
-            // Arrange
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(m => m.GetProjects()).Returns(Enumerable.Empty<Project>());
-
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+        public void UninstallPackageDoesNotRemovePackageIfPackageIsReferenced() {
+            // Arrange            
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<Version>())).Returns(true);
             var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var fileSystem = new MockFileSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
-            localRepository.AddPackage(package);
+            localRepository.Object.AddPackage(package);
             sourceRepository.AddPackage(package);
-
-            IProjectManager projectWithPackage = CreateProjectManagerWithPackage(package);
-            var packageManager = new MockVsPackageManager(solutionManager.Object, sourceRepository, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(sourceRepository, fileSystem, localRepository.Object);
 
             // Act
-            packageManager.UninstallPackage(projectWithPackage, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
+            packageManager.UninstallPackage(null, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
 
             // Assert
-            Assert.IsFalse(projectWithPackage.LocalRepository.Exists(package));
-            Assert.IsFalse(packageManager.LocalRepository.Exists(package));
-        }
-
-        private IProjectManager CreateProjectManagerWithPackage(IPackage package) {
-            MockPackageRepository localRepository = new MockPackageRepository();
-            localRepository.AddPackage(package);
-            return new ProjectManager(new MockPackageRepository(),
-                                      new DefaultPackagePathResolver(new MockProjectSystem()),
-                                      new MockProjectSystem(),
-                                      localRepository);
-        }
-
-        private class MockVsPackageManager : VsPackageManager {        
-            public MockVsPackageManager(ISolutionManager solutionManager,
-                                        IPackageRepository sourceRepository,
-                                        IFileSystem fileSystem,
-                                        ISharedPackageRepository localRepository) :
-                base(solutionManager, sourceRepository, fileSystem, localRepository) {
-            }
+            Assert.IsTrue(packageManager.LocalRepository.Exists(package));
         }
     }
 }
