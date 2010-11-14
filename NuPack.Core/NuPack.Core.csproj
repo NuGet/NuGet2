@@ -38,6 +38,8 @@
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\VersionExtensions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
     <Compile Include="Packages\IPackageMetadata.cs" />
@@ -75,6 +77,8 @@
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
+    <Compile Include="Utility\IVersionSpec.cs" />
+    <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\ZipPackageFactory.cs" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />

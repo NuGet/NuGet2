@@ -72,11 +72,11 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B")
+                                                                    new PackageDependency("B")
                                                                 }, content: new[] { "foo" });
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B")
+                                                                    new PackageDependency("B")
                                                                 }, content: new[] { "foo" });
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
             projectManager.LocalRepository.AddPackage(packageA20);
@@ -474,13 +474,13 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B", version:new Version("1.0"))
+                                                                    PackageDependency.CreateDependency("B", "[1.0]")
                                                                 },
                                                                 content: new[] { "foo" });
 
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B", version:new Version("2.0"))
+                                                                    PackageDependency.CreateDependency("B", "[2.0]")
                                                                 },
                                                                 content: new[] { "bar" });
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "foo" });
@@ -525,8 +525,8 @@ namespace NuGet.Test {
             IPackage packageA10 = PackageUtility.CreatePackage("A",
                                                                "1.0",
                                                                dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
-                                                                    PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
+                                                                    PackageDependency.CreateDependency("B","[1.0]"),
+                                                                    PackageDependency.CreateDependency("C","[1.0]")
                                                                 }, content: new[] { "A.file" });
 
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "B.fie" });
@@ -541,9 +541,9 @@ namespace NuGet.Test {
 
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                dependencies: new List<PackageDependency> { 
-                                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
-                                                                                    PackageDependency.CreateDependency("C", version: Version.Parse( "2.0")),
-                                                                                    PackageDependency.CreateDependency("D", version: Version.Parse( "1.0"))
+                                                                                    PackageDependency.CreateDependency("B", "[1.0]"),
+                                                                                    PackageDependency.CreateDependency("C", "[2.0]"),
+                                                                                    PackageDependency.CreateDependency("D", "[1.0]")
                                                                }, content: new[] { "A.20.file" });
 
             IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0", content: new[] { "C.20" });
@@ -612,7 +612,7 @@ namespace NuGet.Test {
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                dependencies: new List<PackageDependency> { 
-                                                                   PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
+                                                                   PackageDependency.CreateDependency("B", "[1.0]"),
                                                                });
 
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
@@ -625,7 +625,7 @@ namespace NuGet.Test {
             // A 2.0 -> [B 2.0]
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "2.0"))
+                                                                    PackageDependency.CreateDependency("B", "[2.0]")
                                                             });
 
             sourceRepository.AddPackage(packageA20);
@@ -644,7 +644,7 @@ namespace NuGet.Test {
             // A 1.0 -> [B 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                dependencies: new List<PackageDependency> { 
-                                                                   PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
+                                                                   PackageDependency.CreateDependency("B", "[1.0]"),
                                                                }, content: new[] { "A.cs" });
 
 
@@ -658,7 +658,7 @@ namespace NuGet.Test {
             // A 2.0 -> [B 2.0]
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                    PackageDependency.CreateDependency("B", version: Version.Parse( "2.0")),
+                                                                    PackageDependency.CreateDependency("B", "[2.0]"),
                                                                 }, content: new[] { "D.a" });
 
             IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "B.s" });
@@ -686,13 +686,13 @@ namespace NuGet.Test {
             // A 1.0 -> [C >= 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> {                                                                         
-                                                                        PackageDependency.CreateDependency("C", minVersion: Version.Parse( "1.0"))
+                                                                        PackageDependency.CreateDependency("C", "1.0")
                                                                     }, content: new[] { "A" });
 
             // B 1.0 -> [C <= 2.0]
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0",
                                                                 dependencies: new List<PackageDependency> {                                                                         
-                                                                        PackageDependency.CreateDependency("C", maxVersion: Version.Parse("2.0"))
+                                                                        PackageDependency.CreateDependency("C", "2.0")
                                                                     }, content: new[] { "B" });
 
             IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0", content: new[] { "C" });
@@ -732,8 +732,8 @@ namespace NuGet.Test {
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
-                                                                        PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
+                                                                        PackageDependency.CreateDependency("B", "[1.0]"),
+                                                                        PackageDependency.CreateDependency("C", "[1.0]")
                                                                     }, content: new[] { "file" });
 
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", new[] { "Bfile" });
@@ -742,7 +742,7 @@ namespace NuGet.Test {
             // G 1.0 -> [C (>= 1.0)]
             IPackage packageG10 = PackageUtility.CreatePackage("G", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("C", minVersion: Version.Parse("1.0"))
+                                                                        PackageDependency.CreateDependency("C", "1.0")
                                                                     }, content: new[] { "Gfile" });
 
             projectManager.LocalRepository.AddPackage(packageA10);
@@ -756,9 +756,9 @@ namespace NuGet.Test {
 
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
-                                                                        PackageDependency.CreateDependency("C", version: Version.Parse( "2.0")),
-                                                                        PackageDependency.CreateDependency("D", version: Version.Parse( "1.0"))
+                                                                        PackageDependency.CreateDependency("B", "[1.0]"),
+                                                                        PackageDependency.CreateDependency("C", "[2.0]"),
+                                                                        PackageDependency.CreateDependency("D", "[1.0]")
                                                                     }, content: new[] { "A20file" });
 
             IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0", new[] { "C20file" });
@@ -796,8 +796,8 @@ namespace NuGet.Test {
             // A 1.0 -> [B 1.0, C 1.0]
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
-                                                                        PackageDependency.CreateDependency("C", version: Version.Parse( "1.0"))
+                                                                        PackageDependency.CreateDependency("B", "[1.0]"),
+                                                                        PackageDependency.CreateDependency("C", "[1.0]")
                                                                     }, content: new[] { "afile" });
 
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "Bfile" });
@@ -806,7 +806,7 @@ namespace NuGet.Test {
             // G 1.0 -> [C 1.0]
             IPackage packageG10 = PackageUtility.CreatePackage("G", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("C", version: Version.Parse("1.0"))
+                                                                        PackageDependency.CreateDependency("C", "[1.0]")
                                                                     }, content: new[] { "gfile" });
 
             projectManager.LocalRepository.AddPackage(packageA10);
@@ -820,9 +820,9 @@ namespace NuGet.Test {
 
             IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("B", version: Version.Parse( "1.0")),
-                                                                        PackageDependency.CreateDependency("C", version: Version.Parse( "2.0")),
-                                                                        PackageDependency.CreateDependency("D", version: Version.Parse( "1.0"))
+                                                                        PackageDependency.CreateDependency("B", "[1.0]"),
+                                                                        PackageDependency.CreateDependency("C", "[2.0]"),
+                                                                        PackageDependency.CreateDependency("D", "[1.0]")
                                                                     }, content: new[] { "a20file" });
 
             IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0", content: new[] { "cfile" });
@@ -848,7 +848,7 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
-                                                                        PackageDependency.CreateDependency("B", version:new Version("1.0"))
+                                                                        PackageDependency.CreateDependency("B", "[1.0]")
                                                                     }, content: new[] { "afile" });
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "bfile" });
             IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "cfile" });
@@ -922,7 +922,7 @@ namespace NuGet.Test {
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
-                                                                PackageDependency.CreateDependency("B")
+                                                                new PackageDependency("B")
                                                             }, content: new[] { "A" });
 
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0", content: new[] { "B" });
@@ -949,13 +949,13 @@ namespace NuGet.Test {
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
-                    PackageDependency.CreateDependency("B")
+                    new PackageDependency("B")
                 },
                 content: new[] { "foo" });
 
             IPackage packageB = PackageUtility.CreatePackage("B", "1.0",
                                                             dependencies: new List<PackageDependency> {
-                                                                PackageDependency.CreateDependency("C")
+                                                                new PackageDependency("C")
                                                             },
                                                             content: new[] { "bar" });
 

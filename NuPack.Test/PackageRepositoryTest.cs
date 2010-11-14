@@ -39,7 +39,7 @@ namespace NuGet.Test {
             var repo = GetRemoteRepository();
 
             // Act
-            var package = repo.FindPackage(packageId: "A", exactVersion: Version.Parse("1.0"));
+            var package = repo.FindPackage(packageId: "A", version: Version.Parse("1.0"));
 
             // Assert
             Assert.IsNotNull(package);
@@ -53,8 +53,8 @@ namespace NuGet.Test {
             var repo = GetLocalRepository();
 
             // Act
-            var package1 = repo.FindPackage(packageId: "X", exactVersion: Version.Parse("1.0"));
-            var package2 = repo.FindPackage(packageId: "A", exactVersion: Version.Parse("1.1"));
+            var package1 = repo.FindPackage(packageId: "X", version: Version.Parse("1.0"));
+            var package2 = repo.FindPackage(packageId: "A", version: Version.Parse("1.1"));
 
             // Assert
             Assert.IsNull(package1 ?? package2);
@@ -66,7 +66,7 @@ namespace NuGet.Test {
             var repo = GetRemoteRepository();
 
             // Act
-            var package = repo.FindPackage(packageId: "A", minVersion: Version.Parse("0.9"), maxVersion: Version.Parse("1.1"));
+            var package = repo.FindPackage("A", "[0.9, 1.1]");
 
             // Assert
             Assert.IsNotNull(package);
@@ -80,39 +80,11 @@ namespace NuGet.Test {
             var repo = GetLocalRepository();
 
             // Act
-            var package1 = repo.FindPackage(packageId: "X", minVersion: Version.Parse("0.9"), maxVersion: Version.Parse("1.1"));
-            var package2 = repo.FindPackage(packageId: "A", minVersion: Version.Parse("1.4"), maxVersion: Version.Parse("1.5"));
+            var package1 = repo.FindPackage("X", "[0.9, 1.1]");
+            var package2 = repo.FindPackage("A", "[1.4, 1.5]");
 
             // Assert
             Assert.IsNull(package1 ?? package2);
-        }
-
-        [TestMethod]
-        public void FindPackageByIdVersionAndVersionRangesUsesExactVersionFirst() {
-            // Arrange
-            var repo = GetRemoteRepository();
-
-            // Act
-            var package = repo.FindPackage(packageId: "A", exactVersion: Version.Parse("1.0"), 
-                minVersion: Version.Parse("5.0"), maxVersion: Version.Parse("5.1"));
-
-            // Assert
-            Assert.IsNotNull(package);
-            Assert.AreEqual("A", package.Id);
-            Assert.AreEqual(Version.Parse("1.0"), package.Version);
-        }
-
-        [TestMethod]
-        public void FindPackageByIdVersionAndVersionRangesReturnsNullIfExactVersionNotFound() {
-            // Arrange
-            var repo = GetRemoteRepository();
-
-            // Act
-            var package = repo.FindPackage(packageId: "A", exactVersion: Version.Parse("1.9"),
-                minVersion: Version.Parse("5.0"), maxVersion: Version.Parse("5.1"));
-
-            // Assert
-            Assert.IsNull(package);
         }
 
         [TestMethod]
@@ -121,8 +93,7 @@ namespace NuGet.Test {
             var repo = GetRemoteRepository();
 
             // Act
-            var package = repo.FindPackage(packageId: "A", exactVersion: null,
-                minVersion: Version.Parse("0.6"), maxVersion: Version.Parse("1.1.5"));
+            var package = repo.FindPackage("A", "[0.6, 1.1.5]");
 
             // Assert
             Assert.IsNotNull(package);

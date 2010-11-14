@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TFS = Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace NuGet.TeamFoundationServer {
@@ -26,7 +27,7 @@ namespace NuGet.TeamFoundationServer {
         public IEnumerable<string> GetItems(string fullPath, ItemType itemType) {
             // REVIEW: We should pass the filter to this method so it happens on the server
             // REVIEW: Can we do some smart caching so we don't hit the server everytime this is called?
-            var itemSet = _workspace.VersionControlServer.GetItems(fullPath, VersionSpec.Latest, RecursionType.OneLevel, DeletedState.NonDeleted, itemType);
+            var itemSet = _workspace.VersionControlServer.GetItems(fullPath, TFS.VersionSpec.Latest, RecursionType.OneLevel, DeletedState.NonDeleted, itemType);
             
             // Get the local files for the server files
             var items = new HashSet<string>(from item in itemSet.Items

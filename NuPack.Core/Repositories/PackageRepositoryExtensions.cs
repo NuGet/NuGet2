@@ -16,7 +16,7 @@ namespace NuGet {
         }
 
         public static bool Exists(this IPackageRepository repository, string packageId, Version version) {
-            return repository.FindPackage(packageId, null, null, version) != null;
+            return repository.FindPackage(packageId, version) != null;
         }
 
         public static bool TryFindPackage(this IPackageRepository repository, string packageId, Version version, out IPackage package) {
@@ -25,23 +25,76 @@ namespace NuGet {
         }
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId) {
-            return FindPackage(repository, packageId, exactVersion: null, minVersion: null, maxVersion: null);
+            return repository.FindPackage(packageId, version: null);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version exactVersion) {
-            return FindPackage(repository, packageId, exactVersion: exactVersion, minVersion: null, maxVersion: null);
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, string versionSpec) {
+            if (versionSpec == null) {
+                throw new ArgumentNullException("versionSpec");
+            }
+            return repository.FindPackage(packageId, VersionUtility.ParseVersionSpec(versionSpec));
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion) {
-            return FindPackage(repository, packageId, minVersion: minVersion, maxVersion: maxVersion, exactVersion: null);
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version version) {
+            if (repository == null) {
+                throw new ArgumentNullException("repository");
+            }
+
+            if (packageId == null) {
+                throw new ArgumentNullException("packageId");
+            }
+
+            IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
+                                                       .AsEnumerable()
+                                                       .OrderByDescending(p => p.Version);
+
+            if (version != null) {
+                packages = packages.Where(p => p.Version == version);
+            }
+
+            return packages.FirstOrDefault();
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version minVersion, Version maxVersion, Version exactVersion) {
-            return repository.FindPackagesById(packageId).FindByVersion(minVersion, maxVersion, exactVersion);
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionInfo) {
+            if (repository == null) {
+                throw new ArgumentNullException("repository");
+            }
+
+            if (packageId == null) {
+                throw new ArgumentNullException("packageId");
+            }
+
+            IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
+                                                       .AsEnumerable()
+                                                       .OrderByDescending(p => p.Version);
+
+            if (versionInfo != null) {
+                packages = packages.FindByVersion(versionInfo);
+            }
+
+            return packages.FirstOrDefault();
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, PackageDependency dependency) {
-            return repository.FindPackage(dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
+        public static IPackage FindDependency(this IPackageRepository repository, PackageDependency dependency) {
+            if (repository == null) {
+                throw new ArgumentNullException("repository");
+            }
+
+            if (dependency == null) {
+                throw new ArgumentNullException("dependency");
+            }
+
+            // When looking for dependencies, order by lowest version
+            IEnumerable<IPackage> packages = repository.FindPackagesById(dependency.Id)
+                                                       .AsEnumerable()
+                                                       .OrderBy(p => p.Version);
+
+            // If version info was specified then use it
+            if (dependency.VersionSpec != null) {
+                packages = packages.FindByVersion(dependency.VersionSpec);
+            }
+
+            return packages.FirstOrDefault();
         }
 
         /// <summary>

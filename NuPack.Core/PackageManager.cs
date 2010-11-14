@@ -120,7 +120,7 @@ namespace NuGet {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = SourceRepository.FindPackage(packageId, version: version);
 
             if (package == null) {
                 throw new InvalidOperationException(
@@ -205,7 +205,7 @@ namespace NuGet {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            IPackage package = LocalRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = LocalRepository.FindPackage(packageId, version: version);
 
             if (package == null) {
                 throw new InvalidOperationException(String.Format(

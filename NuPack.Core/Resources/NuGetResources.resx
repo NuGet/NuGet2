@@ -306,4 +306,7 @@
   <data name="ErrorReadingFile" xml:space="preserve">
     <value>Error reading '{0}'.</value>
   </data>
+  <data name="InvalidVersionString" xml:space="preserve">
+    <value>'{0}' is not a valid version string</value>
+  </data>
 </root>

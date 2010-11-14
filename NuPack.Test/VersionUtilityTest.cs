@@ -98,5 +98,138 @@ namespace NuGet.Test {
             Assert.AreEqual(".NETFramework", frameworkName.Identifier);
             Assert.AreEqual(VersionUtility.DefaultTargetFrameworkVersion, frameworkName.Version);
         }
+
+        [TestMethod]
+        public void ParseVersionSpecWithNullThrows() {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgNull(() => VersionUtility.ParseVersionSpec(null), "versionString");
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecSimpleVersionNoBrackets() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("1.2");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual(null, versionInfo.MaxVersion);
+            Assert.IsFalse(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecSimpleVersionNoBracketsExtraSpaces() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("  1  .   2  ");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual(null, versionInfo.MaxVersion);
+            Assert.IsFalse(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecMaxOnlyInclusive() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("(,1.2]");
+
+            // Assert
+            Assert.AreEqual(null, versionInfo.MinVersion);
+            Assert.IsFalse(versionInfo.IsMinInclusive);
+            Assert.AreEqual("1.2", versionInfo.MaxVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecMaxOnlyExclusive() {
+            var versionInfo = VersionUtility.ParseVersionSpec("(,1.2)");
+            Assert.AreEqual(null, versionInfo.MinVersion);
+            Assert.IsFalse(versionInfo.IsMinInclusive);
+            Assert.AreEqual("1.2", versionInfo.MaxVersion.ToString());
+            Assert.IsFalse(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecExactVersion() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("[1.2]");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual("1.2", versionInfo.MaxVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecMinOnlyExclusive() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("(1.2,)");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsFalse(versionInfo.IsMinInclusive);
+            Assert.AreEqual(null, versionInfo.MaxVersion);
+            Assert.IsFalse(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecRangeExclusiveExclusive() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("(1.2,2.3)");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsFalse(versionInfo.IsMinInclusive);
+            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
+            Assert.IsFalse(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecRangeExclusiveInclusive() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("(1.2,2.3]");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsFalse(versionInfo.IsMinInclusive);
+            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecRangeInclusiveExclusive() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("[1.2,2.3)");
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
+            Assert.IsFalse(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecRangeInclusiveInclusive() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("[1.2,2.3]");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecRangeInclusiveInclusiveExtraSpaces() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("   [  1 .2   , 2  .3   ]  ");
+
+            // Assert
+            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMaxInclusive);
+        }
     }
 }

@@ -107,13 +107,8 @@ namespace NuGet {
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
-                return from d in Dependencies.Split(',')
-                       let parts = d.Split(':')
-                       where parts.Length == 4
-                       select PackageDependency.CreateDependency(parts[0],
-                                                                 VersionUtility.ParseOptionalVersion(parts[1]),
-                                                                 VersionUtility.ParseOptionalVersion(parts[2]),
-                                                                 VersionUtility.ParseOptionalVersion(parts[3]));
+                return from d in Dependencies.Split('|')
+                       select ParseDependency(d);
             }
         }
 
@@ -148,5 +143,13 @@ namespace NuGet {
             return this.GetFullName();
         }
 
+        private PackageDependency ParseDependency(string dependencyString) {
+            // jQuery:[1.0]
+            string[] tokens = dependencyString.Split(':');
+            string id = tokens[0];
+            IVersionSpec versionSpec;
+            VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
+            return new PackageDependency(id, versionSpec);
+        }
     }
 }

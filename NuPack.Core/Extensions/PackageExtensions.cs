@@ -10,28 +10,12 @@ namespace NuGet {
     public static class PackageExtensions {
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description" };
 
-        public static IPackage FindByVersion(this IEnumerable<IPackage> source, Version minVersion, Version maxVersion, Version exactVersion) {
-            IEnumerable<IPackage> packages = from p in source
-                                             orderby p.Version descending
-                                             select p;
-
-            if (exactVersion != null) {
-                // Try to match the exact version
-                packages = packages.Where(p => p.Version == exactVersion);
-            }
-            else {
-                if (minVersion != null) {
-                    // Try to match the latest that satisfies the min version if any
-                    packages = packages.Where(p => p.Version >= minVersion);
-                }
-
-                if (maxVersion != null) {
-                    // Try to match the latest that satisfies the max version if any
-                    packages = packages.Where(p => p.Version <= maxVersion);
-                }
+        public static IEnumerable<IPackage> FindByVersion(this IEnumerable<IPackage> source, IVersionSpec versionSpec) {
+            if (versionSpec == null) {
+                throw new ArgumentNullException("versionSpec");
             }
 
-            return packages.FirstOrDefault();
+            return source.Where(versionSpec.ToDelegate());
         }
 
         public static IEnumerable<IPackageFile> GetFiles(this IPackage package, string directory) {

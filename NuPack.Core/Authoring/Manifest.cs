@@ -65,7 +65,7 @@ namespace NuGet {
             return new Manifest {
                 Metadata = new ManifestMetadata {
                     Id = metadata.Id.SafeTrim(),
-                    Version = GetVersionString(metadata.Version),
+                    Version = metadata.Version.ToStringSafe(),
                     Title = metadata.Title.SafeTrim(),
                     Authors = GetCommaSeparatedString(metadata.Authors),
                     Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
@@ -82,9 +82,7 @@ namespace NuGet {
                                    (from d in metadata.Dependencies
                                     select new ManifestDependency {
                                         Id = d.Id.SafeTrim(),
-                                        MinVersion = GetVersionString(d.MinVersion),
-                                        MaxVersion = GetVersionString(d.MaxVersion),
-                                        Version = GetVersionString(d.Version)
+                                        Version = d.VersionSpec.ToStringSafe()
                                     }).ToList()
                 }
             };
@@ -124,13 +122,6 @@ namespace NuGet {
 
         private static ValidationContext CreateValidationContext(object value) {
             return new ValidationContext(value, NullServiceProvider.Instance, new Dictionary<object, object>());
-        }
-
-        private static string GetVersionString(Version version) {
-            if (version == null) {
-                return null;
-            }
-            return version.ToString();
         }
 
         private class NullServiceProvider : IServiceProvider {

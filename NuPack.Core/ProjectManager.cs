@@ -123,7 +123,7 @@ namespace NuGet {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
-            IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = SourceRepository.FindPackage(packageId, version: version);
 
             if (package == null) {
                 throw new InvalidOperationException(
@@ -310,7 +310,7 @@ namespace NuGet {
 
             Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
 
-            IPackage package = SourceRepository.FindPackage(packageId, exactVersion: version);
+            IPackage package = SourceRepository.FindPackage(packageId, version: version);
 
             if (package == null) {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);

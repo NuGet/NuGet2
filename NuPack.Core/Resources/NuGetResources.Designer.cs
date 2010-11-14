@@ -232,6 +232,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid version string.
+        /// </summary>
+        internal static string InvalidVersionString {
+            get {
+                return ResourceManager.GetString("InvalidVersionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; not installed. Attempting to retrieve dependency from source....
         /// </summary>
         internal static string Log_AttemptingToRetrievePackageFromSource {

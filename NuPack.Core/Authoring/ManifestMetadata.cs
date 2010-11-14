@@ -132,10 +132,7 @@ namespace NuGet {
                     return Enumerable.Empty<PackageDependency>();
                 }
                 return from dependency in Dependencies
-                       select PackageDependency.CreateDependency(dependency.Id,
-                                                                 VersionUtility.ParseOptionalVersion(dependency.MinVersion),
-                                                                 VersionUtility.ParseOptionalVersion(dependency.MaxVersion),
-                                                                 VersionUtility.ParseOptionalVersion(dependency.Version));
+                       select new PackageDependency(dependency.Id, String.IsNullOrEmpty(dependency.Version) ? null : VersionUtility.ParseVersionSpec(dependency.Version));
             }
         }
 

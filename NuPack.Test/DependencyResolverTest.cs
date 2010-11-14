@@ -41,7 +41,7 @@ namespace NuGet.Test {
 
             IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("B", version: new Version("1.0")),
+                                                            PackageDependency.CreateDependency("B", "[1.0]"),
                                                         });
             mockRepository.AddPackage(packageC);
 
@@ -64,7 +64,7 @@ namespace NuGet.Test {
 
             IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("A", version: new Version("2.0")),
+                                                            PackageDependency.CreateDependency("A", "[2.0]"),
                                                         });
             mockRepository.AddPackage(packageC);
 
@@ -96,8 +96,8 @@ namespace NuGet.Test {
 
             IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("B", version: new Version("1.0")),
-                                                            PackageDependency.CreateDependency("A", version: new Version("1.0")),
+                                                            PackageDependency.CreateDependency("B", "[1.0]"),
+                                                            PackageDependency.CreateDependency("A", "[1.0]"),
                                                         });
             mockRepository.AddPackage(packageC);
 
@@ -131,14 +131,14 @@ namespace NuGet.Test {
 
             IPackage packageB = PackageUtility.CreatePackage("B", "2.0",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("D", version: new Version("6.0")),
-                                                            PackageDependency.CreateDependency("E", version: new Version("4.0"))
+                                                            PackageDependency.CreateDependency("D", "[6.0]"),
+                                                            PackageDependency.CreateDependency("E", "[4.0]")
                                                         });
             mockRepository.AddPackage(packageB);
 
             IPackage packageD = PackageUtility.CreatePackage("D", "6.0",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("A", version: new Version("1.0"))
+                                                            PackageDependency.CreateDependency("A", "[1.0]")
                                                         });
             mockRepository.AddPackage(packageD);
 
@@ -147,14 +147,14 @@ namespace NuGet.Test {
 
             IPackage packageC = PackageUtility.CreatePackage("C", "3.0",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("A", version: new Version("1.0")),
-                                                            PackageDependency.CreateDependency("B", version: new Version("2.0"))
+                                                            PackageDependency.CreateDependency("A", "[1.0]"),
+                                                            PackageDependency.CreateDependency("B", "[2.0]")
                                                         });
             mockRepository.AddPackage(packageC);
 
             IPackage packageF = PackageUtility.CreatePackage("F", "0.1",
                                                         dependencies: new List<PackageDependency> {
-                                                            PackageDependency.CreateDependency("C", version: new Version("2.0"))
+                                                            PackageDependency.CreateDependency("C", "[2.0]")
                                                         });
             mockRepository.AddPackage(packageF);
 

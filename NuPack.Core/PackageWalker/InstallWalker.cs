@@ -61,7 +61,7 @@ namespace NuGet {
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
             // See if we have a local copy
-            IPackage package = Repository.FindPackage(dependency);
+            IPackage package = Repository.FindDependency(dependency);
 
             if (package != null) {
                 // We have it installed locally
@@ -71,7 +71,7 @@ namespace NuGet {
                 // We didn't resolve the dependency so try to retrieve it from the source
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
-                package = SourceRepository.FindPackage(dependency);
+                package = SourceRepository.FindDependency(dependency);
 
                 if (package != null) {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageRetrieveSuccessfully);
@@ -80,7 +80,7 @@ namespace NuGet {
 
             return package;
         }
-        
+
         protected override void OnDependencyResolveError(PackageDependency dependency) {
             throw new InvalidOperationException(
                 String.Format(CultureInfo.CurrentCulture,
@@ -93,7 +93,11 @@ namespace NuGet {
                                              where p.Id.Equals(dependency.Id, StringComparison.OrdinalIgnoreCase)
                                              select p;
 
-            IPackage package = packages.FindByVersion(dependency.MinVersion, dependency.MaxVersion, dependency.Version);
+            if (dependency.VersionSpec != null) {
+                packages = packages.FindByVersion(dependency.VersionSpec);
+            }
+
+            IPackage package = packages.FirstOrDefault();
 
             // Return false if this package is already resolved (i.e. it's been visited)
             return package == null || !Marker.IsVisited(package);

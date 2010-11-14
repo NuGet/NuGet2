@@ -31,7 +31,7 @@ namespace NuGet {
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return _sourceRepository.FindPackage(dependency);
+            return _sourceRepository.FindDependency(dependency);
         }
 
         protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {

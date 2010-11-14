@@ -106,24 +106,14 @@ namespace NuGet {
             // Updating to A 2.0 from A 1.0 needs to know if there is a conflict with C
             // Since C works with B (>= 1.0) it it should be ok to update A
 
-            // If there is an exact version specified then we check if the package is that exact version
-            if (dependency.Version != null) {
-                return dependency.Version.Equals(targetPackage.Version);
+            if (dependency.VersionSpec == null) {
+                return true;
             }
 
-            bool isSatisfied = true;
+            // Get the delegate for this version info and see if it returns true
+            Func<IPackage, bool> versionMatcher = dependency.VersionSpec.ToDelegate();
 
-            // See if it meets the minimum version requirement if any
-            if (dependency.MinVersion != null) {
-                isSatisfied = targetPackage.Version >= dependency.MinVersion;
-            }
-
-            // See if it meets the maximum version requirement if any
-            if (dependency.MaxVersion != null) {
-                isSatisfied = isSatisfied && targetPackage.Version <= dependency.MaxVersion;
-            }
-
-            return isSatisfied;
+            return versionMatcher(targetPackage);
         }
     }
 }

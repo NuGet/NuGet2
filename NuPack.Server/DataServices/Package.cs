@@ -36,7 +36,7 @@ namespace NuGet.Server.DataServices {
                 Tags += " ";
             }
 
-            Dependencies = String.Join(",", from d in package.Dependencies
+            Dependencies = String.Join("|", from d in package.Dependencies
                                             select ConvertDependency(d));
             PackageHash = derivedData.PackageHash;
             PackageSize = derivedData.PackageSize;
@@ -153,7 +153,7 @@ namespace NuGet.Server.DataServices {
         }
 
         private string ConvertDependency(PackageDependency dependency) {
-            return String.Format("{0}:{1}:{2}:{3}", dependency.Id, dependency.MinVersion, dependency.MaxVersion, dependency.Version);
+            return String.Format("{0}:{1}", dependency.Id, dependency.VersionSpec);
         }
     }
 }

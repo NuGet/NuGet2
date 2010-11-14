@@ -101,7 +101,7 @@ namespace NuGet {
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return Repository.FindPackage(dependency);
+            return Repository.FindDependency(dependency);
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {
