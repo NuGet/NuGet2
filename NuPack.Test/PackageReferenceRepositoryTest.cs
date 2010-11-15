@@ -8,7 +8,7 @@ namespace NuGet.Test {
     [TestClass]
     public class PackageReferenceRepositoryTest {
         [TestMethod]
-        public void CtorRegisteresWithSharedRepository() {
+        public void RegisterIfNecessaryDoesNotRegistersWithSharedRepositoryIfRepositoryDoesNotContainsPackages() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
@@ -18,6 +18,27 @@ namespace NuGet.Test {
 
             // Act
             var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            referenceRepository.RegisterIfNecessary();
+
+            // Assert
+            Assert.IsNull(path);
+        }
+
+        [TestMethod]
+        public void RegisterIfNecessaryRegistersWithSharedRepositoryIfRepositoryContainsPackages() {
+            // Arrange
+            var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
+            string path = null;
+            sharedRepository.Setup(m => m.RegisterRepository(It.IsAny<string>()))
+                            .Callback<string>(p => path = p);
+            var fileSystem = new MockFileSystem();
+            IPackage package = PackageUtility.CreatePackage("A");
+            sharedRepository.Object.AddPackage(package);
+
+            // Act
+            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            referenceRepository.AddPackage(package);
+            referenceRepository.RegisterIfNecessary();
 
             // Assert
             Assert.AreEqual(@"C:\MockFileSystem\packages.config", path);

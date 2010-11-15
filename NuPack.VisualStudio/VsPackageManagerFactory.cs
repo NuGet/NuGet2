@@ -52,7 +52,7 @@ namespace NuGet.VisualStudio {
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
             RepositoryInfo info = GetRepositoryInfo();
 
-            return new VsPackageManager(repository, info.FileSystem, info.Repository);
+            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository);
         }
 
         private RepositoryInfo GetRepositoryInfo() {

@@ -6,24 +6,35 @@ using EnvDTE;
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
+        private readonly IDictionary<Project, IProjectManager> _projects;
 
-        public VsPackageManager(IPackageRepository sourceRepository,
+        public VsPackageManager(ISolutionManager solutionManager,
+                                IPackageRepository sourceRepository,
                                 IFileSystem fileSystem,
                                 ISharedPackageRepository sharedRepository) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
             _sharedRepository = sharedRepository;
+            _projects = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
+            IProjectManager projectManager;
+            _projects.TryGetValue(project, out projectManager);
+            return projectManager;
+        }
+
+        private IProjectManager CreateProjectManager(Project project) {
             // Create the projet system
             IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
+            var repository = new PackageReferenceRepository(projectSystem, _sharedRepository);
+
+            // Ensure that this repository is registered with the shared repository if it needs to be
+            repository.RegisterIfNecessary();
+
             // Create the project manager with the shared repository
-            return new ProjectManager(_sharedRepository,
-                                      PathResolver,
-                                      projectSystem,
-                                      new PackageReferenceRepository(projectSystem, _sharedRepository));
+            return new ProjectManager(_sharedRepository, PathResolver, projectSystem, repository);
         }
 
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {

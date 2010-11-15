@@ -25,8 +25,6 @@ namespace NuGet {
             }
             FileSystem = fileSystem;
             SourceRepository = sourceRepository;
-
-            SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
         }
 
         private IFileSystem FileSystem {
@@ -137,6 +135,12 @@ namespace NuGet {
             }
 
             DeleteEntry(document, package.Id, package.Version);
+        }
+
+        public void RegisterIfNecessary() {
+            if (GetPackages().Any()) {
+                SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
+            }
         }
 
         private void DeleteEntry(XDocument document, string id, Version version) {

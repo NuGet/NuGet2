@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Test;
 
 namespace NuGet.Test.VisualStudio {
     [TestClass]
@@ -15,7 +16,7 @@ namespace NuGet.Test.VisualStudio {
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
-            var packageManager = new VsPackageManager(sourceRepository, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -35,7 +36,7 @@ namespace NuGet.Test.VisualStudio {
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(sourceRepository, projectSystem, localRepository);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, projectSystem, localRepository);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -58,7 +59,7 @@ namespace NuGet.Test.VisualStudio {
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             localRepository.Object.AddPackage(package);
             sourceRepository.AddPackage(package);
-            var packageManager = new VsPackageManager(sourceRepository, fileSystem, localRepository.Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository.Object);
 
             // Act
             packageManager.UninstallPackage(null, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);

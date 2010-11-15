@@ -231,7 +231,7 @@ namespace NuGet.VisualStudio.Test {
                                          PackageUtility.CreatePackage("P2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
-            return new VsPackageManager(remoteRepo.Object, fileSystem.Object, localRepo.Object);
+            return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object);
         }
 
         private static IPackageSourceProvider GetSourceProvider() {

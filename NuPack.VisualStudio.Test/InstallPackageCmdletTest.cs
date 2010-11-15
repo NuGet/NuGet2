@@ -82,8 +82,9 @@ namespace NuGet.VisualStudio.Test {
         private class MockVsPackageManager : VsPackageManager {
 
             public MockVsPackageManager()
-                : base(new Mock<IPackageRepository>().Object,
-                new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object) {
+                : base(new Mock<ISolutionManager>().Object,
+                        new Mock<IPackageRepository>().Object,
+                        new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object) {
             }
 
             public IProjectManager ProjectManager { get; set; }
