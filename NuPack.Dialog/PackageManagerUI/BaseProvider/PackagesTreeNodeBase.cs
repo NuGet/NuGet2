@@ -244,7 +244,7 @@ namespace NuGet.Dialog.Providers {
         private LoadPageResult ExecuteAsync(int pageNumber, CancellationToken token) {
             token.ThrowIfCancellationRequested();
 
-            IQueryable<IPackage> query = GetPackages().OrderBy(p => p.Id);
+            IQueryable<IPackage> query = GetPackages().OrderByDescending(p => p.Score);
 
             token.ThrowIfCancellationRequested();
 

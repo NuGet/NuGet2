@@ -74,6 +74,36 @@ namespace NuGet {
             set;
         }
 
+        public Uri ReportAbuseUrl {
+            get {
+                return null;
+            }
+        }
+
+        public int DownloadCount {
+            get {
+                return -1;
+            }
+        }
+
+        public int Score {
+            get {
+                return -1;
+            }
+        }
+
+        public double Rating {
+            get {
+                return -1;
+            }
+        }
+
+        public int RatingsCount {
+            get {
+                return 0;
+            }
+        }
+
         public bool RequireLicenseAcceptance {
             get;
             set;

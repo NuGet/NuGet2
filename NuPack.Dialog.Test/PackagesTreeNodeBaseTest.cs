@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
-using System.Linq;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
@@ -166,31 +167,39 @@ namespace NuGet.Dialog.Test {
 
             int numberOfPackages = 23;
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages);
+            Exception exception = null;
 
             node.QueryExecutionCallback = delegate {
-                // Assert
-                Assert.AreEqual(3, node.TotalPages);
-                Assert.AreEqual(2, node.CurrentPage);
-                Assert.AreEqual(10, node.Extensions.Count);
+                try {
+                    // Assert
+                    Assert.AreEqual(3, node.TotalPages);
+                    Assert.AreEqual(2, node.CurrentPage);
+                    Assert.AreEqual(10, node.Extensions.Count);
 
-                // the loaded extensions should be from 10 to 19 (because they are on page 2)
-                IList<IVsExtension> extentions = node.Extensions;
-                var expected = Enumerable.Range(0, numberOfPackages)
-                                         .Select(i => "A" + i)
-                                         .OrderBy(s => s)
-                                         .Skip(10)
-                                         .ToArray();
-
-                for (int i = 0; i < 10; i++) {
-                    Assert.AreEqual(expected[i], extentions[i].Name);
+                    // the loaded extensions should be from 10 to 19 (because they are on page 2)
+                    IList<IVsExtension> extentions = node.Extensions;
+                    var expected = Enumerable.Range(0, numberOfPackages)
+                                             .OrderByDescending(i => i)
+                                             .Skip(10)
+                                             .Select(i => "A" + i)
+                                             .ToArray();
+                    for (int i = 0; i < 10; i++) {
+                        Assert.AreEqual(expected[i], extentions[i].Name);
+                    }
                 }
-
-                resetEvent.Set();
+                catch (Exception e) {
+                    exception = e;
+                }
+                finally {
+                    // If there is an exception we don't want to freeze the unit test forever
+                    resetEvent.Set();
+                }
             };
 
             // Act
             node.LoadPage(2);
             resetEvent.Wait();
+            Assert.IsNull(exception);
         }
 
         [TestMethod]

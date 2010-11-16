@@ -153,6 +153,9 @@
   <data name="Dialog_PackageUpdatedTooltip" xml:space="preserve">
     <value>This package is already updated.</value>
   </data>
+  <data name="Dialog_ReportAbuse" xml:space="preserve">
+    <value>Report Abuse</value>
+  </data>
   <data name="Dialog_RootNodeAll" xml:space="preserve">
     <value>All</value>
   </data>
@@ -187,7 +190,7 @@
     <value>The following package(s) require a click-to-accept license:</value>
   </data>
   <data name="License_LicenseText" xml:space="preserve">
-    <value>By clicking &quot;I Accept,&quot; you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click &quot;I Decline.&quot;</value>
+    <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
   </data>
   <data name="License_ViewLicense" xml:space="preserve">
     <value>View License Terms</value>

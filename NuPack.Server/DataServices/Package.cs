@@ -17,13 +17,13 @@ namespace NuGet.Server.DataServices {
             Title = package.Title;
             Authors = String.Join(",", package.Authors);
             if (package.IconUrl != null) {
-                IconUrl = package.IconUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.SafeUnescaped);
+                IconUrl = package.IconUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             if (package.LicenseUrl != null) {
-                LicenseUrl = package.LicenseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.SafeUnescaped);
+                LicenseUrl = package.LicenseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             if (package.ProjectUrl != null) {
-                ProjectUrl = package.ProjectUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.SafeUnescaped);
+                ProjectUrl = package.ProjectUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             RequireLicenseAcceptance = package.RequireLicenseAcceptance;
             Description = package.Description;
@@ -40,6 +40,12 @@ namespace NuGet.Server.DataServices {
                                             select ConvertDependency(d));
             PackageHash = derivedData.PackageHash;
             PackageSize = derivedData.PackageSize;
+            Uri reportAbuseUrl = PackageUtility.GetRepostAbuseUrl(Id, Version);
+            if (reportAbuseUrl != null) {
+                ReportAbuseUrl = reportAbuseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+            }
+            var rating = Math.Abs((double)Id.GetHashCode() % 50) / 10;
+            Score = Id.GetHashCode();
         }
 
         public string Id {
@@ -73,6 +79,31 @@ namespace NuGet.Server.DataServices {
         }
 
         public string ProjectUrl {
+            get;
+            set;
+        }
+
+        public string ReportAbuseUrl {
+            get;
+            set;
+        }
+
+        public int DownloadCount {
+            get;
+            set;
+        }
+
+        public int Score {
+            get;
+            set;
+        }
+
+        public int RatingsCount {
+            get;
+            set;
+        }
+
+        public double Rating {
             get;
             set;
         }

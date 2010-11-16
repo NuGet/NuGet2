@@ -16,12 +16,15 @@ namespace NuGet.Server.Controllers {
             return View();
         }
 
+        public string ReportAbuse(string id, string version) {
+            return String.Format("Thank you for reporting {0} {1}", id, version);
+        }
+
         // ?p=filename
         public ActionResult Download(string p) {
             DateTimeOffset lastModified = _fileSystem.GetLastModified(p);
             return new ConditionalGetResult(lastModified,
                                             () => File(_fileSystem.GetFullPath(p), "application/zip", p));
         }
-        
     }
 }

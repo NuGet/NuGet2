@@ -118,6 +118,13 @@
                     </Hyperlink>
                 </TextBlock>
 
+                <!-- Report Abuse Url -->
+                <TextBlock Visibility="{Binding PackageIdentity.ReportAbuseUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Hyperlink NavigateUri="{Binding PackageIdentity.ReportAbuseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Run Text="{x:Static resources:Resources.Dialog_ReportAbuse}" />
+                    </Hyperlink>
+                </TextBlock>
+
                 <!-- Description -->
                 <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
                 </self:TextBlockControl>

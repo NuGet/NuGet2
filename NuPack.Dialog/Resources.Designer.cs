@@ -169,6 +169,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Report Abuse.
+        /// </summary>
+        public static string Dialog_ReportAbuse {
+            get {
+                return ResourceManager.GetString("Dialog_ReportAbuse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string Dialog_RootNodeAll {
