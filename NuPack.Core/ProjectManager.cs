@@ -200,7 +200,9 @@ namespace NuGet {
                     continue;
                 }
 
-                Project.AddReference(relativeReferencePath, assemblyReference.GetStream());
+                using (Stream stream = assemblyReference.GetStream()) {
+                    Project.AddReference(relativeReferencePath, stream);
+                }
             }
 
             // Add package to local repository
