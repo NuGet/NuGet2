@@ -12,6 +12,7 @@ namespace NuGet {
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
         private Lazy<IPackage> _package;
+ 
         public string Id {
             get;
             set;
@@ -107,8 +108,13 @@ namespace NuGet {
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
+                if (String.IsNullOrEmpty(Dependencies)) {
+                    return Enumerable.Empty<PackageDependency>();
+                }
                 return from d in Dependencies.Split('|')
-                       select ParseDependency(d);
+                       let dependency = ParseDependency(d)
+                       where dependency != null
+                       select dependency;
             }
         }
 
@@ -143,12 +149,26 @@ namespace NuGet {
             return this.GetFullName();
         }
 
-        private PackageDependency ParseDependency(string dependencyString) {
-            // jQuery:[1.0]
-            string[] tokens = dependencyString.Split(':');
-            string id = tokens[0];
-            IVersionSpec versionSpec;
-            VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
+        /// <summary>
+        /// Parses a dependeny from the feed in the format:
+        /// id:versionSpec or id
+        /// </summary>
+        private static PackageDependency ParseDependency(string value) {            
+            string[] tokens = value.SafeTrim().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (tokens.Length == 0) {
+                return null;
+            }
+
+            // Trim the id
+            string id = tokens[0].SafeTrim();
+            IVersionSpec versionSpec = null;
+
+            if (tokens.Length > 1) {
+                // Attempt to parse the version
+                VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
+            }
+
             return new PackageDependency(id, versionSpec);
         }
     }

@@ -31,8 +31,6 @@
                                         <xs:element name="dependency" minOccurs="1" maxOccurs="unbounded">
                                             <xs:complexType>
                                                 <xs:attribute name="id" type="xs:string" use="required" />
-                                                <xs:attribute name="minVersion" type="xs:string" use="optional" />
-                                                <xs:attribute name="maxVersion" type="xs:string" use="optional" />
                                                 <xs:attribute name="version" type="xs:string" use="optional" />
                                             </xs:complexType>
                                         </xs:element>

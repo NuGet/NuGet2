@@ -42,7 +42,9 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AggregateRepositoryTest.cs" />
+    <Compile Include="DataServicePackageTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
+    <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
@@ -81,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server\Infrastructure\ServerPackageRepositoryTest.cs" />
     <Compile Include="UriHelperTest.cs" />
+    <Compile Include="VersionSpecTest.cs" />
     <Compile Include="VersionUtilityTest.cs" />
     <Compile Include="XmlExtensionsTest.cs" />
   </ItemGroup>

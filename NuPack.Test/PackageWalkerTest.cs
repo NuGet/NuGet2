@@ -259,7 +259,7 @@ namespace NuGet.Test {
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (>= 1.5)'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (\u2265 1.5)'");
         }
 
         [TestMethod]

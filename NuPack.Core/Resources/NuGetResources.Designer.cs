@@ -205,11 +205,29 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dependency &apos;{0}&apos; has an invalid version..
+        /// </summary>
+        internal static string DependencyHasInvalidVersion {
+            get {
+                return ResourceManager.GetString("DependencyHasInvalidVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Child dependencies of dependency only packages cannot mix external and project packages.
         /// </summary>
         internal static string DependencyOnlyCannotMixDependencies {
             get {
                 return ResourceManager.GetString("DependencyOnlyCannotMixDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; already has a dependency defined for &apos;{1}&apos;..
+        /// </summary>
+        internal static string DuplicateDependenciesDefined {
+            get {
+                return ResourceManager.GetString("DuplicateDependenciesDefined", resourceCulture);
             }
         }
         

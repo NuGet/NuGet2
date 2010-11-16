@@ -53,6 +53,7 @@ namespace NuGet.Test {
             builder.Tags.Add("t1");
             builder.Tags.Add("t2");
             builder.Tags.Add("t3");
+            builder.Dependencies.Add(new PackageDependency("     X   "));
             var ms = new MemoryStream();
 
             // Act
@@ -72,8 +73,121 @@ namespace NuGet.Test {
     <summary>Summary</summary>
     <language>en-us</language>
     <tags>#t1 #t2 #t3</tags>
+    <dependencies>
+      <dependency id=""X"" />
+    </dependencies>
   </metadata>
 </package>", ms.ReadToEnd());
+        }
+
+        [TestMethod]
+        public void VersionFormatIsPreserved() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Descriptions",
+                Summary = "Summary",
+            };
+            builder.Authors.Add("David");
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+                MinVersion = new Version("1.0"),
+                IsMinInclusive = true
+            }));
+            builder.Dependencies.Add(new PackageDependency("C", new VersionSpec {
+                MinVersion = new Version("1.0"),
+                MaxVersion = new Version("5.0"),
+                IsMinInclusive = false
+            }));
+            var ms = new MemoryStream();
+
+            // Act
+            Manifest.Create(builder).Save(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0""?>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>David</authors>
+    <owners>David</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <summary>Summary</summary>
+    <dependencies>
+      <dependency id=""B"" version=""1.0"" />
+      <dependency id=""C"" version=""(1.0, 5.0)"" />
+    </dependencies>
+  </metadata>
+</package>", ms.ReadToEnd());
+        }
+
+
+        [TestMethod]
+        public void SavingPackageWithDuplicateDependenciesThrows() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Descriptions",
+                Summary = "Summary",
+            };
+            builder.Authors.Add("David");
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+                MinVersion = new Version("1.0"),
+                IsMinInclusive = true
+            }));
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+                MinVersion = new Version("1.0"),
+                MaxVersion = new Version("5.0"),
+                IsMinInclusive = false
+            }));
+            var ms = new MemoryStream();
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => Manifest.Create(builder).Save(ms), "'A' already has a dependency defined for 'B'.");
+        }
+
+        [TestMethod]
+        public void SavingPackageWithInvalidDependencyRangeThrows() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Descriptions",
+                Summary = "Summary",
+            };
+            builder.Authors.Add("David");
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+                MinVersion = new Version("1.0"),
+                MaxVersion = new Version("1.0")
+            }));
+            var ms = new MemoryStream();
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => Manifest.Create(builder).Save(ms), "Dependency 'B' has an invalid version.");
+        }
+
+        [TestMethod]
+        public void SavingPackageWithInvalidDependencyVersionMaxLessThanMinThrows() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Descriptions",
+                Summary = "Summary",
+            };
+            builder.Authors.Add("David");
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+                MinVersion = new Version("2.0"),
+                MaxVersion = new Version("1.0")
+            }));
+            var ms = new MemoryStream();
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => Manifest.Create(builder).Save(ms), "Dependency 'B' has an invalid version.");
         }
 
         [TestMethod]
@@ -293,7 +407,7 @@ Description is required.");
             PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
             var authors = builder.Authors.ToList();
             var owners = builder.Owners.ToList();
-           
+
             // Assert
             Assert.AreEqual("Artem.XmlProviders", builder.Id);
             Assert.AreEqual(new Version(2, 5), builder.Version);

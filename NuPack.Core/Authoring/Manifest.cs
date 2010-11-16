@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using NuGet.Resources;
 
 namespace NuGet {
     [XmlType("package")]
@@ -97,13 +99,48 @@ namespace NuGet {
 
         private static void Validate(Manifest manifest) {
             var results = new List<ValidationResult>();
+
+            // Run all data annotations validations
             TryValidate(manifest.Metadata, results);
             TryValidate(manifest.Files, results);
             TryValidate(manifest.Metadata.Dependencies, results);
-
+           
             if (results.Any()) {
                 string message = String.Join(Environment.NewLine, results.Select(r => r.ErrorMessage));
                 throw new ValidationException(message);
+            }
+
+            // Validate additonal dependency rules dependencies
+            ValidateDependencies(manifest.Metadata);
+        }
+
+        private static void ValidateDependencies(IPackageMetadata metadata) {
+            var dependencySet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var dependency in metadata.Dependencies) {
+                // Throw an error if this dependency has been defined more than once
+                if (!dependencySet.Add(dependency.Id)) {
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.DuplicateDependenciesDefined, metadata.Id, dependency.Id));
+                }
+
+                // Validate the dependency version
+                ValidateDependencyVersion(dependency);
+            }
+        }
+        private static void ValidateDependencyVersion(PackageDependency dependency) {
+            if (dependency.VersionSpec != null) {
+                if (dependency.VersionSpec.MinVersion != null &&
+                    dependency.VersionSpec.MaxVersion != null) {
+
+                    if (!dependency.VersionSpec.IsMaxInclusive &&
+                        !dependency.VersionSpec.IsMinInclusive &&
+                        dependency.VersionSpec.MaxVersion == dependency.VersionSpec.MinVersion) {
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.DependencyHasInvalidVersion, dependency.Id));
+                    }
+
+                    if (dependency.VersionSpec.MaxVersion < dependency.VersionSpec.MinVersion) {
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.DependencyHasInvalidVersion, dependency.Id));
+                    }
+                }
             }
         }
 

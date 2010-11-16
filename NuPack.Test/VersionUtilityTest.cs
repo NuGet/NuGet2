@@ -102,7 +102,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void ParseVersionSpecWithNullThrows() {
             // Act & Assert
-            ExceptionAssert.ThrowsArgNull(() => VersionUtility.ParseVersionSpec(null), "versionString");
+            ExceptionAssert.ThrowsArgNull(() => VersionUtility.ParseVersionSpec(null), "value");
         }
 
         [TestMethod]

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -47,7 +46,9 @@ namespace NuGet {
         /// something a framework name that the package manager understands.
         /// </summary>
         public static FrameworkName ParseFrameworkName(string frameworkName) {
-            Debug.Assert(!String.IsNullOrEmpty(frameworkName));
+            if (frameworkName == null) {
+                throw new ArgumentNullException("frameworkName");
+            }
 
             // {FrameworkName}{Version}
             var match = Regex.Match(frameworkName, @"\d+.*");
@@ -102,30 +103,30 @@ namespace NuGet {
         ///      (1.0, 2.0)   --> 1.0 &lt; x &lt; 2.0
         ///      [1.0, 2.0]   --> 1.0 ≤ x ≤ 2.0
         /// </summary>
-        public static IVersionSpec ParseVersionSpec(string versionString) { 
+        public static IVersionSpec ParseVersionSpec(string value) {
             IVersionSpec versionInfo;
-            if (!TryParseVersionSpec(versionString, out versionInfo)) {
+            if (!TryParseVersionSpec(value, out versionInfo)) {
                 throw new ArgumentException(
                     String.Format(CultureInfo.CurrentCulture,
-                     NuGetResources.InvalidVersionString, versionString));
+                     NuGetResources.InvalidVersionString, value));
             }
 
             return versionInfo;
         }
 
-        public static bool TryParseVersionSpec(string versionString, out IVersionSpec iversionSpec) {
-            if (versionString == null) {
-                throw new ArgumentNullException("versionString");
+        public static bool TryParseVersionSpec(string value, out IVersionSpec result) {
+            if (value == null) {
+                throw new ArgumentNullException("value");
             }
 
             var versionSpec = new VersionSpec();
-            versionString = versionString.Trim();
+            value = value.Trim();
 
             // First, try to parse it as a plain version string
             Version version;
-            if (Version.TryParse(versionString, out version)) {
+            if (Version.TryParse(value, out version)) {
                 // A plain version is treated as an inclusive minimum range
-                iversionSpec = new VersionSpec {
+                result = new VersionSpec {
                     MinVersion = version,
                     IsMinInclusive = true
                 };
@@ -135,15 +136,15 @@ namespace NuGet {
 
             // It's not a plain version, so it must be using the bracket arithmetic range syntax
 
-            iversionSpec = null;
+            result = null;
 
             // Fail early if the string is too short to be valid
-            if (versionString.Length < 3) {
+            if (value.Length < 3) {
                 return false;
             }
 
             // The first character must be [ ot (
-            switch (versionString.First()) {
+            switch (value.First()) {
                 case '[':
                     versionSpec.IsMinInclusive = true;
                     break;
@@ -155,7 +156,7 @@ namespace NuGet {
             }
 
             // The last character must be ] ot )
-            switch (versionString.Last()) {
+            switch (value.Last()) {
                 case ']':
                     versionSpec.IsMaxInclusive = true;
                     break;
@@ -167,10 +168,10 @@ namespace NuGet {
             }
 
             // Get rid of the two brackets
-            versionString = versionString.Substring(1, versionString.Length - 2);
+            value = value.Substring(1, value.Length - 2);
 
             // Split by comma, and make sure we don't get more than two pieces
-            string[] parts = versionString.Split(',');
+            string[] parts = value.Split(',');
             if (parts.Length > 2) {
                 return false;
             }
@@ -196,7 +197,7 @@ namespace NuGet {
             }
 
             // Successful parse!
-            iversionSpec = versionSpec;
+            result = versionSpec;
             return true;
         }
     }
