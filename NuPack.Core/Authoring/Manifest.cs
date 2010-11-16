@@ -131,8 +131,8 @@ namespace NuGet {
                 if (dependency.VersionSpec.MinVersion != null &&
                     dependency.VersionSpec.MaxVersion != null) {
 
-                    if (!dependency.VersionSpec.IsMaxInclusive &&
-                        !dependency.VersionSpec.IsMinInclusive &&
+                    if ((!dependency.VersionSpec.IsMaxInclusive ||
+                         !dependency.VersionSpec.IsMinInclusive) &&
                         dependency.VersionSpec.MaxVersion == dependency.VersionSpec.MinVersion) {
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.DependencyHasInvalidVersion, dependency.Id));
                     }

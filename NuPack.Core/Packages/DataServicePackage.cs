@@ -12,7 +12,7 @@ namespace NuGet {
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
         private Lazy<IPackage> _package;
- 
+
         public string Id {
             get;
             set;
@@ -150,18 +150,22 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Parses a dependeny from the feed in the format:
+        /// Parses a dependency from the feed in the format:
         /// id:versionSpec or id
         /// </summary>
-        private static PackageDependency ParseDependency(string value) {            
-            string[] tokens = value.SafeTrim().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+        private static PackageDependency ParseDependency(string value) {
+            if (String.IsNullOrWhiteSpace(value)) {
+                return null;
+            }
+
+            string[] tokens = value.Trim().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (tokens.Length == 0) {
                 return null;
             }
 
             // Trim the id
-            string id = tokens[0].SafeTrim();
+            string id = tokens[0].Trim();
             IVersionSpec versionSpec = null;
 
             if (tokens.Length > 1) {
