@@ -200,7 +200,7 @@ namespace NuGet.Test {
             Assert.AreEqual(0, projectSystem.Paths.Count);
             Assert.AreEqual(1, projectSystem.References.Count);
             Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
-            Assert.IsTrue(projectSystem.References.ContainsValue(@"C:\MockFileSystem\A.1.0\reference.dll"));
+            Assert.IsTrue(projectSystem.References.ContainsValue(@"A.1.0\reference.dll"));
             Assert.IsTrue(localRepository.Exists("A"));
             Assert.IsTrue(localRepository.Exists("B"));
         }

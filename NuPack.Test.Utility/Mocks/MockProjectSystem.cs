@@ -14,7 +14,7 @@ namespace NuGet.Test.Mocks {
             private set;
         }
         
-        public virtual void AddReference(string referencePath) {
+        public virtual void AddReference(string referencePath, Stream stream) {
             References.Add(Path.GetFileName(referencePath), referencePath);
         }
 

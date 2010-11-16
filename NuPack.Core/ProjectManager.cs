@@ -175,16 +175,24 @@ namespace NuGet {
                 return;
             }
 
-            // Resolve assembly references
-            var assemblyReferences = ResolveAssemblyReferences(package);
+            ExtractPackageFilesToProject(package);
 
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
+            OnPackageReferenceAdded(args);
+        }
+
+        protected virtual void ExtractPackageFilesToProject(IPackage package) {
             // Add content files
             Project.AddFiles(package.GetContentFiles(), _fileTransformers);
 
+            // Resolve assembly references
+            IEnumerable<IPackageAssemblyReference> assemblyReferences = ResolveAssemblyReferences(package);
+
             // Add the references to the reference path
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
-                // Get teh physical path of the assembly reference
+                // Get the physical path of the assembly reference
                 string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
+                string relativeReferencePath = PathUtility.GetRelativePath(Project.Root, referencePath);
 
                 // If this assembly is already referenced by the project then skip it
                 if (Project.ReferenceExists(assemblyReference.Name)) {
@@ -192,14 +200,11 @@ namespace NuGet {
                     continue;
                 }
 
-                Project.AddReference(referencePath);
+                Project.AddReference(relativeReferencePath, assemblyReference.GetStream());
             }
 
             // Add package to local repository
             LocalRepository.AddPackage(package);
-
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
-            OnPackageReferenceAdded(args);
         }
 
         public void RemovePackageReference(string packageId) {
