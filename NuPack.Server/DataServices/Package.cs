@@ -44,7 +44,7 @@ namespace NuGet.Server.DataServices {
             if (reportAbuseUrl != null) {
                 ReportAbuseUrl = reportAbuseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
-            var rating = Math.Abs((double)Id.GetHashCode() % 50) / 10;
+            Rating = Math.Abs((double)Id.GetHashCode() % 50) / 10;
             Score = Id.GetHashCode();
         }
 
