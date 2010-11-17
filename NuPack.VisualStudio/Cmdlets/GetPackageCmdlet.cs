@@ -56,24 +56,35 @@ namespace NuGet.VisualStudio.Cmdlets {
         [Parameter(Position = 1, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
-        [Parameter(Position = 2, ParameterSetName = "Remote")]
-        [Parameter(ParameterSetName = "Updates")]
+        [Parameter(Position = 2)]
         public string Source { get; set; }
 
-        private bool Local {
+        /// <summary>
+        /// Determines if no local repositories are needed to process this command
+        /// </summary>
+        private bool UseRemoteSourceOnly {
             get {
-                return !(Remote.IsPresent || Updates.IsPresent);
+                return Remote.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
+            }
+        }
+
+        /// <summary>
+        /// Determines if a remote repository would be needed to process this command.
+        /// </summary>
+        private bool UseRemoteSource {
+            get {
+                return Remote.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
             }
         }
 
         protected override void ProcessRecordCore() {
-            if (!SolutionManager.IsSolutionOpen && (!Remote.IsPresent || Updates.IsPresent)) {
+            if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
                 WriteError(VsResources.Cmdlet_NoSolution);
                 return;
             }
 
             IPackageRepository repository;
-            if (!Local) {
+            if (UseRemoteSource) {
                 repository = GetRemoteRepository();
             }
             else {
@@ -137,7 +148,7 @@ namespace NuGet.VisualStudio.Cmdlets {
                             Description = p.Description
                         };
 
-            if (Local) {
+            if (!UseRemoteSource) {
                 Log(MessageLevel.Info, String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ListingPackages, _settings.RepositoryPath));
             }
 

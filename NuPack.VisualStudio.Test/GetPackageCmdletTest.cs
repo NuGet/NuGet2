@@ -86,6 +86,21 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
+        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndRemoteIsNotSpecified() {
+            // Arrange 
+            var cmdlet = BuildCmdlet();
+            cmdlet.Source = "foo";
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
+        }
+
+        [TestMethod]
         public void GetPackageReturnsFilteredPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -112,10 +127,54 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
+        public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndRemoteIsPresent() {
+            // Arrange 
+            var cmdlet = BuildCmdlet(isSolutionOpen: false);
+            cmdlet.Remote = new SwitchParameter(isPresent: true);
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(4, result.Count());
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new Version("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P2", Version = new Version("1.2") });
+            AssertPackageResultsEqual(result.ElementAt(3), new { Id = "P3", Version = new Version("1.0") });
+        }
+
+        [TestMethod]
+        public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndSourceIsPresent() {
+            // Arrange 
+            var cmdlet = BuildCmdlet(isSolutionOpen: false);
+            cmdlet.Source = "foo";
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
+        }
+
+        [TestMethod]
         public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.Updates = new SwitchParameter(isPresent: true);
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
+                "The current environment doesn't have a solution open.");
+        }
+
+        [TestMethod]
+        public void GetPackageThrowsWhenSolutionIsClosedUpdatesAndSourceArePresent() {
+            // Arrange 
+            var cmdlet = BuildCmdlet(isSolutionOpen: false);
+            cmdlet.Updates = new SwitchParameter(isPresent: true);
+            cmdlet.Source = "foo";
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
@@ -217,6 +276,7 @@ namespace NuGet.VisualStudio.Test {
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
             repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foo"))).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("ActiveRepo", "ActiveRepo"))).Returns(GetActiveRepository());
 
             return repositoryFactory.Object;
         }
@@ -227,16 +287,21 @@ namespace NuGet.VisualStudio.Test {
             var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
+           
+            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object);
+        }
+
+        private static IPackageRepository GetActiveRepository() {
             var remotePackages = new[] { PackageUtility.CreatePackage("P0", "1.1"), PackageUtility.CreatePackage("P1", "1.1"), 
                                          PackageUtility.CreatePackage("P2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
-            return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object);
+            return remoteRepo.Object;
         }
 
         private static IPackageSourceProvider GetSourceProvider() {
             Mock<IPackageSourceProvider> sourceProvider = new Mock<IPackageSourceProvider>();
-            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("foo", "foo"));
+            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("ActiveRepo", "ActiveRepo"));
             return sourceProvider.Object;
         }
     }
