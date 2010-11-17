@@ -43,11 +43,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\NuPack.Console\PowerShellHost\Scripts\about_NuGet.VisualStudio.help.txt">
-      <Link>en-US\about_NuGet.VisualStudio.help.txt</Link>
+      <Link>about_NuGet.VisualStudio.help.txt</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\NuPack.Console\PowerShellHost\Scripts\NuGet.VisualStudio.dll-Help.xml">
-      <Link>en-US\NuGet.VisualStudio.dll-Help.xml</Link>
+      <Link>NuGet.VisualStudio.dll-Help.xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\NuPack.Console\PowerShellHost\Scripts\Profile.ps1">
