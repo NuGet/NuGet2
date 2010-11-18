@@ -12,7 +12,7 @@ using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
-    [XmlType("package")]
+    [XmlRoot("package", Namespace = Constants.ManifestSchemaNamespace)]
     public class Manifest {
         public Manifest() {
             Metadata = new ManifestMetadata();
@@ -39,9 +39,11 @@ namespace NuGet {
             // Read the document
             XDocument document = XDocument.Load(stream);
 
-            // Remove the schema namespace
+            // Add the schema namespace if it isn't there
             foreach (var e in document.Descendants()) {
-                e.Name = e.Name.LocalName;
+                if (e.Name.Namespace == null || String.IsNullOrEmpty(e.Name.Namespace.NamespaceName)) {
+                    e.Name = XName.Get(e.Name.LocalName, Constants.ManifestSchemaNamespace);
+                }
             }
 
             var serializer = new XmlSerializer(typeof(Manifest));
@@ -104,7 +106,7 @@ namespace NuGet {
             TryValidate(manifest.Metadata, results);
             TryValidate(manifest.Files, results);
             TryValidate(manifest.Metadata.Dependencies, results);
-           
+
             if (results.Any()) {
                 string message = String.Join(Environment.NewLine, results.Select(r => r.ErrorMessage));
                 throw new ValidationException(message);

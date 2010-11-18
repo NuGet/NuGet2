@@ -26,7 +26,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>
@@ -62,7 +62,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>
@@ -107,7 +107,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>
