@@ -6,12 +6,18 @@ using System.Linq;
 
 namespace NuGet {
     [DataServiceKey("Id", "Version")]
+    [EntityPropertyMapping("LastUpdated", SyndicationItemProperty.Updated, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Id", SyndicationItemProperty.Title, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
+        private readonly PackageDownloader _packageDownloader = new PackageDownloader();
         private Lazy<IPackage> _package;
+
+        public DataServicePackage() {
+            _package = new Lazy<IPackage>(DownloadAndVerifyPackage, isThreadSafe: false);
+        }
 
         public string Id {
             get;
@@ -52,7 +58,24 @@ namespace NuGet {
             get;
             set;
         }
+
         public Uri ReportAbuseUrl {
+            get;
+            set;
+        }
+
+        public Uri DownloadUrl {
+            get {
+                return Context.GetReadStreamUri(this);
+            }
+        }
+
+        public DateTimeOffset Published {
+            get;
+            set;
+        }
+
+        public DateTimeOffset LastUpdated {
             get;
             set;
         }
@@ -112,6 +135,11 @@ namespace NuGet {
             set;
         }
 
+        internal IDataServiceContext Context {
+            get;
+            set;
+        }
+
         IEnumerable<string> IPackageMetadata.Authors {
             get {
                 if (String.IsNullOrEmpty(Authors)) {
@@ -165,12 +193,18 @@ namespace NuGet {
             return _package.Value.GetStream();
         }
 
-        internal void InitializeDownloader(Func<IPackage> downloader) {
-            _package = new Lazy<IPackage>(downloader, isThreadSafe: false);
-        }
-
         public override string ToString() {
             return this.GetFullName();
+        }
+
+        private IPackage DownloadAndVerifyPackage() {
+            if (!String.IsNullOrEmpty(PackageHash)) {
+                byte[] hashBytes = Convert.FromBase64String(PackageHash);
+                return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, useCache: true);
+            }
+            else {
+                return _packageDownloader.DownloadPackage(DownloadUrl);
+            }
         }
 
         /// <summary>
