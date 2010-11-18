@@ -70,8 +70,11 @@ namespace NuGet {
             return Directory.GetCurrentDirectory();
         }
 
-        DateTimeOffset IFileSystem.GetLastModified(string path)
-        {
+        DateTimeOffset IFileSystem.GetLastModified(string path) {
+            throw new NotSupportedException();
+        }
+
+        public DateTimeOffset GetCreated(string path) {
             throw new NotSupportedException();
         }
     }

@@ -35,7 +35,9 @@ namespace NuGet.Server.Infrastructure {
             byte[] fileBytes = FileSystem.OpenFile(path).ReadAllBytes();
             return new DerivedPackageData {
                 PackageSize = fileBytes.Length,
-                PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes))
+                PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes)),
+                LastUpdated = FileSystem.GetLastModified(path),
+                Created = FileSystem.GetCreated(path)
             };
         }
     }

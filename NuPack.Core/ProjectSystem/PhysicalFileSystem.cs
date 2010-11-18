@@ -146,6 +146,13 @@ namespace NuGet {
             return new FileInfo(GetFullPath(path)).LastWriteTimeUtc;
         }
 
+        public DateTimeOffset GetCreated(string path) {
+            if (DirectoryExists(path)) {
+                return Directory.GetCreationTimeUtc(GetFullPath(path));
+            }
+            return File.GetCreationTimeUtc(GetFullPath(path));
+        }
+
         public virtual bool FileExists(string path) {
             path = GetFullPath(path);
             return File.Exists(path);

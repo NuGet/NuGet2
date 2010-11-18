@@ -13,6 +13,14 @@ namespace NuGet.Test.Mocks {
             Deleted = new HashSet<string>();
         }
 
+        public virtual ILogger Logger {
+            get {
+                return _logger ?? NullLogger.Instance;
+            }
+            set {
+                _logger = value;
+            }
+        }
 
         public virtual string Root {
             get {
@@ -113,16 +121,11 @@ namespace NuGet.Test.Mocks {
         }
 
         public virtual DateTimeOffset GetLastModified(string path) {
-            return DateTime.Now;
+            return DateTime.UtcNow;
         }
 
-        public virtual ILogger Logger {
-            get {
-                return _logger ?? NullLogger.Instance;
-            }
-            set {
-                _logger = value;
-            }
-        }
+        public virtual DateTimeOffset GetCreated(string path) {
+            return DateTime.UtcNow;
+        } 
     }
 }

@@ -46,6 +46,8 @@ namespace NuGet.Server.DataServices {
             }
             Rating = Math.Abs((double)Id.GetHashCode() % 50) / 10;
             Score = Id.GetHashCode();
+            LastUpdated = derivedData.LastUpdated.UtcDateTime;
+            Published = derivedData.Created.UtcDateTime;
         }
 
         public string Id {

@@ -17,5 +17,6 @@ namespace NuGet {
         void AddFile(string path, Stream stream);
         Stream OpenFile(string path);
         DateTimeOffset GetLastModified(string path);
+        DateTimeOffset GetCreated(string path);
     }
 }
