@@ -128,7 +128,7 @@ namespace NuGet {
 
         string IPackageMetadata.Tags {
             get {
-                return String.Join(" ", Tags.Select(t => "#" + t));
+                return String.Join(" ", Tags);
             }
         }
 
@@ -178,7 +178,7 @@ namespace NuGet {
             Language = metadata.Language;
 
             if (metadata.Tags != null) {
-                Tags.AddRange(ParseHashTags(metadata.Tags));
+                Tags.AddRange(ParseTags(metadata.Tags));
             }
 
             Dependencies.AddRange(metadata.Dependencies);
@@ -248,20 +248,12 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Tags come in this format. #tag1 #tag2 #tag3 etc..
+        /// Tags come in this format. tag1 tag2 tag3 etc..
         /// </summary>
-        private IEnumerable<string> ParseHashTags(string tags) {
+        private static IEnumerable<string> ParseTags(string tags) {
             Debug.Assert(tags != null);
-            foreach (var tag in tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)) {
-                string normalizedTag = tag.Trim();
-                
-                if (!normalizedTag.StartsWith("#")) {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.TagMissingHash, normalizedTag));
-                }
-                // Remove the hash from the tag
-                yield return normalizedTag.Substring(1);
-            }
+            return from tag in tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                   select tag.Trim();
         }
     }
 }

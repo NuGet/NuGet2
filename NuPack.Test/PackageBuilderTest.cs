@@ -72,7 +72,7 @@ namespace NuGet.Test {
     <description>Descriptions</description>
     <summary>Summary</summary>
     <language>en-us</language>
-    <tags>#t1 #t2 #t3</tags>
+    <tags>t1 t2 t3</tags>
     <dependencies>
       <dependency id=""X"" />
     </dependencies>
@@ -322,28 +322,6 @@ Description is required.");
             Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
         }
 
-
-        [TestMethod]
-        public void ReadingPackageWithWrongTagsFormatFails() {
-            // Arrange
-            string spec = @"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-    <metadata>
-    <id>Artem.XmlProviders  </id>
-    <version>2.5</version>
-    <title>Some awesome package       </title>
-    <authors>Velio Ivanov</authors>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
-    <language>en-US</language>
-    <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
-    <tags>doo gar</tags>
-  </metadata>
-</package>";
-
-            // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The 'doo' tag is missing a #");
-        }
-
         [TestMethod]
         public void ReadingManifestWithNamespaceBuilderFromStreamCopiesMetadata() {
             // Arrange
@@ -358,7 +336,7 @@ Description is required.");
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <tags>#t1      #t2    #foo-bar</tags>
+    <tags>t1      t2    foo-bar</tags>
   </metadata>
 </package>";
 

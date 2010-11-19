@@ -191,12 +191,12 @@ namespace NuGet {
                     Description = metadata.Description;
                     Summary = metadata.Summary;
                     Language = metadata.Language;
-                    Tags = metadata.Tags ?? "";
+                    Tags = metadata.Tags;
                     Dependencies = metadata.Dependencies;
 
-                    // Ensure tags end with an empty " " so we can do contains filtering reliably
+                    // Ensure tags start and end with an empty " " so we can do contains filtering reliably
                     if (!String.IsNullOrEmpty(Tags)) {
-                        Tags += " ";
+                        Tags = " " + Tags + " ";
                     }
                 }
             }
