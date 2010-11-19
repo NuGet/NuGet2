@@ -80,7 +80,7 @@
             nondefaultPackageRepository.AddPackage(packageB);
 
             //Setup Factory
-            string defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=204820";
+            string defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=206669";
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<PackageSource>(s => s.Source.Equals(defaultFeedUrl)))).Returns(defaultPackageRepository);
             packageRepositoryFactory.Setup(p => p.CreateRepository(It.Is<PackageSource>(s => !s.Source.Equals(defaultFeedUrl)))).Returns(nondefaultPackageRepository);
