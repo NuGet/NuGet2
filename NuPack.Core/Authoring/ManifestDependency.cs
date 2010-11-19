@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
-    [XmlType("dependency")]
+    [XmlType("dependency", Namespace = Constants.ManifestSchemaNamespace)]
     public class ManifestDependency {
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_DependencyIdRequired")]
         [XmlAttribute("id")]

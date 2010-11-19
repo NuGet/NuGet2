@@ -12,7 +12,7 @@ using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
-    [XmlRoot("package", Namespace = Constants.ManifestSchemaNamespace)]
+    [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
     public class Manifest {
         public Manifest() {
             Metadata = new ManifestMetadata();
@@ -45,6 +45,9 @@ namespace NuGet {
                     e.Name = XName.Get(e.Name.LocalName, Constants.ManifestSchemaNamespace);
                 }
             }
+
+            // Remove the namespace from the outer tag to match CTP2 expectations
+            document.Root.Name = document.Root.Name.LocalName;
 
             var serializer = new XmlSerializer(typeof(Manifest));
             var manifest = (Manifest)serializer.Deserialize(document.CreateReader());

@@ -26,8 +26,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>
@@ -62,8 +62,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>
@@ -107,8 +107,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>
@@ -348,8 +348,8 @@ Description is required.");
         public void ReadingManifestWithNamespaceBuilderFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-    <metadata>
+<package>
+    <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
     <id>Artem.XmlProviders  </id>
     <version>2.5</version>
     <title>Some awesome package       </title>

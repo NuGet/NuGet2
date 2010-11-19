@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
-    [XmlType("file")]
+    [XmlType("file", Namespace = Constants.ManifestSchemaNamespace)]
     public class ManifestFile {
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlAttribute("src")]
