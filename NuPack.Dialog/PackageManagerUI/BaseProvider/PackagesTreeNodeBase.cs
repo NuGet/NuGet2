@@ -244,16 +244,19 @@ namespace NuGet.Dialog.Providers {
         private LoadPageResult ExecuteAsync(int pageNumber, CancellationToken token) {
             token.ThrowIfCancellationRequested();
 
-            IQueryable<IPackage> query = GetPackages().OrderByDescending(p => p.Score);
+            IQueryable<IPackage> query = GetPackages();
 
             token.ThrowIfCancellationRequested();
 
-            // This should execute the query
+            // Execute the total count query
             int totalCount = query.Count();
 
             token.ThrowIfCancellationRequested();
 
-            IQueryable<IPackage> pageQuery = query.Skip((pageNumber - 1) * ItemsPerPage).Take(ItemsPerPage);
+            IQueryable<IPackage> orderedQuery = query.OrderByDescending(p => p.Score);
+            IQueryable<IPackage> pageQuery = orderedQuery.Skip((pageNumber - 1) * ItemsPerPage).Take(ItemsPerPage);
+
+            // Execute the page query
             IEnumerable<IPackage> packages = pageQuery.ToList();
 
             token.ThrowIfCancellationRequested();
@@ -262,6 +265,9 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void QueryExecutionCompleted(Task<LoadPageResult> task) {
+            // If a task throws, the exception must be handled or the Exception
+            // property must be accessed or the exception will tear down the process when finalized
+            Exception exception = task.Exception;
 
             var cancellationSource = (CancellationTokenSource)task.AsyncState;
             if (cancellationSource != _currentCancellationSource) {
@@ -276,7 +282,6 @@ namespace NuGet.Dialog.Providers {
             }
             else if (task.IsFaulted) {
                 // show error message in the Message pane
-                Exception exception = task.Exception;
                 ShowMessagePane((exception.InnerException ?? exception).Message);
             }
             else {
