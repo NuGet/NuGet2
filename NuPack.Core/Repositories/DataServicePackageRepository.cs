@@ -6,7 +6,11 @@ namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
- 
+
+        public DataServicePackageRepository(Uri serviceRoot)
+            : this(serviceRoot, new HttpClient()) {
+        }
+
         public DataServicePackageRepository(Uri serviceRoot, IHttpClient client)
             : this(new DataServiceContextWrapper(serviceRoot), client) {
         }
