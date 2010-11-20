@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
@@ -8,6 +9,7 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=206669";
+        internal const string OfficialFeedName = "NuGet official package source";
         internal static readonly PackageSource AggregateSource = new PackageSource("(Aggregate source)", "All") { IsAggregate = true };
 
         private readonly IPackageSourceSettingsManager _settingsManager;
@@ -20,6 +22,7 @@ namespace NuGet.VisualStudio {
             _settingsManager = settingsManager;
 
             DeserializePackageSources();
+            AddOfficialPackageSourceIfNeeded();
             DeserializeActivePackageSource();
         }
 
@@ -113,6 +116,29 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        private void AddOfficialPackageSourceIfNeeded() {
+            // Look for a source with the name of the official source
+            PackageSource officialFeed = GetPackageSources().FirstOrDefault(ps => ps.Name == OfficialFeedName);
+
+            if (officialFeed != null) {
+                // If there is one and it points to the right place, we're done
+                if (officialFeed.Source == DefaultPackageSource) return;
+
+                // It doesn't point to the right place (e.g. came from previous build), do get rid of it
+                RemovePackageSource(officialFeed);
+            }
+
+            // Add the official source to the list.  This covers 3 scenarios:
+            // 1. First time NuGet is ever run, so there is nothing
+            // 2. NuGet ran before, but official feed is missing. We bring it back with the assumtion that it should always be in the list.
+            //    Otherwise they may not be able to get it back if it was mistakenly deleted.
+            // 3. It's an upgrade from on older build which had a different default feed
+            officialFeed = new PackageSource(DefaultPackageSource, OfficialFeedName);
+            AddPackageSource(officialFeed);
+
+            ActivePackageSource = officialFeed;
+        }
+
         private void DeserializeActivePackageSource() {
             var packageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
             if (packageSource != null) {
@@ -120,11 +146,6 @@ namespace NuGet.VisualStudio {
                 AddPackageSource(packageSource);
 
                 ActivePackageSource = packageSource;
-            }
-            else if (_settingsManager.IsFirstRunning) {
-                packageSource = new PackageSource(DefaultPackageSource, "NuGet official package source");
-                AddPackageSource(packageSource);
-                _settingsManager.IsFirstRunning = false;
             }
         }
     }
