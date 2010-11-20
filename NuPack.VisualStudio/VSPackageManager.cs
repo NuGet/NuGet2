@@ -50,6 +50,11 @@ namespace NuGet.VisualStudio {
             InstallPackage(packageId, version, ignoreDependencies);
 
             if (projectManager != null) {
+                projectManager.PackageReferenceRemoved += (sender, e) => {
+                    // Remove any packages that would be removed as a result of updating a dependency or the package itself
+                    UninstallPackage(e.Package, forceRemove: true, removeDependencies: !ignoreDependencies);
+                };
+
                 projectManager.AddPackageReference(packageId, version, ignoreDependencies);
             }
         }
@@ -76,21 +81,7 @@ namespace NuGet.VisualStudio {
 
         // REVIEW: Do we even need this method?
         public virtual void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger) {
-            InitializeLogger(logger, projectManager);
-
-            InstallPackage(packageId, version, !updateDependencies);
-
-            if (projectManager != null) {
-                // Get the old package
-                IPackage oldPackage = projectManager.LocalRepository.FindPackage(packageId);
-
-                projectManager.AddPackageReference(packageId, version, !updateDependencies);
-
-                Debug.Assert(oldPackage != null);
-
-                // Remove from the solution repository
-                UninstallPackage(oldPackage, forceRemove: false, removeDependencies: updateDependencies);
-            }
+            InstallPackage(projectManager, packageId, version, !updateDependencies);
         }
 
         protected override void ExecuteUninstall(IPackage package) {
