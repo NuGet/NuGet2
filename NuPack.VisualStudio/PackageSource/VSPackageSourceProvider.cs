@@ -22,8 +22,8 @@ namespace NuGet.VisualStudio {
             _settingsManager = settingsManager;
 
             DeserializePackageSources();
-            AddOfficialPackageSourceIfNeeded();
             DeserializeActivePackageSource();
+            AddOfficialPackageSourceIfNeeded();
         }
 
         public PackageSource ActivePackageSource {
@@ -116,29 +116,6 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void AddOfficialPackageSourceIfNeeded() {
-            // Look for a source with the name of the official source
-            PackageSource officialFeed = GetPackageSources().FirstOrDefault(ps => ps.Name == OfficialFeedName);
-
-            if (officialFeed != null) {
-                // If there is one and it points to the right place, we're done
-                if (officialFeed.Source == DefaultPackageSource) return;
-
-                // It doesn't point to the right place (e.g. came from previous build), do get rid of it
-                RemovePackageSource(officialFeed);
-            }
-
-            // Add the official source to the list.  This covers 3 scenarios:
-            // 1. First time NuGet is ever run, so there is nothing
-            // 2. NuGet ran before, but official feed is missing. We bring it back with the assumtion that it should always be in the list.
-            //    Otherwise they may not be able to get it back if it was mistakenly deleted.
-            // 3. It's an upgrade from on older build which had a different default feed
-            officialFeed = new PackageSource(DefaultPackageSource, OfficialFeedName);
-            AddPackageSource(officialFeed);
-
-            ActivePackageSource = officialFeed;
-        }
-
         private void DeserializeActivePackageSource() {
             var packageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
             if (packageSource != null) {
@@ -147,6 +124,43 @@ namespace NuGet.VisualStudio {
 
                 ActivePackageSource = packageSource;
             }
+        }
+
+        private void AddOfficialPackageSourceIfNeeded() {
+            // Look for an official source by name
+            PackageSource officialFeed = GetPackageSources().FirstOrDefault(ps => ps.Name == OfficialFeedName);
+
+            if (officialFeed == null) {
+
+                // There is no official feed currently registered
+
+                // Don't register our feed unless the list is empty (other than the aggregate). This is the first-run scenario.
+                // It also applies if user deletes all their feeds, in which case bringing back the official feed makes sense.
+                if (GetPackageSources().Count() > 1) {
+                    return;
+                }
+
+            }
+            else {
+                // If there is an official feed that already points to the right place, we're done
+                if (officialFeed.Source == DefaultPackageSource) {
+                    return;
+                }
+
+                // It doesn't point to the right place (e.g. came from previous build), so get rid of it
+                RemovePackageSource(officialFeed);
+            }
+
+            // Insert it at position 1, so it is right after the aggregate
+            officialFeed = new PackageSource(DefaultPackageSource, OfficialFeedName);
+            _packageSources.Insert(1, officialFeed);
+
+            // Only make it the active source if there isn't one already
+            if (ActivePackageSource == null) {
+                ActivePackageSource = officialFeed;
+            }
+
+            PersistPackageSources();
         }
     }
 }

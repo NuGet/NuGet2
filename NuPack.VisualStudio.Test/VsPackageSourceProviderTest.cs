@@ -35,7 +35,7 @@ namespace NuGet.VisualStudio.Test {
         public void CtorAddsDefaultSourceIfAnotherDefaultWasPreviouslyRegistered() {
             // Arrange
             var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = String.Format("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>NuGet official package source</Name><Source>http://some/old/feed</Source></PackageSource></ArrayOfPackageSource>");
+            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>NuGet official package source</Name><Source>http://some/old/feed</Source></PackageSource></ArrayOfPackageSource>";
             settingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource>";
             var provider = new VsPackageSourceProvider(settingsManager);
 
@@ -46,6 +46,25 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.AreEqual(2, sources.Count);
             Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[1].Source);
+        }
+
+        [TestMethod]
+        public void TestUpgradeFromCTP2MultipleSourceNonOffcialActive() {
+            // Here, we start with 4 sources: the CTP2 official feed, and aaa, bbb, ccc.  'bbb' is the active source
+
+            // Arrange
+            var settingsManager = new MockPackageSourceSettingsManager();
+            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>NuGet official package source</Name><Source>http://go.microsoft.com/fwlink/?LinkID=204820</Source></PackageSource><PackageSource><Name>aaa</Name><Source>c:\\a</Source></PackageSource><PackageSource><Name>bbb</Name><Source>c:\\b</Source></PackageSource><PackageSource><Name>ccc</Name><Source>c:\\c</Source></PackageSource></ArrayOfPackageSource>";
+            settingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><Name>bbb</Name><Source>c:\\b</Source></PackageSource>";
+            var provider = new VsPackageSourceProvider(settingsManager);
+
+            // Act
+            var sources = provider.GetPackageSources().ToList();
+
+            // Assert
+            Assert.AreEqual(5, sources.Count);
+            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[1].Source); // Note: [0] is the aggregate
+            Assert.AreEqual("bbb", provider.ActivePackageSource.Name);   // Make sure we didn't change the active source
         }
 
         [TestMethod]
@@ -75,7 +94,7 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(3, sources.Count);
+            Assert.AreEqual(2, sources.Count);
             Assert.AreEqual(VsPackageSourceProvider.AggregateSource, sources[0]);
             Assert.AreEqual(new PackageSource("a", "a"), sources[1]);
         }
@@ -168,12 +187,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(
-                String.Format(
-                    "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>{0}</Name><Source>{1}</Source></PackageSource></ArrayOfPackageSource>",
-                    VsPackageSourceProvider.OfficialFeedName,
-                    VsPackageSourceProvider.DefaultPackageSource),
-                settingsManager.PackageSourcesString);
+            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
         }
 
         [TestMethod]
@@ -191,12 +205,7 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.IsTrue(result);
             Assert.IsNull(provider.ActivePackageSource);
-            Assert.AreEqual(
-                String.Format(
-                    "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>{0}</Name><Source>{1}</Source></PackageSource></ArrayOfPackageSource>",
-                    VsPackageSourceProvider.OfficialFeedName,
-                    VsPackageSourceProvider.DefaultPackageSource),
-                settingsManager.PackageSourcesString);
+            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
         }
 
         [TestMethod]
