@@ -233,10 +233,6 @@ namespace NuGet.VisualStudio.Test {
         }
 
         private class MockPackageSourceSettingsManager : IPackageSourceSettingsManager {
-            public MockPackageSourceSettingsManager() {
-                //OfficialFeed = VsPackageSourceProvider.DefaultPackageSource;
-            }
-
             public string ActivePackageSourceString {
                 get;
                 set;
