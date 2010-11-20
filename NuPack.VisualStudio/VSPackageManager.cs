@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using EnvDTE;
 
@@ -69,13 +70,27 @@ namespace NuGet.VisualStudio {
             UninstallPackage(packageId, version, forceRemove, removeDependencies);
         }
 
-        public void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies) {
-            UpdatePackage(projectManager, id, version, updateDependencies, NullLogger.Instance);
+        public void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {
+            UpdatePackage(projectManager, packageId, version, updateDependencies, NullLogger.Instance);
         }
 
         // REVIEW: Do we even need this method?
-        public virtual void UpdatePackage(IProjectManager projectManager, string id, Version version, bool updateDependencies, ILogger logger) {
-            InstallPackage(projectManager, id, version, !updateDependencies, logger);
+        public virtual void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger) {
+            InitializeLogger(logger, projectManager);
+
+            InstallPackage(packageId, version, !updateDependencies);
+
+            if (projectManager != null) {
+                // Get the old package
+                IPackage oldPackage = projectManager.LocalRepository.FindPackage(packageId);
+
+                projectManager.AddPackageReference(packageId, version, !updateDependencies);
+
+                Debug.Assert(oldPackage != null);
+
+                // Remove from the solution repository
+                UninstallPackage(oldPackage, forceRemove: false, removeDependencies: updateDependencies);
+            }
         }
 
         protected override void ExecuteUninstall(IPackage package) {
