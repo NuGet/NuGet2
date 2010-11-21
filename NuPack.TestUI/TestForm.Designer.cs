@@ -38,7 +38,7 @@ namespace NuGet.TestUI
             // OkButton
             // 
             this.OkButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.OkButton.Location = new System.Drawing.Point(295, 227);
+            this.OkButton.Location = new System.Drawing.Point(296, 228);
             this.OkButton.Name = "OkButton";
             this.OkButton.Size = new System.Drawing.Size(75, 23);
             this.OkButton.TabIndex = 0;
@@ -48,7 +48,9 @@ namespace NuGet.TestUI
             // 
             // panel1
             // 
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(463, 221);
@@ -56,6 +58,7 @@ namespace NuGet.TestUI
             // 
             // theCancelButton
             // 
+            this.theCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.theCancelButton.Location = new System.Drawing.Point(377, 228);
             this.theCancelButton.Name = "theCancelButton";
             this.theCancelButton.Size = new System.Drawing.Size(75, 23);

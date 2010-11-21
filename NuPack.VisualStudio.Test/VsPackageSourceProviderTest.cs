@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Test;
 using System;
@@ -230,6 +231,42 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual("<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource>", settingsManager.ActivePackageSourceString);
+        }
+
+        [TestMethod]
+        public void SettingPackageSourcesWithoutAggregateWillAddAggregateAsFirstItem() {
+            // Arrange
+            var settingsManager = new MockPackageSourceSettingsManager();
+            settingsManager.PackageSourcesString = "";
+            var provider = new VsPackageSourceProvider(settingsManager);
+            var packageSources = new List<PackageSource> {
+                                                             new PackageSource("a", "a")
+                                                         };
+
+
+            // Act
+            provider.SetPackageSources(packageSources);
+
+            // Assert
+            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
+        }
+
+        [TestMethod]
+        public void SettingPackageSourcesWithAggregateWillNotAddAnotherAggregate() {
+            // Arrange
+            var settingsManager = new MockPackageSourceSettingsManager();
+            settingsManager.PackageSourcesString = "";
+            var provider = new VsPackageSourceProvider(settingsManager);
+            var packageSources = new List<PackageSource> {
+                                                             VsPackageSourceProvider.AggregateSource,
+                                                             new PackageSource("a", "a")
+                                                         };
+
+            // Act
+            provider.SetPackageSources(packageSources);
+
+            // Assert
+            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
         }
 
         private class MockPackageSourceSettingsManager : IPackageSourceSettingsManager {

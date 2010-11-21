@@ -151,7 +151,6 @@
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ToolsOptionsUI\ListViewDataBinder.cs" />
     <Compile Include="ToolsOptionsUI\ToolsOptionsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -216,7 +215,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="PackageManagerUI\packageicon.png" />
-    <Content Include="Resources\checkmark.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PackageManagerUI\PackagesProvider.cd" />

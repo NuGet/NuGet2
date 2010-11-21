@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
@@ -15,10 +18,10 @@ namespace NuGet.Dialog.ToolsOptionsUI {
     /// </remarks>
     public partial class ToolsOptionsControl : UserControl {
         private IPackageSourceProvider _packageSourceProvider;
+        private PackageSource _aggregateSource;
+        private PackageSource _activeSource;
         private BindingSource _allPackageSources;
-        private PackageSource _activePackageSource;
         private bool _initialized;
-        private ListViewDataBinder<PackageSource> _listViewDataBinder;
 
         public ToolsOptionsControl(IPackageSourceProvider packageSourceProvider) {
             _packageSourceProvider = packageSourceProvider;
@@ -33,18 +36,32 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         private void SetupDataBindings() {
             NewPackageName.TextChanged += (o, e) => UpdateUI();
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
-            PackageSourcesListView.ItemSelectionChanged += (o, e) => UpdateUI();
+            MoveUpButton.Click += (o, e) => MoveSelectedItem(-1);
+            MoveDownButton.Click += (o, e) => MoveSelectedItem(1);
+            PackageSourcesListBox.SelectedIndexChanged += (o, e) => UpdateUI();
             NewPackageName.Focus();
             UpdateUI();
         }
 
-        public void UpdateUI() {
-            defaultButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0;
-            removeButton.Enabled = PackageSourcesListView.SelectedItems.Count > 0 && !((PackageSource)PackageSourcesListView.SelectedItems[0].Tag).IsAggregate;
+        private void UpdateUI() {
+            MoveUpButton.Enabled = PackageSourcesListBox.SelectedItem != null &&
+                                    PackageSourcesListBox.SelectedIndex > 0;
+            MoveDownButton.Enabled = PackageSourcesListBox.SelectedItem != null &&
+                                    PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
+            removeButton.Enabled = PackageSourcesListBox.SelectedItem != null;
         }
 
-        public void BindData() {
-            _listViewDataBinder.Bind();
+        private void MoveSelectedItem(int offset) {
+            if (PackageSourcesListBox.SelectedItem == null) {
+                return;
+            }
+
+            var item = PackageSourcesListBox.SelectedItem;
+            int oldIndex = PackageSourcesListBox.SelectedIndex;
+            _allPackageSources.Remove(item);
+            _allPackageSources.Insert(oldIndex + offset, item);
+
+            PackageSourcesListBox.SelectedIndex = oldIndex + offset;
             UpdateUI();
         }
 
@@ -54,21 +71,14 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             }
 
             _initialized = true;
-            _allPackageSources = new BindingSource(_packageSourceProvider.GetPackageSources().ToList(), null);
-            _activePackageSource = _packageSourceProvider.ActivePackageSource;
+            // get packages sources
+            IList<PackageSource> packageSources = _packageSourceProvider.GetPackageSources().ToList();
+            _aggregateSource = packageSources.Where(ps => ps.IsAggregate).Single();
+            _activeSource = _packageSourceProvider.ActivePackageSource;
 
-            _listViewDataBinder = new ListViewDataBinder<PackageSource>(PackageSourcesListView,
-                ps => new string[] { ps.Name, ps.Source },  // new ListViewItem
-                (ps, item) => {
-                    // set checkmark image on default package
-                    if ((_activePackageSource == null && item.Index == 0)   // no default package, so select first
-                        || (ps.Equals(_activePackageSource))) { // OR current item is default package so set checkmark
-                        item.ImageIndex = 0;
-                    }
-                }
-                );
-            _listViewDataBinder.DataSource = _allPackageSources;
-            BindData();
+            // bind to the package sources, excluding Aggregate
+            _allPackageSources = new BindingSource(packageSources.Where(ps => !ps.IsAggregate).ToList(), null);
+            PackageSourcesListBox.DataSource = _allPackageSources;
         }
 
         /// <summary>
@@ -84,8 +94,16 @@ namespace NuGet.Dialog.ToolsOptionsUI {
                 return false;
             }
 
-            _packageSourceProvider.SetPackageSources((IEnumerable<PackageSource>)_allPackageSources.DataSource);
-            _packageSourceProvider.ActivePackageSource = _activePackageSource;
+            // get package sources as ordered list
+            var packageSources = PackageSourcesListBox.Items.Cast<PackageSource>().ToList();
+            _packageSourceProvider.SetPackageSources(packageSources);
+            // restore current active source if it still exists, or reset to aggregate source
+            if (packageSources.Contains(_activeSource)) {
+                _packageSourceProvider.ActivePackageSource = _activeSource;
+            }
+            else {
+                _packageSourceProvider.ActivePackageSource = _aggregateSource;
+            }
             return true;
         }
 
@@ -97,30 +115,15 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             _initialized = false;
 
             _allPackageSources = null;
-            _activePackageSource = null;
             ClearNameSource();
             UpdateUI();
         }
 
         private void OnRemoveButtonClick(object sender, EventArgs e) {
-            if (PackageSourcesListView.SelectedItems.Count == 0) {
+            if (PackageSourcesListBox.SelectedItem == null) {
                 return;
             }
-            var selectedPackage = PackageSourcesListView.SelectedItems[0].Tag as PackageSource;
-            if (selectedPackage != null) {
-                _allPackageSources.Remove(selectedPackage);
-
-                if (_activePackageSource != null && _activePackageSource.Equals(selectedPackage)) {
-                    _activePackageSource = null;
-
-                    // if user deletes the active package source, assign the first item as the active one
-                    if (_allPackageSources.Count > 0) {
-                        _activePackageSource = (PackageSource)_allPackageSources[0];
-                    }
-                }
-
-                BindData();
-            }
+            _allPackageSources.Remove(PackageSourcesListBox.SelectedItem);
         }
 
         private void OnAddButtonClick(object sender, EventArgs e) {
@@ -137,12 +140,12 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             if (String.IsNullOrWhiteSpace(name) && String.IsNullOrWhiteSpace(source)) {
                 return TryAddSourceResults.NothingAdded;
             }
-            
+
             // validate name
             if (String.IsNullOrWhiteSpace(name)) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
-                return TryAddSourceResults.InvalidSource;                
+                return TryAddSourceResults.InvalidSource;
             }
 
             // validate source
@@ -155,13 +158,15 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             if (!(PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source))) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_InvalidSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
-                return TryAddSourceResults.InvalidSource;                
+                return TryAddSourceResults.InvalidSource;
             }
 
-            var sourcesList = (IEnumerable<PackageSource>) _allPackageSources.List;
+            var sourcesList = (IEnumerable<PackageSource>)_allPackageSources.List;
 
             // check to see if name has already been added
-            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase));
+            // also make sure it's not the same as the aggregate source ('All')
+            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase)
+                || String.Equals(name, _aggregateSource.Name, StringComparison.OrdinalIgnoreCase));
             if (hasName) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
@@ -178,14 +183,8 @@ namespace NuGet.Dialog.ToolsOptionsUI {
 
             var newPackageSource = new PackageSource(source, name);
             _allPackageSources.Add(newPackageSource);
-
-            // if the collection contains only the package source that we just added, 
-            // make it the default package source
-            if (_activePackageSource == null && _allPackageSources.Count == 1) {
-                _activePackageSource = newPackageSource;
-            }
-
-            BindData();
+            // set selection to newly added item
+            PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.Items.Count - 1;
 
             // now clear the text boxes
             ClearNameSource();
@@ -204,28 +203,98 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             NewPackageName.Focus();
         }
 
-        private void OnDefaultPackageSourceButtonClick(object sender, EventArgs e) {
-            if (PackageSourcesListView.SelectedItems.Count == 0) {
+
+        private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
+            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListBox.SelectedItem != null) {
+                CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
+            }
+        }
+
+        private void PackageSourcesListBox_KeyUp(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.C && e.Control) {
+                CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
+            }
+        }
+
+        private static void CopySelectedItem(PackageSource selectedPackageSource) {
+            Clipboard.Clear();
+            Clipboard.SetText(selectedPackageSource.Source);
+        }
+
+        private void PackageSourcesListBox_MouseUp(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Right) {
+                PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
+            }
+
+        }
+
+        private readonly Color SelectionFocusGradientLightColor = Color.FromArgb(0xF9, 0xFC, 0xFF);
+        private readonly Color SelectionFocusGradientDarkColor = Color.FromArgb(0xC9, 0xE0, 0xFC);
+        private readonly Color SelectionFocusBorderColor = Color.FromArgb(0x89, 0xB0, 0xDF);
+
+        private readonly Color SelectionUnfocusGradientLightColor = Color.FromArgb(0xF8, 0xF8, 0xF8);
+        private readonly Color SelectionUnfocusGradientDarkColor = Color.FromArgb(0xDC, 0xDC, 0xDC);
+        private readonly Color SelectionUnfocusBorderColor = Color.FromArgb(0xD9, 0xD9, 0xD9);
+
+        private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
+            // Draw the background of the ListBox control for each item.
+            if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
+                using (
+                    var gradientBrush = PackageSourcesListBox.Focused 
+                        ? new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F)
+                        : new LinearGradientBrush(e.Bounds, SelectionUnfocusGradientLightColor, SelectionUnfocusGradientDarkColor, 90.0F))
+                {
+                    e.Graphics.FillRectangle(gradientBrush, e.Bounds);
+                }
+                using (var borderPen = PackageSourcesListBox.Focused 
+                    ? new Pen(SelectionFocusBorderColor)
+                    : new Pen(SelectionUnfocusBorderColor)) {
+                    e.Graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                }
+            
+            }
+            else {
+                // alternate background color for even/odd rows
+                Color backColor = e.Index % 2 == 0
+                                      ? Color.FromKnownColor(KnownColor.Window)
+                                      : Color.FromArgb(0xF6, 0xF6, 0xF6);
+                using (Brush backBrush = new SolidBrush(backColor)) {
+                    e.Graphics.FillRectangle(backBrush, e.Bounds);
+                }
+            }
+
+            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count) {
                 return;
             }
 
-            _activePackageSource = PackageSourcesListView.SelectedItems[0].Tag as PackageSource;
-            BindData();
-        }
+            PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
 
+            using (StringFormat drawFormat = new StringFormat())
+            using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
+            using (Font italicFont = new Font(e.Font, FontStyle.Italic))
+            {
+                drawFormat.Alignment = StringAlignment.Near;
+                drawFormat.Trimming = StringTrimming.EllipsisCharacter;
+                drawFormat.LineAlignment = StringAlignment.Near;
+                // draw package source as
+                // 1. Name
+                //    Source (italics)
+                int ordinal = e.Index + 1;
+                e.Graphics.DrawString(ordinal + ".", e.Font, foreBrush, e.Bounds,
+                                        drawFormat);
+                var nameBounds = NewBounds(e.Bounds, 16, 0);
+                e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
+                var sourceBounds = NewBounds(nameBounds, 0, 16);
+                e.Graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
 
-        private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
-            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListView.SelectedItems.Count > 0) {
-                var selectedPackageSource = (PackageSource) PackageSourcesListView.SelectedItems[0].Tag;
-                Clipboard.Clear();
-                Clipboard.SetText(selectedPackageSource.Source);
+                // If the ListBox has focus, draw a focus rectangle around the selected item.
+                e.DrawFocusRectangle();
             }
         }
 
-        private void PackageSourcesListView_MouseClick(object sender, MouseEventArgs e) {
-            if (e.Button == MouseButtons.Right) {
-                PackageSourcesContextMenu.Show(PackageSourcesListView, e.Location);
-            }
+        private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset) {
+            return new Rectangle(sourceBounds.Left + xOffset, sourceBounds.Top + yOffset,
+                sourceBounds.Width - xOffset, sourceBounds.Height - yOffset);
         }
     }
 
