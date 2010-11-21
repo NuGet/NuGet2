@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -414,6 +415,10 @@ Description is required.");
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <dependencies>
+        <dependency id=""A"" version=""[1.0]"" />
+        <dependency id=""B"" version=""[1.0, 2.5)"" />
+    </dependencies>
   </metadata>
 </package>";
 
@@ -431,6 +436,18 @@ Description is required.");
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.IsTrue(builder.RequireLicenseAcceptance);
+
+            IDictionary<string, IVersionSpec> dependencies = builder.Dependencies.ToDictionary(p => p.Id, p => p.VersionSpec);
+            // <dependency id="A" version="[1.0]" />
+            Assert.IsTrue(dependencies["A"].IsMinInclusive);
+            Assert.IsTrue(dependencies["A"].IsMaxInclusive);
+            Assert.AreEqual(new Version("1.0"), dependencies["A"].MinVersion);
+            Assert.AreEqual(new Version("1.0"), dependencies["A"].MaxVersion);
+            // <dependency id="B" version="[1.0, 2.5)" />
+            Assert.IsTrue(dependencies["B"].IsMinInclusive);
+            Assert.IsFalse(dependencies["B"].IsMaxInclusive);
+            Assert.AreEqual(new Version("1.0"), dependencies["B"].MinVersion);
+            Assert.AreEqual(new Version("2.5"), dependencies["B"].MaxVersion);            
         }
 
         [TestMethod]

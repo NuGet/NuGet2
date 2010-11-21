@@ -55,7 +55,6 @@
     <Compile Include="BufferedEnumerableTest.cs" />
     <Compile Include="ClosureEvaluatorTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
-    <Compile Include="DataServicePackageRepositoryTest.cs" />
     <Compile Include="DependencyResolverTest.cs" />
     <Compile Include="HttpClientTest.cs" />
     <Compile Include="PackageDownloaderTest.cs" />
