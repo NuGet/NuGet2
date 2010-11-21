@@ -106,7 +106,7 @@ namespace NuGet {
         }
 
         public override string ToString() {
-            return _query.ToString();
+            return _query.CreateQuery<T>(Expression).ToString();
         }
     }
 }

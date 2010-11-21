@@ -5,31 +5,25 @@ using System.Text;
 
 namespace NuGet {
     internal class PriorityQueue<TValue> {
-        private readonly SortedDictionary<TValue, HashSet<TValue>> _lookup;
-        private readonly IEqualityComparer<TValue> _equalityComparer;
-
-        public PriorityQueue(IComparer<TValue> comparer,
-                             IEqualityComparer<TValue> equalityComparer) {
-            _equalityComparer = equalityComparer;
-            _lookup = new SortedDictionary<TValue, HashSet<TValue>>(comparer);
+        private readonly SortedDictionary<TValue, Queue<TValue>> _lookup;
+        
+        public PriorityQueue(IComparer<TValue> comparer) {
+            _lookup = new SortedDictionary<TValue, Queue<TValue>>(comparer);
         }
 
         public void Enqueue(TValue value) {
-            HashSet<TValue> queue;
+            Queue<TValue> queue;
             if (!_lookup.TryGetValue(value, out queue)) {
-                queue = new HashSet<TValue>(_equalityComparer);
+                queue = new Queue<TValue>();
                 _lookup.Add(value, queue);
             }
-            queue.Add(value);
+            queue.Enqueue(value);
         }
 
         public TValue Dequeue() {
             // Will throw if there isn't any first element!
             var pair = _lookup.First();
-            var value = pair.Value.First();
-
-            // Remove the item from the set
-            pair.Value.Remove(value);
+            var value = pair.Value.Dequeue();
 
             // Nothing left of the top priority
             if (pair.Value.Count == 0) {

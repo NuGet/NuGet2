@@ -48,5 +48,9 @@ namespace NuGet {
         private Expression GetInnerExpression(Expression expression) {
             return QueryableUtility.ReplaceQueryableExpression(_query, expression);
         }
+
+        public override string ToString() {
+            return _query.ToString();
+        }
     }
 }

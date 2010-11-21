@@ -100,8 +100,15 @@ namespace NuGet {
         }
 
         private IEnumerable<T> GetAggregateEnumerable() {
-            var queue = new PriorityQueue<T>(new OrderingComparer<T>(Expression), _equalityComparer);
+            // Used to pick the right element from each sub query in the right order
+            var queue = new PriorityQueue<T>(new OrderingComparer<T>(Expression));
+
+            // Sub queries
             var subQueryEnumerators = _subQueries.Select(query => query.GetEnumerator()).ToList();
+
+            // Used to keep track of everything we've seen so far (we never show duplicates)
+            var seen = new HashSet<T>(_equalityComparer);
+
             bool empty = false;
 
             while (!empty) {
@@ -121,12 +128,26 @@ namespace NuGet {
                     }
                 }
 
-                if (!queue.IsEmpty) {
-                    // Return the item in the front of the queue
-                    yield return queue.Dequeue();
+                if (queue.IsEmpty) {
+                    // If the queue is empty then see if there are any results left
+                    empty = tasks.All(t => t.Result.Empty);
                 }
                 else {
-                    empty = tasks.All(t => t.Result.Empty);
+                    // Otherwise try to get the next element that isn't a duplicate
+                    while (!queue.IsEmpty) {
+                        // Get the next element from the queue
+                        T element = queue.Dequeue();
+
+                        // Only return it if we haven't already seen it
+                        if (!seen.Contains(element)) {
+                            yield return element;
+                            // Add it to the list of seen elements
+                            seen.Add(element);
+
+                            // Break out of the loop once we've yielded an element
+                            break;
+                        }
+                    }
                 }
 
             }
