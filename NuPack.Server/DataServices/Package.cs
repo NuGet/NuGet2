@@ -39,7 +39,6 @@ namespace NuGet.Server.DataServices {
                 ReportAbuseUrl = reportAbuseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             Rating = Math.Abs((double)Id.GetHashCode() % 50) / 10;
-            Score = Id.GetHashCode();
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
         }
@@ -85,11 +84,6 @@ namespace NuGet.Server.DataServices {
         }
 
         public int DownloadCount {
-            get;
-            set;
-        }
-
-        public int Score {
             get;
             set;
         }

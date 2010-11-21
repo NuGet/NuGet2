@@ -85,11 +85,6 @@ namespace NuGet {
             set;
         }
 
-        public int Score {
-            get;
-            set;
-        }
-
         public double Rating {
             get;
             set;

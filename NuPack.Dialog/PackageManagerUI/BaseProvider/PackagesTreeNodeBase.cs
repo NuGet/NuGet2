@@ -253,7 +253,7 @@ namespace NuGet.Dialog.Providers {
 
             token.ThrowIfCancellationRequested();
 
-            IQueryable<IPackage> orderedQuery = query.OrderByDescending(p => p.Score);
+            IQueryable<IPackage> orderedQuery = query.OrderByDescending(p => p.Rating);
             IQueryable<IPackage> pageQuery = orderedQuery.Skip((pageNumber - 1) * ItemsPerPage).Take(ItemsPerPage);
 
             // Execute the page query

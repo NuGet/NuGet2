@@ -113,8 +113,7 @@ namespace NuGet.Test {
                                                         assemblyReferences: new[] { PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("SP", new Version("40.0"))) },
                                                         tools: null,
                                                         dependencies: null,
-                                                        rating: null,
-                                                        score: null);
+                                                        rating: null);
             projectManager.LocalRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);
             projectManager.LocalRepository.AddPackage(packageB);

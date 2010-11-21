@@ -22,7 +22,7 @@ namespace NuGet.Dialog.Test {
             if (_packages == null) {
                 _packages = new IPackage[_numberOfPackages];
                 for (int i = 0; i < _numberOfPackages; i++) {
-                    _packages[i] = PackageUtility.CreatePackage("A" + i, "1.0", score: i);
+                    _packages[i] = PackageUtility.CreatePackage("A" + i, "1.0", rating: i);
                 }
             }
 

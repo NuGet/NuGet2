@@ -14,15 +14,14 @@ namespace NuGet.Test {
                                               IEnumerable<string> assemblyReferences = null,
                                               IEnumerable<string> tools = null,
                                               IEnumerable<PackageDependency> dependencies = null,
-                                              int? rating = null,
-                                              int? score = null) {
+                                              int? rating = null) {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
                                  content,
                                  CreateAssemblyReferences(assemblyReferences),
                                  tools,
-                                 dependencies, rating, score);
+                                 dependencies, rating);
         }
 
         public static IPackage CreatePackage(string id,
@@ -31,8 +30,7 @@ namespace NuGet.Test {
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
                                               IEnumerable<string> tools,
                                               IEnumerable<PackageDependency> dependencies, 
-                                              int? rating,
-                                              int? score) {
+                                              int? rating) {
 
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
@@ -56,7 +54,6 @@ namespace NuGet.Test {
             mockPackage.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
             mockPackage.Setup(m => m.Rating).Returns(rating ?? -1);
-            mockPackage.Setup(m => m.Score).Returns(score ?? -1);
             return mockPackage.Object;
         }
 

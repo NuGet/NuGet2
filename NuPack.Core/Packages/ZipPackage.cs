@@ -86,12 +86,6 @@ namespace NuGet {
             }
         }
 
-        public int Score {
-            get {
-                return -1;
-            }
-        }
-
         public double Rating {
             get {
                 return -1;
