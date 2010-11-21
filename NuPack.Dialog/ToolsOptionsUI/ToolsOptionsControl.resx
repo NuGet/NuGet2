@@ -136,7 +136,7 @@
     <value>0</value>
   </data>
   <data name="HeaderLabel.Text" xml:space="preserve">
-    <value>Availa&amp;ble package sources:</value>
+    <value>Available &amp;package sources:</value>
   </data>
   <data name="&gt;&gt;HeaderLabel.Name" xml:space="preserve">
     <value>HeaderLabel</value>
@@ -301,7 +301,7 @@
     <value>4</value>
   </data>
   <data name="NewPackageNameLabel.Text" xml:space="preserve">
-    <value>Na&amp;me:</value>
+    <value>&amp;Name:</value>
   </data>
   <data name="&gt;&gt;NewPackageNameLabel.Name" xml:space="preserve">
     <value>NewPackageNameLabel</value>
@@ -334,7 +334,7 @@
     <value>6</value>
   </data>
   <data name="NewPackageSourceLabel.Text" xml:space="preserve">
-    <value>So&amp;urce:</value>
+    <value>&amp;Source:</value>
   </data>
   <data name="&gt;&gt;NewPackageSourceLabel.Name" xml:space="preserve">
     <value>NewPackageSourceLabel</value>

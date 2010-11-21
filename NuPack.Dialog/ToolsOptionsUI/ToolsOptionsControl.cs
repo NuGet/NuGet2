@@ -216,7 +216,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             }
         }
 
-        private void CopySelectedItem(PackageSource selectedPackageSource) {
+        private static void CopySelectedItem(PackageSource selectedPackageSource) {
             Clipboard.Clear();
             Clipboard.SetText(selectedPackageSource.Source);
         }
@@ -228,18 +228,27 @@ namespace NuGet.Dialog.ToolsOptionsUI {
 
         }
 
+        private readonly Color SelectionFocusGradientLightColor = Color.FromArgb(0xF9, 0xFC, 0xFF);
+        private readonly Color SelectionFocusGradientDarkColor = Color.FromArgb(0xC9, 0xE0, 0xFC);
+        private readonly Color SelectionFocusBorderColor = Color.FromArgb(0x89, 0xB0, 0xDF);
+
+        private readonly Color SelectionUnfocusGradientLightColor = Color.FromArgb(0xF8, 0xF8, 0xF8);
+        private readonly Color SelectionUnfocusGradientDarkColor = Color.FromArgb(0xDC, 0xDC, 0xDC);
+        private readonly Color SelectionUnfocusBorderColor = Color.FromArgb(0xD9, 0xD9, 0xD9);
+
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
             // Draw the background of the ListBox control for each item.
             if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
                 using (
                     var gradientBrush = PackageSourcesListBox.Focused 
-                        ? new LinearGradientBrush(e.Bounds, Color.FromArgb(0xF9, 0xFC, 0xFF), Color.FromArgb(0xC9, 0xE0, 0xFC), 90.0F)
-                        : new LinearGradientBrush(e.Bounds, Color.FromArgb(0xF8, 0xF8, 0xF8), Color.FromArgb(0xDC, 0xDC, 0xDC), 90.0F)) {
+                        ? new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F)
+                        : new LinearGradientBrush(e.Bounds, SelectionUnfocusGradientLightColor, SelectionUnfocusGradientDarkColor, 90.0F))
+                {
                     e.Graphics.FillRectangle(gradientBrush, e.Bounds);
                 }
                 using (var borderPen = PackageSourcesListBox.Focused 
-                    ? new Pen(Color.FromArgb(0x89, 0xB0, 0xDF))
-                    : new Pen(Color.FromArgb(0xD9, 0xD9, 0xD9))) {
+                    ? new Pen(SelectionFocusBorderColor)
+                    : new Pen(SelectionUnfocusBorderColor)) {
                     e.Graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
                 }
             
@@ -260,31 +269,30 @@ namespace NuGet.Dialog.ToolsOptionsUI {
 
             PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
 
-            using (StringFormat drawFormat = new StringFormat {
-                Alignment = StringAlignment.Near,
-                Trimming = StringTrimming.EllipsisCharacter,
-                LineAlignment = StringAlignment.Near
-            }) {
-                using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
-                using (Font italicFont = new Font(e.Font, FontStyle.Italic)) {
-                    // draw package source as
-                    // 1. Name
-                    //    Source (italics)
-                    e.Graphics.DrawString(String.Format("{0}.", e.Index + 1), e.Font, foreBrush, e.Bounds,
-                                          drawFormat);
-                    var nameBounds = NewBounds(e.Bounds, 16, 0);
-                    e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
-                    var sourceBounds = NewBounds(nameBounds, 0, 16);
-                    e.Graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
-                }
+            using (StringFormat drawFormat = new StringFormat())
+            using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
+            using (Font italicFont = new Font(e.Font, FontStyle.Italic))
+            {
+                drawFormat.Alignment = StringAlignment.Near;
+                drawFormat.Trimming = StringTrimming.EllipsisCharacter;
+                drawFormat.LineAlignment = StringAlignment.Near;
+                // draw package source as
+                // 1. Name
+                //    Source (italics)
+                int ordinal = e.Index + 1;
+                e.Graphics.DrawString(ordinal + ".", e.Font, foreBrush, e.Bounds,
+                                        drawFormat);
+                var nameBounds = NewBounds(e.Bounds, 16, 0);
+                e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
+                var sourceBounds = NewBounds(nameBounds, 0, 16);
+                e.Graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
 
                 // If the ListBox has focus, draw a focus rectangle around the selected item.
                 e.DrawFocusRectangle();
             }
-
         }
 
-        private Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset) {
+        private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset) {
             return new Rectangle(sourceBounds.Left + xOffset, sourceBounds.Top + yOffset,
                 sourceBounds.Width - xOffset, sourceBounds.Height - yOffset);
         }
