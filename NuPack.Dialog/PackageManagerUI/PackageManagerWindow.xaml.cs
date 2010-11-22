@@ -48,7 +48,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
 
-            IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
+            // Create a cached project manager so that checking for installed packages is fast
+            IProjectManager projectManager = new CachedProjectManager(packageManager.GetProjectManager(activeProject));
 
             // The ExtensionsExplorer control display providers in reverse order.
             // We want the providers to appear as Installed - Online - Updates

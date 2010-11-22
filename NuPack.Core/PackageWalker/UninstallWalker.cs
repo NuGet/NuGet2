@@ -6,8 +6,8 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class UninstallWalker : PackageWalker, IPackageOperationResolver {
-        private IDictionary<IPackage, IEnumerable<IPackage>> _forcedRemoved = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersionComparer);
-        private IDictionary<IPackage, IEnumerable<IPackage>> _skippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersionComparer);
+        private IDictionary<IPackage, IEnumerable<IPackage>> _forcedRemoved = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
+        private IDictionary<IPackage, IEnumerable<IPackage>> _skippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
         private bool _removeDependencies;
 
         public UninstallWalker(IPackageRepository repository,
@@ -157,7 +157,7 @@ namespace NuGet {
 
         private bool IsConnected(IPackage package) {
             // We could cache the results of this lookup
-            if (Marker.Packages.Contains(package, PackageEqualityComparer.IdAndVersionComparer)) {
+            if (Marker.Packages.Contains(package, PackageEqualityComparer.IdAndVersion)) {
                 return true;
             }
 

@@ -112,8 +112,8 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override bool CanExecute(PackageItem item) {
-            // only enable command on a Package in the Online provider if it is not installed yet
-            return !ProjectManager.LocalRepository.Exists(item.Id, new Version(item.Version));
+            // Only enable command on a Package in the Online provider if it is not installed yet
+            return !ProjectManager.IsInstalled(item.PackageIdentity);
         }
 
         public override IVsExtension CreateExtension(IPackage package) {

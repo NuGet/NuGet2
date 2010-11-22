@@ -209,6 +209,10 @@ namespace NuGet {
             LocalRepository.AddPackage(package);
         }
 
+        public bool IsInstalled(IPackage package) {
+            return LocalRepository.Exists(package);
+        }
+
         public void RemovePackageReference(string packageId) {
             RemovePackageReference(packageId, forceRemove: false, removeDependencies: false);
         }

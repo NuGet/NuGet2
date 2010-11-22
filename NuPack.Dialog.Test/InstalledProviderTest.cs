@@ -81,7 +81,7 @@ namespace NuGet.Dialog.Test {
             var packageC = PackageUtility.CreatePackage("C", "2.0");
 
             var projectManager = new Mock<IProjectManager>();
-            projectManager.Setup(p => p.LocalRepository).Returns(repository);
+            projectManager.Setup(p => p.IsInstalled(It.IsAny<IPackage>())).Returns<IPackage>(p => repository.Exists(p));
 
             var provider = CreateInstalledProvider(null, projectManager.Object);
 

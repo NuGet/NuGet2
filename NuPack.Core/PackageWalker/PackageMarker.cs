@@ -3,7 +3,7 @@ namespace NuGet {
 
     public class PackageMarker {
         public PackageMarker()
-            : this(PackageEqualityComparer.IdComparer) {
+            : this(PackageEqualityComparer.Id) {
         }
 
         public PackageMarker(IEqualityComparer<IPackage> equalityComparer) {

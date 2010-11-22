@@ -54,14 +54,24 @@ namespace NuGet.VisualStudio {
             InstallPackage(packageId, version, ignoreDependencies);
 
             if (projectManager != null) {
-                projectManager.PackageReferenceRemoved += (sender, e) => {
+                EventHandler<PackageOperationEventArgs> handler = (sender, e) => {
                     if (LocalRepository.Exists(e.Package)) {
                         // Remove any packages that would be removed as a result of updating a dependency or the package itself
                         UninstallPackage(e.Package, forceRemove: true, removeDependencies: !ignoreDependencies);
                     }
                 };
 
-                projectManager.AddPackageReference(packageId, version, ignoreDependencies);
+                // Add the handler
+                projectManager.PackageReferenceRemoved += handler;
+
+                try {                    
+                    // Add the package reference
+                    projectManager.AddPackageReference(packageId, version, ignoreDependencies);
+                }
+                finally {
+                    // Remove the handler
+                    projectManager.PackageReferenceRemoved -= handler;
+                }
             }
         }
 

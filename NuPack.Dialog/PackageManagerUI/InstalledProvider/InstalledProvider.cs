@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -37,8 +36,8 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override bool CanExecute(PackageItem item) {
-            // enable command on a Package in the Installed provider if the package is installed.
-            return ProjectManager.LocalRepository.Exists(item.PackageIdentity);
+            // Enable command on a Package in the Installed provider if the package is installed.
+            return ProjectManager.IsInstalled(item.PackageIdentity);
         }
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {

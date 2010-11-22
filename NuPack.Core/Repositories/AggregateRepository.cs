@@ -13,7 +13,7 @@ namespace NuGet {
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()), PackageEqualityComparer.IdAndVersionComparer);
+            return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()), PackageEqualityComparer.IdAndVersion);
         }        
     }
 }

@@ -110,6 +110,7 @@
     <Compile Include="..\Common\CommonResources.cs">
       <Link>CommonResources.cs</Link>
     </Compile>
+    <Compile Include="PackageManagerUI\CachedProjectManager.cs" />
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>

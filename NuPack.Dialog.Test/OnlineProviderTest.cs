@@ -65,7 +65,7 @@ namespace NuGet.Dialog.Test {
             localRepository.AddPackage(packageA);
 
             var projectManager = new Mock<IProjectManager>();
-            projectManager.Setup(p => p.LocalRepository).Returns(localRepository);
+            projectManager.Setup(p => p.IsInstalled(It.IsAny<IPackage>())).Returns<IPackage>(p => localRepository.Exists(p));
 
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
