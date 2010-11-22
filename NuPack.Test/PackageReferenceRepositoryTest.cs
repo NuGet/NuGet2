@@ -185,6 +185,10 @@ namespace NuGet.Test {
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""1.0"" />
+  <package id="""" version=""1.0"" />
+  <package id=""G"" version="""" />
+  <package />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 

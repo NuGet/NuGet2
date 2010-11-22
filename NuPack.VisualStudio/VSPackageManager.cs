@@ -31,6 +31,10 @@ namespace NuGet.VisualStudio {
 
             var repository = new PackageReferenceRepository(projectSystem, _sharedRepository);
 
+            // Ensure the logger is null while registering the repository
+            FileSystem.Logger = null;
+            Logger = null;
+
             // Ensure that this repository is registered with the shared repository if it needs to be
             repository.RegisterIfNecessary();
 

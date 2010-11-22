@@ -77,26 +77,23 @@ namespace NuGet {
                 yield break;
             }
             else {
-                foreach (var e in document.Root.Elements("package").ToList()) {
+                foreach (var e in document.Root.Elements("package")) {
                     string id = e.GetOptionalAttributeValue("id");
                     string versionString = e.GetOptionalAttributeValue("version");
                     Version version = VersionUtility.ParseOptionalVersion(versionString);
                     IPackage package = null;
 
-                    if (String.IsNullOrEmpty(id) || version == null) {
-                        // If required attributes are missing then remove the element
-                        e.Remove();
-                    }
-                    else if (!SourceRepository.TryFindPackage(id, version, out package)) {
-                        // Remove bad entries
-                        DeleteEntry(document, id, version);
+                    if (String.IsNullOrEmpty(id) || 
+                        version == null || 
+                        !SourceRepository.TryFindPackage(id, version, out package)) {
+
+                        // Skip bad entries
+                        continue;
                     }
                     else {
                         yield return package;
                     }
                 }
-
-                SaveDocument(document);
             }
         }
 
@@ -149,18 +146,18 @@ namespace NuGet {
             if (element != null) {
                 // Remove the element from the xml dom
                 element.Remove();
-            }
 
-            // Remove the file if there are no more elements
-            if (!document.Root.HasElements) {
-                FileSystem.DeleteFile(PackageReferenceFile);
+                // Remove the file if there are no more elements
+                if (!document.Root.HasElements) {
+                    FileSystem.DeleteFile(PackageReferenceFile);
 
-                // Remove the repository from the source
-                SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
-            }
-            else {
-                // Otherwise save the updated document
-                SaveDocument(document);
+                    // Remove the repository from the source
+                    SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
+                }
+                else {
+                    // Otherwise save the updated document
+                    SaveDocument(document);
+                }
             }
         }
 
@@ -175,15 +172,7 @@ namespace NuGet {
         }
 
         private void SaveDocument(XDocument document) {
-            ILogger logger = FileSystem.Logger;
-            try {
-                // Don't log anything when saving the xml file
-                FileSystem.Logger = null;
-                FileSystem.AddFile(PackageReferenceFile, document.Save);
-            }
-            finally {
-                FileSystem.Logger = logger;
-            }
+            FileSystem.AddFile(PackageReferenceFile, document.Save);
         }
     }
 }

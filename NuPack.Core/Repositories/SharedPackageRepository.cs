@@ -53,26 +53,27 @@ namespace NuGet {
                 return Enumerable.Empty<string>();
             }
 
-            // Paths have to be relative to the this repository
-            var entries = from e in GetRepositoryElements(document)
-                          select new {
-                              Element = e,
-                              Path = e.GetOptionalAttributeValue("path")
-                          };
+            // Only save if we changed the document
+            bool requiresSave = false;
 
+            // Paths have to be relative to the this repository           
             var paths = new HashSet<string>();
-            foreach (var entry in entries.ToList()) {
-                string path = NormalizePath(entry.Path);
+            foreach (var e in GetRepositoryElements(document).ToList()) {
+                string path = NormalizePath(e.GetOptionalAttributeValue("path"));
 
                 if (String.IsNullOrEmpty(path) ||
                     !FileSystem.FileExists(path) ||
                     !paths.Add(path)) {
-                    // Remove invalid entries from the document
-                    entry.Element.Remove();
+
+                    // Skip bad entries
+                    e.Remove();
+                    requiresSave = true;
                 }
             }
 
-            SaveDocument(document);
+            if (requiresSave) {
+                SaveDocument(document);
+            }
 
             return paths;
         }
@@ -111,7 +112,14 @@ namespace NuGet {
 
             if (element != null) {
                 element.Remove();
-                SaveDocument(document);
+
+                // No more entries so remove the file
+                if (!document.Root.HasElements) {
+                    FileSystem.DeleteFile(StoreFilePath);
+                }
+                else {
+                    SaveDocument(document);
+                }
             }
         }
 
@@ -130,15 +138,7 @@ namespace NuGet {
         }
 
         private void SaveDocument(XDocument document) {
-            ILogger logger = FileSystem.Logger;
-            try {
-                // Don't log anything when saving the xml file
-                FileSystem.Logger = null;
-                FileSystem.AddFile(StoreFilePath, document.Save);
-            }
-            finally {
-                FileSystem.Logger = logger;
-            }
+            FileSystem.AddFile(StoreFilePath, document.Save);
         }
 
         private XDocument GetStoreDocument(bool createIfNotExists = false) {
@@ -146,7 +146,12 @@ namespace NuGet {
                 // If the file exists then open and return it
                 if (FileSystem.FileExists(StoreFilePath)) {
                     using (Stream stream = FileSystem.OpenFile(StoreFilePath)) {
-                        return XDocument.Load(stream);
+                        try {
+                            return XDocument.Load(stream);
+                        }
+                        catch (XmlException) {
+                            // There was an error reading the file, but don't throw as a result
+                        }
                     }
                 }
 
@@ -158,7 +163,7 @@ namespace NuGet {
 
                 return null;
             }
-            catch (XmlException e) {
+            catch (Exception e) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                                   NuGetResources.ErrorReadingFile,
