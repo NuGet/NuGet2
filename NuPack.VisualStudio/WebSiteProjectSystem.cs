@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio {
                 string name = Path.GetFileNameWithoutExtension(referencePath);
 
                 // Add a reference to the project
-                Project.Object.References.AddFromFile(GetAbsolutePath(referencePath));
+                Project.Object.References.AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }

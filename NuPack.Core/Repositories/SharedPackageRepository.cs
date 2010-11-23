@@ -12,7 +12,7 @@ namespace NuGet {
         private const string StoreFilePath = "repositories.config";
 
         public SharedPackageRepository(string path)
-            : base(path) {
+            : base(PathUtility.EnsureTrailingSlash(path)) {
         }
 
         public SharedPackageRepository(IPackagePathResolver resolver, IFileSystem fileSystem)
@@ -33,7 +33,8 @@ namespace NuGet {
         }
 
         protected virtual IPackageRepository CreateRepository(string path) {
-            string directory = FileSystem.GetFullPath(Path.GetDirectoryName(path));
+            string absolutePath = PathUtility.GetAbsolutePath(FileSystem.Root, path);
+            string directory = Path.GetDirectoryName(absolutePath);
             return new PackageReferenceRepository(new PhysicalFileSystem(directory), this);
         }
 

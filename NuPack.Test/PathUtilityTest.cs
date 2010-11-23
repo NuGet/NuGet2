@@ -7,7 +7,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void GetRelativePathAbsolutePaths() {
             // Act
-            string path = PathUtility.GetRelativePath(@"c:\foo\bar", @"c:\foo\bar\baz", p => true);
+            string path = PathUtility.GetRelativePath(@"c:\foo\bar\", @"c:\foo\bar\baz");
 
             // Assert
             Assert.AreEqual("baz", path);
@@ -16,7 +16,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void GetRelativePathDirectoryWithPeriods() {
             // Act
-            string path = PathUtility.GetRelativePath(@"c:\foo\MvcApplication1\MvcApplication1.Tests", @"c:\foo\MvcApplication1\packages\foo.dll", p => !p.EndsWith(".dll"));
+            string path = PathUtility.GetRelativePath(@"c:\foo\MvcApplication1\MvcApplication1.Tests\", @"c:\foo\MvcApplication1\packages\foo.dll");
 
             // Assert
             Assert.AreEqual(@"..\packages\foo.dll", path);
@@ -25,7 +25,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void GetRelativePathAbsolutePathAndShare() {
             // Act
-            string path = PathUtility.GetRelativePath(@"c:\foo\bar", @"\\baz", p => true);
+            string path = PathUtility.GetRelativePath(@"c:\foo\bar", @"\\baz");
 
             // Assert
             Assert.AreEqual(@"\\baz", path);
@@ -34,37 +34,28 @@ namespace NuGet.Test {
         [TestMethod]
         public void GetRelativePathShares() {
             // Act
-            string path = PathUtility.GetRelativePath(@"\\baz\a\b\c", @"\\baz\", p => true);
+            string path = PathUtility.GetRelativePath(@"\\baz\a\b\c\", @"\\baz\");
 
             // Assert
-            Assert.AreEqual(@"..\..\..", path);
+            Assert.AreEqual(@"..\..\..\", path);
         }
 
         [TestMethod]
         public void GetRelativePathFileNames() {
             // Act
-            string path = PathUtility.GetRelativePath(@"c:\a\y\x.dll", @"c:\a\b.dll", p => !Path.HasExtension(p));
+            string path = PathUtility.GetRelativePath(@"c:\a\y\x.dll", @"c:\a\b.dll");
 
             // Assert
-            Assert.AreEqual(@"..\..\b.dll", path);
+            Assert.AreEqual(@"..\b.dll", path);
         }
 
         [TestMethod]
         public void GetRelativePathUnrelatedAbsolutePaths() {
             // Act
-            string path = PathUtility.GetRelativePath(@"c:\foo", @"d:\bar", p => true);
+            string path = PathUtility.GetRelativePath(@"c:\foo", @"d:\bar");
 
             // Assert
             Assert.AreEqual(@"d:\bar", path);
-        }
-
-        [TestMethod]
-        public void GetRelativePathAbsoluteAndRelativePath() {
-            // Act
-            string path = PathUtility.GetRelativePath(@"c:\foo", @"bar", p => true);
-
-            // Assert
-            Assert.AreEqual(@"bar", path);
         }
     }
 }

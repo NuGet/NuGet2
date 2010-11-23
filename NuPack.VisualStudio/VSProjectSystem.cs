@@ -78,7 +78,7 @@ namespace NuGet.VisualStudio {
                 string name = Path.GetFileNameWithoutExtension(referencePath);
 
                 // Add a reference to the project
-                Project.Object.References.Add(GetAbsolutePath(referencePath));
+                Project.Object.References.Add(PathUtility.GetAbsolutePath(Root, referencePath));
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
@@ -177,15 +177,6 @@ namespace NuGet.VisualStudio {
 
         public virtual bool IsSupportedFile(string path) {
             return !(Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Normalizes a path relative to the root to an absolute path.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        protected string GetAbsolutePath(string path) {
-            return Path.GetFullPath(Path.Combine(Root, path));
         }
 
         private void EnsureCheckedOutIfExists(string path) {
