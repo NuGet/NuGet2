@@ -8,6 +8,10 @@ namespace NuGet {
         /// Returns path2 relative to path1
         /// </summary>
         public static string GetRelativePath(string path1, string path2) {
+            return GetRelativePath(path1, path2, Directory.Exists);
+        }
+
+        public static string GetRelativePath(string path1, string path2, Func<string, bool> isDirectory) {
             if (path1 == null) {
                 throw new ArgumentNullException("path1");
             }
@@ -33,7 +37,12 @@ namespace NuGet {
 
             var builder = new StringBuilder();
             for (int i = index; i < path1Segments.Length; i++) {
-                if (!Path.HasExtension(path1Segments[i])) {
+                // REVIEW: Perf?
+                // Get the full path
+                string fullPath = String.Join(@"\", path1Segments, 0, index + 1);
+
+                // If it's a directory then append ..\
+                if (isDirectory(fullPath)) {
                     builder.Append(@"..\");
                 }
             }
@@ -43,8 +52,7 @@ namespace NuGet {
                 builder.Append(Path.DirectorySeparatorChar);
             }
 
-            return builder.ToString().Trim(Path.DirectorySeparatorChar);
-
+            return builder.ToString().TrimEnd(Path.DirectorySeparatorChar);
         }
     }
 }

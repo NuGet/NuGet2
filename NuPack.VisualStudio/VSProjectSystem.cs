@@ -82,8 +82,8 @@ namespace NuGet.VisualStudio {
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
-            catch {
-
+            catch (Exception e) {
+                Logger.Log(MessageLevel.Warning, e.Message);
             }
         }
 
@@ -100,7 +100,8 @@ namespace NuGet.VisualStudio {
                     Logger.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
                 }
             }
-            catch {
+            catch (Exception e) {
+                Logger.Log(MessageLevel.Warning, e.Message);
             }
         }
 
@@ -131,8 +132,8 @@ namespace NuGet.VisualStudio {
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
             }
-            catch {
-
+            catch (Exception e) {
+                Logger.Log(MessageLevel.Warning, e.Message);
             }
         }
 
@@ -168,7 +169,7 @@ namespace NuGet.VisualStudio {
                     return property.Value;
                 }
             }
-            catch(ArgumentException) {
+            catch (ArgumentException) {
                 // If the property doesn't exist this will throw an argument exception
             }
             return null;
