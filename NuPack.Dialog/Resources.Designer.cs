@@ -205,6 +205,51 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ascending.
+        /// </summary>
+        public static string Dialog_SortAscending {
+            get {
+                return ResourceManager.GetString("Dialog_SortAscending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Descending.
+        /// </summary>
+        public static string Dialog_SortDescending {
+            get {
+                return ResourceManager.GetString("Dialog_SortDescending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highest Rated.
+        /// </summary>
+        public static string Dialog_SortOption_HighestRated {
+            get {
+                return ResourceManager.GetString("Dialog_SortOption_HighestRated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Most Downloads.
+        /// </summary>
+        public static string Dialog_SortOption_MostDownloads {
+            get {
+                return ResourceManager.GetString("Dialog_SortOption_MostDownloads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Dialog_SortOption_Name {
+            get {
+                return ResourceManager.GetString("Dialog_SortOption_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Library Package Reference.
         /// </summary>
         public static string Dialog_Title {

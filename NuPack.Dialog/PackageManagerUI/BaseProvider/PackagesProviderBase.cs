@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
-using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -18,6 +19,7 @@ namespace NuGet.Dialog.Providers {
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
+        private IList<IVsSortDescriptor> _sortDescriptors;
 
         protected PackagesProviderBase(IProjectManager projectManager, ResourceDictionary resources) {
 
@@ -44,15 +46,20 @@ namespace NuGet.Dialog.Providers {
             private set;
         }
 
-        public PackagesTreeNodeBase SelectedNode { 
-            get; 
-            set; 
+        public PackagesTreeNodeBase SelectedNode {
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets the root node of the tree
         /// </summary>
         protected IVsExtensionsTreeNode RootNode {
+            get;
+            set;
+        }
+
+        public PackageSortDescriptor CurrentSort {
             get;
             set;
         }
@@ -84,6 +91,30 @@ namespace NuGet.Dialog.Providers {
                 }
                 return _detailViewDataTemplate;
             }
+        }
+
+        // hook for unit test
+        internal Action ExecuteCompletedCallback {
+            get;
+            set;
+        }
+
+        public IList<IVsSortDescriptor> SortDescriptors {
+            get {
+                if (_sortDescriptors == null) {
+                    _sortDescriptors = CreateSortDescriptors();
+                }
+                return _sortDescriptors;
+            }
+        }
+
+        protected virtual IList<IVsSortDescriptor> CreateSortDescriptors() {
+            return new List<IVsSortDescriptor> {
+                        new PackageSortDescriptor(Resources.Dialog_SortOption_HighestRated, "Rating", ListSortDirection.Descending),
+                        new PackageSortDescriptor(Resources.Dialog_SortOption_MostDownloads, "DownloadCount", ListSortDirection.Descending),
+                        new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortAscending), "Id"),
+                        new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortDescending), "Id", ListSortDirection.Descending)
+                  };
         }
 
         public override string ToString() {
@@ -196,8 +227,5 @@ namespace NuGet.Dialog.Providers {
 
         protected virtual void OnExecuteCompleted(PackageItem item) {
         }
-
-        // hook for unit test
-        internal Action ExecuteCompletedCallback { get; set; }
     }
 }

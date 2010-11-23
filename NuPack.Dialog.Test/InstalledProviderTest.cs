@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -29,6 +31,22 @@ namespace NuGet.Dialog.Test {
 
             // Act & Assert
             Assert.IsTrue(provider.RefreshOnNodeSelection);
+        }
+
+        [TestMethod]
+        public void VerifySortDescriptors() {
+            // Arrange
+            var provider = CreateInstalledProvider();
+
+            // Act
+            var descriptors = provider.SortDescriptors.Cast<PackageSortDescriptor>().ToList();
+
+            // Assert
+            Assert.AreEqual(2, descriptors.Count);
+            Assert.AreEqual("Id", descriptors[0].Name);
+            Assert.AreEqual(ListSortDirection.Ascending, descriptors[0].Direction);
+            Assert.AreEqual("Id", descriptors[1].Name);
+            Assert.AreEqual(ListSortDirection.Descending, descriptors[1].Direction);
         }
 
         [TestMethod]

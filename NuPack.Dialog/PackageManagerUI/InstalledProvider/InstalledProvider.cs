@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -27,6 +31,14 @@ namespace NuGet.Dialog.Providers {
             get {
                 return true;
             }
+        }
+
+
+        protected override IList<IVsSortDescriptor> CreateSortDescriptors() {
+            return new List<IVsSortDescriptor> {
+                        new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortAscending), "Id"),
+                        new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortDescending), "Id", ListSortDirection.Descending)
+                  };
         }
 
         protected override void FillRootNodes() {

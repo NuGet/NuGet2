@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
 using System.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -139,55 +139,74 @@ namespace NuGet.Dialog.Test {
 
         [TestMethod]
         public void WhenConstructedLoadPageOneAutomatically() {
-            int numberOfPackages = 10;
-
-            ManualResetEventSlim resetEvent = new ManualResetEventSlim(false);
-
-            // Arrange
-            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages);
-
-            node.QueryExecutionCallback = delegate {
+            TreeNodeActionTest(node => {
+                // Act
+                // Simply accessing the Extentions property will trigger loadding the first page
+                IList<IVsExtension> extentions = node.Extensions;
+            },
+            node => {
                 // Assert
                 Assert.AreEqual(1, node.TotalPages);
                 Assert.AreEqual(10, node.Extensions.Count);
-
-                resetEvent.Set();
-            };
-
-            // Act
-            // simply accessing the Extentions property will trigger loadding the first page
-            IList<IVsExtension> extentions = node.Extensions;
-            resetEvent.Wait();
+            });
         }
 
         [TestMethod]
         public void LoadPageMethodLoadTheCorrectExtensions() {
-            // Arrange
-            ManualResetEventSlim resetEvent = new ManualResetEventSlim(false);
+            TreeNodeActionTest(node => node.LoadPage(2),
+                               node => {
+                                   // Assert
+                                   Assert.AreEqual(5, node.TotalPages);
+                                   Assert.AreEqual(2, node.CurrentPage);
+                                   Assert.AreEqual(2, node.Extensions.Count);
 
-            int numberOfPackages = 23;
-            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages);
+                                   Assert.AreEqual("A7", node.Extensions[0].Name);
+                                   Assert.AreEqual("A6", node.Extensions[1].Name);
+                               },
+                               pageSize: 2,
+                               numberOfPackages: 10);
+        }
+
+        [TestMethod]
+        public void LoadPageMethodWithCustomSortLoadsExtensionsInTheCorrectOrder() {
+            // Arrange
+            var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Descending);
+
+            TreeNodeActionTest(node => node.SortSelectionChanged(idSortDescriptor),
+                               node => {
+                                   // Assert
+                                   Assert.AreEqual(1, node.TotalPages);
+                                   Assert.AreEqual(1, node.CurrentPage);
+                                   Assert.AreEqual(5, node.Extensions.Count);
+
+                                   Assert.AreEqual("A4", node.Extensions[0].Name);
+                                   Assert.AreEqual("A3", node.Extensions[1].Name);
+                                   Assert.AreEqual("A2", node.Extensions[2].Name);
+                                   Assert.AreEqual("A1", node.Extensions[3].Name);
+                                   Assert.AreEqual("A0", node.Extensions[4].Name);
+                               },
+                               numberOfPackages: 5);
+        }
+
+        private static void TreeNodeActionTest(Action<PackagesTreeNodeBase> treeNodeAction,
+                                               Action<PackagesTreeNodeBase> callback,
+                                               int? pageSize = null,
+                                               int? numberOfPackages = null) {
+            // Arrange
+            const int defaultNumberOfPackages = 10;
+            ManualResetEventSlim resetEvent = new ManualResetEventSlim(initialState: false);
+            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages ?? defaultNumberOfPackages);
+            node.PageSize = pageSize ?? node.PageSize;
+
             Exception exception = null;
 
             node.QueryExecutionCallback = delegate {
                 try {
-                    // Assert
-                    Assert.AreEqual(3, node.TotalPages);
-                    Assert.AreEqual(2, node.CurrentPage);
-                    Assert.AreEqual(10, node.Extensions.Count);
-
-                    // the loaded extensions should be from 10 to 19 (because they are on page 2)
-                    IList<IVsExtension> extentions = node.Extensions;
-                    var expected = Enumerable.Range(0, numberOfPackages)
-                                             .OrderByDescending(i => i)
-                                             .Skip(10)
-                                             .Select(i => "A" + i)
-                                             .ToArray();
-                    for (int i = 0; i < 10; i++) {
-                        Assert.AreEqual(expected[i], extentions[i].Name);
-                    }
+                    // Callback for assertion
+                    callback(node);
                 }
                 catch (Exception e) {
+                    // There was an exception when running the callback async, so record the exception
                     exception = e;
                 }
                 finally {
@@ -197,9 +216,26 @@ namespace NuGet.Dialog.Test {
             };
 
             // Act
-            node.LoadPage(2);
+            treeNodeAction(node);
+
+            // Wait for the event to get signaled
             resetEvent.Wait();
-            Assert.IsNull(exception);
+
+            // Make sure there was no exception
+            Assert.IsNull(exception, exception != null ? exception.Message : String.Empty);
+        }
+
+        [TestMethod]
+        public void SortSelectionChangedReturnsFalseIfCurrentSortDescriptorIsNull() {
+            // Arrange
+            int numberOfPackages = 10;
+            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages);
+
+            // Act
+            bool result = node.SortSelectionChanged(null);
+
+            // Assert
+            Assert.IsFalse(result);
         }
 
         [TestMethod]

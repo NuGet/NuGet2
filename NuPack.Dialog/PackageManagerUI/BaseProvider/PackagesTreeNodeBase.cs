@@ -9,10 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Internal.Web.Utils;
 using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuGet.Dialog.Extensions;
 
 namespace NuGet.Dialog.Providers {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
+    internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsSortDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
 
         // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
@@ -25,6 +26,7 @@ namespace NuGet.Dialog.Providers {
         private bool _isSelected;
         private bool _activeQueryStateCancelled;
         private bool _loadingInProgress;
+
         private CancellationTokenSource _currentCancellationSource;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -35,6 +37,7 @@ namespace NuGet.Dialog.Providers {
 
             Parent = parent;
             Provider = provider;
+            PageSize = ItemsPerPage;
         }
 
         protected PackagesProviderBase Provider {
@@ -151,6 +154,17 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        // this is for unit testing
+        internal Action QueryExecutionCallback {
+            get;
+            set;
+        }
+
+        internal int PageSize {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Refresh the list of packages belong to this node
         /// </summary>
@@ -253,8 +267,9 @@ namespace NuGet.Dialog.Providers {
 
             token.ThrowIfCancellationRequested();
 
-            IQueryable<IPackage> orderedQuery = query.OrderByDescending(p => p.Rating).ThenBy(p => p.Id);
-            IQueryable<IPackage> pageQuery = orderedQuery.Skip((pageNumber - 1) * ItemsPerPage).Take(ItemsPerPage);
+            // Apply the ordering then sort by id
+            IQueryable<IPackage> orderedQuery = ApplyOrdering(query).ThenBy(p => p.Id);
+            IQueryable<IPackage> pageQuery = orderedQuery.Skip((pageNumber - 1) * PageSize).Take(PageSize);
 
             // Execute the page query
             IEnumerable<IPackage> packages = pageQuery.ToList();
@@ -262,6 +277,33 @@ namespace NuGet.Dialog.Providers {
             token.ThrowIfCancellationRequested();
 
             return new LoadPageResult(packages, pageNumber, totalCount);
+        }
+
+        private IOrderedQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query) {
+            // If the default sort is null then fall back to rating
+            if (Provider.CurrentSort == null) {
+                return query.OrderByDescending(p => p.Rating);
+            }
+
+            // Order by the current descriptor
+            return query.SortBy<IPackage>(Provider.CurrentSort);
+        }
+
+        public IList<IVsSortDescriptor> GetSortDescriptors() {
+            // Get the sort descriptor from the provider
+            return Provider.SortDescriptors;
+        }
+
+        public bool SortSelectionChanged(IVsSortDescriptor selectedDescriptor) {
+            Provider.CurrentSort = selectedDescriptor as PackageSortDescriptor;
+
+            if (Provider.CurrentSort != null) {
+                // Reload the first page since the sort order changed
+                LoadPage(1);
+                return true;
+            }
+
+            return false;
         }
 
         private void QueryExecutionCompleted(Task<LoadPageResult> task) {
@@ -298,7 +340,7 @@ namespace NuGet.Dialog.Providers {
                     _extensions[0].IsSelected = true;
                 }
 
-                int totalPages = (result.TotalCount + ItemsPerPage - 1) / ItemsPerPage;
+                int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
                 int pageNumber = result.PageNumber;
 
                 TotalPages = Math.Max(1, totalPages);
@@ -311,9 +353,6 @@ namespace NuGet.Dialog.Providers {
                 QueryExecutionCallback();
             }
         }
-
-        // this is for unit testing
-        internal Action QueryExecutionCallback { get; set; }
 
         protected void OnNotifyPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {

@@ -165,6 +165,21 @@
   <data name="Dialog_Settings" xml:space="preserve">
     <value>_Settings</value>
   </data>
+  <data name="Dialog_SortAscending" xml:space="preserve">
+    <value>Ascending</value>
+  </data>
+  <data name="Dialog_SortDescending" xml:space="preserve">
+    <value>Descending</value>
+  </data>
+  <data name="Dialog_SortOption_HighestRated" xml:space="preserve">
+    <value>Highest Rated</value>
+  </data>
+  <data name="Dialog_SortOption_MostDownloads" xml:space="preserve">
+    <value>Most Downloads</value>
+  </data>
+  <data name="Dialog_SortOption_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
   <data name="Dialog_Title" xml:space="preserve">
     <value>Add Library Package Reference</value>
   </data>
