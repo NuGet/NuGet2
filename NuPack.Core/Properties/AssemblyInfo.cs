@@ -11,5 +11,5 @@ using System.Security;
 [assembly: InternalsVisibleTo("NuGet.Test.Utility")]
 
 #if !CODE_COVERAGE
-[assembly: SecurityTransparent]
+//[assembly: SecurityTransparent]
 #endif
