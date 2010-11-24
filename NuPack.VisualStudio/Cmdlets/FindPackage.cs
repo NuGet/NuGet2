@@ -8,6 +8,8 @@ namespace NuGet.VisualStudio.Cmdlets {
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     public class FindPackage : GetPackageCmdlet {
 
+        private const int MaxReturnedPackages = 30;
+
         public FindPackage()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
@@ -29,7 +31,12 @@ namespace NuGet.VisualStudio.Cmdlets {
             if (!String.IsNullOrEmpty(Filter)) {
                 packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
-            return packages.OrderBy(p => p.Id);
+
+            packages = packages.OrderBy(p => p.Id);
+
+            // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
+            // typing InstallPackage TAB would download the entire feed.
+            return packages.Take(MaxReturnedPackages);
         }
 
         protected override IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
