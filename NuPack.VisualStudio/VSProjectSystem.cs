@@ -115,7 +115,6 @@ namespace NuGet.VisualStudio {
             return Path.GetDirectoryName(path).Equals(BinDir, StringComparison.OrdinalIgnoreCase);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         protected virtual void AddFileToProject(string path) {
             if (ExcludeFile(path)) {
                 return;
@@ -124,17 +123,12 @@ namespace NuGet.VisualStudio {
             // Get the project items for the folder path
             string folderPath = Path.GetDirectoryName(path);
             ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
+            
+            // Add the file to the project
+            string fullPath = GetFullPath(path);
+            container.AddFromFileCopy(fullPath);
 
-            try {
-                // Add the file to the project
-                string fullPath = GetFullPath(path);
-                container.AddFromFileCopy(fullPath);
-
-                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
-            }
-            catch (Exception e) {
-                Logger.Log(MessageLevel.Warning, e.Message);
-            }
+            Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
         }
 
         public override IEnumerable<string> GetFiles(string path, string filter) {

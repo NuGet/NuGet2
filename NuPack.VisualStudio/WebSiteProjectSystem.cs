@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
+using System;
 
 namespace NuGet.VisualStudio {
     internal class WebSiteProjectSystem : WebProjectSystem {
@@ -25,8 +26,8 @@ namespace NuGet.VisualStudio {
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
-            catch {
-
+            catch (Exception e) {
+                Logger.Log(MessageLevel.Warning, e.Message);
             }
         }
 

@@ -6,10 +6,10 @@ namespace NuGet {
     public class PathUtility {
         public static string EnsureTrailingSlash(string path) {
             if (path == null) {
-                throw new ArgumentException("path");
+                throw new ArgumentNullException("path");
             }
             int length = path.Length;
-            if ((length != 0) && (path[length - 1] == Path.DirectorySeparatorChar)) {
+            if ((length != 0) && (path[length - 1] != Path.DirectorySeparatorChar)) {
                 return path + Path.DirectorySeparatorChar;
             }
             return path;
@@ -30,7 +30,7 @@ namespace NuGet {
             Uri source = new Uri(path1);
             Uri target = new Uri(path2);
 
-            return source.MakeRelativeUri(target).OriginalString.Replace('/', Path.DirectorySeparatorChar);
+            return UriUtility.GetPath(source.MakeRelativeUri(target));
         }
 
         public static string GetAbsolutePath(string basePath, string relativePath) {

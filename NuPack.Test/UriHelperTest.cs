@@ -14,7 +14,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void GetPathFromUriGetPathFromUri() {
+        public void GetPathFromUri() {
             // Arrange
             Uri uri = new Uri("/a/b.txt", UriKind.Relative);
 

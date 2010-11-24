@@ -5,6 +5,54 @@ namespace NuGet.Test {
     [TestClass]
     public class PathUtilityTest {
         [TestMethod]
+        public void EnsureTrailingSlashThrowsIfPathIsNull() {
+            // Arrange
+            string path = null;
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgNull(() => PathUtility.EnsureTrailingSlash(path), "path");
+        }
+
+        [TestMethod]
+        public void EnsureTrailingSlashReturnsOriginalPathIfEmpty() {
+            // Arrange
+            string path = "";
+
+            // Act
+            string output = PathUtility.EnsureTrailingSlash(path);
+
+            // Assert
+            Assert.AreEqual(path, output);
+        }
+
+        [TestMethod]
+        public void EnsureTrailingSlashReturnsOriginalStringIfPathTerminatesInSlash() {
+            // Arrange
+            string path = @"foo\bar\";
+
+            // Act
+            string output = PathUtility.EnsureTrailingSlash(path);
+
+            // Assert
+            Assert.AreEqual(path, output);
+        }
+
+        [TestMethod]
+        public void EnsureTrailingSlashAppendsSlashIfPathDoesNotTerminateInSlash() {
+            // Arrange
+            string path1 = @"foo\bar";
+            string path2 = "foo";
+
+            // Act
+            string output1 = PathUtility.EnsureTrailingSlash(path1);
+            string output2 = PathUtility.EnsureTrailingSlash(path2);
+
+            // Assert
+            Assert.AreEqual(path1 + Path.DirectorySeparatorChar, output1);
+            Assert.AreEqual(path2 + Path.DirectorySeparatorChar, output2);
+        }
+
+        [TestMethod]
         public void GetRelativePathAbsolutePaths() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\bar\", @"c:\foo\bar\baz");
