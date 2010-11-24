@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 
 namespace NuGet {
     internal static class PathResolver {
@@ -10,7 +11,7 @@ namespace NuGet {
             if (pathFromBase.Contains("*")) {
                 return GetPathSearchFilter(pathFromBase);
             }
-            else { 
+            else {
                 pathFromBase = Path.GetFullPath(pathFromBase.TrimStart(Path.DirectorySeparatorChar));
                 string directory = Path.GetDirectoryName(pathFromBase);
                 string searchFilter = Path.GetFileName(pathFromBase);
@@ -36,7 +37,7 @@ namespace NuGet {
                 }
                 string searchPattern = Path.GetFileName(path);
 
-                return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern), 
+                return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern),
                     SearchOption.TopDirectoryOnly);
             }
         }
@@ -47,17 +48,28 @@ namespace NuGet {
         /// For all other paths, the path is resolved as the first path portion that does not contain a wildcard character
         /// </summary>
         public static string ResolvePackagePath(string searchString, string basePath, string actualPath, string targetPath) {
+            Debug.Assert(searchString != null);
             if (String.IsNullOrEmpty(basePath)) {
                 basePath = ".";
             }
             basePath = Path.GetFullPath(basePath);
             actualPath = Path.GetFullPath(actualPath);
-            string packagePath = null;
+            targetPath = targetPath ?? String.Empty;
+            string targetExtension = Path.GetExtension(targetPath);
+            string searchExtension = Path.GetExtension(searchString);
 
+            string packagePath = null;
             int searchWildCard = searchString.IndexOf("*", StringComparison.OrdinalIgnoreCase);
-            // If the search path in the manifest does not contain a wildcard character 
-            // or the wildcard is at the start of search path, do not truncate the search path from the actualPath
+            
+            if ((searchWildCard == -1) && targetExtension.Equals(searchExtension, StringComparison.OrdinalIgnoreCase) || IsTargetDirectory(targetPath)) {
+                // Content file copy and rename
+                // <file src="ie\css\style.css" target="Content\css\ie.css" />
+                return targetPath;
+            }
+
             if (searchWildCard > 0) {
+                // If the search path in the manifest does not contain a wildcard character 
+                // or the wildcard is at the start of search path, do not truncate the search path from the actualPath
                 searchString = searchString.Substring(0, searchWildCard - 1);
                 int index = actualPath.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
                 packagePath = actualPath.Substring(index + searchString.Length).TrimStart(Path.DirectorySeparatorChar);
@@ -65,10 +77,19 @@ namespace NuGet {
             else if (actualPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase)) {
                 packagePath = actualPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
             }
-            else{
+            else {
                 packagePath = Path.GetFileName(actualPath);
             }
-            return Path.Combine(targetPath ?? String.Empty, packagePath);
+            
+            return Path.Combine(targetPath, packagePath);
+        }
+
+        /// <summary>
+        /// Hierustic to determine if the path specified in the target is a directory
+        /// </summary>
+        /// <returns>true if the targetPath does not contain an extension</returns>
+        private static bool IsTargetDirectory(string targetPath) {
+            return Path.GetExtension(targetPath).Length == 0;
         }
 
         private static string NormalizeSearchDirectory(string directory) {
@@ -79,6 +100,4 @@ namespace NuGet {
             return String.IsNullOrEmpty(filter) ? "*" : filter;
         }
     }
-
-
 }

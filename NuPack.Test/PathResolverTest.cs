@@ -367,6 +367,20 @@ namespace NuGet.Test {
             Assert.AreEqual(@"lib\sl4\pack.dll", result);
         }
 
+        [TestMethod]
+        public void PathResolverUsesTargetPathWhenFileExtensionMatchesAndSearchPathDoesNotContainWildcard() {
+            // Arrange
+            var path = @"root\dir\subdir\pack.dll";
+            var basePath = @"root";
+            var targetPath = @"lib\sl4\bar.dll";
+
+            // Act
+            var result = PathResolver.ResolvePackagePath(@"dir\subdir\foo.dll", basePath, path, targetPath);
+
+            // Assert
+            Assert.AreEqual(targetPath, result);
+        }
+
         private void AssertEqual(PathSearchFilter expected, PathSearchFilter actual) {
             Assert.AreEqual(expected.SearchDirectory, actual.SearchDirectory);
             Assert.AreEqual(expected.SearchOption, actual.SearchOption);
