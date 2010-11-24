@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet {
-    public class PathUtility {
+    public static class PathUtility {
         public static string EnsureTrailingSlash(string path) {
             if (path == null) {
                 throw new ArgumentNullException("path");
@@ -42,7 +43,7 @@ namespace NuGet {
                 throw new ArgumentNullException("relativePath");
             }
 
-            Uri resultUri = new Uri(new Uri(basePath), relativePath);
+            Uri resultUri = new Uri(new Uri(basePath), new Uri(relativePath, UriKind.Relative));
             return resultUri.LocalPath;
         }
     }

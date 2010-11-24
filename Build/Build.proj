@@ -34,10 +34,16 @@
             <ReplaceWith>$(BUILD_NUMBER)</ReplaceWith>
         </RegexTransform>
     </ItemGroup>
-
-    <Target Name="Go" DependsOnTargets="UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
+    
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
     </Target>
     
+    <Target Name="CheckFxCop">
+        <Error 
+        Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') " 
+        Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll. Cannot proceed" /> 
+    </Target>
+
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
         <RegexTransform Items="@(RegexTransform)" />
     </Target>

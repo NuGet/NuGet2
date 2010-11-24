@@ -105,5 +105,19 @@ namespace NuGet.Test {
             // Assert
             Assert.AreEqual(@"d:\bar", path);
         }
+
+        [TestMethod]
+        public void GetAbsolutePathComplementsGetRelativePath() {
+            // Arrange
+            string basePath = @"c:\foo\bar\baz";
+            string targetPath = @"c:\foo";
+            string relativePath = PathUtility.GetRelativePath(basePath, targetPath);
+
+            // Act
+            string absolutePath = PathUtility.GetAbsolutePath(basePath, relativePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, absolutePath);
+        }
     }
 }
