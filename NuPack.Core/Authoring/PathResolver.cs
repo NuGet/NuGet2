@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 
 namespace NuGet {
     internal static class PathResolver {
@@ -54,20 +54,25 @@ namespace NuGet {
             }
             basePath = Path.GetFullPath(basePath);
             actualPath = Path.GetFullPath(actualPath);
-            targetPath = targetPath ?? String.Empty;
-            string targetExtension = Path.GetExtension(targetPath);
-            string searchExtension = Path.GetExtension(searchString);
+            string actualFileName = Path.GetFileName(actualPath);
 
             string packagePath = null;
             int searchWildCard = searchString.IndexOf("*", StringComparison.OrdinalIgnoreCase);
-            
-            if ((searchWildCard == -1) && targetExtension.Equals(searchExtension, StringComparison.OrdinalIgnoreCase) || IsTargetDirectory(targetPath)) {
-                // Content file copy and rename
-                // <file src="ie\css\style.css" target="Content\css\ie.css" />
-                return targetPath;
-            }
 
-            if (searchWildCard > 0) {
+            if ((searchWildCard == -1) && actualFileName.Equals(Path.GetFileName(searchString), StringComparison.OrdinalIgnoreCase)) {
+                // If the search path looks like an absolute path to a file, then 
+                // (a) If the target path shares the same extension, copy it
+                // e.g. <file src="ie\css\style.css" target="Content\css\ie.css" /> --> Content\css\ie.css
+                // (b) Else the file would be at the root of the target.
+                // e.g. <file src="foo\bar\baz.dll" target="lib" /> --> lib\baz.dll
+                if (Path.GetExtension(searchString).Equals(Path.GetExtension(targetPath), StringComparison.OrdinalIgnoreCase)) {
+                    return targetPath;
+                }
+                else {
+                    packagePath = actualFileName;
+                }
+            }
+            else if (searchWildCard > 0) {
                 // If the search path in the manifest does not contain a wildcard character 
                 // or the wildcard is at the start of search path, do not truncate the search path from the actualPath
                 searchString = searchString.Substring(0, searchWildCard - 1);
@@ -80,16 +85,8 @@ namespace NuGet {
             else {
                 packagePath = Path.GetFileName(actualPath);
             }
-            
-            return Path.Combine(targetPath, packagePath);
-        }
 
-        /// <summary>
-        /// Hierustic to determine if the path specified in the target is a directory
-        /// </summary>
-        /// <returns>true if the targetPath does not contain an extension</returns>
-        private static bool IsTargetDirectory(string targetPath) {
-            return Path.GetExtension(targetPath).Length == 0;
+            return Path.Combine(targetPath ?? String.Empty, packagePath);
         }
 
         private static string NormalizeSearchDirectory(string directory) {

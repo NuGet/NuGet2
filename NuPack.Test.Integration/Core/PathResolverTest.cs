@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
 
 namespace NuGet.Test.Integration.PathResolver {
 
@@ -16,7 +15,7 @@ namespace NuGet.Test.Integration.PathResolver {
         public TestContext TestContext { get; set; }
 
         /// <summary>
-        /// Foo.dll in the root. target="lib"
+        /// Foo.dll at basePath. target="lib"
         /// Expected: \lib\foo.dll
         /// </summary>
         [TestMethod]
@@ -38,15 +37,15 @@ namespace NuGet.Test.Integration.PathResolver {
         /// <summary>
         /// Single assembly in deep path
         /// Foo.dll in bar\baz\. target="lib"
-        /// Expected \lib\bar\baz\foo.dll
+        /// Expected \lib\foo.dll
         /// </summary>
         [TestMethod]
         public void SingleAssemblyInDeepPathTest() {
             // Arrange
             string search = @"bar\baz\foo.dll";
             string target = "lib";
-            string root = CreateFileSystem(new Dir("bar", 
-                                            new Dir("baz", 
+            string root = CreateFileSystem(new Dir("bar",
+                                            new Dir("baz",
                                                 new File("foo.dll"))));
             var manifest = GetManifest(search, target);
 
@@ -55,7 +54,7 @@ namespace NuGet.Test.Integration.PathResolver {
 
             // Assert
             Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.First().Path, @"lib\bar\baz\foo.dll");
+            Assert.AreEqual(packageBuilder.Files.First().Path, @"lib\foo.dll");
         }
 
         /// <summary>
@@ -119,7 +118,7 @@ namespace NuGet.Test.Integration.PathResolver {
             string target = @"content\css\mobile";
             Stream manifest = GetManifest(search, target);
             string root = CreateFileSystem(new Dir("css",
-                                            new Dir("mobile", 
+                                            new Dir("mobile",
                                                 new File("style1.css"), new File("style2.css"))));
 
             // Act
@@ -144,9 +143,9 @@ namespace NuGet.Test.Integration.PathResolver {
             string target = @"content\css";
             Stream manifest = GetManifest(search, target);
             string root = CreateFileSystem(new Dir("css",
-                                            new Dir("mobile", 
-                                                new File("style.css"), 
-                                                new Dir("wp7", 
+                                            new Dir("mobile",
+                                                new File("style.css"),
+                                                new Dir("wp7",
                                                     new File("style.css"))),
                                             new Dir("browser",
                                                 new File("style.css"))));
@@ -173,7 +172,7 @@ namespace NuGet.Test.Integration.PathResolver {
             string search = @"css\cool\style.css";
             string target = @"content";
             Stream manifest = GetManifest(search, target);
-            string root = CreateFileSystem(new Dir("css", 
+            string root = CreateFileSystem(new Dir("css",
                                             new Dir("cool",
                                                 new File("style.css"))));
 
@@ -183,11 +182,102 @@ namespace NuGet.Test.Integration.PathResolver {
             // Assert
             Assert.AreEqual(packageBuilder.Files.Count, 1);
             Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\style.css");
-            Assert.AreEqual(packageBuilder.Files.ElementAt(1).Path, @"content\css\mobile\style.css");
-            Assert.AreEqual(packageBuilder.Files.ElementAt(2).Path, @"content\css\mobile\wp7\style.css");
         }
 
+        /// <summary>
+        /// Source: images\Neatpic.png
+        /// Search: images\Neatpic.png
+        /// Target: Content\images\foo.bar
+        /// Expected: \Content\images\foo.bar\Neatpick.png
+        /// </summary>
+        [TestMethod]
+        public void ContentFilesCopiedToFolderWithDotInNameTest() {
+            // Arrange
+            string search = @"images\neatpic.png";
+            string target = @"content\images\foo.bar";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("images",
+                                            new File("neatpic.png")));
 
+            // Act
+            var packageBuilder = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(packageBuilder.Files.Count, 1);
+            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\images\foo.bar\neatpic.png");
+        }
+
+        /// <summary>
+        /// Source: css\cool\style.css
+        /// Search: css\cool\style.css
+        /// Target: Content\css\cool
+        /// Expected: Content\css\cool\style.css
+        /// </summary>
+        [TestMethod]
+        public void ContentFileWithDeepPathAndDeepTargetTest() {
+            // Arrange
+            string search = @"css\cool\style.css";
+            string target = @"content\css\cool";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("css",
+                                            new Dir("cool",
+                                                new File("style.css"))));
+
+            // Act
+            var packageBuilder = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(packageBuilder.Files.Count, 1);
+            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\cool\style.css");
+        }
+
+        /// <summary>
+        /// Source: css\cool\style.css
+        /// Search: css\cool\style.css
+        /// Target: Content\css\cool\style.css
+        /// Expected: Content\css\cool\style.css
+        /// </summary>
+        [TestMethod]
+        public void ContentFileWithDeepPathAndDeepTargetWithFileNameTest() {
+            // Arrange
+            string search = @"css\cool\style.css";
+            string target = @"content\css\cool\style.css";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("css",
+                                            new Dir("cool",
+                                                new File("style.css"))));
+
+            // Act
+            var packageBuilder = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(packageBuilder.Files.Count, 1);
+            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\cool\style.css");
+        }
+
+        /// <summary>
+        /// Source: ie\css\style.css
+        /// Search: ie\css\style.css
+        /// Target: Content\css\ie.css
+        /// Expected: Content\css\cool\style.css
+        /// </summary>
+        [TestMethod]
+        public void ContentFileCopyAndRename() {
+            // Arrange
+            string search = @"ie\css\style.css";
+            string target = @"content\css\ie.css";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("ie",
+                                            new Dir("css",
+                                                new File("style.css"))));
+
+            // Act
+            var packageBuilder = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(packageBuilder.Files.Count, 1);
+            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\ie.css");
+        }
 
         private Stream GetManifest(string search, string target) {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -238,12 +328,11 @@ namespace NuGet.Test.Integration.PathResolver {
             }
 
             public override void Create() {
-                System.IO.Directory.CreateDirectory(GetFullPath());
+                Directory.CreateDirectory(GetFullPath());
                 foreach (var f in _files) {
                     f.Create();
                 }
             }
-
         }
     }
 }

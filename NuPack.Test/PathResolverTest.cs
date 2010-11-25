@@ -370,7 +370,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void PathResolverUsesTargetPathWhenFileExtensionMatchesAndSearchPathDoesNotContainWildcard() {
             // Arrange
-            var path = @"root\dir\subdir\pack.dll";
+            var path = @"root\dir\subdir\foo.dll";
             var basePath = @"root";
             var targetPath = @"lib\sl4\bar.dll";
 

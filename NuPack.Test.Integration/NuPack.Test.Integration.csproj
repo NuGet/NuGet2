@@ -56,7 +56,7 @@
     <Compile Include="CommandRunner.cs" />
     <Compile Include="NuPackCommandLine\NuPackCommandLineTest.cs" />
     <Compile Include="NuPackCommandLine\NuSpecFileContext.cs" />
-    <Compile Include="PathResolver\PathResolverTest.cs" />
+    <Compile Include="Core\PathResolverTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
