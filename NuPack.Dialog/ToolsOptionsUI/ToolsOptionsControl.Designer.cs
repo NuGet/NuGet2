@@ -121,15 +121,15 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.NewPackageNameLabel);
+            this.Controls.Add(this.NewPackageName);
+            this.Controls.Add(this.NewPackageSourceLabel);
+            this.Controls.Add(this.NewPackageSource);
+            this.Controls.Add(this.addButton);
+            this.Controls.Add(this.HeaderLabel);
             this.Controls.Add(this.PackageSourcesListBox);
             this.Controls.Add(this.MoveDownButton);
             this.Controls.Add(this.MoveUpButton);
-            this.Controls.Add(this.HeaderLabel);
-            this.Controls.Add(this.NewPackageName);
-            this.Controls.Add(this.NewPackageNameLabel);
-            this.Controls.Add(this.NewPackageSource);
-            this.Controls.Add(this.NewPackageSourceLabel);
-            this.Controls.Add(this.addButton);
             this.Controls.Add(this.removeButton);
             this.Name = "ToolsOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);

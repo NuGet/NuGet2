@@ -133,7 +133,7 @@
     <value>138, 13</value>
   </data>
   <data name="HeaderLabel.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+    <value>5</value>
   </data>
   <data name="HeaderLabel.Text" xml:space="preserve">
     <value>Available &amp;package sources:</value>
@@ -148,7 +148,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;HeaderLabel.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>1</value>
   </data>
   <data name="NewPackageSource.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left, Right</value>
@@ -163,7 +163,7 @@
     <value>317, 20</value>
   </data>
   <data name="NewPackageSource.TabIndex" type="System.Int32, mscorlib">
-    <value>7</value>
+    <value>3</value>
   </data>
   <data name="&gt;&gt;NewPackageSource.Name" xml:space="preserve">
     <value>NewPackageSource</value>
@@ -175,7 +175,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;NewPackageSource.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>4</value>
   </data>
   <data name="addButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -190,7 +190,7 @@
     <value>79, 23</value>
   </data>
   <data name="addButton.TabIndex" type="System.Int32, mscorlib">
-    <value>8</value>
+    <value>4</value>
   </data>
   <data name="addButton.Text" xml:space="preserve">
     <value>&amp;Add</value>
@@ -205,7 +205,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;addButton.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>6</value>
   </data>
   <metadata name="PackageSourcesContextMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
@@ -238,7 +238,7 @@
     <value>80, 23</value>
   </data>
   <data name="removeButton.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
+    <value>9</value>
   </data>
   <data name="removeButton.Text" xml:space="preserve">
     <value>&amp;Remove</value>
@@ -268,7 +268,7 @@
     <value>318, 20</value>
   </data>
   <data name="NewPackageName.TabIndex" type="System.Int32, mscorlib">
-    <value>5</value>
+    <value>1</value>
   </data>
   <data name="&gt;&gt;NewPackageName.Name" xml:space="preserve">
     <value>NewPackageName</value>
@@ -280,7 +280,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;NewPackageName.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>2</value>
   </data>
   <data name="NewPackageNameLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -298,7 +298,7 @@
     <value>38, 13</value>
   </data>
   <data name="NewPackageNameLabel.TabIndex" type="System.Int32, mscorlib">
-    <value>4</value>
+    <value>0</value>
   </data>
   <data name="NewPackageNameLabel.Text" xml:space="preserve">
     <value>&amp;Name:</value>
@@ -313,7 +313,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;NewPackageNameLabel.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>3</value>
   </data>
   <data name="NewPackageSourceLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -331,7 +331,7 @@
     <value>44, 13</value>
   </data>
   <data name="NewPackageSourceLabel.TabIndex" type="System.Int32, mscorlib">
-    <value>6</value>
+    <value>2</value>
   </data>
   <data name="NewPackageSourceLabel.Text" xml:space="preserve">
     <value>&amp;Source:</value>
@@ -346,7 +346,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;NewPackageSourceLabel.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>5</value>
   </data>
   <data name="MoveUpButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -358,7 +358,7 @@
     <value>80, 23</value>
   </data>
   <data name="MoveUpButton.TabIndex" type="System.Int32, mscorlib">
-    <value>9</value>
+    <value>7</value>
   </data>
   <data name="MoveUpButton.Text" xml:space="preserve">
     <value>Move &amp;Up</value>
@@ -373,7 +373,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;MoveUpButton.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>9</value>
   </data>
   <data name="MoveDownButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -388,7 +388,7 @@
     <value>80, 23</value>
   </data>
   <data name="MoveDownButton.TabIndex" type="System.Int32, mscorlib">
-    <value>9</value>
+    <value>8</value>
   </data>
   <data name="MoveDownButton.Text" xml:space="preserve">
     <value>Move &amp;Down</value>
@@ -403,7 +403,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;MoveDownButton.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>8</value>
   </data>
   <data name="PackageSourcesListBox.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
@@ -421,7 +421,7 @@
     <value>363, 116</value>
   </data>
   <data name="PackageSourcesListBox.TabIndex" type="System.Int32, mscorlib">
-    <value>10</value>
+    <value>6</value>
   </data>
   <data name="&gt;&gt;PackageSourcesListBox.Name" xml:space="preserve">
     <value>PackageSourcesListBox</value>
@@ -433,7 +433,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;PackageSourcesListBox.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>7</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
