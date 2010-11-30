@@ -78,7 +78,7 @@
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-            <ButtonText>Package &amp;source:</ButtonText>
+            <ButtonText>&amp;Package source:</ButtonText>
         </Strings>
       </Combo>
 
@@ -86,7 +86,7 @@
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" />
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-            <ButtonText>Default &amp;project:</ButtonText>
+            <ButtonText>Default pro&amp;ject:</ButtonText>
         </Strings>
       </Combo>
     </Combos>

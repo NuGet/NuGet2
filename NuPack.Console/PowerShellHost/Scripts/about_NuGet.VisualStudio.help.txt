@@ -30,7 +30,8 @@ LONG DESCRIPTION
 		Add-BindingRedirects	Examines all assemblies within the output path for a project and adds binding 
 								redirects to the application (or web) configuration file where necessary.
                             
-		Get-Project				Returns a reference to the DTE (Development Tools Environment) for the active or specified project.
+		Get-Project				Returns a reference to the DTE (Development Tools Environment) for the active 
+								or specified project.
 
 SEE ALSO
     Online documentation: http://go.microsoft.com/fwlink/?LinkID=206619
