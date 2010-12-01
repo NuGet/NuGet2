@@ -104,23 +104,40 @@
                     <self:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
+                <!-- Download count -->
+                <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.DownloadCount, Converter={StaticResource countConverter}, ConverterParameter=-1}">
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DownloadsLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                </StackPanel>
+
+                <!-- Rating count -->
+                <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Rating, Converter={StaticResource countConverter}, ConverterParameter=-1}">
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_RatingLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:RatingControl Height="12" Value="{Binding PackageIdentity.Rating, Mode=OneWay}" Margin="3,0,3,0">
+                        <FrameworkElement.ToolTip>
+                            <TextBlock Text="{Binding PackageIdentity.Rating, StringFormat={x:Static resources:Resources.Dialog_RatingTooltip}}" Style="{StaticResource TileToolTipStyle}"/>
+                        </FrameworkElement.ToolTip>
+                    </self:RatingControl>
+                    <self:TextBlockControl Text="{Binding PackageIdentity.RatingsCount, StringFormat={x:Static resources:Resources.Dialog_VotesCount}}" Style="{StaticResource DetailMetadataValueStyle}" />
+                </StackPanel>
+
                 <!-- View License link -->
                 <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
-                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                    <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <!-- Project Url -->
                 <TextBlock Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource NullToVisibilityConverter}}">
-                    <Hyperlink NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                    <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.Dialog_MoreInfo}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <!-- Report Abuse Url -->
                 <TextBlock Visibility="{Binding PackageIdentity.ReportAbuseUrl, Converter={StaticResource NullToVisibilityConverter}}">
-                    <Hyperlink NavigateUri="{Binding PackageIdentity.ReportAbuseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                    <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ReportAbuseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.Dialog_ReportAbuse}" />
                     </Hyperlink>
                 </TextBlock>
