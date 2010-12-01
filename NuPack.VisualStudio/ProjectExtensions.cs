@@ -206,7 +206,7 @@ namespace NuGet.VisualStudio {
         }
 
         public static MsBuildProject AsMSBuildProject(this Project project) {
-            return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).First();
+            return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).FirstOrDefault();
         }
     }
 }

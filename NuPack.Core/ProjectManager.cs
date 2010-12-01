@@ -194,7 +194,6 @@ namespace NuGet {
                 string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
                 string relativeReferencePath = PathUtility.GetRelativePath(Project.Root, referencePath);
 
-                // If this assembly is already referenced by the project then skip it
                 if (Project.ReferenceExists(assemblyReference.Name)) {
                     Project.RemoveReference(assemblyReference.Name);
                 }

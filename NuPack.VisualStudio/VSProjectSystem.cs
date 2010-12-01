@@ -90,26 +90,29 @@ namespace NuGet.VisualStudio {
 
                 // Always set copy local to true for references that we add
                 reference.CopyLocal = true;
-
-                // If we added a reference and the path wasn't updated to the one we specified then fix it.
+ 
+                // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
+                // Most commmonly, it happens if this assembly is in the GAC or in the output path.
                 if (!reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase)) {
                     // Get the msbuild project for this project
                     MsBuildProject buildProject = Project.AsMSBuildProject();
 
-                    // Get the assembly name of the reference we are trying to add
-                    AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
+                    if (buildProject != null) {
+                        // Get the assembly name of the reference we are trying to add
+                        AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
 
-                    // Try to find the item for the assembly name
-                    MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
-                                               where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
-                                               select assemblyReferenceNode.Item1).FirstOrDefault();
+                        // Try to find the item for the assembly name
+                        MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
+                                                   where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
+                                                   select assemblyReferenceNode.Item1).FirstOrDefault();
 
-                    if (item != null) {
-                        // Add the <HintPath> metadata item as a relative path
-                        item.SetMetadataValue("HintPath", referencePath);
+                        if (item != null) {
+                            // Add the <HintPath> metadata item as a relative path
+                            item.SetMetadataValue("HintPath", referencePath);
 
-                        // Save the project after we've modified it.
-                        Project.Save();
+                            // Save the project after we've modified it.
+                            Project.Save();
+                        }
                     }
                 }
 
@@ -219,7 +222,7 @@ namespace NuGet.VisualStudio {
         }
 
         private static bool AssemblyNamesMatch(AssemblyName name1, AssemblyName name2) {
-            return EqualsIfNotNull(name1.Name, name2.Name, StringComparer.OrdinalIgnoreCase.Equals) &&
+            return name1.Name.Equals(name2.Name, StringComparison.OrdinalIgnoreCase) &&
                    EqualsIfNotNull(name1.Version, name2.Version) &&
                    EqualsIfNotNull(name1.CultureInfo, name2.CultureInfo) &&
                    EqualsIfNotNull(name1.GetPublicKeyToken(), name2.GetPublicKeyToken(), Enumerable.SequenceEqual);
