@@ -1,29 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5">
-    <Name>NuGet Package Manager</Name>
-    <Author>Outercurve Foundation</Author>
-    <Version>0.5.0.0</Version>
-    <Description xml:space="preserve">A collection of tools to automate the process of installing, upgrading, configuring, and removing packages from a VS Project.</Description>
-    <Locale>1033</Locale>
-    <MoreInfoUrl>http://nuget.codeplex.com/documentation</MoreInfoUrl>
-    <License>LICENSE.txt</License>
-    <GettingStartedGuide>http://nuget.codeplex.com</GettingStartedGuide>
-    <Icon>Resources\Package.ico</Icon>
-    <PreviewImage>Resources\PreviewImage.png</PreviewImage>
-    <SupportedProducts>
-      <VisualStudio Version="10.0">
-        <Edition>Pro</Edition>
-      </VisualStudio>
-    </SupportedProducts>
-    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
-    <AllUsers>true</AllUsers>
-  </Identifier>
-  <References />
-  <Content>
-    <MefComponent>|NuPack.TeamFoundationServer|</MefComponent>
-    <MefComponent>|PowerShellHostProvider|</MefComponent>
-    <MefComponent>|NuPack.Console|</MefComponent>
-    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
-  </Content>
+    <Identifier Id="NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5">
+        <Name>NuGet Package Manager</Name>
+        <Author>Outercurve Foundation</Author>
+        <Version>1.1.0.0</Version>
+        <Description xml:space="preserve">A collection of tools to automate the process of installing, upgrading, configuring, and removing packages from a VS Project.</Description>
+        <Locale>1033</Locale>
+        <MoreInfoUrl>http://nuget.codeplex.com/documentation</MoreInfoUrl>
+        <License>LICENSE.txt</License>
+        <GettingStartedGuide>http://nuget.codeplex.com</GettingStartedGuide>
+        <Icon>Resources\Package.ico</Icon>
+        <PreviewImage>Resources\PreviewImage.png</PreviewImage>
+        <SupportedProducts>
+            <VisualStudio Version="10.0">
+                <Edition>Pro</Edition>
+            </VisualStudio>
+        </SupportedProducts>
+        <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
+        <AllUsers>true</AllUsers>
+    </Identifier>
+    <References />
+    <Content>
+        <MefComponent>|NuPack.TeamFoundationServer|</MefComponent>
+        <MefComponent>|PowerShellHostProvider|</MefComponent>
+        <MefComponent>|NuPack.Console|</MefComponent>
+        <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
+    </Content>
 </Vsix>
