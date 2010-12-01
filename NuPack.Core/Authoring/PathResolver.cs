@@ -76,7 +76,12 @@ namespace NuGet {
                 // If the search path in the manifest does not contain a wildcard character 
                 // or the wildcard is at the start of search path, do not truncate the search path from the actualPath
                 searchString = searchString.Substring(0, searchWildCard - 1);
-                int index = actualPath.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
+                
+                // Ignore any occurences of the searchString in the basePath portion of the actualPath.
+                // e.g. actualPath: C:\foo\foo\foo.txt, basePath: C:\foo, searchPath: foo\*.txt. In this case ignore the first foo.
+                int offset = actualPath.IndexOf(basePath, StringComparison.OrdinalIgnoreCase);
+
+                int index = actualPath.IndexOf(searchString, offset > 0 ? offset : 0, StringComparison.OrdinalIgnoreCase);
                 packagePath = actualPath.Substring(index + searchString.Length).TrimStart(Path.DirectorySeparatorChar);
             }
             else if (actualPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase)) {

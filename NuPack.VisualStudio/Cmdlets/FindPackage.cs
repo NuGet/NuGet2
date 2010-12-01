@@ -45,7 +45,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             if (!String.IsNullOrEmpty(Filter)) {
                 packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
-            return localRepository.GetUpdates(sourceRepository, packagesToUpdate);
+            return sourceRepository.GetUpdates(packagesToUpdate);
         }
 
         protected override void Log(MessageLevel level, string formattedMessage) {

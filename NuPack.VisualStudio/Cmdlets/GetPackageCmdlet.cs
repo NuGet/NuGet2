@@ -137,7 +137,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             if (!String.IsNullOrEmpty(Filter)) {
                 packagesToUpdate = packagesToUpdate.Find(Filter.Split());
             }
-            return localRepository.GetUpdates(sourceRepository, packagesToUpdate);
+            return sourceRepository.GetUpdates(packagesToUpdate);
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
