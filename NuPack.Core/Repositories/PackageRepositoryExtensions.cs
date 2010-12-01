@@ -98,13 +98,12 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Returns packages from the source repository that are later versions to any package in the current repository.
+        /// Returns updates for packages from the repository 
         /// </summary>
-        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository) {
-            return GetUpdates(repository, sourceRepository, repository.GetPackages());
-        }
-
-        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IPackageRepository sourceRepository, IEnumerable<IPackage> packages) {
+        /// <param name="repository">The repository to search for updates</param>
+        /// <param name="packages">Packages to look for updates</param>
+        /// <returns></returns>
+        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IEnumerable<IPackage> packages) {
             List<IPackage> packageList = packages.ToList();
 
             if (!packageList.Any()) {
@@ -119,7 +118,7 @@ namespace NuGet {
             var filterExpression = Expression.Lambda<Func<IPackage, bool>>(expressionBody, parameterExpression);
 
             // These are the packages that we need to look at for potential updates.
-            IDictionary<string, IPackage> sourcePackages = sourceRepository.GetPackages()
+            IDictionary<string, IPackage> sourcePackages = repository.GetPackages()
                                                                            .Where(filterExpression)
                                                                            .OrderBy(p => p.Id)
                                                                            .AsEnumerable()

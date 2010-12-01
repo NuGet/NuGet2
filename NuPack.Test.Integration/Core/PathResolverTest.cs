@@ -279,6 +279,58 @@ namespace NuGet.Test.Integration.PathResolver {
             Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\ie.css");
         }
 
+        /// <summary>
+        /// Source: ie\css\style.css, ie\logo.jpg
+        /// Search: ie\**\*.cs
+        /// Target: content\style\
+        /// Expected: No files to be present
+        /// </summary>
+        [TestMethod]
+        public void NoFilesAreCopiedWhenFilterReturnsEmptyResults() {
+            // Arrange
+            string search = @"ie\**\*.cs";
+            string target = @"content\style\";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("ie",
+                                            new File("logo.jpg"),
+                                            new Dir("css",
+                                                new File("style.css"))));
+
+            // Act
+            var packageBuilder = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(packageBuilder.Files.Count, 0);
+        }
+
+        /// <summary>
+        /// Source: \style\css\style\style.css, \style\style.css
+        /// Search: style\**\*.css
+        /// Target: content\styles
+        /// Expected: content\styles\style.css, content\styles\css\style\style.css 
+        /// </summary>
+        [TestMethod]
+        public void DirectoryStructureWithRepeatingTerms() {
+            // Arrange
+            string search = @"style\**\*.css";
+            string target = @"content\styles";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("style",
+                                            new File("style.css"),
+                                            new Dir("css",
+                                                new Dir("style", 
+                                                    new File("style.css")
+                                                )
+                                            )));
+            // Act
+            var packageBuilder = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(packageBuilder.Files.Count, 2);
+            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\styles\style.css");
+            Assert.AreEqual(packageBuilder.Files.ElementAt(1).Path, @"content\styles\css\style\style.css");
+        }
+
         private Stream GetManifest(string search, string target) {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -291,7 +343,7 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         private string CreateFileSystem(File file) {
-            string rootDir = Path.Combine(TestContext.TestDir, "PathResolverIntegrationTests", TestContext.TestName);
+            string rootDir = Path.Combine(TestContext.TestDeploymentDir, "PathResolverIntegrationTests", TestContext.TestName);
             new Dir(rootDir, file).Create();
             return rootDir;
         }

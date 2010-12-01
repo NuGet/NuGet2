@@ -16,7 +16,8 @@ namespace NuGet.VisualStudio.Test {
                                          string kind = VsConstants.CsharpProjectTypeGuid,
                                          IEnumerable<string> projectFiles = null,
                                          Func<string, Property> propertyGetter = null) {
-            Debug.Assert(lazyAction.Value, "Lazy action must have been initialized by now");
+            EnsureTypeIdentifierAttribute();
+
 
             Mock<Project> project = new Mock<Project>();
             project.SetupGet(p => p.Name).Returns(name);
@@ -31,7 +32,7 @@ namespace NuGet.VisualStudio.Test {
 
             Mock<Property> fullName = new Mock<Property>();
             fullName.Setup(c => c.Value).Returns(name);
-            properties.Setup(p => p.Item("FullPath")).Returns(fullName.Object);            
+            properties.Setup(p => p.Item("FullPath")).Returns(fullName.Object);
             project.SetupGet(p => p.Properties).Returns(properties.Object);
             if (projectFiles != null) {
 
@@ -61,8 +62,14 @@ namespace NuGet.VisualStudio.Test {
         }
 
         public static DTE GetDTE() {
-            Debug.Assert(lazyAction.Value);
+            EnsureTypeIdentifierAttribute();
             return new Mock<DTE>().Object;
+        }
+
+        public static void EnsureTypeIdentifierAttribute() {
+            if (!lazyAction.Value) {
+                throw new InvalidOperationException("Lazy action must have been initialized by now");
+            }
         }
     }
 }
