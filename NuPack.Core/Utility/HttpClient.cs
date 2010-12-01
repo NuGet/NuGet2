@@ -30,11 +30,16 @@ namespace NuGet {
 
         public Uri GetRedirectedUri(Uri uri) {
             WebRequest request = CreateRequest(uri);
-            WebResponse response = request.GetResponse();
-            if (response == null) {
-                return null;
+            try {
+                WebResponse response = request.GetResponse();
+                if (response == null) {
+                    return null;
+                }
+                return response.ResponseUri;
             }
-            return response.ResponseUri;
+            catch (WebException e) {
+                return e.Response.ResponseUri;
+            }
         }
     }
 }

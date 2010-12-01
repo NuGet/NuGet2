@@ -1,29 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
-using NuGet.Common;
 using System.Net;
+using NuGet.Common;
 
 namespace NuGet.Commands {
 
-    //Push c:\foo\p.nupkg asd-dwf-123 -Publish-
-
     [Export(typeof(ICommand))]
-    [Command("Push", "Push package to feed", MinArgs = 2, MaxArgs = 2)]
+    [Command(typeof(NuGetResources), "push", "PushCommandDescription", AltName = "p",
+        MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
+        UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : ICommand {
-        private const string _baseFeedUrl = "http://localhost/GalleryServer";
         private const string _createPackageService = "PackageFiles";
         private const string _publichPackageService = "PublishedPackages";
+        private const string _userAgentPattern = "CommandLine/{0} ({1})";
+        private const string _baseGalleryServerUrlFWLink = "http://go.microsoft.com/fwlink/?LinkID=207106";
 
         private string _apiKey;
         private string _packagePath;
+        private string _userAgent;
+        private Uri _baseGalleryServerUrl;
 
         public List<string> Arguments { get; set; }
 
         public IConsole Console { get; set; }
 
-        [Option("Should publish package, be default true", AltName = "p")]
+        [Option(typeof(NuGetResources), "PushCommandPublishDescription", AltName = "pub")]
         public bool Publish { get; set; }
 
         [ImportingConstructor]
@@ -38,26 +42,23 @@ namespace NuGet.Commands {
             //Second argument should be the API Key
             _apiKey = Arguments[1];
 
+            var client = new HttpClient();
+            _baseGalleryServerUrl = client.GetRedirectedUri(new Uri(_baseGalleryServerUrlFWLink));
+
+            var version = typeof(PushCommand).Assembly.GetNameSafe().Version;
+            _userAgent = String.Format(CultureInfo.InvariantCulture, _userAgentPattern, version, Environment.OSVersion);
+
             PushPackage();
-
-            if (!Publish) {
-                Console.WriteLine("Your Package has been created in the Gallery Server but not published");
-            }
-            else {
-                Console.WriteLine("Your package has been created and published on the Gallery Server");
-            }
-
-
         }
 
         private void PushPackage() {
-            Console.WriteLine("Creating and entry for your package...");
-            //Create the Package
-            var url = new Uri(string.Format("{0}/{1}/{2}/nupkg", _baseFeedUrl, _createPackageService, _apiKey));
 
-            var request = WebRequest.Create(url);
+            var url = new Uri(string.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, _createPackageService, _apiKey));
+
+            var request = (HttpWebRequest)WebRequest.Create(url);
             request.ContentType = "application/octet-stream";
             request.Method = "POST";
+            request.UserAgent = _userAgent;
 
             ZipPackage pkg = new ZipPackage(_packagePath);
 
@@ -68,35 +69,55 @@ namespace NuGet.Commands {
                 requestStream.Write(file, 0, file.Length);
             }
 
-            var response = (HttpWebResponse)request.GetResponse();
+            Console.WriteLine(NuGetResources.PushCommandCreatingPackage, pkg.Id, pkg.Version);
 
-            //TODO: What other codes does the server use?
+            var response = SafeGetResponse(request);
+
             if (response.StatusCode != HttpStatusCode.OK) {
-                throw new CommandLineException("There was a problem and your package was not uploaded. Status Code {0}", response.StatusCode);
+                string errorMessage = String.Empty;
+                using (var stream = response.GetResponseStream()) {
+                    errorMessage = stream.ReadToEnd();
+                }
+
+                throw new CommandLineException(NuGetResources.PushCommandInvalidResponse, response.StatusCode, errorMessage);
             }
 
+            Console.WriteLine(NuGetResources.PushCommandPackageCreated);
 
-            //Publish the created package
             if (Publish) {
                 PublishPackage(pkg.Id, pkg.Version.ToString());
             }
 
         }
 
-
         private void PublishPackage(string id, string version) {
-            Console.WriteLine("Publishing your package...");
+            Console.WriteLine(NuGetResources.PushCommandPublishingPackage, id, version);
 
-            var url = new Uri(string.Format("{0}/{1}/{2}/{3}/{4}", _baseFeedUrl, _publichPackageService, _apiKey, id, version));
+            var url = new Uri(string.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _publichPackageService, _apiKey, id, version));
 
-            var request = WebRequest.Create(url);
+            var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "GET";
+            request.UserAgent = _userAgent;
 
-            var response = (HttpWebResponse)request.GetResponse();
+            var response = SafeGetResponse(request);
 
-            //TODO: What other codes does the server use?
             if (response.StatusCode != HttpStatusCode.OK) {
-                throw new CommandLineException("There was a problem and your package was not uploaded. Status Code {0}", response.StatusCode);
+                string errorMessage = String.Empty;
+                using (var stream = response.GetResponseStream()) {
+                    errorMessage = stream.ReadToEnd();
+                }
+
+                throw new CommandLineException(NuGetResources.PushCommandInvalidResponse, response.StatusCode, errorMessage);
+            }
+            Console.WriteLine(NuGetResources.PushCommandPackagePublished);
+        }
+
+        private HttpWebResponse SafeGetResponse(HttpWebRequest request) {
+            try {
+                return (HttpWebResponse)request.GetResponse();
+            }
+            catch (WebException e) {
+                return (HttpWebResponse)e.Response;
             }
         }
     }

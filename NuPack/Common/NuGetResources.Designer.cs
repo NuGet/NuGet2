@@ -232,6 +232,87 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Creating an entry for your package [ID:{0} Ver:{1}]....
+        /// </summary>
+        internal static string PushCommandCreatingPackage {
+            get {
+                return ResourceManager.GetString("PushCommandCreatingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Push a package to the server and publish it to the feed..
+        /// </summary>
+        internal static string PushCommandDescription {
+            get {
+                return ResourceManager.GetString("PushCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: {1}.
+        /// </summary>
+        internal static string PushCommandInvalidResponse {
+            get {
+                return ResourceManager.GetString("PushCommandInvalidResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your package has been uploaded to the server but not published..
+        /// </summary>
+        internal static string PushCommandPackageCreated {
+            get {
+                return ResourceManager.GetString("PushCommandPackageCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your package has been published to the live feed..
+        /// </summary>
+        internal static string PushCommandPackagePublished {
+            get {
+                return ResourceManager.GetString("PushCommandPackagePublished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies if the package should be published to the live feed. True by default..
+        /// </summary>
+        internal static string PushCommandPublishDescription {
+            get {
+                return ResourceManager.GetString("PushCommandPublishDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishing your package [ID:{0} Ver:{1}] to the live feed....
+        /// </summary>
+        internal static string PushCommandPublishingPackage {
+            get {
+                return ResourceManager.GetString("PushCommandPublishingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the location of the package and your API key to push the package to the server..
+        /// </summary>
+        internal static string PushCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("PushCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;package location&gt; &lt;API key&gt; [options].
+        /// </summary>
+        internal static string PushCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("PushCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The resource type &apos;{0}&apos; does not have an accessible get for the &apos;{1}&apos; property..
         /// </summary>
         internal static string ResourcePropertyDoesNotHaveAccessibleGet {
