@@ -6,7 +6,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using EnvDTE;
+using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.Shell.Interop;
+using MsBuildProject = Microsoft.Build.Evaluation.Project;
+using Project = EnvDTE.Project;
+using ProjectItem = EnvDTE.ProjectItem;
 
 namespace NuGet.VisualStudio {
     public static class ProjectExtensions {
@@ -199,6 +203,10 @@ namespace NuGet.VisualStudio {
             }
 
             return projectTypeGuids.Split(';');
+        }
+
+        public static MsBuildProject AsMSBuildProject(this Project project) {
+            return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).First();
         }
     }
 }

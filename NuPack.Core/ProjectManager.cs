@@ -196,8 +196,7 @@ namespace NuGet {
 
                 // If this assembly is already referenced by the project then skip it
                 if (Project.ReferenceExists(assemblyReference.Name)) {
-                    Logger.Log(MessageLevel.Warning, NuGetResources.Warning_AssemblyAlreadyReferenced, Project.ProjectName, assemblyReference.Name);
-                    continue;
+                    Project.RemoveReference(assemblyReference.Name);
                 }
 
                 using (Stream stream = assemblyReference.GetStream()) {

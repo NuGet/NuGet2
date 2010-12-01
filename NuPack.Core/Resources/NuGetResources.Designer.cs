@@ -592,15 +592,6 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; already has an assembly reference to &apos;{1}&apos;.
-        /// </summary>
-        internal static string Warning_AssemblyAlreadyReferenced {
-            get {
-                return ResourceManager.GetString("Warning_AssemblyAlreadyReferenced", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already exists. Skipping....
         /// </summary>
         internal static string Warning_FileAlreadyExists {
@@ -642,15 +633,6 @@ namespace NuGet.Resources {
         internal static string Warning_UninstallingPackageWillBreakDependents {
             get {
                 return ResourceManager.GetString("Warning_UninstallingPackageWillBreakDependents", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Removing &apos;{0}&apos; might cause &apos;{1}&apos; to be broken.
-        /// </summary>
-        internal static string Warning_UninstallingPackageWillBreakDependents1 {
-            get {
-                return ResourceManager.GetString("Warning_UninstallingPackageWillBreakDependents1", resourceCulture);
             }
         }
     }

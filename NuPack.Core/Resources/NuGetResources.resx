@@ -270,9 +270,6 @@
   <data name="UnknownPackage" xml:space="preserve">
     <value>Unable to find package '{0}'</value>
   </data>
-  <data name="Warning_AssemblyAlreadyReferenced" xml:space="preserve">
-    <value>'{0}' already has an assembly reference to '{1}'</value>
-  </data>
   <data name="Warning_FileAlreadyExists" xml:space="preserve">
     <value>'{0}' already exists. Skipping...</value>
   </data>
@@ -287,9 +284,6 @@
   </data>
   <data name="Warning_UninstallingPackageWillBreakDependents" xml:space="preserve">
     <value>Uninstalling '{0}' might cause '{1}' to be broken</value>
-  </data>
-  <data name="Warning_UninstallingPackageWillBreakDependents1" xml:space="preserve">
-    <value>Removing '{0}' might cause '{1}' to be broken</value>
   </data>
   <data name="AggregateQueriesRequireOrder" xml:space="preserve">
     <value>Aggregate queries require at least one OrderBy.</value>
