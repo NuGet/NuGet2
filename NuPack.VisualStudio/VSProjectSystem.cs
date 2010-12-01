@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
+using VSLangProj;
+using MsBuildProject = Microsoft.Build.Evaluation.Project;
+using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
+using Project = EnvDTE.Project;
 
 namespace NuGet.VisualStudio {
     public class VsProjectSystem : PhysicalFileSystem, IProjectSystem {
@@ -77,8 +82,39 @@ namespace NuGet.VisualStudio {
             try {
                 string name = Path.GetFileNameWithoutExtension(referencePath);
 
+                // Get the full path to the reference
+                string fullPath = PathUtility.GetAbsolutePath(Root, referencePath);
+
                 // Add a reference to the project
-                Project.Object.References.Add(PathUtility.GetAbsolutePath(Root, referencePath));
+                Reference reference = Project.Object.References.Add(fullPath);
+
+                // Always set copy local to true for references that we add
+                reference.CopyLocal = true;
+ 
+                // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
+                // Most commmonly, it happens if this assembly is in the GAC or in the output path.
+                if (!reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase)) {
+                    // Get the msbuild project for this project
+                    MsBuildProject buildProject = Project.AsMSBuildProject();
+
+                    if (buildProject != null) {
+                        // Get the assembly name of the reference we are trying to add
+                        AssemblyName assemblyName = AssemblyName.GetAssemblyName(fullPath);
+
+                        // Try to find the item for the assembly name
+                        MsBuildProjectItem item = (from assemblyReferenceNode in buildProject.GetAssemblyReferences()
+                                                   where AssemblyNamesMatch(assemblyName, assemblyReferenceNode.Item2)
+                                                   select assemblyReferenceNode.Item1).FirstOrDefault();
+
+                        if (item != null) {
+                            // Add the <HintPath> metadata item as a relative path
+                            item.SetMetadataValue("HintPath", referencePath);
+
+                            // Save the project after we've modified it.
+                            Project.Save();
+                        }
+                    }
+                }
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
@@ -123,7 +159,7 @@ namespace NuGet.VisualStudio {
             // Get the project items for the folder path
             string folderPath = Path.GetDirectoryName(path);
             ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
-            
+
             // Add the file to the project
             string fullPath = GetFullPath(path);
             container.AddFromFileCopy(fullPath);
@@ -183,6 +219,27 @@ namespace NuGet.VisualStudio {
                 // Check out the item
                 Project.DTE.SourceControl.CheckOutItem(fullPath);
             }
+        }
+
+        private static bool AssemblyNamesMatch(AssemblyName name1, AssemblyName name2) {
+            return name1.Name.Equals(name2.Name, StringComparison.OrdinalIgnoreCase) &&
+                   EqualsIfNotNull(name1.Version, name2.Version) &&
+                   EqualsIfNotNull(name1.CultureInfo, name2.CultureInfo) &&
+                   EqualsIfNotNull(name1.GetPublicKeyToken(), name2.GetPublicKeyToken(), Enumerable.SequenceEqual);
+        }
+
+        private static bool EqualsIfNotNull<T>(T obj1, T obj2) {
+            return EqualsIfNotNull(obj1, obj2, (a, b) => a.Equals(b));
+        }
+
+        private static bool EqualsIfNotNull<T>(T obj1, T obj2, Func<T, T, bool> equals) {
+            // If both objects are non null do the equals
+            if (obj1 != null && obj2 != null) {
+                return equals(obj1, obj2);
+            }
+
+            // Otherwise consider them equal if either of the values are null
+            return true;
         }
     }
 }
