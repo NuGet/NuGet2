@@ -13,15 +13,15 @@ namespace NuGet.Commands {
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : ICommand {
-        private const string _createPackageService = "PackageFiles";
-        private const string _publichPackageService = "PublishedPackages";
-        private const string _userAgentPattern = "CommandLine/{0} ({1})";
-        private const string _baseGalleryServerUrlFWLink = "http://go.microsoft.com/fwlink/?LinkID=207106";
+        private const string _CreatePackageService = "PackageFiles";
+        private const string _PublichPackageService = "PublishedPackages";
+        private const string _UserAgentPattern = "CommandLine/{0} ({1})";
+        private const string _BaseGalleryServerUrlFWLink = "http://go.microsoft.com/fwlink/?LinkID=207106";
 
         private string _apiKey;
         private string _packagePath;
         private string _userAgent;
-        private Uri _baseGalleryServerUrl;
+        private string _baseGalleryServerUrl;
 
         public List<string> Arguments { get; set; }
 
@@ -43,17 +43,17 @@ namespace NuGet.Commands {
             _apiKey = Arguments[1];
 
             var client = new HttpClient();
-            _baseGalleryServerUrl = client.GetRedirectedUri(new Uri(_baseGalleryServerUrlFWLink));
+            _baseGalleryServerUrl = GetSafeRedirectedUri(_BaseGalleryServerUrlFWLink);
 
             var version = typeof(PushCommand).Assembly.GetNameSafe().Version;
-            _userAgent = String.Format(CultureInfo.InvariantCulture, _userAgentPattern, version, Environment.OSVersion);
+            _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
 
             PushPackage();
         }
 
         private void PushPackage() {
 
-            var url = new Uri(string.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, _createPackageService, _apiKey));
+            var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, _CreatePackageService, _apiKey));
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.ContentType = "application/octet-stream";
@@ -93,7 +93,7 @@ namespace NuGet.Commands {
         private void PublishPackage(string id, string version) {
             Console.WriteLine(NuGetResources.PushCommandPublishingPackage, id, version);
 
-            var url = new Uri(string.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _publichPackageService, _apiKey, id, version));
+            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _PublichPackageService, _apiKey, id, version));
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "GET";
@@ -118,6 +118,20 @@ namespace NuGet.Commands {
             }
             catch (WebException e) {
                 return (HttpWebResponse)e.Response;
+            }
+        }
+
+        private string GetSafeRedirectedUri(string uri) {
+            WebRequest request = WebRequest.Create(uri);
+            try {
+                WebResponse response = request.GetResponse();
+                if (response == null) {
+                    return null;
+                }
+                return response.ResponseUri.ToString();
+            }
+            catch (WebException e) {
+                return e.Response.ResponseUri.ToString(); ;
             }
         }
     }
