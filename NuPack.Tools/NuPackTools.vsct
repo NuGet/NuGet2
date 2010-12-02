@@ -78,7 +78,7 @@
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
-            <ButtonText>&amp;Package source:</ButtonText>
+            <ButtonText>Pac&amp;kage source:</ButtonText>
         </Strings>
       </Combo>
 
