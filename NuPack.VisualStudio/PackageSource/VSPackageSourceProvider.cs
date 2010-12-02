@@ -117,6 +117,13 @@ namespace NuGet.VisualStudio {
             else if (!_packageSources.Contains(AggregateSource)) {
                 _packageSources.Insert(0, AggregateSource);
             }
+            else {
+                // When deserialize old data from previous version of NuGet,
+                // the IsAggregate property is missing and hence set to false. 
+                // Set it to 'true'.
+                PackageSource aggregateSourceInCollection = _packageSources.Single(p => p.Equals(AggregateSource));
+                aggregateSourceInCollection.IsAggregate = true;
+            }
         }
 
         private void DeserializeActivePackageSource() {
@@ -146,7 +153,7 @@ namespace NuGet.VisualStudio {
             }
             else {
                 // If there is an official feed that already points to the right place, we're done
-                if (officialFeed.Source == DefaultPackageSource) {
+                if (DefaultPackageSource.Equals(officialFeed.Source, StringComparison.OrdinalIgnoreCase)) {
                     return;
                 }
 
