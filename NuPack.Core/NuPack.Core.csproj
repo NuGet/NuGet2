@@ -163,9 +163,9 @@
     <Compile Include="Packages\ZipPackageFile.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Authoring\nuspec.xsd">
+    <EmbeddedResource Include="Authoring\nuspec.xsd">
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
     <None Include="Class diagrams\Packages.cd" />
     <None Include="Class diagrams\PackageWalkers.cd" />
     <None Include="Class diagrams\Repositories.cd" />

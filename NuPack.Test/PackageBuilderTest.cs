@@ -227,38 +227,29 @@ Description is required.");
             // Act and Assert
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null), "Data at the root level is invalid. Line 1, position 1.");
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), "Root element is missing.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec3.AsStream(), null), @"Id is required.
-Version is required.
-Authors is required.
-Description is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec4.AsStream(), null), @"Id is required.
-Version is required.
-Authors is required.
-Description is required.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null), @"The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null), @"The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id, description, authors, version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-
         [TestMethod]
-        public void PackageBuilderRequiredFields() {
+        public void MissingIdThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
-    <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
-            string badSpec1 = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<package><metadata>
-    <version>2.5</version>
-    <authors>Velio Ivanov</authors>
-    <language>en-us</language>
-    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
-  </metadata></package>";
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+        }
 
-            string badSpec2 = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        [TestMethod]
+        public void MissingVersionThrows() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <authors>Velio Ivanov</authors>
@@ -266,7 +257,14 @@ Description is required.");
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
-            string badSpec3 = @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+        }
+
+        [TestMethod]
+        public void MissingAuthorsThrows() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
@@ -274,7 +272,14 @@ Description is required.");
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
-            string badSpec4 = @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+        }
+
+        [TestMethod]
+        public void MissingDescriptionThrows() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
@@ -282,7 +287,14 @@ Description is required.");
     <language>en-us</language>
   </metadata></package>";
 
-            string badDependencies = @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+        }
+
+        [TestMethod]
+        public void MalformedDependenciesThrows() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
@@ -294,7 +306,14 @@ Description is required.");
     </dependencies>
   </metadata></package>";
 
-            string missingFileSource = @"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
+        }
+
+        [TestMethod]
+        public void MissingFileSrcThrows() {
+            // Act
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
@@ -310,17 +329,31 @@ Description is required.");
   </files>
 </package>";
 
-            // Act
-            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
-
             // Assert
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec1.AsStream(), null), "Id is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec2.AsStream(), null), "Version is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec3.AsStream(), null), "Authors is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badSpec4.AsStream(), null), "Description is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(badDependencies.AsStream(), null), "Dependency Id is required.");
-            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(missingFileSource.AsStream(), null), "Source is required.");
-            Assert.IsNotNull(packageBuilder); // Verify no exception was thrown
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'src' is missing.");
+        }
+
+        [TestMethod]
+        public void MisplacedFileNodeThrows() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <dependencies>
+        <dependency id=""foo"" />
+    </dependencies>
+  <files>
+    <file />
+  </files>
+  </metadata>
+</package>";
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. List of possible elements expected: 'iconUrl, requireLicenseAcceptance, licenseUrl, projectUrl, title, tags, summary, owners' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [TestMethod]
