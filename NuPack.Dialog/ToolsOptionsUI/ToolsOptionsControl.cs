@@ -56,12 +56,17 @@ namespace NuGet.Dialog.ToolsOptionsUI {
                 return;
             }
 
-            var item = PackageSourcesListBox.SelectedItem;
             int oldIndex = PackageSourcesListBox.SelectedIndex;
-            _allPackageSources.Remove(item);
-            _allPackageSources.Insert(oldIndex + offset, item);
+            int newIndex = oldIndex + offset;
 
-            PackageSourcesListBox.SelectedIndex = oldIndex + offset;
+            if (newIndex < 0 || newIndex > PackageSourcesListBox.Items.Count - 1) {
+                return;
+            }
+            var item = PackageSourcesListBox.SelectedItem;
+            _allPackageSources.Remove(item);
+            _allPackageSources.Insert(newIndex, item);
+
+            PackageSourcesListBox.SelectedIndex = newIndex;
             UpdateUI();
         }
 
@@ -124,6 +129,7 @@ namespace NuGet.Dialog.ToolsOptionsUI {
                 return;
             }
             _allPackageSources.Remove(PackageSourcesListBox.SelectedItem);
+            UpdateUI();
         }
 
         private void OnAddButtonClick(object sender, EventArgs e) {
@@ -131,7 +137,8 @@ namespace NuGet.Dialog.ToolsOptionsUI {
             if (result == TryAddSourceResults.NothingAdded) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameAndSourceRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
-            }        
+            }
+            UpdateUI();
         }
 
         private TryAddSourceResults TryAddSource() {
@@ -232,23 +239,14 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         private readonly Color SelectionFocusGradientDarkColor = Color.FromArgb(0xC9, 0xE0, 0xFC);
         private readonly Color SelectionFocusBorderColor = Color.FromArgb(0x89, 0xB0, 0xDF);
 
-        private readonly Color SelectionUnfocusGradientLightColor = Color.FromArgb(0xF8, 0xF8, 0xF8);
-        private readonly Color SelectionUnfocusGradientDarkColor = Color.FromArgb(0xDC, 0xDC, 0xDC);
-        private readonly Color SelectionUnfocusBorderColor = Color.FromArgb(0xD9, 0xD9, 0xD9);
-
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
             // Draw the background of the ListBox control for each item.
             if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
-                using (
-                    var gradientBrush = PackageSourcesListBox.Focused 
-                        ? new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F)
-                        : new LinearGradientBrush(e.Bounds, SelectionUnfocusGradientLightColor, SelectionUnfocusGradientDarkColor, 90.0F))
+                using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F))
                 {
                     e.Graphics.FillRectangle(gradientBrush, e.Bounds);
                 }
-                using (var borderPen = PackageSourcesListBox.Focused 
-                    ? new Pen(SelectionFocusBorderColor)
-                    : new Pen(SelectionUnfocusBorderColor)) {
+                using (var borderPen = new Pen(SelectionFocusBorderColor)) {
                     e.Graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
                 }
             
