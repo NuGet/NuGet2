@@ -14,7 +14,7 @@
         <WarningLevel>4</WarningLevel>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
-        <AdditionalSettingsImport>$(NuPackRoot)\Extended.Settings.targets</AdditionalSettingsImport>
+        <AdditionalSettingsImport Condition=" $(AdditionalSettingsImport) == '' ">$(NuPackRoot)\Extended.Settings.targets</AdditionalSettingsImport>
     </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->
