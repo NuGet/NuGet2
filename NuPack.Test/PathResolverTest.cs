@@ -329,7 +329,7 @@ namespace NuGet.Test {
         public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenTargetPathSpecified() {
             // Arrange
             var path = @"root\dir\subdir\pack.dll";
-            var basePath = @"root";
+            var basePath = @"";
             var targetPath = @"lib\sl4";
             
             // Act
@@ -343,7 +343,7 @@ namespace NuGet.Test {
         public void PathResolverTruncatesWildCardInSearchPathWhenNoTargetPathSpecified() {
             // Arrange
             var path = @"root\dir\subdir\pack.dll";
-            var basePath = @"root";
+            var basePath = @"";
             var targetPath = String.Empty;
 
             // Act
@@ -379,6 +379,21 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(targetPath, result);
+        }
+
+        [TestMethod]
+        public void PathResolverDoesNotLookForSearchTermThatOccurInBasePath() {
+            // Arrange
+            var actualPath = @"X:\drops\bin\Release\Output\bin\release\myfile.dll";
+            var basePath = @"X:\drops\bin\Release\Output\";
+            var searchString = @"bin\release\*.dll";
+            var targetPath = @"lib\net40";
+
+            // Act
+            var result = PathResolver.ResolvePackagePath(searchString: searchString, basePath: basePath, actualPath: actualPath, targetPath: targetPath);
+
+            // Assert
+            Assert.AreEqual(@"lib\net40\myfile.dll", result);
         }
 
         private void AssertEqual(PathSearchFilter expected, PathSearchFilter actual) {
