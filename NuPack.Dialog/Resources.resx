@@ -126,6 +126,9 @@
   <data name="Dialog_DependenciesLabel" xml:space="preserve">
     <value>Dependencies:</value>
   </data>
+  <data name="Dialog_DownloadsLabel" xml:space="preserve">
+    <value>Downloads:</value>
+  </data>
   <data name="Dialog_InstallButton" xml:space="preserve">
     <value>_Install</value>
   </data>
@@ -152,6 +155,12 @@
   </data>
   <data name="Dialog_PackageUpdatedTooltip" xml:space="preserve">
     <value>This package is already updated.</value>
+  </data>
+  <data name="Dialog_RatingLabel" xml:space="preserve">
+    <value>Rating:</value>
+  </data>
+  <data name="Dialog_RatingTooltip" xml:space="preserve">
+    <value>{0:f1} stars</value>
   </data>
   <data name="Dialog_ReportAbuse" xml:space="preserve">
     <value>Report Abuse</value>
@@ -194,6 +203,9 @@
   </data>
   <data name="Dialog_VersionLabel" xml:space="preserve">
     <value>Version:</value>
+  </data>
+  <data name="Dialog_VotesCount" xml:space="preserve">
+    <value>({0} Votes)</value>
   </data>
   <data name="License_Accept" xml:space="preserve">
     <value>I _Accept</value>

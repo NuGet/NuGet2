@@ -88,6 +88,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Downloads:.
+        /// </summary>
+        public static string Dialog_DownloadsLabel {
+            get {
+                return ResourceManager.GetString("Dialog_DownloadsLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Install.
         /// </summary>
         public static string Dialog_InstallButton {
@@ -165,6 +174,24 @@ namespace NuGet.Dialog {
         public static string Dialog_PackageUpdatedTooltip {
             get {
                 return ResourceManager.GetString("Dialog_PackageUpdatedTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rating:.
+        /// </summary>
+        public static string Dialog_RatingLabel {
+            get {
+                return ResourceManager.GetString("Dialog_RatingLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:f1} stars.
+        /// </summary>
+        public static string Dialog_RatingTooltip {
+            get {
+                return ResourceManager.GetString("Dialog_RatingTooltip", resourceCulture);
             }
         }
         
@@ -291,6 +318,15 @@ namespace NuGet.Dialog {
         public static string Dialog_VersionLabel {
             get {
                 return ResourceManager.GetString("Dialog_VersionLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ({0} Votes).
+        /// </summary>
+        public static string Dialog_VotesCount {
+            get {
+                return ResourceManager.GetString("Dialog_VotesCount", resourceCulture);
             }
         }
         

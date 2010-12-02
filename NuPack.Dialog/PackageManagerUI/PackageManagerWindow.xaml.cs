@@ -190,7 +190,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 // m_Providers is the name of the expander provider control (the one on the leftmost column)
                 UIElement providerExpander = FindChildElementByNameOrType(grid, "m_Providers", typeof(ProviderExpander));
                 if (providerExpander != null) {
-                    // remove disclaimer text and provider extpander from their current parents
+                    // remove disclaimer text and provider expander from their current parents
                     grid.Children.Remove(providerExpander);
                     LayoutRoot.Children.Remove(DisclaimerText);
 

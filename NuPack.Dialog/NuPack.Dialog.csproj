@@ -113,6 +113,8 @@
     <Compile Include="Extensions\QueryExtensions.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
     <Compile Include="PackageManagerUI\CachedProjectManager.cs" />
+    <Compile Include="PackageManagerUI\Controls\RatingControl.cs" />
+    <Compile Include="PackageManagerUI\Controls\StartControl.cs" />
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -199,6 +201,10 @@
     <Page Include="PackageManagerUI\TemplateStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

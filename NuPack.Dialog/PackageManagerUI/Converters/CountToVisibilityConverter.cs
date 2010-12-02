@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Data;
+using System.Globalization;
 
 namespace NuGet.Dialog.PackageManagerUI {
     public class CountToVisibilityConverter : IValueConverter {
@@ -8,14 +9,22 @@ namespace NuGet.Dialog.PackageManagerUI {
         public bool Inverted { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            int count = (int)value;
+            double count = System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
 
-            Visibility returnValue = Visibility.Visible;
-            if (Inverted) {
-                returnValue = count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            double threshold = 0;
+            if (parameter != null) {
+                threshold = System.Convert.ToDouble(parameter, CultureInfo.InvariantCulture);
             }
-            else {
-                returnValue = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            Visibility returnValue = count > threshold ? Visibility.Visible : Visibility.Collapsed;
+
+            if (Inverted) {
+                if (returnValue == Visibility.Visible) {
+                    returnValue = Visibility.Collapsed;
+                }
+                else {
+                    returnValue = Visibility.Visible;
+                }
             }
 
             return returnValue;
