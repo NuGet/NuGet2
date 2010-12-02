@@ -234,6 +234,21 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
+        public void AggregateSourceWithoutIsAggregateFlagSetFlagToTrue() {
+            // Arrange
+            var settingsManager = new MockPackageSourceSettingsManager();
+            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>NuGet official package source</Name><Source>http://go.microsoft.com/fwlink/?LinkID=206669</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(settingsManager);
+
+            // Act
+            var sources = provider.GetPackageSources().ToList();
+
+            // Assert
+            Assert.AreEqual(2, sources.Count);
+            Assert.IsTrue(sources[0].IsAggregate);
+        }
+
+        [TestMethod]
         public void SettingPackageSourcesWithoutAggregateWillAddAggregateAsFirstItem() {
             // Arrange
             var settingsManager = new MockPackageSourceSettingsManager();
@@ -268,6 +283,8 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
         }
+
+        
 
         private class MockPackageSourceSettingsManager : IPackageSourceSettingsManager {
             public string ActivePackageSourceString {
