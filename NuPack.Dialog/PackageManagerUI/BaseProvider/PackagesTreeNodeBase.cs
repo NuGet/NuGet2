@@ -16,7 +16,7 @@ namespace NuGet.Dialog.Providers {
     internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsSortDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer {
 
         // The number of extensions to show per page.
-        private const int ItemsPerPage = 10;
+        private const int DefaultItemsPerPage = 10;
 
         // We cache the query until it changes (due to sort order or search)
         private IEnumerable<IPackage> _query;
@@ -41,7 +41,7 @@ namespace NuGet.Dialog.Providers {
 
             Parent = parent;
             Provider = provider;
-            PageSize = ItemsPerPage;
+            PageSize = DefaultItemsPerPage;
         }
 
         protected PackagesProviderBase Provider {
@@ -279,10 +279,14 @@ namespace NuGet.Dialog.Providers {
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
             }
 
-            IEnumerable<IPackage> packages = _query.DistinctLast(PackageEqualityComparer.Id)
+            IList<IPackage> packages = _query.DistinctLast(PackageEqualityComparer.Id)
                                                    .Skip((pageNumber - 1) * PageSize)
                                                    .Take(PageSize)
                                                    .ToList();
+
+            if (packages.Count < PageSize) {
+                _totalCount = (pageNumber - 1) * PageSize + packages.Count;
+            }
 
             token.ThrowIfCancellationRequested();
 
