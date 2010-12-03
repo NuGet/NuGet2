@@ -39,6 +39,7 @@
     <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />

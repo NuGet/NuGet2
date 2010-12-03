@@ -188,14 +188,83 @@ namespace NuGet.Dialog.Test {
                                numberOfPackages: 5);
         }
 
+        [TestMethod]
+        public void LoadPageFollowedBySortClearsCacheAndUsesNewSortOrder() {
+            // Arrange
+            var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Ascending);
+            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: 5);
+
+            // Act            
+            TreeNodeActionTest(node,
+                               n => n.LoadPage(1),
+                               n => {
+                                   // Assert
+                                   Assert.AreEqual(1, n.TotalPages);
+                                   Assert.AreEqual(1, n.CurrentPage);
+                                   Assert.AreEqual(5, n.Extensions.Count);
+                                   Assert.AreEqual("A4", n.Extensions[0].Name);
+                                   Assert.AreEqual("A3", n.Extensions[1].Name);
+                                   Assert.AreEqual("A2", n.Extensions[2].Name);
+                                   Assert.AreEqual("A1", n.Extensions[3].Name);
+                                   Assert.AreEqual("A0", n.Extensions[4].Name);
+                               });
+
+            TreeNodeActionTest(node,
+                               n => n.SortSelectionChanged(idSortDescriptor),
+                               n => {
+                                   // Assert
+                                   Assert.AreEqual(1, n.TotalPages);
+                                   Assert.AreEqual(1, n.CurrentPage);
+                                   Assert.AreEqual(5, n.Extensions.Count);
+                                   Assert.AreEqual("A0", n.Extensions[0].Name);
+                                   Assert.AreEqual("A1", n.Extensions[1].Name);
+                                   Assert.AreEqual("A2", n.Extensions[2].Name);
+                                   Assert.AreEqual("A3", n.Extensions[3].Name);
+                                   Assert.AreEqual("A4", n.Extensions[4].Name);
+                               });
+        }
+
+        [TestMethod]
+        public void DuplicateExtensionsAreRemoved() {
+            // Arrange
+            var node = CreatePackagesTreeNodeBase(new[]{
+                PackageUtility.CreatePackage("A", "1.0", rating:1),
+                PackageUtility.CreatePackage("A", "2.0",rating:1),
+                PackageUtility.CreatePackage("A", "3.0",rating:1),
+                PackageUtility.CreatePackage("B", "1.0",rating:2),
+                PackageUtility.CreatePackage("B", "2.0",rating:2),
+                PackageUtility.CreatePackage("C", "4.0",rating:2.3)
+            });
+
+            // Act
+            TreeNodeActionTest(node,
+                               n => n.LoadPage(1),
+                               n => {
+                                   // Assert
+                                   Assert.AreEqual(1, n.TotalPages);
+                                   Assert.AreEqual(1, n.CurrentPage);
+                                   Assert.AreEqual(3, n.Extensions.Count);
+                                   Assert.AreEqual("C", n.Extensions[0].Name);
+                                   Assert.AreEqual("B", n.Extensions[1].Name);
+                                   Assert.AreEqual("A", n.Extensions[2].Name);
+                               });
+        }
+
         private static void TreeNodeActionTest(Action<PackagesTreeNodeBase> treeNodeAction,
                                                Action<PackagesTreeNodeBase> callback,
                                                int? pageSize = null,
                                                int? numberOfPackages = null) {
-            // Arrange
             const int defaultNumberOfPackages = 10;
+            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: numberOfPackages ?? defaultNumberOfPackages);
+            TreeNodeActionTest(node, treeNodeAction, callback, pageSize);
+        }
+
+        private static void TreeNodeActionTest(PackagesTreeNodeBase node,
+                                               Action<PackagesTreeNodeBase> treeNodeAction,
+                                               Action<PackagesTreeNodeBase> callback,
+                                               int? pageSize = null) {
+            // Arrange
             ManualResetEventSlim resetEvent = new ManualResetEventSlim(initialState: false);
-            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages ?? defaultNumberOfPackages);
             node.PageSize = pageSize ?? node.PageSize;
 
             Exception exception = null;
@@ -228,8 +297,7 @@ namespace NuGet.Dialog.Test {
         [TestMethod]
         public void SortSelectionChangedReturnsFalseIfCurrentSortDescriptorIsNull() {
             // Arrange
-            int numberOfPackages = 10;
-            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(null, numberOfPackages);
+            PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: 10);
 
             // Act
             bool result = node.SortSelectionChanged(null);
@@ -254,6 +322,15 @@ namespace NuGet.Dialog.Test {
 
             PackagesProviderBase provider = new MockPackagesProvider();
             return new MockTreeNode(parentTreeNode, provider, numberOfPackages);
+        }
+
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null) {
+            if (parentTreeNode == null) {
+                parentTreeNode = parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            }
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+            return new MockTreeNode(parentTreeNode, provider, packages);
         }
     }
 }

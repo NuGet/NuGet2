@@ -18,6 +18,10 @@ namespace NuGet.Dialog.Providers {
         // The number of extensions to show per page.
         private const int ItemsPerPage = 10;
 
+        // We cache the query until it changes (due to sort order or search)
+        private IEnumerable<IPackage> _query;
+        private int _totalCount;
+
         private IList<IVsExtension> _extensions;
         private IList<IVsExtensionsTreeNode> _nodes;
         private int _totalPages = 1, _currentPage = 1;
@@ -258,25 +262,31 @@ namespace NuGet.Dialog.Providers {
         private LoadPageResult ExecuteAsync(int pageNumber, CancellationToken token) {
             token.ThrowIfCancellationRequested();
 
-            IQueryable<IPackage> query = GetPackages();
+            if (_query == null) {
+                IQueryable<IPackage> query = GetPackages();
+
+                token.ThrowIfCancellationRequested();
+
+                // Execute the total count query
+                _totalCount = query.Count();
+
+                token.ThrowIfCancellationRequested();
+
+                // Apply the ordering then sort by id
+                IQueryable<IPackage> orderedQuery = ApplyOrdering(query).ThenBy(p => p.Id);
+
+                // Buffer 3 page sizes
+                _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
+            }
+
+            IEnumerable<IPackage> packages = _query.DistinctLast(PackageEqualityComparer.Id)
+                                                   .Skip((pageNumber - 1) * PageSize)
+                                                   .Take(PageSize)
+                                                   .ToList();
 
             token.ThrowIfCancellationRequested();
 
-            // Execute the total count query
-            int totalCount = query.Count();
-
-            token.ThrowIfCancellationRequested();
-
-            // Apply the ordering then sort by id
-            IQueryable<IPackage> orderedQuery = ApplyOrdering(query).ThenBy(p => p.Id);
-            IQueryable<IPackage> pageQuery = orderedQuery.Skip((pageNumber - 1) * PageSize).Take(PageSize);
-
-            // Execute the page query
-            IEnumerable<IPackage> packages = pageQuery.ToList();
-
-            token.ThrowIfCancellationRequested();
-
-            return new LoadPageResult(packages, pageNumber, totalCount);
+            return new LoadPageResult(packages, pageNumber, _totalCount);
         }
 
         private IOrderedQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query) {
@@ -298,6 +308,9 @@ namespace NuGet.Dialog.Providers {
             Provider.CurrentSort = selectedDescriptor as PackageSortDescriptor;
 
             if (Provider.CurrentSort != null) {
+                // If we changed the sort order then invalidate the cache.
+                _query = null;
+
                 // Reload the first page since the sort order changed
                 LoadPage(1);
                 return true;
