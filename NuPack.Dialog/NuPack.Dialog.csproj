@@ -110,6 +110,7 @@
     <Compile Include="..\Common\CommonResources.cs">
       <Link>CommonResources.cs</Link>
     </Compile>
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\QueryExtensions.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />

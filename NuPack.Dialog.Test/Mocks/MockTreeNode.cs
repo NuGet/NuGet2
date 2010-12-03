@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
@@ -10,7 +11,7 @@ namespace NuGet.Dialog.Test {
     internal class MockTreeNode : PackagesTreeNodeBase {
 
         private int _numberOfPackages;
-        private IPackage[] _packages;
+        private IEnumerable<IPackage> _packages;
 
         public override string Name {
             get {
@@ -20,10 +21,11 @@ namespace NuGet.Dialog.Test {
 
         public override IQueryable<IPackage> GetPackages() {
             if (_packages == null) {
-                _packages = new IPackage[_numberOfPackages];
+                var packages = new List<IPackage>();
                 for (int i = 0; i < _numberOfPackages; i++) {
-                    _packages[i] = PackageUtility.CreatePackage("A" + i, "1.0", rating: i);
+                    packages.Add(PackageUtility.CreatePackage("A" + i, "1.0", rating: i));
                 }
+                _packages = packages;
             }
 
             return _packages.AsQueryable();
@@ -33,6 +35,12 @@ namespace NuGet.Dialog.Test {
             : base(parent, provider) {
 
             _numberOfPackages = numberOfPackages;
+        }
+
+        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, IEnumerable<IPackage> packages)
+            : base(parent, provider) {
+
+            _packages = packages;
         }
     }
 }

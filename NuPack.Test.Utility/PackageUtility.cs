@@ -14,7 +14,7 @@ namespace NuGet.Test {
                                               IEnumerable<string> assemblyReferences = null,
                                               IEnumerable<string> tools = null,
                                               IEnumerable<PackageDependency> dependencies = null,
-                                              int? rating = null) {
+                                              double? rating = null) {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
@@ -29,8 +29,8 @@ namespace NuGet.Test {
                                               IEnumerable<string> content,
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
                                               IEnumerable<string> tools,
-                                              IEnumerable<PackageDependency> dependencies, 
-                                              int? rating) {
+                                              IEnumerable<PackageDependency> dependencies,
+                                              double? rating) {
 
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
