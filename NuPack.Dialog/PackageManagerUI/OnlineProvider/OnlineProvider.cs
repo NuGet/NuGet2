@@ -50,17 +50,11 @@ namespace NuGet.Dialog.Providers {
             var packageSources = _packageSourceProvider.GetPackageSources();
 
             // create one tree node per package source
-            // REVIEW: do we want to truncate the number of nodes?
             foreach (var source in packageSources) {
                 PackagesTreeNodeBase node = null;
                 try {
-                    IPackageRepository repository = _packageRepositoryFactory.CreateRepository(source);
+                    var repository = new LazyRespository(_packageRepositoryFactory, source);
                     node = new SimpleTreeNode(this, source.Name, RootNode, repository);
-
-                    // pre-select the active package source by default
-                    if (source.Equals(_packageSourceProvider.ActivePackageSource)) {
-                        SelectNode(node);
-                    }
                 }
                 catch (Exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
