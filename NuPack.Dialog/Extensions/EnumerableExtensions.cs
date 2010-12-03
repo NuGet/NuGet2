@@ -9,19 +9,19 @@ namespace NuGet.Dialog.Extensions {
         internal static IEnumerable<TElement> DistinctLast<TElement>(this IEnumerable<TElement> source,
                                                                    IEqualityComparer<TElement> comparer) {
             bool first = true;
-            var lastElement = default(TElement);
+            var previousElement = default(TElement);
 
             foreach (TElement element in source) {
-                if (!first && !comparer.Equals(element, lastElement)) {                   
-                    yield return lastElement;                   
+                if (!first && !comparer.Equals(element, previousElement)) {                   
+                    yield return previousElement;                   
                 }
 
-                lastElement = element;
+                previousElement = element;
                 first = false;
             }
 
             if (!first) {
-                yield return lastElement;
+                yield return previousElement;
             }
         }
     }
