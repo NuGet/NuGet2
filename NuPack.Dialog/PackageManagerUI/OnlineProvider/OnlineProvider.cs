@@ -53,7 +53,7 @@ namespace NuGet.Dialog.Providers {
             foreach (var source in packageSources) {
                 PackagesTreeNodeBase node = null;
                 try {
-                    var repository = new LazyRespository(_packageRepositoryFactory, source);
+                    var repository = new LazyRepository(_packageRepositoryFactory, source);
                     node = new SimpleTreeNode(this, source.Name, RootNode, repository);
                 }
                 catch (Exception) {

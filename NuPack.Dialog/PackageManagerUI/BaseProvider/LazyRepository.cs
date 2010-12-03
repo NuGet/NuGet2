@@ -2,24 +2,30 @@
 using System.Linq;
 
 namespace NuGet.Dialog.Providers {
-    internal class LazyRespository : IPackageRepository {
+    internal class LazyRepository : IPackageRepository {
 
         private Lazy<IPackageRepository> _repository;
 
-        public LazyRespository(IPackageRepositoryFactory factory, PackageSource source) {
+        private IPackageRepository Repository {
+            get { 
+                return _repository.Value; 
+            }
+        }
+
+        public LazyRepository(IPackageRepositoryFactory factory, PackageSource source) {
             _repository = new Lazy<IPackageRepository>(() => factory.CreateRepository(source));
         }
 
         public IQueryable<IPackage> GetPackages() {
-            return _repository.Value.GetPackages();
+            return Repository.GetPackages();
         }
 
         public void AddPackage(IPackage package) {
-            _repository.Value.AddPackage(package);
+            Repository.AddPackage(package);
         }
 
         public void RemovePackage(IPackage package) {
-            _repository.Value.RemovePackage(package);
+            Repository.RemovePackage(package);
         }
     }
 }
