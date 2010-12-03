@@ -8,12 +8,15 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
     [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
     public class Manifest {
+        private const string SchemaResourceName = "NuGet.Authoring.nuspec.xsd";
+
         public Manifest() {
             Metadata = new ManifestMetadata();
         }
@@ -45,6 +48,9 @@ namespace NuGet {
                     e.Name = XName.Get(e.Name.LocalName, Constants.ManifestSchemaNamespace);
                 }
             }
+
+            // Validate the schema
+            ValidateManifestSchema(document);
 
             // Remove the namespace from the outer tag to match CTP2 expectations
             document.Root.Name = document.Root.Name.LocalName;
@@ -100,6 +106,26 @@ namespace NuGet {
                 return null;
             }
             return String.Join(",", values);
+        }
+
+        private static void ValidateManifestSchema(XDocument document) {
+            // Create the schema set
+            var schemaSet = new XmlSchemaSet();
+            using (Stream schemaStream = GetSchemaStream()) {
+                schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
+            }
+
+            // Validate the document
+            document.Validate(schemaSet, (sender, e) => {
+                if (e.Severity == XmlSeverityType.Error) {
+                    // Throw an exception if there is a validation error
+                    throw new InvalidOperationException(e.Message);
+                }
+            });
+        }
+
+        private static Stream GetSchemaStream() {
+            return typeof(Manifest).Assembly.GetManifestResourceStream(SchemaResourceName);
         }
 
         private static void Validate(Manifest manifest) {
@@ -178,6 +204,6 @@ namespace NuGet {
             public object GetService(Type serviceType) {
                 return null;
             }
-        }
+        }        
     }
 }
