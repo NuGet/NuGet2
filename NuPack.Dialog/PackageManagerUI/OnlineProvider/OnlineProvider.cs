@@ -88,19 +88,21 @@ namespace NuGet.Dialog.Providers {
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
 
-            if (item.PackageIdentity.HasPowerShellScript()) {
-                MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
-                return false;
-            }
-
             var activePackageManager = GetActivePackageManager();
             if (activePackageManager == null) {
                 return false;
             }
 
             DependencyResolver helper = new DependencyResolver(activePackageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
-                                                          .Where(p => p.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(p));
+            IList<IPackage> dependencies = helper.GetDependencies(item.PackageIdentity).ToList();
+
+            IEnumerable<IPackage> scriptPackages = dependencies.Where(p => p.HasPowerShellScript());
+            if (scriptPackages.Any()) {
+                MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
+                return false;
+            }
+
+            IEnumerable<IPackage> licensePackages = dependencies.Where(p => p.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(p));
             // display license window if necessary
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);

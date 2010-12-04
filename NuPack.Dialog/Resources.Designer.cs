@@ -160,7 +160,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This package contains PowerShell scripts and needs to be installed from the Package Manager Console..
+        ///   Looks up a localized string similar to This package (or one of its dependencies) contains PowerShell scripts and needs to be installed from the Package Manager Console..
         /// </summary>
         public static string Dialog_PackageHasPSScript {
             get {
