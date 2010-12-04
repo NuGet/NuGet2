@@ -17,9 +17,9 @@ namespace NuGet.Dialog.Providers {
         private IVsPackageManagerFactory _packageManagerFactory;
 
         public OnlineProvider(
-            IProjectManager projectManager, 
-            ResourceDictionary resources, 
-            IPackageRepositoryFactory packageRepositoryFactory, 
+            IProjectManager projectManager,
+            ResourceDictionary resources,
+            IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory) :
             base(projectManager, resources) {
@@ -43,9 +43,9 @@ namespace NuGet.Dialog.Providers {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We want to suppress all errors to show an empty node.")]
+            Justification = "We want to suppress all errors to show an empty node.")]
         protected override void FillRootNodes() {
             var packageSources = _packageSourceProvider.GetPackageSources();
 
@@ -84,9 +84,15 @@ namespace NuGet.Dialog.Providers {
                 var selectedNode = SelectedNode as SimpleTreeNode;
                 return (selectedNode != null) ? _packageManagerFactory.CreatePackageManager(selectedNode.Repository) : null;
             }
-       }
+        }
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+
+            if (item.PackageIdentity.HasPowerShellScript()) {
+                MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
+                return false;
+            }
+
             var activePackageManager = GetActivePackageManager();
             if (activePackageManager == null) {
                 return false;
