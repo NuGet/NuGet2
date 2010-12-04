@@ -17,9 +17,9 @@ namespace NuGet.Dialog.Providers {
         private IVsPackageManagerFactory _packageManagerFactory;
 
         public OnlineProvider(
-            IProjectManager projectManager, 
-            ResourceDictionary resources, 
-            IPackageRepositoryFactory packageRepositoryFactory, 
+            IProjectManager projectManager,
+            ResourceDictionary resources,
+            IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory) :
             base(projectManager, resources) {
@@ -43,9 +43,9 @@ namespace NuGet.Dialog.Providers {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We want to suppress all errors to show an empty node.")]
+            Justification = "We want to suppress all errors to show an empty node.")]
         protected override void FillRootNodes() {
             var packageSources = _packageSourceProvider.GetPackageSources();
 
@@ -78,17 +78,25 @@ namespace NuGet.Dialog.Providers {
                 var selectedNode = SelectedNode as SimpleTreeNode;
                 return (selectedNode != null) ? _packageManagerFactory.CreatePackageManager(selectedNode.Repository) : null;
             }
-       }
+        }
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+
             var activePackageManager = GetActivePackageManager();
             if (activePackageManager == null) {
                 return false;
             }
 
             DependencyResolver helper = new DependencyResolver(activePackageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
-                                                          .Where(p => p.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(p));
+            IList<IPackage> dependencies = helper.GetDependencies(item.PackageIdentity).ToList();
+
+            IEnumerable<IPackage> scriptPackages = dependencies.Where(p => p.HasPowerShellScript());
+            if (scriptPackages.Any()) {
+                MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
+                return false;
+            }
+
+            IEnumerable<IPackage> licensePackages = dependencies.Where(p => p.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(p));
             // display license window if necessary
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);

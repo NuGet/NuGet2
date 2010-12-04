@@ -160,6 +160,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This package (or one of its dependencies) contains PowerShell scripts and needs to be installed from the Package Manager Console..
+        /// </summary>
+        public static string Dialog_PackageHasPSScript {
+            get {
+                return ResourceManager.GetString("Dialog_PackageHasPSScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This package is already installed..
         /// </summary>
         public static string Dialog_PackageInstalledTooltip {

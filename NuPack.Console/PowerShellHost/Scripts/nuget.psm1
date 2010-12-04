@@ -22,19 +22,19 @@ function global:TabExpansion($line, $lastWord) {
     }
     
     switch ($tokens[0]) {
-        { $_ -eq 'New-Package' -or $_ -eq 'nnp' } {
+        'New-Package' {
             $choices = TabExpansionForNewPackage $secondLastToken $tokens.length $filter
         }
     
-        { $_ -eq 'Install-Package' -or $_ -eq 'nip' } {
+        'Install-Package' {
             $choices = TabExpansionForAddPackage $line $secondLastToken $tokens.length $filter
         }
 
-        { $_ -eq 'Uninstall-Package' -or $_ -eq 'nup' } {
+        'Uninstall-Package' {
             $choices = TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
 
-        { $_ -eq 'Update-Package' -or $_ -eq 'npp' } {
+        'Update-Package' {
             $choices = TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
         }
         
@@ -48,7 +48,7 @@ function global:TabExpansion($line, $lastWord) {
         $choices | Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | Sort-Object
     }
     else {
-        # Fallback the to default tab expansion
+        # Fallback to the default tab expansion
         DefaultTabExpansion $line $lastWord 
     }
 }

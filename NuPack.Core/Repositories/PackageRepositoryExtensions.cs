@@ -110,16 +110,8 @@ namespace NuGet {
                 yield break;
             }
 
-            // Filter packages by what we currently have installed
-            ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
-            Expression expressionBody = packageList.Select(package => GetCompareExpression(parameterExpression, package))
-                                                .Aggregate(Expression.OrElse);
-
-            var filterExpression = Expression.Lambda<Func<IPackage, bool>>(expressionBody, parameterExpression);
-
             // These are the packages that we need to look at for potential updates.
-            IDictionary<string, IPackage> sourcePackages = repository.GetPackages()
-                                                                           .Where(filterExpression)
+            IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList)
                                                                            .OrderBy(p => p.Id)
                                                                            .AsEnumerable()
                                                                            .GroupBy(package => package.Id)
@@ -133,6 +125,41 @@ namespace NuGet {
                     yield return newestAvailablePackage;
                 }
             }
+        }
+
+        /// <summary>
+        /// Since odata dies when our query for updates is too big. We query for updates 10 packages at a time
+        /// and return the full list of candidates for updates.
+        /// </summary>
+        private static IEnumerable<IPackage> GetUpdateCandidates(IPackageRepository repository, IEnumerable<IPackage> packages) {
+            const int batchSize = 10;
+            
+            while (packages.Any()) {
+                // Get the current batch
+                IEnumerable<IPackage> currentPackages = packages.Take(batchSize);
+
+                // Get the filter expression for that set of packages 
+                Expression<Func<IPackage, bool>> filterExpression = GetFilterExpression(currentPackages);
+
+                // Return the current batch
+                foreach (var package in repository.GetPackages().Where(filterExpression)) {
+                    yield return package;
+                }
+
+                packages = packages.Skip(batchSize);
+            }
+        }
+
+        /// <summary>
+        /// For the list of input packages generate an expression like:
+        /// p => p.Id == 'package1id' or p.Id == 'package2id' or p.Id == 'package3id'... up to package n
+        /// </summary>
+        private static Expression<Func<IPackage, bool>> GetFilterExpression(IEnumerable<IPackage> packages) {
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
+            Expression expressionBody = packages.Select(package => GetCompareExpression(parameterExpression, package))
+                                                .Aggregate(Expression.OrElse);
+
+            return Expression.Lambda<Func<IPackage, bool>>(expressionBody, parameterExpression);
         }
 
         /// <summary>
