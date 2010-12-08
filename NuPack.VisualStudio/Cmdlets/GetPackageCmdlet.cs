@@ -14,21 +14,18 @@ namespace NuGet.VisualStudio.Cmdlets {
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
-        private readonly IRepositorySettings _settings;
-
+        
         public GetPackageCmdlet()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRepositorySettings>()) {
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
-                                IVsPackageManagerFactory packageManagerFactory,
-                                IRepositorySettings settings)
+                                IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
 
             if (repositoryFactory == null) {
@@ -37,11 +34,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             if (packageSourceProvider == null) {
                 throw new ArgumentNullException("packageSourceProvider");
             }
-            if (settings == null) {
-                throw new ArgumentNullException("settings");
-            }
 
-            _settings = settings;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
         }
