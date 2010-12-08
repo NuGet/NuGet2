@@ -2,6 +2,13 @@
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildProjectDirectory)\Build.tasks" />
     <PropertyGroup>
+	<MajorVersion>1</MajorVersion>
+	<MinorVersion>1</MinorVersion>
+	<Build>$([System.DateTime]::Now.ToString("yMd"))</Build>
+	<Revision>$(BUILD_NUMBER)</Revision>
+	<Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
+    </PropertyGroup>
+    <PropertyGroup>
        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
         <NuPackRoot>$(MSBuildProjectDirectory)\..</NuPackRoot>
         <DropDirectory>$(NuPackRoot)\bin</DropDirectory>
@@ -26,12 +33,12 @@
     
     <ItemGroup>
         <RegexTransform Include="$(NuPackRoot)\NuPack.Tools\source.extension.vsixmanifest">        
-            <Find>&lt;Version&gt;(?&lt;major&gt;\d+)\.(?&lt;minor&gt;\d+)\.\d+\.(?&lt;revision&gt;\d+)&lt;/Version&gt;</Find>
-            <ReplaceWith>&lt;Version&gt;$(BUILD_NUMBER)&lt;/Version&gt;</ReplaceWith>
+            <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
+            <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
         <RegexTransform Include="$(NuPackRoot)\Common\CommonAssemblyInfo.cs">
-            <Find>(?&lt;major&gt;\d+)\.(?&lt;minor&gt;\d+)\.\d+\.(?&lt;revision&gt;\d+)</Find>
-            <ReplaceWith>$(BUILD_NUMBER)</ReplaceWith>
+            <Find>\d+\.\d+\.\d+\.\d+</Find>
+            <ReplaceWith>$(Version)</ReplaceWith>
         </RegexTransform>
     </ItemGroup>
     
