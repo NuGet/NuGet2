@@ -183,6 +183,9 @@
   <data name="PushCommandInvalidResponse" xml:space="preserve">
     <value>{0}: {1}</value>
   </data>
+  <data name="PushCommandNoSourceError" xml:space="preserve">
+    <value>There is no default source, please specify a source.</value>
+  </data>
   <data name="PushCommandPackageCreated" xml:space="preserve">
     <value>Your package has been uploaded to the server but not published.</value>
   </data>
@@ -194,6 +197,9 @@
   </data>
   <data name="PushCommandPublishingPackage" xml:space="preserve">
     <value>Publishing your package [ID:{0} Ver:{1}] to the live feed...</value>
+  </data>
+  <data name="PushCommandSourceDescription" xml:space="preserve">
+    <value>Specifies the base GalleryServer Url.</value>
   </data>
   <data name="PushCommandUsageDescription" xml:space="preserve">
     <value>Specify the location of the package and your API key to push the package to the server.</value>

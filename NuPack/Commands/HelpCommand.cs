@@ -99,7 +99,7 @@ namespace NuGet {
 
             CommandAttribute attribute = _commandManager.GetCommandAttribute(command);
 
-            Console.WriteLine("usage: {0} {1}", _commandExe, attribute.CommandName);
+            Console.WriteLine("usage: {0} {1} {2}", _commandExe, attribute.CommandName, attribute.GetUsageSummary());
             Console.WriteLine();
 
             if (!String.IsNullOrEmpty(attribute.AltName)) {
