@@ -18,15 +18,13 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         public UpdatePackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
-            // Update dependencies by default
-            UpdateDependencies = true;
         }
 
         [Parameter(Position = 2)]
         public Version Version { get; set; }
 
         [Parameter(Position = 3)]
-        public SwitchParameter UpdateDependencies { get; set; }
+        public SwitchParameter IgnoreDependencies { get; set; }
 
         [Parameter(Position = 4)]
         public string Source { get; set; }
@@ -45,7 +43,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
 
             IProjectManager projectManager = ProjectManager;
-            PackageManager.UpdatePackage(projectManager, Id, Version, UpdateDependencies, this);
+            PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
         }
     }
 }

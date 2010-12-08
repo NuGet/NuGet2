@@ -346,7 +346,7 @@
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="false" position="named">
-          <maml:name>UpdateDependencies</maml:name>
+          <maml:name>IgnoreDependencies</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
           <maml:name>Project</maml:name>
@@ -380,9 +380,9 @@
         <dev:defaultValue></dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" position="named">
-        <maml:name>UpdateDependencies</maml:name>
+        <maml:name>IgnoreDependencies</maml:name>
         <maml:description>
-          <maml:para>Updates all of the package’s dependencies to the latest version. True by default.</maml:para>
+          <maml:para>Updates all of the package’s dependencies to the latest version. False by default.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">

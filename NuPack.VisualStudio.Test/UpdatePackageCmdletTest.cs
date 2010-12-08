@@ -68,7 +68,6 @@ namespace NuGet.VisualStudio.Test {
             var cmdlet = new Mock<UpdatePackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.UpdateDependencies = new SwitchParameter(isPresent: true);
 
             // Act
             cmdlet.Object.Execute();
@@ -80,14 +79,23 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void UpdatePackageCmdletSetsUpdateDependenciesToTrueByDefault() {
+        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectlyWhenPresent() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            var cmdlet = new UpdatePackageCmdlet(TestUtils.GetSolutionManager(), packageManagerFactory.Object);
-            
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var cmdlet = new Mock<UpdatePackageCmdlet>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(isPresent: true);
+
+            // Act
+            cmdlet.Object.Execute();
+
             // Assert
-            Assert.IsTrue(cmdlet.UpdateDependencies);
+            Assert.AreEqual("my-id", vsPackageManager.PackageId);
+            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
+            Assert.IsFalse(vsPackageManager.UpdateDependencies);
         }
 
         private class MockVsPackageManager : VsPackageManager {
