@@ -44,6 +44,34 @@ namespace NuGet {
             return package.Id + " " + package.Version;
         }
 
+        /// <summary>
+        /// Reduces the number of operations to the minimal set
+        /// </summary>
+        internal static IEnumerable<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations) {
+            // Break the set into 2 lists and remove duplicates
+            var removeList = operations.Where(o => o.Action == PackageAction.Uninstall)
+                                       .Distinct()
+                                       .Select(o => o.Package);
+
+            var addList = operations.Where(o => o.Action == PackageAction.Install)
+                                    .Distinct()
+                                    .Select(o => o.Package);
+
+            // Find the reduced set of packages to install and uninstall by taking the set difference in both ways
+            // i.e. if there are 2 lists:
+            // removedList = [-A, -B, -D]
+            // addList= [+A, +B, +C]
+            // reducedRemovedList = [-D]
+            // reducedAddedList = [+C]
+            var reducedRemoveList = from p in removeList.Except(addList, PackageEqualityComparer.IdAndVersion)
+                                    select new PackageOperation(p, PackageAction.Uninstall);
+
+            var reducedAddList = from p in addList.Except(removeList, PackageEqualityComparer.IdAndVersion)
+                                 select new PackageOperation(p, PackageAction.Install);
+            
+            return reducedRemoveList.Union(reducedAddList);
+        }
+
         public static IQueryable<IPackage> Find(this IQueryable<IPackage> packages, params string[] searchTerms) {
             if (searchTerms == null) {
                 return packages;

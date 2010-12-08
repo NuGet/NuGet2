@@ -112,7 +112,6 @@ namespace NuGet {
 
             // These are the packages that we need to look at for potential updates.
             IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList)
-                                                                           .OrderBy(p => p.Id)
                                                                            .AsEnumerable()
                                                                            .GroupBy(package => package.Id)
                                                                            .ToDictionary(package => package.Key,
@@ -141,8 +140,12 @@ namespace NuGet {
                 // Get the filter expression for that set of packages 
                 Expression<Func<IPackage, bool>> filterExpression = GetFilterExpression(currentPackages);
 
+                // Add the order by so aggregate queries work
+                IQueryable<IPackage> query = repository.GetPackages().Where(filterExpression)
+                                                                     .OrderBy(p => p.Id);
+
                 // Return the current batch
-                foreach (var package in repository.GetPackages().Where(filterExpression)) {
+                foreach (var package in query) {
                     yield return package;
                 }
 

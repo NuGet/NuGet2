@@ -259,6 +259,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There is no default source, please specify a source..
+        /// </summary>
+        internal static string PushCommandNoSourceError {
+            get {
+                return ResourceManager.GetString("PushCommandNoSourceError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your package has been uploaded to the server but not published..
         /// </summary>
         internal static string PushCommandPackageCreated {
@@ -291,6 +300,15 @@ namespace NuGet.Common {
         internal static string PushCommandPublishingPackage {
             get {
                 return ResourceManager.GetString("PushCommandPublishingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
+        /// </summary>
+        internal static string PushCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("PushCommandSourceDescription", resourceCulture);
             }
         }
         

@@ -79,20 +79,20 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Listing packages from &apos;{0}&apos;..
-        /// </summary>
-        public static string Cmdlet_ListingPackages {
-            get {
-                return ResourceManager.GetString("Cmdlet_ListingPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Missing Project parameter or invalid project name..
         /// </summary>
         public static string Cmdlet_MissingProjectParameter {
             get {
                 return ResourceManager.GetString("Cmdlet_MissingProjectParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No packages installed..
+        /// </summary>
+        public static string Cmdlet_NoPackagesInstalled {
+            get {
+                return ResourceManager.GetString("Cmdlet_NoPackagesInstalled", resourceCulture);
             }
         }
         

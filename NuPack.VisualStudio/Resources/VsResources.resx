@@ -192,8 +192,8 @@
   <data name="SolutionDirectoryNotAvailable" xml:space="preserve">
     <value>Unable to locate the solution directory. Please ensure that the solution has been saved.</value>
   </data>
-  <data name="Cmdlet_ListingPackages" xml:space="preserve">
-    <value>Listing packages from '{0}'.</value>
+  <data name="Cmdlet_NoPackagesInstalled" xml:space="preserve">
+    <value>No packages installed.</value>
   </data>
   <data name="ErrorReadingFile" xml:space="preserve">
     <value>Error reading '{0}'.</value>

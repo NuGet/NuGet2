@@ -249,7 +249,7 @@ namespace NuGet.VisualStudio.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
-            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, repositorySettings.Object) { CallBase = true }.Object;
+            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object) { CallBase = true }.Object;
             cmdlet.Remote = new SwitchParameter(isPresent: true);
 
             // Act and Assert
@@ -264,9 +264,7 @@ namespace NuGet.VisualStudio.Test {
         private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            var mockRepositorySettings = new Mock<IRepositorySettings>();
-            mockRepositorySettings.Setup(m => m.RepositoryPath).Returns("Some path");
-            return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object, mockRepositorySettings.Object);
+            return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

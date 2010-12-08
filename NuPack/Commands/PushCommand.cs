@@ -9,14 +9,13 @@ using NuGet.Common;
 namespace NuGet.Commands {
 
     [Export(typeof(ICommand))]
-    [Command(typeof(NuGetResources), "push", "PushCommandDescription", AltName = "p",
+    [Command(typeof(NuGetResources), "push", "PushCommandDescription",
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : ICommand {
         private const string _CreatePackageService = "PackageFiles";
         private const string _PublichPackageService = "PublishedPackages";
         private const string _UserAgentPattern = "CommandLine/{0} ({1})";
-        private const string _BaseGalleryServerUrlFWLink = "http://go.microsoft.com/fwlink/?LinkID=207106";
 
         private string _apiKey;
         private string _packagePath;
@@ -29,6 +28,9 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PushCommandPublishDescription", AltName = "pub")]
         public bool Publish { get; set; }
+
+        [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
+        public string Source { get; set; }
 
         [ImportingConstructor]
         public PushCommand(IConsole console) {
@@ -43,7 +45,11 @@ namespace NuGet.Commands {
             _apiKey = Arguments[1];
 
             var client = new HttpClient();
-            _baseGalleryServerUrl = GetSafeRedirectedUri(_BaseGalleryServerUrlFWLink);
+
+            if (String.IsNullOrEmpty(Source)) {
+                throw new CommandLineException(NuGetResources.PushCommandNoSourceError);
+            }
+            _baseGalleryServerUrl = GetSafeRedirectedUri(Source);
 
             var version = typeof(PushCommand).Assembly.GetNameSafe().Version;
             _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);

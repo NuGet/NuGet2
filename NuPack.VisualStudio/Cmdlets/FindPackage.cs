@@ -14,16 +14,14 @@ namespace NuGet.VisualStudio.Cmdlets {
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRepositorySettings>()) {
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
         public FindPackage(IPackageRepositoryFactory repositoryFactory,
                           IPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
-                          IVsPackageManagerFactory packageManagerFactory,
-                          IRepositorySettings settings)
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, settings) {
+                          IVsPackageManagerFactory packageManagerFactory)
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory) {
         }
 
         protected override IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository) {
