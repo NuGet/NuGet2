@@ -149,7 +149,9 @@ namespace NuGet.VisualStudio.Cmdlets {
                         };
 
             if (!UseRemoteSource) {
-                Log(MessageLevel.Info, String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ListingPackages, _settings.RepositoryPath));
+                if (!query.Any()) {
+                    Log(MessageLevel.Info, VsResources.Cmdlet_NoPackagesInstalled);
+                }
             }
 
             WriteObject(query, enumerateCollection: true);
