@@ -151,5 +151,36 @@ namespace NuGet.Test {
             Assert.AreEqual(new Version("3.0"), packages[2].Version);
             Assert.AreEqual("B", packages[3].Id);
         }
+
+        [TestMethod]
+        public void GetUpdates() {
+            // Arrange
+            var r1 = new MockPackageRepository() {
+                PackageUtility.CreatePackage("A", "2.0"),
+            };
+
+            var r2 = new MockPackageRepository() {
+                PackageUtility.CreatePackage("A"),
+            };
+
+            var r3 = new MockPackageRepository() {
+                PackageUtility.CreatePackage("A", "3.0"),
+            };
+
+            var r4 = new MockPackageRepository() {
+                PackageUtility.CreatePackage("A"),
+                PackageUtility.CreatePackage("B"),
+            };
+
+            var repository = new AggregateRepository(new[] { r1, r2, r3, r4 });
+
+            // Act
+            var updates = repository.GetUpdates(new[] { PackageUtility.CreatePackage("A", "1.0") }).ToList();
+
+            // Assert
+            Assert.AreEqual(1, updates.Count);
+            Assert.AreEqual("A", updates[0].Id);
+            Assert.AreEqual(new Version("3.0"), updates[0].Version);
+        }
     }
 }
