@@ -36,7 +36,6 @@ namespace NuGet.Commands {
         public PushCommand(IConsole console) {
             Console = console;
             Publish = true;
-            Source = String.Empty;
         }
 
         public void Execute() {
