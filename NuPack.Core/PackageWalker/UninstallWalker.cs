@@ -145,7 +145,7 @@ namespace NuGet {
                            String.Join(", ", pair.Value.Select(p => p.GetFullName())));
             }
 
-            return Operations;
+            return Operations.Reduce();
         }
 
         private IEnumerable<IPackage> GetDependents(IPackage package) {

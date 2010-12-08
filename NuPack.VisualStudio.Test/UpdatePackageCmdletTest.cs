@@ -79,6 +79,17 @@ namespace NuGet.VisualStudio.Test {
             Assert.IsTrue(vsPackageManager.UpdateDependencies);
         }
 
+        [TestMethod]
+        public void UpdatePackageCmdletSetsUpdateDependenciesToTrueByDefault() {
+            // Arrange
+            var vsPackageManager = new MockVsPackageManager();
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var cmdlet = new UpdatePackageCmdlet(TestUtils.GetSolutionManager(), packageManagerFactory.Object);
+            
+            // Assert
+            Assert.IsTrue(cmdlet.UpdateDependencies);
+        }
+
         private class MockVsPackageManager : VsPackageManager {
 
             public MockVsPackageManager()

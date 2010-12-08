@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
@@ -93,7 +94,7 @@ namespace NuGet.Test.VisualStudio {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             localRepository.Setup(m => m.IsReferenced("A", new Version("1.0"))).Returns(false);
-            var projectRepository = new MockPackageRepository();
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -119,7 +120,7 @@ namespace NuGet.Test.VisualStudio {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             localRepository.Setup(m => m.IsReferenced("A", new Version("1.0"))).Returns(true);
-            var projectRepository = new MockPackageRepository();
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -144,7 +145,7 @@ namespace NuGet.Test.VisualStudio {
         public void UpdatePackageWithSharedDependency() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            var projectRepository = new MockPackageRepository();
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -185,6 +186,135 @@ namespace NuGet.Test.VisualStudio {
             Assert.IsTrue(packageManager.LocalRepository.Exists(B20));
             Assert.IsTrue(packageManager.LocalRepository.Exists(F10));
             Assert.IsTrue(packageManager.LocalRepository.Exists(G10));
+        }
+
+        [TestMethod]
+        public void UpdatePackageWithSameDependency() {
+            // Arrange            
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            // A1 -> B1
+            // A2 -> B1
+            var A10 = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "A1.dll" }, dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0")) });
+            var A20 = PackageUtility.CreatePackage("A", "2.0", assemblyReferences: new[] { "A2.dll" }, dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0")) });
+            var B10 = PackageUtility.CreatePackage("B", "1.0", assemblyReferences: new[] { "B1.dll" });
+            sourceRepository.AddPackage(A10);
+            sourceRepository.AddPackage(A20);
+            sourceRepository.AddPackage(B10);
+            localRepository.Object.AddPackage(A10);
+            localRepository.Object.AddPackage(A20);
+            localRepository.Object.AddPackage(B10);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+            projectManager.AddPackageReference("A", new Version("1.0"));
+
+            // Act
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.IsFalse(packageManager.LocalRepository.Exists(A10));
+            Assert.IsFalse(projectSystem.ReferenceExists("A1.dll"));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(B10));
+            Assert.IsTrue(projectSystem.ReferenceExists("B1.dll"));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(A20));
+            Assert.IsTrue(projectSystem.ReferenceExists("A2.dll"));
+        }
+
+        [TestMethod]
+        public void UpdatePackageNewVersionOfPackageHasLessDependencies() {
+            // Arrange            
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            // A1 -> B1
+            // A2
+            var A10 = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "A1.dll" }, dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0")) });
+            var A20 = PackageUtility.CreatePackage("A", "2.0", assemblyReferences: new[] { "A2.dll" });
+            var B10 = PackageUtility.CreatePackage("B", "1.0", assemblyReferences: new[] { "B1.dll" });
+            sourceRepository.AddPackage(A10);
+            sourceRepository.AddPackage(A20);
+            sourceRepository.AddPackage(B10);
+            localRepository.Object.AddPackage(A10);
+            localRepository.Object.AddPackage(A20);
+            localRepository.Object.AddPackage(B10);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+            projectManager.AddPackageReference("A", new Version("1.0"));
+
+            // Act
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.IsFalse(packageManager.LocalRepository.Exists(A10));
+            Assert.IsFalse(projectSystem.ReferenceExists("A1.dll"));
+            Assert.IsFalse(packageManager.LocalRepository.Exists(B10));
+            Assert.IsFalse(projectSystem.ReferenceExists("B1.dll"));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(A20));
+            Assert.IsTrue(projectSystem.ReferenceExists("A2.dll"));
+        }
+
+        [TestMethod]
+        public void UpdatePackageWithMultipleSharedDependencies() {
+            // Arrange            
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            // A1 -> B1, C1
+            // A2 -> B1
+            var A10 = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "A1.dll" }, dependencies: new[] { 
+                new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0")),
+                new PackageDependency("C", VersionUtility.ParseVersionSpec("1.0")),
+            });
+            var A20 = PackageUtility.CreatePackage("A", "2.0", assemblyReferences: new[] { "A2.dll" }, dependencies: new[] { 
+                new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0"))
+            });
+            var B10 = PackageUtility.CreatePackage("B", "1.0", assemblyReferences: new[] { "B1.dll" });
+            var C10 = PackageUtility.CreatePackage("C", "1.0", assemblyReferences: new[] { "C1.dll" });
+            sourceRepository.AddPackage(A10);
+            sourceRepository.AddPackage(A20);
+            sourceRepository.AddPackage(B10);
+            sourceRepository.AddPackage(C10);
+            localRepository.Object.AddPackage(A10);
+            localRepository.Object.AddPackage(A20);
+            localRepository.Object.AddPackage(B10);
+            localRepository.Object.AddPackage(C10);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+            projectManager.AddPackageReference("A", new Version("1.0"));
+
+            // Act
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.IsFalse(packageManager.LocalRepository.Exists(A10));
+            Assert.IsFalse(projectSystem.ReferenceExists("A1.dll"));
+            Assert.IsFalse(packageManager.LocalRepository.Exists(C10));
+            Assert.IsFalse(projectSystem.ReferenceExists("C1.dll"));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(B10));
+            Assert.IsTrue(projectSystem.ReferenceExists("B1.dll"));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(A20));
+            Assert.IsTrue(projectSystem.ReferenceExists("A2.dll"));
+        }
+
+        // This repository better simulates what happens when we're running the package manager in vs
+        private class MockProjectPackageRepository : MockPackageRepository {
+            private readonly IPackageRepository _parent;
+            public MockProjectPackageRepository(IPackageRepository parent) {
+                _parent = parent;
+            }
+            public override IQueryable<IPackage> GetPackages() {
+                return base.GetPackages().Where(p => _parent.Exists(p));
+            }
         }
     }
 }

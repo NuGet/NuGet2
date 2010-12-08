@@ -18,6 +18,8 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         public UpdatePackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
+            // Update dependencies by default
+            UpdateDependencies = true;
         }
 
         [Parameter(Position = 2)]
