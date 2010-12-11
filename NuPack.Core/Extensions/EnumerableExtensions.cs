@@ -36,7 +36,6 @@ namespace NuGet {
             T single = null;
             foreach (var item in source) {
                 if (single == null) {
-                    // The first time single isn't null so assign it
                     single = item;
                 }
                 else {
@@ -45,7 +44,6 @@ namespace NuGet {
                 }
             }
 
-            // Return the only item in the enumeration
             return single;
         }
 
