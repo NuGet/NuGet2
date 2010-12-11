@@ -1,9 +1,8 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
     [TestClass]
@@ -171,6 +170,40 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsFalse(packages.Any());
+        }
+
+        [TestMethod]
+        public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision() {
+            // Arrange
+            var repository = new MockPackageRepository() {
+                PackageUtility.CreatePackage("B", "2.0"),
+                PackageUtility.CreatePackage("B", "1.0"),
+                PackageUtility.CreatePackage("B", "1.0.1"),
+                PackageUtility.CreatePackage("B", "1.0.9"),
+                PackageUtility.CreatePackage("B", "1.1")
+            };
+
+            // B >= 1.0
+            PackageDependency dependency1 = PackageDependency.CreateDependency("B", "1.0");
+
+            // B >= 1.0.0
+            PackageDependency dependency2 = PackageDependency.CreateDependency("B", "1.0.0");
+
+            // B >= 1.0.0.0
+            PackageDependency dependency3 = PackageDependency.CreateDependency("B", "1.0.0.0");
+
+            // Act
+            IPackage package1 = repository.FindDependency(dependency1);
+            IPackage package2 = repository.FindDependency(dependency2);
+            IPackage package3 = repository.FindDependency(dependency3);
+
+            // Assert
+            Assert.AreEqual("B", package1.Id);
+            Assert.AreEqual(new Version("1.0.9"), package1.Version);
+            Assert.AreEqual("B", package2.Id);
+            Assert.AreEqual(new Version("1.0.9"), package2.Version);
+            Assert.AreEqual("B", package3.Id);
+            Assert.AreEqual(new Version("1.0.9"), package3.Version);
         }
 
         private static IPackageRepository GetEmptyRepository() {

@@ -86,15 +86,31 @@ namespace NuGet {
 
             // When looking for dependencies, order by lowest version
             IEnumerable<IPackage> packages = repository.FindPackagesById(dependency.Id)
-                                                       .AsEnumerable()
-                                                       .OrderBy(p => p.Version);
+                                                       .AsEnumerable();
 
             // If version info was specified then use it
             if (dependency.VersionSpec != null) {
                 packages = packages.FindByVersion(dependency.VersionSpec);
             }
 
-            return packages.FirstOrDefault();
+            if (packages.Any()) {
+                // We want to take the biggest build and revision number for the smallest
+                // major and minor combination (we want to make some versioning assumptions that the 3rd number is a non-breaking bug fix). This is so that we get the closest version
+                // to the dependency, but also get bug fixes without requiring people to manually update the nuspec.
+                // For example, if A -> B 1.0.0 and the feed has B 1.0.0 and B 1.0.1 then the more correct choice is B 1.0.1. 
+                // If we don't do this, A will always end up getting the 'buggy' 1.0.0, 
+                // unless someone explicitly changes it to ask for 1.0.1, which is very painful if many packages are using B 1.0.0.
+                var groups = from p in packages
+                             group p by new { p.Version.Major, p.Version.Minor } into g
+                             orderby g.Key.Major, g.Key.Minor
+                             select g;
+
+                return (from p in groups.First()
+                        orderby p.Version descending
+                        select p).FirstOrDefault();
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -132,7 +148,7 @@ namespace NuGet {
         /// </summary>
         private static IEnumerable<IPackage> GetUpdateCandidates(IPackageRepository repository, IEnumerable<IPackage> packages) {
             const int batchSize = 10;
-            
+
             while (packages.Any()) {
                 // Get the current batch
                 IEnumerable<IPackage> currentPackages = packages.Take(batchSize);

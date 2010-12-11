@@ -607,6 +607,49 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(solutionPackage), "External packages cannot depend on packages that target projects.");
         }
 
+        [TestMethod]
+        public void InstallWalkerResolvesLowestMajorAndMinorVersionButHighestBuildAndRevisionForDependencies() {
+            // Arrange
+
+            // A 1.0 -> B 1.0
+            // B 1.0 -> C 1.1
+            // C 1.1 -> D 1.0
+
+            var A10 = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { PackageDependency.CreateDependency("B", "1.0") });
+            
+            var repository = new MockPackageRepository() {
+                PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
+                PackageUtility.CreatePackage("B", "1.0", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
+                PackageUtility.CreatePackage("B", "1.0.1"),
+                A10,
+                PackageUtility.CreatePackage("D", "2.0"),
+                PackageUtility.CreatePackage("C", "1.1.3", dependencies: new[] { PackageDependency.CreateDependency("D", "1.0") }),
+                PackageUtility.CreatePackage("C", "1.1.1", dependencies: new[] { PackageDependency.CreateDependency("D", "1.0") }),
+                PackageUtility.CreatePackage("C", "1.5.1", dependencies: new[] { PackageDependency.CreateDependency("D", "1.0") }),
+                PackageUtility.CreatePackage("B", "1.0.9", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
+                PackageUtility.CreatePackage("B", "1.1", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") })
+            };
+
+
+            IPackageOperationResolver resolver = new InstallWalker(new MockPackageRepository(),
+                                                                   repository,
+                                                                   NullLogger.Instance,
+                                                                   ignoreDependencies: false);
+            // Act
+            var packages = resolver.ResolveOperations(A10).ToList();
+
+            // Assert
+            Assert.AreEqual(4, packages.Count);
+            Assert.AreEqual("D", packages[0].Package.Id);
+            Assert.AreEqual(new Version("2.0"), packages[0].Package.Version);
+            Assert.AreEqual("C", packages[1].Package.Id);
+            Assert.AreEqual(new Version("1.1.3"), packages[1].Package.Version);
+            Assert.AreEqual("B", packages[2].Package.Id);
+            Assert.AreEqual(new Version("1.0.9"), packages[2].Package.Version);
+            Assert.AreEqual("A", packages[3].Package.Id);
+            Assert.AreEqual(new Version("1.0"), packages[3].Package.Version);
+        }
+
         private class TestWalker : PackageWalker {
             private readonly IPackageRepository _repository;
             public TestWalker(IPackageRepository repository) {
