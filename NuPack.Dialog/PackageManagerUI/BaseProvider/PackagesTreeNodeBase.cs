@@ -28,7 +28,6 @@ namespace NuGet.Dialog.Providers {
         private bool _progressPaneActive;
         private bool _isExpanded;
         private bool _isSelected;
-        private bool _activeQueryStateCancelled;
         private bool _loadingInProgress;
 
         private CancellationTokenSource _currentCancellationSource;
@@ -112,9 +111,7 @@ namespace NuGet.Dialog.Providers {
                     EnsureExtensionCollection();
                     LoadPage(1);
                 }
-                else if (_activeQueryStateCancelled) {
-                    LoadPage(CurrentPage);
-                }
+                
                 return _extensions;
             }
         }
@@ -216,7 +213,6 @@ namespace NuGet.Dialog.Providers {
 
             // avoid more than one loading occurring at the same time
             _loadingInProgress = true;
-            _activeQueryStateCancelled = false;
 
             _currentCancellationSource = new CancellationTokenSource();
 
@@ -229,8 +225,10 @@ namespace NuGet.Dialog.Providers {
                 uiScheduler = TaskScheduler.Default;
             }
 
-            Task.Factory.StartNew((state) => ExecuteAsync(pageNumber, _currentCancellationSource.Token), _currentCancellationSource, _currentCancellationSource.Token).
-                ContinueWith(QueryExecutionCompleted, uiScheduler);
+            Task.Factory.StartNew(
+                (state) => ExecuteAsync(pageNumber, _currentCancellationSource.Token), 
+                _currentCancellationSource, 
+                _currentCancellationSource.Token).ContinueWith(QueryExecutionCompleted, uiScheduler);
         }
 
         private void EnsureExtensionCollection() {
@@ -248,7 +246,6 @@ namespace NuGet.Dialog.Providers {
             if (_currentCancellationSource != null) {
                 _currentCancellationSource.Cancel();
                 _loadingInProgress = false;
-                _activeQueryStateCancelled = true;
             }
         }
 
@@ -308,12 +305,16 @@ namespace NuGet.Dialog.Providers {
             return Provider.SortDescriptors;
         }
 
+        protected void ResetQuery() {
+            _query = null;
+        }
+
         public bool SortSelectionChanged(IVsSortDescriptor selectedDescriptor) {
             Provider.CurrentSort = selectedDescriptor as PackageSortDescriptor;
 
             if (Provider.CurrentSort != null) {
                 // If we changed the sort order then invalidate the cache.
-                _query = null;
+                ResetQuery();
 
                 // Reload the first page since the sort order changed
                 LoadPage(1);
@@ -336,7 +337,6 @@ namespace NuGet.Dialog.Providers {
             _loadingInProgress = false;
 
             if (task.IsCanceled) {
-                _activeQueryStateCancelled = false;
                 HideProgressPane();
             }
             else if (task.IsFaulted) {

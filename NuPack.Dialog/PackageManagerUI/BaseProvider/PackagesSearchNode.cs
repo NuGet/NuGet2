@@ -6,7 +6,7 @@ namespace NuGet.Dialog.Providers {
 
     internal class PackagesSearchNode : PackagesTreeNodeBase {
 
-        private readonly string _searchText;
+        private string _searchText;
         private readonly PackagesTreeNodeBase _baseNode;
 
         public PackagesTreeNodeBase BaseNode {
@@ -32,6 +32,21 @@ namespace NuGet.Dialog.Providers {
         public override string Name {
             get {
                 return Resources.Dialog_RootNodeSearch;
+            }
+        }
+
+        public void ChangeSearchText(string newSearchText) {
+            if (newSearchText == null) {
+                throw new ArgumentNullException("newSearchText");
+            }
+
+            if (_searchText != newSearchText) {
+                _searchText = newSearchText;
+
+                if (IsSelected) {
+                    ResetQuery();
+                    LoadPage(CurrentPage);
+                }
             }
         }
 

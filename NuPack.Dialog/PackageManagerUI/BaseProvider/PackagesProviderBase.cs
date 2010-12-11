@@ -13,7 +13,7 @@ namespace NuGet.Dialog.Providers {
     /// </summary>
     internal abstract class PackagesProviderBase : VsExtensionsProvider {
 
-        private PackagesTreeNodeBase _searchNode;
+        private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
 
@@ -121,16 +121,22 @@ namespace NuGet.Dialog.Providers {
             return Name;
         }
 
-        public override IVsExtensionsTreeNode Search(string searchTerms) {
+        public override IVsExtensionsTreeNode Search(string searchText) {
             if (OperationCoordinator.IsBusy) {
                 return null;
             }
 
-            RemoveSearchNode();
-
-            if (!String.IsNullOrEmpty(searchTerms) && SelectedNode != null) {
-                _searchNode = new PackagesSearchNode(this, this.RootNode, SelectedNode, searchTerms);
-                AddSearchNode();
+            if (!String.IsNullOrEmpty(searchText) && SelectedNode != null) {
+                if (_searchNode != null) {
+                    _searchNode.ChangeSearchText(searchText);
+                }
+                else {
+                    _searchNode = new PackagesSearchNode(this, this.RootNode, SelectedNode, searchText);
+                    AddSearchNode();
+                }
+            }
+            else {
+                RemoveSearchNode();
             }
 
             return _searchNode;
@@ -138,13 +144,13 @@ namespace NuGet.Dialog.Providers {
 
         private void RemoveSearchNode() {
             if (_searchNode != null) {
-                // dispose any search results
-                RootNode.Nodes.Remove(_searchNode);
-                _searchNode = null;
-
                 if (_lastSelectedNode != null) {
                     SelectNode(_lastSelectedNode);
                 }
+
+                // dispose any search results
+                RootNode.Nodes.Remove(_searchNode);
+                _searchNode = null;
             }
         }
 
