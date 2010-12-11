@@ -29,6 +29,27 @@ namespace NuGet {
         }
 
         /// <summary>
+        /// This is a small optimization so we don't need to count the number of items in a list to check if there is only one.
+        /// SingleOrDefault throws if there is more than one item in the list, we're replacing the throw behavior with return null hence the name.
+        /// </summary>
+        internal static T SingleOrNull<T>(this IEnumerable<T> source) where T : class {
+            T single = null;
+            foreach (var item in source) {
+                if (single == null) {
+                    // The first time single isn't null so assign it
+                    single = item;
+                }
+                else {
+                    // If there is more than one item then just return null immediately
+                    return null;
+                }
+            }
+
+            // Return the only item in the enumeration
+            return single;
+        }
+
+        /// <summary>
         /// Replacing closures with constant values is required only when executing in partial trust and the NuGet assembly is GACed.
         /// </summary>
         private static bool IsRewritingRequired() {
