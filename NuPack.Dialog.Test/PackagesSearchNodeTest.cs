@@ -27,6 +27,25 @@ namespace NuGet.Dialog.Test {
         }
 
         [TestMethod]
+        public void SetSearchTextMethodChangesQuery() {
+            // Arrange
+            PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
+
+            // Act
+            node.SetSearchText("B");
+            var packages1 = node.GetPackages().ToList();
+
+            node.SetSearchText("A1");
+            var packages2 = node.GetPackages().ToList();
+
+            // Assert
+            Assert.AreEqual(0, packages1.Count);
+
+            Assert.AreEqual(1, packages2.Count);
+            Assert.AreEqual("A1", packages2[0].Id);
+        }
+
+        [TestMethod]
         public void GetPackagesReturnsCorrectPackagesBasedOnExtensions() {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);

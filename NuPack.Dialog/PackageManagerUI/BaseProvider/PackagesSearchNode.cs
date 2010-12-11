@@ -35,7 +35,7 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        public void ChangeSearchText(string newSearchText) {
+        public void SetSearchText(string newSearchText) {
             if (newSearchText == null) {
                 throw new ArgumentNullException("newSearchText");
             }
@@ -45,7 +45,7 @@ namespace NuGet.Dialog.Providers {
 
                 if (IsSelected) {
                     ResetQuery();
-                    LoadPage(CurrentPage);
+                    Refresh();
                 }
             }
         }

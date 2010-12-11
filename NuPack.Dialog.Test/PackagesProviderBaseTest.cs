@@ -85,6 +85,35 @@ namespace NuGet.Dialog.Test {
         }
 
         [TestMethod]
+        public void SearchMethodDoNotCreateNewSearchNodeWhenSearchTextChanges() {
+            // Arrange
+            PackagesProviderBase provider = CreatePackagesProviderBase();
+            provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
+
+            // Act
+            IVsExtensionsTreeNode searchNode = provider.Search("hello");
+            IVsExtensionsTreeNode secondSearchNode = provider.Search("hellop");
+
+            // Assert
+            Assert.AreSame(searchNode, secondSearchNode);
+        }
+
+        [TestMethod]
+        public void SearchMethodReturnsNullForNullOrEmptySearchText() {
+            // Arrange
+            PackagesProviderBase provider = CreatePackagesProviderBase();
+            provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
+
+            // Act
+            IVsExtensionsTreeNode searchNode = provider.Search(null);
+            IVsExtensionsTreeNode secondSearchNode = provider.Search("");
+
+            // Assert
+            Assert.IsNull(searchNode);
+            Assert.IsNull(secondSearchNode);
+        }
+
+        [TestMethod]
         public void MediumIconDataTemplate() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
@@ -137,7 +166,7 @@ namespace NuGet.Dialog.Test {
                 repository.AddPackage(PackageUtility.CreatePackage("world", "2.0"));
                 repository.AddPackage(PackageUtility.CreatePackage("nuget", "3.0"));
 
-                RootNode.Nodes.Add(new SimpleTreeNode(new MockPackagesProvider(), "All", RootNode, repository));
+                RootNode.Nodes.Add(new SimpleTreeNode(this, "All", RootNode, repository));
             }
 
             public override string Name {

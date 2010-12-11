@@ -128,7 +128,7 @@ namespace NuGet.Dialog.Providers {
 
             if (!String.IsNullOrEmpty(searchText) && SelectedNode != null) {
                 if (_searchNode != null) {
-                    _searchNode.ChangeSearchText(searchText);
+                    _searchNode.SetSearchText(searchText);
                 }
                 else {
                     _searchNode = new PackagesSearchNode(this, this.RootNode, SelectedNode, searchText);
