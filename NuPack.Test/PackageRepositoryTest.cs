@@ -192,10 +192,18 @@ namespace NuGet.Test {
             // B >= 1.0.0.0
             PackageDependency dependency3 = PackageDependency.CreateDependency("B", "1.0.0.0");
 
+            // B = 1.0
+            PackageDependency dependency4 = PackageDependency.CreateDependency("B", "[1.0]");
+
+            // B >= 1.0.0 && <= 1.0.8
+            PackageDependency dependency5 = PackageDependency.CreateDependency("B", "[1.0.0, 1.0.8]");
+
             // Act
             IPackage package1 = repository.FindDependency(dependency1);
             IPackage package2 = repository.FindDependency(dependency2);
             IPackage package3 = repository.FindDependency(dependency3);
+            IPackage package4 = repository.FindDependency(dependency4);
+            IPackage package5 = repository.FindDependency(dependency5);
 
             // Assert
             Assert.AreEqual("B", package1.Id);
@@ -204,6 +212,10 @@ namespace NuGet.Test {
             Assert.AreEqual(new Version("1.0.9"), package2.Version);
             Assert.AreEqual("B", package3.Id);
             Assert.AreEqual(new Version("1.0.9"), package3.Version);
+            Assert.AreEqual("B", package4.Id);
+            Assert.AreEqual(new Version("1.0"), package4.Version);
+            Assert.AreEqual("B", package5.Id);
+            Assert.AreEqual(new Version("1.0.1"), package5.Version);
         }
 
         private static IPackageRepository GetEmptyRepository() {
