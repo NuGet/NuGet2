@@ -11,7 +11,10 @@ namespace NuGet.Test {
             // Arrange
             var repository = new AggregateRepository(new[] { 
                 new MockPackageRepository { 
-                    PackageUtility.CreatePackage("A") 
+                    PackageUtility.CreatePackage("A"), 
+                }, 
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("B"), 
                 } 
             });
 
