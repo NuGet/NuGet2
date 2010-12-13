@@ -129,6 +129,8 @@ namespace NuGet {
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
             Operations.Clear();
+            Marker.Reset();
+
             Walk(package);
 
             // Log warnings for packages that were forcibly removed

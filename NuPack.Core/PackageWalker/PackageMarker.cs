@@ -39,6 +39,10 @@ namespace NuGet {
             return Visited.TryGetValue(package, out packageVisitedState) && packageVisitedState == VisitedState.Processing;
         }
 
+        public void Reset() {
+            Visited.Clear();
+        }
+
         internal enum VisitedState {
             Processing,
             Completed

@@ -16,6 +16,7 @@ namespace NuGet {
         }
 
         public IEnumerable<IPackage> GetDependencies(IPackage package) {
+            Marker.Reset();
             _dependencies = new HashSet<IPackage>();
             _dependencies.Add(package);
 

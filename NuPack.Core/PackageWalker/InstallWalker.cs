@@ -105,6 +105,8 @@ namespace NuGet {
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
             Operations.Clear();
+            Marker.Reset();
+
             Walk(package);
             return Operations.Reduce();
         }
