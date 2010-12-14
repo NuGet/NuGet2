@@ -115,6 +115,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No packages are installed. Click the Online tab to search for packages available online..
+        /// </summary>
+        public static string Dialog_InstalledProviderNoItem {
+            get {
+                return ResourceManager.GetString("Dialog_InstalledProviderNoItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operation failed.
         /// </summary>
         public static string Dialog_MessageBoxTitle {
@@ -147,6 +156,15 @@ namespace NuGet.Dialog {
         public static string Dialog_OnlineProvider {
             get {
                 return ResourceManager.GetString("Dialog_OnlineProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No packages found in the current source..
+        /// </summary>
+        public static string Dialog_OnlineProviderNoItem {
+            get {
+                return ResourceManager.GetString("Dialog_OnlineProviderNoItem", resourceCulture);
             }
         }
         
@@ -318,6 +336,15 @@ namespace NuGet.Dialog {
         public static string Dialog_UpdateProvider {
             get {
                 return ResourceManager.GetString("Dialog_UpdateProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No package updates are available..
+        /// </summary>
+        public static string Dialog_UpdatesProviderNoItem {
+            get {
+                return ResourceManager.GetString("Dialog_UpdatesProviderNoItem", resourceCulture);
             }
         }
         

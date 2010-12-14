@@ -81,7 +81,8 @@
                 IsMediumIconsViewButtonVisible="False"
                 IsSmallIconsViewButtonVisible="False"
                 IsLargeIconsViewButtonVisible="False"
-                CategorySelectionChanged="OnCategorySelectionChanged" />
+                CategorySelectionChanged="OnCategorySelectionChanged"
+                ProviderSelectionChanged="OnProviderSelectionChanged" />
         </Border>
 
         <Border 

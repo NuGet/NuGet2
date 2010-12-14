@@ -123,5 +123,11 @@ namespace NuGet.Dialog.Providers {
                 CommandName = Resources.Dialog_InstallButton
             };
         }
+
+        public override string NoItemsMessage {
+            get {
+                return Resources.Dialog_OnlineProviderNoItem;
+            }
+        }
     }
 }

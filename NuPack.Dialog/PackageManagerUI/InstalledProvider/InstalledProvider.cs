@@ -68,5 +68,11 @@ namespace NuGet.Dialog.Providers {
                 CommandName = Resources.Dialog_UninstallButton
             };
         }
+
+        public override string NoItemsMessage {
+            get {
+                return Resources.Dialog_InstalledProviderNoItem;
+            }
+        }
     }
 }

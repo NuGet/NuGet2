@@ -79,5 +79,11 @@ namespace NuGet.Dialog.Providers {
                 CommandName = Resources.Dialog_UpdateButton
             };
         }
+
+        public override string NoItemsMessage {
+            get {
+                return Resources.Dialog_UpdatesProviderNoItem;
+            }
+        }
     }
 }

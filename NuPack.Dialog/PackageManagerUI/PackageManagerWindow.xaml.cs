@@ -224,5 +224,12 @@ namespace NuGet.Dialog.PackageManagerUI {
                 return null;
             }
         }
+
+        private void OnProviderSelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
+            if (selectedProvider != null) {
+                explorer.NoItemsMessage = selectedProvider.NoItemsMessage;
+            }
+        }
     }
 }

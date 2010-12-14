@@ -233,5 +233,11 @@ namespace NuGet.Dialog.Providers {
 
         protected virtual void OnExecuteCompleted(PackageItem item) {
         }
+
+        public virtual string NoItemsMessage {
+            get {
+                return String.Empty;
+            } 
+        }
     }
 }
