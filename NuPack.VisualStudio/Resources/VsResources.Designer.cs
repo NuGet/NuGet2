@@ -70,7 +70,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executing script file {0}..
+        ///   Looks up a localized string similar to Executing script file &apos;{0}&apos;..
         /// </summary>
         public static string Cmdlet_ExecutingScript {
             get {

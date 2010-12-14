@@ -144,7 +144,7 @@ namespace NuGet.VisualStudio.Cmdlets {
                 psVariable.Set("__project", project);
 
                 string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
-                WriteVerbose(VsResources.Cmdlet_ExecutingScript);
+                WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ExecutingScript, fullPath));
                 InvokeCommand.InvokeScript(command);
 
                 // clear temp variables
