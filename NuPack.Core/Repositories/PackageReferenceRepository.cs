@@ -150,9 +150,6 @@ namespace NuGet {
                 // Remove the file if there are no more elements
                 if (!document.Root.HasElements) {
                     FileSystem.DeleteFile(PackageReferenceFile);
-
-                    // Remove the repository from the source
-                    SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
                 }
                 else {
                     // Otherwise save the updated document
