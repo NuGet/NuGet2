@@ -48,50 +48,6 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void UnregisterRepositoryRemovesPathFromRepositoriesConfig() {
-            // Arrange
-            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<repositories>
-  <repository path=""A\packages.config"" />
-  <repository path=""B\packages.config"" />
-</repositories>");
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
-            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object);
-
-            // Act
-            repository.UnregisterRepository(@"c:\foo\A\packages.config");
-
-            // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<repositories>
-  <repository path=""B\packages.config"" />
-</repositories>", fileSystem.Object.ReadAllText("repositories.config"));
-        }
-
-        [TestMethod]
-        public void UnregisterRepositoryWithRelativePathRemovesPathFromRepositoriesConfig() {
-            // Arrange
-            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<repositories>
-  <repository path=""A\packages.config"" />
-  <repository path=""B\packages.config"" />
-</repositories>");
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
-            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object);
-
-            // Act
-            repository.UnregisterRepository(@"A\packages.config");
-
-            // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<repositories>
-  <repository path=""B\packages.config"" />
-</repositories>", fileSystem.Object.ReadAllText("repositories.config"));
-        }
-
-        [TestMethod]
         public void GetRepositoryPathsRemovesInvalidOrNonExistantPathsAndReturnsRelativePaths() {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };

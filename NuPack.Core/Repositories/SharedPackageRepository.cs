@@ -33,7 +33,8 @@ namespace NuGet {
         }
 
         protected virtual IPackageRepository CreateRepository(string path) {
-            string absolutePath = PathUtility.GetAbsolutePath(FileSystem.Root, path);
+            string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
+            string absolutePath = PathUtility.GetAbsolutePath(root, path);
             string directory = Path.GetDirectoryName(absolutePath);
             return new PackageReferenceRepository(new PhysicalFileSystem(directory), this);
         }
