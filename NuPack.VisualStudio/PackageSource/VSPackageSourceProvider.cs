@@ -8,7 +8,7 @@ namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IPackageSourceProvider {
-        internal const string DefaultPackageSource = "http://go.microsoft.com/fwlink/?LinkID=206669";
+        internal const string DefaultPackageSource = "https://go.microsoft.com/fwlink/?LinkID=206669";
         internal const string OfficialFeedName = "NuGet official package source";
         internal static readonly PackageSource AggregateSource = new PackageSource("(Aggregate source)", "All") { IsAggregate = true };
 
