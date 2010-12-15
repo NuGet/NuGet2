@@ -23,6 +23,10 @@ namespace NuGet {
             AddEntry(path);
         }
 
+        public void UnregisterRepository(string path) {
+            DeleteEntry(path);
+        }
+
         public bool IsReferenced(string packageId, Version version) {
             // See if this package exists in any other repository before we remove it
             return GetRepositories().Any(r => r.Exists(packageId, version));
@@ -94,7 +98,33 @@ namespace NuGet {
 
             SaveDocument(document);
         }
-        
+
+        private void DeleteEntry(string path) {
+            // Get the relative path
+            path = NormalizePath(path);
+
+            // Remove the repository from the document
+            XDocument document = GetStoreDocument();
+
+            if (document == null) {
+                return;
+            }
+
+            XElement element = FindEntry(document, path);
+
+            if (element != null) {
+                element.Remove();
+
+                // No more entries so remove the file
+                if (!document.Root.HasElements) {
+                    FileSystem.DeleteFile(StoreFilePath);
+                }
+                else {
+                    SaveDocument(document);
+                }
+            }
+        }
+
         private static IEnumerable<XElement> GetRepositoryElements(XDocument document) {
             return from e in document.Root.Elements("repository")
                    select e;
