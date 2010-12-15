@@ -87,16 +87,25 @@ namespace NuGet.Dialog.Providers {
                 return false;
             }
 
-            DependencyResolver helper = new DependencyResolver(activePackageManager.SourceRepository);
-            IList<IPackage> dependencies = helper.GetDependencies(item.PackageIdentity).ToList();
+            var walker = new InstallWalker(
+                ProjectManager.LocalRepository,
+                activePackageManager.SourceRepository,
+                NullLogger.Instance,
+                ignoreDependencies: false);
 
-            IEnumerable<IPackage> scriptPackages = dependencies.Where(p => p.HasPowerShellScript());
+            IList<PackageOperation> operations = walker.ResolveOperations(item.PackageIdentity).ToList();
+
+            IEnumerable<IPackage> scriptPackages = from o in operations
+                                                   where o.Action == PackageAction.Install && o.Package.HasPowerShellScript()
+                                                   select o.Package;
             if (scriptPackages.Any()) {
                 MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
                 return false;
             }
 
-            IEnumerable<IPackage> licensePackages = dependencies.Where(p => p.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(p));
+            IEnumerable<IPackage> licensePackages = from o in operations
+                                                    where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(o.Package)
+                                                    select o.Package;
             // display license window if necessary
             if (licensePackages.Any()) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);

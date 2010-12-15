@@ -11,11 +11,15 @@ namespace NuGet.Dialog.Providers {
     internal class UpdatesProvider : PackagesProviderBase {
 
         private IVsPackageManager _packageManager;
+        private Lazy<InstallWalker> _walker;
 
         public UpdatesProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
             : base(projectManager, resources) {
 
             _packageManager = packageManager;
+
+            _walker = new Lazy<InstallWalker>(
+                () => new InstallWalker(ProjectManager.LocalRepository, _packageManager.SourceRepository, NullLogger.Instance, ignoreDependencies: false));
         }
 
         public override string Name {
@@ -55,11 +59,14 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+
+            IEnumerable<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity);
+            IList<IPackage> licensePackages = (from o in operations
+                                               where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !_packageManager.LocalRepository.Exists(o.Package)
+                                               select o.Package).ToList();
+
             // display license window if necessary
-            DependencyResolver helper = new DependencyResolver(_packageManager.SourceRepository);
-            IEnumerable<IPackage> licensePackages = helper.GetDependencies(item.PackageIdentity)
-                                                          .Where(p => p.RequireLicenseAcceptance && !_packageManager.LocalRepository.Exists(p));
-            if (licensePackages.Any()) {
+            if (licensePackages.Count > 0) {
                 bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
                     return false;
