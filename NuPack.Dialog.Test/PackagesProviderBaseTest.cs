@@ -99,6 +99,28 @@ namespace NuGet.Dialog.Test {
         }
 
         [TestMethod]
+        public void AfterSearchIsDoneTheOriginalNodeIsResetToTheFirstPage() {
+            // Arrage
+            PackagesProviderBase provider = CreatePackagesProviderBase();
+            provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
+
+            // Act
+            provider.SelectedNode.CurrentPage = 2;
+
+            // Assert
+            Assert.AreEqual(2, provider.SelectedNode.CurrentPage);
+
+            // Act
+            provider.Search("hello");
+            // clear the search
+            provider.Search("");
+
+            // Assert
+            Assert.IsNotNull(provider.SelectedNode);
+            Assert.AreEqual(1, provider.SelectedNode.CurrentPage);
+        }
+
+        [TestMethod]
         public void SearchMethodReturnsNullForNullOrEmptySearchText() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();

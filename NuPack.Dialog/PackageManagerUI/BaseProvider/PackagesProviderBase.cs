@@ -145,6 +145,8 @@ namespace NuGet.Dialog.Providers {
         private void RemoveSearchNode() {
             if (_searchNode != null) {
                 if (_lastSelectedNode != null) {
+                    // after search, we want to reset the original node to page 1 (Work Item #461) 
+                    _lastSelectedNode.CurrentPage = 1;
                     SelectNode(_lastSelectedNode);
                 }
 
