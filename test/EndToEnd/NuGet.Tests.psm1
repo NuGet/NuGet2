@@ -1,35 +1,55 @@
-# Get the current path and load the functions script
 $currentPath = Split-Path $MyInvocation.MyCommand.Definition
-$testOutputPath = Join-Path $currentPath "bin"
-$templatePath = Join-Path $currentPath "ProjectTemplates"
 
-function New-Guid {
-    [System.Guid]::NewGuid().ToString("d").Substring(0, 4)
-}
+# Directory where the projects and solutions are created
+$testOutputPath = Join-Path $currentPath bin
+
+# Directory where vs templates are located
+$templatePath = Join-Path $currentPath ProjectTemplates
+
+# Directory where test scripts are located
+$testPath = Join-Path $currentPath tests
+
+$utilityPath = Join-Path $currentPath utility.ps1
+
+# TODO: Add the ability to rerun failed tests from the previous run
 
 function global:Run-Test {
-    param($test)
+    param(
+        [string]$Test,
+        [switch]$NewSolution
+    )
+    
+    # Load the utility script since we need to use guid
+    . $utilityPath
     
     # Get a reference to the powershell window so we can set focus after the tests are over
     $window = $dte.ActiveWindow
     
     # Close any solution that might be open
-    # REVIEW: Should this be a flag?
     if($dte.Solution -and $dte.Solution.IsOpen) {
-        $dte.Solution.Close()
-    }    
+        if($NewSolution) {
+            $dte.Solution.Close()
+        }
+    }
     
     $testRunId = New-Guid
     $testRunOutputPath = Join-Path $testOutputPath $testRunId
     $testRunResultsFile = Join-Path $testRunOutputPath "Results.txt"
     
+    # Create the output folder
     mkdir $testRunOutputPath | Out-Null
-    
-    # Load all of the test scripts
+       
+    # Load all of the helper scripts from the current location
     Get-ChildItem $currentPath -Filter *.ps1 | %{ 
         . $_.FullName $testRunOutputPath $templatePath
     }
     
+    # Load all of the test scripts
+    Get-ChildItem $testPath -Filter *.ps1 | %{ 
+        . $_.FullName
+    } 
+    
+    # Get all of the the tests functions
     $allTests = Get-ChildItem function:\Test*
     
     # If no tests were specified just run all
@@ -37,31 +57,34 @@ function global:Run-Test {
         $tests = $allTests
     }
     else {
-        $tests = @(Get-ChildItem "function:\Test-$test")
+        $tests = @(Get-ChildItem "function:\Test-$Test")
+        
         if($tests.Count -eq 0) {
-            throw "The test `"$test`" doesn't exist"
+            throw "The test `"$Test`" doesn't exist"
         } 
     }    
     
     try {
         # Run all tests
         $tests | %{ 
-            try {
-                $name = $_.Name.Substring(5)
-                
-                "Running Test $name..."
-                & $_
-                Write-Host -ForegroundColor DarkGreen "$name Pass" 
-                "$name Pass" >> $testRunResultsFile
-            }
-            finally {
-                # Closed all of the windows after a test runs
-                $dte.Documents | %{ $_.Close() }
-            }
+            # Trim the Test- prefix
+            $name = $_.Name.Substring(5)
+            
+            "Running Test $name..."
+            
+            # REVIEW: We should give the test some context
+            # Execute the test
+            & $_
+           
+            Write-Host -ForegroundColor DarkGreen "$name Pass"
+            
+            "$name Pass" >> $testRunResultsFile        
         }
     }
     catch {
-        "$name Failed: $_" >> $testRunResultsFile
+        Write-Host -ForegroundColor Red "$name Failed"
+        
+        "$name Failed: $_" >> $testRunResultsFile        
         throw
     }
     finally {    
