@@ -1,6 +1,7 @@
 # Get the current path and load the functions script
-$__execPath = Split-Path $MyInvocation.MyCommand.Definition
-$__testOutputPath = Join-Path $__execPath "bin"
+$currentPath = Split-Path $MyInvocation.MyCommand.Definition
+$testOutputPath = Join-Path $currentPath "bin"
+$templatePath = Join-Path $currentPath "ProjectTemplates"
 
 function New-Guid {
     [System.Guid]::NewGuid().ToString("d").Substring(0, 4)
@@ -16,18 +17,17 @@ function global:Run-Test {
     # REVIEW: Should this be a flag?
     if($dte.Solution -and $dte.Solution.IsOpen) {
         $dte.Solution.Close()
-    }
-    
+    }    
     
     $testRunId = New-Guid
-    $testRunOutputPath = Join-Path $__testOutputPath $testRunId
+    $testRunOutputPath = Join-Path $testOutputPath $testRunId
     $testRunResultsFile = Join-Path $testRunOutputPath "Results.txt"
     
     mkdir $testRunOutputPath | Out-Null
     
     # Load all of the test scripts
-    Get-ChildItem $__execPath -Filter *.ps1 | %{ 
-        . $_.FullName $testRunOutputPath
+    Get-ChildItem $currentPath -Filter *.ps1 | %{ 
+        . $_.FullName $testRunOutputPath $templatePath
     }
     
     $allTests = Get-ChildItem function:\Test*

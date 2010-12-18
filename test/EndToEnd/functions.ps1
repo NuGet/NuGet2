@@ -1,4 +1,4 @@
-param([string]$outputPath)
+param([string]$outputPath, [string]$templatePath)
 
 # Make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
@@ -25,24 +25,24 @@ function New-Solution {
     Ensure-Dir $solutionDir
      
     $dte.Solution.Create($solutionDir, $name) | Out-Null
-    $dte.Solution.SaveAs($solutionPath) | Out-Null
+    $dte.Solution.SaveAs($solutionPath) | Out-Null    
 }
 
 function New-Project {
     param(
-         [string]$name,
-         [string]$lang = "CSharp"
+         [string]$name
     )
     
     $id = New-Guid
     $projectName = $name + "_$id"
     
     Ensure-Solution
-    $templatePath = $dte.Solution.GetProjectTemplate("$name.zip", $lang)
+    $projectTemplatePath = Join-Path $templatePath "$name.zip"
+    $projectTemplateFilePath = @(Get-ChildItem $projectTemplatePath -Filter *.vstemplate)[0].FullName
     $solutionDir = Split-Path $dte.Solution.FullName
     $destPath = Join-Path $solutionDir $projectName
     
-    $dte.Solution.AddFromTemplate($templatePath, $destPath, $projectName) | Out-Null
+    $dte.Solution.AddFromTemplate($projectTemplateFilePath, $destPath, $projectName, $false) | Out-Null
     Get-Project $projectName
 }
 
