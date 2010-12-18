@@ -1,93 +1,104 @@
 # Assert functions
-function Assert-Fail {
+function Build-ErrorMessage {
     param(
-        [parameter(mandatory = $true)]
-        $Message
+        [parameter(Mandatory = $true)]
+        [string]$BaseMessage,
+        [string]$Message
     )
     
-    # Get the call up the stack before this one
-    $stack = @(Get-PSCallStack)[1]
+    if($Message) {
+        $BaseMessage += ". $Message"
+    }
     
+    $BaseMessage
+}
+
+function Get-AssertError {
+    param(
+        [parameter(Mandatory = $true)]
+        [string]$BaseMessage,
+        [string]$Message
+    )
+    
+    $Message = Build-ErrorMessage $BaseMessage $Message
+        
     # Get the last non assert call
-    $lastCall = Get-PSCallStack | ?{ !$_.Command.StartsWith('Assert') } | Select -First 1
+    $lastCall = Get-PSCallStack | Select -Skip 1 | ?{ !$_.Command.StartsWith('Assert') } | Select -First 1
     
-    Write-Error "$($stack.Command) failed $Message at $($lastCall.Location)"
+    "$Message. At $($lastCall.Location)"
+}
+
+function Assert-Fail {
+    param(
+        [parameter(Mandatory = $true)]
+        [string]$Message
+    )
+    
+    Write-Error (Get-AssertError "Failed" $Message)
 }
 
 function Assert-NotNull {
     param(
-        [parameter(mandatory = $true)]
         $Value,
-        $Message
+        [string]$Message
     )
-    if(!$Message) {
-        $Message = "Value is null"
-    }
     
     if(!$Value) {
-        Assert-Fail $Message
+        Write-Error (Get-AssertError "Value is null" $Message)
     }
 }
 
 function Assert-Null {
     param(
         $Value,
-        $Message
+        [string]$Message
     )
-    if(!$Message) {
-        $Message = "Value is not null"
-    }
     
     if($Value) {
-        Assert-Fail $Message
+        Write-Error (Get-AssertError "Value is not null" $Message)
     }
 }
 
 function Assert-AreEqual {
     param(
-         [parameter(mandatory = $true)]
+         [parameter(Mandatory = $true)]
          $Expected, 
-         [parameter(mandatory = $true)]
-         $Actual
+         [parameter(Mandatory = $true)]
+         $Actual,
+         [string]$Message
     )
     
     if($Expected -ne $Actual) {
-        Assert-Fail "Expected $Expected but got $Actual"
+        Write-Error (Get-AssertError "Expected <$Expected> but got <$Actual>" $Message)
     } 
 }
 
 function Assert-PathExists {
     param(
-          [parameter(mandatory = $true)]
+          [parameter(Mandatory = $true)]
           [string]$Path, 
           [string]$Message
     )
     
     if(!(Test-Path $Path)) {
-        if(!$Message) {
-            $Message = "Path `"$Path`" does not exist"
-        }        
-        Assert-Fail $Message
+        Write-Error (Get-AssertError "The path `"$Path`" does not exist" $Message)
     }
 }
 
 function Assert-Reference {
     param(
-         [parameter(mandatory = $true)]
+         [parameter(Mandatory = $true)]
          $Project, 
-         [parameter(mandatory = $true)]
+         [parameter(Mandatory = $true)]
          [string]$Reference,
          [string]$Version
     )
     
     $assemblyReference = Get-AssemblyReference $Project $Reference
     
-    if(!$assemblyReference) {
-        Assert-Fail "Reference `"$Reference`" does not exist"
-    }
-    elseif(!$assemblyReference.Path) {
-        Assert-Fail "Reference `"$Reference`" exists but is broken"
-    }
+    Assert-NotNull $assemblyReference "Reference `"$Reference`" does not exist"
+    Assert-NotNull $assemblyReference.Path "Reference `"$Reference`" exists but is broken"
+    Assert-PathExists $assemblyReference.Path "Reference `"$Reference`" exists but is broken"
     
     if($Version) {
         $actualVersion = [Version]::Parse($Version)
@@ -104,23 +115,8 @@ function Assert-Build {
     
     Build-Project $Project $Configuration
     
-    # Make sure there are no errors in the error list
-    $errorList = $dte.Windows | ?{ $_.Caption -eq 'Error List' } | Select -First 1
+    # Get the errors from the error list
+    $errors = Get-Errors    
     
-    if(!$errorList) {
-        Assert-Fail "Unable to locate the error list"
-    }
-    
-    $errors = $errorList.Object.ErrorItems
-    
-    if($errors.Count -gt 0) {
-        if($errors.Count -eq 1) {
-            $errorsMessage = "There was 1 error"
-        }   
-        else {
-            $errorsMessage = "There were $($errors.Count) erros"
-        }
-        # REVIEW: Should we show the error window?
-        Assert-Fail "Failed to build `"$($Project.Name)`". $errorsMessage"
-    }
+    Assert-AreEqual 0 $errors.Count "Failed to build `"$($Project.Name)`. There were errors in the list."
 }

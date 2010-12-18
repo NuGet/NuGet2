@@ -165,6 +165,20 @@ function Get-OutputPath {
     Join-Path (Get-ProjectDir) $outputPath
 }
 
+function Get-Errors {
+    $dte.ExecuteCommand("View.ErrorList", " ")
+    
+    # Make sure there are no errors in the error list
+    $errorList = $dte.Windows | ?{ $_.Caption -eq 'Error List' } | Select -First 1
+    
+    if(!$errorList) {
+        throw "Unable to locate the error list"
+    }
+    
+    # Get the list of errors from the error list
+    $errorList.Object.ErrorItems    
+}
+
 function Get-ProjectItem {
     param(
         [parameter(Mandatory = $true)]

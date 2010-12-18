@@ -11,6 +11,9 @@ $testPath = Join-Path $currentPath tests
 
 $utilityPath = Join-Path $currentPath utility.ps1
 
+# Directory where the test packages are (This is passed to each test method)
+$testRepositoryPath = Join-Path $currentPath Packages
+
 # TODO: Add the ability to rerun failed tests from the previous run
 
 function global:Run-Test {
@@ -73,8 +76,8 @@ function global:Run-Test {
             "Running Test $name..."
             
             # REVIEW: We should give the test some context
-            # Execute the test
-            & $_
+            # Execute the test passing the repository path
+            & $_ $testRepositoryPath
            
             Write-Host -ForegroundColor DarkGreen "$name Pass"
             
