@@ -5,11 +5,10 @@ function Assert-Fail {
         $Message
     )
     
-    Get-PSCallStack
-    
-    # Get the cal up teh stack before this one
+    # Get the call up the stack before this one
     $stack = @(Get-PSCallStack)[1]
     
+    # Get the last non assert call
     $lastCall = Get-PSCallStack | ?{ !$_.Command.StartsWith('Assert') } | Select -First 1
     
     Write-Error "$($stack.Command) failed $Message at $($lastCall.Location)"
@@ -91,7 +90,8 @@ function Assert-Reference {
     }
     
     if($Version) {
-        Assert-AreEqual $Version $assemblyReference.Version
+        $actualVersion = [Version]::Parse($Version)
+        Assert-AreEqual $actualVersion $assemblyReference.Version
     }
 }
 
