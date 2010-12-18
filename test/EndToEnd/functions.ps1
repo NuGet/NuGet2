@@ -62,6 +62,18 @@ function New-MvcApplication {
     New-Project EmptyMvcWebApplicationProjectTemplatev2.0.cs
 }
 
+function Build-Project {
+    param(
+        $project
+        [string]$configuration
+    )
+    if(!$configuration) {
+        # If no configuration was specified then use
+        $configuration = $dte.Solution.SolutionBuild.ActiveConfiguration.Name
+    }    
+    $dte.Solution.SolutionBuild.BuildProject($configuration, $project.UniqueName, $true)
+}
+
 function Assert-PackagesConfig {
     param($project)
     try {
@@ -184,5 +196,5 @@ function Get-PackagesDir {
 
 function Assert-Fail {
     param($message)
-    throw "ASSERT: $message"
+    throw "FAILED : $message"
 }
