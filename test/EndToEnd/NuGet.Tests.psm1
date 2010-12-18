@@ -79,13 +79,13 @@ function global:Run-Test {
             # Execute the test passing the repository path
             & $_ $testRepositoryPath
            
-            Write-Host -ForegroundColor DarkGreen "$name Pass"
+            Write-Host -ForegroundColor DarkGreen "Test $name Pass"
             
             "$name Pass" >> $testRunResultsFile        
         }
     }
     catch {
-        Write-Host -ForegroundColor Red "$name Failed"
+        Write-Host -ForegroundColor Red "Test $name Failed"
         
         "$name Failed: $_" >> $testRunResultsFile        
         throw
