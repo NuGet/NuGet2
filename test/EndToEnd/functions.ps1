@@ -64,7 +64,7 @@ function New-MvcApplication {
 
 function Build-Project {
     param(
-        $project
+        $project,
         [string]$configuration
     )
     if(!$configuration) {
