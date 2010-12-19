@@ -4,7 +4,7 @@ using System.Linq;
 namespace NuGet.Dialog.Providers {
     internal class LazyRepository : IPackageRepository {
 
-        private Lazy<IPackageRepository> _repository;
+        private readonly Lazy<IPackageRepository> _repository;
 
         private IPackageRepository Repository {
             get { 

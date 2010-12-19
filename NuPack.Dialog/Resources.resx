@@ -136,7 +136,7 @@
     <value>Installed packages</value>
   </data>
   <data name="Dialog_InstalledProviderNoItem" xml:space="preserve">
-    <value>No packages are installed. Click the Online tab to search for packages available online.</value>
+    <value>No packages are installed in the current project.</value>
   </data>
   <data name="Dialog_MessageBoxTitle" xml:space="preserve">
     <value>Operation failed</value>
@@ -151,7 +151,7 @@
     <value>Online</value>
   </data>
   <data name="Dialog_OnlineProviderNoItem" xml:space="preserve">
-    <value>No packages found in the current source.</value>
+    <value>No packages found in the current package source.</value>
   </data>
   <data name="Dialog_PackageDisclaimer" xml:space="preserve">
     <value>Each item above may have sub-dependencies subject to additional license agreements.</value>
@@ -211,7 +211,7 @@
     <value>Updates</value>
   </data>
   <data name="Dialog_UpdatesProviderNoItem" xml:space="preserve">
-    <value>No package updates are available.</value>
+    <value>No package updates are available for the current project.</value>
   </data>
   <data name="Dialog_VersionLabel" xml:space="preserve">
     <value>Version:</value>

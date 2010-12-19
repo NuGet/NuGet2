@@ -115,7 +115,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No packages are installed. Click the Online tab to search for packages available online..
+        ///   Looks up a localized string similar to No packages are installed in the current project..
         /// </summary>
         public static string Dialog_InstalledProviderNoItem {
             get {
@@ -160,7 +160,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No packages found in the current source..
+        ///   Looks up a localized string similar to No packages found in the current package source..
         /// </summary>
         public static string Dialog_OnlineProviderNoItem {
             get {
@@ -340,7 +340,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No package updates are available..
+        ///   Looks up a localized string similar to No package updates are available for the current project..
         /// </summary>
         public static string Dialog_UpdatesProviderNoItem {
             get {

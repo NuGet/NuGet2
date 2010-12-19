@@ -33,7 +33,6 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-
         protected override IList<IVsSortDescriptor> CreateSortDescriptors() {
             return new List<IVsSortDescriptor> {
                         new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortAscending), "Id"),
