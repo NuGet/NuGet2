@@ -95,14 +95,26 @@ function Assert-Reference {
     )
     
     $assemblyReference = Get-AssemblyReference $Project $Reference
-    
     Assert-NotNull $assemblyReference "Reference `"$Reference`" does not exist"
-    Assert-NotNull $assemblyReference.Path "Reference `"$Reference`" exists but is broken"
-    Assert-PathExists $assemblyReference.Path "Reference `"$Reference`" exists but is broken"
+    
+    $path = $assemblyReference.Path
+    
+    # Support for websites
+    if(!$path) {
+        $path = $assemblyReference.FullPath
+    }
+    
+    Assert-NotNull $path "Reference `"$Reference`" exists but is broken"
+    Assert-PathExists $path "Reference `"$Reference`" exists but is broken"
     
     if($Version) {
+        $assemblyVersion = $assemblyReference.Version
+        if(!$assemblyVersion) {
+            $assemblyVersion = [System.Reflection.AssemblyName]::GetAssemblyName($path).Version
+        }
+        
         $actualVersion = [Version]::Parse($Version)
-        Assert-AreEqual $actualVersion $assemblyReference.Version
+        Assert-AreEqual $actualVersion $assemblyVersion
     }
 }
 

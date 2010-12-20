@@ -80,7 +80,13 @@ function New-Project {
     $window.SetFocus()
     
     # Return the project
-    Get-Project $projectName
+    $project = Get-Project $projectName 
+    
+    if(!$project) {
+        $project = Get-Project "$destPath\"
+    }
+    
+    $project
 }
 
 function New-ClassLibrary { 
@@ -97,6 +103,10 @@ function New-WebApplication {
 
 function New-MvcApplication { 
     New-Project EmptyMvcWebApplicationProjectTemplatev2.0.cs
+}
+
+function New-WebSite {
+    New-Project EmptyWeb
 }
 
 function Build-Project {
