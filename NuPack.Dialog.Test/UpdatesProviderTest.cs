@@ -163,7 +163,7 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, "A", new Version("2.0"), true), Times.Once());
+                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true), Times.Once());
 
                 manualEvent.Set();
             };

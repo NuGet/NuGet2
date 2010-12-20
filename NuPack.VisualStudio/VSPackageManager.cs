@@ -53,6 +53,10 @@ namespace NuGet.VisualStudio {
             // the user has to manually clean it up by uninstalling it
             InstallPackage(packageId, version, ignoreDependencies);
 
+            AddPackageReference(projectManager, packageId, version, ignoreDependencies);
+        }
+
+        private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
             if (projectManager != null) {
                 EventHandler<PackageOperationEventArgs> handler = (sender, e) => {
                     // Remove any packages that would be removed as a result of updating a dependency or the package itself
@@ -71,6 +75,22 @@ namespace NuGet.VisualStudio {
                     projectManager.PackageReferenceRemoved -= handler;
                 }
             }
+        }
+
+        public void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies) {
+            if (package == null) {
+                throw new ArgumentNullException("package");
+            }
+
+            if (operations == null) {
+                throw new ArgumentNullException("operations");
+            }
+
+            foreach (var operation in operations) {
+                Execute(operation);
+            }
+
+            AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies);
         }
 
         public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies) {
@@ -96,6 +116,10 @@ namespace NuGet.VisualStudio {
         // REVIEW: Do we even need this method?
         public virtual void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger) {
             InstallPackage(projectManager, packageId, version, !updateDependencies, logger);
+        }
+
+        public void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies) {
+            InstallPackage(projectManager, package, operations, !updateDependencies);
         }
 
         protected override void ExecuteUninstall(IPackage package) {

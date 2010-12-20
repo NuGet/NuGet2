@@ -31,6 +31,42 @@ namespace NuGet.Test.VisualStudio {
         }
 
         [TestMethod]
+        public void InstallPackageWithOperationsExecuteAllOperations() {
+            // Arrange 
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, projectSystem, localRepository);
+
+            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, dependencies: new PackageDependency[] { new PackageDependency("bar") });
+            sourceRepository.AddPackage(package);
+
+            var package2 = PackageUtility.CreatePackage("bar", "2.0", new[] { "world" });
+            sourceRepository.AddPackage(package2);
+
+            var package3 = PackageUtility.CreatePackage("awesome", "1.0", new[] { "candy" });
+            localRepository.AddPackage(package3);
+
+            var operations = new PackageOperation[] {  
+                 new PackageOperation(package, PackageAction.Install), 
+                 new PackageOperation(package2, PackageAction.Install), 
+                 new PackageOperation(package3, PackageAction.Uninstall) 
+             };
+
+            // Act 
+            packageManager.InstallPackage(projectManager, package, operations, ignoreDependencies: false);
+
+            // Assert 
+            Assert.IsTrue(packageManager.LocalRepository.Exists(package));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(package2));
+            Assert.IsTrue(!packageManager.LocalRepository.Exists(package3));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(package));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(package2));
+        }
+
+        [TestMethod]
         public void InstallPackgeWithNullProjectManagerOnlyInstallsIntoPackageManager() {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;

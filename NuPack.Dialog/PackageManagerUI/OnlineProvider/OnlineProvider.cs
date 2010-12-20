@@ -114,7 +114,7 @@ namespace NuGet.Dialog.Providers {
                 }
             }
 
-            activePackageManager.InstallPackage(ProjectManager, item.Id, new Version(item.Version), ignoreDependencies: false);
+            activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false);
             return true;
         }
 

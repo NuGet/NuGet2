@@ -60,7 +60,7 @@ namespace NuGet.Dialog.Providers {
 
         protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
 
-            IEnumerable<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity);
+            IList<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity).ToList();
             IList<IPackage> licensePackages = (from o in operations
                                                where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !_packageManager.LocalRepository.Exists(o.Package)
                                                select o.Package).ToList();
@@ -73,7 +73,7 @@ namespace NuGet.Dialog.Providers {
                 }
             }
 
-            _packageManager.UpdatePackage(ProjectManager, item.Id, new Version(item.Version), updateDependencies: true);
+            _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true);
             return true;
         }
 
