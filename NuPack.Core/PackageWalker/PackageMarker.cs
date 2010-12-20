@@ -1,46 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NuGet {
-    using System.Collections.Generic;
+    /// <summary>
+    /// Keeps track of a package's visited state while walking a graph. It also acts as a package repository and
+    /// a dependents resolver for the live graph.
+    /// </summary>
+    public sealed class PackageMarker : IPackageRepository, IDependentsResolver {
+        private readonly Dictionary<string, Dictionary<IPackage, VisitedState>> _visited = new Dictionary<string, Dictionary<IPackage, VisitedState>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<IPackage, HashSet<IPackage>> _dependents = new Dictionary<IPackage, HashSet<IPackage>>(PackageEqualityComparer.IdAndVersion);
 
-    public class PackageMarker {
-        public PackageMarker()
-            : this(PackageEqualityComparer.Id) {
-        }
-
-        public PackageMarker(IEqualityComparer<IPackage> equalityComparer) {
-            Visited = new Dictionary<IPackage, VisitedState>(equalityComparer);
-        }
-
-        private IDictionary<IPackage, VisitedState> Visited {
-            get;
-            set;
-        }
-
+        /// <summary>
+        /// Returns all packages regardless we've ever seen
+        /// </summary>
         public IEnumerable<IPackage> Packages {
             get {
-                return Visited.Keys;
+                return _visited.Values.SelectMany(p => p.Keys);
             }
         }
 
+        public bool Contains(IPackage package) {
+            Dictionary<IPackage, VisitedState> lookup = GetLookup(package.Id, createEntry: true);
+            return lookup != null && lookup.ContainsKey(package);
+        }
+
         public void MarkProcessing(IPackage package) {
-            Visited[package] = VisitedState.Processing;
+            Dictionary<IPackage, VisitedState> lookup = GetLookup(package.Id, createEntry: true);
+            lookup[package] = VisitedState.Processing;
         }
 
         public void MarkVisited(IPackage package) {
-            Visited[package] = VisitedState.Completed;
+            Dictionary<IPackage, VisitedState> lookup = GetLookup(package.Id, createEntry: true);
+            lookup[package] = VisitedState.Completed;
+        }
+
+        public bool IsVersionCycle(string packageId) {
+            Dictionary<IPackage, VisitedState> lookup = GetLookup(packageId);
+            return lookup != null && lookup.Values.Any(state => state == VisitedState.Processing);
         }
 
         public bool IsVisited(IPackage package) {
-            VisitedState packageVisitedState;
-            return Visited.TryGetValue(package, out packageVisitedState) && packageVisitedState == VisitedState.Completed;
+            Dictionary<IPackage, VisitedState> lookup = GetLookup(package.Id);
+            VisitedState state;
+            return lookup != null && lookup.TryGetValue(package, out state) && state == VisitedState.Completed;
         }
 
         public bool IsCycle(IPackage package) {
-            VisitedState packageVisitedState;
-            return Visited.TryGetValue(package, out packageVisitedState) && packageVisitedState == VisitedState.Processing;
+            Dictionary<IPackage, VisitedState> lookup = GetLookup(package.Id);
+            VisitedState state;
+            return lookup != null && lookup.TryGetValue(package, out state) && state == VisitedState.Processing;
         }
 
-        public void Reset() {
-            Visited.Clear();
+        public void Clear() {
+            _visited.Clear();
+            _dependents.Clear();
+        }
+
+        IQueryable<IPackage> IPackageRepository.GetPackages() {
+            // Return visited packages only
+            return Packages.Where(IsVisited).AsSafeQueryable();
+        }
+
+        void IPackageRepository.AddPackage(IPackage package) {
+            throw new NotSupportedException();
+        }
+
+        void IPackageRepository.RemovePackage(IPackage package) {
+            throw new NotSupportedException();
+        }
+
+        IEnumerable<IPackage> IDependentsResolver.GetDependents(IPackage package) {
+            HashSet<IPackage> dependents;
+            if (_dependents.TryGetValue(package, out dependents)) {
+                return dependents;
+            }
+            return Enumerable.Empty<IPackage>();
+        }
+
+        /// <summary>
+        /// While walking the package graph we call this to update dependents.
+        /// </summary>
+        public void AddDependent(IPackage package, IPackage dependency) {
+            HashSet<IPackage> values;
+            if (!_dependents.TryGetValue(dependency, out values)) {
+                values = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
+                _dependents.Add(dependency, values);
+            }
+
+            // Add the current package to the list of dependents
+            values.Add(package);
+        }
+
+        private Dictionary<IPackage, VisitedState> GetLookup(string packageId, bool createEntry = false) {
+            Dictionary<IPackage, VisitedState> state;
+            if (!_visited.TryGetValue(packageId, out state)) {
+                if (createEntry) {
+                    state = new Dictionary<IPackage, VisitedState>(PackageEqualityComparer.IdAndVersion);
+                    _visited[packageId] = state;
+                }
+            }
+            return state;
         }
 
         internal enum VisitedState {

@@ -64,7 +64,7 @@ namespace NuGet {
             private set;
         }
 
-        protected override void OnBeforeDependencyWalk(IPackage package) {
+        protected override void OnBeforePackageWalk(IPackage package) {
             // Before choosing to uninstall a package we need to figure out if it is in use
             IEnumerable<IPackage> dependents = GetDependents(package);
             if (dependents.Any()) {
@@ -129,7 +129,7 @@ namespace NuGet {
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
             Operations.Clear();
-            Marker.Reset();
+            Marker.Clear();
 
             Walk(package);
 
@@ -159,7 +159,7 @@ namespace NuGet {
 
         private bool IsConnected(IPackage package) {
             // We could cache the results of this lookup
-            if (Marker.Packages.Contains(package, PackageEqualityComparer.IdAndVersion)) {
+            if (Marker.Contains(package)) {
                 return true;
             }
 

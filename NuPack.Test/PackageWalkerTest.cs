@@ -146,6 +146,87 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ResolveDependenciesForInstallDiamondDependencyGraphWithDifferntVersionOfSamePackage() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            // A -> [B, C]
+            // B -> [D >= 1, E >= 2]
+            // C -> [D >= 2, E >= 1]
+            //     A
+            //   /   \
+            //  B     C
+            //  | \   | \
+            //  D1 E2 D2 E1
+
+            IPackage packageA = PackageUtility.CreateProjectLevelPackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    new PackageDependency("B"),
+                                                                    new PackageDependency("C")
+                                                                });
+
+
+            IPackage packageB = PackageUtility.CreateProjectLevelPackage("B", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("D", "1.0"),
+                                                                    PackageDependency.CreateDependency("E", "2.0")
+                                                                });
+
+            IPackage packageC = PackageUtility.CreateProjectLevelPackage("C", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("D", "2.0"),
+                                                                    PackageDependency.CreateDependency("E", "1.0")
+                                                                });
+
+            IPackage packageD10 = PackageUtility.CreateProjectLevelPackage("D", "1.0");
+            IPackage packageD20 = PackageUtility.CreateProjectLevelPackage("D", "2.0");
+            IPackage packageE10 = PackageUtility.CreateProjectLevelPackage("E", "1.0");
+            IPackage packageE20 = PackageUtility.CreateProjectLevelPackage("E", "2.0");
+
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageD20);
+            sourceRepository.AddPackage(packageD10);
+            sourceRepository.AddPackage(packageE20);
+            sourceRepository.AddPackage(packageE10);
+
+            IPackageOperationResolver projectResolver = new ProjectInstallWalker(localRepository,
+                                                                                sourceRepository,
+                                                                                new DependentsWalker(localRepository),
+                                                                                NullLogger.Instance,
+                                                                                ignoreDependencies: false);
+
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
+                                                                   sourceRepository,
+                                                                   NullLogger.Instance,
+                                                                   ignoreDependencies: false);
+
+            // Act
+            var operations = resolver.ResolveOperations(packageA).ToList();
+            var projectOperations = resolver.ResolveOperations(packageA).ToList();
+
+            // Assert
+            Assert.AreEqual(5, operations.Count);
+            Assert.AreEqual("E", operations[0].Package.Id);
+            Assert.AreEqual(new Version("2.0"), operations[0].Package.Version);
+            Assert.AreEqual("B", operations[1].Package.Id);
+            Assert.AreEqual("D", operations[2].Package.Id);
+            Assert.AreEqual(new Version("2.0"), operations[2].Package.Version);
+            Assert.AreEqual("C", operations[3].Package.Id);
+            Assert.AreEqual("A", operations[4].Package.Id);
+
+            Assert.AreEqual(5, projectOperations.Count);
+            Assert.AreEqual("E", projectOperations[0].Package.Id);
+            Assert.AreEqual(new Version("2.0"), projectOperations[0].Package.Version);
+            Assert.AreEqual("B", projectOperations[1].Package.Id);
+            Assert.AreEqual("D", projectOperations[2].Package.Id);
+            Assert.AreEqual(new Version("2.0"), projectOperations[2].Package.Version);
+            Assert.AreEqual("C", projectOperations[3].Package.Id);
+            Assert.AreEqual("A", projectOperations[4].Package.Id);
+        }
+
+        [TestMethod]
         public void ResolveDependenciesForUninstallDiamondDependencyGraph() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -201,7 +282,6 @@ namespace NuGet.Test {
             Assert.IsNotNull(packages["C"]);
             Assert.IsNotNull(packages["D"]);
         }
-
 
         [TestMethod]
         public void ResolveDependencyForInstallCircularReferenceWithDifferentVersionOfPackageReferenceThrows() {

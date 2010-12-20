@@ -45,6 +45,7 @@
     <Compile Include="IProjectManager.cs" />
     <Compile Include="Packages\IPackageMetadata.cs" />
     <Compile Include="Packages\IServerPackageMetadata.cs" />
+    <Compile Include="PackageWalker\ConflictResult.cs" />
     <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
     <Compile Include="PackageWalker\IDependentsResolver.cs" />
     <Compile Include="PackageWalker\PackageAction.cs" />

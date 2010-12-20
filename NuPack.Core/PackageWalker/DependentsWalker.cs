@@ -1,9 +1,9 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
+namespace NuGet {
     public class DependentsWalker : PackageWalker, IDependentsResolver {
         public DependentsWalker(IPackageRepository repository) {
             if (repository == null) {
@@ -26,10 +26,6 @@ namespace NuGet {
         private IDictionary<IPackage, HashSet<IPackage>> DependentsLookup {
             get;
             set;
-        }
-
-        protected override PackageMarker CreateMarker() {
-            return new PackageMarker(PackageEqualityComparer.IdAndVersion);
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {

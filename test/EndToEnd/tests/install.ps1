@@ -28,6 +28,38 @@ function Test-WebsiteSimpleInstall {
     Assert-Reference $p HtmlSanitizationLibrary 4.0.0.0
 }
 
+function Test-DiamondDependencies {
+    param(
+        [string]$Repository
+    )
+    
+    # Scenario:
+    # TestPackageD 1.0 -> TestPackageB 1.0, TestPackageC 1.0
+    # TestPackageB 1.0 -> TestPackageA 1.0 
+    # TestPackageC 1.0 -> TestPackageA 2.0
+    #     TestPackageD 1.0
+    #      /            \
+    # TestPackageB 1.0 TestPackageC 1.0
+    #     |              |
+    # TestPackageA 1.0 TestPackageA 2.0
+    
+    # Arrange 
+    $packages = @("TestPackageA", "TestPackageB", "TestPackageC", "TestPackageD")
+    $project = New-ClassLibrary
+    
+    # Act
+    Install-Package TestPackageD -Project $project.Name -Source $Repository
+    
+    # Assert
+    $packages | %{ Assert-SolutionPackage $_ }
+    $packages | %{ Assert-Package $project $_ }
+    $packages | %{ Assert-Reference $project $_ }
+    Assert-Package $project TestPackageA 2.0.0.0
+    Assert-Reference $project TestPackageA 2.0.0.0
+    Assert-Null (Get-ProjectPackage $project TestPackageA 1.0.0.0) 
+    Assert-Null (Get-SolutionPackage TestPackageA 1.0.0.0)
+}
+
 function Test-WebsiteWillNotDuplicateConfigOnReInstall {
     # Arrange
     $p = New-WebSite

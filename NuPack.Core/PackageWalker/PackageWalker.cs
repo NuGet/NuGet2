@@ -1,16 +1,16 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Linq;
-    using NuGet.Resources;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using NuGet.Resources;
 
+namespace NuGet {
     public abstract class PackageWalker {
         private readonly Dictionary<IPackage, PackageWalkInfo> _packageLookup = new Dictionary<IPackage, PackageWalkInfo>();
-        private PackageMarker _marker;
 
         protected PackageWalker() {
+            Marker = new PackageMarker();
         }
 
         protected virtual bool RaiseErrorOnCycle {
@@ -26,16 +26,8 @@ namespace NuGet {
         }
 
         protected PackageMarker Marker {
-            get {
-                if (_marker == null) {
-                    _marker = CreateMarker();
-                }
-                return _marker;
-            }
-        }
-
-        protected virtual PackageMarker CreateMarker() {
-            return new PackageMarker();
+            get;
+            private set;
         }
 
         public void Walk(IPackage package) {
@@ -44,18 +36,16 @@ namespace NuGet {
                 return;
             }
 
-            OnBeforeDependencyWalk(package);
+            OnBeforePackageWalk(package);
 
             // Mark the package as processing
             Marker.MarkProcessing(package);
 
             if (!IgnoreDependencies) {
                 foreach (var dependency in package.Dependencies) {
-                    if (!OnBeforeResolveDependency(dependency)) {
-                        continue;
-                    }
-
-                    IPackage resolvedDependency = ResolveDependency(dependency);
+                    // Try to resolve the dependency from the visited packages first
+                    IPackage resolvedDependency = Marker.FindDependency(dependency) ??
+                                                  ResolveDependency(dependency);
 
                     if (resolvedDependency == null) {
                         OnDependencyResolveError(dependency);
@@ -66,11 +56,14 @@ namespace NuGet {
                     PackageWalkInfo dependencyInfo = GetPackageInfo(resolvedDependency);
                     dependencyInfo.Parent = package;
 
+                    Marker.AddDependent(package, resolvedDependency);
+
                     if (!OnAfterResolveDependency(package, resolvedDependency)) {
                         continue;
                     }
 
-                    if (Marker.IsCycle(resolvedDependency)) {
+                    if (Marker.IsCycle(resolvedDependency) || 
+                        Marker.IsVersionCycle(resolvedDependency.Id)) {
                         if (RaiseErrorOnCycle) {
                             List<IPackage> packages = Marker.Packages.ToList();
                             packages.Add(resolvedDependency);
@@ -123,11 +116,7 @@ namespace NuGet {
             return true;
         }
 
-        protected virtual bool OnBeforeResolveDependency(PackageDependency dependency) {
-            return true;
-        }
-
-        protected virtual void OnBeforeDependencyWalk(IPackage package) {
+        protected virtual void OnBeforePackageWalk(IPackage package) {
         }
 
         protected virtual void OnAfterDependencyWalk(IPackage package) {

@@ -6,8 +6,12 @@ namespace NuGet.Test {
     using System.Runtime.Versioning;
     using System.Text;
     using Moq;
-    
-    public class PackageUtility {        
+
+    public class PackageUtility {
+        public static IPackage CreateProjectLevelPackage(string id, string version = "1.0", IEnumerable<PackageDependency> dependencies = null) {
+            return CreatePackage(id, version, assemblyReferences: new[] { id + ".dll" }, dependencies: dependencies);
+        }
+
         public static IPackage CreatePackage(string id,
                                               string version = "1.0",
                                               IEnumerable<string> content = null,
