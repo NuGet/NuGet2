@@ -98,6 +98,24 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void GetRelativePathWithSpaces() {
+            // Act
+            string path = PathUtility.GetRelativePath(@"c:\foo", @"c:\foo\This is a folder");
+
+            // Assert
+            Assert.AreEqual(@"foo\This is a folder", path);
+        }
+
+        [TestMethod]
+        public void GetAbsolutePathWithSpaces() {
+            // Act
+            string path = PathUtility.GetAbsolutePath(@"c:\foo\", @"This is a folder");
+
+            // Assert
+            Assert.AreEqual(@"c:\foo\This is a folder", path);
+        }
+
+        [TestMethod]
         public void GetRelativePathUnrelatedAbsolutePaths() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo", @"d:\bar");

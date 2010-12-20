@@ -10,7 +10,7 @@ namespace NuGet {
                 path = path.Substring(1);
             }
             // Change the direction of the slashes to match the filesystem.
-            return path.Replace('/', Path.DirectorySeparatorChar);
+            return Uri.UnescapeDataString(path.Replace('/', Path.DirectorySeparatorChar));
         }
 
         internal static Uri CreatePartUri(string path) {
