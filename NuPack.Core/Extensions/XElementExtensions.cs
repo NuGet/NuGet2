@@ -123,10 +123,10 @@ namespace NuGet {
                 int leftNameMatches = CountMatches(left, target, (a, b) => a.Name == b.Name);
                 int rightNameMatches = CountMatches(right, target, (a, b) => a.Name == b.Name);
 
-                return rightNameMatches - leftNameMatches;
+                return rightNameMatches.CompareTo(leftNameMatches);
             }
 
-            return rightExactMathes - leftExactMathes;
+            return rightExactMathes.CompareTo(leftExactMathes);
         }
 
         private static int CountMatches(XElement left, XElement right, Func<XAttribute, XAttribute, bool> matcher) {
