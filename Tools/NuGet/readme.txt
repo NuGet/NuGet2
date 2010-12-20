@@ -1,0 +1,1 @@
+This folder contains a collection of tools that revolve around NuGet
