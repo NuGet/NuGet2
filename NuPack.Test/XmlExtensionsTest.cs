@@ -60,6 +60,59 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void MergingElementsWithMultipleSameAttributeNamesAndValuesDoesntDuplicateEntries() {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            // Act
+            var result = a.MergeWith(b);
+
+            // Assert
+            var elements = result.Elements("test").ToList();
+            Assert.AreEqual(2, elements.Count);
+            AssertAttributeValue(elements[0], "name", "one");
+            AssertAttributeValue(elements[0], "value", "foo");
+            AssertAttributeValue(elements[1], "name", "two");
+            AssertAttributeValue(elements[1], "value", "bar");
+        }
+
+        [TestMethod]
+        public void MergingElementsWithMultipleEntiresAddsEntryIfNotExists() {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+    <test name=""three"" value=""baz"" />
+</tests>");
+
+            // Act
+            var result = a.MergeWith(b);
+
+            // Assert
+            var elements = result.Elements("test").ToList();
+            Assert.AreEqual(3, elements.Count);
+            AssertAttributeValue(elements[0], "name", "one");
+            AssertAttributeValue(elements[0], "value", "foo");
+            AssertAttributeValue(elements[1], "name", "two");
+            AssertAttributeValue(elements[1], "value", "bar");
+            AssertAttributeValue(elements[2], "name", "three");
+            AssertAttributeValue(elements[2], "value", "baz");
+        }
+
+        [TestMethod]
         public void MergingTagWithConflictsAddsTag() {
             // Arrange
             XElement a = XElement.Parse(@"<connectionStrings><add name=""sqlce"" connectionString=""|DataDirectory|\foo.sdf"" /></connectionStrings>");

@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace NuGet {    
+namespace NuGet {
     public static class XElementExtensions {
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "We don't care about base types")]
         public static string GetOptionalAttributeValue(this XElement element, string localName, string namespaceName = null) {
@@ -81,8 +82,7 @@ namespace NuGet {
 
             // Go through the elements to be merged
             foreach (var targetChild in target.Elements()) {
-                // See if this element is in the root document
-                var sourceChild = source.Element(targetChild.Name);
+                var sourceChild = FindElement(source, targetChild);
                 if (sourceChild != null && !HasConflict(sourceChild, targetChild)) {
                     // Other wise merge recursively
                     sourceChild.MergeWith(targetChild, nodeActions);
@@ -99,6 +99,41 @@ namespace NuGet {
                 }
             }
             return source;
+        }
+
+        private static XElement FindElement(XElement source, XElement targetChild) {
+            // Get all of the elements in the source that match this name
+            var sourceElements = source.Elements(targetChild.Name).ToList();
+
+            // Try to find the best matching element based on attribute names and values
+            sourceElements.Sort((a, b) => Compare(targetChild, a, b));
+
+            return sourceElements.FirstOrDefault();
+        }
+
+        private static int Compare(XElement target, XElement left, XElement right) {
+            Debug.Assert(left.Name == right.Name);
+
+            // First check how much attribute names and values match
+            int leftExactMathes = CountMatches(left, target, AttributeEquals);
+            int rightExactMathes = CountMatches(right, target, AttributeEquals);
+
+            if (leftExactMathes == rightExactMathes) {
+                // Then check which names match
+                int leftNameMatches = CountMatches(left, target, (a, b) => a.Name == b.Name);
+                int rightNameMatches = CountMatches(right, target, (a, b) => a.Name == b.Name);
+
+                return rightNameMatches - leftNameMatches;
+            }
+
+            return rightExactMathes - leftExactMathes;
+        }
+
+        private static int CountMatches(XElement left, XElement right, Func<XAttribute, XAttribute, bool> matcher) {
+            return (from la in left.Attributes()
+                    from ta in right.Attributes()
+                    where matcher(la, ta)
+                    select la).Count();
         }
 
         private static bool HasConflict(XElement source, XElement target) {
