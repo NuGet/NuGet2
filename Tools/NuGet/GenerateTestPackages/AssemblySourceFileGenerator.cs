@@ -12,7 +12,7 @@ namespace GenerateTestPackages
     using System;
     
     
-    #line 1 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+    #line 1 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "10.0.0.0")]
     public partial class AssemblySourceFileGenerator : AssemblySourceFileGeneratorBase
     {
@@ -78,14 +78,14 @@ namespace GenerateTestPackages
             this.Write("\r\nusing System;\r\nusing System.Text;\r\nusing System.Reflection;\r\n\r\n[assembly: Assem" +
                     "blyVersion(\"");
             
-            #line 7 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 7 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Package.FullName.Version));
             
             #line default
             #line hidden
             this.Write("\")]\r\n\r\nnamespace ");
             
-            #line 9 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 9 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Package.Id));
             
             #line default
@@ -93,28 +93,28 @@ namespace GenerateTestPackages
             this.Write(" {\r\n    public static class SomeClass {\r\n        public static string SomeString " +
                     "{\r\n            get  {\r\n                return \"");
             
-            #line 13 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 13 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Package.FullName));
             
             #line default
             #line hidden
             this.Write(" (\"\r\n");
             
-            #line 14 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 14 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
  foreach (var dependency in Package.Dependencies) { 
             
             #line default
             #line hidden
             this.Write("                    + ");
             
-            #line 15 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 15 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(dependency.Id));
             
             #line default
             #line hidden
             this.Write(".SomeClass.SomeString + \" \"\r\n");
             
-            #line 16 "D:\Code\NuGet\NuPack\test\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 16 "D:\Code\NuGet\NuPack\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
  } 
             
             #line default

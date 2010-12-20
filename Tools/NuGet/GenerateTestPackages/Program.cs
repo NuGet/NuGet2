@@ -21,12 +21,12 @@ namespace GenerateTestPackages {
 
             // Parse through the dgml file and group things by Source
             _packages = document.Descendants(ns + "Link")
-                .ToLookup(l => l.Attribute("Source").Value, l => l.Attribute("Target").Value)
-                .Select(group => new PackageInfo(group.Key, group))
+                .ToLookup(l => l.Attribute("Source").Value)
+                .Select(group => new PackageInfo(group.Key, group.Select(GetDependencyInfoFromLinkTag)))
                 .ToDictionary(p => p.FullName.ToString());
 
             // Add all the packages that only exist as targets to the dictionary
-            var allPackageNames = _packages.Values.SelectMany(p => p.Dependencies).Select(dep => dep.ToString()).Distinct().ToList();
+            var allPackageNames = _packages.Values.SelectMany(p => p.Dependencies).Select(dep => dep.FullName.ToString()).Distinct().ToList();
             foreach (var dependency in allPackageNames) {
                 if (!_packages.ContainsKey(dependency)) {
                     _packages.Add(dependency, new PackageInfo(dependency));
@@ -37,6 +37,14 @@ namespace GenerateTestPackages {
             foreach (var p in _packages.Values) {
                 EnsurePackageProcessed(p);
             }
+        }
+
+        static DependencyInfo GetDependencyInfoFromLinkTag(XElement linkTag) {
+            var label = linkTag.Attribute("Label");
+
+            return new DependencyInfo(
+                new FullPackageName(linkTag.Attribute("Target").Value),
+                label != null ? VersionUtility.ParseVersionSpec(label.Value) : null);
         }
 
         static void EnsurePackageProcessed(string fullName) {
@@ -53,7 +61,7 @@ namespace GenerateTestPackages {
         static void ProcessPackage(PackageInfo package) {
             // Make sure all its dependencies are processed first
             foreach (var dependency in package.Dependencies) {
-                EnsurePackageProcessed(dependency.ToString());
+                EnsurePackageProcessed(dependency.FullName.ToString());
             }
 
             Console.WriteLine("Creating package {0}", package.FullName);
@@ -78,8 +86,8 @@ namespace GenerateTestPackages {
             };
 
             // Add all the dependencies as referenced assemblies
-            foreach (FullPackageName dependency in package.Dependencies) {
-                compilerParams.ReferencedAssemblies.Add(GetAssemblyFullPath(dependency));
+            foreach (DependencyInfo dependency in package.Dependencies) {
+                compilerParams.ReferencedAssemblies.Add(GetAssemblyFullPath(dependency.FullName));
             }
 
             // Create the source code and compile it using CodeDom
@@ -108,13 +116,8 @@ namespace GenerateTestPackages {
                 TargetPath = @"lib\" + Path.GetFileName(assemblySourcePath)
             });
 
-            foreach (FullPackageName dependency in package.Dependencies) {
-                var versionSpec = new VersionSpec() {
-                    IsMinInclusive=true,
-                    MinVersion=dependency.Version
-                };
-
-                packageBuilder.Dependencies.Add(new PackageDependency(dependency.Id, versionSpec));
+            foreach (DependencyInfo dependency in package.Dependencies) {
+                packageBuilder.Dependencies.Add(new PackageDependency(dependency.Id, dependency.VersionSpec));
             }
 
             using (var stream = File.Create(GetPackageFileFullPath(package))) {
@@ -138,21 +141,35 @@ namespace GenerateTestPackages {
     }
 
     class PackageInfo {
-        public PackageInfo(string nameAndVersion, IEnumerable<string> dependencies = null) {
+        public PackageInfo(string nameAndVersion, IEnumerable<DependencyInfo> dependencies = null) {
             FullName = new FullPackageName(nameAndVersion);
 
-            Dependencies = dependencies != null ? dependencies.Select(fullName => new FullPackageName(fullName)) : Enumerable.Empty<FullPackageName>();
+            Dependencies = dependencies != null ? dependencies : Enumerable.Empty<DependencyInfo>();
         }
 
         public FullPackageName FullName { get; private set; }
         public string Id { get { return FullName.Id; } }
         public Version Version { get { return FullName.Version; } }
-        public IEnumerable<FullPackageName> Dependencies { get; private set; }
+        public IEnumerable<DependencyInfo> Dependencies { get; private set; }
         public bool Processed { get; set; }
 
         public override string ToString() {
             return FullName.ToString();
         }
+    }
+
+    // Contains at least an exact id:version, and optionally a fuller version spec
+    class DependencyInfo {
+        public DependencyInfo(FullPackageName fullName, IVersionSpec versionSpec) {
+            FullName = fullName;
+
+            // Default to the simple version (which means min-version)
+            VersionSpec = versionSpec ?? VersionUtility.ParseVersionSpec(FullName.Version.ToString());
+        }
+
+        public FullPackageName FullName { get; private set; }
+        public IVersionSpec VersionSpec { get; private set; }
+        public string Id { get { return FullName.Id; } }
     }
 
     class FullPackageName {

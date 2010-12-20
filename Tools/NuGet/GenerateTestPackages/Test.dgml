@@ -8,7 +8,7 @@
     <Node Id="D:1.0" Label="D:1.0" />
   </Nodes>
   <Links>
-    <Link Source="B:1.0" Target="A:1.0" />
+    <Link Source="B:1.0" Target="A:1.0" Label="[1.0,2.0)" />
     <Link Source="C:1.0" Target="A:2.0" />
     <Link Source="D:1.0" Target="B:1.0" />
     <Link Source="D:1.0" Target="C:1.0" />
