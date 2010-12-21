@@ -47,16 +47,18 @@ namespace NuGetConsole.Host {
             // Get host TabExpansion result
             string[] expansions = TabExpansion.GetExpansions(line, lastWord);
 
-            if (expansions != null && expansions.Length > 0) {
-                // Adjust expansions so that common words like "$dte.Commands." don't appear in intellisense
-                string leftWord = line.Substring(lastWordBegin, caretIndex - lastWordBegin);
-                string commonWord = AdjustExpansions(leftWord, ref expansions);
-                int commonWordLength = !string.IsNullOrEmpty(commonWord) ? commonWord.Length : 0;
+            if (expansions != null) {
+                if (expansions.Length > 0) {
+                    // Adjust expansions so that common words like "$dte.Commands." don't appear in intellisense
+                    string leftWord = line.Substring(lastWordBegin, caretIndex - lastWordBegin);
+                    string commonWord = AdjustExpansions(leftWord, ref expansions);
+                    int commonWordLength = !string.IsNullOrEmpty(commonWord) ? commonWord.Length : 0;
 
-                return new SimpleExpansion(
-                    lastWordBegin + commonWordLength,
-                    lastWord.Length - commonWordLength,
-                    expansions);
+                    return new SimpleExpansion(
+                        lastWordBegin + commonWordLength,
+                        lastWord.Length - commonWordLength,
+                        expansions);
+                }
             }
             else if (TabExpansion is IPathExpansion) {
                 return ((IPathExpansion)TabExpansion).GetPathExpansions(line);

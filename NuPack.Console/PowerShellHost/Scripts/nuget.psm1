@@ -9,6 +9,13 @@ if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
 function global:TabExpansion($line, $lastWord) {
     $tokens = $line.Split(@(' '), 'RemoveEmptyEntries')
     $filter = $lastWord.Trim()
+    
+    # remove double quotes around last word
+    $trimmedFilter = $filter.Trim( '"', "'" )
+    if ($trimmedFilter.length -lt $filter.length) {
+        $filter = $trimmedFilter
+        $addQuote = $true
+    }
 
     if (!$filter) {
         $tokens = $tokens + $filter
@@ -42,14 +49,17 @@ function global:TabExpansion($line, $lastWord) {
             $choices = TabExpansionForGetProject $secondLastToken $tokens.length $filter
         }
     }
-    
-    if($choices) {
-        # Return all the choices, do some filtering based on the last word and sort them
-        $choices | Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | Sort-Object
-    }
-    else {
+
+	if ($choices -eq $null) {
         # Fallback to the default tab expansion
         DefaultTabExpansion $line $lastWord 
+	}
+	else {
+        # Return all the choices, do some filtering based on the last word, sort them and wrap each suggestion in a double quote if necessary
+        $choices | 
+            Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | 
+            Sort-Object |
+            ForEach-Object { if ($addQuote -or $_.IndexOf(' ') -gt -1) { '"' + $_ + '"'} else { $_ } }
     }
 }
 
