@@ -60,6 +60,5 @@ function Test-WebsiteConfigElementsAreRemovedEvenIfReordered {
     $config = [xml](Get-Content $configPath)
     
     # Assert
-    $config.configuration.configSections
     Assert-Null $config.configuration.configSections
 }
