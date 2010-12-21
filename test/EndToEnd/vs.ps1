@@ -189,6 +189,20 @@ function Get-Errors {
     $errorList.Object.ErrorItems    
 }
 
+function Get-ProjectItemPath {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [string]$Path
+    )
+    $item = Get-ProjectItem $Project $Path
+    
+    if($item) {
+        return $item.Properties.Item("FullPath").Value
+    }
+}
+
 function Get-ProjectItem {
     param(
         [parameter(Mandatory = $true)]

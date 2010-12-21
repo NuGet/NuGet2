@@ -18,22 +18,17 @@ $testRepositoryPath = Join-Path $currentPath Packages
 
 function global:Run-Test {
     param(
-        [string]$Test,
-        [switch]$NewSolution
+        [string]$Test
     )
+    
+    # Close the solution after every test run
+    $dte.Solution.Close()
     
     # Load the utility script since we need to use guid
     . $utilityPath
     
     # Get a reference to the powershell window so we can set focus after the tests are over
     $window = $dte.ActiveWindow
-    
-    # Close any solution that might be open
-    if($dte.Solution -and $dte.Solution.IsOpen) {
-        if($NewSolution) {
-            $dte.Solution.Close()
-        }
-    }
     
     $testRunId = New-Guid
     $testRunOutputPath = Join-Path $testOutputPath $testRunId
@@ -78,10 +73,14 @@ function global:Run-Test {
             # REVIEW: We should give the test some context
             # Execute the test passing the repository path
             & $_ $testRepositoryPath
-           
+            
             Write-Host -ForegroundColor DarkGreen "Test $name Pass"
             
-            "$name Pass" >> $testRunResultsFile        
+            "$name Pass" >> $testRunResultsFile
+            
+            if(!$Test) {
+                $dte.Solution.Close()
+            }
         }
     }
     catch {
@@ -97,6 +96,6 @@ function global:Run-Test {
         # Set focus back to powershell
         $window.SetFocus()
         
-        "Results were written to $testRunResultsFile"
+        "Results were written to $testRunResultsFile"         
     }
 }

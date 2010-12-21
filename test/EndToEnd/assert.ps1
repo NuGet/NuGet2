@@ -37,6 +37,28 @@ function Assert-Fail {
     Write-Error (Get-AssertError "Failed" $Message)
 }
 
+function Assert-True {
+    param(
+        $Value,
+        [string]$Message
+    )
+    
+    if($Value -eq $false) {
+        Write-Error (Get-AssertError "Value is not true" $Message)
+    }
+}
+
+function Assert-False {
+    param(
+        $Value,
+        [string]$Message
+    )
+    
+    if($Value -eq $true) {
+        Write-Error (Get-AssertError "Value is not false" $Message)
+    }
+}
+
 function Assert-NotNull {
     param(
         $Value,

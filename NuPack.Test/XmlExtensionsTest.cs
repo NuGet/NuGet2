@@ -161,6 +161,54 @@ namespace NuGet.Test {
             AssertAttributeValue(barElement, "b", "2");
         }
 
+        [TestMethod]
+        public void ExceptWithSimilarTagsRemovesTagsThatChanged() {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""One"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            // Act
+            var result = a.Except(b);
+
+            // Assert
+            Assert.AreEqual(@"<tests>
+  <test name=""One"" value=""foo"" />
+</tests>", result.ToString());
+        }
+
+        [TestMethod]
+        public void ExceptWithSimilarTagsRemovesTagsThatWereReordered() {
+            // Act
+            XElement a = XElement.Parse(@"
+<configuration>
+<tests>
+    <test name=""one"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+</tests>
+</configuration>");
+
+            XElement b = XElement.Parse(@"
+<configuration>
+<tests>
+    <test name=""two"" value=""bar"" />
+    <test name=""one"" value=""foo"" />
+</tests>
+</configuration>");
+
+            // Act
+            var result = a.Except(b);
+
+            // Assert
+            Assert.AreEqual("<configuration />", result.ToString());
+        }
+
         private static void AssertAttributeValue(XElement element, string attributeName, string expectedAttributeValue) {
             XAttribute attr = element.Attribute(attributeName);
             Assert.IsNotNull(attr);

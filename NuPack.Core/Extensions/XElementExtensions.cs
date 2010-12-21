@@ -46,7 +46,7 @@ namespace NuGet {
             }
 
             foreach (var sourceChild in source.Elements().ToList()) {
-                var targetChild = target.Element(sourceChild.Name);
+                var targetChild = FindElement(target, sourceChild);
                 if (targetChild != null && !HasConflict(sourceChild, targetChild)) {
                     Except(sourceChild, targetChild);
                     bool hasContent = sourceChild.HasAttributes || sourceChild.HasElements;
