@@ -24,5 +24,17 @@ namespace NuGet.Test {
             // Assert
             Assert.AreEqual(@"a\b.txt", path);
         }
+
+        [TestMethod]
+        public void GetPathFromUriWithEncodedSpacesDecodesSpaces() {
+            // Arrange
+            Uri uri = new Uri("/a/b/This%20is%20a%20test/c.txt", UriKind.Relative);
+
+            // Act
+            string path = UriUtility.GetPath(uri);
+
+            // Assert
+            Assert.AreEqual(@"a\b\This is a test\c.txt", path);
+        }
     }
 }
