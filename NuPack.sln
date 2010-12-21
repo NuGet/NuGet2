@@ -57,6 +57,24 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Test.Utility", "NuPa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuPack.Dialog.Test", "NuPack.Dialog.Test\NuPack.Dialog.Test.csproj", "{FC2D8406-0A17-40FC-A11B-B5133B552C47}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "functional", "functional", "{3B13F3A6-64D9-4D22-9890-88A542E2603E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{4F42391D-ABC3-4832-9F6B-2F65DA85624A}"
+	ProjectSection(SolutionItems) = preProject
+		test\EndToEnd\assert.ps1 = test\EndToEnd\assert.ps1
+		test\EndToEnd\nuget.assert.ps1 = test\EndToEnd\nuget.assert.ps1
+		test\EndToEnd\NuGet.Tests.psm1 = test\EndToEnd\NuGet.Tests.psm1
+		test\EndToEnd\utility.ps1 = test\EndToEnd\utility.ps1
+		test\EndToEnd\vs.ps1 = test\EndToEnd\vs.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A-215C-4327-8DAA-AB00C59EF489}"
+	ProjectSection(SolutionItems) = preProject
+		test\EndToEnd\tests\install.ps1 = test\EndToEnd\tests\install.ps1
+		test\EndToEnd\tests\uninstall.ps1 = test\EndToEnd\tests\uninstall.ps1
+		test\EndToEnd\tests\update.ps1 = test\EndToEnd\tests\update.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = NuPack.vsmdi
@@ -187,5 +205,8 @@ Global
 		{5B445EB1-3D2F-4D03-A004-09275F649419} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{F016882A-C798-4446-BB75-D3C393A38B32} = {E7B39EAD-EA32-4011-845A-C949A336389A}
 		{FC2D8406-0A17-40FC-A11B-B5133B552C47} = {E7B39EAD-EA32-4011-845A-C949A336389A}
+		{3B13F3A6-64D9-4D22-9890-88A542E2603E} = {E7B39EAD-EA32-4011-845A-C949A336389A}
+		{4F42391D-ABC3-4832-9F6B-2F65DA85624A} = {3B13F3A6-64D9-4D22-9890-88A542E2603E}
+		{D617D07A-215C-4327-8DAA-AB00C59EF489} = {3B13F3A6-64D9-4D22-9890-88A542E2603E}
 	EndGlobalSection
 EndGlobal
