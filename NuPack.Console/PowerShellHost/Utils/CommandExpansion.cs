@@ -47,8 +47,10 @@ namespace NuGetConsole.Host {
             // Get host TabExpansion result
             string[] expansions = TabExpansion.GetExpansions(line, lastWord);
 
-            if (expansions != null) {
-                if (expansions.Length > 0) {
+            if (expansions != null && expansions.Length > 0) {
+                // If the first element is null, it means one of the NuGet cmdlets returns empty list of suggestions.
+                // In which case, don't show the intellisense, but don't show file-system paths either.
+                if (expansions[0] != null) {
                     // Adjust expansions so that common words like "$dte.Commands." don't appear in intellisense
                     string leftWord = line.Substring(lastWordBegin, caretIndex - lastWordBegin);
                     string commonWord = AdjustExpansions(leftWord, ref expansions);

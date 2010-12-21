@@ -333,8 +333,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                             "$__pc_args=@(); $input|%{$__pc_args+=$_}; TabExpansion $__pc_args[0] $__pc_args[1]; Remove-Variable __pc_args -Scope 0",
                             new string[] { line, lastWord },
                             outputResults: false)
-                        where s != null
-                        select s.ToString();
+                        select (s == null ? null : s.ToString());
             return query.ToArray();
         }
         #endregion

@@ -1,14 +1,22 @@
 # make sure we stop on exceptions
 $ErrorActionPreference = "Stop"
 
+# This object reprents the result value for tab expansion functions when no result is returned.
+# This is so that we can distinguish it from $null, which has different semantics
+$NoResultValue = New-Object 'System.Object'
+
 # Backup the original tab expansion function
 if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
     Rename-Item Function:\TabExpansion global:DefaultTabExpansion
 }
 
 function global:TabExpansion($line, $lastWord) {
-    $tokens = $line.Split(@(' '), 'RemoveEmptyEntries')
     $filter = $lastWord.Trim()
+    
+    if ($filter.StartsWith('-')) {
+       # if this is a parameter, let default PS tab expansion supply the list of parameters
+       return (DefaultTabExpansion $line $lastWord)
+    }
     
     # remove double quotes around last word
     $trimmedFilter = $filter.Trim( '"', "'" )
@@ -16,7 +24,8 @@ function global:TabExpansion($line, $lastWord) {
         $filter = $trimmedFilter
         $addQuote = $true
     }
-
+    
+    $tokens = $line.Split(@(' '), 'RemoveEmptyEntries')
     if (!$filter) {
         $tokens = $tokens + $filter
     }
@@ -30,7 +39,7 @@ function global:TabExpansion($line, $lastWord) {
     
     switch ($tokens[0]) {
         'New-Package' {
-            $choices = TabExpansionForNewPackage $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForNewPackage $secondLastToken $tokens.length
         }
     
         'Install-Package' {
@@ -46,38 +55,43 @@ function global:TabExpansion($line, $lastWord) {
         }
         
         'Get-Project' {
-            $choices = TabExpansionForGetProject $secondLastToken $tokens.length $filter
+            $choices = TabExpansionForGetProject $secondLastToken
+        }
+        
+        default {
+            $choices = $NoResultValue
         }
     }
-
-	if ($choices -eq $null) {
+    
+	if ($choices -eq $NoResultValue) {
         # Fallback to the default tab expansion
         DefaultTabExpansion $line $lastWord 
 	}
-	else {
+	elseif ($choices) {
         # Return all the choices, do some filtering based on the last word, sort them and wrap each suggestion in a double quote if necessary
         $choices | 
             Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | 
             Sort-Object |
             ForEach-Object { if ($addQuote -or $_.IndexOf(' ') -gt -1) { '"' + $_ + '"'} else { $_ } }
     }
+    else {
+        # return null here will tell the console not to show system file paths
+        return $null
+    }
 }
 
-function TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
-    }
-    elseif (($secondLastWord -eq '-project') -or 
+function TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount) {
+    if (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 2 -and !$secondLastWord.StartsWith('-'))) {
         Get-ProjectNames
+    }
+    else {
+        return $NoResultValue
     }
 }
 
 function TabExpansionForAddPackage([string]$line, [string]$secondLastWord, [int]$tokenCount, [string]$filter) {
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
-    }
-    elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
+    if (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
         # Determine if a Source param is present
         $source = ""
         if ($line -match "-Source(\s+)([^\s]+)") {
@@ -92,29 +106,32 @@ function TabExpansionForAddPackage([string]$line, [string]$secondLastWord, [int]
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
         Get-ProjectNames
     }
+    else {
+        return $NoResultValue
+    }
 }
 
 function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
-    }
-    elseif (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
+    if (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
         if (IsSolutionOpen) {
-            (Find-Package -Filter $filter -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name } 
+            (Find-Package -Filter $filter -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
         }
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
         Get-ProjectNames
     }
+    else {
+        return $NoResultValue
+    }
 }
 
-function TabExpansionForGetProject([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, do not return anything so that the default PS tab expansion can supply the list of parameters
-    }
-    elseif (($secondLastWord -eq '-name') -or ($secondLastWord -eq '')) {
+function TabExpansionForGetProject([string]$secondLastWord) {
+    if (($secondLastWord -eq '-name') -or ($secondLastWord -eq '')) {
         Get-ProjectNames
+    }
+    else {
+        return $NoResultValue
     }
 }
 
