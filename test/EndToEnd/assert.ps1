@@ -154,3 +154,26 @@ function Assert-Build {
     
     Assert-AreEqual 0 $errors.Count "Failed to build `"$($Project.Name)`. There were errors in the list."
 }
+
+function Assert-Throws {
+    param(
+        [parameter(Mandatory = $true)]
+        [scriptblock]$Action,
+        [parameter(Mandatory = $true)]
+        [string]$ExceptionMessage
+    )
+
+    $exceptionThrown = $false
+
+    try {
+        & $Action
+    }
+    catch {        
+       Assert-AreEqual $_.Exception.Message $ExceptionMessage
+       $exceptionThrown = $true
+    }
+
+    if(!$exceptionThrown) {
+        Write-Error (Get-AssertError "Expected exception was not thrown")
+    }
+}
