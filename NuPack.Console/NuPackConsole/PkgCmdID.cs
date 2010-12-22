@@ -1,7 +1,5 @@
 // PkgCmdID.cs
 // MUST match PkgCmdID.h
-using System;
-
 namespace NuGetConsole.Implementation {
     static class PkgCmdIDList {
         public const int idToolbar = 0x1010;
@@ -12,5 +10,5 @@ namespace NuGetConsole.Implementation {
         public const int cmdidSourcesList = 0x0410;
         public const int cmdidClearHost = 0x0300;
         public const int cmdidSourceSettings = 0x0200;
-    };
+    }
 }
