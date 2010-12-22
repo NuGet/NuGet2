@@ -72,7 +72,7 @@ function global:TabExpansion($line, $lastWord) {
         $choices | 
             Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | 
             Sort-Object |
-            ForEach-Object { if ($addQuote -or $_.IndexOf(' ') -gt -1) { '"' + $_ + '"'} else { $_ } }
+            ForEach-Object { if ($addQuote -or $_.IndexOf(' ') -gt -1) { "'" + $_ + "'"} else { $_ } }
     }
     else {
         # return null here will tell the console not to show system file paths
