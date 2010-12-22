@@ -117,50 +117,38 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AtomFeedPackageRepo_InvalidFeedContent" xml:space="preserve">
-    <value>Unable to read feed contents. Verify that the feed conforms to the Atom Syndication format.</value>
-  </data>
-  <data name="AtomFeedPackageRepo_InvalidFeedSource" xml:space="preserve">
-    <value>Unable to read feed. Verify that a feed is hosted at the remote server and is available.</value>
-  </data>
   <data name="CircularDependencyDetected" xml:space="preserve">
-    <value>Circular dependency detected '{0}'</value>
+    <value>Circular dependency detected '{0}'.</value>
   </data>
   <data name="ConflictErrorWithDependent" xml:space="preserve">
-    <value>Conflict occurred. '{0}' referenced but requested '{1}'. '{2}' depends on '{0}'</value>
+    <value>Conflict occurred. '{0}' referenced but requested '{1}'. '{2}' depends on '{0}'.</value>
   </data>
   <data name="ConflictErrorWithDependents" xml:space="preserve">
-    <value>Conflict occurred. '{0}' referenced but requested '{1}'. '{2}' depend on '{0}'</value>
+    <value>Conflict occurred. '{0}' referenced but requested '{1}'. '{2}' depend on '{0}'.</value>
   </data>
   <data name="Debug_AddedFile" xml:space="preserve">
-    <value>Added file '{0}'</value>
+    <value>Added file '{0}'.</value>
   </data>
   <data name="Debug_AddedFileToFolder" xml:space="preserve">
-    <value>Added file '{0}' to folder '{1}'</value>
+    <value>Added file '{0}' to folder '{1}'.</value>
   </data>
   <data name="Debug_DependencyAlreadyInstalled" xml:space="preserve">
-    <value>Dependency '{0}' already installed</value>
-  </data>
-  <data name="Debug_DependencyAlreadyReferenced" xml:space="preserve">
-    <value>Dependency '{0}' already referenced</value>
+    <value>Dependency '{0}' already installed.</value>
   </data>
   <data name="Debug_LookingForUpdates" xml:space="preserve">
     <value>Looking for updates for '{0}'...</value>
   </data>
-  <data name="Debug_ProcessingDependencies" xml:space="preserve">
-    <value>Processing dependencies for '{0}'</value>
-  </data>
   <data name="Debug_RemovedFile" xml:space="preserve">
-    <value>Removed file '{0}'</value>
+    <value>Removed file '{0}'.</value>
   </data>
   <data name="Debug_RemovedFileFromFolder" xml:space="preserve">
-    <value>Removed file '{0}' to folder '{1}'</value>
+    <value>Removed file '{0}' to folder '{1}'.</value>
   </data>
   <data name="Debug_RemovedFolder" xml:space="preserve">
-    <value>Removed folder '{0}'</value>
+    <value>Removed folder '{0}'.</value>
   </data>
   <data name="DependencyOnlyCannotMixDependencies" xml:space="preserve">
-    <value>Child dependencies of dependency only packages cannot mix external and project packages</value>
+    <value>Child dependencies of dependency only packages cannot mix external and project packages.</value>
   </data>
   <data name="ExternalPackagesCannotDependOnProjectLevelPackages" xml:space="preserve">
     <value>External packages cannot depend on packages that target projects.</value>
@@ -171,41 +159,29 @@
   <data name="Log_AttemptingToRetrievePackageReferenceFromSource" xml:space="preserve">
     <value>'{0}' not referenced. Retrieving dependency...</value>
   </data>
-  <data name="Log_LeavingPackageInstalled" xml:space="preserve">
-    <value>Leaving '{0}' installed</value>
-  </data>
-  <data name="Log_ModifiedConfiguration" xml:space="preserve">
-    <value>Modified configuration file</value>
-  </data>
   <data name="Log_NoUpdatesAvailable" xml:space="preserve">
     <value>No updates available for '{0}'</value>
   </data>
   <data name="Log_PackageAlreadyInstalled" xml:space="preserve">
-    <value>'{0}' already installed</value>
+    <value>'{0}' already installed.</value>
   </data>
   <data name="Log_PackageInstalledSuccessfully" xml:space="preserve">
-    <value>Successfully installed '{0}'</value>
+    <value>Successfully installed '{0}'.</value>
   </data>
   <data name="Log_PackageRetrieveSuccessfully" xml:space="preserve">
-    <value>Done</value>
-  </data>
-  <data name="Log_PackageUpToDate" xml:space="preserve">
-    <value>'{0}' is up to date</value>
+    <value>Done.</value>
   </data>
   <data name="Log_ProjectAlreadyReferencesPackage" xml:space="preserve">
-    <value>{0} already has a reference to '{1}'</value>
+    <value>{0} already has a reference to '{1}'.</value>
   </data>
   <data name="Log_SuccessfullyAddedPackageReference" xml:space="preserve">
-    <value>Successfully added '{0}' to {1}</value>
+    <value>Successfully added '{0}' to {1}.</value>
   </data>
   <data name="Log_SuccessfullyRemovedPackageReference" xml:space="preserve">
-    <value>Successfully removed '{0}' from {1}</value>
+    <value>Successfully removed '{0}' from {1}.</value>
   </data>
   <data name="Log_SuccessfullyUninstalledPackage" xml:space="preserve">
-    <value>Successfully uninstalled '{0}'</value>
-  </data>
-  <data name="Log_UpdatingToSpecificVersion" xml:space="preserve">
-    <value>Updating '{0}' to version '{1}'</value>
+    <value>Successfully uninstalled '{0}'.</value>
   </data>
   <data name="Manifest_DependencyIdRequired" xml:space="preserve">
     <value>Dependency Id is required.</value>
@@ -220,79 +196,52 @@
     <value>{0} cannot be empty.</value>
   </data>
   <data name="NewerVersionAlreadyReferenced" xml:space="preserve">
-    <value>Already referencing a newer version of '{0}'</value>
+    <value>Already referencing a newer version of '{0}'.</value>
   </data>
   <data name="PackageDoesNotContainManifest" xml:space="preserve">
     <value>Package does not contain a manifest.</value>
   </data>
   <data name="PackageHasDependent" xml:space="preserve">
-    <value>Unable to uninstall '{0}' because '{1}' depends on it</value>
-  </data>
-  <data name="PackageHasDependentReference" xml:space="preserve">
-    <value>Unable to remove reference to '{0}' because '{1}' depends on it</value>
+    <value>Unable to uninstall '{0}' because '{1}' depends on it.</value>
   </data>
   <data name="PackageHasDependents" xml:space="preserve">
-    <value>Unable to uninstall '{0}' because '{1}' depend on it</value>
-  </data>
-  <data name="PackageHasMultipleDependentsReferenced" xml:space="preserve">
-    <value>Unable to remove reference to '{0}' because '{1}' depend on it</value>
-  </data>
-  <data name="PackageHasNoProjectContent" xml:space="preserve">
-    <value>Unable to add reference to '{0}' because it has no project content.</value>
-  </data>
-  <data name="PackageMissingRequiredProperty" xml:space="preserve">
-    <value>Package is missing required property '{0}'</value>
-  </data>
-  <data name="PackageNotInstalled" xml:space="preserve">
-    <value>Package '{0}' is not installed</value>
-  </data>
-  <data name="PackageSourceMustBePhysicalPath" xml:space="preserve">
-    <value>Package source must be a rooted physical path</value>
+    <value>Unable to uninstall '{0}' because '{1}' depend on it.</value>
   </data>
   <data name="ProjectDoesNotHaveReference" xml:space="preserve">
     <value>{0} does not reference '{1}'.</value>
-  </data>
-  <data name="ReferenceDoesNotExist" xml:space="preserve">
-    <value>Unable to add a assembly reference to '{0}'. The file does not exist</value>
   </data>
   <data name="TokenHasNoValue" xml:space="preserve">
     <value>The replacement token '{0}' has no value.</value>
   </data>
   <data name="UnableToFindCompatibleReference" xml:space="preserve">
-    <value>Unable to find assembly references that are compatible with the target framework '{0}'</value>
+    <value>Unable to find assembly references that are compatible with the target framework '{0}'.</value>
   </data>
   <data name="UnableToLocateDependency" xml:space="preserve">
-    <value>Unable to locate dependency '{0}'. It may have been uninstalled</value>
+    <value>Unable to locate dependency '{0}'. It may have been uninstalled.</value>
   </data>
   <data name="UnableToResolveDependency" xml:space="preserve">
-    <value>Unable to resolve dependency '{0}'</value>
+    <value>Unable to resolve dependency '{0}'.</value>
   </data>
   <data name="UnknownPackage" xml:space="preserve">
-    <value>Unable to find package '{0}'</value>
+    <value>Unable to find package '{0}'.</value>
   </data>
   <data name="Warning_FileAlreadyExists" xml:space="preserve">
     <value>'{0}' already exists. Skipping...</value>
   </data>
   <data name="Warning_FileModified" xml:space="preserve">
-    <value>Skipping '{0}' because it was modified</value>
+    <value>Skipping '{0}' because it was modified.</value>
   </data>
   <data name="Warning_PackageSkippedBecauseItIsInUse" xml:space="preserve">
-    <value>'{0}' skipped, because it is in use by '{1}'</value>
-  </data>
-  <data name="Warning_RemovingPackageReferenceWillBreakDependents" xml:space="preserve">
-    <value>Removing '{0}' might cause '{1}' to be broken</value>
+    <value>'{0}' skipped, because it is in use by '{1}'.</value>
   </data>
   <data name="Warning_UninstallingPackageWillBreakDependents" xml:space="preserve">
-    <value>Uninstalling '{0}' might cause '{1}' to be broken</value>
+    <value>Uninstalling '{0}' might cause '{1}' to be broken.</value>
   </data>
   <data name="AggregateQueriesRequireOrder" xml:space="preserve">
     <value>Aggregate queries require at least one OrderBy.</value>
   </data>
   <data name="PackageContentsVerifyError" xml:space="preserve">
     <value>Failed to download package correctly. The contents of the package could not be verified. </value>
-  </data>
-  <data name="TagMissingHash" xml:space="preserve">
-    <value>The '{0}' tag is missing a #</value>
   </data>
   <data name="CannotCreateEmptyPackage" xml:space="preserve">
     <value>Cannot create a package that has no dependencies nor content.</value>
@@ -301,7 +250,7 @@
     <value>Error reading '{0}'.</value>
   </data>
   <data name="InvalidVersionString" xml:space="preserve">
-    <value>'{0}' is not a valid version string</value>
+    <value>'{0}' is not a valid version string.</value>
   </data>
   <data name="DependencyHasInvalidVersion" xml:space="preserve">
     <value>Dependency '{0}' has an invalid version.</value>

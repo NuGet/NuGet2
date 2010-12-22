@@ -48,7 +48,7 @@ namespace NuGet.Test {
             PackageManager packageManager = CreatePackageManager();
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage("foo"), "Unable to find package 'foo'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage("foo"), "Unable to find package 'foo'.");
         }
 
         [TestMethod]
@@ -85,7 +85,7 @@ namespace NuGet.Test {
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.InstallPackage("unknown"),
-                                                              "Unable to find package 'unknown'");
+                                                              "Unable to find package 'unknown'.");
         }
 
         [TestMethod]

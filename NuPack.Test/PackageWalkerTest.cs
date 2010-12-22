@@ -58,7 +58,7 @@ namespace NuGet.Test {
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(package), "Unable to resolve dependency 'B'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(package), "Unable to resolve dependency 'B'.");
         }
 
         [TestMethod]
@@ -87,7 +87,7 @@ namespace NuGet.Test {
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'.");
         }
 
         [TestMethod]
@@ -316,7 +316,7 @@ namespace NuGet.Test {
 
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA10), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.5'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA10), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.5'.");
         }
 
         [TestMethod]
@@ -339,7 +339,7 @@ namespace NuGet.Test {
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (\u2265 1.5)'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (\u2265 1.5)'.");
         }
 
         [TestMethod]
@@ -364,7 +364,7 @@ namespace NuGet.Test {
                                                              ignoreDependencies: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'.");
         }
 
         [TestMethod]
@@ -419,7 +419,7 @@ namespace NuGet.Test {
                                                                forceRemove: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to locate dependency 'B'. It may have been uninstalled");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to locate dependency 'B'. It may have been uninstalled.");
         }
 
         [TestMethod]
@@ -444,7 +444,7 @@ namespace NuGet.Test {
                                                                forceRemove: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it.");
         }
 
         [TestMethod]
@@ -469,7 +469,7 @@ namespace NuGet.Test {
                                                                forceRemove: false);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it");
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it.");
         }
 
         [TestMethod]
@@ -664,7 +664,7 @@ namespace NuGet.Test {
             mockRepository.AddPackage(solutionPackage);
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(metaPackage), "Child dependencies of dependency only packages cannot mix external and project packages");
+            ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(metaPackage), "Child dependencies of dependency only packages cannot mix external and project packages.");
         }
 
         [TestMethod]

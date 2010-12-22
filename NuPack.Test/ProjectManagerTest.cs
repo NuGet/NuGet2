@@ -26,7 +26,7 @@ namespace NuGet.Test {
             ProjectManager projectManager = CreateProjectManager();
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("unknown"), "Unable to find package 'unknown'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("unknown"), "Unable to find package 'unknown'.");
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageB10);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", Version.Parse("1.0")), @"Already referencing a newer version of 'A'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", Version.Parse("1.0")), @"Already referencing a newer version of 'A'.");
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace NuGet.Test {
             var projectManager = CreateProjectManager();
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.RemovePackageReference("foo"), "Unable to find package 'foo'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.RemovePackageReference("foo"), "Unable to find package 'foo'.");
         }
 
         [TestMethod]
@@ -600,7 +600,7 @@ namespace NuGet.Test {
             projectManager.LocalRepository.AddPackage(packageA20);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: Version.Parse("1.0")), @"Already referencing a newer version of 'A'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: Version.Parse("1.0")), @"Already referencing a newer version of 'A'.");
         }
 
         [TestMethod]
@@ -632,7 +632,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageA20);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Unable to resolve dependency 'B (= 2.0)'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Unable to resolve dependency 'B (= 2.0)'.");
         }
 
         [TestMethod]
@@ -838,7 +838,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageD10);
 
             // Act 
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'.");
         }
 
         [TestMethod]
@@ -860,7 +860,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageB20);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Conflict occurred. 'B 1.0' referenced but requested 'B 2.0'. 'A 1.0' depends on 'B 1.0'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Conflict occurred. 'B 1.0' referenced but requested 'B 2.0'. 'A 1.0' depends on 'B 1.0'.");
         }
 
         [TestMethod]
@@ -993,7 +993,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(mockPackage.Object);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v2.0'");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v2.0'.");
         }
 
         [TestMethod]
