@@ -14,12 +14,24 @@ $utilityPath = Join-Path $currentPath utility.ps1
 # Directory where the test packages are (This is passed to each test method)
 $testRepositoryPath = Join-Path $currentPath Packages
 
+$toolsPath = Join-Path $currentPath ..\..\Tools
+
+$generatePackagesProject = Join-Path $toolsPath NuGet\GenerateTestPackages\GenerateTestPackages.csproj
+
+$generatePackagesExePath = Join-Path $toolsPath NuGet\GenerateTestPackages\bin\Debug\GenerateTestPackages.exe
+
+$msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
+
 # TODO: Add the ability to rerun failed tests from the previous run
 
 function global:Run-Test {
     param(
         [string]$Test
     )
+    
+    if(!(Test-Path $generatePackagesExePath)) {
+        & $msbuildPath $generatePackagesProject /v:quiet
+    }
     
     # Close the solution after every test run
     $dte.Solution.Close()
@@ -70,16 +82,38 @@ function global:Run-Test {
             
             "Running Test $name..."
             
-            # REVIEW: We should give the test some context
-            # Execute the test passing the repository path
-            & $_ $testRepositoryPath
+            $repositoryPath = Join-Path $testRepositoryPath $name
+            $values = @{
+                RepositoryRoot = $testRepositoryPath
+                RepositoryPath = Join-Path $repositoryPath Packages
+            }
             
-            Write-Host -ForegroundColor DarkGreen "Test $name Pass"
+            if(Test-Path $repositoryPath) {            
+                pushd 
+                Set-Location $repositoryPath
+                # Generate any packages that might be in the repository dir
+                Get-ChildItem $repositoryPath -Filter *.dgml | %{
+                    & $generatePackagesExePath $_.FullName | Out-Null
+                } 
+                popd
+            }
             
-            "$name Pass" >> $testRunResultsFile
-            
-            if(!$Test) {
-                $dte.Solution.Close()
+            $context = New-Object PSObject -Property $values
+            try {
+                & $_ $context
+                
+                Write-Host -ForegroundColor DarkGreen "Test $name Pass"
+                
+                "$name Pass" >> $testRunResultsFile
+                
+                if(!$Test) {
+                    $dte.Solution.Close()
+                }
+            }
+            finally {            
+                # Cleanup the output from running the generate packages tool
+                Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
     }

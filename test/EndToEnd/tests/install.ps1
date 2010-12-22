@@ -30,34 +30,34 @@ function Test-WebsiteSimpleInstall {
 
 function Test-DiamondDependencies {
     param(
-        [string]$Repository
+        $context
     )
     
     # Scenario:
-    # TestPackageD 1.0 -> TestPackageB 1.0, TestPackageC 1.0
-    # TestPackageB 1.0 -> TestPackageA 1.0 
-    # TestPackageC 1.0 -> TestPackageA 2.0
-    #     TestPackageD 1.0
-    #      /            \
-    # TestPackageB 1.0 TestPackageC 1.0
-    #     |              |
-    # TestPackageA 1.0 TestPackageA 2.0
+    # D 1.0 -> B 1.0, C 1.0
+    # B 1.0 -> A 1.0 
+    # C 1.0 -> A 2.0
+    #     D 1.0
+    #      /  \
+    #  B 1.0   C 1.0
+    #     |    |
+    #  A 1.0   A 2.0
     
     # Arrange 
-    $packages = @("TestPackageA", "TestPackageB", "TestPackageC", "TestPackageD")
+    $packages = @("A", "B", "C", "D")
     $project = New-ClassLibrary
     
     # Act
-    Install-Package TestPackageD -Project $project.Name -Source $Repository
+    Install-Package D -Project $project.Name -Source $context.RepositoryPath
     
     # Assert
     $packages | %{ Assert-SolutionPackage $_ }
     $packages | %{ Assert-Package $project $_ }
     $packages | %{ Assert-Reference $project $_ }
-    Assert-Package $project TestPackageA 2.0.0.0
-    Assert-Reference $project TestPackageA 2.0.0.0
-    Assert-Null (Get-ProjectPackage $project TestPackageA 1.0.0.0) 
-    Assert-Null (Get-SolutionPackage TestPackageA 1.0.0.0)
+    Assert-Package $project A 2.0
+    Assert-Reference $project A 2.0.0.0
+    Assert-Null (Get-ProjectPackage $project A 1.0.0.0) 
+    Assert-Null (Get-SolutionPackage A 1.0.0.0)
 }
 
 function Test-WebsiteWillNotDuplicateConfigOnReInstall {
