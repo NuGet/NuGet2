@@ -9,5 +9,5 @@ namespace NuGet.Tools {
 
         public static readonly Guid guidNuGetConsoleCmdSet = new Guid(guidNuGetConsoleCmdSetString);
         public static readonly Guid guidNuGetDialogCmdSet = new Guid(guidNuGetDialogCmdSetString);
-    };
+    }
 }
