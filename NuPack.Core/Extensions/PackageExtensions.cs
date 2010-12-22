@@ -45,32 +45,53 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Reduces the number of operations to the minimal set
+        /// Calculates the canonical list of operations.
         /// </summary>
         internal static IEnumerable<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations) {
-            // Break the set into 2 lists and remove duplicates
-            var removeList = operations.Where(o => o.Action == PackageAction.Uninstall)
-                                       .Distinct()
-                                       .Select(o => o.Package);
+            // Convert the list of operations to a dictionary from (Action, Id, Version) -> [Operations]
+            // We keep track of the index so that we preserve the ordering of the operations
+            var operationLookup = operations.Select((o, index) => new { Operation = o, Index = index })
+                                            .ToLookup(o => GetOperationKey(o.Operation))
+                                            .ToDictionary(g => g.Key,
+                                                          g => g.ToList());
 
-            var addList = operations.Where(o => o.Action == PackageAction.Install)
-                                    .Distinct()
-                                    .Select(o => o.Package);
+            // Given a list of operations we're going to eliminate the ones that have opposites (i.e. 
+            // if the list contains +A 1.0 and -A 1.0, then we eliminate them both entries).
+            foreach (var operation in operations) {
+                // We get the opposing operation for the current operation:
+                // if o is +A 1.0 then the opposing key is - A 1.0
+                Tuple<PackageAction, string, Version> opposingKey = GetOpposingOperationKey(operation);
 
-            // Find the reduced set of packages to install and uninstall by taking the set difference in both ways
-            // i.e. if there are 2 lists:
-            // removedList = [-A, -B, -D]
-            // addList= [+A, +B, +C]
-            // reducedRemovedList = [-D]
-            // reducedAddedList = [+C]
-            var reducedRemoveList = from p in removeList.Except(addList, PackageEqualityComparer.IdAndVersion)
-                                    select new PackageOperation(p, PackageAction.Uninstall);
+                // We can't use TryGetValue since the value of the dictionary entry
+                // is a List of an anonymous type.
+                if (operationLookup.ContainsKey(opposingKey)) {
+                    // We we find an opposing entry, we remove it from the list of candidates
+                    var opposingOperations = operationLookup[opposingKey];
+                    opposingOperations.RemoveAt(0);
 
-            var reducedAddList = from p in addList.Except(removeList, PackageEqualityComparer.IdAndVersion)
-                                 select new PackageOperation(p, PackageAction.Install);
-            
-            return reducedRemoveList.Union(reducedAddList);
+                    // Remove the list from the dictionary if nothing is in it
+                    if (!opposingOperations.Any()) {
+                        operationLookup.Remove(opposingKey);
+                    }
+                }
+            }
+
+            // Create the final list of operations and order them by their original index
+            return operationLookup.SelectMany(o => o.Value)
+                                  .OrderBy(o => o.Index)
+                                  .Select(o => o.Operation);
         }
+
+        private static Tuple<PackageAction, string, Version> GetOperationKey(PackageOperation operation) {
+            return Tuple.Create(operation.Action, operation.Package.Id, operation.Package.Version);
+        }
+
+        private static Tuple<PackageAction, string, Version> GetOpposingOperationKey(PackageOperation operation) {
+            return Tuple.Create(operation.Action == PackageAction.Install ?
+                                PackageAction.Uninstall :
+                                PackageAction.Install, operation.Package.Id, operation.Package.Version);
+        }
+
 
         public static IQueryable<IPackage> Find(this IQueryable<IPackage> packages, params string[] searchTerms) {
             if (searchTerms == null) {

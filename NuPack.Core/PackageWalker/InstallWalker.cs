@@ -8,6 +8,7 @@ using NuGet.Resources;
 namespace NuGet {
     public class InstallWalker : PackageWalker, IPackageOperationResolver {
         private readonly bool _ignoreDependencies;
+        private readonly HashSet<IPackage> _packagesToUninstall = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
 
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
@@ -66,9 +67,9 @@ namespace NuGet {
         }
 
         protected override void OnBeforePackageWalk(IPackage package) {
-            ConflictResult conflict = GetConflict(package.Id);
+            ConflictResult conflictResult = GetConflict(package.Id);
 
-            if (conflict == null) {
+            if (conflictResult == null) {
                 return;
             }
 
@@ -79,27 +80,37 @@ namespace NuGet {
             //     B1 -> C >= 1
             //     C2 -> []
             // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
-            var dependents = from dependentPackage in GetDependents(conflict)
+            var dependents = from dependentPackage in GetDependents(conflictResult)
                              where !IsDependencySatisfied(dependentPackage, package)
                              select dependentPackage;
 
             if (dependents.Any()) {
-                throw CreatePackageConflictException(package, conflict.Package, dependents);
+                throw CreatePackageConflictException(package, conflictResult.Package, dependents);
             }
-            else if (package.Version < conflict.Package.Version) {
+            else if (package.Version < conflictResult.Package.Version) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.NewerVersionAlreadyReferenced, package.Id));
             }
-            else if (package.Version > conflict.Package.Version) {
+            else if (package.Version > conflictResult.Package.Version) {
+                // If this package isn't part of the current graph (i.e. hasn't been visited yet) and
+                // is marked for removal, then do nothing. This is so we don't get unnecessary duplicates.
+                if (!Marker.Contains(conflictResult.Package) &&
+                    _packagesToUninstall.Contains(conflictResult.Package)) {
+                    return;
+                }
+
                 // Uninstall the conflicting package
-                var resolver = new UninstallWalker(conflict.Repository,
-                                                   conflict.DependentsResolver,
+                var resolver = new UninstallWalker(conflictResult.Repository,
+                                                   conflictResult.DependentsResolver,
                                                    NullLogger.Instance,
                                                    !IgnoreDependencies,
                                                    forceRemove: true);
 
-                foreach (var operation in resolver.ResolveOperations(conflict.Package)) {
+                foreach (var operation in resolver.ResolveOperations(conflictResult.Package)) {
+                    // Keep a separate set of packages to uninstall so we have a fast way to check
+                    // if a package is being uninstalled
+                    _packagesToUninstall.Add(operation.Package);
                     Operations.Add(operation);
                 }
             }
@@ -140,6 +151,7 @@ namespace NuGet {
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
             Operations.Clear();
             Marker.Clear();
+            _packagesToUninstall.Clear();
 
             Walk(package);
             return Operations.Reduce();
