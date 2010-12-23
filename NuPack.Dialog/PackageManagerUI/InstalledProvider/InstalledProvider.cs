@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Threading;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -16,8 +17,12 @@ namespace NuGet.Dialog.Providers {
 
         private IVsPackageManager _packageManager;
 
-        public InstalledProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
-            : base(projectManager, resources) {
+        public InstalledProvider(
+            IVsPackageManager packageManager, 
+            IProjectManager projectManager, 
+            ResourceDictionary resources,
+            IProgressWindowOpener progressWindowOpener)
+            : base(projectManager, resources, progressWindowOpener) {
             _packageManager = packageManager;
         }
 
@@ -51,7 +56,7 @@ namespace NuGet.Dialog.Providers {
             return ProjectManager.IsInstalled(item.PackageIdentity);
         }
 
-        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+        protected override bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
             _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
             return true;
         }
@@ -71,6 +76,12 @@ namespace NuGet.Dialog.Providers {
         public override string NoItemsMessage {
             get {
                 return Resources.Dialog_InstalledProviderNoItem;
+            }
+        }
+
+        public override string ProgressWindowTitle {
+            get {
+                return Dialog.Resources.Dialog_UninstallProgress;
             }
         }
     }

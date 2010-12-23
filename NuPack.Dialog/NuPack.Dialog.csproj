@@ -128,6 +128,7 @@
     <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
     <Compile Include="PackageManagerUI\MessageHelper.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
@@ -151,7 +152,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PackageManagerUI\ProgressDialog.xaml.cs">
+      <DependentUpon>ProgressDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
+    <Compile Include="PackageManagerUI\ProgressWindowOpener.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -198,6 +203,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="PackageManagerUI\PackageManagerWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\ProgressDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

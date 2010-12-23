@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
+using NuGet.Dialog.PackageManagerUI;
 
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {
@@ -12,7 +13,7 @@ namespace NuGet.Dialog.Test {
         }
 
         public MockPackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager)
-            : base(projectManager, new ResourceDictionary()) {
+            : base(projectManager, new ResourceDictionary(), new Mock<IProgressWindowOpener>().Object) {
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {
@@ -23,7 +24,7 @@ namespace NuGet.Dialog.Test {
             return true;
         }
 
-        public override void Execute(PackageItem item, PackageManagerUI.ILicenseWindowOpener licenseWindowOpener) {
+        public override void Execute(PackageItem item) {
         }
 
         public override string Name {

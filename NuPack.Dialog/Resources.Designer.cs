@@ -124,6 +124,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Installing....
+        /// </summary>
+        public static string Dialog_InstallProgress {
+            get {
+                return ResourceManager.GetString("Dialog_InstallProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operation failed.
         /// </summary>
         public static string Dialog_MessageBoxTitle {
@@ -165,6 +174,15 @@ namespace NuGet.Dialog {
         public static string Dialog_OnlineProviderNoItem {
             get {
                 return ResourceManager.GetString("Dialog_OnlineProviderNoItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Completed.
+        /// </summary>
+        public static string Dialog_OperationCompleted {
+            get {
+                return ResourceManager.GetString("Dialog_OperationCompleted", resourceCulture);
             }
         }
         
@@ -322,11 +340,29 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Uninstalling....
+        /// </summary>
+        public static string Dialog_UninstallProgress {
+            get {
+                return ResourceManager.GetString("Dialog_UninstallProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Update.
         /// </summary>
         public static string Dialog_UpdateButton {
             get {
                 return ResourceManager.GetString("Dialog_UpdateButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating....
+        /// </summary>
+        public static string Dialog_UpdateProgress {
+            get {
+                return ResourceManager.GetString("Dialog_UpdateProgress", resourceCulture);
             }
         }
         

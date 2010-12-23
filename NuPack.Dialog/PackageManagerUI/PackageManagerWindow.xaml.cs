@@ -27,7 +27,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
-                                    IPackageSourceProvider packageSourceProvider)
+                                    IPackageSourceProvider packageSourceProvider,
+                                    IProgressWindowOpener progressWindowOpener)
             : base(F1Keyword) {
 
             InitializeComponent();
@@ -37,13 +38,14 @@ namespace NuGet.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            SetupProviders(dte, packageManagerFactory, repositoryFactory, packageSourceProvider);
+            SetupProviders(dte, packageManagerFactory, repositoryFactory, packageSourceProvider, progressWindowOpener);
         }
 
         private void SetupProviders(DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
-                                    IPackageSourceProvider packageSourceProvider) {
+                                    IPackageSourceProvider packageSourceProvider,
+                                    IProgressWindowOpener progressWindowOpener) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -54,7 +56,12 @@ namespace NuGet.Dialog.PackageManagerUI {
             // The ExtensionsExplorer control display providers in reverse order.
             // We want the providers to appear as Installed - Online - Updates
 
-            var updatesProvider = new UpdatesProvider(packageManager, projectManager, Resources);
+            var updatesProvider = new UpdatesProvider(
+                packageManager, 
+                projectManager, 
+                Resources, 
+                this, 
+                progressWindowOpener);
             explorer.Providers.Add(updatesProvider);
 
             var onlineProvider = new OnlineProvider(
@@ -62,11 +69,12 @@ namespace NuGet.Dialog.PackageManagerUI {
                 Resources,
                 packageRepositoryFactory,
                 packageSourceProvider,
-                packageManagerFactory);
-
+                packageManagerFactory,
+                this,
+                progressWindowOpener);
             explorer.Providers.Add(onlineProvider);
 
-            var installedProvider = new InstalledProvider(packageManager, projectManager, Resources);
+            var installedProvider = new InstalledProvider(packageManager, projectManager, Resources, progressWindowOpener);
             explorer.Providers.Add(installedProvider);
 
             // make the Installed provider as selected by default
@@ -118,7 +126,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             PackagesProviderBase provider = control.SelectedProvider as PackagesProviderBase;
             if (provider != null) {
                 try {
-                    provider.Execute(selectedItem, this);
+                    provider.Execute(selectedItem);
                 }
                 catch (Exception exception) {
                     MessageHelper.ShowErrorMessage(exception);

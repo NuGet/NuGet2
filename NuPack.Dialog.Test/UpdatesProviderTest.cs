@@ -151,12 +151,11 @@ namespace NuGet.Dialog.Test {
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
 
-            var provider = CreateUpdatesProvider(packageManager.Object, projectManager.Object);
+            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+            var provider = CreateUpdatesProvider(packageManager.Object, projectManager.Object, mockLicenseWindowOpener.Object);
 
             var extensionA = new PackageItem(provider, packageA2, null);
             var extensionC = new PackageItem(provider, packageC, null);
-
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
@@ -169,13 +168,13 @@ namespace NuGet.Dialog.Test {
             };
 
             // Act
-            provider.Execute(extensionA, mockLicenseWindowOpener.Object);
+            provider.Execute(extensionA);
 
             // do not allow the method to return
             manualEvent.WaitOne();
         }
 
-        private static UpdatesProvider CreateUpdatesProvider(IVsPackageManager packageManager = null, IProjectManager projectManager = null) {
+        private static UpdatesProvider CreateUpdatesProvider(IVsPackageManager packageManager = null, IProjectManager projectManager = null, ILicenseWindowOpener licenseWindowOpener = null) {
             if (packageManager == null) {
                 packageManager = new Mock<IVsPackageManager>().Object;
             }
@@ -184,7 +183,8 @@ namespace NuGet.Dialog.Test {
                 projectManager = new Mock<IProjectManager>().Object;
             }
 
-            return new UpdatesProvider(packageManager, projectManager, new System.Windows.ResourceDictionary());
+            var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
+            return new UpdatesProvider(packageManager, projectManager, new System.Windows.ResourceDictionary(), licenseWindowOpener, mockProgressWindowOpener.Object);
         }
     }
 }

@@ -137,7 +137,7 @@ namespace NuGet.Dialog.Test {
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
             // Act
-            provider.Execute(extensionA, mockLicenseWindowOpener.Object);
+            provider.Execute(extensionA);
 
             // Assert
             packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", null, false, false), Times.Once());
@@ -153,7 +153,9 @@ namespace NuGet.Dialog.Test {
                 projectManager = new Mock<IProjectManager>().Object;
             }
 
-            return new InstalledProvider(packageManager, projectManager, new System.Windows.ResourceDictionary());
+            var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
+
+            return new InstalledProvider(packageManager, projectManager, new System.Windows.ResourceDictionary(), mockProgressWindowOpener.Object);
         }
     }
 }

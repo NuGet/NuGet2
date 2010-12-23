@@ -157,7 +157,7 @@ namespace NuGet.Dialog.Test {
             var extensionB = new PackageItem(provider, packageB, null);
 
             // Act
-            provider.Execute(extensionB, mockLicenseWindowOpener.Object);
+            provider.Execute(extensionB);
 
             // do not allow the method to return
             manualEvent.WaitOne();
@@ -201,12 +201,17 @@ namespace NuGet.Dialog.Test {
             var factory = new Mock<IVsPackageManagerFactory>();
             factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>())).Returns(packageManager);
 
+            var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
+            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+
             return new OnlineProvider(
                 projectManager,
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
                 packageSourceProvider,
-                factory.Object);
+                factory.Object,
+                mockLicenseWindowOpener.Object,
+                mockProgressWindowOpener.Object);
         }
     }
 }

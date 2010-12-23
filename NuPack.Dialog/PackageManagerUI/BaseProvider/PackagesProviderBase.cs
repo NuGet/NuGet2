@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
@@ -16,12 +18,16 @@ namespace NuGet.Dialog.Providers {
         private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
+        private IProgressWindowOpener _progressWindowOpener;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
 
-        protected PackagesProviderBase(IProjectManager projectManager, ResourceDictionary resources) {
+        protected PackagesProviderBase(
+            IProjectManager projectManager, 
+            ResourceDictionary resources,
+            IProgressWindowOpener progressWindowOpener) {
 
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
@@ -31,7 +37,13 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("resources");
             }
 
+            if (progressWindowOpener == null) {
+                throw new ArgumentNullException("progressWindowOpener");
+            }
+
             _resources = resources;
+            
+            _progressWindowOpener = progressWindowOpener;
             ProjectManager = projectManager;
         }
 
@@ -183,7 +195,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public virtual void Execute(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+        public virtual void Execute(PackageItem item) {
             if (OperationCoordinator.IsBusy) {
                 return;
             }
@@ -192,24 +204,59 @@ namespace NuGet.Dialog.Providers {
             OperationCoordinator.IsBusy = true;
 
             BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += (o, e) => {
-                bool succeeded = ExecuteCore(item, licenseWindowOpener);
-                e.Cancel = !succeeded;
-                e.Result = item;
-            };
+            worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
-            worker.RunWorkerAsync(item);
+
+            // this allows the async operation to cancel the progress window display (in case
+            // there is error or need to show license window)
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Token.Register(CloseProgressWindow, true);
+
+            // We don't want to show progress window immediately. Instead, we set a delayed timer. 
+            // After it times out, if the operation is still ongoing, then we show progress window.
+            // This way, if the operation happens too fast, progress window doesn't need to show up.
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(600);
+            timer.Tick += (o, e) => {
+                timer.Stop();
+                if (worker.IsBusy && !cts.IsCancellationRequested) {
+                    _progressWindowOpener.ShowModal(ProgressWindowTitle);
+                }
+            };
+            timer.Start();
+
+            worker.RunWorkerAsync(Tuple.Create(item, cts));
+        }
+
+        private void CloseProgressWindow() {
+            if (_progressWindowOpener.IsOpen) {
+                _progressWindowOpener.Close();
+            }
+        }
+
+        private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e) {
+            var tuple = (Tuple<PackageItem, CancellationTokenSource>)e.Argument;
+            bool succeeded = ExecuteCore(tuple.Item1, tuple.Item2);
+            e.Cancel = !succeeded;
+            e.Result = tuple.Item1;
         }
 
         private void OnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             OperationCoordinator.IsBusy = false;
 
+            // operation completed. Enable the OK button to allow user to close the dialog.
+            _progressWindowOpener.SetCompleted();
+
             if (e.Error == null) {
-                if (!e.Cancelled) {
+                if (e.Cancelled) {
+                    CloseProgressWindow();
+                }
+                else {
                     OnExecuteCompleted((PackageItem)e.Result);
                 }
             }
             else {
+                CloseProgressWindow();
                 MessageHelper.ShowErrorMessage(e.Error);
             }
 
@@ -229,7 +276,7 @@ namespace NuGet.Dialog.Providers {
         /// This method is called on background thread.
         /// </summary>
         /// <returns><c>true</c> if the method succeeded. <c>false</c> otherwise.</returns>
-        protected virtual bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+        protected virtual bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
             return true;
         }
 
@@ -240,6 +287,12 @@ namespace NuGet.Dialog.Providers {
             get {
                 return String.Empty;
             } 
+        }
+
+        public virtual string ProgressWindowTitle {
+            get {
+                return String.Empty;
+            }
         }
     }
 }

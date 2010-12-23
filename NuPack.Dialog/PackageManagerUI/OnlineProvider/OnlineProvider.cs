@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -15,18 +16,22 @@ namespace NuGet.Dialog.Providers {
         private IPackageRepositoryFactory _packageRepositoryFactory;
         private IPackageSourceProvider _packageSourceProvider;
         private IVsPackageManagerFactory _packageManagerFactory;
+        private ILicenseWindowOpener _licenseWindowOpener;
 
         public OnlineProvider(
             IProjectManager projectManager,
             ResourceDictionary resources,
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
-            IVsPackageManagerFactory packageManagerFactory) :
-            base(projectManager, resources) {
+            IVsPackageManagerFactory packageManagerFactory,
+            ILicenseWindowOpener licenseWindowOpener,
+            IProgressWindowOpener progressWindowOpener) :
+            base(projectManager, resources, progressWindowOpener) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _packageManagerFactory = packageManagerFactory;
+            _licenseWindowOpener = licenseWindowOpener;
         }
 
         public override string Name {
@@ -80,7 +85,7 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+        protected override bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
 
             var activePackageManager = GetActivePackageManager();
             if (activePackageManager == null) {
@@ -99,6 +104,10 @@ namespace NuGet.Dialog.Providers {
                                                    where o.Action == PackageAction.Install && o.Package.HasPowerShellScript()
                                                    select o.Package;
             if (scriptPackages.Any()) {
+
+                // cancel/hide the progress window if we are going to show an error message.
+                progressWindowCts.Cancel();
+
                 MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
                 return false;
             }
@@ -108,7 +117,11 @@ namespace NuGet.Dialog.Providers {
                                                     select o.Package;
             // display license window if necessary
             if (licensePackages.Any()) {
-                bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
+
+                // cancel/hide the progress window if we are going to show license window
+                progressWindowCts.Cancel();
+
+                bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
                     return false;
                 }
@@ -136,6 +149,12 @@ namespace NuGet.Dialog.Providers {
         public override string NoItemsMessage {
             get {
                 return Resources.Dialog_OnlineProviderNoItem;
+            }
+        }
+
+        public override string ProgressWindowTitle {
+            get {
+                return Dialog.Resources.Dialog_InstallProgress;
             }
         }
     }

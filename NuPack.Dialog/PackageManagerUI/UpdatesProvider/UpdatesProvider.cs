@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -12,11 +12,18 @@ namespace NuGet.Dialog.Providers {
 
         private IVsPackageManager _packageManager;
         private Lazy<InstallWalker> _walker;
+        private ILicenseWindowOpener _licenseWindowOpener;
 
-        public UpdatesProvider(IVsPackageManager packageManager, IProjectManager projectManager, ResourceDictionary resources)
-            : base(projectManager, resources) {
+        public UpdatesProvider(
+            IVsPackageManager packageManager, 
+            IProjectManager projectManager, 
+            ResourceDictionary resources,
+            ILicenseWindowOpener licenseWindowOpener,
+            IProgressWindowOpener progressWindowOpener)
+            : base(projectManager, resources, progressWindowOpener) {
 
             _packageManager = packageManager;
+            _licenseWindowOpener = licenseWindowOpener;
 
             _walker = new Lazy<InstallWalker>(
                 () => new InstallWalker(ProjectManager.LocalRepository, _packageManager.SourceRepository, NullLogger.Instance, ignoreDependencies: false));
@@ -58,7 +65,7 @@ namespace NuGet.Dialog.Providers {
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        protected override bool ExecuteCore(PackageItem item, ILicenseWindowOpener licenseWindowOpener) {
+        protected override bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
 
             IList<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity).ToList();
             IList<IPackage> licensePackages = (from o in operations
@@ -67,7 +74,10 @@ namespace NuGet.Dialog.Providers {
 
             // display license window if necessary
             if (licensePackages.Count > 0) {
-                bool accepted = licenseWindowOpener.ShowLicenseWindow(licensePackages);
+                // cancel/hide the progress window if we are going to show license window
+                progressWindowCts.Cancel();
+
+                bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
                     return false;
                 }
@@ -90,6 +100,12 @@ namespace NuGet.Dialog.Providers {
         public override string NoItemsMessage {
             get {
                 return Resources.Dialog_UpdatesProviderNoItem;
+            }
+        }
+
+        public override string ProgressWindowTitle {
+            get {
+                return Dialog.Resources.Dialog_UpdateProgress;
             }
         }
     }

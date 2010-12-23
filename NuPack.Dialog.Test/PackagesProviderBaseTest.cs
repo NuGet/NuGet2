@@ -6,6 +6,7 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using NuGet.Dialog.PackageManagerUI;
 
 namespace NuGet.Dialog.Test {
 
@@ -168,7 +169,7 @@ namespace NuGet.Dialog.Test {
             }
 
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
-                base(projectManager, resources) {
+                base(projectManager, resources, new Mock<IProgressWindowOpener>().Object) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {
@@ -179,7 +180,7 @@ namespace NuGet.Dialog.Test {
                 return false;
             }
 
-            public override void Execute(PackageItem item, PackageManagerUI.ILicenseWindowOpener licenseWindowOpener) {
+            public override void Execute(PackageItem item) {
             }
 
             protected override void FillRootNodes() {
