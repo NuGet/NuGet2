@@ -27,5 +27,20 @@ function Test-RemovePackageRemovesPackageFromSolutionIfNotInUse {
     Uninstall-Package elmah -Project $p1.Name
     Assert-Null (Get-AssemblyReference $p1 elmah)
     Assert-Null (Get-ProjectPackage $p1 elmah)
-    Assert-Null (Get-SolutionPackage elmah)    
+    Assert-Null (Get-SolutionPackage elmah)
+}
+
+function Test-UninstallingPackageWithConfigTransformWhenConfigReadOnly {
+    # Arrange
+    $p1 = New-WebApplication
+    
+    Install-Package elmah -Project $p1.Name    
+    Assert-Reference $p1 elmah
+    Assert-SolutionPackage elmah
+    attrib +R (Get-ProjectItemPath $p1 web.config)
+    
+    Uninstall-Package elmah -Project $p1.Name
+    Assert-Null (Get-AssemblyReference $p1 elmah)
+    Assert-Null (Get-ProjectPackage $p1 elmah)
+    Assert-Null (Get-SolutionPackage elmah)
 }

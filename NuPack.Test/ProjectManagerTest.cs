@@ -415,6 +415,41 @@ namespace NuGet.Test {
 </configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
+        [TestMethod]
+        public void RemovePackageWithTransformFileThatThrowsContinuesRemovingPackage() {
+            // Arrange
+            var mockProjectSystem = new MockProjectSystem();
+            var mockRepository = new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
+            mockProjectSystem.AddFile("web.config", () => { throw new UnauthorizedAccessException(); });
+            mockProjectSystem.AddFile("foo.txt");
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, localRepository);
+            var package = new Mock<IPackage>();
+            package.Setup(m => m.Id).Returns("A");
+            package.Setup(m => m.Version).Returns(new Version("1.0"));
+            var file = new Mock<IPackageFile>();
+            var contentFile = new Mock<IPackageFile>();
+            contentFile.Setup(m => m.Path).Returns(@"content\foo.txt");
+            contentFile.Setup(m => m.GetStream()).Returns(new MemoryStream());
+            file.Setup(m => m.Path).Returns(@"content\web.config.transform");
+            file.Setup(m => m.GetStream()).Returns(() =>
+@"<configuration>
+    <system.web>
+        <compilation debug=""true"" targetFramework=""4.0"" />
+    </system.web>
+</configuration>
+".AsStream());
+            package.Setup(m => m.GetFiles()).Returns(new[] { file.Object, contentFile.Object });
+            mockRepository.AddPackage(package.Object);
+            projectManager.LocalRepository.AddPackage(package.Object);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.IsFalse(mockProjectSystem.FileExists("foo.txt"));
+            Assert.IsFalse(localRepository.Exists(package.Object));
+        }
 
         [TestMethod]
         public void RemovePackageWithUnsupportedTransformFileDoesNothing() {

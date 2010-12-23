@@ -34,6 +34,7 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want delete to be robust, when exceptions occur we log then and move on")]
         public static void DeleteFiles(this IProjectSystem project,
                                        IEnumerable<IPackageFile> files,
                                        IEnumerable<IPackage> otherPackages,
@@ -75,10 +76,16 @@ namespace NuGet {
                                                 where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
                                                 select otherFile;
 
-                            transformer.RevertFile(file, path, matchingFiles, project);
+                            try {
+                                transformer.RevertFile(file, path, matchingFiles, project);
+                            }
+                            catch (Exception e) {
+                                // Report a warning and move on
+                                project.Logger.Log(MessageLevel.Warning, e.Message);
+                            }
                         }
                     }
-                    else if(project.IsSupportedFile(path)) {
+                    else if (project.IsSupportedFile(path)) {
                         project.DeleteFileSafe(path, file.GetStream);
                     }
                 }

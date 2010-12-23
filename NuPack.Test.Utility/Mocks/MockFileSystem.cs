@@ -120,6 +120,10 @@ namespace NuGet.Test.Mocks {
             Paths[path] = () => new MemoryStream(buffer);
         }
 
+        public virtual void AddFile(string path, Func<Stream> getStream) {
+            Paths[path] = getStream;
+        }
+
         public virtual DateTimeOffset GetLastModified(string path) {
             return DateTime.UtcNow;
         }
