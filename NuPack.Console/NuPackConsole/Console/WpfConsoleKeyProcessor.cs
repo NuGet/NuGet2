@@ -171,19 +171,21 @@ namespace NuGetConsole.Implementation.Console {
 
                     case VSConstants.VSStd2KCmdID.UP:
                         if (!IsCompletionSessionActive) {
-                            if (!IsCaretInReadOnlyRegion) {
-                                WpfConsole.NavigateHistory(-1);
-                                hr = VSConstants.S_OK;
+                            if (IsCaretInReadOnlyRegion) {
+                                ExecuteCommand(VSConstants.VSStd2KCmdID.END);
                             }
+                            WpfConsole.NavigateHistory(-1);
+                            hr = VSConstants.S_OK;
                         }
                         break;
 
                     case VSConstants.VSStd2KCmdID.DOWN:
                         if (!IsCompletionSessionActive) {
-                            if (!IsCaretInReadOnlyRegion) {
-                                WpfConsole.NavigateHistory(+1);
-                                hr = VSConstants.S_OK;
+                            if (IsCaretInReadOnlyRegion) {
+                                ExecuteCommand(VSConstants.VSStd2KCmdID.END);
                             }
+                            WpfConsole.NavigateHistory(+1);
+                            hr = VSConstants.S_OK;
                         }
                         break;
 
