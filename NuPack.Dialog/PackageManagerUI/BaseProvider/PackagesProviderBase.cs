@@ -15,10 +15,11 @@ namespace NuGet.Dialog.Providers {
     /// </summary>
     internal abstract class PackagesProviderBase : VsExtensionsProvider {
 
+        private static readonly TimeSpan ShowProgressWindowDelay = TimeSpan.FromMilliseconds(600);
         private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
-        private IProgressWindowOpener _progressWindowOpener;
+        private readonly IProgressWindowOpener _progressWindowOpener;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
@@ -203,20 +204,20 @@ namespace NuGet.Dialog.Providers {
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
-            BackgroundWorker worker = new BackgroundWorker();
+            var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
 
             // this allows the async operation to cancel the progress window display (in case
             // there is error or need to show license window)
-            CancellationTokenSource cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
             cts.Token.Register(CloseProgressWindow, true);
 
             // We don't want to show progress window immediately. Instead, we set a delayed timer. 
             // After it times out, if the operation is still ongoing, then we show progress window.
             // This way, if the operation happens too fast, progress window doesn't need to show up.
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(600);
+            var timer = new DispatcherTimer();
+            timer.Interval = ShowProgressWindowDelay;
             timer.Tick += (o, e) => {
                 timer.Stop();
                 if (worker.IsBusy && !cts.IsCancellationRequested) {
