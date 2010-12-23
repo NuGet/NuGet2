@@ -57,10 +57,11 @@ namespace NuGet.VisualStudio {
         }
 
         private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
-            if (projectManager != null) {
+            if (projectManager != null) {                
                 EventHandler<PackageOperationEventArgs> handler = (sender, e) => {
                     // Remove any packages that would be removed as a result of updating a dependency or the package itself
-                    UninstallPackage(e.Package, forceRemove: true, removeDependencies: false);
+                    // We can execute the uninstall directly since we don't need to resolve dependencies again
+                    ExecuteUninstall(e.Package);
                 };
 
                 // Add the handler
