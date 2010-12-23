@@ -30,7 +30,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void AddingPackageReferenceThrowsExceptionPackageReferenceIsNotAdded() {
+        public void AddingPackageReferenceThrowsExceptionPackageReferenceIsAdded() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -44,7 +44,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<UnauthorizedAccessException>(() => projectManager.AddPackageReference("A"));
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA));
         }
 
         [TestMethod]
@@ -1014,11 +1014,12 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void AddPackageReferenceWithAnyNonCompatibleReferenceThrows() {
+        public void AddPackageReferenceWithAnyNonCompatibleReferenceThrowsAndPackageIsNotReferenced() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            var localRepository=new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, new MockPackageRepository());
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, localRepository);
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
@@ -1029,6 +1030,7 @@ namespace NuGet.Test {
 
             // Act & Assert            
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v2.0'.");
+            Assert.IsFalse(localRepository.Exists(mockPackage.Object));
         }
 
         [TestMethod]

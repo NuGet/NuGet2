@@ -182,29 +182,36 @@ namespace NuGet {
         }
 
         protected virtual void ExtractPackageFilesToProject(IPackage package) {
-            // Add content files
-            Project.AddFiles(package.GetContentFiles(), _fileTransformers);
-
-            // Resolve assembly references
+            // BUG 491: Installing a package with incompatible binaries still does a partial install.
+            // Resolve assembly references first so that if this fails we never do anything to the project
             IEnumerable<IPackageAssemblyReference> assemblyReferences = ResolveAssemblyReferences(package);
 
-            // Add the references to the reference path
-            foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
-                // Get the physical path of the assembly reference
-                string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
-                string relativeReferencePath = PathUtility.GetRelativePath(Project.Root, referencePath);
+            try {
+                // Add content files
+                Project.AddFiles(package.GetContentFiles(), _fileTransformers);
 
-                if (Project.ReferenceExists(assemblyReference.Name)) {
-                    Project.RemoveReference(assemblyReference.Name);
-                }
+                // Add the references to the reference path
+                foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
+                    // Get the physical path of the assembly reference
+                    string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
+                    string relativeReferencePath = PathUtility.GetRelativePath(Project.Root, referencePath);
 
-                using (Stream stream = assemblyReference.GetStream()) {
-                    Project.AddReference(relativeReferencePath, stream);
+                    if (Project.ReferenceExists(assemblyReference.Name)) {
+                        Project.RemoveReference(assemblyReference.Name);
+                    }
+
+                    using (Stream stream = assemblyReference.GetStream()) {
+                        Project.AddReference(relativeReferencePath, stream);
+                    }
                 }
             }
-
-            // Add package to local repository
-            LocalRepository.AddPackage(package);
+            finally {
+                // Add package to local repository in the finally so that the user can uninstall it
+                // if any exception occurs. This is easier than rolling back since the user can just
+                // manually uninstall things that may have failed.
+                // If this fails then the user is out of luck.
+                LocalRepository.AddPackage(package);
+            }
         }
 
         public bool IsInstalled(IPackage package) {

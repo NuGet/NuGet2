@@ -94,3 +94,29 @@ function Test-WebsiteConfigElementsAreRemovedEvenIfReordered {
     # Assert
     Assert-Null $config.configuration.configSections
 }
+
+function Test-FailedInstallStillMarksPackageAsInstalled {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act & Assert
+    Assert-Throws { Install-Package haack.metaweblog -Project $p.Name -Source $context.RepositoryRoot } "The replacement token 'namespace' has no value."
+    Assert-Package $p haack.metaweblog 0.1.0
+    Assert-SolutionPackage haack.metaweblog 0.1.0
+}
+
+function Test-PackageWithIncompatibleAssembliesDontMarkPackageAsInstalled {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebApplication
+
+    # Act & Assert
+    Assert-Throws { Install-Package BingMapAppSDK -Project $p.Name -Source $context.RepositoryRoot } "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v4.0'."
+    Assert-Null (Get-ProjectPackage $p BingMapAppSDK 1.0.1011.1716)
+    Assert-SolutionPackage BingMapAppSDK 1.0.1011.1716
+}
