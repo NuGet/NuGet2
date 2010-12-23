@@ -81,6 +81,8 @@ namespace NuGet.Dialog.Providers {
                 if (!accepted) {
                     return false;
                 }
+
+                ShowProgressWindow();
             }
 
             _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true);

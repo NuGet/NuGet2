@@ -211,7 +211,7 @@ namespace NuGet.Dialog.Providers {
             // this allows the async operation to cancel the progress window display (in case
             // there is error or need to show license window)
             var cts = new CancellationTokenSource();
-            cts.Token.Register(CloseProgressWindow, true);
+            cts.Token.Register(HideProgressWindow, true);
 
             // We don't want to show progress window immediately. Instead, we set a delayed timer. 
             // After it times out, if the operation is still ongoing, then we show progress window.
@@ -220,19 +220,13 @@ namespace NuGet.Dialog.Providers {
             timer.Interval = ShowProgressWindowDelay;
             timer.Tick += (o, e) => {
                 timer.Stop();
-                if (worker.IsBusy && !cts.IsCancellationRequested) {
-                    _progressWindowOpener.ShowModal(ProgressWindowTitle);
+                if (worker.IsBusy && OperationCoordinator.IsBusy && !cts.IsCancellationRequested) {
+                    ShowProgressWindow();
                 }
             };
             timer.Start();
 
             worker.RunWorkerAsync(Tuple.Create(item, cts));
-        }
-
-        private void CloseProgressWindow() {
-            if (_progressWindowOpener.IsOpen) {
-                _progressWindowOpener.Close();
-            }
         }
 
         private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e) {
@@ -264,6 +258,18 @@ namespace NuGet.Dialog.Providers {
             if (ExecuteCompletedCallback != null) {
                 ExecuteCompletedCallback();
             }
+        }
+
+        protected void ShowProgressWindow() {
+            _progressWindowOpener.Show(ProgressWindowTitle);
+        }
+
+        private void HideProgressWindow() {
+            _progressWindowOpener.Hide();
+        }
+
+        private void CloseProgressWindow() {
+            _progressWindowOpener.Close();
         }
 
         protected virtual void FillRootNodes() {

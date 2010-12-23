@@ -105,7 +105,7 @@ namespace NuGet.Dialog.Providers {
                                                    select o.Package;
             if (scriptPackages.Any()) {
 
-                // cancel/hide the progress window if we are going to show an error message.
+                // hide the progress window if we are going to show an error message.
                 progressWindowCts.Cancel();
 
                 MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
@@ -117,14 +117,15 @@ namespace NuGet.Dialog.Providers {
                                                     select o.Package;
             // display license window if necessary
             if (licensePackages.Any()) {
-
-                // cancel/hide the progress window if we are going to show license window
+                // hide the progress window if we are going to show license window
                 progressWindowCts.Cancel();
 
                 bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
                     return false;
                 }
+
+                ShowProgressWindow();
             }
 
             activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false);
