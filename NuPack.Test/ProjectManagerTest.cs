@@ -1017,7 +1017,7 @@ namespace NuGet.Test {
         public void AddPackageReferenceWithAnyNonCompatibleReferenceThrowsAndPackageIsNotReferenced() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
-            var localRepository=new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, localRepository);
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
