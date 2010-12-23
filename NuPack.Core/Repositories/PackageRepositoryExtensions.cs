@@ -45,7 +45,7 @@ namespace NuGet {
             }
 
             IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
-                                                       .AsEnumerable()
+                                                       .ToList()
                                                        .OrderByDescending(p => p.Version);
 
             if (version != null) {
@@ -65,7 +65,7 @@ namespace NuGet {
             }
 
             IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
-                                                       .AsEnumerable()
+                                                       .ToList()
                                                        .OrderByDescending(p => p.Version);
 
             if (versionInfo != null) {
@@ -86,7 +86,7 @@ namespace NuGet {
 
             // When looking for dependencies, order by lowest version
             IEnumerable<IPackage> packages = repository.FindPackagesById(dependency.Id)
-                                                       .AsEnumerable();
+                                                       .ToList();
 
             // If version info was specified then use it
             if (dependency.VersionSpec != null) {
@@ -128,7 +128,7 @@ namespace NuGet {
 
             // These are the packages that we need to look at for potential updates.
             IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList)
-                                                                           .AsEnumerable()
+                                                                           .ToList()
                                                                            .GroupBy(package => package.Id)
                                                                            .ToDictionary(package => package.Key,
                                                                                          package => package.OrderByDescending(p => p.Version).First());
