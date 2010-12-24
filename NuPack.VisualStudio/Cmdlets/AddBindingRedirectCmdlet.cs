@@ -8,15 +8,15 @@ using NuGet.Runtime;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio.Cmdlets {
-    [Cmdlet(VerbsCommon.Add, "BindingRedirects")]
-    public class AddBindingRedirectsCmdlet : Cmdlet {        
+    [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
+    public class AddBindingRedirectCmdlet : Cmdlet {        
         private readonly ISolutionManager _solutionManager;
 
-        public AddBindingRedirectsCmdlet()
+        public AddBindingRedirectCmdlet()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public AddBindingRedirectsCmdlet(ISolutionManager solutionManager) {
+        public AddBindingRedirectCmdlet(ISolutionManager solutionManager) {
             _solutionManager = solutionManager;
         }
 

@@ -1,14 +1,14 @@
 ﻿TOPIC
-    about_NuGet
-    
+	about_NuGet
+	
 SHORT DESCRIPTION
-    Provides information about NuGet Package Manager commands.
-           
+	Provides information about NuGet Package Manager commands.
+		   
 LONG DESCRIPTION
-    This topic describes the NuGet Package Manager commands. NuGet is an integrated package 
+	This topic describes the NuGet Package Manager commands. NuGet is an integrated package 
 	management tool for adding libraries and tools to .NET projects.
 
-                 
+				 
 	The following NuGet Cmdlets for are included.
 
 		Cmdlet					Description
@@ -27,16 +27,16 @@ LONG DESCRIPTION
 
 		New-Package				Creates a new package when supplied with a Nuspec package specification file.
 
-		Add-BindingRedirects	Examines all assemblies within the output path for a project and adds binding 
+		Add-BindingRedirect		Examines all assemblies within the output path for a project and adds binding 
 								redirects to the application (or web) configuration file where necessary.
-                            
+							
 		Get-Project				Returns a reference to the DTE (Development Tools Environment) for the active 
 								or specified project.
 
 SEE ALSO
-    Online documentation: http://go.microsoft.com/fwlink/?LinkID=206619
-    Get-Package
-    Install-Package
-    Uninstall-Package
-    Update-Package
-    New-Package
+	Online documentation: http://go.microsoft.com/fwlink/?LinkID=206619
+	Get-Package
+	Install-Package
+	Uninstall-Package
+	Update-Package
+	New-Package

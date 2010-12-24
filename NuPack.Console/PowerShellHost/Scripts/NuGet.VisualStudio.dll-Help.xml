@@ -475,7 +475,7 @@
     </maml:relatedLinks>
   </command:command>
 
-  <!-- Add-BindingRedirects command -->
+  <!-- Add-BindingRedirect command -->
   <command:command
       xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
       xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10"
@@ -483,7 +483,7 @@
 
     <command:details>
       <command:name>
-        Add-BindingRedirects
+        Add-BindingRedirect
       </command:name>
       <maml:description>
         <maml:para>Adds binding redirects to the config file.</maml:para>
@@ -492,7 +492,7 @@
         <maml:para></maml:para>
       </maml:copyright>
       <command:verb>Add</command:verb>
-      <command:noun>BindingRedirects</command:noun>
+      <command:noun>BindingRedirect</command:noun>
       <dev:version></dev:version>
     </command:details>
 
@@ -503,7 +503,7 @@
     <!-- Cmdlet syntax section-->
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Add-BindingRedirects</maml:name>
+        <maml:name>Add-BindingRedirect</maml:name>
         <command:parameter required="true" position="1">
           <maml:name>Project</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
@@ -532,7 +532,7 @@
         <maml:uri>http://nuget.codeplex.com</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
-        <maml:linkText>Add-BindingRedirects</maml:linkText>
+        <maml:linkText>Add-BindingRedirect</maml:linkText>
         <maml:uri/>
       </maml:navigationLink>
     </maml:relatedLinks>
