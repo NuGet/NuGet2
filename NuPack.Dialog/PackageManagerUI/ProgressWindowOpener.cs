@@ -23,7 +23,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             if (IsOpen) {
                 // if the window is hidden, just re-show it instead of creating a new window instance
                 _currentWindow.Title = title;
-                _currentWindow.Show();
+                _currentWindow.ShowDialog();
             }
             else {
                 _currentWindow = new ProgressDialog();
