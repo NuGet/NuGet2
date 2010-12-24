@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
 using System.Windows;
-using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
@@ -13,9 +12,8 @@ namespace NuGet.Dialog.Providers {
     /// <summary>
     /// Base class for all tree node types.
     /// </summary>
-    internal abstract class PackagesProviderBase : VsExtensionsProvider {
+    internal abstract class PackagesProviderBase : VsExtensionsProvider, ILogger {
 
-        private static readonly TimeSpan ShowProgressWindowDelay = TimeSpan.FromMilliseconds(600);
         private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
@@ -207,40 +205,20 @@ namespace NuGet.Dialog.Providers {
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
+            worker.RunWorkerAsync(item);
 
-            // this allows the async operation to cancel the progress window display (in case
-            // there is error or need to show license window)
-            var cts = new CancellationTokenSource();
-            cts.Token.Register(HideProgressWindow, true);
-
-            // We don't want to show progress window immediately. Instead, we set a delayed timer. 
-            // After it times out, if the operation is still ongoing, then we show progress window.
-            // This way, if the operation happens too fast, progress window doesn't need to show up.
-            var timer = new DispatcherTimer();
-            timer.Interval = ShowProgressWindowDelay;
-            timer.Tick += (o, e) => {
-                timer.Stop();
-                if (worker.IsBusy && OperationCoordinator.IsBusy && !cts.IsCancellationRequested) {
-                    ShowProgressWindow();
-                }
-            };
-            timer.Start();
-
-            worker.RunWorkerAsync(Tuple.Create(item, cts));
+            ShowProgressWindow();
         }
 
         private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e) {
-            var tuple = (Tuple<PackageItem, CancellationTokenSource>)e.Argument;
-            bool succeeded = ExecuteCore(tuple.Item1, tuple.Item2);
+            var item = (PackageItem)e.Argument;
+            bool succeeded = ExecuteCore(item);
             e.Cancel = !succeeded;
-            e.Result = tuple.Item1;
+            e.Result = item;
         }
 
         private void OnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             OperationCoordinator.IsBusy = false;
-
-            // operation completed. Enable the OK button to allow user to close the dialog.
-            _progressWindowOpener.SetCompleted();
 
             if (e.Error == null) {
                 if (e.Cancelled) {
@@ -248,11 +226,14 @@ namespace NuGet.Dialog.Providers {
                 }
                 else {
                     OnExecuteCompleted((PackageItem)e.Result);
+                    _progressWindowOpener.SetCompleted(successful: true);
                 }
             }
             else {
-                CloseProgressWindow();
-                MessageHelper.ShowErrorMessage(e.Error);
+                // REVIEW: Do we need to introduce MessageLevel.Error value?
+                // show error message in the progress window in case of error
+                Log(MessageLevel.Warning, (e.Error.InnerException ?? e.Error).Message);
+                _progressWindowOpener.SetCompleted(successful: false);
             }
 
             if (ExecuteCompletedCallback != null) {
@@ -264,11 +245,11 @@ namespace NuGet.Dialog.Providers {
             _progressWindowOpener.Show(ProgressWindowTitle);
         }
 
-        private void HideProgressWindow() {
+        protected void HideProgressWindow() {
             _progressWindowOpener.Hide();
         }
 
-        private void CloseProgressWindow() {
+        protected void CloseProgressWindow() {
             _progressWindowOpener.Close();
         }
 
@@ -283,7 +264,7 @@ namespace NuGet.Dialog.Providers {
         /// This method is called on background thread.
         /// </summary>
         /// <returns><c>true</c> if the method succeeded. <c>false</c> otherwise.</returns>
-        protected virtual bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
+        protected virtual bool ExecuteCore(PackageItem item) {
             return true;
         }
 
@@ -299,6 +280,16 @@ namespace NuGet.Dialog.Providers {
         public virtual string ProgressWindowTitle {
             get {
                 return String.Empty;
+            }
+        }
+
+        public void Log(MessageLevel level, string message, params object[] args) {
+            if (_progressWindowOpener.IsOpen) {
+                // for the dialog we only shows info or warning messages and ignore debug messages
+                if (level == MessageLevel.Info || level == MessageLevel.Warning) {
+                    string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
+                    _progressWindowOpener.AddMessage(level, formattedMessage);
+                }
             }
         }
     }

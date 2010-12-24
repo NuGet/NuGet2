@@ -56,7 +56,7 @@ namespace NuGet.Test.VisualStudio {
              };
 
             // Act 
-            packageManager.InstallPackage(projectManager, package, operations, ignoreDependencies: false);
+            packageManager.InstallPackage(projectManager, package, operations, ignoreDependencies: false, logger: NullLogger.Instance);
 
             // Assert 
             Assert.IsTrue(packageManager.LocalRepository.Exists(package));

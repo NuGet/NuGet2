@@ -78,7 +78,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies) {
+        public void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, ILogger logger) {
             if (package == null) {
                 throw new ArgumentNullException("package");
             }
@@ -86,6 +86,8 @@ namespace NuGet.VisualStudio {
             if (operations == null) {
                 throw new ArgumentNullException("operations");
             }
+
+            InitializeLogger(logger, projectManager);
 
             foreach (var operation in operations) {
                 Execute(operation);
@@ -119,8 +121,8 @@ namespace NuGet.VisualStudio {
             InstallPackage(projectManager, packageId, version, !updateDependencies, logger);
         }
 
-        public void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies) {
-            InstallPackage(projectManager, package, operations, !updateDependencies);
+        public void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, ILogger logger) {
+            InstallPackage(projectManager, package, operations, !updateDependencies, logger);
         }
 
         protected override void ExecuteUninstall(IPackage package) {

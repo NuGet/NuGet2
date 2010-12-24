@@ -56,8 +56,8 @@ namespace NuGet.Dialog.Providers {
             return ProjectManager.IsInstalled(item.PackageIdentity);
         }
 
-        protected override bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
-            _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false);
+        protected override bool ExecuteCore(PackageItem item) {
+            _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
             return true;
         }
 

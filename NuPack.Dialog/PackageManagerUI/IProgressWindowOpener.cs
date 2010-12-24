@@ -5,6 +5,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         void Hide();
         bool IsOpen { get; }
         bool Close();
-        void SetCompleted();
+        void SetCompleted(bool successful);
+        void AddMessage(MessageLevel level, string message);
     }
 }

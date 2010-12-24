@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -65,7 +64,7 @@ namespace NuGet.Dialog.Providers {
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        protected override bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
+        protected override bool ExecuteCore(PackageItem item) {
 
             IList<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity).ToList();
             IList<IPackage> licensePackages = (from o in operations
@@ -74,8 +73,8 @@ namespace NuGet.Dialog.Providers {
 
             // display license window if necessary
             if (licensePackages.Count > 0) {
-                // cancel/hide the progress window if we are going to show license window
-                progressWindowCts.Cancel();
+                // hide the progress window if we are going to show license window
+                HideProgressWindow();
 
                 bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
@@ -85,7 +84,7 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true);
+            _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true, logger: this);
             return true;
         }
 

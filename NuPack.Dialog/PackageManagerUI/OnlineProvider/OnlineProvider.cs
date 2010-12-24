@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
@@ -85,7 +84,7 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected override bool ExecuteCore(PackageItem item, CancellationTokenSource progressWindowCts) {
+        protected override bool ExecuteCore(PackageItem item) {
 
             var activePackageManager = GetActivePackageManager();
             if (activePackageManager == null) {
@@ -104,12 +103,7 @@ namespace NuGet.Dialog.Providers {
                                                    where o.Action == PackageAction.Install && o.Package.HasPowerShellScript()
                                                    select o.Package;
             if (scriptPackages.Any()) {
-
-                // hide the progress window if we are going to show an error message.
-                progressWindowCts.Cancel();
-
-                MessageHelper.ShowErrorMessage(Resources.Dialog_PackageHasPSScript);
-                return false;
+                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
             IEnumerable<IPackage> licensePackages = from o in operations
@@ -118,7 +112,7 @@ namespace NuGet.Dialog.Providers {
             // display license window if necessary
             if (licensePackages.Any()) {
                 // hide the progress window if we are going to show license window
-                progressWindowCts.Cancel();
+                HideProgressWindow();
 
                 bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
@@ -128,7 +122,7 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false);
+            activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
             return true;
         }
 
