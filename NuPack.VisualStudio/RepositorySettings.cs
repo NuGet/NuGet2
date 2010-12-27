@@ -14,28 +14,28 @@ namespace NuGet.VisualStudio {
         private const string DefaultRepositoryDirectory = "packages";
         private const string NuGetConfig = "nuget.config";
 
-        private readonly ISolutionManager _solutionManager;
-
         private string _configurationPath;
         private IFileSystem _fileSystem;
+        private readonly ISolutionManager _solutionManager;
+        private readonly ISourceControlResolver _sourceControlResolver;
 
-        [ImportingConstructor]
-        public RepositorySettings(ISolutionManager solutionManager)
-            : this(solutionManager, null) {
-        }
-
-        public RepositorySettings(ISolutionManager solutionManager, IFileSystem fileSystem) {
+        [ImportingConstructor]        
+        public RepositorySettings(ISolutionManager solutionManager, ISourceControlResolver sourceControlResolver) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
 
-            _fileSystem = fileSystem;
+            if (sourceControlResolver == null) {
+                throw new ArgumentNullException("sourceControlResolver");
+            }
+
             _solutionManager = solutionManager;
+            _sourceControlResolver = sourceControlResolver;
 
             _solutionManager.SolutionClosing += (sender, e) => {
                 // Kill our configuration cache when someone closes the solution
                 _configurationPath = null;
-                _fileSystem = fileSystem;
+                _fileSystem = null;
             };
         }
 
@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio {
         private IFileSystem FileSystem {
             get {
                 if (_fileSystem == null) {
-                    _fileSystem = new PhysicalFileSystem(_solutionManager.SolutionDirectory);
+                    _fileSystem = _sourceControlResolver.GetFileSystem(_solutionManager.SolutionDirectory);
                 }
                 return _fileSystem;
             }

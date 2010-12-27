@@ -10,15 +10,14 @@ namespace NuGet.VisualStudio.Test {
     public class RepositorySettingsTest {
         [TestMethod]
         public void CtorWithNullSolutionManagerThrows() {
-            ExceptionAssert.ThrowsArgNull(() => new RepositorySettings(null), "solutionManager");
+            ExceptionAssert.ThrowsArgNull(() => new RepositorySettings(null, new Mock<ISourceControlResolver>().Object), "solutionManager");
         }
 
         [TestMethod]
         public void RepositoryPathThrowsIfSolutionDirectoryIsNull() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
-            var fileSystem = new MockFileSystem();
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, new Mock<ISourceControlResolver>().Object);
             
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => { string s = repositorySettings.RepositoryPath; }, "Unable to locate the solution directory. Please ensure that the solution has been saved.");
@@ -29,8 +28,9 @@ namespace NuGet.VisualStudio.Test {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
-            var fileSystem = new MockFileSystem();
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(new MockFileSystem());
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string path = repositorySettings.RepositoryPath;
@@ -49,7 +49,10 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath>lib</repositoryPath>
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string path = repositorySettings.RepositoryPath;
@@ -68,7 +71,10 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath></repositoryPath>
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string path = repositorySettings.RepositoryPath;
@@ -87,7 +93,9 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => { string s = repositorySettings.RepositoryPath; }, @"Error reading 'bar\nuget.config'.");
@@ -103,7 +111,9 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath>lib</repositoryPath>
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string p1 = repositorySettings.RepositoryPath;
@@ -131,7 +141,9 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath>lib</repositoryPath>
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string p1 = repositorySettings.RepositoryPath;
@@ -159,7 +171,9 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath>lib</repositoryPath>
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string p1 = repositorySettings.RepositoryPath;
@@ -184,7 +198,9 @@ namespace NuGet.VisualStudio.Test {
 <settings>
     <repositoryPath>lib</repositoryPath>
 </settings>");
-            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystem);
+            var sourceControlResolver = new Mock<ISourceControlResolver>();
+            sourceControlResolver.Setup(m => m.GetFileSystem(@"bar\baz")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, sourceControlResolver.Object);
 
             // Act
             string p1 = repositorySettings.RepositoryPath;
