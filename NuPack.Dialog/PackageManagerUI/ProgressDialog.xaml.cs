@@ -35,23 +35,33 @@ namespace NuGet.Dialog.PackageManagerUI {
         public void AddMessage(string message, Brush messageColor) {
             Paragraph paragraph = null;
 
+            // delay creating the FlowDocument for the RichTextBox
+            // the FlowDocument will contain a single Paragraph, which
+            // contains all the logging messages.
             if (MessagePane.Document == null) {
                 MessagePane.Document = new FlowDocument();
                 paragraph = new Paragraph();
                 MessagePane.Document.Blocks.Add(paragraph);
             }
             else {
+                // if the FlowDocument has been created before, retrieve 
+                // the last paragraph from it.
                 paragraph = (Paragraph)MessagePane.Document.Blocks.LastBlock;
             }
 
+            // each message is reprepseted by a Run element
             var run = new Run(message) {
                 Foreground = messageColor 
             };
 
+            // if the paragraph is non-empty, add a line break before the new message
             if (paragraph.Inlines.Count > 0) {
                 paragraph.Inlines.Add(new LineBreak());
             }
+
             paragraph.Inlines.Add(run);
+
+            // scroll to the end to show the latest message
             MessagePane.ScrollToEnd();
         }
     }
