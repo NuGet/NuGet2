@@ -6,18 +6,18 @@
     <DevEnvDir>$(VsDir)\Common7\IDE</DevEnvDir>
     <TestResultsFile>$(TargetDir)$(AssemblyName).trx</TestResultsFile>
     <TestAssembly>$(TargetDir)$(AssemblyName).dll</TestAssembly>
-    <IntegrationTestSettings>NuPack.Test.Integration\NuPack.Test.Integration.testsettings</IntegrationTestSettings>
+    <IntegrationTestSettings>NuPack.Test.Integration\NuGet.Test.Integration.testsettings</IntegrationTestSettings>
 </PropertyGroup>
 
 <Target Name="RunTests">
     <Delete Files="$(TestResultsFile)" />
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TestAssembly)&quot; /resultsfile:&quot;$(TestResultsFile)&quot;" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TestAssembly)&quot; /resultsfile:&quot;$(TestResultsFile)&quot;" WorkingDirectory="$(NuGetRoot)" ContinueOnError="false" />
     <Message Text="##teamcity[importData type='mstest' path='$(TestResultsFile)']"/>
 </Target>
 
 <Target Name="RunIntegrationTests">
     <Delete Files="$(TestResultsFile)" />
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TestAssembly)&quot; /resultsfile:&quot;$(TestResultsFile)&quot; /testsettings:$(IntegrationTestSettings)" WorkingDirectory="$(NuPackRoot)" ContinueOnError="false" />
+    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TestAssembly)&quot; /resultsfile:&quot;$(TestResultsFile)&quot; /testsettings:$(IntegrationTestSettings)" WorkingDirectory="$(NuGetRoot)" ContinueOnError="false" />
     <Message Text="##teamcity[importData type='mstest' path='$(TestResultsFile)']"/>
 </Target>
 </Project>

@@ -21,9 +21,9 @@
     </Identifier>
     <References />
     <Content>
-        <MefComponent>|NuPack.TeamFoundationServer|</MefComponent>
+        <MefComponent>|NuGet.TeamFoundationServer|</MefComponent>
         <MefComponent>|PowerShellHostProvider|</MefComponent>
-        <MefComponent>|NuPack.Console|</MefComponent>
+        <MefComponent>|NuGet.Console|</MefComponent>
         <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     </Content>
 </Vsix>

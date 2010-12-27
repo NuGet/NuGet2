@@ -3,14 +3,14 @@
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
   </PropertyGroup>
-  <Import Project="..\Build\NuPack.Settings.targets" />
+  <Import Project="..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{6146CA62-CC16-422C-A105-3E81F7452AA6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.VisualStudio</RootNamespace>
     <AssemblyName>NuGet.VisualStudio</AssemblyName>
-    <CodeAnalysisRuleSet>..\NuPack.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
@@ -72,7 +72,7 @@
     <Compile Include="Cmdlets\InstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\GetPackageCmdlet.cs" />
     <Compile Include="Cmdlets\NewPackageCmdlet.cs" />
-    <Compile Include="Cmdlets\NuPackBaseCmdlet.cs" />
+    <Compile Include="Cmdlets\NuGetBaseCmdlet.cs" />
     <Compile Include="Cmdlets\ProcessPackageBaseCmdlet.cs" />
     <Compile Include="Cmdlets\UninstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
@@ -125,9 +125,9 @@
     <None Include="Class diagrams\ProjectSystems.cd" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NuPack.Core\NuPack.Core.csproj">
+    <ProjectReference Include="..\NuPack.Core\NuGet.Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
-      <Name>NuPack.Core</Name>
+      <Name>NuGet.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

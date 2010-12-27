@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
-  <Import Project="..\..\Build\NuPack.Settings.targets" />
+  <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>NuGetConsole</RootNamespace>
@@ -8,7 +8,7 @@
     <ProjectGuid>{50E33DA2-AF14-486D-81B8-BD8409744A38}</ProjectGuid>
     <CreateVsixContainer>False</CreateVsixContainer>
     <DeployExtension>False</DeployExtension>
-    <CodeAnalysisRuleSet>..\..\NuPack.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>

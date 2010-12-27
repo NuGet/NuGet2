@@ -1,4 +1,4 @@
-﻿namespace NuGet.Test.NuPackCommandLine.Commands {
+﻿namespace NuGet.Test.NuGetCommandLine.Commands {
 
     using System.Collections.Generic;
     using System.Linq;

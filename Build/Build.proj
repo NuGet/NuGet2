@@ -4,24 +4,24 @@
     
     <PropertyGroup>
        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-        <NuPackRoot>$(MSBuildProjectDirectory)\..</NuPackRoot>
-        <DropDirectory>$(NuPackRoot)\bin</DropDirectory>
+        <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
+        <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
-        <NuPackDropDirectory>$(DropDirectory)\NuPack</NuPackDropDirectory>
-        <ExeBuildDirectory>$(NuPackRoot)\NuPack\bin\$(Configuration)</ExeBuildDirectory>
-        <ExeDropDirectory>$(NuPackDropDirectory)\Console</ExeDropDirectory>
-        <VisualStudioAddInBuildDirectory>$(NuPackRoot)\NuPack.Tools\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
-        <VisualStudioAddInDropDirectory>$(NuPackDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
-        <ServerBuildDirectory>$(NuPackRoot)\NuPack.Server</ServerBuildDirectory>
-        <ServerDropDirectory>$(NuPackDropDirectory)\Server</ServerDropDirectory>
-        <ZipExe>$(NuPackRoot)\Tools\7zip4.65\7z.exe</ZipExe>
-        <ILMergeExe>$(NuPackRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
+        <NuGetDropDirectory>$(DropDirectory)\NuPack</NuGetDropDirectory>
+        <ExeBuildDirectory>$(NuGetRoot)\NuPack\bin\$(Configuration)</ExeBuildDirectory>
+        <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuGetRoot)\NuPack.Tools\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
+        <ServerBuildDirectory>$(NuGetRoot)\NuPack.Server</ServerBuildDirectory>
+        <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
+        <ZipExe>$(NuGetRoot)\Tools\7zip4.65\7z.exe</ZipExe>
+        <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
         <ILMergeFileFinalName>NuGet.exe</ILMergeFileFinalName>
-        <ILMergeInternalizeIgnoreFile>$(NuPackRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
+        <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
         <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
-        <MSBuildBuildDirectory>$(NuPackRoot)\NuPack.MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
-        <MSBuildDropDirectory>$(NuPackDropDirectory)\MSBuild</MSBuildDropDirectory>
+        <MSBuildBuildDirectory>$(NuGetRoot)\NuPack.MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
+        <MSBuildDropDirectory>$(NuGetDropDirectory)\MSBuild</MSBuildDropDirectory>
         <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
     
@@ -38,11 +38,11 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <RegexTransform Include="$(NuPackRoot)\NuPack.Tools\source.extension.vsixmanifest">        
+        <RegexTransform Include="$(NuGetRoot)\NuPack.Tools\source.extension.vsixmanifest">        
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
             <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
-        <RegexTransform Include="$(NuPackRoot)\Common\CommonAssemblyInfo.cs">
+        <RegexTransform Include="$(NuGetRoot)\Common\CommonAssemblyInfo.cs">
             <Find>\d+\.\d+\.\d+\.\d+</Find>
             <ReplaceWith>$(Version)</ReplaceWith>
         </RegexTransform>
@@ -62,19 +62,19 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
 
     <Target Name="RunTests">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.Dialog.Test\NuPack.Dialog.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuPackRoot)\NuPack.Test\NuPack.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuPackRoot)\NuPack.VisualStudio.Test\NuPack.VisualStudio.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuPackRoot)\NuPack.MSBuild.Test\NuPack.MSBuild.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\NuPack.Dialog.Test\NuGet.Dialog.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\NuPack.Test\NuGet.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\NuPack.VisualStudio.Test\NuGet.VisualStudio.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\NuPack.MSBuild.Test\NuGet.MSBuild.Test.csproj" Targets="RunTests" />
     </Target>
     
     <Target Name="ReportFxCopResults">
         <ItemGroup>
-            <FxCopOutputItems Include="$(NuPackRoot)\**\*.dll.CodeAnalysisLog.xml" />
+            <FxCopOutputItems Include="$(NuGetRoot)\**\*.dll.CodeAnalysisLog.xml" />
         </ItemGroup>
         <Message Text="##teamcity[importData type='FxCop' path='%(FxCopOutputItems.Identity)']" />
     </Target>
@@ -84,7 +84,7 @@
         <RemoveDir Directories="$(DropDirectory)" Condition="Exists('$(DropDirectory)')" ContinueOnError="True" />
         <MakeDir Directories="$(DropDirectory)" Condition="!Exists('$(DropDirectory)')" />
         <MakeDir Directories="$(ArtifactDropDirectory)" Condition="!Exists('$(ArtifactDropDirectory)')" />
-        <MakeDir Directories="$(NuPackDropDirectory)" Condition="!Exists('$(NuPackDropDirectory)')" />
+        <MakeDir Directories="$(NuGetDropDirectory)" Condition="!Exists('$(NuGetDropDirectory)')" />
         <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
@@ -157,6 +157,6 @@
     </Target>
     
     <Target Name="RunIntegrationTests">
-        <MSBuild Projects="$(NuPackRoot)\NuPack.Test.Integration\NuPack.Test.Integration.csproj" Targets="RunIntegrationTests" />
+        <MSBuild Projects="$(NuGetRoot)\NuPack.Test.Integration\NuGet.Test.Integration.csproj" Targets="RunIntegrationTests" />
     </Target>
 </Project>
