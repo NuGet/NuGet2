@@ -40,7 +40,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <RegexTransform Include="$(NuGetRoot)\VsExtension\source.extension.vsixmanifest">        
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">        
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
             <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
