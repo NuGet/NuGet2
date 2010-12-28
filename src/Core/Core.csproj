@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\Build\NuGet.Settings.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet</RootNamespace>
+    <AssemblyName>NuGet.Core</AssemblyName>
+    <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Common\CommonResources.resx">
+      <Link>Common\CommonResources.resx</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\NuGetResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Common\CommonResources.cs">
+      <Link>Common\CommonResources.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\GlobalSuppressions.cs">
+      <Link>Common\GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="Authoring\IPackageBuilder.cs" />
+    <Compile Include="Authoring\ManifestDependency.cs" />
+    <Compile Include="Authoring\ManifestFile.cs" />
+    <Compile Include="Authoring\ManifestMetadata.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\QueryableExtensions.cs" />
+    <Compile Include="Extensions\VersionExtensions.cs" />
+    <Compile Include="IPackageManager.cs" />
+    <Compile Include="IProjectManager.cs" />
+    <Compile Include="Packages\IPackageMetadata.cs" />
+    <Compile Include="Packages\IServerPackageMetadata.cs" />
+    <Compile Include="PackageWalker\ConflictResult.cs" />
+    <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
+    <Compile Include="PackageWalker\IDependentsResolver.cs" />
+    <Compile Include="PackageWalker\PackageAction.cs" />
+    <Compile Include="PackageWalker\PackageOperation.cs" />
+    <Compile Include="PackageWalker\PackageTargets.cs" />
+    <Compile Include="PackageWalker\PackageWalkInfo.cs" />
+    <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
+    <Compile Include="Repositories\AggregateQuery.cs" />
+    <Compile Include="Repositories\AggregateRepository.cs" />
+    <Compile Include="Repositories\SmartDataServiceQuery.cs" />
+    <Compile Include="Repositories\BufferedEnumerable.cs" />
+    <Compile Include="Repositories\DataServiceContextWrapper.cs" />
+    <Compile Include="Repositories\DataServiceQueryWrapper.cs" />
+    <Compile Include="Repositories\ExpressionRewriter.cs" />
+    <Compile Include="Repositories\IDataServiceContext.cs" />
+    <Compile Include="Repositories\IDataServiceQuery.cs" />
+    <Compile Include="Repositories\IPackageRepositoryFactory.cs" />
+    <Compile Include="Repositories\ISharedPackageRepository.cs" />
+    <Compile Include="Repositories\OrderingComparer.cs" />
+    <Compile Include="Repositories\PriorityQueue.cs" />
+    <Compile Include="Extensions\AppDomainExtensions.cs" />
+    <Compile Include="Extensions\AssemblyNameExtensions.cs" />
+    <Compile Include="Repositories\SharedPackageRepository.cs" />
+    <Compile Include="Runtime\AssemblyBinding.cs" />
+    <Compile Include="Runtime\BindingRedirectManager.cs" />
+    <Compile Include="Runtime\BindingRedirectResolver.cs" />
+    <Compile Include="Runtime\IAssembly.cs" />
+    <Compile Include="Runtime\RemoteAssembly.cs" />
+    <Compile Include="Extensions\AssemblyExtensions.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="FileModifiers\Preprocessor.cs" />
+    <Compile Include="FileModifiers\XmlTransfomer.cs" />
+    <Compile Include="Utility\IHttpClient.cs" />
+    <Compile Include="Utility\IVersionSpec.cs" />
+    <Compile Include="Utility\VersionSpec.cs" />
+    <Compile Include="Utility\ZipPackageFactory.cs" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Authoring\PathSearchFilter.cs" />
+    <Compile Include="Logging\NullLogger.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="PackageOperationEventArgs.cs" />
+    <Compile Include="Logging\MessageLevel.cs" />
+    <Compile Include="PackageManager.cs" />
+    <Compile Include="Authoring\PhysicalPackageFile.cs" />
+    <Compile Include="Authoring\PackageBuilder.cs" />
+    <Compile Include="Authoring\PathResolver.cs" />
+    <Compile Include="Authoring\Manifest.cs" />
+    <Compile Include="PackageSource\PackageSource.cs" />
+    <Compile Include="Packages\DataServicePackage.cs" />
+    <Compile Include="Packages\DefaultPackagePathResolver.cs" />
+    <Compile Include="Packages\IPackage.cs" />
+    <Compile Include="Packages\IPackagePathResolver.cs" />
+    <Compile Include="ProjectManager.cs" />
+    <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
+    <Compile Include="Repositories\DataServicePackageRepository.cs" />
+    <Compile Include="Utility\ClosureEvaluator.cs" />
+    <Compile Include="Utility\HashCodeCombiner.cs" />
+    <Compile Include="Utility\HttpClient.cs" />
+    <Compile Include="Utility\IPackageFactory.cs" />
+    <Compile Include="Utility\PackageDownloader.cs" />
+    <Compile Include="Utility\IHashProvider.cs" />
+    <Compile Include="Utility\PackageEqualityComparer.cs" />
+    <Compile Include="PackageWalker\PackageMarker.cs" />
+    <Compile Include="Packages\ZipPackage.cs" />
+    <Compile Include="Utility\GlobalSuppressions.cs" />
+    <Compile Include="Packages\IPackageAssemblyReference.cs" />
+    <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
+    <Compile Include="PackageWalker\PackageWalker.cs" />
+    <Compile Include="PackageWalker\InstallWalker.cs" />
+    <Compile Include="PackageWalker\ProjectInstallWalker.cs" />
+    <Compile Include="PackageWalker\DependentsWalker.cs" />
+    <Compile Include="PackageWalker\UninstallWalker.cs" />
+    <Compile Include="ProjectSystem\IFileSystem.cs" />
+    <Compile Include="Repositories\PackageReferenceRepository.cs" />
+    <Compile Include="Extensions\PackageExtensions.cs" />
+    <Compile Include="Repositories\PackageRepositoryExtensions.cs" />
+    <Compile Include="Extensions\FileSystemExtensions.cs" />
+    <Compile Include="Repositories\PackageRepositoryFactory.cs" />
+    <Compile Include="Resources\NuGetResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NuGetResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\ProjectSystemExtensions.cs" />
+    <Compile Include="Utility\PathUtility.cs" />
+    <Compile Include="Utility\QueryableUtility.cs" />
+    <Compile Include="Utility\CryptoHashProvider.cs" />
+    <Compile Include="Extensions\StreamExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Utility\PackageUtility.cs" />
+    <Compile Include="Utility\SafeEnumerableQuery.cs" />
+    <Compile Include="Utility\XmlUtility.cs" />
+    <Compile Include="ProjectSystem\IProjectSystem.cs" />
+    <Compile Include="Repositories\PackageRepositoryBase.cs" />
+    <Compile Include="Repositories\IPackageRepository.cs" />
+    <Compile Include="Packages\Constants.cs" />
+    <Compile Include="Packages\IPackageFile.cs" />
+    <Compile Include="Packages\PackageDependency.cs" />
+    <Compile Include="Utility\Crc32.cs" />
+    <Compile Include="Repositories\LocalPackageRepository.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\UriUtility.cs" />
+    <Compile Include="Utility\VersionUtility.cs" />
+    <Compile Include="Extensions\XElementExtensions.cs" />
+    <Compile Include="Packages\ZipPackageFile.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Authoring\nuspec.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="Class diagrams\Packages.cd" />
+    <None Include="Class diagrams\PackageWalkers.cd" />
+    <None Include="Class diagrams\Repositories.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>Properties\CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

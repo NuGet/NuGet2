@@ -6,7 +6,7 @@
     <DevEnvDir>$(VsDir)\Common7\IDE</DevEnvDir>
     <TestResultsFile>$(TargetDir)$(AssemblyName).trx</TestResultsFile>
     <TestAssembly>$(TargetDir)$(AssemblyName).dll</TestAssembly>
-    <IntegrationTestSettings>Test.Integration\NuGet.Test.Integration.testsettings</IntegrationTestSettings>
+    <IntegrationTestSettings>test\Test.Integration\NuGet.Test.Integration.testsettings</IntegrationTestSettings>
 </PropertyGroup>
 
 <Target Name="RunTests">

@@ -5,14 +5,16 @@
     <PropertyGroup>
        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
+        <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
+        <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
-        <ExeBuildDirectory>$(NuGetRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
+        <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
-        <VisualStudioAddInBuildDirectory>$(NuGetRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
-        <ServerBuildDirectory>$(NuGetRoot)\Server</ServerBuildDirectory>
+        <ServerBuildDirectory>$(NuGetSrcRoot)\Server</ServerBuildDirectory>
         <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
         <ZipExe>$(NuGetRoot)\Tools\7zip4.65\7z.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
@@ -20,7 +22,7 @@
         <ILMergeFileFinalName>NuGet.exe</ILMergeFileFinalName>
         <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
         <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
-        <MSBuildBuildDirectory>$(NuGetRoot)\MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
+        <MSBuildBuildDirectory>$(NuGetSrcRoot)\MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
         <MSBuildDropDirectory>$(NuGetDropDirectory)\MSBuild</MSBuildDropDirectory>
         <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
@@ -66,10 +68,10 @@
     </Target>
 
     <Target Name="RunTests">
-        <MSBuild Projects="$(NuGetRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuGetRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuGetRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuGetRoot)\MSBuild.Test\MSBuild.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetTestRoot)\MSBuild.Test\MSBuild.Test.csproj" Targets="RunTests" />
     </Target>
     
     <Target Name="ReportFxCopResults">
@@ -157,6 +159,6 @@
     </Target>
     
     <Target Name="RunIntegrationTests">
-        <!--<MSBuild Projects="$(NuGetRoot)\Test.Integration\Test.Integration.csproj" Targets="RunIntegrationTests" />-->
+        <MSBuild Projects="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Targets="RunIntegrationTests" />
     </Target>
 </Project>
