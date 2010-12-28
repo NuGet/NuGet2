@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="..\Build\NuGet.Settings.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet.Dialog</RootNamespace>
+    <AssemblyName>NuGet.Dialog</AssemblyName>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\NuGet.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionsExplorer.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.OLE.Interop" />
+    <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0" />
+    <Reference Include="Microsoft.VisualStudio.TextManager.Interop" />
+    <Reference Include="Microsoft.VisualStudio.Shell.10.0">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="EnvDTE">
+      <Guid>{80CC9F66-E7D8-4DDD-85B6-D9E6CD0E93E2}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE100">
+      <Guid>{26AD1324-4B7C-44BC-84F8-B86AED45729F}</Guid>
+      <VersionMajor>10</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE80">
+      <Guid>{1A31287A-4D7D-413E-8E32-3B374931BD89}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE90">
+      <Guid>{2CE2370E-D744-4936-A090-3FFFE667B0E1}</Guid>
+      <VersionMajor>9</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.VisualStudio.CommandBars">
+      <Guid>{1CBA492E-7263-47BB-87FE-639000619B15}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\CommonResources.cs">
+      <Link>CommonResources.cs</Link>
+    </Compile>
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\PackageExtensions.cs" />
+    <Compile Include="Extensions\QueryExtensions.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
+    <Compile Include="PackageManagerUI\CachedProjectManager.cs" />
+    <Compile Include="PackageManagerUI\Controls\RatingControl.cs" />
+    <Compile Include="PackageManagerUI\Controls\StarControl.cs" />
+    <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PackageManagerUI\Converters\CountToVisibilityConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\LoadPageResult.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
+    <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\MessageHelper.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
+    <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PackageManagerUI\InstalledProvider\InstalledProvider.cs" />
+    <Compile Include="PackageManagerUI\LicenseAcceptanceWindow.xaml.cs">
+      <DependentUpon>LicenseAcceptanceWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PackageManagerUI\BaseProvider\RootTreeNode.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackageItem.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\OnlineProvider.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackagesSearchNode.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\SimpleTreeNode.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\PackagesTreeNodeBase.cs" />
+    <Compile Include="PackageManagerUI\PackageManagerWindow.xaml.cs">
+      <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PackageManagerUI\Controls\TextBlockControl.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PackageManagerUI\ProgressDialog.xaml.cs">
+      <DependentUpon>ProgressDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
+    <Compile Include="PackageManagerUI\ProgressWindowOpener.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ToolsOptionsUI\ToolsOptionsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ToolsOptionsUI\ToolsOptionsControl.Designer.cs">
+      <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ToolsOptionsUI\ToolsOptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PackageManagerUI\UriHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Common\CommonResources.resx">
+      <Link>CommonResources.resx</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ToolsOptionsUI\ToolsOptionsControl.resx">
+      <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="PackageManagerUI\CommonStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\LicenseAcceptanceWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\OnlineProviderTemplates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PackageManagerUI\PackageManagerWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\ProgressDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\TemplateStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VisualStudio\VisualStudio.csproj">
+      <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
+      <Name>VisualStudio</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml">
+      <Link>Properties\CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="PackageManagerUI\packageicon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PackageManagerUI\PackagesProvider.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

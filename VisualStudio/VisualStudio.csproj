@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <NoWarn>1762</NoWarn>
+  </PropertyGroup>
+  <Import Project="..\Build\NuGet.Settings.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{6146CA62-CC16-422C-A105-3E81F7452AA6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet.VisualStudio</RootNamespace>
+    <AssemblyName>NuGet.VisualStudio</AssemblyName>
+    <CodeAnalysisRuleSet>..\NuGet.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Common\CommonResources.resx">
+      <Link>Common\CommonResources.resx</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="..\Common\CommonResources.cs">
+      <Link>Common\CommonResources.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\GlobalSuppressions.cs">
+      <Link>Common\GlobalSuppressions.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="EnvDTE80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86" />
+    <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\v1.0\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cmdlets\AddBindingRedirectCmdlet.cs" />
+    <Compile Include="Cmdlets\FindPackage.cs" />
+    <Compile Include="Cmdlets\GetProjectCmdlet.cs" />
+    <Compile Include="Cmdlets\InstallPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\GetPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\NewPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\NuGetBaseCmdlet.cs" />
+    <Compile Include="Cmdlets\ProcessPackageBaseCmdlet.cs" />
+    <Compile Include="Cmdlets\UninstallPackageCmdlet.cs" />
+    <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
+    <Compile Include="IRepositorySettings.cs" />
+    <Compile Include="ISourceControlResolver.cs" />
+    <Compile Include="MSBuildProjectExtensions.cs" />
+    <Compile Include="RepositorySettings.cs" />
+    <Compile Include="SourceControlResolver.cs" />
+    <Compile Include="VsPackageManagerFactory.cs" />
+    <Compile Include="DTEExtensions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Ioc\ServiceLocator.cs" />
+    <Compile Include="ISolutionManager.cs" />
+    <Compile Include="ISourceControlFileSystemProvider.cs" />
+    <Compile Include="IVsPackageManager.cs" />
+    <Compile Include="IVsPackageManagerFactory.cs" />
+    <Compile Include="PackageSource\CachedRepositoryFactory.cs" />
+    <Compile Include="PackageSource\IPackageSourceProvider.cs" />
+    <Compile Include="PackageSource\IPackageSourceSettingsManager.cs" />
+    <Compile Include="PackageSource\VsPackageSourceSettingsManager.cs" />
+    <Compile Include="PackageSource\SerializationHelper.cs" />
+    <Compile Include="PackageSource\VsPackageSourceRepository.cs" />
+    <Compile Include="PackageSource\VsPackageSourceProvider.cs" />
+    <Compile Include="SolutionExtensions.cs" />
+    <Compile Include="SolutionManager.cs" />
+    <Compile Include="ProjectExtensions.cs" />
+    <Compile Include="VsProjectSystemFactory.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\VsResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VsResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utility\PathValidator.cs" />
+    <Compile Include="VsConstants.cs" />
+    <Compile Include="VsPackageManager.cs" />
+    <Compile Include="WebProjectSystem.cs" />
+    <Compile Include="WebSiteProjectSystem.cs" />
+    <Compile Include="VsProjectSystem.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\VsResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>VsResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Class diagrams\PackageManagers.cd" />
+    <None Include="Class diagrams\ProjectSystems.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml">
+      <Link>Properties\CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

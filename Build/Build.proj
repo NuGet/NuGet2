@@ -7,12 +7,12 @@
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
-        <NuGetDropDirectory>$(DropDirectory)\NuPack</NuGetDropDirectory>
-        <ExeBuildDirectory>$(NuGetRoot)\NuPack\bin\$(Configuration)</ExeBuildDirectory>
+        <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
+        <ExeBuildDirectory>$(NuGetRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
-        <VisualStudioAddInBuildDirectory>$(NuGetRoot)\NuPack.Tools\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuGetRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
-        <ServerBuildDirectory>$(NuGetRoot)\NuPack.Server</ServerBuildDirectory>
+        <ServerBuildDirectory>$(NuGetRoot)\Server</ServerBuildDirectory>
         <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
         <ZipExe>$(NuGetRoot)\Tools\7zip4.65\7z.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
@@ -20,7 +20,7 @@
         <ILMergeFileFinalName>NuGet.exe</ILMergeFileFinalName>
         <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
         <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
-        <MSBuildBuildDirectory>$(NuGetRoot)\NuPack.MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
+        <MSBuildBuildDirectory>$(NuGetRoot)\MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
         <MSBuildDropDirectory>$(NuGetDropDirectory)\MSBuild</MSBuildDropDirectory>
         <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
@@ -38,7 +38,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <RegexTransform Include="$(NuGetRoot)\NuPack.Tools\source.extension.vsixmanifest">        
+        <RegexTransform Include="$(NuGetRoot)\VsExtension\source.extension.vsixmanifest">        
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
             <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
@@ -66,10 +66,10 @@
     </Target>
 
     <Target Name="RunTests">
-        <MSBuild Projects="$(NuGetRoot)\NuPack.Dialog.Test\NuGet.Dialog.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuGetRoot)\NuPack.Test\NuGet.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuGetRoot)\NuPack.VisualStudio.Test\NuGet.VisualStudio.Test.csproj" Targets="RunTests" />
-        <MSBuild Projects="$(NuGetRoot)\NuPack.MSBuild.Test\NuGet.MSBuild.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetRoot)\MSBuild.Test\MSBuild.Test.csproj" Targets="RunTests" />
     </Target>
     
     <Target Name="ReportFxCopResults">
@@ -157,6 +157,6 @@
     </Target>
     
     <Target Name="RunIntegrationTests">
-        <MSBuild Projects="$(NuGetRoot)\NuPack.Test.Integration\NuGet.Test.Integration.csproj" Targets="RunIntegrationTests" />
+        <!--<MSBuild Projects="$(NuGetRoot)\Test.Integration\Test.Integration.csproj" Targets="RunIntegrationTests" />-->
     </Target>
 </Project>

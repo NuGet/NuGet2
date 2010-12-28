@@ -1,29 +1,29 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Core", "NuPack.Core\NuGet.Core.csproj", "{F879F274-EFA0-4157-8404-33A19B4E6AEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{F879F274-EFA0-4157-8404-33A19B4E6AEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.VisualStudio", "NuPack.VisualStudio\NuGet.VisualStudio.csproj", "{6146CA62-CC16-422C-A105-3E81F7452AA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio", "VisualStudio\VisualStudio.csproj", "{6146CA62-CC16-422C-A105-3E81F7452AA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Test", "NuPack.Test\NuGet.Test.csproj", "{D3106412-E3AF-4CB6-B6D3-3664465B491F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine.Test", "CommandLine.Test\CommandLine.Test.csproj", "{D3106412-E3AF-4CB6-B6D3-3664465B491F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Server", "NuPack.Server\NuGet.Server.csproj", "{793B20A9-E263-4B54-BB31-305B602087CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{793B20A9-E263-4B54-BB31-305B602087CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Tools", "NuPack.Tools\NuGet.Tools.csproj", "{D0F9864B-D782-4471-81A2-29555E5DC0D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsExtension", "VsExtension\VsExtension.csproj", "{D0F9864B-D782-4471-81A2-29555E5DC0D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Console", "NuPack.Console\NuPackConsole\NuGet.Console.csproj", "{50E33DA2-AF14-486D-81B8-BD8409744A38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "vsConsole\Console\Console.csproj", "{50E33DA2-AF14-486D-81B8-BD8409744A38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost", "NuPack.Console\PowerShellHost\PowerShellHost.csproj", "{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost", "VsConsole\PowerShellHost\PowerShellHost.csproj", "{5A79EEF3-51C0-4A14-8D37-50EF38AD835D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet", "NuPack\NuGet.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine", "CommandLine\CommandLine.csproj", "{B34A6632-E627-4B66-8E0A-D2DA3BC96893}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Dialog", "NuPack.Dialog\NuGet.Dialog.csproj", "{05497432-8899-4ED4-BB97-7B5EA3E911DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog", "Dialog\Dialog.csproj", "{05497432-8899-4ED4-BB97-7B5EA3E911DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.TeamFoundationServer", "NuPack.TeamFoundationServer\NuGet.TeamFoundationServer.csproj", "{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer", "TeamFoundationServer\TeamFoundationServer.csproj", "{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7B39EAD-EA32-4011-845A-C949A336389A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Test.Integration", "NuPack.Test.Integration\NuGet.Test.Integration.csproj", "{135A5956-39CD-495C-8FB2-06678A90488D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Integration", "Test.Integration\Test.Integration.csproj", "{135A5956-39CD-495C-8FB2-06678A90488D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notices", "notices", "{E8BEECAD-4A51-48A6-9602-6D8C6F41841E}"
 	ProjectSection(SolutionItems) = preProject
@@ -39,24 +39,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Build\ilmerge.internalize.ignore.txt = Build\ilmerge.internalize.ignore.txt
 		NuGet.ruleset = NuGet.ruleset
 		Build\NuGet.Settings.targets = Build\NuGet.Settings.targets
-		NuPack.Test.Integration\NuGet.Test.Integration.testsettings = NuPack.Test.Integration\NuGet.Test.Integration.testsettings
+		Test.Integration\NuGet.Test.Integration.testsettings = Test.Integration\NuGet.Test.Integration.testsettings
 		Build\NuGet.Test.targets = Build\NuGet.Test.targets
 		NuGet.vsmdi = NuGet.vsmdi
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHostProvider", "NuPack.Console\PowerShellHostProvider\PowerShellHostProvider.csproj", "{A5E7AEB3-738F-4C39-A459-00F90483B2FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHostProvider", "VsConsole\PowerShellHostProvider\PowerShellHostProvider.csproj", "{A5E7AEB3-738F-4C39-A459-00F90483B2FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.MSBuild", "NuPack.MSBuild\NuGet.MSBuild.csproj", "{74CD9786-C226-4A58-A250-2DBC9EE29670}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuild", "MSBuild\MSBuild.csproj", "{74CD9786-C226-4A58-A250-2DBC9EE29670}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.MSBuild.Test", "NuPack.MSBuild.Test\NuGet.MSBuild.Test.csproj", "{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuild.Test", "MSBuild.Test\MSBuild.Test.csproj", "{6A76CD40-AB6E-4321-9978-3DB0B7A180D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.VisualStudio.Test", "NuPack.VisualStudio.Test\NuGet.VisualStudio.Test.csproj", "{3840480F-EA53-4CD4-8155-7CA579CB8E37}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio.Test", "VisualStudio.Test\VisualStudio.Test.csproj", "{3840480F-EA53-4CD4-8155-7CA579CB8E37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.TestUI", "NuPack.TestUI\NuGet.TestUI.csproj", "{5B445EB1-3D2F-4D03-A004-09275F649419}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUI", "TestUI\TestUI.csproj", "{5B445EB1-3D2F-4D03-A004-09275F649419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Test.Utility", "NuPack.Test.Utility\NuGet.Test.Utility.csproj", "{F016882A-C798-4446-BB75-D3C393A38B32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Utility", "Test.Utility\Test.Utility.csproj", "{F016882A-C798-4446-BB75-D3C393A38B32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGet.Dialog.Test", "NuPack.Dialog.Test\NuGet.Dialog.Test.csproj", "{FC2D8406-0A17-40FC-A11B-B5133B552C47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog.Test", "Dialog.Test\Dialog.Test.csproj", "{FC2D8406-0A17-40FC-A11B-B5133B552C47}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "functional", "functional", "{3B13F3A6-64D9-4D22-9890-88A542E2603E}"
 EndProject

@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Extern href="msobtnid.h"/>
+
+  <Commands package="guidPowerConsolePkg">
+
+    <Menus>
+      <!-- This is the toolbar in the console -->
+      <Menu guid="guidPowerConsoleCmdSet" id="idToolbar" type="ToolWindowToolbar">
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Package Manager Console</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="guidToolsGroup" id="idLibraryPackageManager" type="Menu" priority="0x500">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OTHER2" />
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Library Package Ma&amp;nager</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+    
+    <Groups>
+      <Group guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" priority="0x1000">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
+      </Group>
+      <Group guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" priority="0x1500">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
+      </Group>
+      <Group guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup" priority="0x2000">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
+      </Group>
+      <Group guid="guidToolsGroup" id="idToolsGroup" priority="0x100">
+        <Parent guid="guidToolsGroup" id="idLibraryPackageManager" />
+      </Group>
+    </Groups>
+    
+    <Buttons>
+      <Button guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100" type="Button">
+        <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
+        <Strings>
+          <ButtonText>Package Manager C&amp;onsole</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0x1020" type="Button">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup"/>
+        <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
+        <Strings>
+          <ButtonText>&amp;Package Manager Settings</ButtonText>
+        </Strings>
+      </Button>
+      
+      <Button guid="guidPowerConsoleCmdSet" id="cmdidClearHost" priority="0x1010" type="Button">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup"/>
+        <Icon guid="guidToolbarImages" id="bmpClearConsole" />
+        <Strings>
+          <ButtonText>&amp;Clear Console</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x0100" type="Button">
+          <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
+          <CommandFlag>DefaultInvisible</CommandFlag>
+          <CommandFlag>DynamicVisibility</CommandFlag>
+          <Strings>
+              <CommandName>cmdidAddPackages</CommandName>
+              <ButtonText>Add Library Pac&amp;kage Reference...</ButtonText>
+          </Strings>
+      </Button>
+    </Buttons>
+
+    <Combos>
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="200" priority="0x1005">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+            <ButtonText>Pac&amp;kage source:</ButtonText>
+        </Strings>
+      </Combo>
+
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidProjects" idCommandList="cmdidProjectsList" type="IndexCombo" defaultWidth="200" priority="0x1010">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" />
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+            <ButtonText>Default pro&amp;ject:</ButtonText>
+        </Strings>
+      </Combo>
+    </Combos>
+   
+    <Bitmaps>
+      <Bitmap guid="guidToolbarImages" href="Resources\Toolbar.png"/>
+    </Bitmaps>
+  </Commands>
+
+  <VisibilityConstraints>
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExists" />
+  </VisibilityConstraints>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0xF200">
+      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+    </CommandPlacement>
+    
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+          <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+          <Parent guid="guidVenusCmdId" id="IDG_VENUS_CTX_REFERENCE"/>
+      </CommandPlacement>
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+          <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
+      </CommandPlacement>
+  </CommandPlacements>
+  
+  <Symbols>
+    <GuidSymbol name="guidPowerConsolePkg" value="{F7D0E7A3-C60B-422A-BFAE-CEED36ADE7D2}" />    
+    <GuidSymbol name="guidPowerConsoleCmdSet" value="{1E8A55F6-C18D-407F-91C8-94B02AE1CED6}">
+      <IDSymbol name="idToolbar" value="0x1010"/>
+      <IDSymbol name="idToolbarHostsGroup" value="0x2000"/>
+      <IDSymbol name="idToolbarProjectGroup" value="0x2005"/>
+      <IDSymbol name="idToolbarCommandsGroup" value="0x2010"/>
+      <IDSymbol name="cmdidPowerConsole" value="0x0100" />
+      <IDSymbol name="cmdidSourceSettings" value="0x0200" />
+      <IDSymbol name="cmdidClearHost" value="0x0300" />
+      <IDSymbol name="cmdidSources" value="0x0400" />
+      <IDSymbol name="cmdidSourcesList" value="0x0410" />
+      <IDSymbol name="cmdidProjects" value="0x0500" />
+      <IDSymbol name="cmdidProjectsList" value="0x0510" />
+    </GuidSymbol>
+    <GuidSymbol name="guidToolbarImages" value="{C96A41A9-81D8-4F67-A344-E4BED01FBAEC}" >
+      <IDSymbol name="bmpPowerConsole" value="1" />
+      <IDSymbol name="bmpClearConsole" value="2" />
+      <IDSymbol name="bmpSourceSettings" value="3" />
+    </GuidSymbol>
+    <GuidSymbol name="guidToolsGroup" value="{C0D88179-5D25-4982-BFE6-EC5FD59AC103}">
+      <IDSymbol name="idLibraryPackageManager" value="0x100" />
+      <IDSymbol name="idToolsGroup" value="0x200" />
+    </GuidSymbol>
+                
+    <!-- This is the guid used to group the menu commands together -->
+    <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
+        <IDSymbol name="cmdidAddPackages" value="0x0100" />
+    </GuidSymbol>
+    <GuidSymbol name="guidVenusCmdId" value="{C7547851-4E3A-4E5B-9173-FA6E9C8BD82C}" >
+        <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />
+        <IDSymbol name="IDG_CTX_REFERENCE" value="0x102" />
+    </GuidSymbol>
+    <GuidSymbol name="guidReferenceContext" value="{D309F791-903F-11D0-9EFC-00A0C911004F}">
+      <IdSymbol name="cmdAddReferenceGroup" value="0x450" />
+    </GuidSymbol>
+  </Symbols>
+
+</CommandTable>
