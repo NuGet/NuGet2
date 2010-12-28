@@ -7,13 +7,13 @@ using EnvDTE80;
 using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace NuGet.VisualStudio {
-    [Export(typeof(ISourceControlResolver))]
-    public class SourceControlResolver : ISourceControlResolver {
+    [Export(typeof(IFileSystemProvider))]
+    public class VsFileSystemProvider : IFileSystemProvider {
         private readonly DTE _dte;
         private readonly IComponentModel _componentModel;
 
         [ImportingConstructor]
-        public SourceControlResolver(DTE dte, IComponentModel componentModel) {
+        public VsFileSystemProvider(DTE dte, IComponentModel componentModel) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
             }

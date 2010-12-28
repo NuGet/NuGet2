@@ -7,7 +7,7 @@ namespace NuGet.VisualStudio {
     public class VsPackageManagerFactory : IVsPackageManagerFactory {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly ISolutionManager _solutionManager;
-        private readonly ISourceControlResolver _sourceControlResolver;
+        private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IRepositorySettings _repositorySettings;
 
         private RepositoryInfo _repositoryInfo;
@@ -15,7 +15,7 @@ namespace NuGet.VisualStudio {
         [ImportingConstructor]
         public VsPackageManagerFactory(ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,
-                                       ISourceControlResolver sourceControlResolver,
+                                       IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
@@ -23,14 +23,14 @@ namespace NuGet.VisualStudio {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
-            if (sourceControlResolver == null) {
-                throw new ArgumentNullException("sourceControlResolver");
+            if (fileSystemProvider == null) {
+                throw new ArgumentNullException("fileSystemProvider");
             }
             if (repositorySettings == null) {
                 throw new ArgumentNullException("repositorySettings");
             }
 
-            _sourceControlResolver = sourceControlResolver;
+            _fileSystemProvider = fileSystemProvider;
             _repositorySettings = repositorySettings;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
@@ -60,7 +60,7 @@ namespace NuGet.VisualStudio {
             string path = _repositorySettings.RepositoryPath;
 
             if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path)) {                
-                IFileSystem fileSystem = _sourceControlResolver.GetFileSystem(path);
+                IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
                 ISharedPackageRepository repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
 
                 _repositoryInfo = new RepositoryInfo(path, fileSystem, repository);

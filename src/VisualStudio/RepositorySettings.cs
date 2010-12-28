@@ -17,20 +17,20 @@ namespace NuGet.VisualStudio {
         private string _configurationPath;
         private IFileSystem _fileSystem;
         private readonly ISolutionManager _solutionManager;
-        private readonly ISourceControlResolver _sourceControlResolver;
+        private readonly IFileSystemProvider _fileSystemProvider;
 
         [ImportingConstructor]        
-        public RepositorySettings(ISolutionManager solutionManager, ISourceControlResolver sourceControlResolver) {
+        public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
 
-            if (sourceControlResolver == null) {
-                throw new ArgumentNullException("sourceControlResolver");
+            if (fileSystemProvider == null) {
+                throw new ArgumentNullException("fileSystemProvider");
             }
 
             _solutionManager = solutionManager;
-            _sourceControlResolver = sourceControlResolver;
+            _fileSystemProvider = fileSystemProvider;
 
             _solutionManager.SolutionClosing += (sender, e) => {
                 // Kill our configuration cache when someone closes the solution
@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio {
         private IFileSystem FileSystem {
             get {
                 if (_fileSystem == null) {
-                    _fileSystem = _sourceControlResolver.GetFileSystem(_solutionManager.SolutionDirectory);
+                    _fileSystem = _fileSystemProvider.GetFileSystem(_solutionManager.SolutionDirectory);
                 }
                 return _fileSystem;
             }

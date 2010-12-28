@@ -77,11 +77,11 @@
     <Compile Include="Cmdlets\UninstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\UpdatePackageCmdlet.cs" />
     <Compile Include="IRepositorySettings.cs" />
-    <Compile Include="ISourceControlResolver.cs" />
+    <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="MSBuildProjectExtensions.cs" />
     <Compile Include="QueryExtensions.cs" />
     <Compile Include="RepositorySettings.cs" />
-    <Compile Include="SourceControlResolver.cs" />
+    <Compile Include="VsFileSystemProvider.cs" />
     <Compile Include="VsPackageManagerFactory.cs" />
     <Compile Include="DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
