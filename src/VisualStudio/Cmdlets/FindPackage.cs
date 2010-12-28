@@ -24,6 +24,13 @@ namespace NuGet.VisualStudio.Cmdlets {
             : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory) {
         }
 
+        protected override void ProcessRecordCore() {
+            // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
+            // typing InstallPackage TAB would download the entire feed.
+            First = MaxReturnedPackages;
+            base.ProcessRecordCore();
+        }
+
         protected override IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository) {
             var packages = sourceRepository.GetPackages();
             if (!String.IsNullOrEmpty(Filter)) {
@@ -31,10 +38,8 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
 
             packages = packages.OrderBy(p => p.Id);
-
-            // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
-            // typing InstallPackage TAB would download the entire feed.
-            return packages.Take(MaxReturnedPackages);
+            
+            return packages;
         }
 
         protected override IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
