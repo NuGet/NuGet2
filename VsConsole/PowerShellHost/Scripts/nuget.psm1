@@ -204,9 +204,5 @@ if (IsSolutionOpen) {
     UpdateWorkingDirectory
 }
 
-# assign aliases to package cmdlets
-
-New-Alias 'List-Package' 'Get-Package'
-
 # export public functions and aliases 
-Export-ModuleMember -Function 'Get-ProjectNames','TabExpansion' -Alias 'List-Package'
+Export-ModuleMember -Function 'Get-ProjectNames','TabExpansion'

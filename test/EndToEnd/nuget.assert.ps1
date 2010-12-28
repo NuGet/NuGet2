@@ -8,7 +8,7 @@ function Get-SolutionPackage {
     )
     
     # Get the package entries from the solution
-    $packages = List-Package | ?{ $_.Id -eq $Id }
+    $packages = Get-Package | ?{ $_.Id -eq $Id }
     
     if($Version) {
         $actualVersion = [Version]::Parse($Version)

@@ -13,10 +13,7 @@ LONG DESCRIPTION
 
 		Cmdlet					Description
 		------------------		----------------------------------------------
-		Get-Package				Lists the set of packages available from the package source.
-
-		List-Package			An alias for Get-Package. This is the more widely used command 
-								for listing packages.
+		Get-Package				Gets the set of packages available from the package source.
 
 		Install-Package			Installs a package and its dependencies into the project.
 
