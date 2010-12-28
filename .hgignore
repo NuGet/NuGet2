@@ -10,4 +10,4 @@ glob:*.sln.cache
 glob:*.orig
 glob:*.suo
 glob:TestResults
-glob:NuPack.Server/Packages/*.nupkg
+glob:src/Server/Packages/*.nupkg
