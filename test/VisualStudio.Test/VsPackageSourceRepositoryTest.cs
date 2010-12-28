@@ -7,6 +7,9 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 
 namespace NuGet.VisualStudio.Test {
+
+    using PackageUtility = NuGet.Test.PackageUtility;
+
     [TestClass]
     public class VsPackageSourceRepositoryTest {
         [TestMethod]

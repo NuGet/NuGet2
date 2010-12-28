@@ -7,6 +7,9 @@ using NuGet.Test;
 using NuGet.VisualStudio.Cmdlets;
 
 namespace NuGet.VisualStudio.Test {
+
+    using PackageUtility = NuGet.Test.PackageUtility;
+
     [TestClass]
     public class GetPackageCmdletTest {
         [TestMethod]
@@ -21,6 +24,21 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("0.9") });
             AssertPackageResultsEqual(result.Last(), new { Id = "P2", Version = new Version("1.0") });
+        }
+
+        [TestMethod]
+        public void GetPackageReturnsCorrectInstalledPackagesWhenNoParametersAreSpecifiedAndSkipAndTakeAreSpecified() {
+            // Arrange 
+            var cmdlet = BuildCmdlet();
+            cmdlet.First = 1;
+            cmdlet.Skip = 1;
+
+            // Act 
+            var result = cmdlet.GetResults().Cast<dynamic>();
+
+            // Assert
+            Assert.AreEqual(1, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "P2", Version = new Version("1.0") });
         }
 
         [TestMethod]
@@ -52,6 +70,59 @@ namespace NuGet.VisualStudio.Test {
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P2", Version = new Version("1.2") });
             AssertPackageResultsEqual(result.ElementAt(3), new { Id = "P3", Version = new Version("1.0") });
+        }
+
+        [TestMethod]
+        public void GetPackageReturnsAllPackagesFromActiveRepositoryWhenRemoteIsPresentAndTheRemoteRepositoryIsThrottled() {
+            // Arrange 
+            var cmdlet = BuildCmdlet(throttling: true);
+            cmdlet.Remote = new SwitchParameter(isPresent: true);
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(30, result.Count());
+
+            for (int i = 0; i < 30; i++) {
+                AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + i.ToString("00"), Version = new Version("1." + i.ToString("00")) });
+            }
+        }
+
+        [TestMethod]
+        public void GetPackageReturnsCorrectPackagesWhenRemoteIsPresentAndTheRemoteRepositoryIsThrottledAndFirstAndSkipAreSet() {
+            // Arrange 
+            var cmdlet = BuildCmdlet(throttling: true);
+            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.First = 12;
+            cmdlet.Skip = 5;
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(12, result.Count());
+
+            for (int i = 0; i < 12; i++) {
+                AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + (i + 5).ToString("00"), Version = new Version("1." + (i + 5).ToString("00")) });
+            }
+        }
+
+        [TestMethod]
+        public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent() {
+            // Arrange 
+            var cmdlet = BuildCmdlet();
+            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.First = 2;
+            cmdlet.Skip = 1;
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new Version("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P2", Version = new Version("1.2") });
         }
 
         [TestMethod]
@@ -246,7 +317,7 @@ namespace NuGet.VisualStudio.Test {
         public void GetPackagesThrowsWhenNoSourceIsProvidedAndRemoteIsPresent() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(() => GetPackageManager(false));
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
             var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object) { CallBase = true }.Object;
@@ -261,9 +332,9 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
+        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true, bool throttling = false) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(() => GetPackageManager(throttling));
             return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
         }
 
@@ -279,14 +350,13 @@ namespace NuGet.VisualStudio.Test {
             return repositoryFactory.Object;
         }
 
-        private static IVsPackageManager GetPackageManager() {
+        private static IVsPackageManager GetPackageManager(bool throttling = false) {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<ISharedPackageRepository>();
             var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
-           
-            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object);
+            return new VsPackageManager(TestUtils.GetSolutionManager(), throttling ? GetThrottledActiveRepository() : GetActiveRepository(), fileSystem.Object, localRepo.Object);
         }
 
         private static IPackageRepository GetActiveRepository() {
@@ -294,6 +364,17 @@ namespace NuGet.VisualStudio.Test {
                                          PackageUtility.CreatePackage("P2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
+            return remoteRepo.Object;
+        }
+
+        private static IPackageRepository GetThrottledActiveRepository() {
+            var remotePackages = new IPackage[30];
+            for (int i = 0; i < remotePackages.Length; i++) {
+                remotePackages[i] = PackageUtility.CreatePackage("P" + i.ToString("00"), "1." + i.ToString("00"));
+            }
+
+            var remoteRepo = new Mock<IPackageRepository>();
+            remoteRepo.Setup(c => c.GetPackages()).Returns(new ThrottledQueryable<IPackage>(remotePackages));
             return remoteRepo.Object;
         }
 

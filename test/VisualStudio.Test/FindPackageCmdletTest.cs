@@ -7,6 +7,8 @@ using NuGet.Test;
 using NuGet.VisualStudio.Cmdlets;
 
 namespace NuGet.VisualStudio.Test {
+    using PackageUtility = NuGet.Test.PackageUtility;
+
     [TestClass]
     public class FindPackageCmdletTest  {
         [TestMethod]

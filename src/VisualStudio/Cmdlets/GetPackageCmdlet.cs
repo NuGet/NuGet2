@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio.Resources;
@@ -14,7 +14,9 @@ namespace NuGet.VisualStudio.Cmdlets {
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
-        
+        private int _firstValue;
+        private bool _firstValueSpecified;
+
         public GetPackageCmdlet()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
@@ -51,6 +53,22 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         [Parameter(Position = 2)]
         public string Source { get; set; }
+
+        [Parameter]
+        [ValidateRange(0, int.MaxValue)]
+        public int First {
+            get {
+                return _firstValue;
+            }
+            set {
+                _firstValue = value;
+                _firstValueSpecified = true;
+            }
+        }
+
+        [Parameter]
+        [ValidateRange(0, int.MaxValue)]
+        public int Skip { get; set; }
 
         /// <summary>
         /// Determines if no local repositories are needed to process this command
@@ -91,7 +109,9 @@ namespace NuGet.VisualStudio.Cmdlets {
             else {
                 packages = FilterPackages(repository);
             }
-            WritePackages(packages);
+
+            var filteredPackages = packages.SkipAndTake(Skip, _firstValueSpecified ? First : (int?)null);
+            WritePackages(filteredPackages);
         }
 
         /// <summary>

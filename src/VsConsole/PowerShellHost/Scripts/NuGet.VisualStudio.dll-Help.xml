@@ -52,7 +52,7 @@
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
-    
+
     <!-- Cmdlet parameter section  -->
     <command:parameters>
       <command:parameter required="true" position="1">
@@ -130,18 +130,18 @@
         Get-Package
       </command:name>
       <maml:description>
-        <maml:para>Lists the set of packages available from the package source.</maml:para>
+        <maml:para>Gets the set of packages available from the package source.</maml:para>
       </maml:description>
       <maml:copyright>
         <maml:para></maml:para>
       </maml:copyright>
-      <command:verb>List</command:verb>
+      <command:verb>Get</command:verb>
       <command:noun>Package</command:noun>
       <dev:version></dev:version>
     </command:details>
 
     <maml:description>
-      <maml:para>Lists the set of packages available from the package source. Defaults to only showing the list of installed packages.</maml:para>
+      <maml:para>Gets the set of packages available from the package source. Defaults to only showing the list of installed packages.</maml:para>
     </maml:description>
 
     <!-- Cmdlet syntax section-->
@@ -162,6 +162,14 @@
           <maml:name>Filter</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>First</maml:name>
+          <command:parameterValue required="true">int</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>Skip</maml:name>
+          <command:parameterValue required="true">int</command:parameterValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
 
@@ -179,19 +187,31 @@
       <command:parameter required="false" position="named">
         <maml:name>Remote</maml:name>
         <maml:description>
-          <maml:para>Lists packages available from the online package source.</maml:para>
+          <maml:para>Gets packages available from the online package source.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Updates</maml:name>
         <maml:description>
-          <maml:para>Lists packages that have an update available from the package source.</maml:para>
+          <maml:para>Gets packages that have an update available from the package source.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Filter</maml:name>
         <maml:description>
           <maml:para>Specifies a filter string used to narrow down the list of packages returned. The filter is searched for in the package Id and in the description.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>First</maml:name>
+        <maml:description>
+          <maml:para>Specifies the number of packages to return from the beginning of the list.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Skip</maml:name>
+        <maml:description>
+          <maml:para>Skips (does not return) the specified number of packages, counting from the beginning of the list.</maml:para>
         </maml:description>
       </command:parameter>
     </command:parameters>

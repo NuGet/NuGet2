@@ -36,12 +36,15 @@
     <Compile Include="InstallPackageCmdletTest.cs" />
     <Compile Include="MockCommandRuntime.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />
+    <Compile Include="ModifyTakeExpressionVisitor.cs" />
     <Compile Include="NewPackageCmdletTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetProjectCmdletTest.cs" />
+    <Compile Include="QueryExtensionsTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
+    <Compile Include="ThrottledQueryable.cs" />
     <Compile Include="UninstallPackageCmdletTest.cs" />
     <Compile Include="UpdatePackageCmdletTest.cs" />
     <Compile Include="VsPackageManagerTest.cs" />
