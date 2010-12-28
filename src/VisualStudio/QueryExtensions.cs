@@ -10,7 +10,7 @@ namespace NuGet.VisualStudio {
     /// 
     /// It works around the limitation by repeatedly querying the source until the latter runs out of items.
     /// </summary>
-    public static class QueryExtensions {
+    internal static class QueryExtensions {
 
         public static IEnumerable<T> GetAll<T>(this IQueryable<T> source, int skip, int? first) {
             bool useFirst = first.HasValue;
