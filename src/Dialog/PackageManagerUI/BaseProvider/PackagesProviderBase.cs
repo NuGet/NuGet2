@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Threading;
 using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
@@ -230,9 +229,8 @@ namespace NuGet.Dialog.Providers {
                 }
             }
             else {
-                // REVIEW: Do we need to introduce MessageLevel.Error value?
                 // show error message in the progress window in case of error
-                Log(MessageLevel.Warning, (e.Error.InnerException ?? e.Error).Message);
+                LogCore(LogMessageLevel.Error, (e.Error.InnerException ?? e.Error).Message);
                 _progressWindowOpener.SetCompleted(successful: false);
             }
 
@@ -284,12 +282,15 @@ namespace NuGet.Dialog.Providers {
         }
 
         public void Log(MessageLevel level, string message, params object[] args) {
-            if (_progressWindowOpener.IsOpen) {
-                // for the dialog we only shows info or warning messages and ignore debug messages
-                if (level == MessageLevel.Info || level == MessageLevel.Warning) {
-                    string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
-                    _progressWindowOpener.AddMessage(level, formattedMessage);
-                }
+            var logLevel = (LogMessageLevel)level;
+            LogCore(logLevel, message, args);
+        }
+
+        private void LogCore(LogMessageLevel level, string message, params object[] args) {
+            // for the dialog we ignore debug messages
+            if (_progressWindowOpener.IsOpen && level != LogMessageLevel.Debug) {
+                string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
+                _progressWindowOpener.AddMessage(level, formattedMessage);
             }
         }
     }

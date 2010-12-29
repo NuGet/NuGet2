@@ -12,10 +12,15 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         internal void SetCompleted(bool successful) {
-            OkButton.IsEnabled = true;
-            ProgressBar.IsIndeterminate = false;
-            ProgressBar.Value = ProgressBar.Maximum;
-            StatusText.Text = successful ? NuGet.Dialog.Resources.Dialog_OperationSucceeded : NuGet.Dialog.Resources.Dialog_OperationFailed;
+            if (successful) {
+                ForceClose();
+            }
+            else {
+                OkButton.IsEnabled = true;
+                ProgressBar.IsIndeterminate = false;
+                ProgressBar.Value = ProgressBar.Maximum;
+                StatusText.Text = NuGet.Dialog.Resources.Dialog_OperationFailed;
+            }
         }
 
         private void OkButton_Click(object sender, System.Windows.RoutedEventArgs e) {
