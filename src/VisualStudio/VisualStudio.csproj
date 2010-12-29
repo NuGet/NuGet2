@@ -67,7 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cmdlets\AddBindingRedirectCmdlet.cs" />
-    <Compile Include="Cmdlets\FindPackage.cs" />
+    <Compile Include="Cmdlets\FindPackageCmdlet.cs" />
     <Compile Include="Cmdlets\GetProjectCmdlet.cs" />
     <Compile Include="Cmdlets\InstallPackageCmdlet.cs" />
     <Compile Include="Cmdlets\GetPackageCmdlet.cs" />

@@ -6,18 +6,18 @@ using System.Management.Automation;
 
 namespace NuGet.VisualStudio.Cmdlets {
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
-    public class FindPackage : GetPackageCmdlet {
+    public class FindPackageCmdlet : GetPackageCmdlet {
 
         private const int MaxReturnedPackages = 30;
 
-        public FindPackage()
+        public FindPackageCmdlet()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
-        public FindPackage(IPackageRepositoryFactory repositoryFactory,
+        public FindPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
                           IPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
                           IVsPackageManagerFactory packageManagerFactory)

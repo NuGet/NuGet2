@@ -24,6 +24,42 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(1, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new Version("1.0") });
         }
+
+        [TestMethod]
+        public void FindPackageReturnsMaximumResultsWithFirstAndSkipParametersSet() {
+            // Arrange 
+            var cmdlet = BuildCmdlet();
+            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.First = 2;
+            cmdlet.Skip = 1;
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(3, result.Count());     // FindPackage always sets First = 30
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new Version("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P3", Version = new Version("1.0") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "Pack2", Version = new Version("1.2") });
+        }
+
+        [TestMethod]
+        public void FindPackageReturnsMaximumResultsWithFirstParameterSet() {
+            // Arrange 
+            var cmdlet = BuildCmdlet();
+            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.First = 20;
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(4, result.Count());     // FindPackage always sets First = 30
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new Version("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P3", Version = new Version("1.0") });
+            AssertPackageResultsEqual(result.ElementAt(3), new { Id = "Pack2", Version = new Version("1.2") });
+        }
         
         [TestMethod]
         public void FindPackageFiltersRemoteByIdWhenSwitchIsSpecified() {
@@ -61,10 +97,10 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static FindPackage BuildCmdlet(bool isSolutionOpen = true) {
+        private static FindPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            return new FindPackage(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
+            return new FindPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {
