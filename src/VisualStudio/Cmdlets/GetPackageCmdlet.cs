@@ -110,7 +110,12 @@ namespace NuGet.VisualStudio.Cmdlets {
                 packages = FilterPackages(repository);
             }
 
-            var filteredPackages = packages.SkipAndTake(Skip, _firstValueSpecified ? First : (int?)null);
+            var filteredPackages = packages.AsQueryable().Skip(Skip);
+
+            if (_firstValueSpecified) {
+                filteredPackages = filteredPackages.Take(First);
+            }
+
             WritePackages(filteredPackages);
         }
 

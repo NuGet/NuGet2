@@ -88,26 +88,7 @@ namespace NuGet.VisualStudio.Test {
                 AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + i.ToString("00"), Version = new Version("1." + i.ToString("00")) });
             }
         }
-
-        [TestMethod]
-        public void GetPackageReturnsCorrectPackagesWhenRemoteIsPresentAndTheRemoteRepositoryIsThrottledAndFirstAndSkipAreSet() {
-            // Arrange 
-            var cmdlet = BuildCmdlet(throttling: true);
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
-            cmdlet.First = 70;
-            cmdlet.Skip = 25;
-
-            // Act 
-            var result = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.AreEqual(70, result.Count());
-
-            for (int i = 0; i < 70; i++) {
-                AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + (i + 25).ToString("00"), Version = new Version("1." + (i + 25).ToString("00")) });
-            }
-        }
-
+        
         [TestMethod]
         public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent() {
             // Arrange 

@@ -42,7 +42,6 @@
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetProjectCmdletTest.cs" />
-    <Compile Include="QueryExtensionsTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
     <Compile Include="ThrottledQueryable.cs" />
     <Compile Include="UninstallPackageCmdletTest.cs" />

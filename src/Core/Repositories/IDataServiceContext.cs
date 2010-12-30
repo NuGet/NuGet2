@@ -13,5 +13,7 @@ namespace NuGet {
         IEnumerable<T> ExecuteBatch<T>(DataServiceRequest request);
 
         Uri GetReadStreamUri(object entity);
+
+        IEnumerable<T> Execute<T>(Type elementType, DataServiceQueryContinuation continuation);
     }
 }
