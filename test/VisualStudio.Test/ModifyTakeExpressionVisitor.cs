@@ -11,7 +11,8 @@ namespace NuGet.VisualStudio.Test {
         private int _throttleValue;
 
         public ModifyTakeExpressionVisitor(Type elementType, int throttleValue = 10) {
-            _throttleValue = throttleValue;
+            // QueryExtensions.GetAll() assumes page size limit is greater than 50
+            _throttleValue = Math.Max(throttleValue, 50);
             _takeMethod = typeof(Queryable).GetMethod("Take", BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(elementType);
         }
 

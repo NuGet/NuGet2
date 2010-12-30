@@ -31,8 +31,8 @@ namespace NuGet.VisualStudio {
 
                 totalItemCount += queryItemCount;
 
-                if (queryItemCount == 0) {
-                    // stop if no item is returned
+                // This assumes that the server paging size is always greater than 50
+                if (queryItemCount < 50) {
                     yield break;
                 }
             }

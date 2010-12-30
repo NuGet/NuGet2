@@ -82,9 +82,9 @@ namespace NuGet.VisualStudio.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(30, result.Count());
+            Assert.AreEqual(100, result.Count());
 
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 100; i++) {
                 AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + i.ToString("00"), Version = new Version("1." + i.ToString("00")) });
             }
         }
@@ -94,17 +94,17 @@ namespace NuGet.VisualStudio.Test {
             // Arrange 
             var cmdlet = BuildCmdlet(throttling: true);
             cmdlet.Remote = new SwitchParameter(isPresent: true);
-            cmdlet.First = 12;
-            cmdlet.Skip = 5;
+            cmdlet.First = 70;
+            cmdlet.Skip = 25;
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(12, result.Count());
+            Assert.AreEqual(70, result.Count());
 
-            for (int i = 0; i < 12; i++) {
-                AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + (i + 5).ToString("00"), Version = new Version("1." + (i + 5).ToString("00")) });
+            for (int i = 0; i < 70; i++) {
+                AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + (i + 25).ToString("00"), Version = new Version("1." + (i + 25).ToString("00")) });
             }
         }
 
@@ -368,7 +368,7 @@ namespace NuGet.VisualStudio.Test {
         }
 
         private static IPackageRepository GetThrottledActiveRepository() {
-            var remotePackages = new IPackage[30];
+            var remotePackages = new IPackage[100];
             for (int i = 0; i < remotePackages.Length; i++) {
                 remotePackages[i] = PackageUtility.CreatePackage("P" + i.ToString("00"), "1." + i.ToString("00"));
             }
