@@ -12,6 +12,9 @@ namespace NuGet.VisualStudio {
     /// </summary>
     internal static class QueryExtensions {
 
+        // This assumes that the server paging size is always greater than 50
+        internal const int MinimumResultItemCount = 50;
+
         public static IEnumerable<T> GetAll<T>(this IQueryable<T> source, int skip, int? first) {
             bool useFirst = first.HasValue;
 
@@ -31,8 +34,7 @@ namespace NuGet.VisualStudio {
 
                 totalItemCount += queryItemCount;
 
-                // This assumes that the server paging size is always greater than 50
-                if (queryItemCount < 50) {
+                if (queryItemCount < MinimumResultItemCount) {
                     yield break;
                 }
             }
