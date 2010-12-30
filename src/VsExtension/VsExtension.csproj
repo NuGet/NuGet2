@@ -59,8 +59,8 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <VSCTCompile Include="NuGetTools.vsct">
-        <ResourceName>Menus.ctmenu</ResourceName>
-        <SubType>Designer</SubType>
+      <ResourceName>Menus.ctmenu</ResourceName>
+      <SubType>Designer</SubType>
     </VSCTCompile>
     <Content Include="Resources\Package.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -68,6 +68,10 @@
     </Content>
     <Content Include="Resources\PreviewImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\VsConsole\PowerShellHost\Scripts\Types.format.ps1xml">
+      <Link>Scripts\Types.format.ps1xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="Resources\Toolbar.png" />

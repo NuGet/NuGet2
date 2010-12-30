@@ -159,20 +159,13 @@ namespace NuGet.VisualStudio.Cmdlets {
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
-            var query = from p in packages
-                        select new {
-                            Id = p.Id,
-                            Version = p.Version,
-                            Description = p.Description
-                        };
-
             if (!UseRemoteSource) {
-                if (!query.Any()) {
+                if (!packages.Any()) {
                     Log(MessageLevel.Info, VsResources.Cmdlet_NoPackagesInstalled);
                 }
             }
 
-            WriteObject(query, enumerateCollection: true);
+            WriteObject(packages, enumerateCollection: true);
         }
     }
 }

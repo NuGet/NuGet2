@@ -199,10 +199,15 @@ function IsSolutionOpen() {
    return ($dte -and $dte.Solution -and $dte.Solution.IsOpen)
 }
 
+#load PS type format file
+$currentScriptPath = Split-Path -parent $MyInvocation.MyCommand.Definition
+Update-FormatData -prependpath $currentScriptPath\Types.format.ps1xml
+
+# execute init.ps1 files in the current solution
 if (IsSolutionOpen) {
     ExecuteInitScripts
     UpdateWorkingDirectory
 }
 
-# export public functions and aliases 
-Export-ModuleMember -Function 'Get-ProjectNames','TabExpansion'
+# export public functions
+Export-ModuleMember -Function 'TabExpansion'

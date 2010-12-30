@@ -70,6 +70,7 @@
     <None Include="Scripts\Add-WrapperMembers.ps1" />
     <None Include="Scripts\nuget.psm1" />
     <None Include="Scripts\Profile.ps1" />
+    <None Include="Scripts\Types.format.ps1xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">
