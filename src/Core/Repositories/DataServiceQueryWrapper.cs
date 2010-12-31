@@ -13,9 +13,14 @@ namespace NuGet {
         private readonly IDataServiceContext _context;
 
         public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query) {
+            if (context == null) {
+                throw new ArgumentNullException("context");
+            }
+
             if (query == null) {
                 throw new ArgumentNullException("query");
             }
+           
             _context = context;
             _query = query;
         }
@@ -49,14 +54,14 @@ namespace NuGet {
         }
 
         private IEnumerable<T> GetAll() {
-            Type elementType = typeof(T);
             var results = _query.Execute();
 
+            Type elementType = null;
             DataServiceQueryContinuation continuation = null;
             do {
                 foreach (T item in results) {
                     // Get the concrete element type of the results returned
-                    if (item != null && (elementType.IsInterface || elementType.IsAbstract)) {
+                    if (elementType == null && item != null) {
                         elementType = item.GetType();
                     }
                     yield return item;
@@ -65,6 +70,8 @@ namespace NuGet {
                 continuation = ((QueryOperationResponse)results).GetContinuation();
 
                 if (continuation != null) {
+                    Debug.Assert(elementType != null, "Element type is null and there is a continuation!");
+
                     // We need to execute the query with a concrete element type even though 
                     // we already have a <T>. This is because <T> might be an interface type
                     // which odata won't know how to create.
