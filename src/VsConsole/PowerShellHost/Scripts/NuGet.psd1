@@ -4,7 +4,7 @@
 ModuleToProcess = 'NuGet.VisualStudio.dll'
 
 # Version number of this module.
-ModuleVersion = '1.1'
+ModuleVersion = '1.1.0.0'
 
 # ID used to uniquely identify this module
 GUID = '76e6f9c4-7045-44c0-a557-17fab0835c12'

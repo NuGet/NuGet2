@@ -48,6 +48,10 @@
             <Find>\d+\.\d+\.\d+\.\d+</Find>
             <ReplaceWith>$(Version)</ReplaceWith>
         </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsConsole\PowerShellHost\Scripts\nuget.psd1">
+          <Find><![CDATA[ModuleVersion = '\d+\.\d+\.\d+\.\d+']]></Find>
+          <ReplaceWith><![CDATA[ModuleVersion = '$(Version)']]></ReplaceWith>
+        </RegexTransform>
     </ItemGroup>
     
     <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
