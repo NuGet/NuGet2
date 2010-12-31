@@ -8,9 +8,9 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using EnvDTE;
 using EnvDTE80;
+using Microsoft.PowerShell;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
-using Microsoft.PowerShell;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
@@ -89,13 +89,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
 
             string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
-            string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            string npackPath = Path.Combine(extensionLocation, @"Scripts\NuGet.psm1");
-            string vsPath = Path.Combine(extensionLocation, @"NuGet.VisualStudio.dll");
-
-            this.ImportModule(profilePath);
-            this.ImportModule(npackPath);
-            this.ImportModule(vsPath);
+            string nugetPath = Path.Combine(extensionLocation, @"NuGet.psd1");
+            this.ImportModule(nugetPath);
 
             return true;
         }
@@ -113,19 +108,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 new SessionStateVariableEntry("DTE", (DTE2)dte, "Visual Studio DTE automation object",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
-
             initialSessionState.Variables.Add(
                 new SessionStateVariableEntry("packageManagerFactory", packageManagerFactory, "Package Manager Factory",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
-
-            // For debugging, uncomment these lines below. Loading the scripts through InitialSessionState
-            // will reveal syntax error information if there is any.
-            //
-            //string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
-            //string profilePath = Path.Combine(extensionLocation, @"Scripts\Profile.ps1");
-            //string npackPath = Path.Combine(extensionLocation, @"Scripts\NuGet.psm1");
-            //string vsPath = Path.Combine(extensionLocation, @"NuGet.VisualStudio.dll");
-            //initialSessionState.ImportPSModule(new string[] { profilePath, npackPath, vsPath });
 
             _myHost = new MyHost(this, _name, _privateData);
             _myRunSpace = RunspaceFactory.CreateRunspace(_myHost, initialSessionState);

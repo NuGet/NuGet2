@@ -54,10 +54,6 @@
       <Link>Scripts\Profile.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\VsConsole\PowerShellHost\Scripts\nuget.psm1">
-      <Link>Scripts\nuget.ps1</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <VSCTCompile Include="NuGetTools.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
@@ -72,6 +68,14 @@
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\Types.format.ps1xml">
       <Link>Scripts\Types.format.ps1xml</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.psd1">
+      <Link>NuGet.psd1</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\VsConsole\PowerShellHost\Scripts\nuget.psm1">
+      <Link>Scripts\nuget.psm1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="Resources\Toolbar.png" />

@@ -10,7 +10,7 @@ if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
     Rename-Item Function:\TabExpansion global:DefaultTabExpansion
 }
 
-function global:TabExpansion($line, $lastWord) {
+function TabExpansion($line, $lastWord) {
     $filter = $lastWord.Trim()
     
     if ($filter.StartsWith('-')) {
@@ -83,7 +83,7 @@ function global:TabExpansion($line, $lastWord) {
 function TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount) {
     if (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 2 -and !$secondLastWord.StartsWith('-'))) {
-        Get-ProjectNames
+        GetProjectNames
     }
     else {
         return $NoResultValue
@@ -104,7 +104,7 @@ function TabExpansionForAddPackage([string]$line, [string]$secondLastWord, [int]
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        Get-ProjectNames
+        GetProjectNames
     }
     else {
         return $NoResultValue
@@ -119,7 +119,7 @@ function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount,
     }
     elseif (($secondLastWord -eq '-project') -or 
             ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        Get-ProjectNames
+        GetProjectNames
     }
     else {
         return $NoResultValue
@@ -128,14 +128,14 @@ function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount,
 
 function TabExpansionForGetProject([string]$secondLastWord) {
     if (($secondLastWord -eq '-name') -or ($secondLastWord -eq '')) {
-        Get-ProjectNames
+        GetProjectNames
     }
     else {
         return $NoResultValue
     }
 }
 
-function global:Get-ProjectNames() {
+function GetProjectNames() {
     (Get-Project -All) | ForEach-Object { $_.Name }
 }
 
@@ -199,15 +199,8 @@ function IsSolutionOpen() {
    return ($dte -and $dte.Solution -and $dte.Solution.IsOpen)
 }
 
-#load PS type format file
-$currentScriptPath = Split-Path -parent $MyInvocation.MyCommand.Definition
-Update-FormatData -prependpath $currentScriptPath\Types.format.ps1xml
-
 # execute init.ps1 files in the current solution
 if (IsSolutionOpen) {
     ExecuteInitScripts
     UpdateWorkingDirectory
 }
-
-# export public functions
-Export-ModuleMember -Function 'TabExpansion'
