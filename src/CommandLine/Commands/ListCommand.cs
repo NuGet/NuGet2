@@ -57,7 +57,9 @@
 
             IEnumerable<IPackage> packages = GetPackages();
 
-            if (packages != null && packages.Any()) {
+            bool hasPackages = false;
+
+            if (packages != null) {
                 if (Verbose) {
                     /***********************************************
                      * Package-Name
@@ -73,6 +75,7 @@
                         Console.PrintJustified(1, p.Version.ToString());
                         Console.PrintJustified(1, p.Description);
                         Console.WriteLine();
+                        hasPackages = true;
                     }
                 }
                 else {
@@ -82,10 +85,12 @@
                      ***********************************************/
                     foreach (var p in packages) {
                         Console.PrintJustified(0, p.GetFullName());
+                        hasPackages = true;
                     }
                 }
             }
-            else {
+
+            if (!hasPackages) {
                 Console.WriteLine(NuGetResources.ListCommandNoPackages);
             }
         }
