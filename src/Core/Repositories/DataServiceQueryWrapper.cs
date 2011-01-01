@@ -11,8 +11,12 @@ namespace NuGet {
 
         private readonly DataServiceQuery _query;
         private readonly IDataServiceContext _context;
+        private readonly Type _concreteType;
 
-        public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query) {
+        public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query): this(context, query, typeof(T)) {
+        }
+
+        public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query, Type concreteType) {
             if (context == null) {
                 throw new ArgumentNullException("context");
             }
@@ -23,6 +27,7 @@ namespace NuGet {
            
             _context = context;
             _query = query;
+            _concreteType = concreteType;
         }
 
         public bool RequiresBatch(Expression expression) {
@@ -46,7 +51,7 @@ namespace NuGet {
 
             var query = (DataServiceQuery)_query.Provider.CreateQuery<TElement>(expression);
 
-            return new DataServiceQueryWrapper<TElement>(_context, query);
+            return new DataServiceQueryWrapper<TElement>(_context, query, typeof(T));
         }
 
         public IEnumerator<T> GetEnumerator() {
@@ -56,26 +61,16 @@ namespace NuGet {
         private IEnumerable<T> GetAll() {
             var results = _query.Execute();
 
-            Type elementType = null;
             DataServiceQueryContinuation continuation = null;
             do {
                 foreach (T item in results) {
-                    // Get the concrete element type of the results returned
-                    if (elementType == null && item != null) {
-                        elementType = item.GetType();
-                    }
                     yield return item;
                 }
 
                 continuation = ((QueryOperationResponse)results).GetContinuation();
 
                 if (continuation != null) {
-                    Debug.Assert(elementType != null, "Element type is null and there is a continuation!");
-
-                    // We need to execute the query with a concrete element type even though 
-                    // we already have a <T>. This is because <T> might be an interface type
-                    // which odata won't know how to create.
-                    results = _context.Execute<T>(elementType, continuation);
+                    results = _context.Execute<T>(_concreteType, continuation);
                 }
 
             } while (continuation != null);
