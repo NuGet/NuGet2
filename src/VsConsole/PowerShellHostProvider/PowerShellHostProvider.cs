@@ -38,7 +38,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static IHost CreatePowerShellHost(IConsole console) {
 
-            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, /*isAsync*/false, new Commander(console));
+            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, /*isAsync*/true, new Commander(console));
 
             return host;
         }
