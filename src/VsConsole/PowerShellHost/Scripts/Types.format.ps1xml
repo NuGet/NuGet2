@@ -70,7 +70,7 @@
                             <ListItem>
                                 <Label>Dependencies</Label>
                                 <ScriptBlock>
-                                    $dependencies = if ($_.Dependencies -is [string[]]) { $_.Dependencies -join ',' } else { $_.Dependencies };
+                                    $dependencies = if ($_.Dependencies -is [string]) { $_.Dependencies.Split('|') } else { $_.Dependencies };
                                     return $dependencies;
                                 </ScriptBlock>
                             </ListItem>
