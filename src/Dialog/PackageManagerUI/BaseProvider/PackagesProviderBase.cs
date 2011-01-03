@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
@@ -21,14 +22,22 @@ namespace NuGet.Dialog.Providers {
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
+        private Project _project;
+        private IScriptExecutor _scriptExecutor;
 
         protected PackagesProviderBase(
+            Project project,
             IProjectManager projectManager, 
             ResourceDictionary resources,
-            IProgressWindowOpener progressWindowOpener) {
+            IProgressWindowOpener progressWindowOpener,
+            IScriptExecutor scriptExecutor) {
 
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
+            }
+
+            if (project == null) {
+                throw new ArgumentNullException("project");
             }
 
             if (resources == null) {
@@ -39,10 +48,15 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("progressWindowOpener");
             }
 
+            if (scriptExecutor == null) {
+                throw new ArgumentNullException("scriptExecutor");
+            }
+
             _resources = resources;
-            
+            _scriptExecutor = scriptExecutor;
             _progressWindowOpener = progressWindowOpener;
             ProjectManager = projectManager;
+            _project = project;
         }
 
         public virtual bool RefreshOnNodeSelection {
@@ -292,6 +306,30 @@ namespace NuGet.Dialog.Providers {
                 string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
                 _progressWindowOpener.AddMessage(level, formattedMessage);
             }
+        }
+
+        protected void RegisterPackageOperationEvents(IPackageManager packageManager) {
+            packageManager.PackageInstalled += OnPackageInstalled;
+            ProjectManager.PackageReferenceAdded += OnPackageReferenceAdded;
+            ProjectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
+        }
+
+        protected void UnregisterPackageOperationEvents(IPackageManager packageManager) {
+            packageManager.PackageInstalled -= OnPackageInstalled;
+            ProjectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
+            ProjectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
+        }
+
+        private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {
+            _scriptExecutor.Execute(e.InstallPath, "init.ps1", e.Package, null, this);
+        }
+
+        private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
+            _scriptExecutor.Execute(e.InstallPath, "install.ps1", e.Package, _project, this);
+        }
+
+        private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
+            _scriptExecutor.Execute(e.InstallPath, "uninstall.ps1", e.Package, _project, this);
         }
     }
 }

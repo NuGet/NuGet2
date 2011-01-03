@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
+using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -18,14 +20,16 @@ namespace NuGet.Dialog.Providers {
         private ILicenseWindowOpener _licenseWindowOpener;
 
         public OnlineProvider(
+            Project project,
             IProjectManager projectManager,
             ResourceDictionary resources,
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             ILicenseWindowOpener licenseWindowOpener,
-            IProgressWindowOpener progressWindowOpener) :
-            base(projectManager, resources, progressWindowOpener) {
+            IProgressWindowOpener progressWindowOpener,
+            IScriptExecutor scriptExecutor) :
+            base(project, projectManager, resources, progressWindowOpener, scriptExecutor) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
@@ -100,15 +104,17 @@ namespace NuGet.Dialog.Providers {
             IList<PackageOperation> operations = walker.ResolveOperations(item.PackageIdentity).ToList();
 
             IEnumerable<IPackage> scriptPackages = from o in operations
-                                                   where o.Action == PackageAction.Install && o.Package.HasPowerShellScript()
+                                                   where o.Package.HasPowerShellScript()
                                                    select o.Package;
-            if (scriptPackages.Any()) {
+
+            if (scriptPackages.Any() && !RegistryHelper.CheckIfPowerShell2Installed()) {
                 throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
             IEnumerable<IPackage> licensePackages = from o in operations
                                                     where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(o.Package)
                                                     select o.Package;
+
             // display license window if necessary
             if (licensePackages.Any()) {
                 // hide the progress window if we are going to show license window
@@ -122,7 +128,14 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
+            try {
+                RegisterPackageOperationEvents(activePackageManager);
+                activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
+            }
+            finally {
+                UnregisterPackageOperationEvents(activePackageManager);
+            }
+            
             return true;
         }
 

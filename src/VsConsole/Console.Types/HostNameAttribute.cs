@@ -23,7 +23,9 @@ namespace NuGetConsole {
         /// Specifies a unique MEF host name metadata.
         /// </summary>
         public HostNameAttribute(string hostName) {
-            UtilityMethods.ThrowIfArgumentNull(hostName);
+            if (hostName == null) {
+                throw new ArgumentNullException("hostName");
+            }
             this.HostName = hostName;
         }
     }

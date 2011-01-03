@@ -97,6 +97,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This package (or one of its dependencies) contains PowerShell scripts but attempt to load the PowerShell ..
+        /// </summary>
+        public static string Dialog_HostSetupFailed {
+            get {
+                return ResourceManager.GetString("Dialog_HostSetupFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Install.
         /// </summary>
         public static string Dialog_InstallButton {
@@ -205,7 +214,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This package (or one of its dependencies) contains PowerShell scripts and needs to be installed from the Package Manager Console..
+        ///   Looks up a localized string similar to This package (or one of its dependencies) contains PowerShell scripts but the PowerShell 2.0 (or newer) runtime is not installed on this machine..
         /// </summary>
         public static string Dialog_PackageHasPSScript {
             get {

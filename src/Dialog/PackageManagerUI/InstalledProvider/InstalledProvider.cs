@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Threading;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
+using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -19,10 +20,13 @@ namespace NuGet.Dialog.Providers {
 
         public InstalledProvider(
             IVsPackageManager packageManager, 
+            Project project,
             IProjectManager projectManager, 
             ResourceDictionary resources,
-            IProgressWindowOpener progressWindowOpener)
-            : base(projectManager, resources, progressWindowOpener) {
+            IProgressWindowOpener progressWindowOpener,
+            IScriptExecutor scriptExecutor)
+            : base(project, projectManager, resources, progressWindowOpener, scriptExecutor) {
+
             _packageManager = packageManager;
         }
 
@@ -57,7 +61,20 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-            _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
+
+            // because we are not removing dependencies, we don't need to walk the graph to search for script files
+            bool hasScript = item.PackageIdentity.HasPowerShellScript(new string[] { "uninstall.ps1" });
+            if (hasScript && !RegistryHelper.CheckIfPowerShell2Installed()) {
+                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+            }
+
+            try {
+                RegisterPackageOperationEvents(_packageManager);
+                _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
+            }
+            finally {
+                UnregisterPackageOperationEvents(_packageManager);
+            }
             return true;
         }
 

@@ -76,6 +76,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A
 		test\EndToEnd\tests\update.ps1 = test\EndToEnd\tests\update.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console.Types", "src\VsConsole\Console.Types\Console.Types.csproj", "{6FD11460-39A3-4A10-BA63-7541B0A7D053}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = NuGet.vsmdi
@@ -194,6 +196,12 @@ Global
 		{FC2D8406-0A17-40FC-A11B-B5133B552C47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC2D8406-0A17-40FC-A11B-B5133B552C47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC2D8406-0A17-40FC-A11B-B5133B552C47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FD11460-39A3-4A10-BA63-7541B0A7D053}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{6FD11460-39A3-4A10-BA63-7541B0A7D053}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{6FD11460-39A3-4A10-BA63-7541B0A7D053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FD11460-39A3-4A10-BA63-7541B0A7D053}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FD11460-39A3-4A10-BA63-7541B0A7D053}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FD11460-39A3-4A10-BA63-7541B0A7D053}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

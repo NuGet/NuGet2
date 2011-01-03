@@ -88,9 +88,6 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
 
             IProjectManager projectManager = PackageManager.GetProjectManager(project);
-            projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
-            projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
-
             return projectManager;
         }
 

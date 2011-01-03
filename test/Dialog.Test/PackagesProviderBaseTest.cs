@@ -169,7 +169,7 @@ namespace NuGet.Dialog.Test {
             }
 
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
-                base(projectManager, resources, new Mock<IProgressWindowOpener>().Object) {
+                base(null, projectManager, resources, new Mock<IProgressWindowOpener>().Object, null) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {

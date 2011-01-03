@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionsExplorer.dll</HintPath>
@@ -40,6 +41,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
@@ -110,9 +112,15 @@
     <Compile Include="..\..\Common\CommonResources.cs">
       <Link>CommonResources.cs</Link>
     </Compile>
+    <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
+      <Link>RegistryHelper.cs</Link>
+    </Compile>
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\PackageExtensions.cs" />
     <Compile Include="Extensions\QueryExtensions.cs" />
+    <Compile Include="OutputConsole\IOutputConsoleProvider.cs" />
+    <Compile Include="OutputConsole\OutputConsole.cs" />
+    <Compile Include="OutputConsole\OutputConsoleProvider.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
     <Compile Include="PackageManagerUI\CachedProjectManager.cs" />
@@ -129,6 +137,7 @@
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\IScriptExecutor.cs" />
     <Compile Include="PackageManagerUI\MessageHelper.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
@@ -155,6 +164,7 @@
     <Compile Include="PackageManagerUI\ProgressDialog.xaml.cs">
       <DependentUpon>ProgressDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PackageManagerUI\PSScriptExecutor.cs" />
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
     <Compile Include="PackageManagerUI\ProgressWindowOpener.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -227,6 +237,10 @@
     <ProjectReference Include="..\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
       <Name>VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
+      <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
+      <Name>Console.Types</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -88,6 +88,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
+      <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
+      <Name>Console.Types</Name>
+    </ProjectReference>
     <ProjectReference Include="..\vsConsole\Console\Console.csproj">
       <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
       <Name>Console</Name>

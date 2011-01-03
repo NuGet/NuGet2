@@ -25,10 +25,10 @@ namespace NuGetConsole.Host.PowerShellProvider {
         /// </summary>
         public const string PowerConsoleHostName = "Package Manager Host";
  
-        public IHost CreateHost(IConsole console) {
+        public IHost CreateHost(IConsole console, bool async) {
             bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
             if (isPowerShell2Installed) {
-                return CreatePowerShellHost(console);
+                return CreatePowerShellHost(console, async);
             }
             else {
                 return new UnsupportedHost(console);
@@ -36,9 +36,9 @@ namespace NuGetConsole.Host.PowerShellProvider {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static IHost CreatePowerShellHost(IConsole console) {
+        private static IHost CreatePowerShellHost(IConsole console, bool async) {
 
-            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, /*isAsync*/true, new Commander(console));
+            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, async, new Commander(console));
 
             return host;
         }

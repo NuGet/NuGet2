@@ -205,13 +205,15 @@ namespace NuGet.Dialog.Test {
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
             return new OnlineProvider(
+                null,
                 projectManager,
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
                 packageSourceProvider,
                 factory.Object,
                 mockLicenseWindowOpener.Object,
-                mockProgressWindowOpener.Object);
+                mockProgressWindowOpener.Object,
+                null);
         }
     }
 }

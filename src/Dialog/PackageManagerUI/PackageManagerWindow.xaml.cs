@@ -10,7 +10,9 @@ using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
+using NuGetConsole;
 using DTEPackage = Microsoft.VisualStudio.Shell.Package;
+using NuGet.OutputWindowConsole;
 
 namespace NuGet.Dialog.PackageManagerUI {
 
@@ -28,7 +30,9 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IProgressWindowOpener progressWindowOpener)
+                                    IProgressWindowOpener progressWindowOpener,
+                                    IOutputConsoleProvider consoleProvider,
+                                    IScriptExecutor scriptExecutor)
             : base(F1Keyword) {
 
             InitializeComponent();
@@ -38,14 +42,23 @@ namespace NuGet.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            SetupProviders(dte, packageManagerFactory, repositoryFactory, packageSourceProvider, progressWindowOpener);
+            SetupProviders(
+                dte, 
+                packageManagerFactory, 
+                repositoryFactory, 
+                packageSourceProvider, 
+                progressWindowOpener, 
+                consoleProvider,
+                scriptExecutor);
         }
 
         private void SetupProviders(DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IProgressWindowOpener progressWindowOpener) {
+                                    IProgressWindowOpener progressWindowOpener,
+                                    IOutputConsoleProvider consoleProvider,
+                                    IScriptExecutor scriptExecutor) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -57,24 +70,34 @@ namespace NuGet.Dialog.PackageManagerUI {
             // We want the providers to appear as Installed - Online - Updates
 
             var updatesProvider = new UpdatesProvider(
-                packageManager, 
+                packageManager,
+                activeProject,
                 projectManager, 
                 Resources, 
                 this, 
-                progressWindowOpener);
+                progressWindowOpener,
+                scriptExecutor);
             explorer.Providers.Add(updatesProvider);
 
             var onlineProvider = new OnlineProvider(
+                activeProject,
                 projectManager,
                 Resources,
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
                 this,
-                progressWindowOpener);
+                progressWindowOpener,
+                scriptExecutor);
             explorer.Providers.Add(onlineProvider);
 
-            var installedProvider = new InstalledProvider(packageManager, projectManager, Resources, progressWindowOpener);
+            var installedProvider = new InstalledProvider(
+                packageManager, 
+                activeProject,
+                projectManager, 
+                Resources, 
+                progressWindowOpener,
+                scriptExecutor);
             explorer.Providers.Add(installedProvider);
 
             // make the Installed provider as selected by default

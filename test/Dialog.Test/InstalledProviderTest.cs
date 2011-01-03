@@ -155,7 +155,7 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            return new InstalledProvider(packageManager, projectManager, new System.Windows.ResourceDictionary(), mockProgressWindowOpener.Object);
+            return new InstalledProvider(packageManager, null, projectManager, new System.Windows.ResourceDictionary(), mockProgressWindowOpener.Object, null);
         }
     }
 }

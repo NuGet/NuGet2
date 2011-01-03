@@ -22,7 +22,9 @@ namespace NuGetConsole {
         /// "\n" (not implemented yet). Default culture is "en".
         /// </remarks>
         public DisplayNameAttribute(string displayName) {
-            UtilityMethods.ThrowIfArgumentNullOrEmpty(displayName);
+            if (displayName == null) {
+                throw new ArgumentNullException("displayName");
+            }
             this.DisplayName = displayName;
         }
     }

@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
+using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     internal class UpdatesProvider : PackagesProviderBase {
@@ -14,12 +16,14 @@ namespace NuGet.Dialog.Providers {
         private ILicenseWindowOpener _licenseWindowOpener;
 
         public UpdatesProvider(
-            IVsPackageManager packageManager, 
+            IVsPackageManager packageManager,
+            Project project,
             IProjectManager projectManager, 
             ResourceDictionary resources,
             ILicenseWindowOpener licenseWindowOpener,
-            IProgressWindowOpener progressWindowOpener)
-            : base(projectManager, resources, progressWindowOpener) {
+            IProgressWindowOpener progressWindowOpener,
+            IScriptExecutor scriptExecutor)
+            : base(project, projectManager, resources, progressWindowOpener, scriptExecutor) {
 
             _packageManager = packageManager;
             _licenseWindowOpener = licenseWindowOpener;
@@ -67,6 +71,15 @@ namespace NuGet.Dialog.Providers {
         protected override bool ExecuteCore(PackageItem item) {
 
             IList<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity).ToList();
+
+            IEnumerable<IPackage> scriptPackages = from o in operations
+                                                   where o.Package.HasPowerShellScript()
+                                                   select o.Package;
+            
+            if (scriptPackages.Any() && !RegistryHelper.CheckIfPowerShell2Installed()) {
+                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+            }
+
             IList<IPackage> licensePackages = (from o in operations
                                                where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !_packageManager.LocalRepository.Exists(o.Package)
                                                select o.Package).ToList();
@@ -84,7 +97,13 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true, logger: this);
+            try {
+                RegisterPackageOperationEvents(_packageManager);
+                _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true, logger: this);
+            }
+            finally {
+                UnregisterPackageOperationEvents(_packageManager);
+            }
             return true;
         }
 

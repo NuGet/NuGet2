@@ -163,7 +163,7 @@
     <value>Each item above may have sub-dependencies subject to additional license agreements.</value>
   </data>
   <data name="Dialog_PackageHasPSScript" xml:space="preserve">
-    <value>This package (or one of its dependencies) contains PowerShell scripts and needs to be installed from the Package Manager Console.</value>
+    <value>This package (or one of its dependencies) contains PowerShell scripts but the PowerShell 2.0 (or newer) runtime is not installed on this machine.</value>
   </data>
   <data name="Dialog_PackageInstalledTooltip" xml:space="preserve">
     <value>This package is already installed.</value>
@@ -269,5 +269,8 @@
   </data>
   <data name="Dialog_OperationFailed" xml:space="preserve">
     <value>Operation failed.</value>
+  </data>
+  <data name="Dialog_HostSetupFailed" xml:space="preserve">
+    <value>This package (or one of its dependencies) contains PowerShell scripts but attempt to load the PowerShell .</value>
   </data>
 </root>

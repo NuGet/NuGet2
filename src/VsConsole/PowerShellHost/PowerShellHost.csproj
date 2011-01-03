@@ -46,7 +46,6 @@
     <Compile Include="Utils\MethodBinder.cs" />
     <Compile Include="Utils\TypeWrapper.cs" />
     <Compile Include="HostUtilities.cs" />
-    <Compile Include="Types\IPowerShellHost.cs" />
     <Compile Include="MyHost.cs" />
     <Compile Include="MyHostRawUserInterface.cs" />
     <Compile Include="MyHostUI.cs" />
@@ -81,6 +80,10 @@
     <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
       <Name>VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Console.Types\Console.Types.csproj">
+      <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
+      <Name>Console.Types</Name>
     </ProjectReference>
     <ProjectReference Include="..\Console\Console.csproj">
       <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
