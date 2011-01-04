@@ -9,6 +9,9 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using EnvDTE;
+using System.Threading;
+using System;
 
 namespace NuGet.Dialog.Test {
 
@@ -144,7 +147,53 @@ namespace NuGet.Dialog.Test {
             mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
         }
 
-        private static InstalledProvider CreateInstalledProvider(IVsPackageManager packageManager = null, IProjectManager projectManager = null) {
+        [TestMethod]
+        public void ExecuteMethodInvokesUninstallScriptWhenThePackageContainsOne() {
+            // Arrange
+            var repository = new MockPackageRepository();
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", tools: new string[] { "uninstall.ps1" });
+            repository.AddPackage(packageA);
+
+            var projectManager = CreateProjectManager(repository);
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.UninstallPackage(
+                projectManager, It.IsAny<string>(), It.IsAny<Version>(), false, false, It.IsAny<ILogger>())).Callback(
+                () => projectManager.RemovePackageReference("A"));
+
+            var project = new Mock<Project>();
+            var scriptExecutor = new Mock<IScriptExecutor>();
+
+            var provider = CreateInstalledProvider(packageManager.Object, projectManager, project.Object, scriptExecutor.Object);
+
+            var extensionA = new PackageItem(provider, packageA, null);
+
+            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+
+            var manualEvent = new ManualResetEventSlim(false);
+
+            provider.ExecuteCompletedCallback = () => {
+                try {
+                    // Assert
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "uninstall.ps1", packageA, project.Object, It.IsAny<ILogger>()));
+                }
+                finally {
+                    manualEvent.Set();
+                }
+            };
+
+            // Act
+            provider.Execute(extensionA);
+
+            manualEvent.Wait();
+        }
+
+        private static InstalledProvider CreateInstalledProvider(
+            IVsPackageManager packageManager = null, 
+            IProjectManager projectManager = null,
+            Project project = null,
+            IScriptExecutor scriptExecutor = null) {
             if (packageManager == null) {
                 packageManager = new Mock<IVsPackageManager>().Object;
             }
@@ -155,7 +204,20 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            return new InstalledProvider(packageManager, null, projectManager, new System.Windows.ResourceDictionary(), mockProgressWindowOpener.Object, null);
+            if (project == null) {
+                project = new Mock<Project>().Object;
+            }
+
+            if (scriptExecutor == null) {
+                scriptExecutor = new Mock<IScriptExecutor>().Object;
+            }
+
+            return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), mockProgressWindowOpener.Object, scriptExecutor);
+        }
+
+        private static ProjectManager CreateProjectManager(IPackageRepository localRepository) {
+            var projectSystem = new MockProjectSystem();
+            return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }
 }

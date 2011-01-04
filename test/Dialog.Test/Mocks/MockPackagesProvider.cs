@@ -4,6 +4,7 @@ using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
 using NuGet.Dialog.PackageManagerUI;
+using EnvDTE;
 
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {
@@ -13,7 +14,7 @@ namespace NuGet.Dialog.Test {
         }
 
         public MockPackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager)
-            : base(null, projectManager, new ResourceDictionary(), new Mock<IProgressWindowOpener>().Object, null) {
+            : base(new Mock<Project>().Object, projectManager, new ResourceDictionary(), new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object) {
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {

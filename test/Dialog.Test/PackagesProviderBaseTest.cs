@@ -7,6 +7,7 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.Dialog.PackageManagerUI;
+using EnvDTE;
 
 namespace NuGet.Dialog.Test {
 
@@ -169,7 +170,7 @@ namespace NuGet.Dialog.Test {
             }
 
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
-                base(null, projectManager, resources, new Mock<IProgressWindowOpener>().Object, null) {
+                base(new Mock<Project>().Object, projectManager, resources, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {

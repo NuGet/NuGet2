@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -174,7 +175,70 @@ namespace NuGet.Dialog.Test {
             manualEvent.WaitOne();
         }
 
-        private static UpdatesProvider CreateUpdatesProvider(IVsPackageManager packageManager = null, IProjectManager projectManager = null, ILicenseWindowOpener licenseWindowOpener = null) {
+        [TestMethod]
+        public void ExecuteMethodInvokeInstallScriptAndUninstallScript() {
+            // Local repository contains Package A 1.0 and Package B
+            // Source repository contains Package A 2.0 and Package C
+
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0", tools: new string[] { "uninstall.ps1" });
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0", content: new string[] { "hello world" }, tools: new string[] { "install.ps1" });
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA1);
+            localRepository.AddPackage(packageB);
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageC);
+
+            var projectManager = CreateProjectManager(localRepository, sourceRepository);
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+
+            packageManager.Setup(p => p.UpdatePackage(
+               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, It.IsAny<ILogger>())).Callback(
+               () => {
+                   projectManager.AddPackageReference("A", new Version("2.0"), false);
+               });
+
+            var project = new Mock<Project>();
+            var scriptExecutor = new Mock<IScriptExecutor>();
+
+            var provider = CreateUpdatesProvider(packageManager.Object, projectManager, null, project.Object, scriptExecutor.Object);
+
+            var extensionA = new PackageItem(provider, packageA2, null);
+
+            ManualResetEvent manualEvent = new ManualResetEvent(false);
+
+            provider.ExecuteCompletedCallback = delegate {
+                // Assert
+                try {
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "uninstall.ps1", packageA1, project.Object, It.IsAny<ILogger>()), Times.Once());
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "install.ps1", packageA2, project.Object, It.IsAny<ILogger>()), Times.Once());
+                }
+                finally {
+                    manualEvent.Set();
+                }
+            };
+
+            // Act
+            provider.Execute(extensionA);
+
+            // do not allow the method to return
+            manualEvent.WaitOne();
+        }
+
+        private static UpdatesProvider CreateUpdatesProvider(
+            IVsPackageManager packageManager = null, 
+            IProjectManager projectManager = null, 
+            ILicenseWindowOpener licenseWindowOpener = null,
+            Project project = null,
+            IScriptExecutor scriptExecutor = null) {
+
             if (packageManager == null) {
                 packageManager = new Mock<IVsPackageManager>().Object;
             }
@@ -183,8 +247,21 @@ namespace NuGet.Dialog.Test {
                 projectManager = new Mock<IProjectManager>().Object;
             }
 
+            if (project == null) {
+                project = new Mock<Project>().Object;
+            }
+
+            if (scriptExecutor == null) {
+                scriptExecutor = new Mock<IScriptExecutor>().Object;
+            }
+
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
-            return new UpdatesProvider(packageManager, null, projectManager, new System.Windows.ResourceDictionary(), licenseWindowOpener, mockProgressWindowOpener.Object, null);
+            return new UpdatesProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), licenseWindowOpener, mockProgressWindowOpener.Object, scriptExecutor);
+        }
+
+        private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {
+            var projectSystem = new MockProjectSystem();
+            return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }
 }

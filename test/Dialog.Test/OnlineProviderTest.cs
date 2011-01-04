@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
@@ -10,6 +9,8 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using EnvDTE;
+using System;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
@@ -142,14 +143,79 @@ namespace NuGet.Dialog.Test {
             IVsPackageManager activePackageManager = provider.GetActivePackageManager();
             Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
 
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+            ManualResetEvent manualEvent = new ManualResetEvent(false);
+
+            provider.ExecuteCompletedCallback = delegate {
+                // Assert
+                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, provider), Times.Once());
+
+                manualEvent.Set();
+            };
+
+            var extensionB = new PackageItem(provider, packageB, null);
+
+            // Act
+            provider.Execute(extensionB);
+
+            // do not allow the method to return
+            manualEvent.WaitOne();
+        }
+
+        [TestMethod]
+        public void ExecuteMethodInvokesScript() {
+            // source repo has A, B, C
+            // solution repo has A
+            // project repo has C
+
+            // install B
+
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world"}, tools: new string[] { "install.ps1", "init.ps1" } );
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            var solutionRepository = new MockPackageRepository();
+            solutionRepository.AddPackage(packageA);
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.Add(packageC);
+
+            var projectManager = CreateProjectManager(localRepository, solutionRepository);
+
+            var project = new Mock<Project>();
+            var scriptExecutor = new Mock<IScriptExecutor>();
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
+
+            packageManager.Setup(p => p.InstallPackage(
+               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>())).Callback(
+               () => {
+                   solutionRepository.AddPackage(packageB);
+                   projectManager.AddPackageReference(packageB.Id, packageB.Version);
+               });
+
+            var provider = CreateOnlineProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object);
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA);
+            firstTreeNode.Repository.AddPackage(packageB);
+            firstTreeNode.Repository.AddPackage(packageC);
+
+            provider.SelectedNode = firstTreeNode;
 
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
-                mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, provider), Times.Once());
+                scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "install.ps1", packageB, project.Object, It.IsAny<ILogger>()), Times.Once());
 
                 manualEvent.Set();
             };
@@ -167,7 +233,9 @@ namespace NuGet.Dialog.Test {
             IVsPackageManager packageManager = null,
             IProjectManager projectManager = null,
             IPackageRepositoryFactory repositoryFactory = null,
-            IPackageSourceProvider packageSourceProvider = null) {
+            IPackageSourceProvider packageSourceProvider = null,
+            Project project = null,
+            IScriptExecutor scriptExecutor = null) {
 
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -204,8 +272,16 @@ namespace NuGet.Dialog.Test {
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
+            if (project == null) {
+                project = new Mock<Project>().Object;
+            }
+
+            if (scriptExecutor == null) {
+                scriptExecutor = new Mock<IScriptExecutor>().Object;
+            }
+
             return new OnlineProvider(
-                null,
+                project,
                 projectManager,
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
@@ -213,7 +289,12 @@ namespace NuGet.Dialog.Test {
                 factory.Object,
                 mockLicenseWindowOpener.Object,
                 mockProgressWindowOpener.Object,
-                null);
+                scriptExecutor);
+        }
+
+        private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {
+            var projectSystem = new MockProjectSystem();
+            return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }
 }
