@@ -198,4 +198,7 @@
   <data name="ErrorReadingFile" xml:space="preserve">
     <value>Error reading '{0}'.</value>
   </data>
+  <data name="Cmdlet_NoPackageUpdates" xml:space="preserve">
+    <value>No package updates are available from the current package source.</value>
+  </data>
 </root>

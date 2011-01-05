@@ -97,6 +97,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No package updates are available from the current package source..
+        /// </summary>
+        public static string Cmdlet_NoPackageUpdates {
+            get {
+                return ResourceManager.GetString("Cmdlet_NoPackageUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The current environment doesn&apos;t have a solution open..
         /// </summary>
         public static string Cmdlet_NoSolution {

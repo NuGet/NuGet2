@@ -159,13 +159,17 @@ namespace NuGet.VisualStudio.Cmdlets {
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
-            if (!UseRemoteSource) {
-                if (!packages.Any()) {
+            if (packages.Any()) {
+                WriteObject(packages, enumerateCollection: true);
+            }
+            else {
+                if (!UseRemoteSource) {
                     Log(MessageLevel.Info, VsResources.Cmdlet_NoPackagesInstalled);
                 }
+                else if (Updates.IsPresent) {
+                    Log(MessageLevel.Info, VsResources.Cmdlet_NoPackageUpdates);
+                }
             }
-
-            WriteObject(packages, enumerateCollection: true);
         }
     }
 }
