@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.Cmdlets.Test {
 
     /// <summary>
     /// This Queryable mimics the behavior of OData feed in that it sets a maximum limit of how 

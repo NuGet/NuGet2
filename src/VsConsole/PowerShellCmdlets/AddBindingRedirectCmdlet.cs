@@ -5,9 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
 using EnvDTE;
 using NuGet.Runtime;
-using NuGet.VisualStudio.Resources;
+using NuGet.VisualStudio;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
     public class AddBindingRedirectCmdlet : Cmdlet {        
         private readonly ISolutionManager _solutionManager;
@@ -25,7 +25,7 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         protected override void ProcessRecord() {
             if (!_solutionManager.IsSolutionOpen) {
-                WriteError(VsResources.Cmdlet_NoSolution);
+                WriteError(Resources.Cmdlet_NoSolution);
                 return;
             }
 
@@ -82,7 +82,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             project = project ?? _solutionManager.DefaultProject;
 
             if (project == null) {
-                throw new InvalidOperationException(VsResources.Cmdlet_MissingProjectParameter);
+                throw new InvalidOperationException(Resources.Cmdlet_MissingProjectParameter);
             }
 
             return project;

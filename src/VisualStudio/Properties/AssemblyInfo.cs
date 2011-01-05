@@ -5,3 +5,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("API for automating Visual Studio via NuGet")]
 
 [assembly: InternalsVisibleTo("NuGet.VisualStudio.Test")]
+[assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]

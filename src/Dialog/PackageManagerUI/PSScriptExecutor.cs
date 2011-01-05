@@ -35,7 +35,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             string fullPath = Path.Combine(toolsPath, scriptFileName);
             if (File.Exists(fullPath)) {
 
-                string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ExecutingScript, fullPath);
+                string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath);
 
                 // logging to both the Output window and progress window.
                 logger.Log(MessageLevel.Info, logMessage);

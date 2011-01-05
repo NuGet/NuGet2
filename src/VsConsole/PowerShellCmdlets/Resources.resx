@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,55 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Debug_AddReference" xml:space="preserve">
-    <value>Added reference '{0}' to project '{1}'</value>
+  <data name="Cmdlet_MissingProjectParameter" xml:space="preserve">
+    <value>Missing Project parameter or invalid project name.</value>
   </data>
-  <data name="Debug_RemovedFile" xml:space="preserve">
-    <value>Removed file '{0}'</value>
+  <data name="Cmdlet_NoSolution" xml:space="preserve">
+    <value>The current environment doesn't have a solution open.</value>
   </data>
-  <data name="Debug_RemovedFileFromFolder" xml:space="preserve">
-    <value>Removed file '{0}' from folder '{1}'</value>
+  <data name="Cmdlet_NuspecFileNotFound" xml:space="preserve">
+    <value>Unable to locate a .nuspec file in the specified project.</value>
   </data>
-  <data name="Debug_RemovedFolder" xml:space="preserve">
-    <value>Removed folder '{0}'</value>
+  <data name="Cmdlet_CreatingPackage" xml:space="preserve">
+    <value>Creating package at {0}...</value>
   </data>
-  <data name="Debug_RemoveReference" xml:space="preserve">
-    <value>Removed reference '{0}' from project '{1}'</value>
+  <data name="Cmdlet_PackageCreated" xml:space="preserve">
+    <value>Package file successfully created...</value>
   </data>
-  <data name="DTE_InvalidProject" xml:space="preserve">
-    <value>The project is invalid</value>
+  <data name="Cmdlet_PackageForSolutionOnly" xml:space="preserve">
+    <value>The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.</value>
   </data>
-  <data name="DTE_ProjectUnsupported" xml:space="preserve">
-    <value>The project '{0}' is unsupported</value>
+  <data name="Cmdlet_ProjectNotFound" xml:space="preserve">
+    <value>Project '{0}' is not found.</value>
   </data>
-  <data name="Debug_AddedFileToProject" xml:space="preserve">
-    <value>Added file '{0}' to project '{1}'</value>
+  <data name="Cmdlet_NoPackagesInstalled" xml:space="preserve">
+    <value>No packages installed.</value>
   </data>
-  <data name="PackageSource_Invalid" xml:space="preserve">
-    <value>The package source does not belong to the collection of available sources.</value>
+  <data name="Cmdlet_NoPackageUpdates" xml:space="preserve">
+    <value>No package updates are available from the current package source.</value>
   </data>
-  <data name="Console_DisclaimerText" xml:space="preserve">
-    <value>Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies.</value>
+  <data name="Cmdlet_InstallSuccessDisclaimerText" xml:space="preserve">
+    <value>You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device.</value>
   </data>
-  <data name="Dialog_DisclaimerText" xml:space="preserve">
-    <value>Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages.</value>
-  </data>
-  <data name="PackageCannotBeRemovedBecauseItIsInUse" xml:space="preserve">
-    <value>'{0}' cannot be removed because it in use by '{1}'</value>
-  </data>
-  <data name="Console_GroupPolicyError" xml:space="preserve">
-    <value>Your machine group policy or user group policy disables execution of PowerShell script. Adjust your group policy settings to allow execution of PowerShell scripts.</value>
-  </data>
-  <data name="SolutionDirectoryNotAvailable" xml:space="preserve">
-    <value>Unable to locate the solution directory. Please ensure that the solution has been saved.</value>
-  </data>
-  <data name="ErrorReadingFile" xml:space="preserve">
-    <value>Error reading '{0}'.</value>
-  </data>
-  <data name="NoActivePackageSource" xml:space="preserve">
+  <data name="Cmdlet_NoActivePackageSource" xml:space="preserve">
     <value>Unable to retrieve package list because no source was specified.</value>
   </data>
-  <data name="ExecutingScript" xml:space="preserve">
-    <value>Executing script file '{0}'.</value>
+  <data name="Cmdlet_TooManySpecFiles" xml:space="preserve">
+    <value>More than one .nuspec files were found.</value>
   </data>
 </root>

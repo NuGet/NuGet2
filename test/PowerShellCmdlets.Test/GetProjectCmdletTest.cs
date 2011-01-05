@@ -2,9 +2,11 @@ using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.VisualStudio.Cmdlets;
+using NuGet.Cmdlets;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Test;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.Cmdlets.Test {
     [TestClass]
     public class GetProjectCmdletTest {
         [TestMethod]

@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
-using NuGet.VisualStudio.Resources;
+using NuGet.VisualStudio;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
 
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
@@ -90,7 +89,7 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
-                WriteError(VsResources.Cmdlet_NoSolution);
+                WriteError(Resources.Cmdlet_NoSolution);
                 return;
             }
 
@@ -137,7 +136,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
             else {
                 // No active source has been specified. 
-                throw new InvalidOperationException(VsResources.NoActivePackageSource);
+                throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
             }
         }
 
@@ -164,10 +163,10 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
             else {
                 if (!UseRemoteSource) {
-                    Log(MessageLevel.Info, VsResources.Cmdlet_NoPackagesInstalled);
+                    Log(MessageLevel.Info, Resources.Cmdlet_NoPackagesInstalled);
                 }
                 else if (Updates.IsPresent) {
-                    Log(MessageLevel.Info, VsResources.Cmdlet_NoPackageUpdates);
+                    Log(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
                 }
             }
         }

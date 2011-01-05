@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.Cmdlets.Test {
     public class MockCommandRuntime : ICommandRuntime {
         private readonly List<object> _output;
 

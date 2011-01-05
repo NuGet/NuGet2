@@ -61,105 +61,6 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creating package at {0}....
-        /// </summary>
-        public static string Cmdlet_CreatingPackage {
-            get {
-                return ResourceManager.GetString("Cmdlet_CreatingPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Executing script file &apos;{0}&apos;..
-        /// </summary>
-        public static string Cmdlet_ExecutingScript {
-            get {
-                return ResourceManager.GetString("Cmdlet_ExecutingScript", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Missing Project parameter or invalid project name..
-        /// </summary>
-        public static string Cmdlet_MissingProjectParameter {
-            get {
-                return ResourceManager.GetString("Cmdlet_MissingProjectParameter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No packages installed..
-        /// </summary>
-        public static string Cmdlet_NoPackagesInstalled {
-            get {
-                return ResourceManager.GetString("Cmdlet_NoPackagesInstalled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No package updates are available from the current package source..
-        /// </summary>
-        public static string Cmdlet_NoPackageUpdates {
-            get {
-                return ResourceManager.GetString("Cmdlet_NoPackageUpdates", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The current environment doesn&apos;t have a solution open..
-        /// </summary>
-        public static string Cmdlet_NoSolution {
-            get {
-                return ResourceManager.GetString("Cmdlet_NoSolution", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to locate a .nuspec file in the specified project..
-        /// </summary>
-        public static string Cmdlet_NuspecFileNotFound {
-            get {
-                return ResourceManager.GetString("Cmdlet_NuspecFileNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Package file successfully created....
-        /// </summary>
-        public static string Cmdlet_PackageCreated {
-            get {
-                return ResourceManager.GetString("Cmdlet_PackageCreated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The package &apos;{0}&apos; only applies to the solution and not to a project. Remove the -Project parameter..
-        /// </summary>
-        public static string Cmdlet_PackageForSolutionOnly {
-            get {
-                return ResourceManager.GetString("Cmdlet_PackageForSolutionOnly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Project &apos;{0}&apos; is not found..
-        /// </summary>
-        public static string Cmdlet_ProjectNotFound {
-            get {
-                return ResourceManager.GetString("Cmdlet_ProjectNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to More than one .nuspec files were found..
-        /// </summary>
-        public static string Cmdlet_TooManySpecFiles {
-            get {
-                return ResourceManager.GetString("Cmdlet_TooManySpecFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies..
         /// </summary>
         public static string Console_DisclaimerText {
@@ -268,11 +169,11 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device..
+        ///   Looks up a localized string similar to Executing script file &apos;{0}&apos;..
         /// </summary>
-        public static string InstallSuccessDisclaimerText {
+        public static string ExecutingScript {
             get {
-                return ResourceManager.GetString("InstallSuccessDisclaimerText", resourceCulture);
+                return ResourceManager.GetString("ExecutingScript", resourceCulture);
             }
         }
         

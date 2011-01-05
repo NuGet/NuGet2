@@ -3,8 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Management.Automation;
 using System.Reflection;
+using NuGet.VisualStudio;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
 
     /// <summary>
     /// This is the base class for all NuGet cmdlets.

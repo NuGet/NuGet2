@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Management.Automation;
+using NuGet.VisualStudio;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     public class FindPackageCmdlet : GetPackageCmdlet {
 

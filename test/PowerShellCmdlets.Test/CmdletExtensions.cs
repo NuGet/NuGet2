@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using NuGet.VisualStudio.Cmdlets;
+using NuGet.Cmdlets;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.Cmdlets.Test {
     internal static class CmdletExtensions {
         public static IEnumerable<T> GetResults<T>(this NuGetBaseCmdlet cmdlet) {
             return GetResults(cmdlet).Cast<T>();

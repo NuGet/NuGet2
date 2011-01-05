@@ -1,9 +1,8 @@
 using System;
 using System.Management.Automation;
-using EnvDTE;
-using NuGet.VisualStudio.Resources;
+using NuGet.VisualStudio;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
 
     /// <summary>
     /// This project updates the specfied package to the specfied project.
@@ -38,7 +37,7 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
-                WriteError(VsResources.Cmdlet_NoSolution);
+                WriteError(Resources.Cmdlet_NoSolution);
                 return;
             }
 

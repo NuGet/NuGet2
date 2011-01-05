@@ -1,7 +1,7 @@
 ﻿@{
 
 # Script module or binary module file associated with this manifest
-ModuleToProcess = 'NuGet.VisualStudio.dll'
+ModuleToProcess = 'NuGet.Cmdlets.dll'
 
 # Version number of this module.
 ModuleVersion = '1.1.0.0'

@@ -1,0 +1,11 @@
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+
+[assembly: AssemblyTitle("PowerShellCmdlets")]
+[assembly: AssemblyDescription("This assembly contains NuGet PowerShell cmdlets.")]
+
+[assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("F3670D5F-A177-4E84-93FD-A9ED25ED9AD6")]

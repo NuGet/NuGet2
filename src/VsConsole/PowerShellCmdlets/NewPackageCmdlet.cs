@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
-using NuGet.VisualStudio.Resources;
+using NuGet.VisualStudio;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
 
     /// <summary>
     /// This command creates new package file.
@@ -38,7 +38,7 @@ namespace NuGet.VisualStudio.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
-                throw new InvalidOperationException(VsResources.Cmdlet_NoSolution);
+                throw new InvalidOperationException(Resources.Cmdlet_NoSolution);
             }
 
             string projectName = Project;
@@ -47,13 +47,13 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
 
             if (String.IsNullOrEmpty(projectName)) {
-                WriteError(VsResources.Cmdlet_MissingProjectParameter);
+                WriteError(Resources.Cmdlet_MissingProjectParameter);
                 return;
             }
 
             var projectIns = SolutionManager.GetProject(projectName);
             if (projectIns == null) {
-                WriteError(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ProjectNotFound, projectName));
+                WriteError(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_ProjectNotFound, projectName));
                 return;
             }
 
@@ -63,11 +63,11 @@ namespace NuGet.VisualStudio.Cmdlets {
             }
             catch (InvalidOperationException) {
                 // Single would throw if more than one spec files were found
-                WriteError(VsResources.Cmdlet_TooManySpecFiles);
+                WriteError(Resources.Cmdlet_TooManySpecFiles);
                 return;
             }
             if (specFile == null) {
-                WriteError(VsResources.Cmdlet_NuspecFileNotFound);
+                WriteError(Resources.Cmdlet_NuspecFileNotFound);
                 return;
             }
             string specFilePath = specFile.FileNames[0];
@@ -80,11 +80,11 @@ namespace NuGet.VisualStudio.Cmdlets {
             // Remove .nuspec and .nupkg files from output package 
             RemoveExludedFiles(builder);
             
-            WriteLine(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_CreatingPackage, outputFile));
+            WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_CreatingPackage, outputFile));
             using(Stream stream = File.Create(outputFile)) {
                 builder.Save(stream);
             }
-            WriteLine(VsResources.Cmdlet_PackageCreated);
+            WriteLine(Resources.Cmdlet_PackageCreated);
         }
 
         internal static string GetPackageFilePath(string outputFile, string projectPath, string id, Version version) {

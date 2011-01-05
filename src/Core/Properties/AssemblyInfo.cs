@@ -10,6 +10,7 @@ using System.Security;
 [assembly: InternalsVisibleTo("NuGet.Test")]
 [assembly: InternalsVisibleTo("NuGet.Test.Utility")]
 [assembly: InternalsVisibleTo("NuGet.VisualStudio.Test")]
+[assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]
 
 #if !CODE_COVERAGE
 [assembly: SecurityTransparent]

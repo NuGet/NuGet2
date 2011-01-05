@@ -2,11 +2,11 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
-    <ProjectGuid>{3840480F-EA53-4CD4-8155-7CA579CB8E37}</ProjectGuid>
+    <ProjectGuid>{6C09BF50-E5B3-4810-8A17-37D399A172ED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuGet.VisualStudio.Test</RootNamespace>
-    <AssemblyName>NuGet.VisualStudio.Test</AssemblyName>
+    <RootNamespace>NuGet.Cmdlets.Test</RootNamespace>
+    <AssemblyName>NuGet.Cmdlets.Test</AssemblyName>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <ItemGroup>
@@ -22,6 +22,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -29,28 +30,38 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mocks\MockSolutionManager.cs" />
-    <Compile Include="PathValidatorTest.cs" />
+    <Compile Include="..\VisualStudio.Test\TestUtils.cs">
+      <Link>TestUtils.cs</Link>
+    </Compile>
+    <Compile Include="CmdletExtensions.cs" />
+    <Compile Include="FindPackageCmdletTest.cs" />
+    <Compile Include="GetPackageCmdletTest.cs" />
+    <Compile Include="InstallPackageCmdletTest.cs" />
+    <Compile Include="MockCommandRuntime.cs" />
+    <Compile Include="ModifyTakeExpressionVisitor.cs" />
+    <Compile Include="NewPackageCmdletTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RepositorySettingsTest.cs" />
-    <Compile Include="VsPackageManagerTest.cs" />
-    <Compile Include="VsPackageSourceProviderTest.cs" />
-    <Compile Include="VsPackageSourceRepositoryTest.cs" />
-    <Compile Include="TestUtils.cs" />
-    <Compile Include="VsProjectSystemTest.cs" />
+    <Compile Include="GetProjectCmdletTest.cs" />
+    <Compile Include="ThrottledQueryable.cs" />
+    <Compile Include="UninstallPackageCmdletTest.cs" />
+    <Compile Include="UpdatePackageCmdletTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Test.Utility\Test.Utility.csproj">
-      <Project>{F016882A-C798-4446-BB75-D3C393A38B32}</Project>
-      <Name>Test.Utility</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
       <Name>VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\VsConsole\PowerShellCmdlets\PowerShellCmdlets.csproj">
+      <Project>{84AC92A6-06B4-41B7-81EC-EFE91356D17C}</Project>
+      <Name>PowerShellCmdlets</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Test.Utility\Test.Utility.csproj">
+      <Project>{F016882A-C798-4446-BB75-D3C393A38B32}</Project>
+      <Name>Test.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

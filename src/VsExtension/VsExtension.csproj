@@ -42,12 +42,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\VsConsole\PowerShellHost\Scripts\about_NuGet.VisualStudio.help.txt">
-      <Link>about_NuGet.VisualStudio.help.txt</Link>
+    <Content Include="..\VsConsole\PowerShellCmdlets\Help\about_NuGet.Cmdlets.help.txt">
+      <Link>about_NuGet.Cmdlets.help.txt</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.VisualStudio.dll-Help.xml">
-      <Link>NuGet.VisualStudio.dll-Help.xml</Link>
+    <Content Include="..\VsConsole\PowerShellCmdlets\Help\NuGet.Cmdlets.dll-Help.xml">
+      <Link>NuGet.Cmdlets.dll-Help.xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\Profile.ps1">
@@ -97,6 +97,10 @@
       <Name>Console</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\VsConsole\PowerShellCmdlets\PowerShellCmdlets.csproj">
+      <Project>{84AC92A6-06B4-41B7-81EC-EFE91356D17C}</Project>
+      <Name>PowerShellCmdlets</Name>
     </ProjectReference>
     <ProjectReference Include="..\VsConsole\PowerShellHostProvider\PowerShellHostProvider.csproj">
       <Project>{A5E7AEB3-738F-4C39-A459-00F90483B2FE}</Project>

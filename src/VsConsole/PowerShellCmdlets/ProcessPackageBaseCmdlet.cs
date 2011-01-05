@@ -4,9 +4,10 @@ using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using EnvDTE;
+using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
-namespace NuGet.VisualStudio.Cmdlets {
+namespace NuGet.Cmdlets {
 
     /// <summary>
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
@@ -72,7 +73,7 @@ namespace NuGet.VisualStudio.Cmdlets {
 
                 // If that project was invalid then throw
                 if (project == null) {
-                    throw new InvalidOperationException(VsResources.Cmdlet_MissingProjectParameter);
+                    throw new InvalidOperationException(Resources.Cmdlet_MissingProjectParameter);
                 }
             }
             else if (!String.IsNullOrEmpty(SolutionManager.DefaultProjectName)) {
@@ -141,7 +142,7 @@ namespace NuGet.VisualStudio.Cmdlets {
                 psVariable.Set("__project", project);
 
                 string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
-                WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.Cmdlet_ExecutingScript, fullPath));
+                WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath));
                 InvokeCommand.InvokeScript(command);
 
                 // clear temp variables
@@ -156,7 +157,7 @@ namespace NuGet.VisualStudio.Cmdlets {
             if (package.RequireLicenseAcceptance) {
                 string message = String.Format(
                     CultureInfo.CurrentCulture,
-                    VsResources.InstallSuccessDisclaimerText,
+                    Resources.Cmdlet_InstallSuccessDisclaimerText,
                     package.Id,
                     String.Join(", ", package.Authors),
                     package.LicenseUrl);
