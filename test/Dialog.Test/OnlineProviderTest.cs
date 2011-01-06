@@ -214,10 +214,13 @@ namespace NuGet.Dialog.Test {
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
             provider.ExecuteCompletedCallback = delegate {
-                // Assert
-                scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "install.ps1", packageB, project.Object, It.IsAny<ILogger>()), Times.Once());
-
-                manualEvent.Set();
+                try {
+                    // Assert
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "install.ps1", packageB, project.Object, It.IsAny<ILogger>()), Times.Once());
+                }
+                finally {
+                    manualEvent.Set();
+                }
             };
 
             var extensionB = new PackageItem(provider, packageB, null);

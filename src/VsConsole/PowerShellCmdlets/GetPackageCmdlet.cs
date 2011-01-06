@@ -158,8 +158,10 @@ namespace NuGet.Cmdlets {
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
-            if (packages.Any()) {
-                WriteObject(packages, enumerateCollection: true);
+            var packageList = packages.ToList();
+
+            if (packageList.Count > 0) {
+                WriteObject(packageList, enumerateCollection: true);
             }
             else {
                 if (!UseRemoteSource) {

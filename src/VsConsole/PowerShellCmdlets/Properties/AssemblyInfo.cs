@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("PowerShellCmdlets")]
+[assembly: AssemblyTitle("NuGet.Cmdlets")]
 [assembly: AssemblyDescription("This assembly contains NuGet PowerShell cmdlets.")]
 
 [assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]

@@ -75,23 +75,6 @@ namespace NuGet.Cmdlets.Test {
         }
 
         [TestMethod]
-        public void GetPackageReturnsAllPackagesFromActiveRepositoryWhenRemoteIsPresentAndTheRemoteRepositoryIsThrottled() {
-            // Arrange 
-            var cmdlet = BuildCmdlet(throttling: true);
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
-
-            // Act 
-            var result = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.AreEqual(100, result.Count());
-
-            for (int i = 0; i < 100; i++) {
-                AssertPackageResultsEqual(result.ElementAt(i), new { Id = "P" + i.ToString("00"), Version = new Version("1." + i.ToString("00")) });
-            }
-        }
-        
-        [TestMethod]
         public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -300,7 +283,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackagesThrowsWhenNoSourceIsProvidedAndRemoteIsPresent() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(() => GetPackageManager(false));
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
             var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object) { CallBase = true }.Object;
@@ -315,9 +298,9 @@ namespace NuGet.Cmdlets.Test {
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true, bool throttling = false) {
+        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(() => GetPackageManager(throttling));
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
         }
 
@@ -333,13 +316,13 @@ namespace NuGet.Cmdlets.Test {
             return repositoryFactory.Object;
         }
 
-        private static IVsPackageManager GetPackageManager(bool throttling = false) {
+        private static IVsPackageManager GetPackageManager() {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<ISharedPackageRepository>();
             var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
-            return new VsPackageManager(TestUtils.GetSolutionManager(), throttling ? GetThrottledActiveRepository() : GetActiveRepository(), fileSystem.Object, localRepo.Object);
+            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object);
         }
 
         private static IPackageRepository GetActiveRepository() {
@@ -347,17 +330,6 @@ namespace NuGet.Cmdlets.Test {
                                          PackageUtility.CreatePackage("P2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
             remoteRepo.Setup(c => c.GetPackages()).Returns(remotePackages.AsQueryable());
-            return remoteRepo.Object;
-        }
-
-        private static IPackageRepository GetThrottledActiveRepository() {
-            var remotePackages = new IPackage[100];
-            for (int i = 0; i < remotePackages.Length; i++) {
-                remotePackages[i] = PackageUtility.CreatePackage("P" + i.ToString("00"), "1." + i.ToString("00"));
-            }
-
-            var remoteRepo = new Mock<IPackageRepository>();
-            remoteRepo.Setup(c => c.GetPackages()).Returns(new ThrottledQueryable<IPackage>(remotePackages));
             return remoteRepo.Object;
         }
 
