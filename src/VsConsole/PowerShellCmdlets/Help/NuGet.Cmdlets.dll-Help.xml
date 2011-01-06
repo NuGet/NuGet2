@@ -153,7 +153,7 @@
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="false" position="named">
-          <maml:name>Remote</maml:name>
+          <maml:name>ListAvailable</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
           <maml:name>Updates</maml:name>
@@ -185,7 +185,7 @@
         </command:parameterValue>
       </command:parameter>
       <command:parameter required="false" position="named">
-        <maml:name>Remote</maml:name>
+        <maml:name>ListAvailable</maml:name>
         <maml:description>
           <maml:para>Gets packages available from the online package source.</maml:para>
         </maml:description>
