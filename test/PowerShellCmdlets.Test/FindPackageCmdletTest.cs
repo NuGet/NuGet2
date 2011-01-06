@@ -31,7 +31,7 @@ namespace NuGet.Cmdlets.Test {
         public void FindPackageReturnsMaximumResultsWithFirstAndSkipParametersSet() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
             cmdlet.First = 2;
             cmdlet.Skip = 1;
 
@@ -49,7 +49,7 @@ namespace NuGet.Cmdlets.Test {
         public void FindPackageReturnsMaximumResultsWithFirstParameterSet() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
             cmdlet.First = 20;
 
             // Act 
@@ -68,7 +68,7 @@ namespace NuGet.Cmdlets.Test {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Filter = "pac";
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();

@@ -168,4 +168,7 @@
   <data name="ExecutingScript" xml:space="preserve">
     <value>Executing script file '{0}'.</value>
   </data>
+  <data name="Console_HelpText" xml:space="preserve">
+    <value>Type 'get-help NuGet' to see all available NuGet commands.</value>
+  </data>
 </root>

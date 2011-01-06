@@ -79,6 +79,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type &apos;get-help NuGet&apos; to see all available NuGet commands..
+        /// </summary>
+        public static string Console_HelpText {
+            get {
+                return ResourceManager.GetString("Console_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added file &apos;{0}&apos; to project &apos;{1}&apos;.
         /// </summary>
         public static string Debug_AddedFileToProject {

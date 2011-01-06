@@ -7,7 +7,7 @@ $NoResultValue = New-Object 'System.Object'
 
 # Backup the original tab expansion function
 if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
-    Rename-Item Function:\TabExpansion global:DefaultTabExpansion
+    Rename-Item Function:\TabExpansion DefaultTabExpansion
 }
 
 function TabExpansion($line, $lastWord) {

@@ -51,7 +51,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             SetupRunspace();
             bool successful = LoadStartupScripts();
             if (successful) {
-                DisplayDisclaimerText();
+                DisplayDisclaimerAndHelpText();
                 LoadProfilesIntoRunspace(_myRunSpace);
             }
             else {
@@ -60,8 +60,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        private void DisplayDisclaimerText() {
+        private void DisplayDisclaimerAndHelpText() {
             _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
+            _myHost.UI.WriteLine();
+            _myHost.UI.WriteLine(VsResources.Console_HelpText);
             _myHost.UI.WriteLine();
         }
 

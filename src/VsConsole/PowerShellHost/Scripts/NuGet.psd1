@@ -1,7 +1,7 @@
 ﻿@{
 
 # Script module or binary module file associated with this manifest
-ModuleToProcess = 'NuGet.Cmdlets.dll'
+ModuleToProcess = 'Scripts\nuget.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.1.0.0'
@@ -55,13 +55,13 @@ TypesToProcess = @()
 FormatsToProcess = @('Scripts\Types.format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
-NestedModules = @('Scripts\nuget.psm1')
+NestedModules = @('NuGet.Cmdlets.dll')
 
 # Functions to export from this module
 FunctionsToExport = @('TabExpansion')
 
 # Cmdlets to export from this module
-CmdletsToExport = @('Install-Package', 'Find-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
+CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
 
 # Variables to export from this module
 VariablesToExport = '*'

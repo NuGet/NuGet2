@@ -61,7 +61,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackageReturnsAllPackagesFromActiveRepositoryWhenRemoteIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();
@@ -78,7 +78,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
             cmdlet.First = 2;
             cmdlet.Skip = 1;
 
@@ -95,7 +95,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackageReturnsFilteredPackagesFromActiveRepositoryWhenRemoteIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
             cmdlet.Filter = "P1";
 
             // Act 
@@ -110,7 +110,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
             cmdlet.Source = "foo";
 
             // Act 
@@ -141,7 +141,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackageReturnsFilteredPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
             cmdlet.Filter = "P6";
             cmdlet.Source = "foo";
 
@@ -167,7 +167,7 @@ namespace NuGet.Cmdlets.Test {
         public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndRemoteIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();
@@ -287,7 +287,7 @@ namespace NuGet.Cmdlets.Test {
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
             var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object) { CallBase = true }.Object;
-            cmdlet.Remote = new SwitchParameter(isPresent: true);
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "Unable to retrieve package list because no source was specified.");

@@ -44,8 +44,8 @@ namespace NuGet.Cmdlets {
         public string Filter { get; set; }
 
         [Parameter(Position = 1, ParameterSetName = "Remote")]
-        [Alias("Online")]
-        public SwitchParameter Remote { get; set; }
+        [Alias("Online", "Remote")]
+        public SwitchParameter ListAvailable { get; set; }
 
         [Parameter(Position = 1, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
@@ -74,7 +74,7 @@ namespace NuGet.Cmdlets {
         /// </summary>
         private bool UseRemoteSourceOnly {
             get {
-                return Remote.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
+                return ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
             }
         }
 
@@ -83,7 +83,7 @@ namespace NuGet.Cmdlets {
         /// </summary>
         private bool UseRemoteSource {
             get {
-                return Remote.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
+                return ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
             }
         }
 
