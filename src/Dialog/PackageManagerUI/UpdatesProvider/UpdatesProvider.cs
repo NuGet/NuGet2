@@ -6,30 +6,21 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
-using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
-    internal class UpdatesProvider : PackagesProviderBase {
-
-        private IVsPackageManager _packageManager;
-        private Lazy<InstallWalker> _walker;
-        private ILicenseWindowOpener _licenseWindowOpener;
+    internal class UpdatesProvider : OnlineProvider {
 
         public UpdatesProvider(
-            IVsPackageManager packageManager,
             Project project,
-            IProjectManager projectManager, 
+            IProjectManager projectManager,
             ResourceDictionary resources,
+            IPackageRepositoryFactory packageRepositoryFactory,
+            IPackageSourceProvider packageSourceProvider,
+            IVsPackageManagerFactory packageManagerFactory,
             ILicenseWindowOpener licenseWindowOpener,
             IProgressWindowOpener progressWindowOpener,
             IScriptExecutor scriptExecutor)
-            : base(project, projectManager, resources, progressWindowOpener, scriptExecutor) {
-
-            _packageManager = packageManager;
-            _licenseWindowOpener = licenseWindowOpener;
-
-            _walker = new Lazy<InstallWalker>(
-                () => new InstallWalker(ProjectManager.LocalRepository, _packageManager.SourceRepository, NullLogger.Instance, ignoreDependencies: false));
+            : base(project, projectManager, resources, packageRepositoryFactory, packageSourceProvider, packageManagerFactory, licenseWindowOpener, progressWindowOpener, scriptExecutor) {
         }
 
         public override string Name {
@@ -44,15 +35,8 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected override void FillRootNodes() {
-            var allNode = new UpdatesTreeNode(
-                this,
-                Resources.Dialog_RootNodeAll,
-                RootNode,
-                ProjectManager.LocalRepository,
-                _packageManager.SourceRepository);
-
-            RootNode.Nodes.Add(allNode);
+        protected override PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository repository) {
+            return new UpdatesTreeNode(this, source.Name, RootNode, ProjectManager.LocalRepository, repository);
         }
 
         public override bool CanExecute(PackageItem item) {
@@ -68,43 +52,8 @@ namespace NuGet.Dialog.Providers {
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        protected override bool ExecuteCore(PackageItem item) {
-
-            IList<PackageOperation> operations = _walker.Value.ResolveOperations(item.PackageIdentity).ToList();
-
-            IEnumerable<IPackage> scriptPackages = from o in operations
-                                                   where o.Package.HasPowerShellScript()
-                                                   select o.Package;
-            
-            if (scriptPackages.Any() && !RegistryHelper.CheckIfPowerShell2Installed()) {
-                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
-            }
-
-            IList<IPackage> licensePackages = (from o in operations
-                                               where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !_packageManager.LocalRepository.Exists(o.Package)
-                                               select o.Package).ToList();
-
-            // display license window if necessary
-            if (licensePackages.Count > 0) {
-                // hide the progress window if we are going to show license window
-                HideProgressWindow();
-
-                bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
-                if (!accepted) {
-                    return false;
-                }
-
-                ShowProgressWindow();
-            }
-
-            try {
-                RegisterPackageOperationEvents(_packageManager);
-                _packageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, updateDependencies: true, logger: this);
-            }
-            finally {
-                UnregisterPackageOperationEvents(_packageManager);
-            }
-            return true;
+        protected override void ExecuteCommand(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+            activePackageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, true, this);
         }
 
         protected override void OnExecuteCompleted(PackageItem item) {

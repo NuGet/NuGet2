@@ -62,7 +62,7 @@ namespace NuGet.Dialog.Providers {
                 PackagesTreeNodeBase node = null;
                 try {
                     var repository = new LazyRepository(_packageRepositoryFactory, source);
-                    node = new SimpleTreeNode(this, source.Name, RootNode, repository);
+                    node = CreateTreeNodeForPackageSource(source, repository);
                 }
                 catch (Exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
@@ -71,6 +71,10 @@ namespace NuGet.Dialog.Providers {
 
                 RootNode.Nodes.Add(node);
             }
+        }
+
+        protected virtual PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository repository) {
+            return new SimpleTreeNode(this, source.Name, RootNode, repository);
         }
 
         protected internal IVsPackageManager GetActivePackageManager() {
@@ -130,13 +134,17 @@ namespace NuGet.Dialog.Providers {
 
             try {
                 RegisterPackageOperationEvents(activePackageManager);
-                activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
+                ExecuteCommand(item, activePackageManager, operations);
             }
             finally {
                 UnregisterPackageOperationEvents(activePackageManager);
             }
             
             return true;
+        }
+
+        protected virtual void ExecuteCommand(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+            activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
         }
 
         protected override void OnExecuteCompleted(PackageItem item) {

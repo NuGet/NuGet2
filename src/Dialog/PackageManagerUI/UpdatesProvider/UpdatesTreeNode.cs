@@ -6,10 +6,8 @@ namespace NuGet.Dialog.Providers {
     /// <summary>
     /// This class represents a tree node under the Updates tab
     /// </summary>
-    internal class UpdatesTreeNode : PackagesTreeNodeBase {
-        private readonly string _category;
+    internal class UpdatesTreeNode : SimpleTreeNode {
         private readonly IPackageRepository _localRepository;
-        private readonly IPackageRepository _sourceRepository;
 
         public UpdatesTreeNode(
             PackagesProviderBase provider, 
@@ -17,21 +15,13 @@ namespace NuGet.Dialog.Providers {
             IVsExtensionsTreeNode parent, 
             IPackageRepository localRepository, 
             IPackageRepository sourceRepository) :
-            base(parent, provider) {
+            base(provider, category, parent, sourceRepository) {
 
-            _category = category;
             _localRepository = localRepository;
-            _sourceRepository = sourceRepository;
-        }
-
-        public override string Name {
-            get {
-                return _category;
-            }
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return _sourceRepository.GetUpdates(_localRepository.GetPackages()).AsQueryable();
+            return Repository.GetUpdates(_localRepository.GetPackages()).AsQueryable();
         }
     }
 }

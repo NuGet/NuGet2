@@ -56,7 +56,7 @@ namespace NuGet.Dialog.Test {
         }
 
         [TestMethod]
-        public void RootNodeIsPopulatedWithOneNode() {
+        public void RootNodeIsPopulatedWithCorrectNumberOfChildNodes() {
             // Arrange
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
@@ -68,8 +68,11 @@ namespace NuGet.Dialog.Test {
             var extentionsTree = provider.ExtensionsTree;
 
             // Assert
-            Assert.AreEqual(1, extentionsTree.Nodes.Count);
+            Assert.AreEqual(2, extentionsTree.Nodes.Count);
             Assert.IsInstanceOfType(extentionsTree.Nodes[0], typeof(UpdatesTreeNode));
+            Assert.AreEqual("One", extentionsTree.Nodes[0].Name);
+            Assert.IsInstanceOfType(extentionsTree.Nodes[1], typeof(UpdatesTreeNode));
+            Assert.AreEqual("Two", extentionsTree.Nodes[1].Name);
         }
 
         [TestMethod]
@@ -153,12 +156,14 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
-            var provider = CreateUpdatesProvider(packageManager.Object, projectManager.Object, mockLicenseWindowOpener.Object);
+            var provider = CreateUpdatesProvider(packageManager: packageManager.Object, projectManager: projectManager.Object, licenseWindowOpener: mockLicenseWindowOpener.Object);
 
             var extensionA = new PackageItem(provider, packageA2, null);
             var extensionC = new PackageItem(provider, packageC, null);
 
-            ManualResetEvent manualEvent = new ManualResetEvent(false);
+            provider.SelectedNode = (UpdatesTreeNode)provider.ExtensionsTree.Nodes[0];
+
+            var manualEvent = new ManualResetEvent(false);
 
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
@@ -208,7 +213,8 @@ namespace NuGet.Dialog.Test {
             var project = new Mock<Project>();
             var scriptExecutor = new Mock<IScriptExecutor>();
 
-            var provider = CreateUpdatesProvider(packageManager.Object, projectManager, null, project.Object, scriptExecutor.Object);
+            var provider = CreateUpdatesProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object, null);
+            provider.SelectedNode = (UpdatesTreeNode)provider.ExtensionsTree.Nodes[0];
 
             var extensionA = new PackageItem(provider, packageA2, null);
 
@@ -233,18 +239,51 @@ namespace NuGet.Dialog.Test {
         }
 
         private static UpdatesProvider CreateUpdatesProvider(
-            IVsPackageManager packageManager = null, 
-            IProjectManager projectManager = null, 
-            ILicenseWindowOpener licenseWindowOpener = null,
+            IVsPackageManager packageManager = null,
+            IProjectManager projectManager = null,
+            IPackageRepositoryFactory repositoryFactory = null,
+            IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
-            IScriptExecutor scriptExecutor = null) {
+            IScriptExecutor scriptExecutor = null,
+            ILicenseWindowOpener licenseWindowOpener = null) {
 
             if (packageManager == null) {
-                packageManager = new Mock<IVsPackageManager>().Object;
+                var packageManagerMock = new Mock<IVsPackageManager>();
+                var sourceRepository = new MockPackageRepository();
+                packageManagerMock.Setup(p => p.SourceRepository).Returns(sourceRepository);
+
+                packageManager = packageManagerMock.Object;
             }
 
             if (projectManager == null) {
                 projectManager = new Mock<IProjectManager>().Object;
+            }
+
+            if (repositoryFactory == null) {
+                var repositoryFactoryMock = new Mock<IPackageRepositoryFactory>();
+                repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
+                repositoryFactory = repositoryFactoryMock.Object;
+            }
+
+            if (packageSourceProvider == null) {
+                var packageSourceProviderMock = new Mock<IPackageSourceProvider>();
+                packageSourceProviderMock.Setup(p => p.GetPackageSources()).Returns(
+                        new PackageSource[2] {
+                            new PackageSource("Test1", "One"),
+                            new PackageSource("Test2", "Two")
+                        }
+                    );
+                packageSourceProvider = packageSourceProviderMock.Object;
+            }
+
+            var factory = new Mock<IVsPackageManagerFactory>();
+            factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>())).Returns(packageManager);
+
+            var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
+
+            if (licenseWindowOpener == null) {
+                var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+                licenseWindowOpener = mockLicenseWindowOpener.Object;
             }
 
             if (project == null) {
@@ -255,8 +294,16 @@ namespace NuGet.Dialog.Test {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
-            var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
-            return new UpdatesProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), licenseWindowOpener, mockProgressWindowOpener.Object, scriptExecutor);
+            return new UpdatesProvider(
+                project,
+                projectManager,
+                new System.Windows.ResourceDictionary(),
+                repositoryFactory,
+                packageSourceProvider,
+                factory.Object,
+                licenseWindowOpener,
+                mockProgressWindowOpener.Object,
+                scriptExecutor);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {

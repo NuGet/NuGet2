@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
@@ -9,8 +10,6 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
-using EnvDTE;
-using System;
 
 namespace NuGet.Dialog.Test {
     [TestClass]

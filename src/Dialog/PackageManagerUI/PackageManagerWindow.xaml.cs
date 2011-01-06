@@ -70,11 +70,13 @@ namespace NuGet.Dialog.PackageManagerUI {
             // We want the providers to appear as Installed - Online - Updates
 
             var updatesProvider = new UpdatesProvider(
-                packageManager,
                 activeProject,
-                projectManager, 
-                Resources, 
-                this, 
+                projectManager,
+                Resources,
+                packageRepositoryFactory,
+                packageSourceProvider,
+                packageManagerFactory,
+                this,
                 progressWindowOpener,
                 scriptExecutor);
             explorer.Providers.Add(updatesProvider);

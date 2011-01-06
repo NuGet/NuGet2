@@ -394,7 +394,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No package updates are available for the current project..
+        ///   Looks up a localized string similar to No package updates are available from the selected package source..
         /// </summary>
         public static string Dialog_UpdatesProviderNoItem {
             get {
