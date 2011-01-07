@@ -4,6 +4,8 @@ using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -14,7 +16,7 @@ namespace NuGet.Commands {
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : ICommand {
         private const string _CreatePackageService = "PackageFiles";
-        private const string _PublichPackageService = "PublishedPackages";
+        private const string _PublichPackageService = "PublishedPackages/Publish";
         private const string _UserAgentPattern = "CommandLine/{0} ({1})";
 
         private string _apiKey;
@@ -45,6 +47,7 @@ namespace NuGet.Commands {
             _apiKey = Arguments[1];
 
             var client = new HttpClient();
+            
 
             if (String.IsNullOrEmpty(Source)) {
                 throw new CommandLineException(NuGetResources.PushCommandNoSourceError);
@@ -99,11 +102,23 @@ namespace NuGet.Commands {
         private void PublishPackage(string id, string version) {
             Console.WriteLine(NuGetResources.PushCommandPublishingPackage, id, version);
 
-            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _PublichPackageService, _apiKey, id, version));
+            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, _PublichPackageService));
 
             var request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = "GET";
+            request.ContentType = "application/json";
+            request.Method = "POST";
             request.UserAgent = _userAgent;
+
+            using (Stream requestStream = request.GetRequestStream()) {
+                var data = new PublishData {
+                    Key = _apiKey,
+                    Id = id,
+                    Version = version
+                };
+
+                var jsonSerializer = new DataContractJsonSerializer(typeof(PublishData));
+                jsonSerializer.WriteObject(requestStream, data);
+            }
 
             var response = SafeGetResponse(request);
 
@@ -139,6 +154,17 @@ namespace NuGet.Commands {
             catch (WebException e) {
                 return e.Response.ResponseUri.ToString(); ;
             }
+        }
+
+        public class PublishData {
+            [DataMember(Name = "key")]
+            public string Key { get; set; }
+
+            [DataMember(Name = "id")]
+            public string Id { get; set; }
+
+            [DataMember(Name = "version")]
+            public string Version { get; set; }
         }
     }
 }
