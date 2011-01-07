@@ -33,7 +33,7 @@ namespace NuGet.OutputWindowConsole {
 
             var console = new OutputConsole(outputWindow, vsUIShell);
             var hostProvider = GetPowerShellHostProvider();
-            console.Host = hostProvider.CreateHost(console, async: false);
+            console.Host = hostProvider.CreateHost(console, @async: false);
 
             return console;
         }
@@ -42,7 +42,7 @@ namespace NuGet.OutputWindowConsole {
             // The PowerConsole design enables multiple hosts (PowerShell, Python, Ruby)
             // For the Output window console, we're only interested in the PowerShell host. 
             // Here we filter out the the PowerShell host provider based on its name.
-            
+
             // The PowerShell host provider name is defined in PowerShellHostProvider.cs
             const string PowerShellHostProviderName = "NuGetConsole.Host.PowerShell";
 
