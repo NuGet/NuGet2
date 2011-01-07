@@ -156,6 +156,7 @@ namespace NuGet.Commands {
             }
         }
 
+        [DataContract]
         public class PublishData {
             [DataMember(Name = "key")]
             public string Key { get; set; }
