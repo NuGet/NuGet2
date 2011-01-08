@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using Microsoft.PowerShell;
+using NuGet;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
@@ -47,6 +48,26 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 historyInfo.Properties.Add(new PSNoteProperty("StartExecutionTime", startExecutionTime), true);
                 historyInfo.Properties.Add(new PSNoteProperty("EndExecutionTime", endExecutionTime), true);
                 host.Invoke("$input | Add-History", historyInfo, outputResults: false);
+            }
+        }
+
+        public static void ExecuteScript(this PowerShellHost host, string installPath, string scriptPath, IPackage package) {
+            string fullPath = Path.Combine(installPath, scriptPath);
+            if (File.Exists(fullPath)) {
+                string folderPath = Path.GetDirectoryName(fullPath);
+
+                host.Invoke(
+                   "$__pc_args=@(); $input|%{$__pc_args+=$_}; & '" + fullPath + "' $__pc_args[0] $__pc_args[1] $__pc_args[2]; Remove-Variable __pc_args -Scope 0",
+                   new object[] { installPath, folderPath, package},
+                   outputResults: true);
+            }
+        }
+
+        public static void AddPathToEnvironment(this PowerShellHost host, string path) {
+            if (Directory.Exists(path)) {
+                string environmentPath = Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.Process);
+                environmentPath = environmentPath + ";" + path;
+                Environment.SetEnvironmentVariable("path", environmentPath, EnvironmentVariableTarget.Process);
             }
         }
     }

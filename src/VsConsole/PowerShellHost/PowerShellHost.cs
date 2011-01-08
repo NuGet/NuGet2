@@ -23,6 +23,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private MyHost _myHost;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
+        private readonly IVsPackageManagerFactory _packageManagerFactory;
 
         protected PowerShellHost(IConsole console, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -33,6 +34,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             // TODO: Take these as ctor arguments
             _packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
             _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
+            _packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
 
             _name = name;
             _privateData = privateData;
@@ -44,6 +46,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             private set;
         }
 
+        /// <summary>
+        /// Doing all necessary initialization works before the console accepts user inputs
+        /// </summary>
         public void Initialize() {
             // we setup the runspace here, rather than loading it on-demand. This is so that we can
             // load user profile scripts before the command prompt shows up. It also helps with 
@@ -53,10 +58,26 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             if (successful) {
                 DisplayDisclaimerAndHelpText();
                 LoadProfilesIntoRunspace(_myRunSpace);
+
+                ExecuteInitScripts();
+                _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
             }
             else {
                 IsCommandEnabled = false;
                 DisplayGroupPolicyError();
+            }
+        }
+
+        private void ExecuteInitScripts() {
+            if (_solutionManager.IsSolutionOpen) {
+                var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
+                var localRepository = packageManager.LocalRepository;
+                foreach (var package in localRepository.GetPackages()) {
+                    string installPath = packageManager.PathResolver.GetInstallPath(package);
+
+                    this.AddPathToEnvironment(Path.Combine(installPath, "tools"));
+                    this.ExecuteScript(installPath, "tools\\init.ps1", package);
+                }
             }
         }
 
@@ -103,7 +124,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
 
             DTE dte = ServiceLocator.GetInstance<DTE>();
-            IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
 
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
             initialSessionState.Variables.Add(
@@ -111,7 +131,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
             initialSessionState.Variables.Add(
-                new SessionStateVariableEntry("packageManagerFactory", packageManagerFactory, "Package Manager Factory",
+                new SessionStateVariableEntry("packageManagerFactory", _packageManagerFactory, "Package Manager Factory",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
             _myHost = new MyHost(this, _name, _privateData);

@@ -138,46 +138,12 @@ function GetProjectNames() {
 $solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
 
 $solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
-    ExecuteInitScripts
     UpdateWorkingDirectory
 })
 
 $solutionEvents.add_AfterClosing([EnvDTE._dispSolutionEvents_AfterClosingEventHandler]{
     UpdateWorkingDirectory
 })
-
-function AddToolsFolderToEnv([string]$rootPath) {
-    # add tools path to the environment
-    $toolsPath = (Join-Path $rootPath 'tools')
-    if (Test-Path $toolsPath) {
-        if (!$env:path.EndsWith(';')) {
-            $toolsPath = ';' + $toolsPath
-        }
-        # add the tools folder to the environment path
-        $env:path = $env:path + $toolsPath
-    }
-}
-
-function ExecuteScript([string]$rootPath, [string]$scriptFile, $package) {
-    $fullPath = (Join-Path $rootPath $scriptFile)
-    if (Test-Path $fullPath) {
-        $folder = Split-Path $fullPath
-        & $fullPath $rootPath $folder $package
-    }
-}
-
-function ExecuteInitScripts() {
-    $packageManager = $packageManagerFactory.CreatePackageManager()
-    $repository = $packageManager.LocalRepository
-    $localPackages = $repository.GetPackages()
-
-    $localPackages | ForEach-Object {
-        $path = $packageManager.PathResolver.GetInstallPath($_)
-
-        AddToolsFolderToEnv $path
-        ExecuteScript $path "tools\init.ps1" $_
-    }
-}
 
 function UpdateWorkingDirectory {
     $SolutionDir = if($DTE -and $DTE.Solution -and $DTE.Solution.FullName) { Split-Path $DTE.Solution.FullName -Parent }
@@ -193,8 +159,6 @@ function IsSolutionOpen() {
    return ($dte -and $dte.Solution -and $dte.Solution.IsOpen)
 }
 
-# execute init.ps1 files in the current solution
 if (IsSolutionOpen) {
-    ExecuteInitScripts
     UpdateWorkingDirectory
 }
