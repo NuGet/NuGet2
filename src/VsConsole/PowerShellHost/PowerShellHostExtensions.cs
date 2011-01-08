@@ -63,6 +63,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Usage", 
+            "CA1801:ReviewUnusedParameters", 
+            MessageId = "host",
+            Justification = "We want to make this as an extension method.")]
         public static void AddPathToEnvironment(this PowerShellHost host, string path) {
             if (Directory.Exists(path)) {
                 string environmentPath = Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.Process);
