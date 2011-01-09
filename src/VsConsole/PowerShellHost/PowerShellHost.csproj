@@ -37,6 +37,7 @@
     <Compile Include="..\Console\Utils\UtilityMethods.cs">
       <Link>Utils\UtilityMethods.cs</Link>
     </Compile>
+    <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
     <Compile Include="PowerShellHostExtensions.cs" />
     <Compile Include="PSTypeWrapper.cs" />

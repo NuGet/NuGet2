@@ -134,3 +134,28 @@ function Test-TabExpansionDoNotSuggestGetProjectName() {
     # Assert
     Assert-Null $suggestions
 }
+
+function Test-CustomTabExpansion {
+    function global:Foo($Name) {
+        "Hello $Name"
+    }
+
+    # Arrange    
+    Register-TabExpansion Foo @{ 'Name' = { 'David Fowler', 'John Doe', "John's Hide Out", "Woah's", "A`tB", "G" } }
+
+    # Act
+    $suggestions = TabExpansion 'Foo ' ' '
+
+    # Assert
+    Assert-NotNull $suggestions
+    Assert-AreEqual 6 $suggestions.Count
+    Assert-AreEqual "'A`tB'" $suggestions[0]
+    Assert-AreEqual "'David Fowler'" $suggestions[1]
+    Assert-AreEqual "G" $suggestions[2]
+    Assert-AreEqual "'John Doe'" $suggestions[3]
+    Assert-AreEqual "'John''s Hide Out'" $suggestions[4]
+    Assert-AreEqual "'Woah''s'" $suggestions[5]
+
+    # Remove the function from global scope
+    rm function:\Foo
+}

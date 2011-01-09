@@ -5,132 +5,168 @@ $ErrorActionPreference = "Stop"
 # This is so that we can distinguish it from $null, which has different semantics
 $NoResultValue = New-Object PSObject -Property @{ NoResult = $true }
 
-function NugetTabExpansion($line, $lastWord) {
-    $filter = $lastWord.Trim()
-    
-    if ($filter.StartsWith('-')) {
-       # if this is a parameter, let default PS tab expansion supply the list of parameters
-       return (DefaultTabExpansion $line $lastWord)
-    }
-    
-    # remove double quotes around last word
-    $trimmedFilter = $filter.Trim( '"', "'" )
-    if ($trimmedFilter.length -lt $filter.length) {
-        $filter = $trimmedFilter
-        $addQuote = $true
-    }
-    
-    $tokens = $line.Split(@(' '), 'RemoveEmptyEntries')
-    if (!$filter) {
-        $tokens = $tokens + $filter
-    }
+# Hashtable that stores tab expansion definitions
+$TabExpansionCommands = @{}
 
-    if ($tokens.length -gt 2) {
-        $secondLastToken = $tokens[-2]
-    }
-    else {
-        $secondLastToken = ''
-    }
-    
-    switch ($tokens[0]) {
-        'New-Package' {
-            $choices = TabExpansionForNewPackage $secondLastToken $tokens.length
-        }
-    
-        'Install-Package' {
-            $choices = TabExpansionForAddPackage $line $secondLastToken $tokens.length $filter
-        }
-
-        'Uninstall-Package' {
-            $choices = TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
-        }
-
-        'Update-Package' {
-            $choices = TabExpansionForRemovePackage $secondLastToken $tokens.length $filter
-        }
-        
-        'Get-Project' {
-            $choices = TabExpansionForGetProject $secondLastToken
-        }
-        
-        default {
-            $choices = $NoResultValue
-        }
-    }
-    
-    if ($choices -eq $NoResultValue) {
-        return $choices
-    }
-    elseif ($choices) {
-        # Return all the choices, do some filtering based on the last word, sort them and wrap each suggestion in a double quote if necessary
-        $choices | 
-            Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | 
-            Sort-Object |
-            ForEach-Object { if ($addQuote -or $_.IndexOf(' ') -gt -1) { "'" + ($_ -replace "'", "''") + "'"} else { $_ } }
-    }
-    else {
-        # return null here will tell the console not to show system file paths
-        return $null
-    }
+# This function allows 3rd parties to enable intellisense for arbitrary functions
+function Register-TabExpansion {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $true)]
+        [string]$Name,
+        [parameter(Mandatory = $true)]
+        $Definition
+    )
+ 
+    $TabExpansionCommands[$Name] = $Definition 
 }
 
-function TabExpansionForNewPackage([string]$secondLastWord, [int]$tokenCount) {
-    if (($secondLastWord -eq '-project') -or 
-            ($tokenCount -eq 2 -and !$secondLastWord.StartsWith('-'))) {
-        GetProjectNames
-    }
-    else {
-        return $NoResultValue
-    }
-}
-
-function TabExpansionForAddPackage([string]$line, [string]$secondLastWord, [int]$tokenCount, [string]$filter) {
-    if (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        # Determine if a Source param is present
-        $source = ""
-        if ($line -match "-Source(\s+)([^\s]+)") {
-            $source = $matches[2]
-            Find-Package -Remote -Source $source -Filter $filter -ea 'SilentlyContinue' | Group-Object ID | ForEach-Object { $_.Name }
+Register-TabExpansion 'Install-Package' @{
+    'Id' = {
+        param($context)
+        $filter = $context.Id
+        $source = $context.Source
+ 
+        if($source) {
+            $packages = Find-Package -Remote -Source $source -Filter $filter -ea 'SilentlyContinue'
         }
         else {
-            Find-Package -Remote -Filter $filter -ea 'SilentlyContinue' | Group-Object ID | ForEach-Object { $_.Name }
+            $packages = Find-Package -Remote -Filter $filter -ea 'SilentlyContinue'
         }
+
+        NormalizePackages $packages
     }
-    elseif (($secondLastWord -eq '-project') -or 
-            ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
+    'Project' = {
         GetProjectNames
-    }
-    else {
-        return $NoResultValue
     }
 }
 
-function TabExpansionForRemovePackage([string]$secondLastWord, [int]$tokenCount, [string]$filter) {
-    if (($secondLastWord -eq '-id') -or ($secondLastWord -eq '')) {
-        if (IsSolutionOpen) {
-            (Find-Package -Filter $filter -ea 'SilentlyContinue') | Group-Object ID | ForEach-Object { $_.Name }
+
+$localPackagesTabExpansion = @{
+    'Id' = {
+        param($context)        
+        NormalizePackages (Find-Package -Filter $context.Id -ea 'SilentlyContinue')
+    }
+    'Project' = {
+        GetProjectNames
+    }
+}
+
+Register-TabExpansion 'Uninstall-Package' $localPackagesTabExpansion
+Register-TabExpansion 'Update-Package' $localPackagesTabExpansion
+Register-TabExpansion 'New-Package' @{ 'Project' = { GetProjectNames } }
+Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
+
+
+function GetProjectNames {
+    Get-Project -All | Select -ExpandProperty Name
+}
+
+function NormalizePackages($packages) {
+    $packages | Group-Object Id | Select -ExpandProperty Name
+}
+
+function NugetTabExpansion($line, $lastWord) {
+    # Parse the command
+    $parsedCommand = [NuGetConsole.Host.PowerShell.CommandParser]::Parse($line)
+
+    # Get the command definition
+    $definition = $TabExpansionCommands[$parsedCommand.CommandName]
+
+    # See if we've registered a command for intellisense
+    if($definition) {
+        # Get the command that we're trying to show intellisense for
+        $command = Get-Command $parsedCommand.CommandName -ErrorAction SilentlyContinue
+
+        if($command) {
+            # We're trying to find out what parameter we're trying to show intellisense for based on 
+            # either the name of the an argument or index e.g. "Install-Package -Id " "Install-Package "
+            
+            $argument = $parsedCommand.CompletionArgument
+            $index = $parsedCommand.CompletionIndex
+
+            if(!$argument -and $index -ne $null) {                
+                do {
+                    # Get the argument name for this index
+                    $argument = GetArgumentName $command $index
+
+                    if(!$argument) {
+                        break
+                    }
+                    
+                    # If there is already a value for this argument, then check the next one index.
+                    # This is so we don't show duplicate intellisense e.g. "Install-Package -Id elmah {tab}".
+                    # The above statement shouldn't show intellisense for id since it already has a value
+                    if($parsedCommand.Arguments[$argument] -eq $null) {
+                        $value = $parsedCommand.Arguments[$index]
+                        if(!$value) {
+                            $value = ''   
+                        }
+                        $parsedCommand.Arguments[$argument] = $value
+                        break
+                    }
+                    else {
+                        $index++
+                    }
+
+                } while($true);
+                
+            }
+
+            if($argument) {
+                # If the argument is a true argument of this command and not a partial argument
+                # and there is a non null value (empty is valid), then we execute the script block
+                # for this parameter (if specified)
+                $action = $definition[$argument]
+                $argumentValue = $parsedCommand.Arguments[$argument]
+                        
+                if($command.Parameters[$argument] -and 
+                   $argumentValue -ne $null -and
+                   $action) {
+                    $context = New-Object PSObject -Property $parsedCommand.Arguments
+
+                    $results = @(& $action $context)
+
+                    if($results.Count -eq 0) {
+                        return $null
+                    }
+
+                    # Use the argument value to filter results
+                    $results = $results | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") } | Sort-Object
+
+                    return NormalizeResults $results
+                }
+            }
         }
-    }
-    elseif (($secondLastWord -eq '-project') -or 
-            ($tokenCount -eq 3 -and !$secondLastWord.StartsWith('-'))) {
-        GetProjectNames
-    }
-    else {
-        return $NoResultValue
+    } 
+
+    return $NoResultValue
+}
+
+function NormalizeResults($results) {
+    $results | %{
+        $result = $_
+
+        # Add quotes to a result if it contains whitespace or a quote
+        $addQuotes = $result.Contains(" ") -or $result.Contains("'") -or $result.Contains("`t")
+        
+        if($addQuotes) {
+            $result = "'" + $result.Replace("'", "''") + "'"
+        }
+
+        return $result
     }
 }
 
-function TabExpansionForGetProject([string]$secondLastWord) {
-    if (($secondLastWord -eq '-name') -or ($secondLastWord -eq '')) {
-        GetProjectNames
-    }
-    else {
-        return $NoResultValue
-    }
-}
+function GetArgumentName($command, $index) {    
+    # Next we try to find the parameter name for the parameter index (in the default parameter set)
+    $parameterSet = $Command.DefaultParameterSet
 
-function GetProjectNames() {
-    (Get-Project -All) | ForEach-Object { $_.Name }
+    if(!$parameterSet) {
+        $parameterSet = '__AllParameterSets'
+    }
+
+    return $command.Parameters.Values | ?{ $_.ParameterSets[$parameterSet].Position -eq $index } | Select -ExpandProperty Name
 }
 
 # Hook up Solution events

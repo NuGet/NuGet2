@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace NuGetConsole.Host.PowerShell {
-    public class Command {
-        public Dictionary<object, string> Arguments { get; set; }
-        public int? CompletionIndex { get; set; }
-        public string CompletionArgument { get; set; }
-        public string CommandName { get; set; }
-
-        public Command() {
-            Arguments = new Dictionary<object, string>();
-        }
-    }
-
+    /// <summary>
+    /// A simple parser used for parsing commands that require completion (intellisense).
+    /// </summary>
     public class CommandParser {
         private int _index;
         private readonly string _command;
@@ -44,6 +35,8 @@ namespace NuGetConsole.Host.PowerShell {
         private Command ParseCore() {
             int positionalArgumentIndex = 0;
             var parsedCommand = new Command();
+
+            // Get the command name
             parsedCommand.CommandName = ParseUntilWhitespace();
 
             while (!Done) {
@@ -53,25 +46,31 @@ namespace NuGetConsole.Host.PowerShell {
                     argument = ParseUntilWhitespace();
                 }
 
-                if (argument.StartsWith("-")) {
+                if (argument.StartsWith("-", StringComparison.Ordinal)) {
+                    // Trim the -
                     argument = argument.Substring(1);
 
                     if (!String.IsNullOrEmpty(argument)) {
+                        // Parse the argument value if any
                         if (SkipWhitespace() && CurrentChar != '-') {
                             parsedCommand.Arguments[argument] = ParseUntilWhitespace();
                         }
                         else {
                             parsedCommand.Arguments[argument] = null;
                         }
+
                         parsedCommand.CompletionArgument = argument;
                     }
                     else {
+                        // If this was an empty argument then we aren't trying to complete anything
                         parsedCommand.CompletionArgument = null;
                     }
 
+                    // Reset the completion index if we're completing an argument (these 2 properties are mutually exclusive)
                     parsedCommand.CompletionIndex = null;
                 }
                 else {
+                    // Reset the completion argument
                     parsedCommand.CompletionArgument = null;
                     parsedCommand.CompletionIndex = positionalArgumentIndex;
                     parsedCommand.Arguments[positionalArgumentIndex++] = argument;

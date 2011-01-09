@@ -58,7 +58,7 @@ FormatsToProcess = @('Scripts\Types.format.ps1xml')
 NestedModules = @('NuGet.Cmdlets.dll')
 
 # Functions to export from this module
-FunctionsToExport = @('NugetTabExpansion')
+FunctionsToExport = @('NugetTabExpansion', 'Register-TabExpansion')
 
 # Cmdlets to export from this module
 CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
