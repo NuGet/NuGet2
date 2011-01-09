@@ -142,3 +142,19 @@ function Get-VSComponentModel
 
 # Set initial directory
 Set-Location "$env:USERPROFILE"
+
+# Backup the original tab expansion function
+if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
+    Rename-Item Function:\TabExpansion DefaultTabExpansion
+}
+
+function TabExpansion($line, $lastWord) {
+	$nugetSuggestions = NuGetTabExpansion $line $lastWord
+
+	if ($nugetSuggestions.NoResult) {
+		return DefaultTabExpansion $line $lastWord
+	}
+	else {
+		return $nugetSuggestions
+	}
+}

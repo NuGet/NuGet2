@@ -114,3 +114,23 @@ function Test-TabExpansionForUpdatePackageShowSuggestionsForProjectNames {
         Assert-AreEqual $sortedProjectNames[$i] $suggestions[$i]
     }
 }
+
+# Tests to make sure private functions & cmdlets do not show up in the intellisense
+
+function Test-TabExpansionDoNotSuggestFindPackage() {
+    
+    # Act
+    $suggestions = TabExpansion 'Find-Pac' 'Find-Pac'
+
+    # Assert
+    Assert-Null $suggestions
+}
+
+function Test-TabExpansionDoNotSuggestGetProjectName() {
+    
+    # Act
+    $suggestions = TabExpansion 'GetProjectN' 'GetProjectN'
+
+    # Assert
+    Assert-Null $suggestions
+}

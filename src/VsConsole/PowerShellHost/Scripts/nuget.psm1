@@ -3,14 +3,9 @@ $ErrorActionPreference = "Stop"
 
 # This object reprents the result value for tab expansion functions when no result is returned.
 # This is so that we can distinguish it from $null, which has different semantics
-$NoResultValue = New-Object 'System.Object'
+$NoResultValue = New-Object PSObject -Property @{ NoResult = $true }
 
-# Backup the original tab expansion function
-if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
-    Rename-Item Function:\TabExpansion DefaultTabExpansion
-}
-
-function TabExpansion($line, $lastWord) {
+function NugetTabExpansion($line, $lastWord) {
     $filter = $lastWord.Trim()
     
     if ($filter.StartsWith('-')) {
@@ -63,11 +58,10 @@ function TabExpansion($line, $lastWord) {
         }
     }
     
-	if ($choices -eq $NoResultValue) {
-        # Fallback to the default tab expansion
-        DefaultTabExpansion $line $lastWord 
-	}
-	elseif ($choices) {
+    if ($choices -eq $NoResultValue) {
+        return $choices
+    }
+    elseif ($choices) {
         # Return all the choices, do some filtering based on the last word, sort them and wrap each suggestion in a double quote if necessary
         $choices | 
             Where-Object { $_.StartsWith($filter, "OrdinalIgnoreCase") } | 
