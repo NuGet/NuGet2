@@ -11,7 +11,7 @@
 #>
 function Clear-Host
 {
-	$host.PrivateData.ClearHost()
+    $host.PrivateData.ClearHost()
 }
 
 <#
@@ -149,12 +149,12 @@ if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
 }
 
 function TabExpansion($line, $lastWord) {
-	$nugetSuggestions = NuGetTabExpansion $line $lastWord
+    $nugetSuggestions = NuGetTabExpansion $line $lastWord
 
-	if ($nugetSuggestions.NoResult) {
-		return DefaultTabExpansion $line $lastWord
-	}
-	else {
-		return $nugetSuggestions
-	}
+    if ($nugetSuggestions.NoResult) {
+        return DefaultTabExpansion $line $lastWord
+    }
+    else {
+        return $nugetSuggestions
+    }
 }
