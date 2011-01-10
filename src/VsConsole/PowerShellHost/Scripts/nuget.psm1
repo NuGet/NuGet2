@@ -60,6 +60,7 @@ Register-TabExpansion 'Update-Package' @{
 }
 
 Register-TabExpansion 'New-Package' @{ 'Project' = { GetProjectNames } }
+Register-TabExpansion 'Add-BindingRedirect' @{ 'Project' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
 
 function GetPackages($context) { 
