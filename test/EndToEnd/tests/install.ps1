@@ -135,8 +135,8 @@ function Test-InstallPackageInvokeInstallScriptAndInitScript {
     # Assert
 
     # This asserts init.ps1 gets called
-    Assert-AreEqual "Hello world." (Get-World)
+    Assert-NotNull (Get-ChildItem function:\Get-World)
 
     # This asserts install.ps1 gets called
-    Assert-NotNull $p.Object.References.Item("System.Windows.Forms")
+    Assert-Reference $p System.Windows.Forms
 }

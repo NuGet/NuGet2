@@ -60,5 +60,5 @@ function Test-UninstallPackageInvokeUninstallScript {
     # Assert
 
     # This asserts uninstall.ps1 gets called
-    Assert-AreEqual "This is a test function." (TestFunction)
+    Assert-NotNull (Get-ChildItem function:\TestFunction)
 }
