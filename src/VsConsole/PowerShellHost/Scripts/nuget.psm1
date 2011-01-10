@@ -166,7 +166,7 @@ function NugetTabExpansion($line, $lastWord) {
                     }
 
                     # Use the argument value to filter results
-                    $results = $results | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") } | Sort-Object
+                    $results = $results | %{ $_.ToString() } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") } | Sort-Object
 
                     return NormalizeResults $results
                 }
