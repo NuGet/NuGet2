@@ -18,7 +18,7 @@ namespace NuGetConsole.Host.PowerShell {
                 return _index < _command.Length ? _command[_index] : '\0';
             }
         }
-        
+
         private bool Done {
             get {
                 return _index >= _command.Length;
@@ -26,6 +26,9 @@ namespace NuGetConsole.Host.PowerShell {
         }
 
         public static Command Parse(string command) {
+            if (command == null) {
+                throw new ArgumentNullException("command");
+            }
             return new CommandParser(command).ParseCore();
         }
 
@@ -36,12 +39,10 @@ namespace NuGetConsole.Host.PowerShell {
             // Get the command name
             parsedCommand.CommandName = ParseToken();
 
-            while (!Done) {
-                string argument = null;
+            while (!Done) {                
+                SkipWhitespace();
 
-                if (SkipWhitespace()) {
-                    argument = ParseToken();
-                }
+                string argument = ParseToken();
 
                 if (argument.StartsWith("-", StringComparison.Ordinal)) {
                     // Trim the -
