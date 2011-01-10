@@ -72,6 +72,10 @@
       <Project>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</Project>
       <Name>NuGet</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Test.Utility\Test.Utility.csproj">
+      <Project>{F016882A-C798-4446-BB75-D3C393A38B32}</Project>
+      <Name>Test.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

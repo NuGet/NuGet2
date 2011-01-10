@@ -8,38 +8,47 @@ namespace NuGet {
             basePath = basePath ?? String.Empty;
             string pathFromBase = Path.Combine(basePath, source.TrimStart(Path.DirectorySeparatorChar));
 
-            if (pathFromBase.Contains("*")) {
+            if (!IsAbsolutePathFilter(pathFromBase)) {
                 return GetPathSearchFilter(pathFromBase);
             }
             else {
                 pathFromBase = Path.GetFullPath(pathFromBase.TrimStart(Path.DirectorySeparatorChar));
                 string directory = Path.GetDirectoryName(pathFromBase);
                 string searchFilter = Path.GetFileName(pathFromBase);
-                return new PathSearchFilter(NormalizeSearchDirectory(directory), NormalizeSearchFilter(searchFilter), SearchOption.TopDirectoryOnly);
+                return new PathSearchFilter {
+                    SearchDirectory = NormalizeSearchDirectory(directory),
+                    SearchPattern = NormalizeSearchFilter(searchFilter),
+                    SearchOption = SearchOption.TopDirectoryOnly,
+                    IsAbsolutePathFilter = true
+                };
             }
         }
 
         private static PathSearchFilter GetPathSearchFilter(string path) {
+            Debug.Assert(!IsAbsolutePathFilter(path));
+
+            var searchFilter = new PathSearchFilter();
             int recursiveSearchIndex = path.IndexOf("**", StringComparison.OrdinalIgnoreCase);
+
             if (recursiveSearchIndex != -1) {
                 // Recursive searches are of the format /foo/bar/**/*[.abc]
                 string searchPattern = path.Substring(recursiveSearchIndex + 2).TrimStart(Path.DirectorySeparatorChar);
                 string searchDirectory = recursiveSearchIndex == 0 ? "." : path.Substring(0, recursiveSearchIndex - 1);
-                return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern), SearchOption.AllDirectories);
+                
+                searchFilter.SearchDirectory = NormalizeSearchDirectory(searchDirectory);
+                searchFilter.SearchPattern = NormalizeSearchFilter(searchPattern);
+                searchFilter.SearchOption = SearchOption.AllDirectories;
             }
             else {
-                string searchDirectory;
-                searchDirectory = Path.GetDirectoryName(path);
-                if (String.IsNullOrEmpty(searchDirectory)) {
-                    // Path starts with a wildcard e.g. *, *.foo, *foo, foo*
-                    // Set the current directory to be the search path
-                    searchDirectory = ".";
-                }
+                string searchDirectory = Path.GetDirectoryName(path);
                 string searchPattern = Path.GetFileName(path);
 
-                return new PathSearchFilter(NormalizeSearchDirectory(searchDirectory), NormalizeSearchFilter(searchPattern),
-                    SearchOption.TopDirectoryOnly);
+                searchFilter.SearchDirectory = NormalizeSearchDirectory(searchDirectory);
+                searchFilter.SearchPattern = NormalizeSearchFilter(searchPattern);
+                searchFilter.SearchOption = SearchOption.TopDirectoryOnly;
             }
+
+            return searchFilter;
         }
 
         /// <summary>
@@ -59,7 +68,7 @@ namespace NuGet {
             string packagePath = null;
             int searchWildCard = searchString.IndexOf("*", StringComparison.OrdinalIgnoreCase);
 
-            if ((searchWildCard == -1) && actualFileName.Equals(Path.GetFileName(searchString), StringComparison.OrdinalIgnoreCase)) {
+            if (IsAbsolutePathFilter(searchString) && actualFileName.Equals(Path.GetFileName(searchString), StringComparison.OrdinalIgnoreCase)) {
                 // If the search path looks like an absolute path to a file, then 
                 // (a) If the target path shares the same extension, copy it
                 // e.g. <file src="ie\css\style.css" target="Content\css\ie.css" /> --> Content\css\ie.css
@@ -102,6 +111,13 @@ namespace NuGet {
 
         private static string NormalizeSearchFilter(string filter) {
             return String.IsNullOrEmpty(filter) ? "*" : filter;
+        }
+
+        /// <summary>
+        /// Returns true if the path does not contain any wildcards.
+        /// </summary>
+        private static bool IsAbsolutePathFilter(string filter) {
+            return filter.IndexOf('*') == -1;
         }
     }
 }

@@ -258,4 +258,7 @@
   <data name="DuplicateDependenciesDefined" xml:space="preserve">
     <value>'{0}' already has a dependency defined for '{1}'.</value>
   </data>
+  <data name="PackageAuthoring_FileNotFound" xml:space="preserve">
+    <value>File not found: '{0}'.</value>
+  </data>
 </root>

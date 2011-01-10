@@ -331,6 +331,66 @@ namespace NuGet.Test.Integration.PathResolver {
             Assert.AreEqual(packageBuilder.Files.ElementAt(1).Path, @"content\styles\css\style\style.css");
         }
 
+        /// <summary>
+        /// Source: \style\ie.css
+        /// Search: \style\main.css
+        /// Target: 
+        /// Expected: Exception thrown stating file \style\main.css was not found.
+        /// </summary>
+        [TestMethod]
+        public void MissingFileThrowsAnException() {
+            // Arrange
+            string search = @"style\main.css";
+            string target = String.Empty;
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("style",
+                                            new File("ie.css")
+                                           ));
+            // Act and Assert
+            ExceptionAssert.Throws<FileNotFoundException>(() => new PackageBuilder(manifest, root), @"File not found: 'style\main.css'.");
+        }
+
+        /// <summary>
+        /// Source: main.txt
+        /// Search: main.css
+        /// Target: 
+        /// Expected: Exception thrown stating file main.css was not found.
+        /// </summary>
+        [TestMethod]
+        public void MissingFileAtRootThrowsAnException() {
+            // Arrange
+            string search = @"main.css";
+            string target = String.Empty;
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new File("main.txt"));
+
+            // Act and Assert
+            ExceptionAssert.Throws<FileNotFoundException>(() => new PackageBuilder(manifest, root), @"File not found: 'main.css'.");
+        }
+
+        /// <summary>
+        /// Source: css\main.css, css\main.txt
+        /// Search: css\*.jpg
+        /// Target: 
+        /// </summary>
+        [TestMethod]
+        public void WildcardSearchWithNoResultingItemsDoesNotThrow() {
+            // Arrange
+            string search = @"css\*.jpg";
+            string target = String.Empty;
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("css", 
+                                                new File("main.css"),
+                                                new File("main.txt")));
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.IsNotNull(package);
+            Assert.IsFalse(package.Files.Any());
+        }
+
         private Stream GetManifest(string search, string target) {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>

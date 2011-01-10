@@ -11,7 +11,7 @@ namespace NuGet.Test {
         public void PathWithLocalFileReturnSingleResult() {
             // Arrange
             var path = "foo.txt";
-            var expectedFilter = new PathSearchFilter(_basePath, "foo.txt", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "foo.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
             PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -24,7 +24,7 @@ namespace NuGet.Test {
         public void PathWithLocalFileAndLeadingDirectorySepReturnSingleResult() {
             // Arrange
             var path = "\\foo.txt";
-            var expectedFilter = new PathSearchFilter(_basePath, "foo.txt", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "foo.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
             PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -38,7 +38,7 @@ namespace NuGet.Test {
             // Arrange
             var path = "..\\..\\foo.txt";
             var directory = Path.GetDirectoryName(Path.GetDirectoryName(_basePath));
-            var expectedFilter = new PathSearchFilter(directory, "foo.txt", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = directory, SearchPattern = "foo.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
             PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -52,7 +52,7 @@ namespace NuGet.Test {
         public void RootedFilePathReturnSingleResult() {
             // Arrange
             var path = "Y:\\foo\\bar.txt";
-            var expectedFilter = new PathSearchFilter("Y:\\foo", "bar.txt", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = "Y:\\foo", SearchPattern = "bar.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
             PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -65,7 +65,7 @@ namespace NuGet.Test {
         public void PathWithSingleWildCard() {
             // Arrange
             var path = "*";
-            var expectedFilter = new PathSearchFilter(_basePath, "*", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -78,7 +78,7 @@ namespace NuGet.Test {
         public void PathWithWildCardFileName() {
             // Arrange
             var path = "*.foo";
-            var expectedFilter = new PathSearchFilter(_basePath, "*.foo", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*.foo", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -91,7 +91,7 @@ namespace NuGet.Test {
         public void PathWithWildCardExtension() {
             // Arrange
             var path = "jquery.*";
-            var expectedFilter = new PathSearchFilter(_basePath, "jquery.*", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "jquery.*", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -104,7 +104,7 @@ namespace NuGet.Test {
         public void PathWithWildCardFileNameAndExtension() {
             // Arrange
             var path = "*.*";
-            var expectedFilter = new PathSearchFilter(_basePath, "*.*", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*.*", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -117,7 +117,7 @@ namespace NuGet.Test {
         public void PathWithLeadingDirectorySepDirectoryAndWildCardFileNameAndExtension() {
             // Arrange
             var path = "\\foo\\*";
-            var expectedFilter = new PathSearchFilter(Path.Combine(_basePath, "foo"), "*", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "*", SearchOption = SearchOption.TopDirectoryOnly };
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -130,7 +130,7 @@ namespace NuGet.Test {
         public void PathWithDirectoryAndWildCardFileNameAndExtension() {
             // Arrange
             var path = "foo\\*";
-            var expectedFilter = new PathSearchFilter(Path.Combine(_basePath, "foo"), "*", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "*", SearchOption = SearchOption.TopDirectoryOnly };
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -143,7 +143,7 @@ namespace NuGet.Test {
         public void PathWithDirectoryAndWildCardFileName() {
             // Arrange
             var path = "\\bar\\foo\\*.baz";
-            var expectedFilter = new PathSearchFilter(Path.Combine(_basePath, "bar\\foo"), "*.baz", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "bar\\foo"), SearchPattern = "*.baz", SearchOption = SearchOption.TopDirectoryOnly };
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -157,7 +157,7 @@ namespace NuGet.Test {
             // Arrange
             var path = "..\\..\\bar\\baz\\*.foo";
             var directory = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(_basePath)), "bar\\baz");
-            var expectedFilter = new PathSearchFilter(directory, "*.foo", SearchOption.TopDirectoryOnly);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = directory, SearchPattern = "*.foo", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -170,7 +170,7 @@ namespace NuGet.Test {
         public void PathWithRecursiveWildCardSearch() {
             // Arrange
             var path = @"foo\**\.bar";
-            var expectedFilter = new PathSearchFilter(Path.Combine(_basePath, "foo"), ".bar", SearchOption.AllDirectories);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = ".bar", SearchOption = SearchOption.AllDirectories };
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -183,7 +183,7 @@ namespace NuGet.Test {
         public void PathWithRecursiveWildCardSearchContainingDirectoryStructure() {
             // Arrange
             var path = @"foo\**\baz\.bar";
-            var expectedFilter = new PathSearchFilter(Path.Combine(_basePath, "foo"), "baz\\.bar", SearchOption.AllDirectories);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "baz\\.bar", SearchOption = SearchOption.AllDirectories };
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -196,7 +196,7 @@ namespace NuGet.Test {
         public void PathWithRecursiveWildCardSearchContainingNoExtension() {
             // Arrange
             var path = @"foo\**\*";
-            var expectedFilter = new PathSearchFilter(Path.Combine(_basePath, "foo"), "*", SearchOption.AllDirectories);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "*", SearchOption = SearchOption.AllDirectories };
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -209,7 +209,7 @@ namespace NuGet.Test {
         public void PathWithRecursiveWildCardSearchContainingNoLeadingDirectory() {
             // Arrange
             var path = @"**\*.txt";
-            var expectedFilter = new PathSearchFilter(_basePath, "*.txt", SearchOption.AllDirectories);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*.txt", SearchOption = SearchOption.AllDirectories }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -222,7 +222,7 @@ namespace NuGet.Test {
         public void PathWithOnlyRecursiveWildCardSearchChars() {
             // Arrange
             var path = @"**";
-            var expectedFilter = new PathSearchFilter(_basePath, "*", SearchOption.AllDirectories);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*", SearchOption = SearchOption.AllDirectories }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -235,7 +235,7 @@ namespace NuGet.Test {
         public void PathWithInvalidRecursiveWildCardSearch() {
             // Arrange
             var path = @"**foo/bar";
-            var expectedFilter = new PathSearchFilter(_basePath, "foo/bar", SearchOption.AllDirectories);
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "foo/bar", SearchOption = SearchOption.AllDirectories }; ;
 
             // Act
             var searchFilter = PathResolver.ResolvePath(_basePath, path);
@@ -317,7 +317,7 @@ namespace NuGet.Test {
             var path = @"root\folder\sub-folder\somefile.txt";
             var basePath = "root";
             var targetPath = String.Empty;
-            
+
             // Act
             var result = PathResolver.ResolvePackagePath(@"folder\**", basePath, path, targetPath);
 
@@ -331,7 +331,7 @@ namespace NuGet.Test {
             var path = @"root\dir\subdir\pack.dll";
             var basePath = @"";
             var targetPath = @"lib\sl4";
-            
+
             // Act
             var result = PathResolver.ResolvePackagePath(@"root\dir\**", basePath, path, targetPath);
 
