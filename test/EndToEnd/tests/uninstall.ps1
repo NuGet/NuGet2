@@ -44,3 +44,21 @@ function Test-UninstallingPackageWithConfigTransformWhenConfigReadOnly {
     Assert-Null (Get-ProjectPackage $p1 elmah)
     Assert-Null (Get-SolutionPackage elmah)
 }
+
+function Test-UninstallPackageInvokeUninstallScript {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    Install-Package Moq -Project $p.Name -Source $context.RepositoryRoot
+    Uninstall-Package Moq -Project $p.Name
+
+    # Assert
+
+    # This asserts uninstall.ps1 gets called
+    Assert-AreEqual "This is a test function." (TestFunction)
+}

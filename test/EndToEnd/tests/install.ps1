@@ -120,3 +120,23 @@ function Test-PackageWithIncompatibleAssembliesDontMarkPackageAsInstalled {
     Assert-Null (Get-ProjectPackage $p BingMapAppSDK 1.0.1011.1716)
     Assert-SolutionPackage BingMapAppSDK 1.0.1011.1716
 }
+
+function Test-InstallPackageInvokeInstallScriptAndInitScript {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    Install-Package Moq -Project $p.Name -Source $context.RepositoryRoot
+
+    # Assert
+
+    # This asserts init.ps1 gets called
+    Assert-AreEqual "Hello world." (Get-World)
+
+    # This asserts install.ps1 gets called
+    Assert-NotNull $p.Object.References.Item("System.Windows.Forms")
+}
