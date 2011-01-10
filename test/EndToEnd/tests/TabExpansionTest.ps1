@@ -19,6 +19,16 @@ function Test-TabExpansionForInstallPackageShowSuggestionsForPackageIdWithFilter
     $suggestions | ForEach-Object { Assert-True $_.StartsWith('sql', 'OrdinalIgnoreCase') }
 }
 
+function Test-TabExpansionForInstallPackageSupportsVersion {
+    # Act
+    $suggestions = TabExpansion 'Install-Package Antlr -Version ' ''
+
+    # Assert
+    Assert-AreEqual 2 $suggestions.Count
+    Assert-AreEqual '3.1.1' $suggestions[0]
+    Assert-AreEqual '3.1.3.42154' $suggestions[1]
+}
+
 function Test-TabExpansionForInstallPackageShowSuggestionsForProjectName {
 
     # Arrange
@@ -136,15 +146,15 @@ function Test-TabExpansionDoNotSuggestGetProjectName() {
 }
 
 function Test-CustomTabExpansion {
+    # Arrange
     function global:Foo($Name) {
         "Hello $Name"
     }
 
-    # Arrange    
     Register-TabExpansion Foo @{ 'Name' = { 'David Fowler', 'John Doe', "John's Hide Out", "Woah's", "A`tB", "G" } }
 
     # Act
-    $suggestions = TabExpansion 'Foo ' ' '
+    $suggestions = TabExpansion 'Foo ' ''
 
     # Assert
     Assert-NotNull $suggestions
@@ -155,6 +165,39 @@ function Test-CustomTabExpansion {
     Assert-AreEqual "'John Doe'" $suggestions[3]
     Assert-AreEqual "'John''s Hide Out'" $suggestions[4]
     Assert-AreEqual "'Woah''s'" $suggestions[5]
+
+    # Remove the function from global scope
+    rm function:\Foo
+}
+
+
+function Test-ComplexCustomTabExpansion {
+    # Arrange
+    function global:Foo($Name, $Age) {
+    }
+
+    $ages = @{
+        'David''s Sister''s Brother''s Age' = '10'
+        'Phil' = '11'
+        'David''s Dog' = '12'
+        'John Doe' = '14'
+    }
+
+    Register-TabExpansion Foo @{ 
+        'Name' = { $ages.Keys }
+        'Age' = { param($context) $ages[$context.Name] }
+    }
+
+    # Act
+    $philAge = TabExpansion "Foo -Name Phil -Age " ""
+    $johnDoeAge = TabExpansion "Foo -Name 'John Doe' -Age " ""
+    $dogAge = TabExpansion "Foo -Name 'David''s Dog' -Age " ""
+    $davidAge = TabExpansion "Foo 'David''s Sister''s Brother''s Age' -Age " ""
+
+    Assert-AreEqual 11 $philAge
+    Assert-AreEqual 14 $johnDoeAge
+    Assert-AreEqual 12 $dogAge
+    Assert-AreEqual 10 $davidAge
 
     # Remove the function from global scope
     rm function:\Foo

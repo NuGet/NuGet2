@@ -24,46 +24,65 @@ function Register-TabExpansion {
 Register-TabExpansion 'Install-Package' @{
     'Id' = {
         param($context)
-        $filter = $context.Id
-        $source = $context.Source
- 
-        if($source) {
-            $packages = Find-Package -Remote -Source $source -Filter $filter -ea 'SilentlyContinue'
-        }
-        else {
-            $packages = Find-Package -Remote -Filter $filter -ea 'SilentlyContinue'
-        }
-
-        NormalizePackages $packages
+        GetPackageIds (GetPackages $context)
     }
     'Project' = {
         GetProjectNames
     }
+    'Version' = {
+        param($context)
+        GetPackageVersions (GetPackages $context) $context 
+    }
 }
 
-
-$localPackagesTabExpansion = @{
+Register-TabExpansion 'Uninstall-Package' @{
     'Id' = {
         param($context)        
-        NormalizePackages (Find-Package -Filter $context.Id -ea 'SilentlyContinue')
+        GetPackageIds (Find-Package -Filter $context.Id -ErrorAction SilentlyContinue)
     }
     'Project' = {
         GetProjectNames
     }
 }
 
-Register-TabExpansion 'Uninstall-Package' $localPackagesTabExpansion
-Register-TabExpansion 'Update-Package' $localPackagesTabExpansion
+Register-TabExpansion 'Update-Package' @{
+    'Id' = {
+        param($context)
+        GetPackageIds (Find-Package -Filter $context.Id -ErrorAction SilentlyContinue)
+    }
+    'Project' = {
+        GetProjectNames
+    }
+    'Version' = {
+        param($context)
+        GetPackageVersions (Find-Package -Remote -Filter $context.Id) $context
+    }
+}
+
 Register-TabExpansion 'New-Package' @{ 'Project' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
 
+function GetPackages($context) { 
+    $filter = $context.Id
+    $source = $context.Source
+
+    if($source) {
+        return Find-Package -Remote -Source $source -Filter $filter -ErrorAction SilentlyContinue
+    }
+    
+    return Find-Package -Remote -Filter $filter -ErrorAction SilentlyContinue
+}
 
 function GetProjectNames {
     Get-Project -All | Select -ExpandProperty Name
 }
 
-function NormalizePackages($packages) {
+function GetPackageIds($packages) {
     $packages | Group-Object Id | Select -ExpandProperty Name
+}
+
+function GetPackageVersions($packages, $context) {
+    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version
 }
 
 function NugetTabExpansion($line, $lastWord) {
@@ -78,7 +97,7 @@ function NugetTabExpansion($line, $lastWord) {
         # Get the command that we're trying to show intellisense for
         $command = Get-Command $parsedCommand.CommandName -ErrorAction SilentlyContinue
 
-        if($command) {
+        if($command) {            
             # We're trying to find out what parameter we're trying to show intellisense for based on 
             # either the name of the an argument or index e.g. "Install-Package -Id " "Install-Package "
             
@@ -109,11 +128,25 @@ function NugetTabExpansion($line, $lastWord) {
                         $index++
                     }
 
-                } while($true);
-                
+                } while($true);    
             }
 
-            if($argument) {
+            if($argument) {                
+                # Populate the arguments dictionary with the the name and value of the 
+                # associated index. i.e. for the command "Install-Package elmah" arguments should have
+                # an entries with { 0, "elmah" } and { "Id", "elmah" }
+                $arguments = @{}
+
+                $parsedCommand.Arguments.Keys | Where-Object { $_ -is [int] } | %{
+                    $argName = GetArgumentName $command $_
+                    $arguments[$argName] = $parsedCommand.Arguments[$_]
+                }
+
+                # Copy the arguments over to the parsed command arguments
+                $arguments.Keys | %{ 
+                    $parsedCommand.Arguments[$_] = $arguments[$_]
+                }
+
                 # If the argument is a true argument of this command and not a partial argument
                 # and there is a non null value (empty is valid), then we execute the script block
                 # for this parameter (if specified)
@@ -124,7 +157,7 @@ function NugetTabExpansion($line, $lastWord) {
                    $argumentValue -ne $null -and
                    $action) {
                     $context = New-Object PSObject -Property $parsedCommand.Arguments
-
+                    
                     $results = @(& $action $context)
 
                     if($results.Count -eq 0) {

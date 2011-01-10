@@ -15,13 +15,10 @@ namespace NuGetConsole.Host.PowerShell {
 
         private char CurrentChar {
             get {
-                if (_index < _command.Length) {
-                    return _command[_index];
-                }
-                return '\0';
+                return _index < _command.Length ? _command[_index] : '\0';
             }
         }
-
+        
         private bool Done {
             get {
                 return _index >= _command.Length;
@@ -37,13 +34,13 @@ namespace NuGetConsole.Host.PowerShell {
             var parsedCommand = new Command();
 
             // Get the command name
-            parsedCommand.CommandName = ParseUntilWhitespace();
+            parsedCommand.CommandName = ParseToken();
 
             while (!Done) {
                 string argument = null;
 
                 if (SkipWhitespace()) {
-                    argument = ParseUntilWhitespace();
+                    argument = ParseToken();
                 }
 
                 if (argument.StartsWith("-", StringComparison.Ordinal)) {
@@ -53,7 +50,7 @@ namespace NuGetConsole.Host.PowerShell {
                     if (!String.IsNullOrEmpty(argument)) {
                         // Parse the argument value if any
                         if (SkipWhitespace() && CurrentChar != '-') {
-                            parsedCommand.Arguments[argument] = ParseUntilWhitespace();
+                            parsedCommand.Arguments[argument] = ParseToken();
                         }
                         else {
                             parsedCommand.Arguments[argument] = null;
@@ -80,7 +77,35 @@ namespace NuGetConsole.Host.PowerShell {
             return parsedCommand;
         }
 
-        private string ParseUntilWhitespace() {
+        private string ParseQuotes() {
+            // Skip the first '
+            ParseChar();
+            var sb = new StringBuilder();
+            while (!Done) {
+                sb.Append(ParseUntil(c => c == '\''));
+                ParseChar();
+
+                if (CurrentChar == '\'') {
+                    sb.Append(ParseChar());
+                }
+                else {
+                    break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private char ParseChar() {
+            char ch = CurrentChar;
+            _index++;
+            return ch;
+        }
+
+        private string ParseToken() {
+            if (CurrentChar == '\'') {
+                return ParseQuotes();
+            }
             return ParseUntil(Char.IsWhiteSpace);
         }
 
