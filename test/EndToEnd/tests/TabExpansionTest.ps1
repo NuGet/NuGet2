@@ -177,10 +177,10 @@ function Test-ComplexCustomTabExpansion {
     }
 
     $ages = @{
-        'David''s Sister''s Brother''s Age' = '10'
-        'Phil' = '11'
-        'David''s Dog' = '12'
-        'John Doe' = '14'
+        'David''s Sister''s Brother''s Age' = 10
+        'Phil' = 11
+        'David''s Dog' = 12
+        'John Doe' = 14
     }
 
     Register-TabExpansion Foo @{ 
