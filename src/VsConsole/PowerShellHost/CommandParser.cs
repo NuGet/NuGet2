@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Management.Automation;
 using System.Text;
 
 namespace NuGetConsole.Host.PowerShell {
@@ -33,13 +36,24 @@ namespace NuGetConsole.Host.PowerShell {
         }
 
         private Command ParseCore() {
-            int positionalArgumentIndex = 0;
+            Collection<PSParseError> errors;
+            Collection<PSToken> tokens = PSParser.Tokenize(_command, out errors);
+            
+            // Use the powershell tokenizer to find the index of the last command so we can start parsing from there
+            var lastCommandToken = tokens.LastOrDefault(t => t.Type == PSTokenType.Command);
+
+            if (lastCommandToken != null) {
+                // Start parsing from a command
+                _index = lastCommandToken.Start;
+            }
+
             var parsedCommand = new Command();
+            int positionalArgumentIndex = 0;
 
             // Get the command name
             parsedCommand.CommandName = ParseToken();
 
-            while (!Done) {                
+            while (!Done) {
                 SkipWhitespace();
 
                 string argument = ParseToken();

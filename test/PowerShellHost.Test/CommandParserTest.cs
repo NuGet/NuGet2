@@ -88,5 +88,31 @@ namespace PowerShellHost.Test {
             Assert.IsNull(command.CompletionIndex);
             Assert.AreEqual("Arg2", command.CompletionArgument);
         }
+
+        [TestMethod]
+        public void MultipleCommandsOnlyParsesLastCommand() {
+            // Act
+            var command = CommandParser.Parse("Get-Values -A 1 'B' | Install-Package -Arg1 -Arg2 Value");
+
+            // Assert
+            Assert.AreEqual("Install-Package", command.CommandName);
+            Assert.AreEqual(2, command.Arguments.Count);
+            Assert.IsNull(command.Arguments["Arg1"]);
+            Assert.AreEqual("Value", command.Arguments["Arg2"]);
+            Assert.IsNull(command.CompletionIndex);
+            Assert.AreEqual("Arg2", command.CompletionArgument);
+        }
+
+        [TestMethod]
+        public void AssignmentStatementWithCommandParsesCommand() {
+            // Act
+            var command = CommandParser.Parse("$p = Get-Project ");
+
+            // Assert
+            Assert.AreEqual("Get-Project", command.CommandName);
+            Assert.AreEqual(1, command.Arguments.Count);
+            Assert.AreEqual("", command.Arguments[0]);
+            Assert.AreEqual(0, command.CompletionIndex);
+        }
     }
 }
