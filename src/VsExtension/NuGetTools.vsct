@@ -62,6 +62,14 @@
         </Strings>
       </Button>
 
+      <Button guid="guidPowerConsoleCmdSet" id="cmdidStopHost" priority="0x1020" type="Button">
+        <Parent guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup"/>
+        <Icon guid="guidToolbarImages" id="bmpStopHost" />
+        <Strings>
+          <ButtonText>&amp;Stop command execution</ButtonText>
+        </Strings>
+      </Button>
+
       <Button guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x0100" type="Button">
           <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
           <CommandFlag>DefaultInvisible</CommandFlag>
@@ -144,6 +152,7 @@
       <IDSymbol name="cmdidPowerConsole" value="0x0100" />
       <IDSymbol name="cmdidSourceSettings" value="0x0200" />
       <IDSymbol name="cmdidClearHost" value="0x0300" />
+      <IDSymbol name="cmdidStopHost" value="0x0600" />
       <IDSymbol name="cmdidSources" value="0x0400" />
       <IDSymbol name="cmdidSourcesList" value="0x0410" />
       <IDSymbol name="cmdidProjects" value="0x0500" />
@@ -153,6 +162,7 @@
       <IDSymbol name="bmpPowerConsole" value="1" />
       <IDSymbol name="bmpClearConsole" value="2" />
       <IDSymbol name="bmpSourceSettings" value="3" />
+      <IDSymbol name="bmpStopHost" value="4" />
     </GuidSymbol>
     <GuidSymbol name="guidToolsGroup" value="{C0D88179-5D25-4982-BFE6-EC5FD59AC103}">
       <IDSymbol name="idLibraryPackageManager" value="0x100" />

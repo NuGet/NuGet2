@@ -12,6 +12,11 @@ namespace NuGetConsole {
         void Start();
 
         /// <summary>
+        /// Indicates whether the console is busy executing an earlier command;
+        /// </summary>
+        bool IsExecutingCommand { get; }
+
+        /// <summary>
         /// Clear existing console content. This must be used if you want to clear the console
         /// content externally (not inside a host command execution). The console dispatcher manages
         /// console state, displays prompt, etc. Call this method to avoid interfere with user

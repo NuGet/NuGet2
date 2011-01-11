@@ -24,6 +24,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
+        private Pipeline _executingPipeline;
 
         protected PowerShellHost(IConsole console, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -219,6 +220,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         public void Abort() {
+            if (_executingPipeline != null) {
+                _executingPipeline.StopAsync();
+            }
             ComplexCommand.Clear();
         }
 
@@ -241,8 +245,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     // Remove \r\n, which is added by the Out-String cmdlet.
                     _myHost.UI.WriteErrorLine(str.Substring(0, str.Length - 2));
                 }
-
             }
+        }
+
+        protected void ReportError(Exception exception) {
+            _myHost.UI.WriteErrorLine((exception.InnerException ?? exception).Message);
         }
 
         public string Setting {
@@ -304,8 +311,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
 
             using (Pipeline pipeline = CreatePipeline(command, outputResults)) {
-                return input != null ?
-                    pipeline.Invoke(new object[] { input }) : pipeline.Invoke();
+                _executingPipeline = pipeline;
+                var results =  input != null ? pipeline.Invoke(new object[] { input }) : pipeline.Invoke();
+                _executingPipeline = null;
+                return results;
             }
         }
 
@@ -313,6 +322,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             if (string.IsNullOrEmpty(command)) {
                 return false;
             }
+
+            Debug.Assert(_executingPipeline == null);
 
             Pipeline pipeline = CreatePipeline(command, outputResults);
 
@@ -324,10 +335,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     case PipelineState.Completed:
                     case PipelineState.Failed:
                     case PipelineState.Stopped:
+                        _executingPipeline = null;
                         ((Pipeline)sender).Dispose();
                         break;
                 }
             };
+
+            _executingPipeline = pipeline;
 
             pipeline.InvokeAsync();
             return true;
@@ -412,6 +426,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                         case PipelineState.Completed:
                         case PipelineState.Failed:
                         case PipelineState.Stopped:
+                            if (e.PipelineStateInfo.Reason != null) {
+                                ReportError(e.PipelineStateInfo.Reason);
+                            }
+
                             this.AddHistory(command, startExecutionTime);
                             ExecuteEnd.Raise(this, EventArgs.Empty);
                             break;

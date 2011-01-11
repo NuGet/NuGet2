@@ -88,6 +88,10 @@ namespace NuGetConsole.Implementation {
                 // clear console command
                 CommandID clearHostCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidClearHost);
                 mcs.AddCommand(new OleMenuCommand(ClearHost_Exec, clearHostCommandID));
+
+                // terminate command execution command
+                CommandID stopHostCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidStopHost);
+                mcs.AddCommand(new OleMenuCommand(StopHost_Exec, stopHostCommandID));
             }
         }
 
@@ -257,6 +261,12 @@ namespace NuGetConsole.Implementation {
         void ClearHost_Exec(object sender, EventArgs e) {
             if (WpfConsole != null) {
                 WpfConsole.Dispatcher.ClearConsole();
+            }
+        }
+
+        void StopHost_Exec(object sender, EventArgs e) {
+            if (WpfConsole != null) {
+                WpfConsole.Host.Abort();
             }
         }
 

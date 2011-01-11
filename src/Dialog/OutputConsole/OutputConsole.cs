@@ -74,6 +74,12 @@ namespace NuGet.OutputWindowConsole {
             Write(text);
         }
 
+        public bool IsExecutingCommand {
+            get {
+                return false;
+            }
+        }
+
         public void Clear() {
             EnsureStarted();
             _outputWindowPane.Clear();

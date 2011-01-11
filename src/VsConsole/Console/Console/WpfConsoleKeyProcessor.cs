@@ -90,6 +90,11 @@ namespace NuGetConsole.Implementation.Console {
                 return hr;
             }
 
+            // if the console is in the middle of executing a command, do not accept any key inputs
+            if (WpfConsole.Dispatcher.IsExecutingCommand) {
+                return hr;
+            }
+
             if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97) {
                 Debug.Print("Exec: GUID_VSStandardCommandSet97: {0}", (VSConstants.VSStd97CmdID)nCmdID);
 

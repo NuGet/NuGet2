@@ -29,6 +29,12 @@ namespace NuGetConsole.Implementation.Console {
             this.WpfConsole = wpfConsole;
         }
 
+        public bool IsExecutingCommand {
+            get {
+                return (_dispatcher == null) ? false : _dispatcher.IsExecuting;
+            }
+        }
+
         #region IConsoleDispatcher
 
         public void Start() {
@@ -82,6 +88,8 @@ namespace NuGetConsole.Implementation.Console {
         abstract class Dispatcher {
             protected ConsoleDispatcher ParentDispatcher { get; private set; }
             protected IPrivateWpfConsole WpfConsole { get; private set; }
+
+            public bool IsExecuting { get; protected set; }
 
             protected Dispatcher(ConsoleDispatcher parentDispatcher) {
                 ParentDispatcher = parentDispatcher;
@@ -152,9 +160,11 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public override void PostInputLine(InputLine inputLine) {
+                IsExecuting = true;
                 if (Process(inputLine).Item1) {
                     PromptNewLine();
                 }
+                IsExecuting = false;
             }
         }
 
@@ -163,7 +173,6 @@ namespace NuGetConsole.Implementation.Console {
         /// </summary>
         class AsyncHostConsoleDispatcher : Dispatcher {
             Queue<InputLine> _buffer;
-            bool _isExecuting;
             _Marshaler _marshaler;
 
             public AsyncHostConsoleDispatcher(ConsoleDispatcher parentDispatcher)
@@ -205,7 +214,7 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             void ProcessInputs() {
-                if (_isExecuting) {
+                if (IsExecuting) {
                     return;
                 }
 
@@ -213,7 +222,7 @@ namespace NuGetConsole.Implementation.Console {
                     InputLine inputLine = _buffer.Dequeue();
                     Tuple<bool, bool> executeState = Process(inputLine);
                     if (executeState.Item1) {
-                        _isExecuting = true;
+                        IsExecuting = true;
 
                         if (!executeState.Item2) {
                             // If NOT really executed, processing the same as ExecuteEnd event
@@ -226,8 +235,8 @@ namespace NuGetConsole.Implementation.Console {
             void OnExecuteEnd() {
                 if (IsStarted) // Filter out noise. A host could execute private commands.
                 {
-                    Debug.Assert(_isExecuting);
-                    _isExecuting = false;
+                    Debug.Assert(IsExecuting);
+                    IsExecuting = false;
 
                     PromptNewLine();
                     ProcessInputs();
