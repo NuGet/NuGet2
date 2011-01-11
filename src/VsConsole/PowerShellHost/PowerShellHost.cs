@@ -312,9 +312,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
             using (Pipeline pipeline = CreatePipeline(command, outputResults)) {
                 _executingPipeline = pipeline;
-                var results =  input != null ? pipeline.Invoke(new object[] { input }) : pipeline.Invoke();
-                _executingPipeline = null;
-                return results;
+                try {
+                    return input != null ? pipeline.Invoke(new object[] { input }) : pipeline.Invoke();
+                }
+                finally {
+                    _executingPipeline = null;
+                }
             }
         }
 

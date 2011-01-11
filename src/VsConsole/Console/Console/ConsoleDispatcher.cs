@@ -161,10 +161,14 @@ namespace NuGetConsole.Implementation.Console {
 
             public override void PostInputLine(InputLine inputLine) {
                 IsExecuting = true;
-                if (Process(inputLine).Item1) {
-                    PromptNewLine();
+                try {
+                    if (Process(inputLine).Item1) {
+                        PromptNewLine();
+                    }
                 }
-                IsExecuting = false;
+                finally {
+                    IsExecuting = false;
+                }
             }
         }
 
@@ -233,8 +237,8 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             void OnExecuteEnd() {
-                if (IsStarted) // Filter out noise. A host could execute private commands.
-                {
+                if (IsStarted) {
+                    // Filter out noise. A host could execute private commands.
                     Debug.Assert(IsExecuting);
                     IsExecuting = false;
 
