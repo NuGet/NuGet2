@@ -14,7 +14,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "foo.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
-            PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
+            PathSearchFilter searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -27,7 +27,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "foo.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
-            PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
+            PathSearchFilter searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -41,7 +41,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = directory, SearchPattern = "foo.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
-            PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
+            PathSearchFilter searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -55,7 +55,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = "Y:\\foo", SearchPattern = "bar.txt", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act 
-            PathSearchFilter searchFilter = PathResolver.ResolvePath(_basePath, path);
+            PathSearchFilter searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -68,7 +68,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -81,7 +81,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*.foo", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -94,7 +94,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "jquery.*", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -107,7 +107,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*.*", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -120,7 +120,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "*", SearchOption = SearchOption.TopDirectoryOnly };
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -133,7 +133,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "*", SearchOption = SearchOption.TopDirectoryOnly };
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -146,7 +146,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "bar\\foo"), SearchPattern = "*.baz", SearchOption = SearchOption.TopDirectoryOnly };
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -160,7 +160,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = directory, SearchPattern = "*.foo", SearchOption = SearchOption.TopDirectoryOnly }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -173,7 +173,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = ".bar", SearchOption = SearchOption.AllDirectories };
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -186,7 +186,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "baz\\.bar", SearchOption = SearchOption.AllDirectories };
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -199,7 +199,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = Path.Combine(_basePath, "foo"), SearchPattern = "*", SearchOption = SearchOption.AllDirectories };
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -212,7 +212,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*.txt", SearchOption = SearchOption.AllDirectories }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -225,7 +225,7 @@ namespace NuGet.Test {
             var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "*", SearchOption = SearchOption.AllDirectories }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -234,11 +234,11 @@ namespace NuGet.Test {
         [TestMethod]
         public void PathWithInvalidRecursiveWildCardSearch() {
             // Arrange
-            var path = @"**foo/bar";
-            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = "foo/bar", SearchOption = SearchOption.AllDirectories }; ;
+            var path = @"**foo\bar";
+            var expectedFilter = new PathSearchFilter { SearchDirectory = _basePath, SearchPattern = @"foo\bar", SearchOption = SearchOption.AllDirectories }; ;
 
             // Act
-            var searchFilter = PathResolver.ResolvePath(_basePath, path);
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
 
             // Assert
             AssertEqual(expectedFilter, searchFilter);
@@ -251,7 +251,7 @@ namespace NuGet.Test {
             var basePath = @"root\sub-dir";
 
             // Act
-            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, String.Empty);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "*.*", WildCardSearch = true }, path, String.Empty);
 
             // Assert
             Assert.AreEqual(@"foo\bar.txt", result);
@@ -265,7 +265,7 @@ namespace NuGet.Test {
             var targetPath = @"\abc\cdf";
 
             // Act
-            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "*.*", WildCardSearch = true }, path, targetPath);
 
             // Assert
             Assert.AreEqual(Path.Combine(targetPath, @"foo\bar.txt"), result);
@@ -274,12 +274,11 @@ namespace NuGet.Test {
         [TestMethod]
         public void DestinationPathResolverReturnsFileNamesForNonRelativePaths() {
             // Arrange
-            var searchPath = @"z:\bar\something.txt";
-            var path = searchPath;
-            var basePath = String.Empty;
+            var path = @"z:\bar\something.txt";
+            var basePath = @"x:\";
 
             // Act
-            var result = PathResolver.ResolvePackagePath(searchPath, basePath, path, String.Empty);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "something.txt", WildCardSearch = false }, path, String.Empty);
 
             // Assert
             Assert.AreEqual(@"something.txt", result);
@@ -292,7 +291,7 @@ namespace NuGet.Test {
             var basePath = @"dir\subdir";
 
             // Act
-            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, String.Empty);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "*.*", WildCardSearch = true }, path, String.Empty);
 
             // Assert
             Assert.AreEqual(@"something.txt", result);
@@ -305,7 +304,7 @@ namespace NuGet.Test {
             var basePath = @"dir\subdir";
             var targetPath = "foo";
             // Act
-            var result = PathResolver.ResolvePackagePath("*.*", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "*.*", WildCardSearch = true }, path, targetPath);
 
             // Assert
             Assert.AreEqual(Path.Combine(targetPath, "something.txt"), result);
@@ -315,11 +314,11 @@ namespace NuGet.Test {
         public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenNoTargetPathSpecified() {
             // Arrange
             var path = @"root\folder\sub-folder\somefile.txt";
-            var basePath = "root";
+            var searchDirectory = @"root\folder";
             var targetPath = String.Empty;
 
             // Act
-            var result = PathResolver.ResolvePackagePath(@"folder\**", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = searchDirectory, SearchPattern = "*.txt", WildCardSearch = true }, path, targetPath);
 
             // Assert
             Assert.AreEqual(@"sub-folder\somefile.txt", result);
@@ -329,42 +328,14 @@ namespace NuGet.Test {
         public void PathResolverTruncatesRecursiveWildCardInSearchPathWhenTargetPathSpecified() {
             // Arrange
             var path = @"root\dir\subdir\pack.dll";
-            var basePath = @"";
+            var searchDirectory = @"root\dir";
             var targetPath = @"lib\sl4";
 
             // Act
-            var result = PathResolver.ResolvePackagePath(@"root\dir\**", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = searchDirectory, SearchPattern = "*.*", WildCardSearch = true }, path, targetPath);
 
             // Assert
             Assert.AreEqual(@"lib\sl4\subdir\pack.dll", result);
-        }
-
-        [TestMethod]
-        public void PathResolverTruncatesWildCardInSearchPathWhenNoTargetPathSpecified() {
-            // Arrange
-            var path = @"root\dir\subdir\pack.dll";
-            var basePath = @"";
-            var targetPath = String.Empty;
-
-            // Act
-            var result = PathResolver.ResolvePackagePath(@"root\dir\subdir\**\*.dll", basePath, path, targetPath);
-
-            // Assert
-            Assert.AreEqual(@"pack.dll", result);
-        }
-
-        [TestMethod]
-        public void PathResolverTruncatesWildCardInSearchPathWhenTargetPathSpecified() {
-            // Arrange
-            var path = @"root\dir\subdir\pack.dll";
-            var basePath = @"root";
-            var targetPath = @"lib\sl4";
-
-            // Act
-            var result = PathResolver.ResolvePackagePath(@"dir\subdir\*.dll", basePath, path, targetPath);
-
-            // Assert
-            Assert.AreEqual(@"lib\sl4\pack.dll", result);
         }
 
         [TestMethod]
@@ -375,25 +346,10 @@ namespace NuGet.Test {
             var targetPath = @"lib\sl4\bar.dll";
 
             // Act
-            var result = PathResolver.ResolvePackagePath(@"dir\subdir\foo.dll", basePath, path, targetPath);
+            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "foo.dll", WildCardSearch = false }, path, targetPath);
 
             // Assert
             Assert.AreEqual(targetPath, result);
-        }
-
-        [TestMethod]
-        public void PathResolverDoesNotLookForSearchTermThatOccurInBasePath() {
-            // Arrange
-            var actualPath = @"X:\drops\bin\Release\Output\bin\release\myfile.dll";
-            var basePath = @"X:\drops\bin\Release\Output\";
-            var searchString = @"bin\release\*.dll";
-            var targetPath = @"lib\net40";
-
-            // Act
-            var result = PathResolver.ResolvePackagePath(searchString: searchString, basePath: basePath, actualPath: actualPath, targetPath: targetPath);
-
-            // Assert
-            Assert.AreEqual(@"lib\net40\myfile.dll", result);
         }
 
         private void AssertEqual(PathSearchFilter expected, PathSearchFilter actual) {

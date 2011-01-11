@@ -221,18 +221,18 @@ namespace NuGet {
         }
 
         private void AddFiles(string basePath, string source, string destination) {
-            PathSearchFilter searchFilter = PathResolver.ResolvePath(basePath, source);
+            PathSearchFilter searchFilter = PathResolver.ResolveSearchFilter(basePath, source);
             IEnumerable<string> searchFiles = Directory.EnumerateFiles(searchFilter.SearchDirectory,
                                                           searchFilter.SearchPattern,
                                                           searchFilter.SearchOption);
 
-            if (searchFilter.IsAbsolutePathFilter && !searchFiles.Any()) {
+            if (!searchFilter.WildCardSearch && !searchFiles.Any()) {
                 throw new FileNotFoundException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound, 
                     source));
             }
 
             foreach (var file in searchFiles) {
-                var destinationPath = PathResolver.ResolvePackagePath(source, basePath, file, destination);
+                var destinationPath = PathResolver.ResolvePackagePath(searchFilter, file, destination);
                 Files.Add(new PhysicalPackageFile {
                     SourcePath = file,
                     TargetPath = destinationPath

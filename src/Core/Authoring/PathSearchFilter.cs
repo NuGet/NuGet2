@@ -8,6 +8,6 @@ namespace NuGet {
 
         public string SearchPattern { get; set; }
 
-        public bool IsAbsolutePathFilter { get; set; }
+        public bool WildCardSearch { get; set; }
     }
 }

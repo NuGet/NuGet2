@@ -391,6 +391,160 @@ namespace NuGet.Test.Integration.PathResolver {
             Assert.IsFalse(package.Files.Any());
         }
 
+        /// <summary>
+        /// Source: project-files\static\css\main.css
+        /// Search: ..\static\css\main.css
+        /// Target: content\css
+        /// Expected: \content\css\main.css
+        /// </summary>
+        [TestMethod]
+        public void RelativePathsWithNoWildCards() {
+            // Arrange
+            string search = @"..\static\css\main.css";
+            string target = @"content\css";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("project-files",
+                                                new Dir("static",
+                                                    new Dir("css",
+                                                        new File("main.css")))));
+
+            // Act
+            var package = new PackageBuilder(manifest, Path.Combine(root, "project-files", "nuget"));
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"content\css\main.css");
+        }
+
+        /// <summary>
+        /// Source: project-files\static\css\main.css
+        /// Search: ..\..\static\css\main.css
+        /// Target: content\css\style.css
+        /// Expected: \content\css\style.css
+        /// </summary>
+        [TestMethod]
+        public void RelativePathsWithCopyRename() {
+            // Arrange
+            string search = @"..\..\static\css\main.css";
+            string target = @"content\css\style.css";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("project-files",
+                                                new Dir("static",
+                                                    new Dir("css",
+                                                        new File("main.css")))));
+
+            // Act
+            var package = new PackageBuilder(manifest, Path.Combine(root, "project-files", "nuget-files", "manifest"));
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"content\css\style.css");
+        }
+
+        /// <summary>
+        /// Source: src\awesomeproj\bin\release\awesomeproj.core.dll, src\awesomeproj\bin\release\awesomeproj.aux.dll
+        /// Search: ..\..\src\awesomeproj\bin\release\*.dll
+        /// Target: lib\net40
+        /// Expected: lib\net40\awesomeproj.core.dll, lib\net40\awesomeproj.aux.dll
+        /// </summary>
+        [TestMethod]
+        public void RelativePathWithWildCards() {
+            // Arrange
+            string search = @"..\..\src\awesomeproj\bin\release\*.dll";
+            string target = @"lib\net40";
+            Stream manifest = GetManifest(search, target);
+            string root = CreateFileSystem(new Dir("src",
+                                                new Dir("awesomeproj",
+                                                    new Dir("bin",
+                                                        new Dir("release",
+                                                            new File("awesomeproj.core.dll"), new File("awesomeproj.aux.dll"))))));
+
+            // Act
+            var package = new PackageBuilder(manifest, Path.Combine(root, "build", "nuget"));
+
+            // Assert
+            Assert.AreEqual(2, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"lib\net40\awesomeproj.aux.dll");
+            Assert.AreEqual(package.Files.Last().Path, @"lib\net40\awesomeproj.core.dll");
+        }
+
+        /// <summary>
+        /// Source: [TestDir]\bin\release\foo.dll
+        /// Search: [TestDir]\bin\release\foo.dll
+        /// Target: lib
+        /// Expected: lib\foo.dll
+        /// </summary>
+        [TestMethod]
+        public void AbsolutePathWithNoWildCards() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                    new File("foo.dll"))));
+            string search = Path.Combine(root, @"bin\release\foo.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"lib\foo.dll");
+        }
+
+        /// <summary>
+        /// Source: [TestDir]\bin\release\foo.dll
+        /// Search: [TestDir]\bin\release\foo.dll
+        /// Target: lib\bar.dll
+        /// Expected: lib\bar.dll
+        /// </summary>
+        [TestMethod]
+        public void AbsolutePathWithFileRename() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                    new File("foo.dll"))));
+            string search = Path.Combine(root, @"bin\release\foo.dll");
+            string target = @"lib\bar.dll";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"lib\bar.dll");
+        }
+
+        /// <summary>
+        /// Source: [TestDir]\bin\release\net40\foo.dll, [TestDir]\bin\release\net35\foo.dll
+        /// Search: [TestDir]\bin\release\**\*.dll
+        /// Target: lib
+        /// Expected: lib\net40\foo.dll, lib\net35\foo.dll
+        /// </summary>
+        [TestMethod]
+        public void AbsolutePathWithWildcard() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                    new Dir("net40",
+                                                        new File("foo.dll")),
+                                                    new Dir("net35",
+                                                        new File("foo.dll")))));
+
+            string search = Path.Combine(root, @"bin\release\**\*.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+
+            // Assert
+            Assert.AreEqual(2, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"lib\net35\foo.dll");
+            Assert.AreEqual(package.Files.Last().Path, @"lib\net40\foo.dll");
+        }
+
         private Stream GetManifest(string search, string target) {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
