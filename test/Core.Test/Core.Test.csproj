@@ -75,7 +75,6 @@
     <Compile Include="FileSystemExtensionsTest.cs" />
     <Compile Include="PackageManagerTest.cs" />
     <Compile Include="SecurityTest.cs" />
-    <Compile Include="Server\Controllers\PackagesControllerTest.cs" />
     <Compile Include="Server\Infrastructure\ConditionalGetResultTest.cs" />
     <Compile Include="Server\Infrastructure\NinjectControllerFactoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -34,11 +34,6 @@ namespace NuGet.Server.DataServices {
                                             select ConvertDependency(d));
             PackageHash = derivedData.PackageHash;
             PackageSize = derivedData.PackageSize;
-            Uri reportAbuseUrl = PackageUtility.GetRepostAbuseUrl(Id, Version);
-            if (reportAbuseUrl != null) {
-                ReportAbuseUrl = reportAbuseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
-            }
-            Rating = Math.Abs((double)Id.GetHashCode() % 50) / 10;
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
         }

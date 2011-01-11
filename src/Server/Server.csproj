@@ -60,7 +60,6 @@
     </Compile>
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\PackagesController.cs" />
     <Compile Include="DataServices\Package.cs" />
     <Compile Include="DataServices\PackageContext.cs" />
     <Compile Include="DateTimeExtensions.cs" />
@@ -72,8 +71,6 @@
     <Compile Include="Infrastructure\ConditionalGetResult.cs" />
     <Compile Include="Infrastructure\IServerPackageRepository.cs" />
     <Compile Include="Infrastructure\ServerPackageRepository.cs" />
-    <Compile Include="Infrastructure\FileBasedPackageStore.cs" />
-    <Compile Include="Infrastructure\IPackageStore.cs" />
     <Compile Include="Infrastructure\HttpStatusCodeResult.cs" />
     <Compile Include="Infrastructure\NinjectBootstrapper.cs" />
     <Compile Include="Infrastructure\NinjectControllerFactory.cs" />
