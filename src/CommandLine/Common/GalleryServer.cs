@@ -1,32 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Globalization;
-using System.IO;
+﻿namespace NuGet.Common {   
+ 
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Net;
+    using System.Runtime.Serialization;
+    using System.Runtime.Serialization.Json;
 
-namespace NuGet.Common {
-
-
-    /* CreatePackage (stream & URL)
-     * PublishPackage
-     * UpdatePackage
-     * DeletePackage
-     * RatePackage
-     * DeleteScreenshot */
-
-
-    
     public class GalleryServer {
-        
+        private const string _defaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string _CreatePackageService = "PackageFiles";
-        private const string _PublichPackageService = "PublishedPackages";
-        private const string _UserAgentPattern = "Nuget Gallery API/{0} ({1})";
+        private const string _PackageService = "Packages";
+        private const string _PublichPackageService = "PublishedPackages/Publish";
 
+        //REVIEW: What should be the User agent
+        private const string _UserAgentPattern = "Nuget/{0} ({1})";
+        
         private string _baseGalleryServerUrl;
         private string _userAgent;
 
+        public GalleryServer()
+            : this(_defaultGalleryServerUrl) {
+        }
 
         public GalleryServer(string galleryServerUrl) {
             _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerUrl);
@@ -35,8 +30,7 @@ namespace NuGet.Common {
             _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
         }
 
-        
-        public void CreatePackage(string apiKey, Stream Package) {
+        public void CreatePackage(string apiKey, Stream package) {
             var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, _CreatePackageService, apiKey));
 
             var request = (HttpWebRequest)WebRequest.Create(url);
@@ -44,7 +38,7 @@ namespace NuGet.Common {
             request.Method = "POST";
             request.UserAgent = _userAgent;
 
-            byte[] file = Package.ReadAllBytes();
+            byte[] file = package.ReadAllBytes();
             request.ContentLength = file.Length;
             var requestStream = request.GetRequestStream();
             requestStream.Write(file, 0, file.Length);
@@ -52,32 +46,81 @@ namespace NuGet.Common {
             GetResponse(request);
         }
 
-        public void CreatePackage(string apiKey, string PackageUrl) {
-
+        public void CreatePackage(string apiKey, string externalUrl) {
             var url = new Uri(String.Format("{0}/{1}/CreateFromExternalUrl", _baseGalleryServerUrl, _CreatePackageService));
 
             var request = (HttpWebRequest)WebRequest.Create(url);
+            request.ContentType = "application/json";
             request.Method = "POST";
             request.UserAgent = _userAgent;
-            request.ContentLength = 0;
 
+            using (Stream requestStream = request.GetRequestStream()) {
+                var data = new CreateFromExternalUrlData {
+                    Key = apiKey,
+                    FileExtension = "nupkg",
+                    ExternalPackageUrl = externalUrl
+                };
+
+                var jsonSerializer = new DataContractJsonSerializer(typeof(CreateFromExternalUrlData));
+                jsonSerializer.WriteObject(requestStream, data);
+            }
 
             GetResponse(request);
-
-            
 
         }
 
         public void PublishPackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _PublichPackageService, apiKey, packageID, packageVersion));
+            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, _PublichPackageService));
 
             var request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = "GET";
+            request.ContentType = "application/json";
+            request.Method = "POST";
             request.UserAgent = _userAgent;
+
+            using (Stream requestStream = request.GetRequestStream()) {
+                var data = new PublishData {
+                    Key = apiKey,
+                    Id = packageID,
+                    Version = packageVersion
+                };
+
+                var jsonSerializer = new DataContractJsonSerializer(typeof(PublishData));
+                jsonSerializer.WriteObject(requestStream, data);
+            }
 
             GetResponse(request);
         }
 
+        public void DeletePackage(string apiKey, string packageID, string packageVersion) {
+            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _PackageService, apiKey, packageID, packageVersion));
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "DELETE";
+            request.UserAgent = _userAgent;
+            request.ContentLength = 0;
+
+            GetResponse(request);
+        }
+
+        public void RatePackage(string packageID, string packageVersion, string rating) {
+            var url = new Uri(String.Format("{0}/{1}/{2}", _baseGalleryServerUrl, _PackageService, "RatePackage"));
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.ContentType = "application/json";
+            request.Method = "POST";
+            request.UserAgent = _userAgent;
+
+            using (Stream requestStream = request.GetRequestStream()) {
+                var data = new RatePackageData {
+                    Id = packageID,
+                    Version = packageVersion,
+                    Rating = rating
+                };
+
+                var jsonSerializer = new DataContractJsonSerializer(typeof(RatePackageData));
+                jsonSerializer.WriteObject(requestStream, data);
+            }
+
+            GetResponse(request);
+        }
 
         private WebResponse GetResponse(WebRequest request) {
             try {
@@ -108,5 +151,40 @@ namespace NuGet.Common {
             }
         }
 
+        [DataContract]
+        public class PublishData {
+            [DataMember(Name = "key")]
+            public string Key { get; set; }
+
+            [DataMember(Name = "id")]
+            public string Id { get; set; }
+
+            [DataMember(Name = "version")]
+            public string Version { get; set; }
+        }
+
+        [DataContract]
+        public class CreateFromExternalUrlData {
+            [DataMember(Name = "key")]
+            public string Key { get; set; }
+
+            [DataMember(Name = "fileExtension")]
+            public string FileExtension { get; set; }
+
+            [DataMember(Name = "externalPackageUrl")]
+            public string ExternalPackageUrl { get; set; }
+        }
+
+        [DataContract]
+        public class RatePackageData {
+            [DataMember(Name = "id")]
+            public string Id { get; set; }
+
+            [DataMember(Name = "version")]
+            public string Version { get; set; }
+
+            [DataMember(Name = "rating")]
+            public string Rating { get; set; }
+        }
     }
 }

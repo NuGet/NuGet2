@@ -7,7 +7,6 @@ namespace NuGet {
     using System.Linq;
     using Common;
 
-
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", AltName = "p", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]

@@ -117,6 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DeleteCommandDeletedPackage" xml:space="preserve">
+    <value>{0} {1} has been deleted from the server</value>
+  </data>
+  <data name="DeleteCommandDeletingPackage" xml:space="preserve">
+    <value>Deleting {0} {1} from the server.</value>
+  </data>
+  <data name="DeleteCommandDescription" xml:space="preserve">
+    <value>Delete a package from the server.</value>
+  </data>
+  <data name="DeleteCommandSourceDescription" xml:space="preserve">
+    <value>Specifies the base GalleryServer Url.</value>
+  </data>
+  <data name="DeleteCommandUsageDescription" xml:space="preserve">
+    <value>Specify the Id and version of the package to delete from the server.</value>
+  </data>
+  <data name="DeleteCommandUsageSummary" xml:space="preserve">
+    <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
+  </data>
   <data name="HelpCommandDescription" xml:space="preserve">
     <value>The Help command is used to display general help and also help information about other commands.</value>
   </data>
@@ -174,11 +192,29 @@
   <data name="PackageCommandUsageSummary" xml:space="preserve">
     <value>&lt;manifest&gt; [options]</value>
   </data>
+  <data name="PublishCommandDescription" xml:space="preserve">
+    <value>Publish a package that has been uploaded to the server but not added to the live feed.</value>
+  </data>
+  <data name="PublishCommandPackagePublished" xml:space="preserve">
+    <value>Your package has been published to the live feed.</value>
+  </data>
+  <data name="PublishCommandPublishingPackage" xml:space="preserve">
+    <value>Publishing your package [ID:{0} Ver:{1}] to the live feed...</value>
+  </data>
+  <data name="PublishCommandSourceDescription" xml:space="preserve">
+    <value>Specifies the base GalleryServer Url.</value>
+  </data>
+  <data name="PublishCommandUsageDescription" xml:space="preserve">
+    <value>Specify the Id and Version of the package that will be publised to the lve feed.</value>
+  </data>
+  <data name="PublishCommandUsageSummary" xml:space="preserve">
+    <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
+  </data>
   <data name="PushCommandCreatingPackage" xml:space="preserve">
     <value>Creating an entry for your package [ID:{0} Ver:{1}]...</value>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
-    <value>Push a package to the server and publish it to the feed.</value>
+    <value>Push a package to the server and optionaly publish it to the feed.</value>
   </data>
   <data name="PushCommandInvalidResponse" xml:space="preserve">
     <value>{0}: {1}</value>
@@ -189,14 +225,8 @@
   <data name="PushCommandPackageCreated" xml:space="preserve">
     <value>Your package has been uploaded to the server but not published.</value>
   </data>
-  <data name="PushCommandPackagePublished" xml:space="preserve">
-    <value>Your package has been published to the live feed.</value>
-  </data>
   <data name="PushCommandPublishDescription" xml:space="preserve">
     <value>Specifies if the package should be published to the live feed. True by default.</value>
-  </data>
-  <data name="PushCommandPublishingPackage" xml:space="preserve">
-    <value>Publishing your package [ID:{0} Ver:{1}] to the live feed...</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
     <value>Specifies the base GalleryServer Url.</value>
