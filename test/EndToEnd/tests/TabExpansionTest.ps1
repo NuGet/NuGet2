@@ -51,6 +51,20 @@ function Test-TabExpansionForInstallPackageShowSuggestionsForProjectName {
     }
 }
 
+function Test-TabExpansionForInstallPackageSortByDownloadCountDescending {
+    # Act
+    $suggestions = TabExpansion 'Install-Package ef' 'ef'
+
+    # Assert
+
+    $packages = $suggestions | % { Get-Package -Remote -Filter $_ } | Select-Object -First 1
+    
+    $count = $packages.Count
+    for ($i = 0; $i -lt $count-1; $i++) {
+         Assert-True ($packages[$i].DownloadCount -ge $packages[$i+1].DownloadCount)
+    } 
+}
+
 # Tests for Uninstall-Package intellisense
 
 function Test-TabExpansionForUninstallPackageShowSuggestionsForPackageId {
@@ -151,7 +165,7 @@ function Test-CustomTabExpansion {
         "Hello $Name"
     }
 
-    Register-TabExpansion Foo @{ 'Name' = { 'David Fowler', 'John Doe', "John's Hide Out", "Woah's", "A`tB", "G" } }
+    Register-TabExpansion Foo @{ 'Name' = { 'David Fowler', 'John Doe', "John's Hide Out", "Woah's", "A`tB", "G" | Sort-Object } }
 
     # Act
     $suggestions = TabExpansion 'Foo ' ''

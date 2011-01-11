@@ -75,7 +75,7 @@ function GetPackages($context) {
 }
 
 function GetProjectNames {
-    Get-Project -All | Select -ExpandProperty Name
+    Get-Project -All | Select -ExpandProperty Name | Sort-Object
 }
 
 function GetPackageIds($packages) {
@@ -83,7 +83,7 @@ function GetPackageIds($packages) {
 }
 
 function GetPackageVersions($packages, $context) {
-    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version
+    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version | Sort-Object
 }
 
 function NugetTabExpansion($line, $lastWord) {
@@ -166,7 +166,7 @@ function NugetTabExpansion($line, $lastWord) {
                     }
 
                     # Use the argument value to filter results
-                    $results = $results | %{ $_.ToString() } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") } | Sort-Object
+                    $results = $results | %{ $_.ToString() } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") }
 
                     return NormalizeResults $results
                 }
