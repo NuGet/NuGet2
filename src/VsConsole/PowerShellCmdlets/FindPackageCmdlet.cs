@@ -37,7 +37,7 @@ namespace NuGet.Cmdlets {
                 packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
 
-            packages = packages.OrderByDescending(p => p.DownloadCount);
+            packages = packages.OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id);
             
             return packages;
         }
@@ -48,7 +48,7 @@ namespace NuGet.Cmdlets {
             if (!String.IsNullOrEmpty(Filter)) {
                 packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
-            return sourceRepository.GetUpdates(packagesToUpdate).OrderByDescending(p => p.DownloadCount);
+            return sourceRepository.GetUpdates(packagesToUpdate).OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id);
         }
 
         protected override void Log(MessageLevel level, string formattedMessage) {
