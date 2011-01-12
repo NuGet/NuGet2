@@ -38,7 +38,7 @@ namespace NuGet.VisualStudio {
                 SourceControlBindings binding = null;
                 try {
                     // Get the binding for this solution
-                    binding = sourceControl.GetBindings(path);
+                    binding = sourceControl.GetBindings(_dte.Solution.FullName);
                 }
                 catch (NotImplementedException) {
                     // Some source control providers don't bother to implement this.
