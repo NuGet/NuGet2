@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TFS = Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using TFS = Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace NuGet.TeamFoundationServer {
     public class TfsWorkspaceWrapper : ITfsWorkspace {
