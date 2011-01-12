@@ -61,7 +61,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1} has been deleted from the server.
+        ///   Looks up a localized string similar to {0} {1} was deleted from the server.
         /// </summary>
         internal static string DeleteCommandDeletedPackage {
             get {
@@ -79,7 +79,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete a package from the server..
+        ///   Looks up a localized string similar to Deletes a package from the server..
         /// </summary>
         internal static string DeleteCommandDescription {
             get {
@@ -115,7 +115,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Help command is used to display general help and also help information about other commands..
+        ///   Looks up a localized string similar to The Help command displays general help information and help information about other commands..
         /// </summary>
         internal static string HelpCommandDescription {
             get {
@@ -151,7 +151,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is define the default feed is used..
+        ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is specified the default feed is used..
         /// </summary>
         internal static string ListCommandDescription {
             get {
@@ -196,7 +196,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display a detailed list of information for each package..
+        ///   Looks up a localized string similar to Displays a detailed list of information for each package..
         /// </summary>
         internal static string ListCommandVerboseListDescription {
             get {
@@ -232,7 +232,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creates a NuGet package based on the provided NuSpec file..
+        ///   Looks up a localized string similar to Creates a NuGet package based on the specified NuSpec file..
         /// </summary>
         internal static string PackageCommandDescription {
             get {
@@ -241,7 +241,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory for the created NuGet file.
+        ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
             get {
@@ -286,7 +286,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Publish a package that has been uploaded to the server but not added to the live feed..
+        ///   Looks up a localized string similar to Publishes a package that was uploaded to the server but not added to the live feed..
         /// </summary>
         internal static string PublishCommandDescription {
             get {
@@ -295,7 +295,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your package has been published to the live feed..
+        ///   Looks up a localized string similar to Your package was published to the feed..
         /// </summary>
         internal static string PublishCommandPackagePublished {
             get {
@@ -349,7 +349,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Push a package to the server and optionaly publish it to the feed..
+        ///   Looks up a localized string similar to Pushes a package to the server and optionaly publish it to the feed..
         /// </summary>
         internal static string PushCommandDescription {
             get {
@@ -376,7 +376,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your package has been uploaded to the server but not published..
+        ///   Looks up a localized string similar to Your package was uploaded to the server but not published..
         /// </summary>
         internal static string PushCommandPackageCreated {
             get {
@@ -448,7 +448,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Too little arguments..
+        ///   Looks up a localized string similar to Too few arguments..
         /// </summary>
         internal static string TooFewArgsError {
             get {

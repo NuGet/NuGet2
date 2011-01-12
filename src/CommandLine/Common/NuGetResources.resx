@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DeleteCommandDeletedPackage" xml:space="preserve">
-    <value>{0} {1} has been deleted from the server</value>
+    <value>{0} {1} was deleted from the server</value>
   </data>
   <data name="DeleteCommandDeletingPackage" xml:space="preserve">
     <value>Deleting {0} {1} from the server.</value>
   </data>
   <data name="DeleteCommandDescription" xml:space="preserve">
-    <value>Delete a package from the server.</value>
+    <value>Deletes a package from the server.</value>
   </data>
   <data name="DeleteCommandSourceDescription" xml:space="preserve">
     <value>Specifies the base GalleryServer Url.</value>
@@ -136,7 +136,7 @@
     <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
   </data>
   <data name="HelpCommandDescription" xml:space="preserve">
-    <value>The Help command is used to display general help and also help information about other commands.</value>
+    <value>The Help command displays general help information and help information about other commands.</value>
   </data>
   <data name="HelpCommandUsageDecription" xml:space="preserve">
     <value>Pass a command name to display help information for that command.</value>
@@ -148,7 +148,7 @@
     <value>Invalid option value: '{0} {1}'</value>
   </data>
   <data name="ListCommandDescription" xml:space="preserve">
-    <value>Displays a list of packages at a given source. If no source is define the default feed is used.</value>
+    <value>Displays a list of packages at a given source. If no source is specified the default feed is used.</value>
   </data>
   <data name="ListCommandNoPackages" xml:space="preserve">
     <value>No packages found.</value>
@@ -163,7 +163,7 @@
     <value>[search terms] [options]</value>
   </data>
   <data name="ListCommandVerboseListDescription" xml:space="preserve">
-    <value>Display a detailed list of information for each package.</value>
+    <value>Displays a detailed list of information for each package.</value>
   </data>
   <data name="MissingOptionValueError" xml:space="preserve">
     <value>Missing option value for: '{0}'</value>
@@ -175,10 +175,10 @@
     <value>The Base Path of the files defined in the nuspec file.</value>
   </data>
   <data name="PackageCommandDescription" xml:space="preserve">
-    <value>Creates a NuGet package based on the provided NuSpec file.</value>
+    <value>Creates a NuGet package based on the specified NuSpec file.</value>
   </data>
   <data name="PackageCommandOutputDirDescription" xml:space="preserve">
-    <value>Specifies the directory for the created NuGet file</value>
+    <value>Specifies the directory for the created NuGet package file</value>
   </data>
   <data name="PackageCommandSpecifyNuSpecFileError" xml:space="preserve">
     <value>Please specify a nuspec file to use.</value>
@@ -193,10 +193,10 @@
     <value>&lt;manifest&gt; [options]</value>
   </data>
   <data name="PublishCommandDescription" xml:space="preserve">
-    <value>Publish a package that has been uploaded to the server but not added to the live feed.</value>
+    <value>Publishes a package that was uploaded to the server but not added to the live feed.</value>
   </data>
   <data name="PublishCommandPackagePublished" xml:space="preserve">
-    <value>Your package has been published to the live feed.</value>
+    <value>Your package was published to the feed.</value>
   </data>
   <data name="PublishCommandPublishingPackage" xml:space="preserve">
     <value>Publishing your package [ID:{0} Ver:{1}] to the live feed...</value>
@@ -214,7 +214,7 @@
     <value>Creating an entry for your package [ID:{0} Ver:{1}]...</value>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
-    <value>Push a package to the server and optionaly publish it to the feed.</value>
+    <value>Pushes a package to the server and optionaly publish it to the feed.</value>
   </data>
   <data name="PushCommandInvalidResponse" xml:space="preserve">
     <value>{0}: {1}</value>
@@ -223,7 +223,7 @@
     <value>There is no default source, please specify a source.</value>
   </data>
   <data name="PushCommandPackageCreated" xml:space="preserve">
-    <value>Your package has been uploaded to the server but not published.</value>
+    <value>Your package was uploaded to the server but not published.</value>
   </data>
   <data name="PushCommandPublishDescription" xml:space="preserve">
     <value>Specifies if the package should be published to the live feed. True by default.</value>
@@ -247,7 +247,7 @@
     <value>The resource type '{0}' does not have an accessible static property named '{1}'.</value>
   </data>
   <data name="TooFewArgsError" xml:space="preserve">
-    <value>Too little arguments.</value>
+    <value>Too few arguments.</value>
   </data>
   <data name="TooManyArgsError" xml:space="preserve">
     <value>Too many arguments.</value>
