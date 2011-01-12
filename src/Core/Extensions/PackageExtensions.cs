@@ -8,7 +8,8 @@ using System.Reflection;
 
 namespace NuGet {
     public static class PackageExtensions {
-        private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", "Tags" };
+        private const string TagsProperty = "Tags";
+        private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", TagsProperty };
 
         public static IEnumerable<IPackage> FindByVersion(this IEnumerable<IPackage> source, IVersionSpec versionSpec) {
             if (versionSpec == null) {
@@ -122,6 +123,11 @@ namespace NuGet {
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower",
             Justification = "The expression is remoted using Odata which does not support the culture parameter")]
         private static Expression BuildExpressionForTerm(ParameterExpression packageParameterExpression, string term, string propertyName) {
+            // For tags we want to prepend and append spaces to do an exact match
+            if (propertyName.Equals(TagsProperty, StringComparison.OrdinalIgnoreCase)) {
+                term = " " + term + " ";
+            }
+
             MethodInfo stringContains = typeof(String).GetMethod("Contains", new Type[] { typeof(string) });
             MethodInfo stringToLower = typeof(String).GetMethod("ToLower", Type.EmptyTypes);
 

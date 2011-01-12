@@ -105,8 +105,8 @@ namespace NuGet.Test {
             // Arrange
             var term = "TAG";
             var repo = new MockPackageRepository();
-            repo.Add(CreateMockPackage("A", "1.0", "Description", "TAG"));
-            repo.Add(CreateMockPackage("B", "2.0", "Description", "TagS"));
+            repo.Add(CreateMockPackage("A", "1.0", "Description", " TAG "));
+            repo.Add(CreateMockPackage("B", "2.0", "Description", "Tags"));
             repo.Add(CreateMockPackage("C", "1.0", "This description has tags in it"));
             repo.Add(CreateMockPackage("D", "1.0", "Description"));
             repo.Add(CreateMockPackage("TagCloud", "1.0", "Description"));
@@ -115,11 +115,10 @@ namespace NuGet.Test {
             var packages = repo.GetPackages().Find(term.Split()).ToList();
 
             // Assert
-            Assert.AreEqual(4, packages.Count);
+            Assert.AreEqual(3, packages.Count);
             Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual("B", packages[1].Id);
-            Assert.AreEqual("C", packages[2].Id);
-            Assert.AreEqual("TagCloud", packages[3].Id);
+            Assert.AreEqual("C", packages[1].Id);
+            Assert.AreEqual("TagCloud", packages[2].Id);
         }
 
         [TestMethod]
