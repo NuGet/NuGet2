@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace NuGet {
     public static class PackageExtensions {
-        private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description" };
+        private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", "Tags" };
 
         public static IEnumerable<IPackage> FindByVersion(this IEnumerable<IPackage> source, IVersionSpec versionSpec) {
             if (versionSpec == null) {
@@ -129,8 +129,12 @@ namespace NuGet {
             var propertyExpression = Expression.Property(packageParameterExpression, propertyName);
             // .ToLower()
             var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
-            // .Contains(term.ToLower())
-            return Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower()));
+            
+            // Handle potentially null properties
+            // package.{propertyName} != null && package.{propertyName}.ToLower().Contains(term.ToLower())
+            return Expression.AndAlso(Expression.NotEqual(propertyExpression, 
+                                                      Expression.Constant(null)),
+                                      Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower())));
         }
     }
 }

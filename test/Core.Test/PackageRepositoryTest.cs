@@ -101,6 +101,28 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void FindPackagesReturnsPackagesWithTermInPackageTagOrDescriptionOrId() {
+            // Arrange
+            var term = "TAG";
+            var repo = new MockPackageRepository();
+            repo.Add(CreateMockPackage("A", "1.0", "Description", "TAG"));
+            repo.Add(CreateMockPackage("B", "2.0", "Description", "TagS"));
+            repo.Add(CreateMockPackage("C", "1.0", "This description has tags in it"));
+            repo.Add(CreateMockPackage("D", "1.0", "Description"));
+            repo.Add(CreateMockPackage("TagCloud", "1.0", "Description"));
+
+            // Act
+            var packages = repo.GetPackages().Find(term.Split()).ToList();
+
+            // Assert
+            Assert.AreEqual(4, packages.Count);
+            Assert.AreEqual("A", packages[0].Id);
+            Assert.AreEqual("B", packages[1].Id);
+            Assert.AreEqual("C", packages[2].Id);
+            Assert.AreEqual("TagCloud", packages[3].Id);
+        }
+
+        [TestMethod]
         public void FindPackagesReturnsPackagesWithTerm() {
             // Arrange
             var term = "B xaml";
@@ -241,11 +263,12 @@ namespace NuGet.Test {
             return repository.Object;
         }
 
-        private static IPackage CreateMockPackage(string name, string version, string desc = null) {
+        private static IPackage CreateMockPackage(string name, string version, string desc = null, string tags = null) {
             Mock<IPackage> package = new Mock<IPackage>();
             package.SetupGet(p => p.Id).Returns(name);
             package.SetupGet(p => p.Version).Returns(Version.Parse(version));
             package.SetupGet(p => p.Description).Returns(desc);
+            package.SetupGet(p => p.Tags).Returns(tags);
             return package.Object;
         }
     }
