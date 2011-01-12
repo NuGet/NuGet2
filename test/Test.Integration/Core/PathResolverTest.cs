@@ -527,6 +527,31 @@ namespace NuGet.Test.Integration.PathResolver {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
+                                                    new File("foo.dll"))));
+
+            string search = Path.Combine(root, @"bin\release\*.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(package.Files.First().Path, @"lib\foo.dll");
+        }
+
+        /// <summary>
+        /// Source: [TestDir]\bin\release\net40\foo.dll, [TestDir]\bin\release\net35\foo.dll
+        /// Search: [TestDir]\bin\release\**\*.dll
+        /// Target: lib
+        /// Expected: lib\net40\foo.dll, lib\net35\foo.dll
+        /// </summary>
+        [TestMethod]
+        public void AbsolutePathWithRecursiveWildcard() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
                                                     new Dir("net40",
                                                         new File("foo.dll")),
                                                     new Dir("net35",

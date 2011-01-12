@@ -245,6 +245,45 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void RootedPathWithoutWildCard() {
+            // Arrange
+            var path = @"x:\foo\bar\baz.cs";
+            var expectedFilter = new PathSearchFilter { SearchDirectory = @"x:\foo\bar", SearchPattern = @"baz.cs", SearchOption = SearchOption.TopDirectoryOnly }; ;
+
+            // Act
+            var searchFilter = PathResolver.ResolveSearchFilter(@"C:\project-files", path);
+
+            // Assert
+            AssertEqual(expectedFilter, searchFilter);
+        }
+
+        [TestMethod]
+        public void RootedPathWithWildCard() {
+            // Arrange
+            var path = @"x:\foo\bar\*.cs";
+            var expectedFilter = new PathSearchFilter { SearchDirectory = @"x:\foo\bar", SearchPattern = @"*.cs", SearchOption = SearchOption.TopDirectoryOnly }; ;
+
+            // Act
+            var searchFilter = PathResolver.ResolveSearchFilter(@"C:\project-files", path);
+
+            // Assert
+            AssertEqual(expectedFilter, searchFilter);
+        }
+
+        [TestMethod]
+        public void RootedPathWithRecursiveWildCard() {
+            // Arrange
+            var path = @"x:\foo\bar\**\*.cs";
+            var expectedFilter = new PathSearchFilter { SearchDirectory = @"x:\foo\bar", SearchPattern = @"*.cs", SearchOption = SearchOption.AllDirectories }; ;
+
+            // Act
+            var searchFilter = PathResolver.ResolveSearchFilter(@"C:\project-files", path);
+
+            // Assert
+            AssertEqual(expectedFilter, searchFilter);
+        }
+
+        [TestMethod]
         public void DestinationPathResolverGeneratesRelativePaths() {
             // Arrange
             var path = @"root\sub-dir\foo\bar.txt";
@@ -269,19 +308,6 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(Path.Combine(targetPath, @"foo\bar.txt"), result);
-        }
-
-        [TestMethod]
-        public void DestinationPathResolverReturnsFileNamesForNonRelativePaths() {
-            // Arrange
-            var path = @"z:\bar\something.txt";
-            var basePath = @"x:\";
-
-            // Act
-            var result = PathResolver.ResolvePackagePath(new PathSearchFilter { SearchDirectory = basePath, SearchPattern = "something.txt", WildCardSearch = false }, path, String.Empty);
-
-            // Assert
-            Assert.AreEqual(@"something.txt", result);
         }
 
         [TestMethod]
