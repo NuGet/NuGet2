@@ -46,6 +46,7 @@
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />
+    <Compile Include="PackageSorterTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />

@@ -109,7 +109,7 @@ namespace NuGet {
                 }
             }
 
-            OnAfterDependencyWalk(package);
+            OnAfterPackageWalk(package);
         }
 
         protected virtual bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
@@ -119,7 +119,7 @@ namespace NuGet {
         protected virtual void OnBeforePackageWalk(IPackage package) {
         }
 
-        protected virtual void OnAfterDependencyWalk(IPackage package) {
+        protected virtual void OnAfterPackageWalk(IPackage package) {
         }
 
         protected virtual void OnDependencyResolveError(PackageDependency dependency) {

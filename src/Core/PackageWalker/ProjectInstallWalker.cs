@@ -25,11 +25,11 @@ namespace NuGet {
             return result;
         }
 
-        protected override void OnAfterDependencyWalk(IPackage package) {
+        protected override void OnAfterPackageWalk(IPackage package) {
             PackageWalkInfo info = GetPackageInfo(package);
 
             if (info.Target == PackageTargets.Project) {
-                base.OnAfterDependencyWalk(package);
+                base.OnAfterPackageWalk(package);
             }
         }
     }

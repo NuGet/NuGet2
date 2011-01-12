@@ -11,6 +11,7 @@ using EnvDTE80;
 using Microsoft.PowerShell;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
+using NuGet;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
@@ -73,7 +74,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             if (_solutionManager.IsSolutionOpen) {
                 var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
                 var localRepository = packageManager.LocalRepository;
-                foreach (var package in localRepository.GetPackages()) {
+
+                // invoke init.ps1 files in the order of package dependency.
+                // if A -> B, we invoke B's init.ps1 before A's.
+
+                var sorter = new PackageSorter();
+                var sortedPackages = sorter.GetPackagesByDependencyOrder(localRepository);
+
+                foreach (var package in sortedPackages) {
                     string installPath = packageManager.PathResolver.GetInstallPath(package);
 
                     this.AddPathToEnvironment(Path.Combine(installPath, "tools"));

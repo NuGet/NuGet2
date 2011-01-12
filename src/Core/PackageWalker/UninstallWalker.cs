@@ -96,7 +96,7 @@ namespace NuGet {
             return true;
         }
 
-        protected override void OnAfterDependencyWalk(IPackage package) {
+        protected override void OnAfterPackageWalk(IPackage package) {
             Operations.Push(new PackageOperation(package, PackageAction.Uninstall));
         }
 

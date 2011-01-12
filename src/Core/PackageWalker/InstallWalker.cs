@@ -116,7 +116,7 @@ namespace NuGet {
             }
         }
 
-        protected override void OnAfterDependencyWalk(IPackage package) {
+        protected override void OnAfterPackageWalk(IPackage package) {
             Operations.Add(new PackageOperation(package, PackageAction.Install));
         }
 
