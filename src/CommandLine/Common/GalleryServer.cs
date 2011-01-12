@@ -8,19 +8,19 @@
     using System.Runtime.Serialization.Json;
 
     public class GalleryServer {
-        private const string _defaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
-        private const string _CreatePackageService = "PackageFiles";
-        private const string _PackageService = "Packages";
-        private const string _PublichPackageService = "PublishedPackages/Publish";
+        private const string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
+        private const string CreatePackageService = "PackageFiles";
+        private const string PackageService = "Packages";
+        private const string PublichPackageService = "PublishedPackages/Publish";
 
         //REVIEW: What should be the User agent
-        private const string _UserAgentPattern = "Nuget/{0} ({1})";
+        private const string _UserAgentPattern = "NuGet/{0} ({1})";
         
         private string _baseGalleryServerUrl;
         private string _userAgent;
 
         public GalleryServer()
-            : this(_defaultGalleryServerUrl) {
+            : this(DefaultGalleryServerUrl) {
         }
 
         public GalleryServer(string galleryServerUrl) {
@@ -31,12 +31,8 @@
         }
 
         public void CreatePackage(string apiKey, Stream package) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, _CreatePackageService, apiKey));
-
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = "application/octet-stream";
-            request.Method = "POST";
-            request.UserAgent = _userAgent;
+            var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
+            var request = CreateRequest(url, "POST", "application/octet-stream");
 
             byte[] file = package.ReadAllBytes();
             request.ContentLength = file.Length;
@@ -47,12 +43,8 @@
         }
 
         public void CreatePackage(string apiKey, string externalUrl) {
-            var url = new Uri(String.Format("{0}/{1}/CreateFromExternalUrl", _baseGalleryServerUrl, _CreatePackageService));
-
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = "application/json";
-            request.Method = "POST";
-            request.UserAgent = _userAgent;
+            var url = new Uri(String.Format("{0}/{1}/CreateFromExternalUrl", _baseGalleryServerUrl, CreatePackageService));
+            var request = CreateRequest(url, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new CreateFromExternalUrlData {
@@ -70,12 +62,8 @@
         }
 
         public void PublishPackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, _PublichPackageService));
-
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = "application/json";
-            request.Method = "POST";
-            request.UserAgent = _userAgent;
+            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, PublichPackageService));
+            var request = CreateRequest(url, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new PublishData {
@@ -92,21 +80,16 @@
         }
 
         public void DeletePackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, _PackageService, apiKey, packageID, packageVersion));
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = "DELETE";
-            request.UserAgent = _userAgent;
+            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, PackageService, apiKey, packageID, packageVersion));
+            var request = CreateRequest(url, "DELETE", "text/html");
             request.ContentLength = 0;
 
             GetResponse(request);
         }
 
         public void RatePackage(string packageID, string packageVersion, string rating) {
-            var url = new Uri(String.Format("{0}/{1}/{2}", _baseGalleryServerUrl, _PackageService, "RatePackage"));
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = "application/json";
-            request.Method = "POST";
-            request.UserAgent = _userAgent;
+            var url = new Uri(String.Format("{0}/{1}/{2}", _baseGalleryServerUrl, PackageService, "RatePackage"));
+            var request = CreateRequest(url, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new RatePackageData {
@@ -120,6 +103,14 @@
             }
 
             GetResponse(request);
+        }
+
+        private HttpWebRequest CreateRequest(Uri url, string method, string contentType) {
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.ContentType = contentType;
+            request.Method = method;
+            request.UserAgent = _userAgent;
+            return request;
         }
 
         private WebResponse GetResponse(WebRequest request) {

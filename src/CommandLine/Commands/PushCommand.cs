@@ -54,7 +54,7 @@
             Console.WriteLine(NuGetResources.PushCommandPackageCreated);
             
             if (Publish) {
-                PublishCommand cmd = new PublishCommand(Console);
+                var cmd = new PublishCommand(Console);
                 cmd.Source = Source;
                 cmd.Arguments = new List<string> { pkg.Id, pkg.Version.ToString(), _apiKey };
                 cmd.Execute();
