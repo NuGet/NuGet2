@@ -158,12 +158,13 @@ namespace NuGet.Cmdlets {
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {
-            var packageList = packages.ToList();
-
-            if (packageList.Count > 0) {
-                WriteObject(packageList, enumerateCollection: true);
+            bool hasPackage = false;
+            foreach (var package in packages) {
+                hasPackage = true;
+                WriteObject(package);
             }
-            else {
+
+            if (!hasPackage) {
                 if (!UseRemoteSource) {
                     Log(MessageLevel.Info, Resources.Cmdlet_NoPackagesInstalled);
                 }
