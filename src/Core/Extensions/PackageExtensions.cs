@@ -122,7 +122,7 @@ namespace NuGet {
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower",
             Justification = "The expression is remoted using Odata which does not support the culture parameter")]
         private static Expression BuildExpressionForTerm(ParameterExpression packageParameterExpression, string term, string propertyName) {
-            MethodInfo stringContains = typeof(String).GetMethod("Contains");
+            MethodInfo stringContains = typeof(String).GetMethod("Contains", new Type[] { typeof(string) });
             MethodInfo stringToLower = typeof(String).GetMethod("ToLower", Type.EmptyTypes);
 
             // package.Id / package.Description
