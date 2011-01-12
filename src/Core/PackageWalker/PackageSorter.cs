@@ -35,7 +35,8 @@ namespace NuGet{
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
-
+            Marker.Clear();
+            
             _repository = repository;
             _sortedPackages = new List<IPackage>();
             
