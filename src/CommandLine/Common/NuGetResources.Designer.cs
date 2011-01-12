@@ -61,7 +61,61 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Help command is used to display general help and also help information about other commands..
+        ///   Looks up a localized string similar to {0} {1} was deleted from the server.
+        /// </summary>
+        internal static string DeleteCommandDeletedPackage {
+            get {
+                return ResourceManager.GetString("DeleteCommandDeletedPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleting {0} {1} from the server..
+        /// </summary>
+        internal static string DeleteCommandDeletingPackage {
+            get {
+                return ResourceManager.GetString("DeleteCommandDeletingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deletes a package from the server..
+        /// </summary>
+        internal static string DeleteCommandDescription {
+            get {
+                return ResourceManager.GetString("DeleteCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
+        /// </summary>
+        internal static string DeleteCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("DeleteCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the Id and version of the package to delete from the server..
+        /// </summary>
+        internal static string DeleteCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("DeleteCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options].
+        /// </summary>
+        internal static string DeleteCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("DeleteCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Help command displays general help information and help information about other commands..
         /// </summary>
         internal static string HelpCommandDescription {
             get {
@@ -97,7 +151,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is define the default feed is used..
+        ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is specified the default feed is used..
         /// </summary>
         internal static string ListCommandDescription {
             get {
@@ -142,7 +196,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display a detailed list of information for each package..
+        ///   Looks up a localized string similar to Displays a detailed list of information for each package..
         /// </summary>
         internal static string ListCommandVerboseListDescription {
             get {
@@ -178,7 +232,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creates a NuGet package based on the provided NuSpec file..
+        ///   Looks up a localized string similar to Creates a NuGet package based on the specified NuSpec file..
         /// </summary>
         internal static string PackageCommandDescription {
             get {
@@ -187,7 +241,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory for the created NuGet file.
+        ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
             get {
@@ -232,6 +286,60 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Publishes a package that was uploaded to the server but not added to the live feed..
+        /// </summary>
+        internal static string PublishCommandDescription {
+            get {
+                return ResourceManager.GetString("PublishCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your package was published to the feed..
+        /// </summary>
+        internal static string PublishCommandPackagePublished {
+            get {
+                return ResourceManager.GetString("PublishCommandPackagePublished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishing your package [ID:{0} Ver:{1}] to the live feed....
+        /// </summary>
+        internal static string PublishCommandPublishingPackage {
+            get {
+                return ResourceManager.GetString("PublishCommandPublishingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
+        /// </summary>
+        internal static string PublishCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("PublishCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the Id and Version of the package that will be publised to the lve feed..
+        /// </summary>
+        internal static string PublishCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("PublishCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options].
+        /// </summary>
+        internal static string PublishCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("PublishCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creating an entry for your package [ID:{0} Ver:{1}]....
         /// </summary>
         internal static string PushCommandCreatingPackage {
@@ -241,7 +349,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Push a package to the server and publish it to the feed..
+        ///   Looks up a localized string similar to Pushes a package to the server and optionaly publish it to the feed..
         /// </summary>
         internal static string PushCommandDescription {
             get {
@@ -268,20 +376,11 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your package has been uploaded to the server but not published..
+        ///   Looks up a localized string similar to Your package was uploaded to the server but not published..
         /// </summary>
         internal static string PushCommandPackageCreated {
             get {
                 return ResourceManager.GetString("PushCommandPackageCreated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your package has been published to the live feed..
-        /// </summary>
-        internal static string PushCommandPackagePublished {
-            get {
-                return ResourceManager.GetString("PushCommandPackagePublished", resourceCulture);
             }
         }
         
@@ -291,15 +390,6 @@ namespace NuGet.Common {
         internal static string PushCommandPublishDescription {
             get {
                 return ResourceManager.GetString("PushCommandPublishDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Publishing your package [ID:{0} Ver:{1}] to the live feed....
-        /// </summary>
-        internal static string PushCommandPublishingPackage {
-            get {
-                return ResourceManager.GetString("PushCommandPublishingPackage", resourceCulture);
             }
         }
         
@@ -358,7 +448,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Too little arguments..
+        ///   Looks up a localized string similar to Too few arguments..
         /// </summary>
         internal static string TooFewArgsError {
             get {

@@ -27,6 +27,8 @@
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
+    <Compile Include="Commands\PublishCommand.cs" />
+    <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
@@ -37,6 +39,7 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Common\Console.cs" />
+    <Compile Include="Common\GalleryServer.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
