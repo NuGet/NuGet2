@@ -52,7 +52,7 @@ ScriptsToProcess = @('Scripts\profile.ps1')
 TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('Scripts\Types.format.ps1xml')
+FormatsToProcess = @('Scripts\NuGet.Format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
 NestedModules = @('NuGet.Cmdlets.dll')
