@@ -66,16 +66,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\VsConsole\PowerShellHost\Scripts\Types.format.ps1xml">
-      <Link>Scripts\Types.format.ps1xml</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.psd1">
       <Link>NuGet.psd1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\nuget.psm1">
       <Link>Scripts\nuget.psm1</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.Format.ps1xml">
+      <Link>Scripts\NuGet.Format.ps1xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="Resources\Toolbar.png" />
