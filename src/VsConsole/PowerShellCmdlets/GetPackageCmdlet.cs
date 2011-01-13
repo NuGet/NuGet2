@@ -174,6 +174,9 @@ namespace NuGet.Cmdlets {
             bool hasPackage = false;
             foreach (var package in packages) {
                 hasPackage = true;
+                if (this.Stopping) {
+                    break;
+                }
                 WriteObject(package);
             }
 

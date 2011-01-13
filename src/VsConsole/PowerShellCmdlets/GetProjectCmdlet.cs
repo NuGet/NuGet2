@@ -45,7 +45,11 @@ namespace NuGet.Cmdlets
                 }
                 else {
                     foreach (string projectName in this.Name) {
-                        
+
+                        if (this.Stopping) {
+                            break;
+                        }
+
                         // Treat every name as a wildcard; results in simpler code
                         var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
 
