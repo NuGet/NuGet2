@@ -28,7 +28,6 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!_solutionManager.IsSolutionOpen) {
-                // terminating
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
@@ -41,13 +40,7 @@ namespace NuGet.Cmdlets {
 
                 // if no default project (empty solution), throw terminating
                 if (project == null) {
-                    // terminating
-                    ErrorHandler.HandleException(
-                        new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
-                        terminating: true,
-                        errorId: NuGetErrorId.NoCompatibleProjects,
-                        category: ErrorCategory.ObjectNotFound,
-                        target: null);
+                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
                 }
                 
                 projects.Add(project);

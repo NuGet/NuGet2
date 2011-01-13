@@ -29,6 +29,7 @@
     <Compile Include="FindPackageCmdlet.cs" />
     <Compile Include="GetPackageCmdlet.cs" />
     <Compile Include="GetProjectCmdlet.cs" />
+    <Compile Include="IErrorHandler.cs" />
     <Compile Include="InstallPackageCmdlet.cs" />
     <Compile Include="NewPackageCmdlet.cs" />
     <Compile Include="NuGetBaseCmdlet.cs" />

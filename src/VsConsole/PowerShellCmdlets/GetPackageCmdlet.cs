@@ -93,8 +93,6 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
-                // Should be terminating error, not WriteError as 
-                // no records can be processed in current state.
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 

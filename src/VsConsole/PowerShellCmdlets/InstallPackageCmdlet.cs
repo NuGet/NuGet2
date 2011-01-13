@@ -43,7 +43,6 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
-                // terminating
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 

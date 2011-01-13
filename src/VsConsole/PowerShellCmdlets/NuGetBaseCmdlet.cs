@@ -191,6 +191,14 @@ namespace NuGet.Cmdlets {
                 category: ErrorCategory.InvalidOperation);
         }
 
+        void IErrorHandler.ThrowNoCompatibleProjectsTerminatingError() {
+            ErrorHandler.HandleException(
+                new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
+                terminating: true,
+                errorId: NuGetErrorId.NoCompatibleProjects,
+                category: ErrorCategory.InvalidOperation);
+        }
+
         void IErrorHandler.HandleError(ErrorRecord error, bool terminating) {
             if (terminating) {
                 ThrowTerminatingError(error);

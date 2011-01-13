@@ -26,8 +26,9 @@ namespace NuGet.Cmdlets {
             : base(solutionManager, packageManagerFactory) {
         }
 
-        [Parameter(Position = 0)]
+        [Parameter(Position = 0, ValueFromPipelineByPropertyName=true)]
         [ValidateNotNullOrEmpty]
+        [Alias("Name")] // <EnvDTE.Project>.Name
         public string Project { get; set; }
 
         [Parameter(Mandatory=true, Position = 1)]
@@ -39,6 +40,9 @@ namespace NuGet.Cmdlets {
         [ValidateNotNullOrEmpty]
         public string TargetFile { get; set; }
 
+        /// <summary>
+        /// If present, New-Package will not overwrite TargetFile.
+        /// </summary>
         [Parameter]
         public SwitchParameter NoClobber { get; set; }
 
@@ -54,17 +58,13 @@ namespace NuGet.Cmdlets {
                 projectName = SolutionManager.DefaultProjectName;
             }
 
-            // no default project? empty solution
+            // no default project? empty solution or no compatible projects found
             if (String.IsNullOrEmpty(projectName)) {
-                // terminating
-                ErrorHandler.HandleException(
-                    new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
-                    terminating: true);                
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
             }
 
             var projectIns = SolutionManager.GetProject(projectName);
             if (projectIns == null) {
-                // terminating
                 ErrorHandler.WriteProjectNotFoundError(projectName, terminating: true);
             }
 
