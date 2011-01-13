@@ -74,7 +74,7 @@ namespace NuGet.Cmdlets {
 
                 // If that project was invalid then throw
                 if (project == null) {
-                    throw new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects);
+                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
                 }
             }
             else if (!String.IsNullOrEmpty(SolutionManager.DefaultProjectName)) {
