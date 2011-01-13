@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Cmdlet_MissingProjectParameter" xml:space="preserve">
-    <value>Missing Project parameter or invalid project name.</value>
+  <data name="Cmdlet_NoCompatibleProjects" xml:space="preserve">
+    <value>No compatible project(s) found in the active solution.</value>
   </data>
   <data name="Cmdlet_NoSolution" xml:space="preserve">
     <value>The current environment doesn't have a solution open.</value>

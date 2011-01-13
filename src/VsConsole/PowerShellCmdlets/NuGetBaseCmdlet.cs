@@ -1,18 +1,46 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
+using EnvDTE;
 using Microsoft.PowerShell.Commands;
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
 
-    public interface IErrorHandler {        
+    /// <summary>
+    /// Interface defining common NuGet Cmdlet error handling and generation operations.
+    /// </summary>
+    public interface IErrorHandler {
+        /// <summary>
+        /// Handles a native PowerShell ErrorRecord. If terminating is set to true, this method does not return.
+        /// </summary>
+        /// <param name="error">The record representing the error condition.</param>
+        /// <param name="terminating">If true, write a terminating error else write to error stream.</param>
         void HandleError(ErrorRecord error, bool terminating);
+        /// <summary>
+        /// Handles a regular BCL Exception. If terminating is set to true, this method does not return.
+        /// </summary>
+        /// <param name="exception">The exception representing the error condition.</param>
+        /// <param name="terminating">If true, write a terminating error else write to error stream.</param>
+        /// <param name="errorId">The local-agnostic error id to use. Well-known error ids are defined in <see cref="NuGet.Cmdlets.NuGetErrorId"/>.</param>
+        /// <param name="category">The PowerShell ErrorCategory to use.</param>
+        /// <param name="target">The context object associated with this error condition. This may be null.</param>
         void HandleException(Exception exception, bool terminating, string errorId = NuGetErrorId.CmdletUnhandledException, ErrorCategory category = ErrorCategory.NotSpecified, object target = null);
+        /// <summary>
+        /// Generates an error to signify the specified project was not found. If terminating is set to true, this method does not return.
+        /// </summary>
+        /// <param name="projectName"></param>
+        /// <param name="terminating"></param>
         void WriteProjectNotFoundError(string projectName, bool terminating);
-        void ThrowSolutionNotOpenTerminatingError();        
+        /// <summary>
+        /// Generates a terminating error to signify there is no open solution. This method does not return.
+        /// </summary>
+        void ThrowSolutionNotOpenTerminatingError();
     }
 
     /// <summary>
@@ -109,6 +137,41 @@ namespace NuGet.Cmdlets {
             }
 
             return PackageManagerFactory.CreatePackageManager();
+        }
+
+        /// <summary>
+        /// Return all projects in the solution matching the provided names. Wildcards are supported.
+        /// </summary>
+        /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
+        /// <returns>Projects matching the project name(s) provided.</returns>
+        protected IEnumerable<Project> GetProjectsByName(string[] projectNames) {
+            
+            foreach (string projectName in projectNames) {
+                // if ctrl+c hit, leave immediately
+                if (this.Stopping) {
+                    break;
+                }
+
+                // Treat every name as a wildcard; results in simpler code
+                var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
+
+                var matches =
+                    (from project in _solutionManager.GetProjects()        
+                    where pattern.IsMatch(project.Name)
+                    select project).ToList();
+
+                // We only emit non-terminating error record if a non-wildcarded name was not found.
+                // This is consistent with built-in cmdlets that support wildcarded search.
+                // A search with a wildcard that returns nothing should not be considered an error.
+                if ((matches.Count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName)) {
+                    ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
+                }
+                else {
+                    foreach (Project project in matches) {
+                        yield return project;
+                    }
+                }
+            }
         }
 
         /// <summary>

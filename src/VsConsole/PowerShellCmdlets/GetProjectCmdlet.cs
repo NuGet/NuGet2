@@ -31,43 +31,25 @@ namespace NuGet.Cmdlets
         [Parameter(Mandatory=true, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
-        protected override void ProcessRecordCore()
-        {
+        protected override void ProcessRecordCore() {
+            if (!SolutionManager.IsSolutionOpen) {
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+
             if (All.IsPresent) {
                 WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
             }
             else {
-                var projects = new List<Project>();
-
-                // No name specified; return default project
+                // No name specified; return default project (if not null)
                 if (this.Name == null) {
-                    projects.Add(_solutionManager.DefaultProject);
-                }
-                else {
-                    foreach (string projectName in this.Name) {
-
-                        if (this.Stopping) {
-                            break;
-                        }
-
-                        // Treat every name as a wildcard; results in simpler code
-                        var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
-
-                        var matches = from project in _solutionManager.GetProjects() // cached in dictionary, not expensive to call
-                                      where pattern.IsMatch(project.Name)
-                                      select project;
-
-                        projects.AddRange(matches); // possibly adding empty collection here, but no cost for simpler code.
-
-                        // We only emit non-terminating error record if a non-wildcarded name was not found.
-                        // This is consistent with built-in cmdlets that support wildcarded search.
-                        // A search with a wildcard that returns nothing should not be considered an error.
-                        if ((matches.Count() == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName)) {
-                            ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
-                        }
+                    if (_solutionManager.DefaultProject != null) {
+                        WriteObject(_solutionManager.DefaultProject);
                     }
                 }
-                WriteObject(projects, enumerateCollection: true);
+                else {
+                    // get all projects matching name(s) - handles wildcards
+                    WriteObject(GetProjectsByName(this.Name), enumerateCollection: true);
+                }
             }
         }
     }

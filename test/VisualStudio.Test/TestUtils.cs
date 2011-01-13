@@ -54,6 +54,9 @@ namespace NuGet.VisualStudio.Test {
         public static ISolutionManager GetSolutionManager(bool isSolutionOpen = true, string defaultProjectName = null, IEnumerable<Project> projects = null) {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.SetupGet(c => c.DefaultProjectName).Returns(defaultProjectName);
+            solutionManager.SetupGet(c => c.DefaultProject).Returns(
+                (projects ?? Enumerable.Empty<Project>()).
+                Where(p => p.Name == defaultProjectName).SingleOrDefault());
             solutionManager.Setup(c => c.GetProjects()).Returns(projects ?? Enumerable.Empty<Project>());
             solutionManager.Setup(c => c.GetProject(It.IsAny<string>()))
                 .Returns((string name) => projects.FirstOrDefault(p => p.Name == name));

@@ -58,7 +58,7 @@ namespace NuGet.Cmdlets {
             if (String.IsNullOrEmpty(projectName)) {
                 // terminating
                 ErrorHandler.HandleException(
-                    new InvalidOperationException(Resources.Cmdlet_MissingProjectParameter),
+                    new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
                     terminating: true);                
             }
 

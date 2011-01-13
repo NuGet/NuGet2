@@ -115,20 +115,20 @@ namespace NuGet.Cmdlets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing Project parameter or invalid project name..
-        /// </summary>
-        internal static string Cmdlet_MissingProjectParameter {
-            get {
-                return ResourceManager.GetString("Cmdlet_MissingProjectParameter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unable to retrieve package list because no source was specified..
         /// </summary>
         internal static string Cmdlet_NoActivePackageSource {
             get {
                 return ResourceManager.GetString("Cmdlet_NoActivePackageSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No compatible project(s) found in the active solution..
+        /// </summary>
+        internal static string Cmdlet_NoCompatibleProjects {
+            get {
+                return ResourceManager.GetString("Cmdlet_NoCompatibleProjects", resourceCulture);
             }
         }
         

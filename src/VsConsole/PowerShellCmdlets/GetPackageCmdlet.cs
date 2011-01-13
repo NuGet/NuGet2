@@ -93,17 +93,9 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
-
                 // Should be terminating error, not WriteError as 
                 // no records can be processed in current state.
-                ThrowTerminatingError(
-                    new ErrorRecord(
-                        new InvalidOperationException(Resources.Cmdlet_NoSolution),
-                        NuGetErrorId.NoActiveSolution,
-                        ErrorCategory.InvalidOperation,
-                        null));
-
-                return;
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             IPackageRepository repository;
@@ -173,10 +165,12 @@ namespace NuGet.Cmdlets {
         private void WritePackages(IEnumerable<IPackage> packages) {
             bool hasPackage = false;
             foreach (var package in packages) {
-                hasPackage = true;
-                if (this.Stopping) {
+                // exit early if ctrl+c pressed
+                if (this.Stopping)
+                {
                     break;
                 }
+                hasPackage = true;
                 WriteObject(package);
             }
 

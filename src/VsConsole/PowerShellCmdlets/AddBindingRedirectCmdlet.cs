@@ -10,84 +10,80 @@ using NuGet.VisualStudio;
 namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
     [OutputType(typeof(AssemblyBinding))]
-    public class AddBindingRedirectCmdlet : Cmdlet {        
+    public class AddBindingRedirectCmdlet : NuGetBaseCmdlet {        
         private readonly ISolutionManager _solutionManager;
 
         public AddBindingRedirectCmdlet()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public AddBindingRedirectCmdlet(ISolutionManager solutionManager) {
+        public AddBindingRedirectCmdlet(ISolutionManager solutionManager) : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
 
-        [Parameter(Position = 0)]
+        [Parameter(Position = 0,ValueFromPipelineByPropertyName=true)]
         [ValidateNotNullOrEmpty]
-        public string Project { get; set; }
+        [Alias("Name")] // <EnvDTE.Project>.Name
+        public string[] Project { get; set; }
 
-        protected override void ProcessRecord() {
+        protected override void ProcessRecordCore() {
             if (!_solutionManager.IsSolutionOpen) {
-                WriteError(Resources.Cmdlet_NoSolution);
-                return;
+                // terminating
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            // Get the specified project
-            Project project = GetProject();
+            var projects = new List<Project>();
 
+            // if no project specified, use default
+            if (Project == null)
+            {
+                Project project = _solutionManager.DefaultProject;
+
+                // if no default project (empty solution), throw terminating
+                if (project == null) {
+                    // terminating
+                    ErrorHandler.HandleException(
+                        new InvalidOperationException(Resources.Cmdlet_NoCompatibleProjects),
+                        terminating: true,
+                        errorId: NuGetErrorId.NoCompatibleProjects,
+                        category: ErrorCategory.ObjectNotFound,
+                        target: null);
+                }
+                
+                projects.Add(project);
+            }
+            else {
+                // get matching projects, expanding wildcards
+                projects.AddRange(GetProjectsByName(this.Project));
+            }
+            
             // Create a new app domain so we don't load the assemblies into the host app domain
             AppDomain domain = AppDomain.CreateDomain("domain");
-
+            
             try {
-                // Get the project's output path
-                string outputPath = project.GetOutputPath();
+                foreach (Project project in projects) {
+                    // Get the project's output path
+                    string outputPath = project.GetOutputPath();
 
-                // Get the binding redirects from the output path
-                IEnumerable<AssemblyBinding> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath, domain);
-                
-                // Create a project system
-                IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
+                    // Get the binding redirects from the output path
+                    IEnumerable<AssemblyBinding> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath,
+                                                                                                         domain);
+                    // Create a project system
+                    IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
-                // Create a binding redirect manager over the configuration
-                var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
+                    // Create a binding redirect manager over the configuration
+                    var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
 
-                // Add the redirects
-                manager.AddBindingRedirects(redirects);
+                    // Add the redirects
+                    manager.AddBindingRedirects(redirects);
 
-                // Print out what we did
-                WriteObject(redirects, enumerateCollection: true);
+                    // Print out what we did
+                    WriteObject(redirects, enumerateCollection: true);
+                }
             }
             finally {
                 AppDomain.Unload(domain);
             }
-        }
-
-        [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
-        protected void WriteError(string message) {
-            if (!String.IsNullOrEmpty(message)) {
-                WriteError(new Exception(message));
-            }
-        }
-
-        protected void WriteError(Exception exception) {
-            WriteError(new ErrorRecord(exception, String.Empty, ErrorCategory.NotSpecified, null));
-        }
-
-        private Project GetProject() {
-            Debug.Assert(_solutionManager.IsSolutionOpen);
-
-            Project project = null;
-            if (!String.IsNullOrEmpty(Project)) {
-                project = _solutionManager.GetProject(Project);
-            }
-
-            // If project is null fall back to the default project
-            project = project ?? _solutionManager.DefaultProject;
-
-            if (project == null) {
-                throw new InvalidOperationException(Resources.Cmdlet_MissingProjectParameter);
-            }
-
-            return project;
         }
     }
 }
