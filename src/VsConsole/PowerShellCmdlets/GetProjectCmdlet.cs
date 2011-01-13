@@ -1,41 +1,69 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
+using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.Cmdlets
+{
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = "Single")]
-    public class GetProjectCmdlet : Cmdlet {
+    [Cmdlet(VerbsCommon.Get, "Project")]
+    [OutputType(typeof(Project))]
+    public class GetProjectCmdlet : NuGetBaseCmdlet {
         private readonly ISolutionManager _solutionManager;
 
         public GetProjectCmdlet()
-            : this(ServiceLocator.GetInstance<ISolutionManager>()) {
-
+            : this(ServiceLocator.GetInstance<ISolutionManager>())
+        {
         }
 
-        public GetProjectCmdlet(ISolutionManager solutionManager) {
+        public GetProjectCmdlet(ISolutionManager solutionManager) : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
 
-        [Parameter(Position = 0, ParameterSetName = "Single")]
-        public string Name { get; set; }
+        [Parameter(Mandatory=true, Position = 0, ParameterSetName = "ByName")]
+        [ValidateNotNullOrEmpty]
+        public string[] Name { get; set; }
 
-        [Parameter(Position = 0, ParameterSetName = "All")]
+        [Parameter(Mandatory=true, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
-        protected override void ProcessRecord() {
+        protected override void ProcessRecordCore()
+        {
             if (All.IsPresent) {
                 WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
             }
             else {
-                string projectName = Name;
-                if (string.IsNullOrEmpty(projectName)) {
-                    // if the Name parameter is not specified, get the default project name
-                    projectName = _solutionManager.DefaultProjectName;
+                var projects = new List<Project>();
+
+                // No name specified; return default project
+                if (this.Name == null) {
+                    projects.Add(_solutionManager.DefaultProject);
                 }
-                WriteObject(_solutionManager.GetProject(projectName));
+                else {
+                    foreach (string projectName in this.Name) {
+                        
+                        // Treat every name as a wildcard; results in simpler code
+                        var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
+
+                        var matches = from project in _solutionManager.GetProjects() // cached in dictionary, not expensive to call
+                                      where pattern.IsMatch(project.Name)
+                                      select project;
+
+                        projects.AddRange(matches); // possibly adding empty collection here, but no cost for simpler code.
+
+                        // We only emit non-terminating error record if a non-wildcarded name was not found.
+                        // This is consistent with built-in cmdlets that support wildcarded search.
+                        // A search with a wildcard that returns nothing should not be considered an error.
+                        if ((matches.Count() == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName)) {
+                            ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
+                        }
+                    }
+                }
+                WriteObject(projects, enumerateCollection: true);
             }
         }
     }

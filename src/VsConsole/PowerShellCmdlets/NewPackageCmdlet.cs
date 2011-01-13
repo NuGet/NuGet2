@@ -27,64 +27,149 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
         public string Project { get; set; }
 
-        [Parameter(Position = 1)]
+        [Parameter(Mandatory=true, Position = 1)]
         [Alias("Spec")]
+        [ValidateNotNullOrEmpty]
         public string SpecFile { get; set; }
 
-        [Parameter(Position = 2)]
+        [Parameter(Mandatory=true, Position = 2)]
+        [ValidateNotNullOrEmpty]
         public string TargetFile { get; set; }
+
+        [Parameter]
+        public SwitchParameter NoClobber { get; set; }
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
-                throw new InvalidOperationException(Resources.Cmdlet_NoSolution);
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             string projectName = Project;
+
+            // no project specified - choose default
             if (String.IsNullOrEmpty(projectName)) {
                 projectName = SolutionManager.DefaultProjectName;
             }
 
+            // no default project? empty solution
             if (String.IsNullOrEmpty(projectName)) {
-                WriteError(Resources.Cmdlet_MissingProjectParameter);
-                return;
+                // terminating
+                ErrorHandler.HandleException(
+                    new InvalidOperationException(Resources.Cmdlet_MissingProjectParameter),
+                    terminating: true);                
             }
 
             var projectIns = SolutionManager.GetProject(projectName);
             if (projectIns == null) {
-                WriteError(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_ProjectNotFound, projectName));
-                return;
+                // terminating
+                ErrorHandler.WriteProjectNotFoundError(projectName, terminating: true);
             }
 
-            ProjectItem specFile;
-            try {
-                specFile = FindSpecFile(projectIns, SpecFile).SingleOrDefault();
-            }
-            catch (InvalidOperationException) {
-                // Single would throw if more than one spec files were found
-                WriteError(Resources.Cmdlet_TooManySpecFiles);
-                return;
-            }
-            if (specFile == null) {
-                WriteError(Resources.Cmdlet_NuspecFileNotFound);
-                return;
-            }
-            string specFilePath = specFile.FileNames[0];
-            
+            string specFilePath = GetSpecFilePath(projectIns);
 
             var builder = new NuGet.PackageBuilder(specFilePath);
-            
-            // Get the output file path
-            string outputFile = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);
+
+            string outputFilePath = GetTargetFilePath(projectIns, builder);
+
             // Remove .nuspec and .nupkg files from output package 
             RemoveExludedFiles(builder);
             
-            WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_CreatingPackage, outputFile));
-            using(Stream stream = File.Create(outputFile)) {
+            WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_CreatingPackage, outputFilePath));
+            using(Stream stream = File.Create(outputFilePath)) {
                 builder.Save(stream);
             }
             WriteLine(Resources.Cmdlet_PackageCreated);
+        }
+
+        private string GetSpecFilePath(Project projectIns) {
+            string filePath = null;
+            string specFilePath = null;
+            ProjectItem specFile = null;
+
+            // spec file provided?
+            if (SpecFile != null) {
+                string errorMessage;
+                bool? exists;
+
+                // yes, so translate from PSPath to win32 path
+                if (!TryTranslatePSPath(SpecFile, out filePath, out exists, out errorMessage)) {
+                    // terminating
+                    ErrorHandler.HandleException(
+                        new ItemNotFoundException(Resources.Cmdlet_InvalidPathSyntax),
+                        terminating: true,
+                        errorId: NuGetErrorId.FileNotFound,
+                        category: ErrorCategory.InvalidArgument,
+                        target: SpecFile);
+                }
+            }
+            try
+            {
+                specFile = FindSpecFile(projectIns, filePath).SingleOrDefault();
+            }
+            catch (InvalidOperationException)
+            {
+                // SingleOrDefault will throw if more than one spec files were found
+                // terminating
+                ErrorHandler.HandleException(
+                    new InvalidOperationException(Resources.Cmdlet_TooManySpecFiles),
+                    terminating: true,
+                    errorId: NuGetErrorId.TooManySpecFiles,
+                    category: ErrorCategory.InvalidOperation);
+            }
+
+            if (specFile == null)
+            {
+                // terminating
+                ErrorHandler.HandleException(
+                    new ItemNotFoundException(Resources.Cmdlet_NuspecFileNotFound),
+                    terminating: true,
+                    errorId: NuGetErrorId.NuspecFileNotFound,
+                    category: ErrorCategory.ObjectNotFound,
+                    target: SpecFile);
+            }
+            else
+            {
+                specFilePath = specFile.FileNames[0];
+            }
+            return specFilePath;
+        }
+
+        private string GetTargetFilePath(Project projectIns, PackageBuilder builder) {
+            string outputFilePath = null;
+            string filePath;
+            bool? exists;
+            string errorMessage;
+
+            if (TryTranslatePSPath(TargetFile, out filePath, out exists, out errorMessage)) {
+
+                // Get the output file path
+                outputFilePath = GetPackageFilePath(filePath, projectIns.FullName, builder.Id, builder.Version);
+
+                // prevent overwrite if -NoClobber specified
+                if (exists == true && NoClobber.IsPresent) {
+                    // terminating
+                    ErrorHandler.HandleException(
+                        new UnauthorizedAccessException(String.Format(
+                            Resources.Cmdlet_FileExistsNoClobber, TargetFile)),
+                        terminating: true,
+                        errorId: NuGetErrorId.FileExistsNoClobber,
+                        category: ErrorCategory.PermissionDenied,
+                        target: TargetFile);
+                }
+            }
+            else {
+                // terminating
+                ErrorHandler.HandleException(
+                    new ItemNotFoundException(Resources.Cmdlet_InvalidPathSyntax),
+                    terminating: true,
+                    errorId: NuGetErrorId.FileNotFound,
+                    category: ErrorCategory.InvalidArgument,
+                    target: SpecFile);
+            }
+            return outputFilePath;
         }
 
         internal static string GetPackageFilePath(string outputFile, string projectPath, string id, Version version) {

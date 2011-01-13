@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
@@ -32,8 +34,8 @@ namespace NuGet.Cmdlets.Test {
             var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
             cmdlet.Project = project;
 
-            // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
+            // Act and Assert            
+            ExceptionAssert.Throws<ItemNotFoundException>(() => cmdlet.GetResults(),
                 String.Format("Project '{0}' is not found.", project));
         }
 
@@ -49,7 +51,7 @@ namespace NuGet.Cmdlets.Test {
             cmdlet.Project = projectName;
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
+            ExceptionAssert.Throws<ItemNotFoundException>(() => cmdlet.GetResults(),
                 "Unable to locate a .nuspec file in the specified project.");
         }
 

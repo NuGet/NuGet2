@@ -49,10 +49,10 @@ RequiredAssemblies = @()
 ScriptsToProcess = @('Scripts\profile.ps1')
 
 # Type files (.ps1xml) to be loaded when importing this module
-TypesToProcess = @()
+TypesToProcess = @('scripts\nuget.types.ps1xml')
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('Scripts\NuGet.Format.ps1xml')
+FormatsToProcess = @('Scripts\nuget.format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
 NestedModules = @('NuGet.Cmdlets.dll')
@@ -64,10 +64,10 @@ FunctionsToExport = @('NugetTabExpansion', 'Register-TabExpansion')
 CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
 
 # Variables to export from this module
-VariablesToExport = '*'
+VariablesToExport = ''
 
 # Aliases to export from this module
-AliasesToExport = '*'
+AliasesToExport = ''
 
 # List of all modules packaged with this module
 ModuleList = @()

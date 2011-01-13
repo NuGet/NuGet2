@@ -5,14 +5,19 @@ using System.Management.Automation;
 
 namespace NuGet.Cmdlets.Test {
     public class MockCommandRuntime : ICommandRuntime {
+        
         private readonly List<object> _output;
+        private readonly List<ErrorRecord> _errors;
+        private readonly List<string> _warnings;
 
         // Methods
-        public MockCommandRuntime(List<object> outputList) {
-            if (outputList == null) {
-                throw new ArgumentNullException("outputList");
+        public MockCommandRuntime(List<object> output, List<ErrorRecord> errors, List<string> warnings) {
+            if (output == null) {
+                throw new ArgumentNullException("output");
             }
-            _output = outputList;
+            _output = output;
+            _errors = errors;
+            _warnings = warnings;
         }
 
         public bool ShouldContinue(string query, string caption) {
@@ -58,10 +63,9 @@ namespace NuGet.Cmdlets.Test {
         }
 
         public void WriteError(ErrorRecord errorRecord) {
-            if (errorRecord.Exception != null) {
-                throw new InvalidOperationException(errorRecord.Exception.Message, errorRecord.Exception);
+            if (_errors != null) {
+                _errors.Add(errorRecord);
             }
-            throw new InvalidOperationException(errorRecord.ToString());
         }
 
         public void WriteObject(object sendToPipeline) {
@@ -95,6 +99,9 @@ namespace NuGet.Cmdlets.Test {
         }
 
         public void WriteWarning(string text) {
+            if (this._warnings != null) {
+                this._warnings.Add(text);
+            }
         }
 
         public PSTransactionContext CurrentPSTransaction {

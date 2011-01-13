@@ -15,7 +15,8 @@ namespace NuGet.Cmdlets.Test {
             var cmdlet = BuildCmdlet();
 
             // Act
-            var result = cmdlet.Invoke<Project>();
+            //var result = cmdlet.Invoke<Project>();
+            var result = cmdlet.GetResults<Project>();
             var project = result.SingleOrDefault();
 
             // Assert
@@ -27,10 +28,10 @@ namespace NuGet.Cmdlets.Test {
         public void GetProjectCmdletReturnsProjectWhenProjectNameIsSpecified() {
             // Arrange
             var cmdlet = BuildCmdlet();
-            cmdlet.Name = "WebSite1";
+            cmdlet.Name = new [] { "WebSite1" };
 
             // Act
-            var result = cmdlet.Invoke<Project>();
+            var result = cmdlet.GetResults<Project>();
             var project = result.SingleOrDefault();
 
             // Assert
@@ -42,10 +43,10 @@ namespace NuGet.Cmdlets.Test {
         public void GetProjectCmdletDoesNotThrowWhenProjectNameDoesNotExist() {
             // Arrange
             var cmdlet = BuildCmdlet();
-            cmdlet.Name = "WebSite2";
+            cmdlet.Name = new [] { "WebSite2" };
 
             // Act
-            var result = cmdlet.Invoke<Project>();
+            var result = cmdlet.GetResults<Project>();
             var project = result.SingleOrDefault();
 
             // Assert
@@ -59,7 +60,7 @@ namespace NuGet.Cmdlets.Test {
             cmdlet.All = new SwitchParameter(isPresent: true);
 
             // Act
-            var result = cmdlet.Invoke<Project>();
+            var result = cmdlet.GetResults<Project>();
 
             // Assert
             Assert.AreEqual(3, result.Count());

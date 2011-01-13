@@ -9,6 +9,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
+    [OutputType(typeof(AssemblyBinding))]
     public class AddBindingRedirectCmdlet : Cmdlet {        
         private readonly ISolutionManager _solutionManager;
 
@@ -21,6 +22,7 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
         public string Project { get; set; }
 
         protected override void ProcessRecord() {

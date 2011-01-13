@@ -41,6 +41,7 @@
     <Compile Include="NewPackageCmdletTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetProjectCmdletTest.cs" />
+    <Compile Include="PSPathTranslationTests.cs" />
     <Compile Include="UninstallPackageCmdletTest.cs" />
     <Compile Include="UpdatePackageCmdletTest.cs" />
   </ItemGroup>

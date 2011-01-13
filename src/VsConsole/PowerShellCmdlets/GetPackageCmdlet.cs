@@ -9,7 +9,8 @@ namespace NuGet.Cmdlets {
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = "Default")]
+    [Cmdlet(VerbsCommon.Get, "Package")]
+    [OutputType(typeof(IPackage))]
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
@@ -41,16 +42,19 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
 
-        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [Parameter(Mandatory=true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
         public SwitchParameter ListAvailable { get; set; }
 
-        [Parameter(Position = 1, ParameterSetName = "Updates")]
+        [Parameter(Mandatory=true, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
-        [Parameter(Position = 2)]
+        [Parameter(Position = 1, ParameterSetName = "Updates")]
+        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
         [Parameter]
@@ -89,7 +93,16 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
-                WriteError(Resources.Cmdlet_NoSolution);
+
+                // Should be terminating error, not WriteError as 
+                // no records can be processed in current state.
+                ThrowTerminatingError(
+                    new ErrorRecord(
+                        new InvalidOperationException(Resources.Cmdlet_NoSolution),
+                        NuGetErrorId.NoActiveSolution,
+                        ErrorCategory.InvalidOperation,
+                        null));
+
                 return;
             }
 

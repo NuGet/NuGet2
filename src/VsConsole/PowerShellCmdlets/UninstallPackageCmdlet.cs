@@ -22,16 +22,16 @@ namespace NuGet.Cmdlets {
         [Parameter(Position = 2)]
         public Version Version { get; set; }
 
-        [Parameter(Position = 3)]
+        [Parameter]
         public SwitchParameter Force { get; set; }
 
-        [Parameter(Position = 4)]
+        [Parameter]
         public SwitchParameter RemoveDependencies { get; set; }
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
-                WriteError(Resources.Cmdlet_NoSolution);
-                return;
+                // terminating
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             IProjectManager projectManager = ProjectManager;

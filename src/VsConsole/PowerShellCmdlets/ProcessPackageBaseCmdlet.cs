@@ -23,6 +23,7 @@ namespace NuGet.Cmdlets {
         public string Id { get; set; }
 
         [Parameter(Position = 1)]
+        [ValidateNotNullOrEmpty]
         public string Project { get; set; }
         
         protected IProjectManager ProjectManager {
