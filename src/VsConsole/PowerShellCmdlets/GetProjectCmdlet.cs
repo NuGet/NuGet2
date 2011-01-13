@@ -10,7 +10,7 @@ namespace NuGet.Cmdlets
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Project")]
+    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(Project))]
     public class GetProjectCmdlet : NuGetBaseCmdlet {
         private readonly ISolutionManager _solutionManager;

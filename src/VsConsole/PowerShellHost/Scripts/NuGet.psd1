@@ -49,10 +49,10 @@ RequiredAssemblies = @()
 ScriptsToProcess = @('Scripts\profile.ps1')
 
 # Type files (.ps1xml) to be loaded when importing this module
-TypesToProcess = @('scripts\nuget.types.ps1xml')
+TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('Scripts\nuget.format.ps1xml')
+FormatsToProcess = @('Scripts\Types.format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
 NestedModules = @('NuGet.Cmdlets.dll')

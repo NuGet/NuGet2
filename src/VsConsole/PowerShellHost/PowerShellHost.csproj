@@ -73,7 +73,7 @@
     <None Include="Scripts\NuGet.psd1" />
     <None Include="Scripts\nuget.psm1" />
     <None Include="Scripts\Profile.ps1" />
-    <None Include="Scripts\NuGet.Format.ps1xml" />
+    <None Include="Scripts\Types.Format.ps1xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">

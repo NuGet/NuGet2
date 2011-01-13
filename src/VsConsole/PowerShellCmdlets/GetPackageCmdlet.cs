@@ -9,7 +9,7 @@ namespace NuGet.Cmdlets {
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Package")]
+    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
