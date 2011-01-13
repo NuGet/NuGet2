@@ -122,5 +122,71 @@
             </ListControl>
         </View>
 
+        <View>
+            <Name>EnvDTE.Project</Name>
+            <ViewSelectedBy>
+                <TypeName>System.__ComObject#{866311e6-c887-4143-9833-645f5b93f6f1}</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Width>40</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Kind</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>Name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    switch ($_.Kind) {
+                                        "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
+                                        "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
+                                        default { $_.Kind }
+                                    }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+        
+        <View>
+            <Name>NuGet.Runtime.AssemblyBinding</Name>
+            <ViewSelectedBy>
+                <TypeName>NuGet.Runtime.AssemblyBinding</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Width>40</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader />
+                    <TableColumnHeader />
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>Name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>OldVersion</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>NewVersion</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+
     </ViewDefinitions>
 </Configuration>
