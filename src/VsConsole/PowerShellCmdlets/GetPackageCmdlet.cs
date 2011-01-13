@@ -166,8 +166,7 @@ namespace NuGet.Cmdlets {
             bool hasPackage = false;
             foreach (var package in packages) {
                 // exit early if ctrl+c pressed
-                if (this.Stopping)
-                {
+                if (this.Stopping) {
                     break;
                 }
                 hasPackage = true;
