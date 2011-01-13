@@ -7,7 +7,7 @@
                 <TypeName>NuGet.ZipPackage</TypeName>
                 <TypeName>NuGet.DataServicePackage</TypeName>
             </ViewSelectedBy>
-        
+
             <TableControl>
                 <TableHeaders>
                     <TableColumnHeader>
@@ -36,17 +36,16 @@
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
-                 </TableRowEntries>
+                </TableRowEntries>
             </TableControl>
         </View>
-    
+
         <View>
             <Name>NuGet.IPackage.List</Name>
             <ViewSelectedBy>
                 <TypeName>NuGet.ZipPackage</TypeName>
-                <TypeName>NuGet.DataServicePackage</TypeName>
             </ViewSelectedBy>
-            
+
             <ListControl>
                 <ListEntries>
                     <ListEntry>
@@ -79,6 +78,49 @@
                 </ListEntries>
             </ListControl>
         </View>
-        
+
+        <View>
+            <Name>NuGet.IPackage.List</Name>
+            <ViewSelectedBy>
+                <TypeName>NuGet.DataServicePackage</TypeName>
+            </ViewSelectedBy>
+
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <PropertyName>Id</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <PropertyName>Version</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Authors</Label>
+                                <ScriptBlock>
+                                    $authors = if ($_.Authors -is [string[]]) { $_.Authors -join ',' } else { $_.Authors };
+                                    return $authors;
+                                </ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <PropertyName>Description</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Dependencies</Label>
+                                <ScriptBlock>
+                                    $dependencies = if ($_.Dependencies -is [string]) { $_.Dependencies.Split('|') } else { $_.Dependencies };
+                                    return $dependencies;
+                                </ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Downloads</Label>
+                                <PropertyName>DownloadCount</PropertyName>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
+
     </ViewDefinitions>
 </Configuration>
