@@ -118,7 +118,7 @@ namespace NuGet.Cmdlets {
             
             foreach (string projectName in projectNames) {
                 // if ctrl+c hit, leave immediately
-                if (this.Stopping) {
+                if (Stopping) {
                     break;
                 }
 
@@ -155,7 +155,7 @@ namespace NuGet.Cmdlets {
         /// <returns>True if successfully translated, false if not.</returns>
         protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage)
         {
-            return PSPathUtility.TryTranslatePSPath(this.SessionState, psPath, out path, out exists, out errorMessage);
+            return PSPathUtility.TryTranslatePSPath(SessionState, psPath, out path, out exists, out errorMessage);
         }
         
         [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]

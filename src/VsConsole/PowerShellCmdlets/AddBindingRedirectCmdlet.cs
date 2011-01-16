@@ -47,7 +47,7 @@ namespace NuGet.Cmdlets {
             }
             else {
                 // get matching projects, expanding wildcards
-                projects.AddRange(GetProjectsByName(this.Project));
+                projects.AddRange(GetProjectsByName(Project));
             }
             
             // Create a new app domain so we don't load the assemblies into the host app domain

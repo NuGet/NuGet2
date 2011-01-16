@@ -41,14 +41,14 @@ namespace NuGet.Cmdlets
             }
             else {
                 // No name specified; return default project (if not null)
-                if (this.Name == null) {
+                if (Name == null) {
                     if (_solutionManager.DefaultProject != null) {
                         WriteObject(_solutionManager.DefaultProject);
                     }
                 }
                 else {
                     // get all projects matching name(s) - handles wildcards
-                    WriteObject(GetProjectsByName(this.Name), enumerateCollection: true);
+                    WriteObject(GetProjectsByName(Name), enumerateCollection: true);
                 }
             }
         }

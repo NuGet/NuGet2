@@ -69,22 +69,22 @@ namespace NuGet.Cmdlets.Test {
         }
 
         public void WriteObject(object sendToPipeline) {
-            this._output.Add(sendToPipeline);
+            _output.Add(sendToPipeline);
         }
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection) {
             if (!enumerateCollection) {
-                this._output.Add(sendToPipeline);
+                _output.Add(sendToPipeline);
             }
             else {
                 IEnumerator enumerator = LanguagePrimitives.GetEnumerator(sendToPipeline);
                 if (enumerator != null) {
                     while (enumerator.MoveNext()) {
-                        this._output.Add(enumerator.Current);
+                        _output.Add(enumerator.Current);
                     }
                 }
                 else {
-                    this._output.Add(sendToPipeline);
+                    _output.Add(sendToPipeline);
                 }
             }
         }
@@ -99,8 +99,8 @@ namespace NuGet.Cmdlets.Test {
         }
 
         public void WriteWarning(string text) {
-            if (this._warnings != null) {
-                this._warnings.Add(text);
+            if (_warnings != null) {
+                _warnings.Add(text);
             }
         }
 
