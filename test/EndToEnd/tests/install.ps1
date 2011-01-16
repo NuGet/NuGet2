@@ -140,3 +140,42 @@ function Test-InstallPackageInvokeInstallScriptAndInitScript {
     # This asserts install.ps1 gets called
     Assert-Reference $p System.Windows.Forms
 }
+
+function Test-InstallComplexPackageStructure {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package MyFirstPackage -Project $p.Name -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-NotNull (Get-ProjectItem $p Pages\Blocks\Help\Security)
+    Assert-NotNull (Get-ProjectItem $p Pages\Blocks\Security\App_LocalResources)
+}
+
+function Test-InstallPackageWithWebConfigDebugChanges {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package PackageWithWebDebugConfig -Project $p.Name -Source $context.RepositoryRoot
+
+    # Assert
+    $configItem = Get-ProjectItem $p web.config
+    $configDebugItem = $configItem.ProjectItems.Item("web.debug.config")
+    $configDebugPath = $configDebugItem.Properties.Item("FullPath").Value
+    $configDebug = [xml](Get-Content $configDebugPath)
+    Assert-NotNull $configDebug
+    Assert-NotNull ($configDebug.configuration.connectionStrings.add)
+    $addNode = $configDebug.configuration.connectionStrings.add
+    Assert-AreEqual MyDB $addNode.name
+    Assert-AreEqual "Data Source=ReleaseSQLServer;Initial Catalog=MyReleaseDB;Integrated Security=True" $addNode.connectionString
+}

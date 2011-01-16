@@ -57,25 +57,22 @@ namespace NuGet.VisualStudio {
         }
 
         public static bool TryGetFolder(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
-            return TryGetProjectItem(projectItems, name, new[] { VsConstants.VsProjectItemKindPhysicalFolder }, out projectItem);
+            projectItem = GetProjectItem(projectItems, name, VsConstants.VsProjectItemKindPhysicalFolder);
+
+            return projectItem != null;
         }
 
         public static bool TryGetFile(this ProjectItems projectItems, string name, out ProjectItem projectItem) {
-            return TryGetProjectItem(projectItems, name, new[] { VsConstants.VsProjectItemKindPhysicalFile }, out projectItem);
-        }
-
-        public static bool TryGetProjectItem(this ProjectItems projectItems, string name, IEnumerable<string> kinds, out ProjectItem projectItem) {
-            projectItem = GetProjectItem(projectItems, name);
+            projectItem = GetProjectItem(projectItems, name, VsConstants.VsProjectItemKindPhysicalFile);
 
             if (projectItem == null) {
                 // If we didn't find the project item at the top level, then we look one more level down.
                 // In VS files can have other nested files like aspx and aspx.cs. These are actually top level files in the file system
                 // but are represented as nested project items in VS.
                 projectItem = (from ProjectItem item in projectItems
-                               where kinds.Contains(item.Kind) &&
-                                     item.ProjectItems != null &&
+                               where item.ProjectItems != null &&
                                      item.ProjectItems.Count > 0
-                               select GetProjectItem(item.ProjectItems, name) into item
+                               select GetProjectItem(item.ProjectItems, name, VsConstants.VsProjectItemKindPhysicalFile) into item
                                where item != null
                                select item).FirstOrDefault();
             }
@@ -88,9 +85,11 @@ namespace NuGet.VisualStudio {
             return project.IsWebProject() ? WebConfig : AppConfig;
         }
 
-        private static ProjectItem GetProjectItem(ProjectItems projectItems, string name) {
+        private static ProjectItem GetProjectItem(ProjectItems projectItems, string name, string kind) {
             return (from ProjectItem item in projectItems
-                    where item.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+                    where item.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
+                          item.Kind != null &&
+                          item.Kind.Equals(kind, StringComparison.OrdinalIgnoreCase)
                     select item).FirstOrDefault();
         }
 
