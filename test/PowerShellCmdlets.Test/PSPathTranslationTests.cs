@@ -38,7 +38,7 @@ namespace NuGet.Cmdlets.Test
             $errorMessage = $null
 
             # wrap call in hashtable to return results
-            @{{success = [nuget.cmdlets.pspathutility]::trytranslatepspath(
+            @{{success = [nuget.cmdlets.test.pspathutilityproxy]::trytranslatepspath(
                 $executioncontext.sessionstate,
                 '{0}', # pspath
                 [ref]$path,
@@ -50,7 +50,7 @@ namespace NuGet.Cmdlets.Test
             }}";
 
         [TestInitialize]
-        public void InititializePowerShell() {            
+        public void InititializePowerShell() {
             // create temp file
             _tempFilePath = Path.GetTempFileName();
             
@@ -69,16 +69,13 @@ namespace NuGet.Cmdlets.Test
                 .AddParameter("Root", Path.GetTempPath());
             _ps.Invoke();
             Assert.IsTrue(_ps.Streams.Error.Count == 0, "Failed to create mytemp psdrive.");
-        }
 
-        private void ResetPowerShell() {
-            _ps.Commands.Clear();
             _ps.Streams.ClearStreams();
+            _ps.Commands.Clear();
         }
 
         [TestMethod]
         public void TranslatePSPathThatShouldExist() {
-            ResetPowerShell();
 
             string psPath = "mytemp:\\" + Path.GetFileName(_tempFilePath);
 
@@ -96,7 +93,6 @@ namespace NuGet.Cmdlets.Test
 
         [TestMethod]
         public void TranslatePSPathThatShouldNotExist() {
-            ResetPowerShell();
             
             string randomFile = Path.GetRandomFileName();
             string psPath = "mytemp:\\" + randomFile;
@@ -112,7 +108,7 @@ namespace NuGet.Cmdlets.Test
             Assert.IsFalse((bool)result["exists"]);
             Assert.IsTrue((string)result["path"] == win32Path);
         }
-
+        
         [TestCleanup]
         public void CleanupPowerShell() {
             _ps.Dispose();
