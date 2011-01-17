@@ -273,4 +273,10 @@
   <data name="Dialog_HostSetupFailed" xml:space="preserve">
     <value>This package (or one of its dependencies) contains PowerShell scripts but attempt to load the PowerShell .</value>
   </data>
+  <data name="Dialog_RecentProvider" xml:space="preserve">
+    <value>Recent packages</value>
+  </data>
+  <data name="Dialog_RecentProviderNoItem" xml:space="preserve">
+    <value>There are no recently installed packages.</value>
+  </data>
 </root>

@@ -23,6 +23,12 @@ namespace NuGet.VisualStudio {
             _packageSourceProvider = packageSourceProvider;
         }
 
+        public string Source {
+            get {
+                return ActiveRepository.Source;
+            }
+        }
+
         private IPackageRepository ActiveRepository {
             get {
                 if (_packageSourceProvider.ActivePackageSource == null) {

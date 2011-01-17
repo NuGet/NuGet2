@@ -9,10 +9,9 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.Providers;
-using NuGet.VisualStudio;
-using NuGetConsole;
-using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 using NuGet.OutputWindowConsole;
+using NuGet.VisualStudio;
+using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuGet.Dialog.PackageManagerUI {
 
@@ -32,7 +31,9 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageSourceProvider packageSourceProvider,
                                     IProgressWindowOpener progressWindowOpener,
                                     IOutputConsoleProvider consoleProvider,
-                                    IScriptExecutor scriptExecutor)
+                                    IScriptExecutor scriptExecutor,
+                                    [param: Import("RecentPackagesRepository")]
+                                    IPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
 
             InitializeComponent();
@@ -49,7 +50,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider, 
                 progressWindowOpener, 
                 consoleProvider,
-                scriptExecutor);
+                scriptExecutor,
+                recentPackagesRepository);
         }
 
         private void SetupProviders(DTE dte,
@@ -58,7 +60,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageSourceProvider packageSourceProvider,
                                     IProgressWindowOpener progressWindowOpener,
                                     IOutputConsoleProvider consoleProvider,
-                                    IScriptExecutor scriptExecutor) {
+                                    IScriptExecutor scriptExecutor,
+                                    IPackageRepository recentPackagesRepository) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -66,8 +69,15 @@ namespace NuGet.Dialog.PackageManagerUI {
             // Create a cached project manager so that checking for installed packages is fast
             IProjectManager projectManager = new CachedProjectManager(packageManager.GetProjectManager(activeProject));
 
-            // The ExtensionsExplorer control display providers in reverse order.
-            // We want the providers to appear as Installed - Online - Updates
+            var recentProvider = new RecentProvider(
+                activeProject,
+                projectManager,
+                Resources,
+                packageManagerFactory,
+                this,
+                progressWindowOpener,
+                scriptExecutor,
+                recentPackagesRepository);
 
             var updatesProvider = new UpdatesProvider(
                 activeProject,
@@ -79,7 +89,6 @@ namespace NuGet.Dialog.PackageManagerUI {
                 this,
                 progressWindowOpener,
                 scriptExecutor);
-            explorer.Providers.Add(updatesProvider);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -91,7 +100,6 @@ namespace NuGet.Dialog.PackageManagerUI {
                 this,
                 progressWindowOpener,
                 scriptExecutor);
-            explorer.Providers.Add(onlineProvider);
 
             var installedProvider = new InstalledProvider(
                 packageManager, 
@@ -100,7 +108,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                 Resources, 
                 progressWindowOpener,
                 scriptExecutor);
+
+            // We want the providers to appear as Installed - Online - Updates - Recents
+            // but the ExtensionsExplorer control display providers in "unknown" order.
+            // This was found by trial and error.
+            explorer.Providers.Add(recentProvider);
+            explorer.Providers.Add(updatesProvider);
             explorer.Providers.Add(installedProvider);
+            explorer.Providers.Add(onlineProvider);
 
             // make the Installed provider as selected by default
             explorer.SelectedProvider = installedProvider;

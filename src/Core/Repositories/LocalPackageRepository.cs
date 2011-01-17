@@ -25,6 +25,12 @@ namespace NuGet {
             PathResolver = pathResolver;
         }
 
+        public override string Source {
+            get {
+                return FileSystem.Root;
+            }
+        }
+
         protected IFileSystem FileSystem {
             get;
             private set;

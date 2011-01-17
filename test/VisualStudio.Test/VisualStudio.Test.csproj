@@ -32,6 +32,8 @@
     <Compile Include="Mocks\MockSolutionManager.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RecentPackageRepositoryTest.cs" />
+    <Compile Include="RecentPackageTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
     <Compile Include="VsPackageManagerTest.cs" />
     <Compile Include="VsPackageSourceProviderTest.cs" />

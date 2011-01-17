@@ -262,13 +262,13 @@ namespace NuGet {
             }
         }
 
-        private void OnInstalled(PackageOperationEventArgs e) {
+        protected virtual void OnInstalled(PackageOperationEventArgs e) {
             if (_packageInstalled != null) {
                 _packageInstalled(this, e);
             }
         }
 
-        private void OnUninstalled(PackageOperationEventArgs e) {
+        protected virtual void OnUninstalled(PackageOperationEventArgs e) {
             if (_packageUninstalled != null) {
                 _packageUninstalled(this, e);
             }

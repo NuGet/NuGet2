@@ -56,10 +56,6 @@ namespace NuGet.Dialog.Providers {
             activePackageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, true, this);
         }
 
-        protected override void OnExecuteCompleted(PackageItem item) {
-            item.UpdateEnabledStatus();
-        }
-
         public override IVsExtension CreateExtension(IPackage package) {
             return new PackageItem(this, package, null) {
                 CommandName = Resources.Dialog_UpdateButton

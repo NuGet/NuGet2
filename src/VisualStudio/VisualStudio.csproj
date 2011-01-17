@@ -65,7 +65,13 @@
     <Compile Include="IRepositorySettings.cs" />
     <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="MSBuildProjectExtensions.cs" />
+    <Compile Include="RecentRepository\IPersistencePackageSettingsManager.cs" />
+    <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
+    <Compile Include="RecentRepository\RecentPackage.cs" />
+    <Compile Include="RecentRepository\RecentPackagesRepository.cs" />
+    <Compile Include="RecentRepository\VsPersistencePackageSettingsManager.cs" />
     <Compile Include="RepositorySettings.cs" />
+    <Compile Include="SettingsManagerBase.cs" />
     <Compile Include="VsFileSystemProvider.cs" />
     <Compile Include="VsPackageManagerFactory.cs" />
     <Compile Include="DTEExtensions.cs" />

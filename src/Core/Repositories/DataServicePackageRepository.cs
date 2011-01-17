@@ -6,6 +6,7 @@ namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
+        private readonly string _source;
 
         public DataServicePackageRepository(Uri serviceRoot)
             : this(serviceRoot, new HttpClient()) {
@@ -13,9 +14,10 @@ namespace NuGet {
 
         public DataServicePackageRepository(Uri serviceRoot, IHttpClient client)
             : this(new DataServiceContextWrapper(serviceRoot), client) {
+            _source = serviceRoot.OriginalString;
         }
 
-        public DataServicePackageRepository(IDataServiceContext context, IHttpClient httpClient) {
+        private DataServicePackageRepository(IDataServiceContext context, IHttpClient httpClient) {
             if (context == null) {
                 throw new ArgumentNullException("context");
             }
@@ -30,6 +32,12 @@ namespace NuGet {
             _context.SendingRequest += OnSendingRequest;
             _context.ReadingEntity += OnReadingEntity;
             _context.IgnoreMissingProperties = true;
+        }
+
+        public override string Source {
+            get {
+                return _source;
+            }
         }
 
         private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {

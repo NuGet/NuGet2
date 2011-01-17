@@ -11,6 +11,13 @@ namespace NuGet {
         private readonly Dictionary<string, Dictionary<IPackage, VisitedState>> _visited = new Dictionary<string, Dictionary<IPackage, VisitedState>>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<IPackage, HashSet<IPackage>> _dependents = new Dictionary<IPackage, HashSet<IPackage>>(PackageEqualityComparer.IdAndVersion);
 
+        public string Source {
+            get {
+                // source doesn't matter for this class
+                return String.Empty;
+            }
+        }
+
         /// <summary>
         /// Returns all packages regardless we've ever seen
         /// </summary>

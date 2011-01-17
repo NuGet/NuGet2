@@ -8,15 +8,25 @@ namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
         private readonly IDictionary<Project, IProjectManager> _projects;
+        private readonly IPackageRepository _recentPackagesRepository;
 
         public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
                                 IFileSystem fileSystem,
-                                ISharedPackageRepository sharedRepository) :
+                                ISharedPackageRepository sharedRepository,
+                                IPackageRepository recentPackagesRepository) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
             _sharedRepository = sharedRepository;
             _projects = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
+            _recentPackagesRepository = recentPackagesRepository;
+        }
+
+        public VsPackageManager(ISolutionManager solutionManager,
+                                IPackageRepository sourceRepository,
+                                IFileSystem fileSystem,
+                                ISharedPackageRepository sharedRepository) : 
+            this(solutionManager, sourceRepository, fileSystem, sharedRepository, null) {
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
@@ -140,6 +150,15 @@ namespace NuGet.VisualStudio {
             if (projectManager != null) {
                 projectManager.Logger = logger;
                 projectManager.Project.Logger = logger;
+            }
+        }
+
+        protected override void OnInstalled(PackageOperationEventArgs e) {
+            base.OnInstalled(e);
+
+            // add the installed package to the recent repository
+            if (_recentPackagesRepository != null) {
+                _recentPackagesRepository.AddPackage(new RecentPackage(e.Package, SourceRepository.Source));
             }
         }
     }

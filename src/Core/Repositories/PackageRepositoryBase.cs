@@ -3,6 +3,9 @@ namespace NuGet {
     using System.Linq;
 
     public abstract class PackageRepositoryBase : IPackageRepository {
+
+        public abstract string Source { get; }
+
         public abstract IQueryable<IPackage> GetPackages();
 
         public virtual void AddPackage(IPackage package) {

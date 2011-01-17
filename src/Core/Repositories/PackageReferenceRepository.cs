@@ -27,6 +27,12 @@ namespace NuGet {
             SourceRepository = sourceRepository;
         }
 
+        public override string Source {
+            get {
+                return SourceRepository.Source;
+            }
+        }
+
         private IFileSystem FileSystem {
             get;
             set;

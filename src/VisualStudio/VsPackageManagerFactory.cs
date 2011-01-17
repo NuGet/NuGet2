@@ -9,6 +9,7 @@ namespace NuGet.VisualStudio {
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IRepositorySettings _repositorySettings;
+        private readonly IPackageRepository _recentPackageRepository;
 
         private RepositoryInfo _repositoryInfo;
 
@@ -16,7 +17,9 @@ namespace NuGet.VisualStudio {
         public VsPackageManagerFactory(ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,
                                        IFileSystemProvider fileSystemProvider,
-                                       IRepositorySettings repositorySettings) {
+                                       IRepositorySettings repositorySettings,
+                                       [param: Import("RecentPackagesRepository")]
+                                       IPackageRepository recentPackagesRepository) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
@@ -34,6 +37,7 @@ namespace NuGet.VisualStudio {
             _repositorySettings = repositorySettings;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
+            _recentPackageRepository = recentPackagesRepository;
 
             _solutionManager.SolutionClosing += (sender, e) => {
                 _repositoryInfo = null;
@@ -52,7 +56,7 @@ namespace NuGet.VisualStudio {
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
             RepositoryInfo info = GetRepositoryInfo();
 
-            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository);
+            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository, _recentPackageRepository);
         }
 
         private RepositoryInfo GetRepositoryInfo() {

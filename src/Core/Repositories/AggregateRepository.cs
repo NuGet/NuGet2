@@ -5,6 +5,13 @@ using System.Linq;
 namespace NuGet {
     public class AggregateRepository : PackageRepositoryBase {
         private readonly IEnumerable<IPackageRepository> _repositories;
+        private const string SourceValue = "(Aggregate source)";
+
+        public override string Source {
+            get {
+                return SourceValue;
+            }
+        }
 
         public AggregateRepository(IEnumerable<IPackageRepository> repositories) {
             if (repositories == null) {

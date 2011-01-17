@@ -259,6 +259,24 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recent packages.
+        /// </summary>
+        public static string Dialog_RecentProvider {
+            get {
+                return ResourceManager.GetString("Dialog_RecentProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no recently installed packages..
+        /// </summary>
+        public static string Dialog_RecentProviderNoItem {
+            get {
+                return ResourceManager.GetString("Dialog_RecentProviderNoItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Report Abuse.
         /// </summary>
         public static string Dialog_ReportAbuse {

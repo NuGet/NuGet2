@@ -1,11 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace NuGet.Test.Mocks {    
     public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage> {
         public MockPackageRepository() {
             Packages = new Dictionary<string, List<IPackage>>();
+        }
+
+        public override string Source {
+            get {
+                return String.Empty;
+            }
         }
 
         internal Dictionary<string, List<IPackage>> Packages {
