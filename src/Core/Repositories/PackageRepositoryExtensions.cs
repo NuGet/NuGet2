@@ -55,6 +55,15 @@ namespace NuGet {
             return packages.FirstOrDefault();
         }
 
+        public static IEnumerable<IPackage> FindPackages(this IPackageRepository repository, IEnumerable<string> packageIds) {
+            if (packageIds == null) {
+                throw new ArgumentNullException("packageIds");
+            }
+
+            Expression<Func<IPackage, bool>> filterExpression = GetFilterExpression(packageIds);
+            return repository.GetPackages().Where(filterExpression).OrderBy(p => p.Id);
+        }
+
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionInfo) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
@@ -174,8 +183,13 @@ namespace NuGet {
         /// p => p.Id == 'package1id' or p.Id == 'package2id' or p.Id == 'package3id'... up to package n
         /// </summary>
         private static Expression<Func<IPackage, bool>> GetFilterExpression(IEnumerable<IPackage> packages) {
+            return GetFilterExpression(packages.Select(p => p.Id));
+        }
+
+        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower", Justification = "This is for a linq query")]
+        private static Expression<Func<IPackage, bool>> GetFilterExpression(IEnumerable<string> ids) {
             ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
-            Expression expressionBody = packages.Select(package => GetCompareExpression(parameterExpression, package))
+            Expression expressionBody = ids.Select(id => GetCompareExpression(parameterExpression, id.ToLower()))
                                                 .Aggregate(Expression.OrElse);
 
             return Expression.Lambda<Func<IPackage, bool>>(expressionBody, parameterExpression);
@@ -184,14 +198,13 @@ namespace NuGet {
         /// <summary>
         /// Builds the expression: package.Id.ToLower() == "somepackageid"
         /// </summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower", Justification = "This is for a linq query")]
-        private static Expression GetCompareExpression(Expression parameterExpression, IPackage package) {
+        private static Expression GetCompareExpression(Expression parameterExpression, object value) {
             // package.Id
             Expression propertyExpression = Expression.Property(parameterExpression, "Id");
             // .ToLower()
             Expression toLowerExpression = Expression.Call(propertyExpression, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
             // == localPackage.Id
-            return Expression.Equal(toLowerExpression, Expression.Constant(package.Id.ToLower()));
+            return Expression.Equal(toLowerExpression, Expression.Constant(value));
         }
 
         private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {

@@ -68,22 +68,28 @@ namespace NuGet.VisualStudio {
 
         private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
             if (projectManager != null) {                
-                EventHandler<PackageOperationEventArgs> handler = (sender, e) => {
+                EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
                     // Remove any packages that would be removed as a result of updating a dependency or the package itself
                     // We can execute the uninstall directly since we don't need to resolve dependencies again
                     ExecuteUninstall(e.Package);
                 };
 
-                // Add the handler
-                projectManager.PackageReferenceRemoved += handler;
+                EventHandler<PackageOperationEventArgs> addHandler = (sender, e) => {
+                    AddPackageToRecentRepository(e.Package);
+                };
+
+                // Add the handlers
+                projectManager.PackageReferenceRemoved += removeHandler;
+                projectManager.PackageReferenceAdded += addHandler;
 
                 try {
                     // Add the package reference
                     projectManager.AddPackageReference(packageId, version, ignoreDependencies);
                 }
                 finally {
-                    // Remove the handler
-                    projectManager.PackageReferenceRemoved -= handler;
+                    // Remove the handlers
+                    projectManager.PackageReferenceRemoved -= removeHandler;
+                    projectManager.PackageReferenceAdded -= addHandler;
                 }
             }
         }
@@ -156,9 +162,13 @@ namespace NuGet.VisualStudio {
         protected override void OnInstalled(PackageOperationEventArgs e) {
             base.OnInstalled(e);
 
+            AddPackageToRecentRepository(e.Package);
+        }
+
+        private void AddPackageToRecentRepository(IPackage package) {
             // add the installed package to the recent repository
             if (_recentPackagesRepository != null) {
-                _recentPackagesRepository.AddPackage(new RecentPackage(e.Package, SourceRepository.Source));
+                _recentPackagesRepository.AddPackage(new RecentPackage(package, SourceRepository.Source));
             }
         }
     }

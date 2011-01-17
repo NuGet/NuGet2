@@ -12,10 +12,13 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        public string Source { get; private set; }
+        public string Source {
+            get {
+                return Repository.Source;
+            }
+        }
 
         public LazyRepository(IPackageRepositoryFactory factory, PackageSource source) {
-            Source = source.Source;
             _repository = new Lazy<IPackageRepository>(() => factory.CreateRepository(source));
         }
 

@@ -69,11 +69,11 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual(new Version("1.0"), packages[0].Version);
+            Assert.AreEqual("A", packages[1].Id);
+            Assert.AreEqual(new Version("1.0"), packages[1].Version);
 
-            Assert.AreEqual("C", packages[1].Id);
-            Assert.AreEqual(new Version("2.0"), packages[1].Version);
+            Assert.AreEqual("C", packages[0].Id);
+            Assert.AreEqual(new Version("2.0"), packages[0].Version);
         }
 
         private RecentPackagesRepository CreateRecentPackageRepository(bool empty = false) {
