@@ -13,6 +13,7 @@
       <Word>nuspec</Word>
       <Word>tfs</Word>
       <Word>PowerShell</Word>
+      <Word>ps</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>

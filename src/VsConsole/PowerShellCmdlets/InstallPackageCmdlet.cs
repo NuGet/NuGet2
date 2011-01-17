@@ -1,5 +1,6 @@
 using System;
 using System.Management.Automation;
+
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {

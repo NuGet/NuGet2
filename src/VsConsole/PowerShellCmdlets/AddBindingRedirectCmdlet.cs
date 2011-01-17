@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
+
 using EnvDTE;
 using NuGet.Runtime;
 using NuGet.VisualStudio;
@@ -20,10 +20,11 @@ namespace NuGet.Cmdlets {
         public AddBindingRedirectCmdlet(ISolutionManager solutionManager) : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
-
-        [Parameter(Position = 0,ValueFromPipelineByPropertyName=true)]
+        
+        [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         [Alias("Name")] // <EnvDTE.Project>.Name
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
         public string[] Project { get; set; }
 
         protected override void ProcessRecordCore() {

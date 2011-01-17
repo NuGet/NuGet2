@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
+
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -153,6 +154,7 @@ namespace NuGet.Cmdlets {
                     // terminating
                     ErrorHandler.HandleException(
                         new UnauthorizedAccessException(String.Format(
+                            CultureInfo.CurrentUICulture,
                             Resources.Cmdlet_FileExistsNoClobber, TargetFile)),
                         terminating: true,
                         errorId: NuGetErrorId.FileExistsNoClobber,

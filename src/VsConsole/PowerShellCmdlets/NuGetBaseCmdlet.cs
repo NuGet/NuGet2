@@ -1,13 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
+
 using EnvDTE;
-using Microsoft.PowerShell.Commands;
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
@@ -153,8 +152,10 @@ namespace NuGet.Cmdlets {
         /// <param name="exists">Returns null if not tested, or a bool representing path existence.</param>
         /// <param name="errorMessage">If translation failed, contains the reason.</param>
         /// <returns>True if successfully translated, false if not.</returns>
-        protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage)
-        {
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "PS is abbreviation.")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Following TryParse pattern in BCL", Target = "path")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "Following TryParse pattern in BCL", Target = "exists")]
+        protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage) {
             return PSPathUtility.TryTranslatePSPath(SessionState, psPath, out path, out exists, out errorMessage);
         }
         
@@ -172,7 +173,9 @@ namespace NuGet.Cmdlets {
         void IErrorHandler.WriteProjectNotFoundError(string projectName, bool terminating) {
             var notFoundException =
                 new ItemNotFoundException(
-                    string.Format(Resources.Cmdlet_ProjectNotFound, projectName));
+                    string.Format(
+                        CultureInfo.CurrentUICulture, 
+                        Resources.Cmdlet_ProjectNotFound, projectName));
 
             ErrorHandler.HandleError(
                 new ErrorRecord(
@@ -199,12 +202,12 @@ namespace NuGet.Cmdlets {
                 category: ErrorCategory.InvalidOperation);
         }
 
-        void IErrorHandler.HandleError(ErrorRecord error, bool terminating) {
+        void IErrorHandler.HandleError(ErrorRecord errorRecord, bool terminating) {
             if (terminating) {
-                ThrowTerminatingError(error);
+                ThrowTerminatingError(errorRecord);
             }
             else {
-                WriteError(error);
+                WriteError(errorRecord);
             }
         }
 
@@ -216,11 +219,7 @@ namespace NuGet.Cmdlets {
                 exception = exception.InnerException;
             }
 
-            var error = new ErrorRecord(
-                exception,
-                errorId,
-                category,
-                target);
+            var error = new ErrorRecord(exception, errorId, category, target);
 
             ErrorHandler.HandleError(error, terminating: terminating);
         }

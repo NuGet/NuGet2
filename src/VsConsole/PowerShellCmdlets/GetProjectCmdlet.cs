@@ -1,6 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
+
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -24,11 +24,13 @@ namespace NuGet.Cmdlets
             _solutionManager = solutionManager;
         }
 
-        [Parameter(Mandatory=true, Position = 0, ParameterSetName = "ByName")]
+        
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ByName")]
         [ValidateNotNullOrEmpty]
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
         public string[] Name { get; set; }
 
-        [Parameter(Mandatory=true, ParameterSetName = "All")]
+        [Parameter(Mandatory = true, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
         protected override void ProcessRecordCore() {

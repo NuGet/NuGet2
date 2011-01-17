@@ -9,7 +9,7 @@ namespace NuGet.Cmdlets {
     /// users searching for solutions to problems that may be in a different
     /// language than the human-readable error message accompanying them.
     /// </summary>
-    public static class NuGetErrorId {
+    internal static class NuGetErrorId {
         public const string NoCompatibleProjects = "NuGetNoCompatibleProjects";
         public const string ProjectNotFound = "NuGetProjectNotFound";
         public const string NoActiveSolution = "NuGetNoActiveSolution";

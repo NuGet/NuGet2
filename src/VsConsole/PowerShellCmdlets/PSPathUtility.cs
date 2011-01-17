@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Text;
 using Microsoft.PowerShell.Commands;
 
-namespace NuGet.Cmdlets
-{
-    public static class PSPathUtility
-    {
+namespace NuGet.Cmdlets {
+    public static class PSPathUtility {
         /// <summary>
         /// Translate a PSPath into a System.IO.* friendly Win32 path.
         /// Does not resolve/glob wildcards.
@@ -20,9 +16,12 @@ namespace NuGet.Cmdlets
         /// <param name="exists">Returns null if not tested, or a bool representing path existence.</param>
         /// <param name="errorMessage">If translation failed, contains the reason.</param>
         /// <returns>True if successfully translated, false if not.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "PS is abbreviation.")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification="Following BCL TryParse pattern.")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "Following BCL TryParse pattern.")]
         public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage) {
             if (String.IsNullOrEmpty(psPath)) {
-                throw new ArgumentException("psPath");
+                throw new ArgumentException(@"Argument is null or empty", "psPath");
             }
 
             bool succeeded = false;
@@ -32,7 +31,9 @@ namespace NuGet.Cmdlets
             errorMessage = null;
 
             if (!session.Path.IsValid(psPath)) {
-                errorMessage = String.Format(Resources.Cmdlet_InvalidPathSyntax, psPath);
+                errorMessage = String.Format(
+                    CultureInfo.CurrentUICulture,
+                    Resources.Cmdlet_InvalidPathSyntax, psPath);
             }
             else {
                 try {
@@ -57,7 +58,9 @@ namespace NuGet.Cmdlets
                     errorMessage = Resources.Cmdlet_InvalidProvider;
                 }
                 catch (DriveNotFoundException ex) {
-                    errorMessage = String.Format(Resources.Cmdlet_InvalidPSDrive, ex.ItemName);
+                    errorMessage = String.Format(
+                        CultureInfo.CurrentUICulture,
+                        Resources.Cmdlet_InvalidPSDrive, ex.ItemName);
                 }
             }
             return succeeded;

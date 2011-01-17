@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
   <Import Project="..\..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{84AC92A6-06B4-41B7-81EC-EFE91356D17C}</ProjectGuid>
@@ -29,6 +32,7 @@
     <Compile Include="FindPackageCmdlet.cs" />
     <Compile Include="GetPackageCmdlet.cs" />
     <Compile Include="GetProjectCmdlet.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IErrorHandler.cs" />
     <Compile Include="InstallPackageCmdlet.cs" />
     <Compile Include="NewPackageCmdlet.cs" />

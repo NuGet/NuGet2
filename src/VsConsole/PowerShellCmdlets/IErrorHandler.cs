@@ -9,9 +9,9 @@ namespace NuGet.Cmdlets {
         /// <summary>
         /// Handles a native PowerShell ErrorRecord. If terminating is set to true, this method does not return.
         /// </summary>
-        /// <param name="error">The record representing the error condition.</param>
+        /// <param name="errorRecord">The record representing the error condition.</param>
         /// <param name="terminating">If true, write a terminating error else write to error stream.</param>
-        void HandleError(ErrorRecord error, bool terminating);
+        void HandleError(ErrorRecord errorRecord, bool terminating);
         /// <summary>
         /// Handles a regular BCL Exception. If terminating is set to true, this method does not return.
         /// </summary>

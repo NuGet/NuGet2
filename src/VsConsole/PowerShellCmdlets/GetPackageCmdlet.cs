@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
@@ -45,11 +46,11 @@ namespace NuGet.Cmdlets {
         [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
 
-        [Parameter(Mandatory=true, ParameterSetName = "Remote")]
+        [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
         public SwitchParameter ListAvailable { get; set; }
 
-        [Parameter(Mandatory=true, ParameterSetName = "Updates")]
+        [Parameter(Mandatory = true, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
         [Parameter(Position = 1)]
