@@ -52,8 +52,7 @@ namespace NuGet.Cmdlets {
         [Parameter(Mandatory=true, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
-        [Parameter(Position = 1, ParameterSetName = "Updates")]
-        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [Parameter(Position = 1)]
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
