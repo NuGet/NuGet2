@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
@@ -9,7 +10,8 @@ namespace NuGet.Cmdlets {
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = "Default")]
+    [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    [OutputType(typeof(IPackage))]
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
@@ -41,16 +43,18 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
 
-        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
         public SwitchParameter ListAvailable { get; set; }
 
-        [Parameter(Position = 1, ParameterSetName = "Updates")]
+        [Parameter(Mandatory = true, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
-        [Parameter(Position = 2)]
+        [Parameter(Position = 1)]
+        [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
         [Parameter]
@@ -89,8 +93,7 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
-                WriteError(Resources.Cmdlet_NoSolution);
-                return;
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             IPackageRepository repository;
@@ -160,6 +163,10 @@ namespace NuGet.Cmdlets {
         private void WritePackages(IEnumerable<IPackage> packages) {
             bool hasPackage = false;
             foreach (var package in packages) {
+                // exit early if ctrl+c pressed
+                if (Stopping) {
+                    break;
+                }
                 hasPackage = true;
                 WriteObject(package);
             }

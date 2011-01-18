@@ -1,4 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
+
+using EnvDTE;
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
@@ -6,36 +9,48 @@ namespace NuGet.Cmdlets {
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = "Single")]
-    public class GetProjectCmdlet : Cmdlet {
+    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    [OutputType(typeof(Project))]
+    public class GetProjectCmdlet : NuGetBaseCmdlet {
         private readonly ISolutionManager _solutionManager;
 
         public GetProjectCmdlet()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
-
         }
 
-        public GetProjectCmdlet(ISolutionManager solutionManager) {
+        public GetProjectCmdlet(ISolutionManager solutionManager)
+            : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
 
-        [Parameter(Position = 0, ParameterSetName = "Single")]
-        public string Name { get; set; }
 
-        [Parameter(Position = 0, ParameterSetName = "All")]
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ByName")]
+        [ValidateNotNullOrEmpty]
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
+        public string[] Name { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
-        protected override void ProcessRecord() {
+        protected override void ProcessRecordCore() {
+            if (!SolutionManager.IsSolutionOpen) {
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
+            }
+
             if (All.IsPresent) {
                 WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
             }
             else {
-                string projectName = Name;
-                if (string.IsNullOrEmpty(projectName)) {
-                    // if the Name parameter is not specified, get the default project name
-                    projectName = _solutionManager.DefaultProjectName;
+                // No name specified; return default project (if not null)
+                if (Name == null) {
+                    if (_solutionManager.DefaultProject != null) {
+                        WriteObject(_solutionManager.DefaultProject);
+                    }
                 }
-                WriteObject(_solutionManager.GetProject(projectName));
+                else {
+                    // get all projects matching name(s) - handles wildcards
+                    WriteObject(GetProjectsByName(Name), enumerateCollection: true);
+                }
             }
         }
     }

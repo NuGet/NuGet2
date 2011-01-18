@@ -23,6 +23,7 @@ namespace NuGet.Cmdlets {
         public string Id { get; set; }
 
         [Parameter(Position = 1)]
+        [ValidateNotNullOrEmpty]
         public string Project { get; set; }
         
         protected IProjectManager ProjectManager {
@@ -73,7 +74,7 @@ namespace NuGet.Cmdlets {
 
                 // If that project was invalid then throw
                 if (project == null) {
-                    throw new InvalidOperationException(Resources.Cmdlet_MissingProjectParameter);
+                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
                 }
             }
             else if (!String.IsNullOrEmpty(SolutionManager.DefaultProjectName)) {

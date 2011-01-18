@@ -20,13 +20,15 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter(Position = 2)]
+        [ValidateNotNull]
         public Version Version { get; set; }
 
         [Parameter(Position = 3)]
-        public SwitchParameter IgnoreDependencies { get; set; }
-
-        [Parameter(Position = 4)]
+        [ValidateNotNullOrEmpty]
         public string Source { get; set; }
+
+        [Parameter]
+        public SwitchParameter IgnoreDependencies { get; set; }
 
         protected override IVsPackageManager CreatePackageManager() {
             if (!String.IsNullOrEmpty(Source)) {
@@ -37,8 +39,8 @@ namespace NuGet.Cmdlets {
 
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
-                WriteError(Resources.Cmdlet_NoSolution);
-                return;
+                // terminating
+                ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             IProjectManager projectManager = ProjectManager;

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
+    [OutputType(typeof(IPackage))]
     public class FindPackageCmdlet : GetPackageCmdlet {
 
         private const int MaxReturnedPackages = 30;

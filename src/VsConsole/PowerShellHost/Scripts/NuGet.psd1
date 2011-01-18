@@ -64,10 +64,10 @@ FunctionsToExport = @('NugetTabExpansion', 'Register-TabExpansion')
 CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
 
 # Variables to export from this module
-VariablesToExport = '*'
+VariablesToExport = ''
 
 # Aliases to export from this module
-AliasesToExport = '*'
+AliasesToExport = ''
 
 # List of all modules packaged with this module
 ModuleList = @()

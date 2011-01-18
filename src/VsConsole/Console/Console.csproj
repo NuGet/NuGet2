@@ -109,7 +109,9 @@
     </Compile>
     <Compile Include="Guids.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="PkgCmdID.cs" />
+    <Compile Include="PkgCmdID.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utils\CommonExtensionMethods.cs" />
     <Compile Include="Utils\ExtensionMethods.cs" />
     <Compile Include="Utils\Marshaler.cs" />

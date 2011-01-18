@@ -37,8 +37,12 @@ Register-TabExpansion 'Install-Package' @{
 
 Register-TabExpansion 'Uninstall-Package' @{
     'Id' = {
-        param($context)        
-        GetPackageIds (Find-Package -Filter $context.Id -ErrorAction SilentlyContinue)
+        param($context)
+
+        $parameters = @{}
+        if ($context.id) { $parameters.filter = $context.id }
+
+        GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
     }
     'Project' = {
         GetProjectNames
@@ -48,14 +52,22 @@ Register-TabExpansion 'Uninstall-Package' @{
 Register-TabExpansion 'Update-Package' @{
     'Id' = {
         param($context)
-        GetPackageIds (Find-Package -Filter $context.Id -ErrorAction SilentlyContinue)
+
+        $parameters = @{}
+        if ($context.id) { $parameters.filter = $context.id }
+
+        GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
     }
     'Project' = {
         GetProjectNames
     }
     'Version' = {
         param($context)
-        GetPackageVersions (Find-Package -Remote -Filter $context.Id) $context
+
+        $parameters = @{}
+        if ($context.id) { $parameters.filter = $context.id }
+
+        GetPackageVersions (Find-Package -Remote @parameters) $context
     }
 }
 
@@ -64,14 +76,16 @@ Register-TabExpansion 'Add-BindingRedirect' @{ 'Project' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
 
 function GetPackages($context) { 
-    $filter = $context.Id
-    $source = $context.Source
+    
+    $parameters = @{}
+    if ($context.Id) { $parameters.filter = $context.Id }
+    if ($context.Source) { $parameters.source = $context.Source }
 
     if($source) {
-        return Find-Package -Remote -Source $source -Filter $filter -ErrorAction SilentlyContinue
+        return Find-Package @parameters -Remote -ErrorAction SilentlyContinue
     }
     
-    return Find-Package -Remote -Filter $filter -ErrorAction SilentlyContinue
+    return Find-Package @parameters -Remote -ErrorAction SilentlyContinue
 }
 
 function GetProjectNames {
