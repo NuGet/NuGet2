@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
-
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -60,7 +59,7 @@ namespace NuGet.Cmdlets {
             try {
                 ProcessRecordCore();
             }
-            catch (Exception ex) {   
+            catch (Exception ex) {
                 // unhandled exceptions should be terminating
                 ErrorHandler.HandleException(ex, terminating: true);
             }
@@ -114,7 +113,7 @@ namespace NuGet.Cmdlets {
         /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
         /// <returns>Projects matching the project name(s) provided.</returns>
         protected IEnumerable<Project> GetProjectsByName(string[] projectNames) {
-            
+
             foreach (string projectName in projectNames) {
                 // if ctrl+c hit, leave immediately
                 if (Stopping) {
@@ -123,11 +122,11 @@ namespace NuGet.Cmdlets {
 
                 // Treat every name as a wildcard; results in simpler code
                 var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
-                                
+
                 var matches =
-                    (from project in _solutionManager.GetProjects()        
-                    where pattern.IsMatch(project.Name)
-                    select project).ToList();
+                    (from project in _solutionManager.GetProjects()
+                     where pattern.IsMatch(project.Name)
+                     select project).ToList();
 
                 // We only emit non-terminating error record if a non-wildcarded name was not found.
                 // This is consistent with built-in cmdlets that support wildcarded search.
@@ -154,17 +153,18 @@ namespace NuGet.Cmdlets {
         /// <returns>True if successfully translated, false if not.</returns>
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Following TryParse pattern in BCL", Target = "path")]
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "Following TryParse pattern in BCL", Target = "exists")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "ps is a common powershell prefix")]
         protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage) {
             return PSPathUtility.TryTranslatePSPath(SessionState, psPath, out path, out exists, out errorMessage);
         }
-        
+
         [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]
         protected void WriteError(string message) {
             if (!String.IsNullOrEmpty(message)) {
                 WriteError(new Exception(message));
             }
         }
-        
+
         protected void WriteError(Exception exception) {
             ErrorHandler.HandleException(exception, terminating: false);
         }
@@ -173,7 +173,7 @@ namespace NuGet.Cmdlets {
             var notFoundException =
                 new ItemNotFoundException(
                     String.Format(
-                        CultureInfo.CurrentCulture, 
+                        CultureInfo.CurrentCulture,
                         Resources.Cmdlet_ProjectNotFound, projectName));
 
             ErrorHandler.HandleError(

@@ -19,6 +19,7 @@ namespace NuGet.Cmdlets {
         /// <returns>True if successfully translated, false if not.</returns>        
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification="Following BCL TryParse pattern.")]
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "Following BCL TryParse pattern.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "ps is a common powershell prefix")]
         public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage) {
             if (String.IsNullOrEmpty(psPath)) {
                 throw new ArgumentException(

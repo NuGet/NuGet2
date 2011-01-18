@@ -4,8 +4,7 @@ using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets
-{
+namespace NuGet.Cmdlets {
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
@@ -16,15 +15,15 @@ namespace NuGet.Cmdlets
         private readonly ISolutionManager _solutionManager;
 
         public GetProjectCmdlet()
-            : this(ServiceLocator.GetInstance<ISolutionManager>())
-        {
+            : this(ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public GetProjectCmdlet(ISolutionManager solutionManager) : base(solutionManager, null) {
+        public GetProjectCmdlet(ISolutionManager solutionManager)
+            : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
 
-        
+
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ByName")]
         [ValidateNotNullOrEmpty]
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
