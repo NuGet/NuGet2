@@ -13,7 +13,7 @@ namespace NuGet {
         private readonly IEnumerable<IQueryable<T>> _queryables;
         private readonly Expression _expression;
         private readonly IEqualityComparer<T> _equalityComparer;
-        private readonly IEnumerable<IEnumerable<T>> _subQueries;
+        private readonly IList<IEnumerable<T>> _subQueries;
 
         public AggregateQuery(IEnumerable<IQueryable<T>> queryables, IEqualityComparer<T> equalityComparer) {
             _queryables = queryables;
@@ -24,7 +24,7 @@ namespace NuGet {
 
         private AggregateQuery(IEnumerable<IQueryable<T>> queryables,
                                IEqualityComparer<T> equalityComparer,
-                               IEnumerable<IEnumerable<T>> subQueries,
+                               IList<IEnumerable<T>> subQueries,
                                Expression expression) {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
@@ -101,60 +101,61 @@ namespace NuGet {
 
         private IEnumerable<T> GetAggregateEnumerable() {
             // Used to pick the right element from each sub query in the right order
-            var queue = new PriorityQueue<T>(new OrderingComparer<T>(Expression));
+            var comparer = new OrderingComparer<T>(Expression);
 
-            // Sub queries
-            var subQueryEnumerators = _subQueries.Select(query => query.GetEnumerator()).ToList();
+            // Create lazy queues over each sub query so we can lazily pull items from it
+            var lazyQueues = _subQueries.Select(query => new LazyQueue<T>(query.GetEnumerator())).ToList();
 
             // Used to keep track of everything we've seen so far (we never show duplicates)
             var seen = new HashSet<T>(_equalityComparer);
 
-            bool empty = false;
+            do {                
+                T minElement = default(T);
+                LazyQueue<T> minQueue = null;
 
-            while (!empty) {
                 // Run tasks in parallel
-                var tasks = (from e in subQueryEnumerators
-                             select Task.Factory.StartNew(() => e.MoveNext() ? new { Empty = false, Value = e.Current }
-                                                                             : new { Empty = true, Value = default(T) })
-                             ).ToArray();
+                var tasks = (from queue in lazyQueues
+                             select Task.Factory.StartNew(() => {
+                                 T current;
+                                 return new {
+                                     Empty = !queue.TryPeek(out current),
+                                     Value = current,
+                                     Queue = queue,
+                                 };
+
+                             })).ToArray();
 
                 // Wait for everything to complete
                 Task.WaitAll(tasks);
 
-                // Check each sub queries' enumerator and if there is more then add it to the queue
                 foreach (var task in tasks) {
                     if (!task.Result.Empty) {
-                        queue.Enqueue(task.Result.Value);
-                    }
-                }
-
-                if (queue.IsEmpty) {
-                    // If the queue is empty then see if there are any results left
-                    empty = tasks.All(t => t.Result.Empty);
-                }
-                else {
-                    // Otherwise try to get the next element that isn't a duplicate
-                    while (!queue.IsEmpty) {
-                        // Get the next element from the queue
-                        T element = queue.Dequeue();
-
-                        // Only return it if we haven't already seen it
-                        if (!seen.Contains(element)) {
-                            yield return element;
-                            // Add it to the list of seen elements
-                            seen.Add(element);
-
-                            // Break out of the loop once we've yielded an element
-                            break;
+                        // Keep track of the minimum element in the list
+                        if (minElement == null || comparer.Compare(task.Result.Value, minElement) < 0) {
+                            minElement = task.Result.Value;
+                            minQueue = task.Result.Queue;
                         }
                     }
+                    else {
+                        // Remove the enumerator if it's empty
+                        lazyQueues.Remove(task.Result.Queue);
+                    }
                 }
 
-            }
+                if (lazyQueues.Any()) {
+                    if (seen.Add(minElement)) {
+                        yield return minElement;
+                    }
+
+                    // Clear the top of the enumerator we just peeked
+                    minQueue.Deque();
+                }
+
+            } while (lazyQueues.Any());
         }
 
-        private IEnumerable<IEnumerable<T>> GetSubQueries(Expression expression) {
-            return _queryables.Select(query => GetSubQuery(query, expression));
+        private IList<IEnumerable<T>> GetSubQueries(Expression expression) {
+            return _queryables.Select(query => GetSubQuery(query, expression)).ToList();
         }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
