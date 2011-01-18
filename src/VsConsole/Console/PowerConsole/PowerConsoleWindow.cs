@@ -12,8 +12,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
         public const string ContentType = "PackageConsole";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [
-            Import(typeof(SVsServiceProvider))]
+        [Import(typeof(SVsServiceProvider))]
         internal IServiceProvider ServiceProvider { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
@@ -61,10 +60,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
 
         public string ActiveHost {
             get {
-                if (_activeHost == null) {
-                    Settings.GetDefaultHost(ServiceProvider, out _activeHost);
-                }
-
                 // If _activeHost is invalid (e.g., a previous provider is uninstalled),
                 // simply use a random available host
                 if (string.IsNullOrEmpty(_activeHost) || !HostInfos.ContainsKey(_activeHost)) {

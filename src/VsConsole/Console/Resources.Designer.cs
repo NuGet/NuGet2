@@ -61,6 +61,15 @@ namespace NuGetConsole {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Initializing PowerShell host....
+        /// </summary>
+        internal static string ToolWindowInitializing {
+            get {
+                return ResourceManager.GetString("ToolWindowInitializing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package Manager Console.
         /// </summary>
         internal static string ToolWindowTitle {

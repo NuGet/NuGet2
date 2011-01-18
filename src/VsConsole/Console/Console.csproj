@@ -134,7 +134,6 @@
     <Compile Include="PowerConsole\CompletionSourceProvider.cs" />
     <Compile Include="PowerConsole\HostInfo.cs" />
     <Compile Include="PowerConsole\PowerConsoleWindow.cs" />
-    <Compile Include="PowerConsole\Settings.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

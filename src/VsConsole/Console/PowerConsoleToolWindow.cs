@@ -1,10 +1,10 @@
 using System;
 using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -49,7 +49,7 @@ namespace NuGetConsole.Implementation {
 
         bool IsToolbarEnabled {
             get {
-                return (WpfConsole != null && WpfConsole.Host != null && WpfConsole.Host.IsCommandEnabled);
+                return (_wpfConsole != null && _wpfConsole.Host != null && _wpfConsole.Host.IsCommandEnabled);
             }
         }
 
@@ -95,19 +95,6 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override void OnClose() {
-            // Save ActiveHost on close, ignore errors.
-            try {
-                Settings.SetDefaultHost(this, PowerConsoleWindow.ActiveHost);
-            }
-            catch (Exception x) {
-                Trace.TraceError(x.ToString());
-            }
-
-            base.OnClose();
-        }
-
         public override void OnToolWindowCreated() {
             // Register key bindings to use in the editor
             var windowFrame = (IVsWindowFrame)Frame;
@@ -115,7 +102,15 @@ namespace NuGetConsole.Implementation {
             windowFrame.SetGuidProperty((int)__VSFPROPID.VSFPROPID_InheritKeyBindings, ref cmdUi);
 
             PowerConsoleWindow.ActiveHostChanged += PowerConsoleWindow_ActiveHostChanged;
-            PowerConsoleWindow_ActiveHostChanged(PowerConsoleWindow, null);
+            
+            // pause for a tiny moment to let the tool window open before initializing the host
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(0);
+            timer.Tick += (o, e) => {
+                ((DispatcherTimer)o).Stop();
+                PowerConsoleWindow_ActiveHostChanged(PowerConsoleWindow, EventArgs.Empty);
+            };
+            timer.Start();
 
             base.OnToolWindowCreated();
         }
@@ -389,7 +384,7 @@ namespace NuGetConsole.Implementation {
         /// </summary>
         IVsTextView VsTextView {
             get {
-                if (_vsTextView == null && WpfConsole != null) {
+                if (_vsTextView == null && _wpfConsole != null) {
                     _vsTextView = (IVsTextView)(WpfConsole.VsTextView);
                 }
                 return _vsTextView;
@@ -404,7 +399,16 @@ namespace NuGetConsole.Implementation {
         Border ConsoleParentPane {
             get {
                 if (_consoleParentPane == null) {
-                    _consoleParentPane = new Border();
+                    // display the text "initializing..." while the host is initialized.
+                    var textBlock = new TextBlock {
+                        Text = Resources.ToolWindowInitializing,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+
+                    _consoleParentPane = new Border() {
+                        Child = textBlock
+                    };
                 }
                 return _consoleParentPane;
             }
