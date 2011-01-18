@@ -107,7 +107,7 @@ namespace NuGetConsole.Implementation {
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(0);
             timer.Tick += (o, e) => {
-                ((DispatcherTimer)o).Stop();
+                timer.Stop();
                 PowerConsoleWindow_ActiveHostChanged(PowerConsoleWindow, EventArgs.Empty);
             };
             timer.Start();
