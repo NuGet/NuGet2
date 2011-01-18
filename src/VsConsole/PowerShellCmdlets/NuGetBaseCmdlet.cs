@@ -123,7 +123,7 @@ namespace NuGet.Cmdlets {
 
                 // Treat every name as a wildcard; results in simpler code
                 var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
-
+                                
                 var matches =
                     (from project in _solutionManager.GetProjects()        
                     where pattern.IsMatch(project.Name)
@@ -152,7 +152,6 @@ namespace NuGet.Cmdlets {
         /// <param name="exists">Returns null if not tested, or a bool representing path existence.</param>
         /// <param name="errorMessage">If translation failed, contains the reason.</param>
         /// <returns>True if successfully translated, false if not.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "PS is abbreviation.")]
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Following TryParse pattern in BCL", Target = "path")]
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "Following TryParse pattern in BCL", Target = "exists")]
         protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage) {
@@ -173,8 +172,8 @@ namespace NuGet.Cmdlets {
         void IErrorHandler.WriteProjectNotFoundError(string projectName, bool terminating) {
             var notFoundException =
                 new ItemNotFoundException(
-                    string.Format(
-                        CultureInfo.CurrentUICulture, 
+                    String.Format(
+                        CultureInfo.CurrentCulture, 
                         Resources.Cmdlet_ProjectNotFound, projectName));
 
             ErrorHandler.HandleError(

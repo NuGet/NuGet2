@@ -80,7 +80,7 @@ function New-Project {
     $window.SetFocus()
     
     # Return the project
-    $project = Get-Project $projectName 
+    $project = Get-Project $projectName -ErrorAction SilentlyContinue
     
     if(!$project) {
         $project = Get-Project "$destPath\"

@@ -154,7 +154,7 @@ namespace NuGet.Cmdlets {
                     // terminating
                     ErrorHandler.HandleException(
                         new UnauthorizedAccessException(String.Format(
-                            CultureInfo.CurrentUICulture,
+                            CultureInfo.CurrentCulture,
                             Resources.Cmdlet_FileExistsNoClobber, TargetFile)),
                         terminating: true,
                         errorId: NuGetErrorId.FileExistsNoClobber,
