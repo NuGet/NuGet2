@@ -62,3 +62,22 @@ function Test-UninstallPackageInvokeUninstallScript {
     # This asserts uninstall.ps1 gets called
     Assert-NotNull (Get-ChildItem function:\TestFunction)
 }
+
+function Test-UninstallPackageWithNestedContentFiles {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+    Install-Package NestedFolders -Project $p.Name -Source $context.RepositoryRoot
+
+    # Act    
+    Uninstall-Package NestedFolders -Project $p.Name
+
+    # Assert
+    Assert-Null (Get-ProjectItem $p a)
+    Assert-Null (Get-ProjectItem $p a\b)
+    Assert-Null (Get-ProjectItem $p a\b\c)
+    Assert-Null (Get-ProjectItem $p a\b\c\test.txt)
+}

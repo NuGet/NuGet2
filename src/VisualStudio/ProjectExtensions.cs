@@ -33,13 +33,15 @@ namespace NuGet.VisualStudio {
 
         public static ProjectItem GetProjectItem(this Project project, string path) {
             string folderPath = Path.GetDirectoryName(path);
-            string fileName = Path.GetFileName(path);
+            string itemName = Path.GetFileName(path);
 
             ProjectItems container = GetProjectItems(project, folderPath);
 
             ProjectItem projectItem;
-            // If we couldn't get the folder, or the file doesn't exist, return null
-            if (container == null || !container.TryGetFile(fileName, out projectItem)) {
+            // If we couldn't get the folder, or the child item doesn't exist, return null
+            if (container == null ||
+                (!container.TryGetFile(itemName, out projectItem) &&
+                 !container.TryGetFolder(itemName, out projectItem))) {
                 return null;
             }
 
