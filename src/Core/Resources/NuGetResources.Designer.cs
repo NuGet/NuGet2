@@ -241,7 +241,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;.
+        ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;..
         /// </summary>
         internal static string Log_NoUpdatesAvailable {
             get {
@@ -367,7 +367,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to download package correctly. The contents of the package could not be verified. .
+        ///   Looks up a localized string similar to Failed to download package correctly. The contents of the package could not be verified..
         /// </summary>
         internal static string PackageContentsVerifyError {
             get {
