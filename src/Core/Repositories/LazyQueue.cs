@@ -27,7 +27,7 @@ namespace NuGet {
             return next;
         }
 
-        public void Deque() {
+        public void Dequeue() {
             // Reset the peeked element
             _peeked = default(T);
         }

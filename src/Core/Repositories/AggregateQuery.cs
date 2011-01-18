@@ -148,7 +148,7 @@ namespace NuGet {
                     }
 
                     // Clear the top of the enumerator we just peeked
-                    minQueue.Deque();
+                    minQueue.Dequeue();
                 }
 
             } while (lazyQueues.Any());
