@@ -20,7 +20,7 @@ namespace NuGet.VisualStudio {
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private bool _hasLoadedSettingsStore;
         private DTEEvents _dteEvents;
-
+             
         [ImportingConstructor]
         public RecentPackagesRepository(
             DTE dte,
@@ -63,7 +63,7 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Add the specified package to the list.
         /// </summary>
-        /// <param name="addToFront">if set to true, it will add to package the front</param>
+        /// <param name="addToFront">if set to true, it will add package to the front</param>
         private void AddPackage(IPersistencePackageMetadata metadata, IPackage package, bool addToFront) {
             var index = _packages.FindIndex(p => PackageMetadataEqualityComparer.Instance.Equals(metadata, (IPersistencePackageMetadata)p));
             if (index >= 0) {
@@ -112,7 +112,7 @@ namespace NuGet.VisualStudio {
                                 SelectMany(g => FindPackagesFromSource(g.Key, g).Select(p => new RecentPackage(p, g.Key)));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
-            var filterPackages = FilterPackages(packagesMetadata, newPackages);
+            var filterPackages = FilterPackages(packagesMetadata, newPackages); 
 
             foreach (var p in filterPackages) {
                 AddPackage(p.Item1, p.Item2, addToFront: false);
@@ -145,7 +145,7 @@ namespace NuGet.VisualStudio {
 
             var q = from p in allPackages
                     where lookup.Contains(p.Id)
-                    let m = lookup[p.Id].SingleOrDefault(m => m.Version == p.Version)
+                    let m = lookup[p.Id].FirstOrDefault(m => m.Version == p.Version)
                     where m != null
                     select Tuple.Create(m, p);
 
