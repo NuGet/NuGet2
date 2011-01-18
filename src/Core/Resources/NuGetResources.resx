@@ -160,7 +160,7 @@
     <value>'{0}' not referenced. Retrieving dependency...</value>
   </data>
   <data name="Log_NoUpdatesAvailable" xml:space="preserve">
-    <value>No updates available for '{0}'</value>
+    <value>No updates available for '{0}'.</value>
   </data>
   <data name="Log_PackageAlreadyInstalled" xml:space="preserve">
     <value>'{0}' already installed.</value>
@@ -241,7 +241,7 @@
     <value>Aggregate queries require at least one OrderBy.</value>
   </data>
   <data name="PackageContentsVerifyError" xml:space="preserve">
-    <value>Failed to download package correctly. The contents of the package could not be verified. </value>
+    <value>Failed to download package correctly. The contents of the package could not be verified.</value>
   </data>
   <data name="CannotCreateEmptyPackage" xml:space="preserve">
     <value>Cannot create a package that has no dependencies nor content.</value>
