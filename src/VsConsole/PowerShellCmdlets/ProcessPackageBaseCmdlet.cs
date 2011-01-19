@@ -22,8 +22,9 @@ namespace NuGet.Cmdlets {
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
         public string Id { get; set; }
 
-        [Parameter(Position = 1)]
+        [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
+        [Alias("ProjectName")]
         public string Project { get; set; }
         
         protected IProjectManager ProjectManager {

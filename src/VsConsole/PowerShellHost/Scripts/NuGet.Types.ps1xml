@@ -1,2 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Types />
+<Types>
+  <Type>
+    <!-- EnvDTE.Project -->
+    <Name>System.__ComObject#{866311e6-c887-4143-9833-645f5b93f6f1}</Name>
+    <Members>
+      <AliasProperty>
+        <Name>ProjectName</Name>
+        <ReferencedMemberName>Name</ReferencedMemberName>
+      </AliasProperty>
+    </Members>
+  </Type>
+</Types>

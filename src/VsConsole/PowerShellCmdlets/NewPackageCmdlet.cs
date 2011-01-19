@@ -29,7 +29,7 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName=true)]
         [ValidateNotNullOrEmpty]
-        [Alias("Name")] // <EnvDTE.Project>.Name
+        [Alias("ProjectName")]
         public string Project { get; set; }
 
         [Parameter(Mandatory=true, Position = 1)]
