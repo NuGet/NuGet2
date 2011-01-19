@@ -29,7 +29,7 @@ namespace NuGet {
 
         public override string Source {
             get {
-                return FileSystem.GetFullPath(PackageReferenceFile);
+                return PackageReferenceFile;
             }
         }
 
