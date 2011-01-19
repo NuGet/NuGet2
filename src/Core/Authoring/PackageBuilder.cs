@@ -145,6 +145,25 @@ namespace NuGet {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
+            // Verify that all dependencies specify a versionSpec
+            List<PackageDependency> brokenDependencies = Dependencies.Where(d => d.VersionSpec == null)
+                                                                     .ToList();
+            if (brokenDependencies.Any()) {
+                if (brokenDependencies.Count == 1) {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                                      NuGetResources.DependencyMissingVersion,
+                                      brokenDependencies.Single().Id));
+
+                }
+                else {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                                      NuGetResources.DependenciesMissingVersion,
+                                      String.Join(", ", brokenDependencies.Select(d => d.Id))));
+                }
+            }
+
             using (Package package = Package.Open(stream, FileMode.Create)) {
                 WriteManifest(package);
                 WriteFiles(package);
@@ -227,7 +246,7 @@ namespace NuGet {
                                                           searchFilter.SearchOption);
 
             if (!searchFilter.WildCardSearch && !searchFiles.Any()) {
-                throw new FileNotFoundException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound, 
+                throw new FileNotFoundException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound,
                     source));
             }
 
