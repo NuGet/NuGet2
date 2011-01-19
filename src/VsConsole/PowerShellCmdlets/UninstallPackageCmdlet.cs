@@ -20,6 +20,7 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter(Position = 2)]
+        [ValidateNotNull]
         public Version Version { get; set; }
 
         [Parameter]

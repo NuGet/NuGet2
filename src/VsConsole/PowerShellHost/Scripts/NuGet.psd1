@@ -49,7 +49,7 @@ RequiredAssemblies = @()
 ScriptsToProcess = @('Scripts\profile.ps1')
 
 # Type files (.ps1xml) to be loaded when importing this module
-TypesToProcess = @()
+TypesToProcess = @('Scripts\NuGet.Types.ps1xml')
 
 # Format files (.ps1xml) to be loaded when importing this module
 FormatsToProcess = @('Scripts\NuGet.Format.ps1xml')
