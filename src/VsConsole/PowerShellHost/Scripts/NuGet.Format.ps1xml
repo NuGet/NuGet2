@@ -144,11 +144,12 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
-                                    switch ($_.Kind) {
-                                        "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
-                                        "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
-                                        default { $_.Kind }
-                                    }
+                                  switch ($_.Kind) {
+                                    "{E24C65DC-7377-472B-9ABA-BC803B73C61A}" {"Web Site"}
+                                    "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
+                                    "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
+                                    default { "$_" }
+                                  }
                                 </ScriptBlock>
                             </TableColumnItem>
                         </TableColumnItems>
