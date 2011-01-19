@@ -18,7 +18,7 @@ namespace NuGet.VisualStudio {
                                        IPackageRepositoryFactory repositoryFactory,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
-                                       [param: Import("RecentPackagesRepository")]
+                                       [Import("RecentPackagesRepository")]
                                        IPackageRepository recentPackagesRepository) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");

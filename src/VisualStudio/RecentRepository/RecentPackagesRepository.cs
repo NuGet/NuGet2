@@ -12,7 +12,7 @@ namespace NuGet.VisualStudio {
     public class RecentPackagesRepository : IPackageRepository {
 
         private const string SourceValue = "(MRU)";
-        private const int MaximumPackageCount = 10;
+        private const int MaximumPackageCount = 20;
 
         private readonly List<IPackage> _packages;
         private readonly Dictionary<IPersistencePackageMetadata, IPackage> _packagesCache;

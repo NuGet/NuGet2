@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
@@ -59,39 +60,22 @@ namespace NuGet.VisualStudio {
         public virtual void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
+            IPackage package = SourceRepository.FindPackage(packageId, version: version);
+
+            if (package == null) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.UnknownPackage, packageId));
+            }
+
             // REVIEW: This isn't transactional, so if add package reference fails
             // the user has to manually clean it up by uninstalling it
-            InstallPackage(packageId, version, ignoreDependencies);
+            InstallPackage(package, ignoreDependencies);
 
             AddPackageReference(projectManager, packageId, version, ignoreDependencies);
-        }
-
-        private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
-            if (projectManager != null) {                
-                EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
-                    // Remove any packages that would be removed as a result of updating a dependency or the package itself
-                    // We can execute the uninstall directly since we don't need to resolve dependencies again
-                    ExecuteUninstall(e.Package);
-                };
-
-                EventHandler<PackageOperationEventArgs> addHandler = (sender, e) => {
-                    AddPackageToRecentRepository(e.Package);
-                };
-
-                // Add the handlers
-                projectManager.PackageReferenceRemoved += removeHandler;
-                projectManager.PackageReferenceAdded += addHandler;
-
-                try {
-                    // Add the package reference
-                    projectManager.AddPackageReference(packageId, version, ignoreDependencies);
-                }
-                finally {
-                    // Remove the handlers
-                    projectManager.PackageReferenceRemoved -= removeHandler;
-                    projectManager.PackageReferenceAdded -= addHandler;
-                }
-            }
+            
+            // Add package to recent repository
+            AddPackageToRecentRepository(package);
         }
 
         public void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, ILogger logger) {
@@ -110,6 +94,31 @@ namespace NuGet.VisualStudio {
             }
 
             AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies);
+
+            // Add package to recent repository
+            AddPackageToRecentRepository(package);
+        }
+
+        private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
+            if (projectManager != null) {                
+                EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
+                    // Remove any packages that would be removed as a result of updating a dependency or the package itself
+                    // We can execute the uninstall directly since we don't need to resolve dependencies again
+                    ExecuteUninstall(e.Package);
+                };
+
+                // Add the handlers
+                projectManager.PackageReferenceRemoved += removeHandler;
+
+                try {
+                    // Add the package reference
+                    projectManager.AddPackageReference(packageId, version, ignoreDependencies);
+                }
+                finally {
+                    // Remove the handlers
+                    projectManager.PackageReferenceRemoved -= removeHandler;
+                }
+            }
         }
 
         public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies) {
@@ -157,12 +166,6 @@ namespace NuGet.VisualStudio {
                 projectManager.Logger = logger;
                 projectManager.Project.Logger = logger;
             }
-        }
-
-        protected override void OnInstalled(PackageOperationEventArgs e) {
-            base.OnInstalled(e);
-
-            AddPackageToRecentRepository(e.Package);
         }
 
         private void AddPackageToRecentRepository(IPackage package) {
