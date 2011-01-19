@@ -11,6 +11,7 @@ namespace NuGetConsole.Host.PowerShell {
     public class CommandParser {
         private int _index;
         private readonly string _command;
+        private readonly char[] _escapeChars = new[] { 'n', 'r', 't', 'a', 'b', '"', '\'', '`', '0' };
 
         private CommandParser(string command) {
             _command = command;
@@ -18,7 +19,13 @@ namespace NuGetConsole.Host.PowerShell {
 
         private char CurrentChar {
             get {
-                return _index < _command.Length ? _command[_index] : '\0';
+                return GetChar(_index);
+            }
+        }
+
+        private char NextChar {
+            get {
+                return GetChar(_index + 1);
             }
         }
 
@@ -38,7 +45,7 @@ namespace NuGetConsole.Host.PowerShell {
         private Command ParseCore() {
             Collection<PSParseError> errors;
             Collection<PSToken> tokens = PSParser.Tokenize(_command, out errors);
-            
+
             // Use the powershell tokenizer to find the index of the last command so we can start parsing from there
             var lastCommandToken = tokens.LastOrDefault(t => t.Type == PSTokenType.Command);
 
@@ -92,15 +99,12 @@ namespace NuGetConsole.Host.PowerShell {
             return parsedCommand;
         }
 
-        private string ParseQuotes() {
-            // Skip the first '
-            ParseChar();
+        private string ParseSingleQuotes() {
             var sb = new StringBuilder();
             while (!Done) {
                 sb.Append(ParseUntil(c => c == '\''));
-                ParseChar();
 
-                if (CurrentChar == '\'') {
+                if (ParseChar() == '\'' && CurrentChar == '\'') {
                     sb.Append(ParseChar());
                 }
                 else {
@@ -111,6 +115,29 @@ namespace NuGetConsole.Host.PowerShell {
             return sb.ToString();
         }
 
+        private string ParseDoubleQuotes() {
+            var sb = new StringBuilder();
+            while (!Done) {
+                // Parse until we see a quote or an escape character
+                sb.Append(ParseUntil(c => c == '"' || c == '`'));
+
+                if (IsEscapeSequence()) {
+                    sb.Append(ParseChar());
+                    sb.Append(ParseChar());
+                }
+                else {
+                    ParseChar();
+                    break;
+                }
+            }
+
+            return sb.ToString();
+        }
+        
+        private bool IsEscapeSequence() {
+            return CurrentChar == '`' && Array.IndexOf(_escapeChars, NextChar) >= 0;
+        }
+
         private char ParseChar() {
             char ch = CurrentChar;
             _index++;
@@ -119,7 +146,12 @@ namespace NuGetConsole.Host.PowerShell {
 
         private string ParseToken() {
             if (CurrentChar == '\'') {
-                return ParseQuotes();
+                ParseChar();
+                return ParseSingleQuotes();
+            }
+            else if (CurrentChar == '"') {
+                ParseChar();
+                return ParseDoubleQuotes();
             }
             return ParseUntil(Char.IsWhiteSpace);
         }
@@ -136,6 +168,10 @@ namespace NuGetConsole.Host.PowerShell {
         private bool SkipWhitespace() {
             string ws = ParseUntil(c => !Char.IsWhiteSpace(c));
             return ws.Length > 0;
+        }
+
+        private char GetChar(int index) {
+            return index < _command.Length ? _command[index] : '\0';
         }
     }
 }

@@ -207,11 +207,13 @@ function Test-ComplexCustomTabExpansion {
     $johnDoeAge = TabExpansion "Foo -Name 'John Doe' -Age " ""
     $dogAge = TabExpansion "Foo -Name 'David''s Dog' -Age " ""
     $davidAge = TabExpansion "Foo 'David''s Sister''s Brother''s Age' -Age " ""
+    $davidAgeQuotes = TabExpansion "Foo `"David's Sister's Brother's Age`" -Age " ""
 
     Assert-AreEqual 11 $philAge
     Assert-AreEqual 14 $johnDoeAge
     Assert-AreEqual 12 $dogAge
     Assert-AreEqual 10 $davidAge
+    Assert-AreEqual 10 $davidAgeQuotes
 
     # Remove the function from global scope
     rm function:\Foo

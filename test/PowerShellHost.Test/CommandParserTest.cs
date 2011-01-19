@@ -61,7 +61,7 @@ namespace PowerShellHost.Test {
         }
 
         [TestMethod]
-        public void CommandWithQuotedArgument() {
+        public void CommandWithSingleQuotedArgument() {
             // Act
             var command = CommandParser.Parse("Install-Package 'This quoted value' -Value 'Another one' -Name 'John''s value'");
 
@@ -71,6 +71,21 @@ namespace PowerShellHost.Test {
             Assert.AreEqual("This quoted value", command.Arguments[0]);
             Assert.AreEqual("Another one", command.Arguments["Value"]);
             Assert.AreEqual("John's value", command.Arguments["Name"]);
+            Assert.IsNull(command.CompletionIndex);
+            Assert.AreEqual("Name", command.CompletionArgument);
+        }
+
+        [TestMethod]
+        public void CommandWithQuotedArgument() {
+            // Act
+            var command = CommandParser.Parse("Install-Package \"This quoted value\" -Value \"Another `n one\" -Name \"John`\"s value\"");
+
+            // Assert
+            Assert.AreEqual("Install-Package", command.CommandName);
+            Assert.AreEqual(3, command.Arguments.Count);
+            Assert.AreEqual("This quoted value", command.Arguments[0]);
+            Assert.AreEqual("Another `n one", command.Arguments["Value"]);
+            Assert.AreEqual("John`\"s value", command.Arguments["Name"]);
             Assert.IsNull(command.CompletionIndex);
             Assert.AreEqual("Name", command.CompletionArgument);
         }
