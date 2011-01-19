@@ -15,16 +15,16 @@ namespace NuGet.VisualStudio {
         private const int MaximumPackageCount = 10;
 
         private readonly List<IPackage> _packages;
-        private Dictionary<IPersistencePackageMetadata, IPackage> _packagesCache;
+        private readonly Dictionary<IPersistencePackageMetadata, IPackage> _packagesCache;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
+        private readonly DTEEvents _dteEvents;
         private bool _hasLoadedSettingsStore;
-        private DTEEvents _dteEvents;
-             
+
         [ImportingConstructor]
         public RecentPackagesRepository(
             DTE dte,
-            IPackageRepositoryFactory repositoryFactory, 
+            IPackageRepositoryFactory repositoryFactory,
             IPersistencePackageSettingsManager settingsManager) {
 
             _packages = new List<IPackage>();
@@ -112,13 +112,14 @@ namespace NuGet.VisualStudio {
                                 SelectMany(g => FindPackagesFromSource(g.Key, g).Select(p => new RecentPackage(p, g.Key)));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
-            var filterPackages = FilterPackages(packagesMetadata, newPackages); 
+            var filterPackages = FilterPackages(packagesMetadata, newPackages);
 
             foreach (var p in filterPackages) {
                 AddPackage(p.Item1, p.Item2, addToFront: false);
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private IEnumerable<IPackage> FindPackagesFromSource(string source, IEnumerable<IPersistencePackageMetadata> metadata) {
             var packageSource = new PackageSource(source);
 
@@ -127,7 +128,15 @@ namespace NuGet.VisualStudio {
                 packageSource.IsAggregate = true;
             }
 
-            var repository = _repositoryFactory.CreateRepository(packageSource);
+            IPackageRepository repository = null;
+            try {
+                repository = _repositoryFactory.CreateRepository(packageSource);
+            }
+            catch (Exception) {
+                // we don't care if the source value is invalid or corrupted, which 
+                // will cause CreateRepository to throw.
+            }
+
             return repository == null ?
                 Enumerable.Empty<IPackage>() :
                 repository.FindPackages(metadata.Select(m => m.Id));
@@ -138,18 +147,16 @@ namespace NuGet.VisualStudio {
         /// Returns the result as a list of Tuple of (metadata, package)
         /// </summary>
         private static IEnumerable<Tuple<IPersistencePackageMetadata, IPackage>> FilterPackages(
-            IEnumerable<IPersistencePackageMetadata> packagesMetadata, 
+            IEnumerable<IPersistencePackageMetadata> packagesMetadata,
             IEnumerable<IPackage> allPackages) {
 
             var lookup = packagesMetadata.ToLookup(p => p.Id, StringComparer.OrdinalIgnoreCase);
 
-            var q = from p in allPackages
-                    where lookup.Contains(p.Id)
-                    let m = lookup[p.Id].FirstOrDefault(m => m.Version == p.Version)
-                    where m != null
-                    select Tuple.Create(m, p);
-
-            return q;
+            return from p in allPackages
+                   where lookup.Contains(p.Id)
+                   let m = lookup[p.Id].FirstOrDefault(m => m.Version == p.Version)
+                   where m != null
+                   select Tuple.Create(m, p);
         }
 
         private void SavePackagesToSettingsStore() {

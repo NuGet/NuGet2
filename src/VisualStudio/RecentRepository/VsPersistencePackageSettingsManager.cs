@@ -28,7 +28,7 @@ namespace NuGet.VisualStudio {
                 }
 
                 // avoid corrupted data
-                if (values.Any(p => String.IsNullOrEmpty(p))) {
+                if (values.Length != 3 || values.Any(p => String.IsNullOrEmpty(p))) {
                     continue;
                 }
 
