@@ -159,6 +159,9 @@
           <maml:name>Updates</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
+            <maml:name>Recent</maml:name>
+        </command:parameter>
+        <command:parameter required="false" position="named">
           <maml:name>Filter</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
@@ -189,6 +192,12 @@
         <maml:description>
           <maml:para>Gets packages available from the online package source.</maml:para>
         </maml:description>
+      </command:parameter
+      <command:parameter required="false" position="named">
+          <maml:name>Recent</maml:name>
+          <maml:description>
+              <maml:para>Gets the list of recently installed packages.</maml:para>
+          </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Updates</maml:name>

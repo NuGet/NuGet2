@@ -60,9 +60,8 @@ namespace NuGet.Cmdlets {
         [Parameter(Mandatory = true, ParameterSetName = "Recent")]
         public SwitchParameter Recent { get; set; }
 
-        [Parameter(Position = 1)]
-        [Parameter(ParameterSetName = "Remote")]
-        [Parameter(ParameterSetName = "Updates")]
+        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [Parameter(Position = 1, ParameterSetName = "Updates")]
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
