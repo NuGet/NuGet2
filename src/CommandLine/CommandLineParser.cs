@@ -4,22 +4,25 @@ namespace NuGet {
     using System.Collections.Generic;
     using System.Reflection;
     using NuGet.Common;
+    using System.Linq;
 
     public class CommandLineParser {
         private ICommandManager _commandManager;
 
         public CommandLineParser(ICommandManager manager) {
             _commandManager = manager;
+            _index = 0;
         }
-        
-        public ICommand ExtractOptions(ICommand command, string commandLine) {
+
+        public ICommand ExtractOptions(ICommand command, List<string> commandlineArgs) {
             List<string> arguments = new List<string>();
+            
             IDictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
 
             while (true) {
-                string option = GetNextCommandLineItem(ref commandLine);
+                string option = GetNextCommandLineItem(commandlineArgs);
 
-                if (option == String.Empty) {
+                if (option == null) {
                     break;
                 }
 
@@ -53,10 +56,10 @@ namespace NuGet {
                     value = value ?? "true";
                 }
                 else {
-                    value = GetNextCommandLineItem(ref commandLine);
+                    value = GetNextCommandLineItem(commandlineArgs);
                 }
 
-                if (value == String.Empty) {
+                if (value == null) {
                     throw new CommandLineException(NuGetResources.MissingOptionValueError, option);
                 }
 
@@ -73,13 +76,10 @@ namespace NuGet {
             return command;
         }
 
-        public ICommand ParseCommandLine(string commandLine) {
-            // Extract the executable name
-            GetNextCommandLineItem(ref commandLine);
-
+        public ICommand ParseCommandLine(List<string> commandlineArgs) {
             // Get the desired command name
-            string cmdName = GetNextCommandLineItem(ref commandLine);
-            if (cmdName == String.Empty) {
+            string cmdName = GetNextCommandLineItem(commandlineArgs);
+            if (cmdName == null) {
                 return null;
             }
 
@@ -89,38 +89,17 @@ namespace NuGet {
                 throw new CommandLineException(NuGetResources.UnknowCommandError, cmdName);
             }
 
-            return ExtractOptions(cmd, commandLine);
+            return ExtractOptions(cmd, commandlineArgs);
         }
 
-
-        public static string GetNextCommandLineItem(ref string commandLine) {
-            bool inQuotes = false;
-            int idx = 0;
-
-            commandLine = commandLine.Trim();
-
-            while (idx < commandLine.Length) {
-                if (commandLine[idx] == ' ' && !inQuotes) {
-                    break;
-                }
-
-                if (commandLine[idx] == '"') {
-                    inQuotes = !inQuotes;
-                }
-
-                ++idx;
+        public static string GetNextCommandLineItem(List<string> commandlineArgs) {
+            if (commandlineArgs == null || !commandlineArgs.Any()) {
+                return null;
             }
 
-            string result = commandLine.Substring(0, idx);
-
-            if (idx < commandLine.Length) {
-                commandLine = commandLine.Substring(idx + 1);
-            }
-            else {
-                commandLine = String.Empty;
-            }
-
-            return result.Trim('"');
+            var item = commandlineArgs.First();
+            commandlineArgs.RemoveAt(0);
+            return item;
         }
     }
 }

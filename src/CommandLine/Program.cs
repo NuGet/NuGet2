@@ -46,7 +46,7 @@ namespace NuGet {
 
             try {
                 // Parse the command
-                ICommand command = parser.ParseCommandLine(Environment.CommandLine);
+                ICommand command = parser.ParseCommandLine(args.ToList<string>());
 
                 // Fallback on the help command if we failed to parse a valid command
                 if (command == null) {

@@ -30,6 +30,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             DeleteDirs();
         }
 
+
         [TestMethod]
         public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand() {
             // Act
