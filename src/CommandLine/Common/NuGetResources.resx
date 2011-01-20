@@ -165,6 +165,21 @@
   <data name="ListCommandVerboseListDescription" xml:space="preserve">
     <value>Displays a detailed list of information for each package.</value>
   </data>
+  <data name="InstallCommandDescription" xml:space="preserve">
+    <value>Install a package from a given source. If no source is specified the default feed is used.</value>
+  </data>
+  <data name="InstallCommandVersionDescription" xml:space="preserve">
+    <value>The version of the package to install.</value>
+  </data>
+  <data name="InstallCommandSourceDescription" xml:space="preserve">
+    <value>The location to look for packages.</value>
+  </data>
+  <data name="InstallCommandUsageDescription" xml:space="preserve">
+    <value>Specify the id and optionally the version of the package to install.</value>
+  </data>
+  <data name="InstallCommandUsageSummary" xml:space="preserve">
+    <value>[package id] [options]</value>
+  </data>
   <data name="MissingOptionValueError" xml:space="preserve">
     <value>Missing option value for: '{0}'</value>
   </data>

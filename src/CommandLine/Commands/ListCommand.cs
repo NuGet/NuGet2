@@ -10,7 +10,7 @@
     [Command(typeof(NuGetResources), "list", "ListCommandDescription", AltName = "l",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : ICommand {
-        private const string _defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=206669";
+        internal const string _defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=206669";
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription", AltName = "s")]
         public string Source { get; set; }

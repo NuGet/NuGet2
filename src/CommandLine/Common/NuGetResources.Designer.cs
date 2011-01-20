@@ -142,6 +142,51 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Install a package from a given source. If no source is specified the default feed is used..
+        /// </summary>
+        internal static string InstallCommandDescription {
+            get {
+                return ResourceManager.GetString("InstallCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The location to look for packages..
+        /// </summary>
+        internal static string InstallCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("InstallCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the id and optionally the version of the package to install..
+        /// </summary>
+        internal static string InstallCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("InstallCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [package id] [options].
+        /// </summary>
+        internal static string InstallCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("InstallCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The version of the package to install..
+        /// </summary>
+        internal static string InstallCommandVersionDescription {
+            get {
+                return ResourceManager.GetString("InstallCommandVersionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid option value: &apos;{0} {1}&apos;.
         /// </summary>
         internal static string InvalidOptionValueError {

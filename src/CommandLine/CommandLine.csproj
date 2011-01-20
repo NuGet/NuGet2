@@ -27,6 +27,7 @@
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
+    <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\PublishCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
@@ -68,6 +69,7 @@
     <EmbeddedResource Include="Common\NuGetResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
