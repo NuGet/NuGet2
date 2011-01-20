@@ -63,66 +63,6 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [TestMethod]
-        public void ArgCountTooHigh_ReturnsTrueIfThereAreToManyArgs() {
-            // Arrage
-            var cmdMgr = new Mock<ICommandManager>();
-            ICommand cmd = new MockCommand();
-            cmd.Arguments = new List<string> { "foo", "bar" };
-            CommandAttribute mockCommandAttribute = new CommandAttribute("foo", "bar") { MaxArgs = 1 };
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(mockCommandAttribute);
-            CommandLineParser paser = new CommandLineParser(cmdMgr.Object);
-            // Act
-            bool actual = paser.ArgCountTooHigh(cmd);
-            // Assert
-            Assert.IsTrue(actual);
-        }
-
-        [TestMethod]
-        public void ArgCountTooHigh_ReturnsFalseIfThereIsEqualArgs() {
-            // Arrage 
-            var cmdMgr = new Mock<ICommandManager>();
-            ICommand cmd = new MockCommand();
-            cmd.Arguments = new List<string> { "foo", "bar" };
-            CommandAttribute mockCommandAttribute = new CommandAttribute("foo", "bar") { MaxArgs = 2 };
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(mockCommandAttribute);
-            CommandLineParser paser = new CommandLineParser(cmdMgr.Object);
-            // Act
-            bool actual = paser.ArgCountTooHigh(cmd);
-            // Assert
-            Assert.IsFalse(actual);
-        }
-
-        [TestMethod]
-        public void ArgCountTooLow_ReturnsTrueIfThereAreToFewArgs() {
-            // Arrage 
-            var cmdMgr = new Mock<ICommandManager>();
-            ICommand cmd = new MockCommand();
-            cmd.Arguments = new List<string> { "foo", "bar" };
-            CommandAttribute mockCommandAttribute = new CommandAttribute("foo", "bar") { MinArgs = 4 };
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(mockCommandAttribute);
-            CommandLineParser paser = new CommandLineParser(cmdMgr.Object);
-            // Act
-            bool actual = paser.ArgCountTooLow(cmd);
-            // Assert
-            Assert.IsTrue(actual);
-        }
-
-        [TestMethod]
-        public void ArgCountTooLow_ReturnsFalseIfThereIsEqualArgs() {
-            // Arrage 
-            var cmdMgr = new Mock<ICommandManager>();
-            ICommand cmd = new MockCommand();
-            cmd.Arguments = new List<string> { "foo", "bar" };
-            CommandAttribute mockCommandAttribute = new CommandAttribute("foo", "bar") { MinArgs = 2 };
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(mockCommandAttribute);
-            CommandLineParser paser = new CommandLineParser(cmdMgr.Object);
-            // Act
-            bool actual = paser.ArgCountTooLow(cmd);
-            // Assert
-            Assert.IsFalse(actual);
-        }
-
-        [TestMethod]
         public void ParseCommandLine_ReturnsNullIfNextItemInCommandLineIsEmptyString() {
             CommandLineParser parser = new CommandLineParser(new Mock<ICommandManager>().Object);
             string input = "NuGet";

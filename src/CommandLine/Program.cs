@@ -44,10 +44,27 @@ namespace NuGet {
             }
 
             CommandLineParser parser = new CommandLineParser(p.Manager);
+
             try {
-                // Parse the command and fallback on the help command
-                ICommand parsedCommand = parser.ParseCommandLine(Environment.CommandLine) ?? p.HelpCommand;
-                parsedCommand.Execute();
+                // Parse the command
+                ICommand command = parser.ParseCommandLine(Environment.CommandLine);
+
+                // Fallback on the help command if we failed to parse a valid command
+                if (command == null) {
+                    command = p.HelpCommand;
+                }
+                else if (!p.ArgumentCountValid(command)) {
+                    // If the argument count isn't valid then show help for the command
+                    ICommand helpCommand = p.HelpCommand;
+
+                    // Get the command name and add it to the argumet list of the help command
+                    string commandName = p.Manager.GetCommandAttribute(command).CommandName;
+                    helpCommand.Arguments = new List<string>();
+                    helpCommand.Arguments.Add(commandName);
+                    command = helpCommand;
+                }
+
+                command.Execute();
             }
             catch (Exception e) {
                 var currentColor = ConsoleColor.Gray;
@@ -63,5 +80,12 @@ namespace NuGet {
             }
             return 0;
         }
+
+        public bool ArgumentCountValid(ICommand command) {
+            CommandAttribute attribute = Manager.GetCommandAttribute(command);
+            return command.Arguments.Count >= attribute.MinArgs &&
+                   command.Arguments.Count <= attribute.MaxArgs;
+        }
+
     }
 }

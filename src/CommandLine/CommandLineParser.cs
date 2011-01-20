@@ -11,15 +11,7 @@ namespace NuGet {
         public CommandLineParser(ICommandManager manager) {
             _commandManager = manager;
         }
-
-        public bool ArgCountTooHigh(ICommand command) {
-            return command.Arguments.Count > _commandManager.GetCommandAttribute(command).MaxArgs;
-        }
-
-        public bool ArgCountTooLow(ICommand command) {
-            return command.Arguments.Count < _commandManager.GetCommandAttribute(command).MinArgs;
-        }
-
+        
         public ICommand ExtractOptions(ICommand command, string commandLine) {
             List<string> arguments = new List<string>();
             IDictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
@@ -76,16 +68,7 @@ namespace NuGet {
                 }
             }
 
-
-            command.Arguments = arguments;
-
-            if (ArgCountTooHigh(command)) {
-                throw new CommandLineException(NuGetResources.TooManyArgsError);
-            }
-
-            else if (ArgCountTooLow(command)) {
-                throw new CommandLineException(NuGetResources.TooFewArgsError);
-            }
+            command.Arguments = arguments;            
 
             return command;
         }

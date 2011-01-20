@@ -261,12 +261,6 @@
   <data name="ResourceTypeDoesNotHaveProperty" xml:space="preserve">
     <value>The resource type '{0}' does not have an accessible static property named '{1}'.</value>
   </data>
-  <data name="TooFewArgsError" xml:space="preserve">
-    <value>Too few arguments.</value>
-  </data>
-  <data name="TooManyArgsError" xml:space="preserve">
-    <value>Too many arguments.</value>
-  </data>
   <data name="UnableToConvertTypeError" xml:space="preserve">
     <value>Unable to change from type '{0}' to '{1}'.</value>
   </data>

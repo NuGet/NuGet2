@@ -493,24 +493,6 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Too few arguments..
-        /// </summary>
-        internal static string TooFewArgsError {
-            get {
-                return ResourceManager.GetString("TooFewArgsError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Too many arguments..
-        /// </summary>
-        internal static string TooManyArgsError {
-            get {
-                return ResourceManager.GetString("TooManyArgsError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unable to change from type &apos;{0}&apos; to &apos;{1}&apos;..
         /// </summary>
         internal static string UnableToConvertTypeError {
