@@ -276,4 +276,28 @@
   <data name="UnknownOptionError" xml:space="preserve">
     <value>Unknown option: '{0}'</value>
   </data>
+  <data name="UpdateCommandCheckingForUpdates" xml:space="preserve">
+    <value>Checking for updates from {0}.</value>
+  </data>
+  <data name="UpdateCommandCurrentlyRunningNuGetExe" xml:space="preserve">
+    <value>Currently running NuGet.exe v{0}.</value>
+  </data>
+  <data name="UpdateCommandDescription" xml:space="preserve">
+    <value>Update the running NuGet.exe to the newest version available from the server.</value>
+  </data>
+  <data name="UpdateCommandNuGetUpToDate" xml:space="preserve">
+    <value>NuGet.exe is up to date.</value>
+  </data>
+  <data name="UpdateCommandUnableToFindPackage" xml:space="preserve">
+    <value>Unable to find '{0}' package.</value>
+  </data>
+  <data name="UpdateCommandUnableToLocateNuGetExe" xml:space="preserve">
+    <value>Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package.</value>
+  </data>
+  <data name="UpdateCommandUpdateSuccessful" xml:space="preserve">
+    <value>Update successful.</value>
+  </data>
+  <data name="UpdateCommandUpdatingNuGet" xml:space="preserve">
+    <value>Updating NuGet.exe to {0}.</value>
+  </data>
 </root>

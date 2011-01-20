@@ -536,5 +536,77 @@ namespace NuGet.Common {
                 return ResourceManager.GetString("UnknownOptionError", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checking for updates from {0}..
+        /// </summary>
+        internal static string UpdateCommandCheckingForUpdates {
+            get {
+                return ResourceManager.GetString("UpdateCommandCheckingForUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently running NuGet.exe v{0}..
+        /// </summary>
+        internal static string UpdateCommandCurrentlyRunningNuGetExe {
+            get {
+                return ResourceManager.GetString("UpdateCommandCurrentlyRunningNuGetExe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update the running NuGet.exe to the newest version available from the server..
+        /// </summary>
+        internal static string UpdateCommandDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NuGet.exe is up to date..
+        /// </summary>
+        internal static string UpdateCommandNuGetUpToDate {
+            get {
+                return ResourceManager.GetString("UpdateCommandNuGetUpToDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find &apos;{0}&apos; package..
+        /// </summary>
+        internal static string UpdateCommandUnableToFindPackage {
+            get {
+                return ResourceManager.GetString("UpdateCommandUnableToFindPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package..
+        /// </summary>
+        internal static string UpdateCommandUnableToLocateNuGetExe {
+            get {
+                return ResourceManager.GetString("UpdateCommandUnableToLocateNuGetExe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update successful..
+        /// </summary>
+        internal static string UpdateCommandUpdateSuccessful {
+            get {
+                return ResourceManager.GetString("UpdateCommandUpdateSuccessful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating NuGet.exe to {0}..
+        /// </summary>
+        internal static string UpdateCommandUpdatingNuGet {
+            get {
+                return ResourceManager.GetString("UpdateCommandUpdatingNuGet", resourceCulture);
+            }
+        }
     }
 }

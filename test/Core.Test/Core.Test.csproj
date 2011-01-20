@@ -44,6 +44,7 @@
     <Compile Include="AggregateRepositoryTest.cs" />
     <Compile Include="DataServicePackageTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
+    <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageSorterTest.cs" />
