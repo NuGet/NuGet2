@@ -58,6 +58,12 @@ namespace NuGet.VisualStudio {
 
         }
 
+        public static T GetInstance<T>(string contractName) where T : class {
+            return _container.GetExportedValueOrDefault<T>(contractName) ??
+                   (T)_fallBackServiceLocators.Select(locator => locator(typeof(T)))
+                                      .FirstOrDefault();
+        }
+
         private static object QueryService(_DTE dte, Type serviceType) {
             Guid guidService = serviceType.GUID;
             Guid riid = guidService;

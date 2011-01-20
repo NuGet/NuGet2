@@ -36,3 +36,20 @@ function Test-GetPackageWithUpdatesListsUpdates {
     # Assert
     Assert-AreEqual 2 $packages.Count
 }
+
+function Test-GetPackageListsRecentPackages {
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    Install-Package Antlr -Project $p.Name
+    Install-Package jQuery -Project $p.Name
+
+    $packages = Get-Package -Recent
+    $haveAntlr = @($packages | Where-Object { $_.Id -eq 'Antlr' })
+    $havejQuery = @($packages | Where-Object { $_.Id -eq 'jQuery' })
+
+    # Assert
+    Assert-True ($haveAntlr.Count -gt 0)
+    Assert-True ($havejQuery.Count -gt 0)
+}

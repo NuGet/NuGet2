@@ -8,7 +8,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio {
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [Export("RecentPackagesRepository", typeof(IPackageRepository))]
+    [Export(ContractConstants.RecentPackagesRepositoryContractName, typeof(IPackageRepository))]
     public class RecentPackagesRepository : IPackageRepository {
 
         private const string SourceValue = "(MRU)";
@@ -139,7 +139,7 @@ namespace NuGet.VisualStudio {
 
             return repository == null ?
                 Enumerable.Empty<IPackage>() :
-                repository.FindPackages(metadata.Select(m => m.Id));
+                repository.FindPackages(metadata.Select(m => m.Id).Distinct());
         }
 
         /// <summary>

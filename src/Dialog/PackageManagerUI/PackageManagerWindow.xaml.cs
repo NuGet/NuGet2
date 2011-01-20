@@ -32,7 +32,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IProgressWindowOpener progressWindowOpener,
                                     IOutputConsoleProvider consoleProvider,
                                     IScriptExecutor scriptExecutor,
-                                    [Import("RecentPackagesRepository")]
+                                    [Import(ContractConstants.RecentPackagesRepositoryContractName)]
                                     IPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
 

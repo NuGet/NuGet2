@@ -16,14 +16,16 @@ namespace NuGet.Cmdlets {
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                   ServiceLocator.GetInstance<IPackageRepository>(ContractConstants.RecentPackagesRepositoryContractName)) {
         }
 
         public FindPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
                           IPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
-                          IVsPackageManagerFactory packageManagerFactory)
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory) {
+                          IVsPackageManagerFactory packageManagerFactory,
+                          IPackageRepository recentPackagesRepository)
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository) {
         }
 
         protected override void ProcessRecordCore() {

@@ -15,6 +15,7 @@ namespace NuGet.Cmdlets {
     public class GetPackageCmdlet : NuGetBaseCmdlet {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageRepository _recentPackagesRepository;
         private int _firstValue;
         private bool _firstValueSpecified;
 
@@ -22,13 +23,15 @@ namespace NuGet.Cmdlets {
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                   ServiceLocator.GetInstance<IPackageRepository>(ContractConstants.RecentPackagesRepositoryContractName)) {
         }
 
         public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
-                                IVsPackageManagerFactory packageManagerFactory)
+                                IVsPackageManagerFactory packageManagerFactory,
+                                IPackageRepository recentPackagesRepository)
             : base(solutionManager, packageManagerFactory) {
 
             if (repositoryFactory == null) {
@@ -40,6 +43,7 @@ namespace NuGet.Cmdlets {
 
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
+            _recentPackagesRepository = recentPackagesRepository;
         }
 
         [Parameter(Position = 0)]
@@ -53,7 +57,12 @@ namespace NuGet.Cmdlets {
         [Parameter(Mandatory = true, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
+        [Parameter(Mandatory = true, ParameterSetName = "Recent")]
+        public SwitchParameter Recent { get; set; }
+
         [Parameter(Position = 1)]
+        [Parameter(ParameterSetName = "Remote")]
+        [Parameter(ParameterSetName = "Updates")]
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
@@ -78,7 +87,7 @@ namespace NuGet.Cmdlets {
         /// </summary>
         private bool UseRemoteSourceOnly {
             get {
-                return ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
+                return ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent) || Recent.IsPresent;
             }
         }
 
@@ -87,7 +96,7 @@ namespace NuGet.Cmdlets {
         /// </summary>
         private bool UseRemoteSource {
             get {
-                return ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
+                return ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source) || Recent.IsPresent;
             }
         }
 
@@ -128,6 +137,9 @@ namespace NuGet.Cmdlets {
             if (!String.IsNullOrEmpty(Source)) {
                 // If a Source parameter is explicitly specified, use it
                 return _repositoryFactory.CreateRepository(Source);
+            }
+            else if (Recent.IsPresent) {
+                return _recentPackagesRepository;
             }
             else if (SolutionManager.IsSolutionOpen) {
                 // If the solution is open, retrieve the cached repository instance

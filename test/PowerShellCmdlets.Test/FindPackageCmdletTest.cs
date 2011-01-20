@@ -102,7 +102,12 @@ namespace NuGet.Cmdlets.Test {
         private static FindPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            return new FindPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
+            return new FindPackageCmdlet(
+                GetRepositoryFactory(), 
+                GetSourceProvider(), 
+                TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 
+                packageManagerFactory.Object,
+                new Mock<IPackageRepository>().Object);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

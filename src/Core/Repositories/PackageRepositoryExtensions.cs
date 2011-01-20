@@ -60,8 +60,27 @@ namespace NuGet {
                 throw new ArgumentNullException("packageIds");
             }
 
-            Expression<Func<IPackage, bool>> filterExpression = GetFilterExpression(packageIds);
-            return repository.GetPackages().Where(filterExpression).OrderBy(p => p.Id);
+            return FindPackages(repository, packageIds, GetFilterExpression);
+        }
+
+        /// <summary>
+        /// Since Odata dies when our query for updates is too big. We query for updates 10 packages at a time
+        /// and return the full list of packages.
+        /// </summary>
+        private static IEnumerable<IPackage> FindPackages<T>(this IPackageRepository repository, IEnumerable<T> items, Func<IEnumerable<T>, Expression<Func<IPackage, bool>>> filterSelector) {
+            const int batchSize = 10;
+
+            while (items.Any()) {
+                IEnumerable<T> currentItems = items.Take(batchSize);
+                Expression<Func<IPackage, bool>> filterExpression = filterSelector(currentItems);
+
+                var query = repository.GetPackages().Where(filterExpression).OrderBy(p => p.Id);
+                foreach (var package in query) {
+                    yield return package;
+                }
+
+                items = items.Skip(batchSize);
+            }
         }
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionInfo) {
@@ -156,26 +175,7 @@ namespace NuGet {
         /// and return the full list of candidates for updates.
         /// </summary>
         private static IEnumerable<IPackage> GetUpdateCandidates(IPackageRepository repository, IEnumerable<IPackage> packages) {
-            const int batchSize = 10;
-
-            while (packages.Any()) {
-                // Get the current batch
-                IEnumerable<IPackage> currentPackages = packages.Take(batchSize);
-
-                // Get the filter expression for that set of packages 
-                Expression<Func<IPackage, bool>> filterExpression = GetFilterExpression(currentPackages);
-
-                // Add the order by so aggregate queries work
-                IQueryable<IPackage> query = repository.GetPackages().Where(filterExpression)
-                                                                     .OrderBy(p => p.Id);
-
-                // Return the current batch
-                foreach (var package in query) {
-                    yield return package;
-                }
-
-                packages = packages.Skip(batchSize);
-            }
+            return FindPackages(repository, packages, GetFilterExpression);
         }
 
         /// <summary>

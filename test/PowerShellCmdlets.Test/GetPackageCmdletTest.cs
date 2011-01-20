@@ -11,6 +11,7 @@ using NuGet.VisualStudio.Test;
 namespace NuGet.Cmdlets.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
+    using NuGet.Test.Mocks;
 
     [TestClass]
     public class GetPackageCmdletTest {
@@ -286,11 +287,36 @@ namespace NuGet.Cmdlets.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
-            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object) { CallBase = true }.Object;
+            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null) { CallBase = true }.Object;
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "Unable to retrieve package list because no source was specified.");
+        }
+
+        [TestMethod]
+        public void TestRecentSwitchWorkCorrectly() {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            var repository = new MockPackageRepository();
+            repository.Add(packageA);
+            repository.Add(packageB);
+            repository.Add(packageC);
+
+            var cmdlet = BuildCmdlet(false, repository);
+            cmdlet.Recent = true;
+
+            // Act
+            var packages = cmdlet.GetResults().OfType<IPackage>().ToList();
+
+            // Assert
+            Assert.AreEqual(3, packages.Count);
+            Assert.AreSame(packageA, packages[0]);
+            Assert.AreSame(packageB, packages[1]);
+            Assert.AreSame(packageC, packages[2]);
         }
 
         private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
@@ -298,10 +324,15 @@ namespace NuGet.Cmdlets.Test {
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
+        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true, IPackageRepository recentPackageRepository = null) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            return new GetPackageCmdlet(GetRepositoryFactory(), GetSourceProvider(), TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), packageManagerFactory.Object);
+            return new GetPackageCmdlet(
+                GetRepositoryFactory(), 
+                GetSourceProvider(), 
+                TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 
+                packageManagerFactory.Object,
+                recentPackageRepository);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {
