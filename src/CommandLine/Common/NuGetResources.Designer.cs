@@ -187,6 +187,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}: invalid arguments..
+        /// </summary>
+        internal static string InvalidArguments {
+            get {
+                return ResourceManager.GetString("InvalidArguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid option value: &apos;{0} {1}&apos;.
         /// </summary>
         internal static string InvalidOptionValueError {

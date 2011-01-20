@@ -1,12 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
+using System.Linq;
+using System.Reflection;
+
 namespace NuGet {
-
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using System.ComponentModel.Composition.Hosting;
-    using System.Linq;
-    using System.Reflection;
-
     public class Program {
         private HelpCommand _helpCommand;
         public HelpCommand HelpCommand {
@@ -62,6 +61,9 @@ namespace NuGet {
                     helpCommand.Arguments = new List<string>();
                     helpCommand.Arguments.Add(commandName);
                     command = helpCommand;
+
+                    // Print invalid command then show help
+                    Console.WriteLine(NuGet.Common.NuGetResources.InvalidArguments, commandName);
                 }
 
                 command.Execute();

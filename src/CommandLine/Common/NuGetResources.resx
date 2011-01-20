@@ -294,4 +294,7 @@
   <data name="UpdateCommandUpdatingNuGet" xml:space="preserve">
     <value>Updating NuGet.exe to {0}.</value>
   </data>
+  <data name="InvalidArguments" xml:space="preserve">
+    <value>{0}: invalid arguments.</value>
+  </data>
 </root>
