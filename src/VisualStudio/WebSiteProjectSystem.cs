@@ -1,11 +1,14 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
-using System;
 
 namespace NuGet.VisualStudio {
     internal class WebSiteProjectSystem : WebProjectSystem {
+        private const string RootNamespace = "RootNamespace";
+        private const string DefaultNamespace = "ASP";
+
         public WebSiteProjectSystem(Project project)
             : base(project) {
         }
@@ -29,6 +32,13 @@ namespace NuGet.VisualStudio {
             catch (Exception e) {
                 Logger.Log(MessageLevel.Warning, e.Message);
             }
+        }
+
+        public override dynamic GetPropertyValue(string propertyName) {
+            if (propertyName.Equals(RootNamespace, StringComparison.OrdinalIgnoreCase)) {
+                return DefaultNamespace;                
+            }
+            return base.GetPropertyValue(propertyName);
         }
 
         protected override bool ExcludeFile(string path) {

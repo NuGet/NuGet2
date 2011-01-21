@@ -207,3 +207,17 @@ function Test-FSharpSimpleWithAssemblyReference {
     Assert-SolutionPackage Antlr
     Assert-Reference $p Antlr3.Runtime
 }
+
+function Test-WebsiteInstallPackageWithRootNamespae {
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    Install-Package PackageWithRootNamespaceFileTransform -Project $p.Name
+    
+    # Assert
+    Assert-NotNull (Get-ProjectItem $p foo.cs)
+    $path = (Get-ProjectItemPath $p foo.cs)
+    $content = [System.IO.File]::ReadAllText($path)
+    Assert-True ($content.Contains("namespace ASP"))
+}
