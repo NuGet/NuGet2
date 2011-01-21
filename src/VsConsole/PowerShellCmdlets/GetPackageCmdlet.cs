@@ -40,6 +40,9 @@ namespace NuGet.Cmdlets {
             if (packageSourceProvider == null) {
                 throw new ArgumentNullException("packageSourceProvider");
             }
+            if (recentPackagesRepository == null) {
+                throw new ArgumentNullException("recentPackagesRepository");
+            }
 
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
@@ -82,7 +85,7 @@ namespace NuGet.Cmdlets {
         public int Skip { get; set; }
 
         /// <summary>
-        /// Determines if no local repositories are needed to process this command
+        /// Determines if local repository are not needed to process this command
         /// </summary>
         private bool UseRemoteSourceOnly {
             get {
@@ -91,7 +94,7 @@ namespace NuGet.Cmdlets {
         }
 
         /// <summary>
-        /// Determines if a remote repository would be needed to process this command.
+        /// Determines if a remote repository will be used to process this command.
         /// </summary>
         private bool UseRemoteSource {
             get {
@@ -188,6 +191,9 @@ namespace NuGet.Cmdlets {
                 }
                 else if (Updates.IsPresent) {
                     Log(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
+                }
+                else if (Recent.IsPresent) {
+                    Log(MessageLevel.Info, Resources.Cmdlet_NoRecentPackages);
                 }
             }
         }

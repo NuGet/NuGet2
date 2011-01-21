@@ -2,8 +2,6 @@ using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Cmdlets;
-using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
 namespace NuGet.Cmdlets.Test {

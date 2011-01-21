@@ -4,14 +4,13 @@ using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
-using NuGet.Cmdlets;
+using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
 namespace NuGet.Cmdlets.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
-    using NuGet.Test.Mocks;
 
     [TestClass]
     public class GetPackageCmdletTest {
@@ -287,7 +286,7 @@ namespace NuGet.Cmdlets.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
-            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null) { CallBase = true }.Object;
+            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, new Mock<IPackageRepository>().Object) { CallBase = true }.Object;
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act and Assert
@@ -327,6 +326,11 @@ namespace NuGet.Cmdlets.Test {
         private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true, IPackageRepository recentPackageRepository = null) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
+
+            if (recentPackageRepository == null) {
+                recentPackageRepository = new Mock<IPackageRepository>().Object;
+            }
+
             return new GetPackageCmdlet(
                 GetRepositoryFactory(), 
                 GetSourceProvider(), 

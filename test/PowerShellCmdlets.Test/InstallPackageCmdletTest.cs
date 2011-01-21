@@ -4,7 +4,6 @@ using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
-using NuGet.Cmdlets;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 

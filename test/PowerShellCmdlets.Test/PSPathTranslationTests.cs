@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Reflection;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Microsoft.PowerShell.Commands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using NuGet.Test;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Test;
-using NuGet.Cmdlets;
 
 namespace NuGet.Cmdlets.Test
 {

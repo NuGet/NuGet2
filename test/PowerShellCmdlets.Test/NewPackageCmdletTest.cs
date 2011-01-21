@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
-using NuGet.Cmdlets;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 

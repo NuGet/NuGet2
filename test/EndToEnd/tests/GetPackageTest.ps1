@@ -1,7 +1,7 @@
 
 function Test-GetPackageRetunsMoreThanServerPagingLimit {
     # Act
-    $packages = Get-Package -Source 'https://go.microsoft.com/fwlink/?LinkID=206669'
+    $packages = Get-Package -ListAvailable -Source 'https://go.microsoft.com/fwlink/?LinkID=206669'
     
     # Assert
     Assert-True $packages.Count -gt 100 "Get-Package cmdlet returns less than (or equal to) than server side paging limit"
