@@ -321,15 +321,21 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {
-            _scriptExecutor.Execute(e.InstallPath, "init.ps1", e.Package, null, this);
+            if (e.Package.HasPowerShellScript(new string[] { "init.ps1" })) {
+                _scriptExecutor.Execute(e.InstallPath, "init.ps1", e.Package, null, this);
+            }
         }
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
-            _scriptExecutor.Execute(e.InstallPath, "install.ps1", e.Package, _project, this);
+            if (e.Package.HasPowerShellScript(new string[] { "install.ps1" })) {
+                _scriptExecutor.Execute(e.InstallPath, "install.ps1", e.Package, _project, this);
+            }
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
-            _scriptExecutor.Execute(e.InstallPath, "uninstall.ps1", e.Package, _project, this);
+            if (e.Package.HasPowerShellScript(new string[] { "uninstall.ps1" })) {
+                _scriptExecutor.Execute(e.InstallPath, "uninstall.ps1", e.Package, _project, this);
+            }
         }
     }
 }
