@@ -10,17 +10,18 @@ using NuGet.VisualStudio;
 namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
     [OutputType(typeof(AssemblyBinding))]
-    public class AddBindingRedirectCmdlet : NuGetBaseCmdlet {        
+    public class AddBindingRedirectCmdlet : NuGetBaseCmdlet {
         private readonly ISolutionManager _solutionManager;
 
         public AddBindingRedirectCmdlet()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public AddBindingRedirectCmdlet(ISolutionManager solutionManager) : base(solutionManager, null) {
+        public AddBindingRedirectCmdlet(ISolutionManager solutionManager)
+            : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
-        
+
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         [Alias("Name")] // <EnvDTE.Project>.Name
@@ -35,25 +36,24 @@ namespace NuGet.Cmdlets {
             var projects = new List<Project>();
 
             // if no project specified, use default
-            if (Project == null)
-            {
+            if (Project == null) {
                 Project project = _solutionManager.DefaultProject;
 
                 // if no default project (empty solution), throw terminating
                 if (project == null) {
                     ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
                 }
-                
+
                 projects.Add(project);
             }
             else {
                 // get matching projects, expanding wildcards
                 projects.AddRange(GetProjectsByName(Project));
             }
-            
+
             // Create a new app domain so we don't load the assemblies into the host app domain
             AppDomain domain = AppDomain.CreateDomain("domain");
-            
+
             try {
                 foreach (Project project in projects) {
                     // Get the project's output path

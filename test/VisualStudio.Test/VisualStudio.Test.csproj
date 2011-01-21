@@ -31,6 +31,7 @@
   <ItemGroup>
     <Compile Include="Mocks\MockSolutionManager.cs" />
     <Compile Include="PathValidatorTest.cs" />
+    <Compile Include="ProjectExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecentPackageRepositoryTest.cs" />
     <Compile Include="RecentPackageTest.cs" />

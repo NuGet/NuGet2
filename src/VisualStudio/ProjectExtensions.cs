@@ -16,6 +16,7 @@ namespace NuGet.VisualStudio {
     public static class ProjectExtensions {
         private const string WebConfig = "web.config";
         private const string AppConfig = "app.config";
+        private const string BinFolder = "Bin";
 
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
@@ -172,6 +173,10 @@ namespace NuGet.VisualStudio {
             return types.Contains(VsConstants.WebSiteProjectTypeGuid) || types.Contains(VsConstants.WebApplicationProjectTypeGuid);
         }
 
+        public static bool IsWebSite(this Project project) {
+            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool IsSupported(this Project project) {
             return project.Kind != null &&
                    _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
@@ -182,7 +187,8 @@ namespace NuGet.VisualStudio {
         }
 
         public static string GetOutputPath(this Project project) {
-            string outputPath = project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
+            // For Websites the output path is the bin folder
+            string outputPath = project.IsWebSite() ? BinFolder : project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
             return Path.Combine(project.GetFullPath(), outputPath);
         }
 
