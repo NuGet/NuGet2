@@ -297,4 +297,13 @@
   <data name="InvalidArguments" xml:space="preserve">
     <value>{0}: invalid arguments.</value>
   </data>
+  <data name="PackageCommandAddedFile" xml:space="preserve">
+    <value>Added file '{0}'.</value>
+  </data>
+  <data name="PackageCommandAttemptingToBuildPackage" xml:space="preserve">
+    <value>Attempting to build package from '{0}'.</value>
+  </data>
+  <data name="PackageCommandVerboseDescription" xml:space="preserve">
+    <value>Shows verbose output for package building.</value>
+  </data>
 </root>

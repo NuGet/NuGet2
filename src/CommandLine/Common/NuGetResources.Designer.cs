@@ -277,6 +277,24 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added file &apos;{0}&apos;..
+        /// </summary>
+        internal static string PackageCommandAddedFile {
+            get {
+                return ResourceManager.GetString("PackageCommandAddedFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempting to build package from &apos;{0}&apos;..
+        /// </summary>
+        internal static string PackageCommandAttemptingToBuildPackage {
+            get {
+                return ResourceManager.GetString("PackageCommandAttemptingToBuildPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The Base Path of the files defined in the nuspec file..
         /// </summary>
         internal static string PackageCommandBasePathDescription {
@@ -336,6 +354,15 @@ namespace NuGet.Common {
         internal static string PackageCommandUsageSummary {
             get {
                 return ResourceManager.GetString("PackageCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shows verbose output for package building..
+        /// </summary>
+        internal static string PackageCommandVerboseDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandVerboseDescription", resourceCulture);
             }
         }
         

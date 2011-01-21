@@ -24,6 +24,9 @@ namespace NuGet {
         [Option(typeof(NuGetResources), "PackageCommandBasePathDescription", AltName = "b")]
         public string BasePath { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandVerboseDescription", AltName = "v")]
+        public bool Verbose { get; set; }
+
         [ImportingConstructor]
         public PackCommand(IConsole console) {
             Console = console;
@@ -45,6 +48,8 @@ namespace NuGet {
                 }
             }
 
+            Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(nuspecFile));
+            
             PackageBuilder builder = new PackageBuilder(nuspecFile, BasePath ?? Path.GetDirectoryName(nuspecFile));
 
             var outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
@@ -56,6 +61,16 @@ namespace NuGet {
 
             using (Stream stream = File.Create(outputPath)) {
                 builder.Save(stream);
+            }
+
+            if (Verbose) {
+                Console.WriteLine();
+
+                var package = new ZipPackage(outputPath);
+                foreach (var file in package.GetFiles().OrderBy(p => p.Path.Length)) {
+                    Console.WriteLine(NuGetResources.PackageCommandAddedFile, file.Path);
+                }
+                Console.WriteLine();
             }
 
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
