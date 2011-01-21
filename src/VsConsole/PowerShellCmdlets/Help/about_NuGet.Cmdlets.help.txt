@@ -9,7 +9,7 @@ LONG DESCRIPTION
 	management tool for adding libraries and tools to .NET projects.
 
 				 
-	The following NuGet Cmdlets for are included.
+	The following NuGet cmdlets are included.
 
 		Cmdlet					Description
 		------------------		----------------------------------------------
