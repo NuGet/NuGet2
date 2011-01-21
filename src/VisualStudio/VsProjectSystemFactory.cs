@@ -10,17 +10,18 @@ namespace NuGet.VisualStudio {
         private static Dictionary<string, Func<Project, IProjectSystem>> _factories = new Dictionary<string, Func<Project, IProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
             { VsConstants.WebApplicationProjectTypeGuid , project => new WebProjectSystem(project) },
             { VsConstants.WebSiteProjectTypeGuid , project => new WebSiteProjectSystem(project) },
+            { VsConstants.FsharpProjectTypeGuid , project => new FSharpProjectSystem(project) }
         };
 
 
-        public static IProjectSystem CreateProjectSystem(Project project) {            
+        public static IProjectSystem CreateProjectSystem(Project project) {
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
 
             if (String.IsNullOrEmpty(project.FullName)) {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, 
+                    String.Format(CultureInfo.CurrentCulture,
                     VsResources.DTE_ProjectUnsupported, project.Name));
             }
 

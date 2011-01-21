@@ -109,6 +109,14 @@ function New-WebSite {
     New-Project EmptyWeb
 }
 
+function New-FSharpLibrary {
+    New-Project FSharpLibrary
+}
+
+function New-FSharpConsoleApplication {
+    New-Project FSharpConsoleApplication
+}
+
 function Build-Project {
     param(
         [parameter(Mandatory = $true)]

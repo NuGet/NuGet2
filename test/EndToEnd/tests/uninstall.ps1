@@ -81,3 +81,20 @@ function Test-UninstallPackageWithNestedContentFiles {
     Assert-Null (Get-ProjectItem $p a\b\c)
     Assert-Null (Get-ProjectItem $p a\b\c\test.txt)
 }
+
+function Test-SimpleFSharpUninstall {
+    # Arrange
+    $p = New-FSharpLibrary
+    
+    # Act
+    Install-Package Ninject -Project $p.Name 
+    Assert-Reference $p Ninject
+    Assert-Package $p Ninject
+    Assert-SolutionPackage Ninject
+    Uninstall-Package Ninject -Project $p.Name
+    
+    # Assert
+    Assert-Null (Get-ProjectPackage $p Ninject)
+    Assert-Null (Get-AssemblyReference $p Ninject)
+    Assert-Null (Get-SolutionPackage Ninject)
+}

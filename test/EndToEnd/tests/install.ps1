@@ -179,3 +179,31 @@ function Test-InstallPackageWithWebConfigDebugChanges {
     Assert-AreEqual MyDB $addNode.name
     Assert-AreEqual "Data Source=ReleaseSQLServer;Initial Catalog=MyReleaseDB;Integrated Security=True" $addNode.connectionString
 }
+
+function Test-FSharpSimpleInstallWithContentFiles {
+    # Arrange
+    $p = New-FSharpLibrary
+    
+    # Act
+    Install-Package jquery -Project $p.Name
+    
+    # Assert
+    Assert-Package $p jquery
+    Assert-SolutionPackage jquery
+    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.4.4.js)
+    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.4.4.min.js)
+    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.4.4-vsdoc.js)
+}
+
+function Test-FSharpSimpleWithAssemblyReference {
+    # Arrange
+    $p = New-FSharpConsoleApplication
+    
+    # Act
+    Install-Package Antlr -Project $p.Name
+    
+    # Assert
+    Assert-Package $p Antlr
+    Assert-SolutionPackage Antlr
+    Assert-Reference $p Antlr3.Runtime
+}

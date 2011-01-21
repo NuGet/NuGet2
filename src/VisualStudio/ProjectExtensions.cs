@@ -21,7 +21,8 @@ namespace NuGet.VisualStudio {
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
         private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectTypeGuid, 
                                                                           VsConstants.CsharpProjectTypeGuid, 
-                                                                          VsConstants.VbProjectTypeGuid };
+                                                                          VsConstants.VbProjectTypeGuid,
+                                                                          VsConstants.FsharpProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
         // Get the ProjectItems for a folder path
@@ -153,7 +154,14 @@ namespace NuGet.VisualStudio {
                 // Get the full path of this folder on disk and add it
                 string fullPath = Path.Combine(property.Value, folderName);
 
-                return projectItems.AddFromDirectory(fullPath).ProjectItems;
+                try {
+                    return projectItems.AddFromDirectory(fullPath).ProjectItems;
+                }
+                catch (NotImplementedException) {
+                    // This is the case for F#'s project system, we can't add from directory so we fall back
+                    // to this impl
+                    return projectItems.AddFolder(folderName).ProjectItems;
+                }
             }
 
             return null;
