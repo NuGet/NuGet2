@@ -1,7 +1,6 @@
+using System;
+
 namespace NuGet {
-
-    using System;
-
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class OptionAttribute : Attribute {
         public string AltName { get; set; }

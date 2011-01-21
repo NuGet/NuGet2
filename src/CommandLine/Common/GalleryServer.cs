@@ -1,12 +1,11 @@
-﻿namespace NuGet.Common {   
- 
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Net;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Json;
+﻿using System;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
+namespace NuGet.Common {   
     public class GalleryServer {
         private const string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string CreatePackageService = "PackageFiles";

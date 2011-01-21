@@ -1,10 +1,8 @@
-﻿namespace NuGet.Commands {
-    
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using NuGet.Common;
+﻿using System;
+using System.ComponentModel.Composition;
+using NuGet.Common;
 
+namespace NuGet.Commands {
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "publish", "PublishCommandDescription", AltName = "pub",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",

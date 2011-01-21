@@ -1,12 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.IO;
+using System.Linq;
+using NuGet.Common;
+
 namespace NuGet.Commands {
-
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using System.IO;
-    using System.Linq;
-    using Common;
-
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", AltName = "p", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]

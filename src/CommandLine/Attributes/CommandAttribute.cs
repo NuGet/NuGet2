@@ -1,7 +1,6 @@
+using System;
+
 namespace NuGet {
-
-    using System;
-
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class CommandAttribute : Attribute {
         public string AltName { get; set; }

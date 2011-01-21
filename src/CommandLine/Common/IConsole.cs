@@ -1,6 +1,6 @@
 ﻿using System.IO;
-namespace NuGet.Common {
 
+namespace NuGet.Common {
     public interface IConsole {
         int CursorLeft { get; set; }
         TextWriter Error { get; }

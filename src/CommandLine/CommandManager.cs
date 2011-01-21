@@ -1,12 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Globalization;
+using System.Reflection;
+using NuGet.Common;
+
 namespace NuGet {
-
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using System.Globalization;
-    using System.Reflection;
-    using NuGet.Common;
-
     [Export(typeof(ICommandManager))]
     public class CommandManager : ICommandManager {
         private readonly Dictionary<CommandAttribute, ICommand> _commands;

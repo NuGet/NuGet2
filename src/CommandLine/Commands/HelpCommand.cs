@@ -1,15 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using NuGet.Common;
+
 namespace NuGet.Commands {
-
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using System.Globalization;
-    using System.Linq;
-    using System.Reflection;
-    using NuGet.Common;
-
     [Export(typeof(ICommand))]
-    [Export("HelpCommand")]
+    [Export(typeof(HelpCommand))]
     [Command(typeof(NuGetResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
         UsageSummaryResourceName = "HelpCommandUsageDecription", UsageDescriptionResourceName = "HelpCommandUsageDecription")]
     public class HelpCommand : Command {

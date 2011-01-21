@@ -1,13 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
+using System.Reflection;
+using Microsoft.Internal.Web.Utils;
+using NuGet.Common;
+
 namespace NuGet {
-
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Globalization;
-    using System.Reflection;
-    using Microsoft.Internal.Web.Utils;
-    using NuGet.Common;
-
     public static class CommandLineUtility {
         public static Type RemoveNullableFromType(Type type) {
             return Nullable.GetUnderlyingType(type) ?? type;

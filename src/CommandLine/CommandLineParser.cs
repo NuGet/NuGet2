@@ -1,11 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using NuGet.Common;
+
 namespace NuGet {
-
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using NuGet.Common;
-    using System.Linq;
-
     public class CommandLineParser {
         private ICommandManager _commandManager;
 

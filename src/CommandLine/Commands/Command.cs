@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NuGet.Common;
 using System.ComponentModel.Composition;
+using System.Linq;
+using NuGet.Common;
 
 namespace NuGet.Commands {
     public abstract class Command : ICommand {
@@ -13,11 +12,22 @@ namespace NuGet.Commands {
         [Import]
         public IConsole Console { get; set; }
 
-        [Import("HelpCommand")]
+        [Import]
         public HelpCommand HelpCommand { get; set; }
 
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
+
+        public string GetCurrentCommandName() {
+            var CommandAttribute = this.GetType()
+                                        .GetCustomAttributes(typeof(CommandAttribute), true)
+                                        .Cast<CommandAttribute>()
+                                        .FirstOrDefault();
+            if (CommandAttribute != null) {
+                return CommandAttribute.CommandName;
+            }
+            return String.Empty;
+        }
 
         public void Execute() {
             if (Help) {
@@ -26,14 +36,6 @@ namespace NuGet.Commands {
             else {
                 ExecuteCommand();
             }
-        }
-
-        public string GetCurrentCommandName() {
-            var CommandAttributes = this.GetType().GetCustomAttributes(typeof(CommandAttribute), true);
-            if (CommandAttributes.Any()) {
-                return ((CommandAttribute)CommandAttributes.First()).CommandName;
-            }
-            return String.Empty;
         }
 
         public abstract void ExecuteCommand();

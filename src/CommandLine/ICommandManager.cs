@@ -1,8 +1,7 @@
+using System.Collections.Generic;
+using System.Reflection;
+
 namespace NuGet {
-
-    using System.Collections.Generic;
-    using System.Reflection;
-
     public interface ICommandManager {
         IDictionary<CommandAttribute, ICommand> GetCommands();
         CommandAttribute GetCommandAttribute(ICommand command);

@@ -1,10 +1,8 @@
-﻿namespace NuGet.Commands {
+﻿using System;
+using System.ComponentModel.Composition;
+using NuGet.Common;
 
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using NuGet.Common;
-
+namespace NuGet.Commands {
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription", AltName = "del",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
@@ -25,7 +23,6 @@
             _packageVersion = Arguments[1];
             //Third argument should be the API Key
             _apiKey = Arguments[2];
-
 
             GalleryServer gallery;
             if (String.IsNullOrEmpty(Source)) {

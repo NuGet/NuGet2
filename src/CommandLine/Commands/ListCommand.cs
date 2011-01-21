@@ -1,11 +1,10 @@
-﻿namespace NuGet.Commands {
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using NuGet.Common;
 
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
-    using System.Linq;
-    using NuGet.Common;
-
+namespace NuGet.Commands {
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "list", "ListCommandDescription", AltName = "l",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
