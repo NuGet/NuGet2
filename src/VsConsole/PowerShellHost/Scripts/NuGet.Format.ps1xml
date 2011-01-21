@@ -128,7 +128,7 @@
             <Name>EnvDTE.Project</Name>
             <ViewSelectedBy>
                 <TypeName>System.__ComObject#{866311e6-c887-4143-9833-645f5b93f6f1}</TypeName>
-                <TypeName>Microsoft.VisualStudio.FSharp.ProjectSystem.Automation.OAProject</TypeName>                
+                <TypeName>Microsoft.VisualStudio.FSharp.ProjectSystem.Automation.OAProject</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -136,7 +136,11 @@
                         <Width>40</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>Kind</Label>
+                        <Width>20</Width>
+                        <Label>Type</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>FullName</Label>
                     </TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
@@ -155,6 +159,9 @@
                                     default { "$_" }
                                   }
                                 </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>FullName</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
