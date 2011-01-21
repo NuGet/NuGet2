@@ -306,4 +306,13 @@
   <data name="PackageCommandVerboseDescription" xml:space="preserve">
     <value>Shows verbose output for package building.</value>
   </data>
+  <data name="SpecCommandAssemblyPathDescription" xml:space="preserve">
+    <value>Assembly to use for metadata.</value>
+  </data>
+  <data name="SpecCommandCreatedNuSpec" xml:space="preserve">
+    <value>Created '{0}' successfully.</value>
+  </data>
+  <data name="SpecCommandDescription" xml:space="preserve">
+    <value>Generates a nuspec for a new package.</value>
+  </data>
 </root>

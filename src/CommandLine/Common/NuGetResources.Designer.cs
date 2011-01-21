@@ -529,6 +529,33 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assembly to use for metadata..
+        /// </summary>
+        internal static string SpecCommandAssemblyPathDescription {
+            get {
+                return ResourceManager.GetString("SpecCommandAssemblyPathDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Created &apos;{0}&apos; successfully..
+        /// </summary>
+        internal static string SpecCommandCreatedNuSpec {
+            get {
+                return ResourceManager.GetString("SpecCommandCreatedNuSpec", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generates a nuspec for a new package..
+        /// </summary>
+        internal static string SpecCommandDescription {
+            get {
+                return ResourceManager.GetString("SpecCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to change from type &apos;{0}&apos; to &apos;{1}&apos;..
         /// </summary>
         internal static string UnableToConvertTypeError {

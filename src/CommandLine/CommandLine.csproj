@@ -28,6 +28,7 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
+    <Compile Include="Commands\SpecCommand.cs" />
     <Compile Include="Commands\PublishCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
