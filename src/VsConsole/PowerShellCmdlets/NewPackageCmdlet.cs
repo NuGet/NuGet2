@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -19,7 +18,7 @@ namespace NuGet.Cmdlets {
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
         public NewPackageCmdlet()
-            : this(ServiceLocator.GetInstance<ISolutionManager>(), 
+            : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
@@ -27,17 +26,17 @@ namespace NuGet.Cmdlets {
             : base(solutionManager, packageManagerFactory) {
         }
 
-        [Parameter(Position = 0, ValueFromPipelineByPropertyName=true)]
+        [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         [Alias("ProjectName")]
         public string Project { get; set; }
 
-        [Parameter(Mandatory=true, Position = 1)]
+        [Parameter(Mandatory = true, Position = 1)]
         [Alias("Spec")]
         [ValidateNotNullOrEmpty]
         public string SpecFile { get; set; }
 
-        [Parameter(Mandatory=true, Position = 2)]
+        [Parameter(Mandatory = true, Position = 2)]
         [ValidateNotNullOrEmpty]
         public string TargetFile { get; set; }
 
@@ -77,9 +76,9 @@ namespace NuGet.Cmdlets {
 
             // Remove .nuspec and .nupkg files from output package 
             RemoveExludedFiles(builder);
-            
+
             WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_CreatingPackage, outputFilePath));
-            using(Stream stream = File.Create(outputFilePath)) {
+            using (Stream stream = File.Create(outputFilePath)) {
                 builder.Save(stream);
             }
             WriteLine(Resources.Cmdlet_PackageCreated);
@@ -106,12 +105,10 @@ namespace NuGet.Cmdlets {
                         target: SpecFile);
                 }
             }
-            try
-            {
+            try {
                 specFile = FindSpecFile(projectIns, filePath).SingleOrDefault();
             }
-            catch (InvalidOperationException)
-            {
+            catch (InvalidOperationException) {
                 // SingleOrDefault will throw if more than one spec files were found
                 // terminating
                 ErrorHandler.HandleException(
@@ -121,8 +118,7 @@ namespace NuGet.Cmdlets {
                     category: ErrorCategory.InvalidOperation);
             }
 
-            if (specFile == null)
-            {
+            if (specFile == null) {
                 // terminating
                 ErrorHandler.HandleException(
                     new ItemNotFoundException(Resources.Cmdlet_NuspecFileNotFound),
@@ -131,8 +127,7 @@ namespace NuGet.Cmdlets {
                     category: ErrorCategory.ObjectNotFound,
                     target: SpecFile);
             }
-            else
-            {
+            else {
                 specFilePath = specFile.FileNames[0];
             }
             return specFilePath;
