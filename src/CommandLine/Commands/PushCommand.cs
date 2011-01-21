@@ -15,14 +15,14 @@
         private string _apiKey;
         private string _packagePath;
 
-        [Option(typeof(NuGetResources), "PushCommandPublishDescription", AltName = "pub")]
-        public bool Publish { get; set; }
+        [Option(typeof(NuGetResources), "PushCommandPublishDescription", AltName = "co")]
+        public bool CreateOnly { get; set; }
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
         public PushCommand() {
-            Publish = true;
+            CreateOnly = true;
         }
 
         public override void ExecuteCommand() {
@@ -47,7 +47,7 @@
             }
             Console.WriteLine(NuGetResources.PushCommandPackageCreated);
             
-            if (Publish) {
+            if (!CreateOnly) {
                 var cmd = new PublishCommand();
                 cmd.Console = Console;
                 cmd.Source = Source;
