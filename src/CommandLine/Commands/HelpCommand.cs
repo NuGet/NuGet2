@@ -9,7 +9,7 @@ namespace NuGet.Commands {
     using NuGet.Common;
 
     [Export(typeof(ICommand))]
-    [Export(typeof(HelpCommand))]
+    [Export("HelpCommand")]
     [Command(typeof(NuGetResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
         UsageSummaryResourceName = "HelpCommandUsageDecription", UsageDescriptionResourceName = "HelpCommandUsageDecription")]
     public class HelpCommand : Command {
