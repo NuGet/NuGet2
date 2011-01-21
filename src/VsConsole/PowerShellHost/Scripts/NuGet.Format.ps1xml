@@ -128,6 +128,7 @@
             <Name>EnvDTE.Project</Name>
             <ViewSelectedBy>
                 <TypeName>System.__ComObject#{866311e6-c887-4143-9833-645f5b93f6f1}</TypeName>
+                <TypeName>Microsoft.VisualStudio.FSharp.ProjectSystem.Automation.OAProject</TypeName>                
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -150,6 +151,7 @@
                                     "{E24C65DC-7377-472B-9ABA-BC803B73C61A}" {"Web Site"}
                                     "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
                                     "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
+                                    "{F2A71F9B-5D33-465A-A702-920D77279786}" {"F#"}
                                     default { "$_" }
                                   }
                                 </ScriptBlock>
