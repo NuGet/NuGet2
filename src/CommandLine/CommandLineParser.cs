@@ -11,16 +11,15 @@ namespace NuGet {
 
         public CommandLineParser(ICommandManager manager) {
             _commandManager = manager;
-            _index = 0;
         }
 
-        public ICommand ExtractOptions(ICommand command, List<string> commandlineArgs) {
+        public ICommand ExtractOptions(ICommand command, IEnumerator<string> argsEnumerator) {
             List<string> arguments = new List<string>();
             
             IDictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
 
             while (true) {
-                string option = GetNextCommandLineItem(commandlineArgs);
+                string option = GetNextCommandLineItem(argsEnumerator);
 
                 if (option == null) {
                     break;
@@ -56,7 +55,7 @@ namespace NuGet {
                     value = value ?? "true";
                 }
                 else {
-                    value = GetNextCommandLineItem(commandlineArgs);
+                    value = GetNextCommandLineItem(argsEnumerator);
                 }
 
                 if (value == null) {
@@ -76,9 +75,11 @@ namespace NuGet {
             return command;
         }
 
-        public ICommand ParseCommandLine(List<string> commandlineArgs) {
+        public ICommand ParseCommandLine(IEnumerable<string> commandlineArgs) {
+            IEnumerator<string> argsEnumerator = commandlineArgs.GetEnumerator();
+
             // Get the desired command name
-            string cmdName = GetNextCommandLineItem(commandlineArgs);
+            string cmdName = GetNextCommandLineItem(argsEnumerator);
             if (cmdName == null) {
                 return null;
             }
@@ -89,17 +90,14 @@ namespace NuGet {
                 throw new CommandLineException(NuGetResources.UnknowCommandError, cmdName);
             }
 
-            return ExtractOptions(cmd, commandlineArgs);
+            return ExtractOptions(cmd, argsEnumerator);
         }
 
-        public static string GetNextCommandLineItem(List<string> commandlineArgs) {
-            if (commandlineArgs == null || !commandlineArgs.Any()) {
+        public static string GetNextCommandLineItem(IEnumerator<string> argsEnumerator) {
+            if (argsEnumerator == null || !argsEnumerator.MoveNext()) {
                 return null;
             }
-
-            var item = commandlineArgs.First();
-            commandlineArgs.RemoveAt(0);
-            return item;
+            return argsEnumerator.Current;
         }
     }
 }
