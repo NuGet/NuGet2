@@ -1,4 +1,4 @@
-namespace NuGet {
+namespace NuGet.Commands {
 
     using System;
     using System.Collections.Generic;
@@ -9,18 +9,15 @@ namespace NuGet {
     using NuGet.Common;
 
     [Export(typeof(ICommand))]
+    [Export(typeof(HelpCommand))]
     [Command(typeof(NuGetResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
         UsageSummaryResourceName = "HelpCommandUsageDecription", UsageDescriptionResourceName = "HelpCommandUsageDecription")]
-    public class HelpCommand : ICommand {
+    public class HelpCommand : Command {
         private readonly string _commandExe;
         private readonly ICommandManager _commandManager;
         private readonly string _helpUrl;
         private readonly string _productName;
 
-        public List<string> Arguments {
-            get;
-            set;
-        }
         private string CommandName {
             get {
                 if (Arguments != null && Arguments.Count > 0) {
@@ -29,22 +26,20 @@ namespace NuGet {
                 return null;
             }
         }
-        public IConsole Console { get; private set; }
 
         [ImportingConstructor]
-        public HelpCommand(ICommandManager commandManager, IConsole console)
-            : this(commandManager, console, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, null) {
+        public HelpCommand(ICommandManager commandManager)
+            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, null) {
         }
 
-        public HelpCommand(ICommandManager commandManager, IConsole console, string commandExe, string productName, string helpUrl) {
+        public HelpCommand(ICommandManager commandManager, string commandExe, string productName, string helpUrl) {
             _commandManager = commandManager;
-            Console = console;
             _commandExe = commandExe;
             _productName = productName;
             _helpUrl = helpUrl;
         }
 
-        public void Execute() {
+        public override void ExecuteCommand() {
             if (!String.IsNullOrEmpty(CommandName)) {
                 ViewHelpForCommand(CommandName);
             }

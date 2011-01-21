@@ -16,7 +16,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
-            var updateCmd = new UpdateCommand(factory.Object, consoleInfo.Console);
+            var updateCmd = new UpdateCommand(factory.Object);
+            updateCmd.Console = consoleInfo.Console;
 
             // Act
             ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new Version("2.0")), "Unable to find 'NuGet.CommandLine' package.");
@@ -31,7 +32,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(repository);
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
-            var updateCmd = new UpdateCommand(factory.Object, consoleInfo.Console);
+            var updateCmd = new UpdateCommand(factory.Object);
+            updateCmd.Console = consoleInfo.Console;
 
             // Act
             updateCmd.SelfUpdate("c:\foo.exe", new Version("2.0"));
@@ -49,7 +51,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(repository);
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
-            var updateCmd = new UpdateCommand(factory.Object, consoleInfo.Console);
+            var updateCmd = new UpdateCommand(factory.Object);
+            updateCmd.Console  = consoleInfo.Console;
+            updateCmd.Console = consoleInfo.Console;
 
             // Act & Assert
             ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new Version("2.0")), "Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package.");
@@ -65,7 +69,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(repository);
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
-            var updateCmd = new MockUpdateCommand(factory.Object, consoleInfo.Console);
+            var updateCmd = new MockUpdateCommand(factory.Object);
+            updateCmd.Console = consoleInfo.Console;
 
             // Act
             updateCmd.SelfUpdate(@"c:\NuGet.exe", new Version("2.0"));
@@ -98,8 +103,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             public Dictionary<string, string> MovedFiles = new Dictionary<string, string>();
             public Dictionary<string, string> UpdatedFiles = new Dictionary<string, string>();
 
-            public MockUpdateCommand(IPackageRepositoryFactory factory, IConsole console)
-                : base(factory, console) {
+            public MockUpdateCommand(IPackageRepositoryFactory factory)
+                : base(factory) {
             }
 
             protected override void Move(string oldPath, string newPath) {

@@ -9,32 +9,24 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", AltName = "u")]
-    public class UpdateCommand : ICommand {
+    public class UpdateCommand : Command {
         private const string DefaultFeedUrl = ListCommand._defaultFeedUrl;
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
 
-        public List<string> Arguments { get; set; }
-
-        public IConsole Console { get; private set; }
-
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         [ImportingConstructor]
-        public UpdateCommand(IPackageRepositoryFactory packageRepositoryFactory, IConsole console) {
-            if (console == null) {
-                throw new ArgumentNullException("console");
-            }
+        public UpdateCommand(IPackageRepositoryFactory packageRepositoryFactory) {
 
             if (packageRepositoryFactory == null) {
                 throw new ArgumentNullException("packageRepositoryFactory");
             }
 
-            Console = console;
             RepositoryFactory = packageRepositoryFactory;
         }
 
-        public void Execute() {
+        public override void ExecuteCommand() {
             Assembly assembly = typeof(InstallCommand).Assembly;
             SelfUpdate(assembly.Location, assembly.GetName().Version);
         }

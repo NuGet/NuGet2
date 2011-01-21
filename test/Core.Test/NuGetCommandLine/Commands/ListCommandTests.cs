@@ -16,7 +16,8 @@
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory, console);
+            ListCommand cmd = new ListCommand(factory);
+            cmd.Console = console;
             cmd.Source = "http://NotDefault";
 
             // Act
@@ -32,7 +33,8 @@
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory, console);
+            ListCommand cmd = new ListCommand(factory);
+            cmd.Console = console;
 
             // Act
             IQueryable<IPackage> packages = cmd.GetPackages();
@@ -48,7 +50,8 @@
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory, console);
+            ListCommand cmd = new ListCommand(factory);
+            cmd.Console = console;
             List<string> searchTerms = new List<string>();
             searchTerms.Add("SearchPackage");
             searchTerms.Add("AnotherTerm");

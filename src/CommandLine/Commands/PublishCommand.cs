@@ -1,4 +1,4 @@
-﻿namespace NuGet {
+﻿namespace NuGet.Commands {
     
     using System;
     using System.Collections.Generic;
@@ -9,24 +9,17 @@
     [Command(typeof(NuGetResources), "publish", "PublishCommandDescription", AltName = "pub",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",
         UsageSummaryResourceName = "PublishCommandUsageSummary")]
-    public class PublishCommand : ICommand {
+    public class PublishCommand : Command {
         
         private string _apiKey;
         private string _packageId;
         private string _packageVersion;
 
-        public List<string> Arguments { get; set; }
-        public IConsole Console { get; set; }
-
         [Option(typeof(NuGetResources), "PublishCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [ImportingConstructor]
-        public PublishCommand(IConsole console) {
-            Console = console;
-        }
 
-        public void Execute() {
+        public override void ExecuteCommand() {
             //Frist argument should be the package ID
             _packageId = Arguments[0];
             //Second argument should be the package Version

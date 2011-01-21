@@ -1,4 +1,4 @@
-﻿namespace NuGet {
+﻿namespace NuGet.Commands {
 
     using System;
     using System.Collections.Generic;
@@ -10,14 +10,10 @@
     [Command(typeof(NuGetResources), "push", "PushCommandDescription", AltName="pu",
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
-    public class PushCommand : ICommand {
+    public class PushCommand : Command {
 
         private string _apiKey;
         private string _packagePath;
-
-        public List<string> Arguments { get; set; }
-
-        public IConsole Console { get; set; }
 
         [Option(typeof(NuGetResources), "PushCommandPublishDescription", AltName = "pub")]
         public bool Publish { get; set; }
@@ -25,13 +21,11 @@
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [ImportingConstructor]
-        public PushCommand(IConsole console) {
-            Console = console;
+        public PushCommand() {
             Publish = true;
         }
 
-        public void Execute() {
+        public override void ExecuteCommand() {
             //Frist argument should be the package
             _packagePath = Arguments[0];
             //Second argument should be the API Key
@@ -54,7 +48,8 @@
             Console.WriteLine(NuGetResources.PushCommandPackageCreated);
             
             if (Publish) {
-                var cmd = new PublishCommand(Console);
+                var cmd = new PublishCommand();
+                cmd.Console = Console;
                 cmd.Source = Source;
                 cmd.Arguments = new List<string> { pkg.Id, pkg.Version.ToString(), _apiKey };
                 cmd.Execute();

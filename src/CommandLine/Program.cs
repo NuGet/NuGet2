@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Reflection;
+using NuGet.Commands;
 
 namespace NuGet {
     public class Program {

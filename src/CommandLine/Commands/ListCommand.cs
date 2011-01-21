@@ -9,7 +9,7 @@
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "list", "ListCommandDescription", AltName = "l",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
-    public class ListCommand : ICommand {
+    public class ListCommand : Command {
         internal const string _defaultFeedUrl = "http://go.microsoft.com/fwlink/?LinkID=206669";
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription", AltName = "s")]
@@ -18,23 +18,14 @@
         [Option(typeof(NuGetResources), "ListCommandVerboseListDescription", AltName = "v")]
         public bool Verbose { get; set; }
 
-        public List<string> Arguments { get; set; }
-
-        public IConsole Console { get; private set; }
-
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         [ImportingConstructor]
-        public ListCommand(IPackageRepositoryFactory packageRepositoryFactory, IConsole console) {
-            if (console == null) {
-                throw new ArgumentNullException("console");
-            }
-
+        public ListCommand(IPackageRepositoryFactory packageRepositoryFactory) {
             if (packageRepositoryFactory == null) {
                 throw new ArgumentNullException("packageRepositoryFactory");
             }
 
-            Console = console;
             RepositoryFactory = packageRepositoryFactory;
         }
 
@@ -53,7 +44,7 @@
             return packageRepository.GetPackages();
         }
 
-        public void Execute() {
+        public override void ExecuteCommand() {
 
             IEnumerable<IPackage> packages = GetPackages();
 

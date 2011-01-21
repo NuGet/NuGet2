@@ -1,4 +1,4 @@
-namespace NuGet {
+namespace NuGet.Commands {
 
     using System;
     using System.Collections.Generic;
@@ -10,13 +10,9 @@ namespace NuGet {
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", AltName = "p", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
-    public class PackCommand : ICommand {
+    public class PackCommand : Command {
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
-
-        public List<string> Arguments { get; set; }
-
-        public IConsole Console { get; private set; }
 
         [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription", AltName = "o")]
         public string OutputDirectory { get; set; }
@@ -26,13 +22,8 @@ namespace NuGet {
 
         [Option(typeof(NuGetResources), "PackageCommandVerboseDescription", AltName = "v")]
         public bool Verbose { get; set; }
-
-        [ImportingConstructor]
-        public PackCommand(IConsole console) {
-            Console = console;
-        }
-
-        public void Execute() {
+       
+        public override void ExecuteCommand() {
             string nuspecFile;
 
             if (Arguments.Any()) {
