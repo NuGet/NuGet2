@@ -9,30 +9,14 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 0)]
-    public class SpecCommand : ICommand {
+    public class SpecCommand : Command {
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription", AltName = "a")]
         public string AssemblyPath {
             get;
             set;
         }
 
-        public List<string> Arguments {
-            get;
-            set;
-        }
-
-        public IConsole Console { get; private set; }
-
-        [ImportingConstructor]
-        public SpecCommand(IConsole console) {
-            if (console == null) {
-                throw new ArgumentNullException("console");
-            }
-
-            Console = console;
-        }
-
-        public void Execute() {
+        public override void ExecuteCommand() {
             var builder = new PackageBuilder();
             if (!String.IsNullOrEmpty(AssemblyPath)) {
                 // Load the assembly and try to read the attributes from them
@@ -52,7 +36,6 @@ namespace NuGet.Commands {
             else {
                 builder.Id = "Package";
                 builder.Version = new Version("1.0");
-
             }
 
             builder.Description = builder.Description ?? "Package description";
@@ -60,6 +43,7 @@ namespace NuGet.Commands {
                 builder.Authors.Add("Author here");
             }
 
+            builder.ProjectUrl = new Uri("http://projecturl.com");
             string nuspecFile = builder.Id + ".nuspec";
             using (Stream stream = File.Create(nuspecFile)) {
                 Manifest.Create(builder).Save(stream);
