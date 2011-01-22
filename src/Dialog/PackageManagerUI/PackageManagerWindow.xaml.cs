@@ -108,10 +108,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 Resources, 
                 progressWindowOpener,
                 scriptExecutor);
-
-            // We want the providers to appear as Installed - Online - Updates - Recents
-            // but the ExtensionsExplorer control display providers in "unknown" order.
-            // This was found by trial and error.
+            
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);
             explorer.Providers.Add(installedProvider);

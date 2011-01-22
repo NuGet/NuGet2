@@ -43,6 +43,12 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        public override float SortOrder {
+            get {
+                return 2.0f;
+            }
+        }
+
         public override bool RefreshOnNodeSelection {
             get {
                 // only refresh if the current node doesn't have any extensions

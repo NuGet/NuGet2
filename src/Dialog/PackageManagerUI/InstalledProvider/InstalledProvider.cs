@@ -36,6 +36,12 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        public override float SortOrder {
+            get {
+                return 1.0f;
+            }
+        }
+
         public override bool RefreshOnNodeSelection {
             get {
                 return true;

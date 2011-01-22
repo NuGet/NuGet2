@@ -75,6 +75,8 @@ namespace NuGet.Dialog.Providers {
             set;
         }
 
+        public bool SuppressNextRefresh { get; private set; }
+
         /// <summary>
         /// Gets the root node of the tree
         /// </summary>
@@ -168,15 +170,26 @@ namespace NuGet.Dialog.Providers {
 
         private void RemoveSearchNode() {
             if (_searchNode != null) {
+
+                // When remove the search node, the dialog will automatically select the first node (All node)
+                // Since we are going to restore the previously selected node anyway, we don't want the first node
+                // to refresh. Hence suppress it here.
+                SuppressNextRefresh = true;
+
+                try {
+                    // dispose any search results
+                    RootNode.Nodes.Remove(_searchNode);
+                }
+                finally {
+                    _searchNode = null;
+                    SuppressNextRefresh = false;
+                }
+
                 if (_lastSelectedNode != null) {
                     // after search, we want to reset the original node to page 1 (Work Item #461) 
                     _lastSelectedNode.CurrentPage = 1;
                     SelectNode(_lastSelectedNode);
                 }
-
-                // dispose any search results
-                RootNode.Nodes.Remove(_searchNode);
-                _searchNode = null;
             }
         }
 

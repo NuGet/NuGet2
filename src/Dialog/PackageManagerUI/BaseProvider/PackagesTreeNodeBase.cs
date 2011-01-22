@@ -416,9 +416,11 @@ namespace NuGet.Dialog.Providers {
         /// Called when this node is opened.
         /// </summary>
         internal void OnOpened() {
-            Provider.SelectedNode = this;
-            if (Provider.RefreshOnNodeSelection && !this.IsSearchResultsNode) {
-                Refresh();
+            if (!Provider.SuppressNextRefresh) {
+                Provider.SelectedNode = this;
+                if (Provider.RefreshOnNodeSelection && !this.IsSearchResultsNode) {
+                    Refresh();
+                }
             }
         }
     }
