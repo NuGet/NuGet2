@@ -68,6 +68,11 @@ namespace NuGet.Runtime {
         }
 
         private static IEnumerable<IAssembly> GetAssemblies(string path, AppDomain domain) {
+            // If the directory doesn't exist then bail out
+            if (!Directory.Exists(path)) {
+                yield break;
+            }
+
             foreach (var assemblyFile in Directory.GetFiles(path, "*.dll")) {
                 yield return RemoteAssembly.LoadAssembly(assemblyFile, domain);
             }

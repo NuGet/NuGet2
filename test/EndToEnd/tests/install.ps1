@@ -221,3 +221,14 @@ function Test-WebsiteInstallPackageWithRootNamespae {
     $content = [System.IO.File]::ReadAllText($path)
     Assert-True ($content.Contains("namespace ASP"))
 }
+
+function Test-AddBindingRedirectToWebsiteWithNonExistingOutputPath {
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $redirects = $p | Add-BindingRedirect
+
+    # Assert
+    Assert-Null $redirects
+}
