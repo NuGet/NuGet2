@@ -610,7 +610,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Currently running NuGet.exe v{0}..
+        ///   Looks up a localized string similar to Currently running NuGet.exe {0}..
         /// </summary>
         internal static string UpdateCommandCurrentlyRunningNuGetExe {
             get {

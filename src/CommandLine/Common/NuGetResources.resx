@@ -274,7 +274,7 @@
     <value>Checking for updates from {0}.</value>
   </data>
   <data name="UpdateCommandCurrentlyRunningNuGetExe" xml:space="preserve">
-    <value>Currently running NuGet.exe v{0}.</value>
+    <value>Currently running NuGet.exe {0}.</value>
   </data>
   <data name="UpdateCommandDescription" xml:space="preserve">
     <value>Update the running NuGet.exe to the newest version available from the server.</value>
