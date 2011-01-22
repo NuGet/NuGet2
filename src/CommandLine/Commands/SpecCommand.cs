@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -49,7 +48,14 @@ namespace NuGet.Commands {
                 builder.Authors.Add("Author here");
             }
 
-            builder.ProjectUrl = new Uri("http://projecturl.com");
+            builder.Owners.Add("Owner here");
+            builder.ProjectUrl = new Uri("http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE");
+            builder.LicenseUrl = new Uri("http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE");
+            builder.IconUrl = new Uri("http://ICON_URL_HERE_OR_DELETE_THIS_LINE");
+            builder.Tags.Add("Tag1");
+            builder.Tags.Add("Tag2");
+            builder.Dependencies.Add(new PackageDependency("SampleDependency", VersionUtility.ParseVersionSpec("1.0")));
+
             string nuspecFile = builder.Id + ".nuspec";
 
             // Skip the creation if the file exists and force wasn't specified
