@@ -140,10 +140,13 @@ namespace NuGet {
         }
 
         public void Save(Stream stream) {
+            // Make sure we're saving a valid package id
+            PackageIdValidator.ValidatePackageId(Id);
+
             // Throw if the package doesn't contain any dependencies nor content
             if (!Files.Any() && !Dependencies.Any()) {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
-            }
+            }            
 
             // Verify that all dependencies specify a versionSpec
             List<PackageDependency> brokenDependencies = Dependencies.Where(d => d.VersionSpec == null)
@@ -165,7 +168,10 @@ namespace NuGet {
             }
 
             using (Package package = Package.Open(stream, FileMode.Create)) {
+                // Validate and write the manifest
                 WriteManifest(package);
+
+                // Write the files to the package
                 WriteFiles(package);
 
                 // Copy the metadata properties back to the package

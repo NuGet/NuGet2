@@ -232,6 +232,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package id &apos;{0}&apos; is invalid..
+        /// </summary>
+        internal static string InvalidPackageId {
+            get {
+                return ResourceManager.GetString("InvalidPackageId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid version string..
         /// </summary>
         internal static string InvalidVersionString {

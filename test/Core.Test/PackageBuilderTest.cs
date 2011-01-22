@@ -228,11 +228,11 @@ namespace NuGet.Test {
         public void SaveThrowsIfRequiredPropertiesAreMissing() {
             // Arrange
             var builder = new PackageBuilder();
+            builder.Id = "Package";
             builder.Files.Add(new Mock<IPackageFile>().Object);
 
             // Act & Assert
-            ExceptionAssert.Throws<ValidationException>(() => builder.Save(new MemoryStream()), @"Id is required.
-Version is required.
+            ExceptionAssert.Throws<ValidationException>(() => builder.Save(new MemoryStream()), @"Version is required.
 Authors is required.
 Description is required.");
         }
@@ -513,7 +513,7 @@ Description is required.");
             Assert.IsTrue(dependencies["B"].IsMinInclusive);
             Assert.IsFalse(dependencies["B"].IsMaxInclusive);
             Assert.AreEqual(new Version("1.0"), dependencies["B"].MinVersion);
-            Assert.AreEqual(new Version("2.5"), dependencies["B"].MaxVersion);            
+            Assert.AreEqual(new Version("2.5"), dependencies["B"].MaxVersion);
         }
 
         [TestMethod]
@@ -595,6 +595,20 @@ Enabling license acceptance requires a license url.");
 
             // Act
             ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null), "Invalid URI: The format of the URI could not be determined.");
+        }
+
+        [TestMethod]
+        public void PackageBuilderThrowsIfPackageIdInvalid() {
+            // Arrange
+            var builder = new PackageBuilder {
+                Id = "  a.  b",
+                Version = new Version("1.0"),
+                Description = "Description"
+            };
+            builder.Authors.Add("Me");
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "Package id '  a.  b' is invalid.");
         }
     }
 }

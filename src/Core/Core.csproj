@@ -81,6 +81,7 @@
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
+    <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\ZipPackageFactory.cs" />
     <Reference Include="System" />

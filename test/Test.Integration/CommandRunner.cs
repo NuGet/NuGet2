@@ -1,14 +1,13 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+
 namespace NuGet.Test.Integration {
-
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-
     public class CommandRunner {
+        private static readonly int Timeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
 
         public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit) {
-
-            string result = string.Empty;
+            string result = String.Empty;
 
             ProcessStartInfo psi = new ProcessStartInfo(Path.GetFullPath(process), arguments) {
                 WorkingDirectory = Path.GetFullPath(workingDirectory),
@@ -30,12 +29,13 @@ namespace NuGet.Test.Integration {
 
 
                 if (waitForExit) {
-                    p.WaitForExit(5000);
+                    p.WaitForExit(Timeout);
                 }
                 if (p.HasExited) {
                     exitCode = p.ExitCode;
                 }
             }
+
             result = standardOutput.ReadToEnd();
             if (string.IsNullOrEmpty(result)) {
                 result = errorOutput.ReadToEnd();
