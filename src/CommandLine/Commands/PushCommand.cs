@@ -19,11 +19,7 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-
-        public PushCommand() {
-            CreateOnly = true;
-        }
-
+        
         public override void ExecuteCommand() {
             //Frist argument should be the package
             _packagePath = Arguments[0];
