@@ -5,7 +5,7 @@ using NuGet.Resources;
 
 namespace NuGet {
     public static class PackageIdValidator {
-        private static readonly Regex _idRegex = new Regex(@"^\w+([_.-]\w+)*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex _idRegex = new Regex(@"^\w+([_.-]\w+)*$", RegexOptions.IgnoreCase);
 
         public static bool IsValidPackageId(string packageId) {
             if (packageId == null) {
