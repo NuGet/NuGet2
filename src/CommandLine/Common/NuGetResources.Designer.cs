@@ -556,6 +556,24 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; already exists, use -f to overwrite it..
+        /// </summary>
+        internal static string SpecCommandFileExists {
+            get {
+                return ResourceManager.GetString("SpecCommandFileExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwrite nuspec file if it exists..
+        /// </summary>
+        internal static string SpecCommandForceDescription {
+            get {
+                return ResourceManager.GetString("SpecCommandForceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to change from type &apos;{0}&apos; to &apos;{1}&apos;..
         /// </summary>
         internal static string UnableToConvertTypeError {

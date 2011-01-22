@@ -16,6 +16,12 @@ namespace NuGet.Commands {
             set;
         }
 
+        [Option(typeof(NuGetResources), "SpecCommandForceDescription", AltName = "f")]
+        public bool Force {
+            get;
+            set;
+        }
+
         public override void ExecuteCommand() {
             var builder = new PackageBuilder();
             if (!String.IsNullOrEmpty(AssemblyPath)) {
@@ -45,11 +51,18 @@ namespace NuGet.Commands {
 
             builder.ProjectUrl = new Uri("http://projecturl.com");
             string nuspecFile = builder.Id + ".nuspec";
-            using (Stream stream = File.Create(nuspecFile)) {
-                Manifest.Create(builder).Save(stream);
-            }
 
-            Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
+            // Skip the creation if the file exists and force wasn't specified
+            if (File.Exists(nuspecFile) && !Force) {
+                Console.WriteLine(NuGetResources.SpecCommandFileExists, nuspecFile);
+            }
+            else {
+                using (Stream stream = File.Create(nuspecFile)) {
+                    Manifest.Create(builder).Save(stream);
+                }
+
+                Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
+            }
         }
 
         private string GetAttributeValueOrDefault<T>(Assembly assembly, Func<T, string> selector) where T : Attribute {

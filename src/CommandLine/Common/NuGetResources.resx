@@ -315,4 +315,10 @@
   <data name="SpecCommandDescription" xml:space="preserve">
     <value>Generates a nuspec for a new package.</value>
   </data>
+  <data name="SpecCommandForceDescription" xml:space="preserve">
+    <value>Overwrite nuspec file if it exists.</value>
+  </data>
+  <data name="SpecCommandFileExists" xml:space="preserve">
+    <value>'{0}' already exists, use -f to overwrite it.</value>
+  </data>
 </root>
