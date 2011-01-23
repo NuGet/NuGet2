@@ -310,8 +310,10 @@ namespace NuGet {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
+            IPackage oldPackage = LocalRepository.FindPackage(packageId);
+
             // Check to see if this package is installed
-            if (!LocalRepository.Exists(packageId)) {
+            if (oldPackage == null) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
@@ -321,11 +323,11 @@ namespace NuGet {
 
             IPackage package = SourceRepository.FindPackage(packageId, version: version);
 
-            if (package == null) {
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
+            if (package != null && oldPackage.Version != package.Version) {
+                UpdatePackageReference(package, updateDependencies);
             }
             else {
-                UpdatePackageReference(package, updateDependencies);
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
             }
         }
 

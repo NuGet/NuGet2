@@ -208,6 +208,60 @@ namespace NuGet.Test {
             Assert.IsFalse(packageManager.LocalRepository.Exists(packageA));
         }
 
+        [TestMethod]
+        public void UpdatePackageUninstallsPackageAndInstallsNewPackage() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
+            IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
+            localRepository.Add(A10);
+            sourceRepository.Add(A20);
+
+            // Act
+            packageManager.UpdatePackage("A", updateDependencies: true);
+
+            // Assert
+            Assert.IsFalse(localRepository.Exists("A", new Version("1.0")));
+            Assert.IsTrue(localRepository.Exists("A", new Version("2.0")));
+        }
+
+        [TestMethod]
+        public void UpdatePackageThrowsIfPackageNotInstalled() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
+            sourceRepository.Add(A20);
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UpdatePackage("A", updateDependencies: true), "Unable to find package 'A'.");
+        }
+
+        [TestMethod]
+        public void UpdatePackageDoesNothingIfNoUpdatesAvailable() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
+            localRepository.Add(A10);
+
+            // Act
+            packageManager.UpdatePackage("A", updateDependencies: true);
+
+            // Assert
+            Assert.IsTrue(localRepository.Exists("A", new Version("1.0")));
+        }
+
         private PackageManager CreatePackageManager() {
             var projectSystem = new MockProjectSystem();
             return new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem);

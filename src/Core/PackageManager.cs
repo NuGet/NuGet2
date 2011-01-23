@@ -1,11 +1,11 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
-    using Microsoft.Internal.Web.Utils;
-    using NuGet.Resources;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using Microsoft.Internal.Web.Utils;
+using NuGet.Resources;
 
+namespace NuGet {
     public class PackageManager : IPackageManager {
         private ILogger _logger;
 
@@ -127,7 +127,7 @@ namespace NuGet {
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.UnknownPackage, packageId));
             }
-            else {               
+            else {
                 InstallPackage(package, ignoreDependencies);
             }
         }
@@ -282,6 +282,44 @@ namespace NuGet {
 
         private PackageOperationEventArgs CreateOperation(IPackage package) {
             return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
+        }
+
+        public void UpdatePackage(string packageId, bool updateDependencies) {
+            UpdatePackage(packageId, version: null, updateDependencies: updateDependencies);
+        }
+
+        public void UpdatePackage(string packageId, Version version, bool updateDependencies) {
+            if (String.IsNullOrEmpty(packageId)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            IPackage oldPackage = LocalRepository.FindPackage(packageId);
+
+            // Check to see if this package is installed
+            if (oldPackage == null) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuGetResources.UnknownPackage, packageId));
+            }
+
+            Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
+
+            IPackage newPackage = SourceRepository.FindPackage(packageId, version: version);
+
+            if (newPackage != null && oldPackage.Version != newPackage.Version) {
+                UpdatePackage(oldPackage, newPackage, updateDependencies);                
+            }
+            else {
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
+            }
+        }
+
+        public void UpdatePackage(IPackage oldPackage, IPackage newPackage, bool updateDependencies) {
+            // Install the new package
+            InstallPackage(newPackage, !updateDependencies);
+
+            // Remove the old one
+            UninstallPackage(oldPackage, updateDependencies);
         }
     }
 }
