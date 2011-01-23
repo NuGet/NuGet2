@@ -5,7 +5,7 @@ using EnvDTE;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
-    internal class WebSiteProjectSystem : WebProjectSystem {
+    public class WebSiteProjectSystem : WebProjectSystem {
         private const string RootNamespace = "RootNamespace";
         private const string DefaultNamespace = "ASP";
 

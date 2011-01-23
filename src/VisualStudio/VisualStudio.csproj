@@ -93,7 +93,7 @@
     <Compile Include="SolutionExtensions.cs" />
     <Compile Include="SolutionManager.cs" />
     <Compile Include="ProjectExtensions.cs" />
-    <Compile Include="VsProjectSystemFactory.cs" />
+    <Compile Include="ProjectSystems\VsProjectSystemFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\VsResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -103,9 +103,9 @@
     <Compile Include="Utility\PathValidator.cs" />
     <Compile Include="VsConstants.cs" />
     <Compile Include="VsPackageManager.cs" />
-    <Compile Include="WebProjectSystem.cs" />
-    <Compile Include="WebSiteProjectSystem.cs" />
-    <Compile Include="VsProjectSystem.cs" />
+    <Compile Include="ProjectSystems\WebProjectSystem.cs" />
+    <Compile Include="ProjectSystems\WebSiteProjectSystem.cs" />
+    <Compile Include="ProjectSystems\VsProjectSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\VsResources.resx">

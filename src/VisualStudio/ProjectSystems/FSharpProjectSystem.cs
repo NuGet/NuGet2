@@ -1,6 +1,5 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 using EnvDTE;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio {
     public class FSharpProjectSystem : VsProjectSystem {
