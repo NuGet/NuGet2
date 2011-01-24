@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription", AltName = "del",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary")]

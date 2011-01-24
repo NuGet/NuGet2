@@ -5,7 +5,6 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "list", "ListCommandDescription", AltName = "l",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : Command {

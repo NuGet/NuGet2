@@ -6,7 +6,6 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", AltName = "p", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {

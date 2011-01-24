@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "install", "InstallCommandDescription", AltName = "i",
         MinArgs = 1, MaxArgs = 1,
         UsageSummaryResourceName = "InstallCommandUsageSummary", UsageDescriptionResourceName = "InstallCommandUsageDescription")]

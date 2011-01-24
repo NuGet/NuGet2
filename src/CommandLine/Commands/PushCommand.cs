@@ -5,7 +5,6 @@ using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "push", "PushCommandDescription", AltName="pu",
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]

@@ -6,7 +6,6 @@ using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", AltName = "u")]
     public class UpdateCommand : Command {
         private const string DefaultFeedUrl = ListCommand._defaultFeedUrl;

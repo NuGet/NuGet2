@@ -7,7 +7,6 @@ using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Export(typeof(HelpCommand))]
     [Command(typeof(NuGetResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
         UsageSummaryResourceName = "HelpCommandUsageDecription", UsageDescriptionResourceName = "HelpCommandUsageDecription")]

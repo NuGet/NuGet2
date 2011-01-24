@@ -6,7 +6,6 @@ using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 0)]
     public class SpecCommand : Command {
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription", AltName = "a")]

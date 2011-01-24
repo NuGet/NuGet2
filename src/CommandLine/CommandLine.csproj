@@ -37,6 +37,7 @@
     <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Commands\PushCommand.cs" />
+    <Compile Include="Commands\test.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
