@@ -73,3 +73,31 @@ function Test-UpdatingPackageWithSharedDependency {
     Assert-Null (Get-SolutionPackage C 1.0)
     Assert-Null (Get-SolutionPackage A 2.0)
 }
+
+function Test-UpdateWithoutPackageInstalledThrows {
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act & Assert
+    Assert-Throws { $p | Update-Package elmah } "Unable to find package 'elmah'."
+}
+
+function Test-UpdateSolutionOnlyPackage {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+    $solutionDir = Get-SolutionDir
+
+    # Act
+    $p | Install-Package SolutionOnlyPackage -Source $context.RepositoryRoot -Version 1.0
+    Assert-SolutionPackage SolutionOnlyPackage 1.0
+    Assert-PathExists (Join-Path $solutionDir packages\SolutionOnlyPackage.1.0\file1.txt)    
+
+    $p | Update-Package SolutionOnlyPackage -Source $context.RepositoryRoot
+    Assert-Null (Get-SolutionPackage SolutionOnlyPackage 1.0)
+    Assert-SolutionPackage SolutionOnlyPackage 2.0
+    Assert-PathExists (Join-Path $solutionDir packages\SolutionOnlyPackage.2.0\file2.txt)
+}

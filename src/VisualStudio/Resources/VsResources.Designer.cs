@@ -196,6 +196,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;..
+        /// </summary>
+        public static string NoUpdatesAvailable {
+            get {
+                return ResourceManager.GetString("NoUpdatesAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The package which implements IPersistencePackageMetadata can be added..
         /// </summary>
         public static string PackageCanNotBePersisted {

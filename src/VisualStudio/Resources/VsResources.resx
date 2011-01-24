@@ -180,4 +180,7 @@
   <data name="UnknownPackage" xml:space="preserve">
     <value>Unable to find package '{0}'.</value>
   </data>
+  <data name="NoUpdatesAvailable" xml:space="preserve">
+    <value>No updates available for '{0}'.</value>
+  </data>
 </root>
