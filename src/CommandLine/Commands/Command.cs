@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Export(typeof(ICommand))]
     public abstract class Command : ICommand {
         public Command() {
             Arguments = new List<string>();
