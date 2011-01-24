@@ -98,3 +98,57 @@ function Test-SimpleFSharpUninstall {
     Assert-Null (Get-AssemblyReference $p Ninject)
     Assert-Null (Get-SolutionPackage Ninject)
 }
+
+function Test-UninstallPackageThatIsNotInstalledThrows {
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act & Assert
+    Assert-Throws { $p | Uninstall-Package elmah } "Unable to find package 'elmah'."
+}
+
+function Test-UninstallPackageThatIsInstalledInAnotherProjectThrows {
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-ClassLibrary
+    $p1 | Install-Package elmah
+
+    # Act & Assert
+    Assert-Throws { $p2 | Uninstall-Package elmah } "Unable to find package 'elmah' in '$($p2.Name)'."
+}
+
+function Test-UninstallSolutionOnlyPackage {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-MvcApplication
+    $p | Install-Package SolutionOnlyPackage -Source $context.RepositoryRoot
+
+    Assert-SolutionPackage SolutionOnlyPackage 2.0
+
+    Uninstall-Package SolutionOnlyPackage
+
+    Assert-Null (Get-SolutionPackage SolutionOnlyPackage 2.0)
+}
+
+function Test-UninstallPackageProjectLevelPackageThatsOnlyInstalledAtSolutionLevel {
+    # Arrange
+    $p = New-ClassLibrary
+    $p | Install-Package elmah
+
+    $path = Get-ProjectItemPath $p packages.config
+    $item = Get-ProjectItem $p packages.config
+    $item.Remove()
+    Remove-Item $path
+
+    Assert-SolutionPackage elmah
+    Assert-Null (Get-ProjectPackage $p elmah)
+
+    # Act
+    $p | Uninstall-Package elmah
+
+    # Assert
+    Assert-Null (Get-SolutionPackage elmah)
+}

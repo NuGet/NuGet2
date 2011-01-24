@@ -97,13 +97,14 @@ namespace NuGet.VisualStudio {
         public virtual void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
-            // If we've specified a version then we've probably trying to remove a specific version of
-            // a solution level package (since we allow side by side there)
-            if (projectManager != null && projectManager.LocalRepository.Exists(packageId) && version == null) {
+            bool appliesToProject;
+            IPackage package = FindLocalPackage(projectManager, packageId, out appliesToProject);
+
+            if (appliesToProject) {
                 projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
             }
 
-            UninstallPackage(packageId, version, forceRemove, removeDependencies);
+            UninstallPackage(package, forceRemove, removeDependencies);
         }
 
         public void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {
@@ -113,29 +114,14 @@ namespace NuGet.VisualStudio {
         public virtual void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
-            IPackage package = null;
-            bool existsInProject = false;
+            bool appliesToProject;
+            IPackage package = FindLocalPackage(projectManager, packageId, out appliesToProject);
 
-            // Try the project repository
-            if (projectManager != null) {
-                package = projectManager.LocalRepository.FindPackage(packageId);
-                existsInProject = package != null;
-            }
+            // Find the package we're going to update to
+            IPackage newPackage = SourceRepository.FindPackage(packageId, version);
 
-            // Fallback to the solution repository (it might be a solution only package)
-            package = package ?? LocalRepository.FindPackage(packageId);
-
-            if (package == null) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    VsResources.UnknownPackage, packageId));
-            }
-
-            IPackage newPackage = SourceRepository.FindPackage(packageId, version: version);
-
-            if (newPackage != null && package.Version != newPackage.Version) {                
-                if (existsInProject) {
-                    // If the package exists in the project then install it solution level.
+            if (newPackage != null && package.Version != newPackage.Version) {
+                if (appliesToProject) {
                     InstallPackage(newPackage, !updateDependencies);
 
                     UpdatePackageReference(projectManager, packageId, version, updateDependencies);
@@ -170,6 +156,71 @@ namespace NuGet.VisualStudio {
             if (!_sharedRepository.IsReferenced(package.Id, package.Version)) {
                 base.ExecuteUninstall(package);
             }
+        }
+
+        private IPackage FindLocalPackage(IProjectManager projectManager, string packageId, out bool appliesToProject) {
+            IPackage package = null;
+            bool existsInProject = false;
+            appliesToProject = false;
+
+            if (projectManager != null) {
+                // Try the project repository first
+                package = projectManager.LocalRepository.FindPackage(packageId);
+
+                existsInProject = package != null;
+            }
+
+            // Fallback to the solution repository (it might be a solution only package)
+            package = package ?? LocalRepository.FindPackage(packageId);
+
+            // Can't find the package in the solution or in the project then fail
+            if (package == null) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.UnknownPackage, packageId));
+            }
+
+
+            // Check to see if this package applies to a project based on 3 criteria:
+            // 1. If the package exists in the current project (we assume it was installed into the project in the first place)
+            // 3. The package has project content (i.e. content that can be applied to a project lib or content files)
+            // 2. The package is referenced by any other project
+
+            // This logic will probably fail in one edge case. If there is a meta package that applies to a project
+            // that ended up not being installed in any of the projects and it only exists at solution level.
+            // If this happens, then we think that the following operation applies to the solution instead of showing an error.
+            // To solve that edge case we'd have to walk the graph to find out what the package applies to.
+            appliesToProject = existsInProject ||
+                               package.HasProjectContent() ||
+                               _sharedRepository.IsReferenced(package.Id, package.Version);
+
+            if (appliesToProject) {
+                if (!existsInProject) {
+                    if (_sharedRepository.IsReferenced(package.Id, package.Version)) {
+                        // If the package doesn't exist in the project and is referenced by other projects
+                        // then fail.
+                        if (projectManager != null) {
+                            throw new InvalidOperationException(
+                                    String.Format(CultureInfo.CurrentCulture,
+                                    VsResources.UnknownPackageInProject,
+                                    packageId,
+                                    projectManager.Project.ProjectName));
+                        }
+                    }
+                    else {
+                        // The operation applies to solution level since it's not installed in the current project
+                        // but it is installed in some other project
+                        appliesToProject = false;
+                    }
+                }
+            }
+
+            // Can't have a project level operation if no project was specified
+            if (appliesToProject && projectManager == null) {
+                throw new InvalidOperationException(VsResources.ProjectNotSpecified);
+            }
+
+            return package;
         }
 
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {

@@ -183,4 +183,10 @@
   <data name="NoUpdatesAvailable" xml:space="preserve">
     <value>No updates available for '{0}'.</value>
   </data>
+  <data name="ProjectNotSpecified" xml:space="preserve">
+    <value>No project was specified.</value>
+  </data>
+  <data name="UnknownPackageInProject" xml:space="preserve">
+    <value>Unable to find package '{0}' in '{1}'.</value>
+  </data>
 </root>

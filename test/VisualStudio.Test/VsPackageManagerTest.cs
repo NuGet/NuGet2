@@ -86,7 +86,7 @@ namespace NuGet.Test.VisualStudio {
         }
 
         [TestMethod]
-        public void UninstallPackageDoesNotRemovePackageIfPackageIsReferenced() {
+        public void UninstallProjectLevelPackageThrowsIfPackageIsReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<Version>())).Returns(true);
@@ -97,12 +97,27 @@ namespace NuGet.Test.VisualStudio {
             localRepository.Object.AddPackage(package);
             sourceRepository.AddPackage(package);
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), new MockPackageRepository());
 
             // Act
-            packageManager.UninstallPackage(null, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage(projectManager, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance), @"Unable to find package 'foo' in 'C:\MockFileSystem\'.");
+        }
 
-            // Assert
-            Assert.IsTrue(packageManager.LocalRepository.Exists(package));
+        [TestMethod]
+        public void UninstallProjectLevelPackageWithNoProjectManagerThrows() {
+            // Arrange            
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<Version>())).Returns(true);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
+            localRepository.Object.AddPackage(package);
+            sourceRepository.AddPackage(package);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository.Object);
+            
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage(null, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance), "No project was specified.");
         }
 
         [TestMethod]

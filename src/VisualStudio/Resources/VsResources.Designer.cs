@@ -232,6 +232,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No project was specified..
+        /// </summary>
+        public static string ProjectNotSpecified {
+            get {
+                return ResourceManager.GetString("ProjectNotSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to locate the solution directory. Please ensure that the solution has been saved..
         /// </summary>
         public static string SolutionDirectoryNotAvailable {
@@ -255,6 +264,15 @@ namespace NuGet.VisualStudio.Resources {
         public static string UnknownPackage {
             get {
                 return ResourceManager.GetString("UnknownPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find package &apos;{0}&apos; in &apos;{1}&apos;..
+        /// </summary>
+        public static string UnknownPackageInProject {
+            get {
+                return ResourceManager.GetString("UnknownPackageInProject", resourceCulture);
             }
         }
     }
