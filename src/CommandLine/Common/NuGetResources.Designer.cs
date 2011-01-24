@@ -61,6 +61,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No Description was provided for this command..
+        /// </summary>
+        internal static string DefaultCommandDescription {
+            get {
+                return ResourceManager.GetString("DefaultCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} {1} was deleted from the server.
         /// </summary>
         internal static string DeleteCommandDeletedPackage {

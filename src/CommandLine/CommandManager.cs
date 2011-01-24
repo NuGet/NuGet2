@@ -4,11 +4,13 @@ using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Reflection;
 using NuGet.Common;
+using System.Linq;
 
 namespace NuGet {
     [Export(typeof(ICommandManager))]
     public class CommandManager : ICommandManager {
         private readonly Dictionary<CommandAttribute, ICommand> _commands;
+        private readonly string _commandSuffix = "Command";
 
         public CommandManager() {
             _commands = new Dictionary<CommandAttribute, ICommand>();
@@ -53,8 +55,21 @@ namespace NuGet {
         }
 
         public void RegisterCommand(ICommand command) {
-            foreach (CommandAttribute attrib in command.GetType().GetCustomAttributes(typeof(CommandAttribute), true)) {
-                _commands.Add(attrib, command);
+            var attributes = command.GetType().GetCustomAttributes(typeof(CommandAttribute), true);
+            if (attributes.Any()) { // If metadata was provided use it 
+                foreach (CommandAttribute attrib in attributes) {
+                    _commands.Add(attrib, command);
+                }
+            }
+            else { // Use the command name minus the suffic if present and default description
+                string name = command.GetType().Name;
+                int idx = name.IndexOf(_commandSuffix, StringComparison.InvariantCultureIgnoreCase);
+                if(idx >= 0){
+                    name = name.Remove(idx,_commandSuffix.Length);
+                }
+                if (!String.IsNullOrEmpty(name)) {
+                    _commands.Add(new CommandAttribute(name, NuGetResources.DefaultCommandDescription), command);
+                }
             }
         }
     }

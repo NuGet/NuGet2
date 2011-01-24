@@ -321,4 +321,7 @@
   <data name="SpecCommandFileExists" xml:space="preserve">
     <value>'{0}' already exists, use -f to overwrite it.</value>
   </data>
+  <data name="DefaultCommandDescription" xml:space="preserve">
+    <value>No Description was provided for this command.</value>
+  </data>
 </root>
