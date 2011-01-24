@@ -27,7 +27,6 @@
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
-    <Compile Include="Commands\Class1.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\SpecCommand.cs" />
