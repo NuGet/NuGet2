@@ -324,4 +324,16 @@
   <data name="DefaultCommandDescription" xml:space="preserve">
     <value>No Description was provided for this command.</value>
   </data>
+  <data name="ConsoleConfirmMessage" xml:space="preserve">
+    <value>{0} (y/n) </value>
+  </data>
+  <data name="ConsoleConfirmMessageAccept" xml:space="preserve">
+    <value>y</value>
+  </data>
+  <data name="DeleteCommandCanceled" xml:space="preserve">
+    <value>Delete Canceled</value>
+  </data>
+  <data name="DeleteCommandConfirm" xml:space="preserve">
+    <value>{0} {1} will be deleted from the server, would you like to continue?</value>
+  </data>
 </root>

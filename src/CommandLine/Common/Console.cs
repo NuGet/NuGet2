@@ -109,5 +109,19 @@ namespace NuGet.Common {
                 text = text.Substring(content.Length);
             }
         }
+
+        public bool Confirm(string message) {
+            var currentColor = System.ConsoleColor.Gray;
+            try {
+                currentColor = System.Console.ForegroundColor;
+                System.Console.ForegroundColor = System.ConsoleColor.Yellow;
+                System.Console.Write(String.Format(NuGetResources.ConsoleConfirmMessage, message));
+                var result = System.Console.ReadLine();
+                return result.StartsWith(NuGetResources.ConsoleConfirmMessageAccept, StringComparison.InvariantCultureIgnoreCase);
+            }
+            finally {
+                System.Console.ForegroundColor = currentColor;
+            }
+        }
     }
 }

@@ -17,6 +17,7 @@ namespace NuGet.Common {
         void WriteError(string value);
         void WriteError(string format, params object[] arg);
 
+        bool Confirm(string description);
 
         void PrintJustified(int startIndex, string text);
         void PrintJustified(int startIndex, string text, int maxWidth);

@@ -15,6 +15,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
+        [Option("Do not prompt for delete", AltName="np")]
+        public bool NoPrompt { get; set; }
+
         public override void ExecuteCommand() {
             //Frist argument should be the package ID
             _packageId = Arguments[0];
@@ -31,9 +34,15 @@ namespace NuGet.Commands {
                 gallery = new GalleryServer(Source); 
             }
 
-            Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, _packageId, _packageVersion);
-            gallery.DeletePackage(_apiKey, _packageId, _packageVersion);
-            Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, _packageId, _packageVersion);
+            if (NoPrompt || Console.Confirm(String.Format(NuGetResources.DeleteCommandConfirm, _packageId, _packageVersion))) {
+                Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, _packageId, _packageVersion);
+                gallery.DeletePackage(_apiKey, _packageId, _packageVersion);
+                Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, _packageId, _packageVersion);
+            }
+            else {
+                Console.WriteLine(NuGetResources.DeleteCommandCanceled);
+            }
+          
         }
     }
 }

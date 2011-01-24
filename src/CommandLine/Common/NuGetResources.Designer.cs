@@ -61,11 +61,47 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} (y/n) .
+        /// </summary>
+        internal static string ConsoleConfirmMessage {
+            get {
+                return ResourceManager.GetString("ConsoleConfirmMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to y.
+        /// </summary>
+        internal static string ConsoleConfirmMessageAccept {
+            get {
+                return ResourceManager.GetString("ConsoleConfirmMessageAccept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No Description was provided for this command..
         /// </summary>
         internal static string DefaultCommandDescription {
             get {
                 return ResourceManager.GetString("DefaultCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Canceled.
+        /// </summary>
+        internal static string DeleteCommandCanceled {
+            get {
+                return ResourceManager.GetString("DeleteCommandCanceled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1} will be deleted from the server, would you like to continue?.
+        /// </summary>
+        internal static string DeleteCommandConfirm {
+            get {
+                return ResourceManager.GetString("DeleteCommandConfirm", resourceCulture);
             }
         }
         
