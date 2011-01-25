@@ -244,3 +244,14 @@ function Test-InstallCanPipeToFSharpProjects {
     Assert-Package $p elmah
     Assert-SolutionPackage elmah
 }
+
+function Test-PipingMultipleProjectsToInstall {
+    # Arrange
+    $projects = @((New-WebSite), (New-ClassLibrary), (New-WebApplication))
+
+    # Act
+    $projects | Install-Package elmah
+
+    # Assert
+    $projects | %{ Assert-Package $_ elmah }
+}
