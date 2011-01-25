@@ -20,13 +20,12 @@ namespace NuGet.Dialog.Providers {
         private readonly ResourceDictionary _resources;
         private readonly IProgressWindowOpener _progressWindowOpener;
         private readonly IScriptExecutor _scriptExecutor;
-        private readonly IConsole _outputConsole;
+        private readonly Lazy<IConsole> _outputConsole;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
         private Project _project;
-        
 
         protected PackagesProviderBase(
             Project project,
@@ -53,7 +52,7 @@ namespace NuGet.Dialog.Providers {
             _resources = resources;
             _scriptExecutor = providerServices.ScriptExecutor;
             _progressWindowOpener = providerServices.ProgressWindow;
-            _outputConsole = providerServices.OutputConsole;
+            _outputConsole =  new Lazy<IConsole>(() => providerServices.OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false));
             ProjectManager = projectManager;
             _project = project;
         }
@@ -323,7 +322,7 @@ namespace NuGet.Dialog.Providers {
                 _progressWindowOpener.AddMessage(level, formattedMessage);
             }
 
-            _outputConsole.WriteLine(formattedMessage);
+            _outputConsole.Value.WriteLine(formattedMessage);
         }
 
         protected void RegisterPackageOperationEvents(IPackageManager packageManager) {

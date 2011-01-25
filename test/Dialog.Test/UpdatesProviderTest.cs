@@ -12,7 +12,6 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
-using NuGetConsole;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
@@ -299,7 +298,7 @@ namespace NuGet.Dialog.Test {
                 licenseWindowOpener,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new Mock<IConsole>().Object
+                new MockOutputConsoleProvider()
             );
 
             return new UpdatesProvider(

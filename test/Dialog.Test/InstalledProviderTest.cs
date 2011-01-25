@@ -12,7 +12,6 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
-using NuGetConsole;
 
 namespace NuGet.Dialog.Test {
 
@@ -212,12 +211,12 @@ namespace NuGet.Dialog.Test {
             if (scriptExecutor == null) {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
-
+            
             var services = new ProviderServices(
                 null,
                 mockProgressWindowOpener.Object, 
                 scriptExecutor,
-                new Mock<IConsole>().Object
+                new MockOutputConsoleProvider()
             );
 
             return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), services);

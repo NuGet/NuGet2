@@ -1,23 +1,40 @@
-﻿using NuGet.Dialog.PackageManagerUI;
-using NuGetConsole;
+﻿using System.ComponentModel.Composition;
+using NuGet.Dialog.PackageManagerUI;
+using NuGet.OutputWindowConsole;
 
 namespace NuGet.Dialog.Providers {
-    public sealed class ProviderServices {
-        public ILicenseWindowOpener LicenseWindow { get; private set; }
-        public IProgressWindowOpener ProgressWindow { get; private set; }
-        public IScriptExecutor ScriptExecutor { get; private set; }
-        public IConsole OutputConsole { get; private set; }
 
-        public ProviderServices(
-            ILicenseWindowOpener licenseWindow,
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    [Export]
+    public sealed class ProviderServices {
+
+        // HACK: Can't import ILicenseWindowOpener into ProviderServices via MEF because it creates a cyclic dependency
+        // TODO: Spin off ILicenseWindowOpener into a separate class
+        public ILicenseWindowOpener LicenseWindow { get; internal set; }
+
+        [Import]
+        public IProgressWindowOpener ProgressWindow { get; set; }
+
+        [Import]
+        public IScriptExecutor ScriptExecutor { get; set; }
+
+        [Import]
+        public IOutputConsoleProvider OutputConsoleProvider { get; set; }
+
+        public ProviderServices() {
+        }
+
+        // for unit tests
+        internal ProviderServices(
+            ILicenseWindowOpener licenseWindowOpener,
             IProgressWindowOpener progressWindow,
             IScriptExecutor scriptExecutor,
-            IConsole outputConsole) {
+            IOutputConsoleProvider outputConsoleProvider) {
 
-            LicenseWindow = licenseWindow;
+            LicenseWindow = licenseWindowOpener;
             ProgressWindow = progressWindow;
             ScriptExecutor = scriptExecutor;
-            OutputConsole = outputConsole;
+            OutputConsoleProvider = outputConsoleProvider;
         }
     }
 }

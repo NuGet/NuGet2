@@ -65,6 +65,7 @@
     <Compile Include="EmptyTreeNodeTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="InstalledProviderTest.cs" />
+    <Compile Include="Mocks\MockOutputConsoleProvider.cs" />
     <Compile Include="Mocks\MockPackagesProvider.cs" />
     <Compile Include="Mocks\MockTreeNode.cs" />
     <Compile Include="OnlineProviderTest.cs" />

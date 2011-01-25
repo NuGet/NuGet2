@@ -6,6 +6,7 @@ using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
 using NuGetConsole;
+using NuGet.OutputWindowConsole;
 
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {
@@ -16,7 +17,7 @@ namespace NuGet.Dialog.Test {
 
         public MockPackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager)
             : base(new Mock<Project>().Object, projectManager, new ResourceDictionary(),
-                new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new Mock<IConsole>().Object)) {
+                new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider())) {
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {

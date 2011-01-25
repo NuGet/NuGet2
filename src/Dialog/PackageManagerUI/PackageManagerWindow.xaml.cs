@@ -29,9 +29,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IProgressWindowOpener progressWindowOpener,
-                                    IOutputConsoleProvider consoleProvider,
-                                    IScriptExecutor scriptExecutor,
+                                    ProviderServices providerServices,
                                     [Import(ContractConstants.RecentPackagesRepositoryContractName)]
                                     IPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
@@ -43,27 +41,23 @@ namespace NuGet.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
-            var services = new ProviderServices(
-                this, 
-                progressWindowOpener, 
-                scriptExecutor, 
-                consoleProvider.CreateOutputConsole(requirePowerShellHost: false));
+            providerServices.LicenseWindow = this;
 
             SetupProviders(
                 dte, 
                 packageManagerFactory, 
                 repositoryFactory, 
-                packageSourceProvider, 
-                recentPackagesRepository,
-                services);
+                packageSourceProvider,
+                providerServices,
+                recentPackagesRepository);
         }
 
         private void SetupProviders(DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IPackageRepository recentPackagesRepository,
-                                    ProviderServices services) {
+                                    ProviderServices providerServices,
+                                    IPackageRepository recentPackagesRepository) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -77,7 +71,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 Resources,
                 packageManagerFactory,
                 recentPackagesRepository,
-                services);
+                providerServices);
 
             var updatesProvider = new UpdatesProvider(
                 activeProject,
@@ -86,7 +80,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
-                services);
+                providerServices);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -95,14 +89,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
-                services);
+                providerServices);
 
             var installedProvider = new InstalledProvider(
                 packageManager, 
                 activeProject,
                 projectManager, 
-                Resources, 
-                services);
+                Resources,
+                providerServices);
             
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);
