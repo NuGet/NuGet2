@@ -101,3 +101,36 @@ function Test-UpdateSolutionOnlyPackage {
     Assert-SolutionPackage SolutionOnlyPackage 2.0
     Assert-PathExists (Join-Path $solutionDir packages\SolutionOnlyPackage.2.0\file2.txt)
 }
+
+function Test-UpdateSolutionOnlyPackageWhenAmbiguous {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-MvcApplication
+    Install-Package SolutionOnlyPackage -Version 1.0 -Source $context.RepositoryRoot
+    Install-Package SolutionOnlyPackage -Version 2.0 -Source $context.RepositoryRoot
+
+    Assert-SolutionPackage SolutionOnlyPackage 1.0
+    Assert-SolutionPackage SolutionOnlyPackage 2.0
+
+    Assert-Throws { Update-Package SolutionOnlyPackage } "Unable to update 'SolutionOnlyPackage'. Found multiple versions installed."
+}
+
+function Test-UpdateAmbiguousProjectLevelPackageNoInstalledInProjectThrows {
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-FSharpLibrary
+    $p1 | Install-Package Antlr -Version 3.1.1
+    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    Remove-ProjectItem $p1 packages.config
+    Remove-ProjectItem $p2 packages.config
+
+    Assert-SolutionPackage Antlr 3.1.1
+    Assert-SolutionPackage Antlr 3.1.3.42154
+    @($p1, $p2) | %{ Assert-Null (Get-ProjectPackage $_ Antlr) }
+
+    # Act
+    Assert-Throws { $p1 | Update-Package Antlr } "Unable to find package 'Antlr' in '$($p1.Name)'."
+}

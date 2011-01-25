@@ -211,6 +211,20 @@ function Get-ProjectItemPath {
     }
 }
 
+function Remove-ProjectItem {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [string]$Path
+    )
+
+    $item = Get-ProjectItem $Project $Path
+    $path = Get-ProjectItemPath $Project $Path
+    $item.Remove()
+    Remove-Item $path
+}
+
 function Get-ProjectItem {
     param(
         [parameter(Mandatory = $true)]

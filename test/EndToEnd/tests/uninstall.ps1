@@ -114,7 +114,7 @@ function Test-UninstallPackageThatIsInstalledInAnotherProjectThrows {
     $p1 | Install-Package elmah
 
     # Act & Assert
-    Assert-Throws { $p2 | Uninstall-Package elmah } "Unable to find package 'elmah' in '$($p2.Name)'."
+    Assert-Throws { $p2 | Uninstall-Package elmah } "Unable to find package 'elmah 1.1' in '$($p2.Name)'."
 }
 
 function Test-UninstallSolutionOnlyPackage {
@@ -137,12 +137,8 @@ function Test-UninstallPackageProjectLevelPackageThatsOnlyInstalledAtSolutionLev
     # Arrange
     $p = New-ClassLibrary
     $p | Install-Package elmah
-
-    $path = Get-ProjectItemPath $p packages.config
-    $item = Get-ProjectItem $p packages.config
-    $item.Remove()
-    Remove-Item $path
-
+    Remove-ProjectItem $p packages.config
+    
     Assert-SolutionPackage elmah
     Assert-Null (Get-ProjectPackage $p elmah)
 
@@ -151,4 +147,85 @@ function Test-UninstallPackageProjectLevelPackageThatsOnlyInstalledAtSolutionLev
 
     # Assert
     Assert-Null (Get-SolutionPackage elmah)
+}
+
+function Test-UninstallSpecificPackageThrowsIfNotInstalledInProject {
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-FSharpLibrary
+    $p1 | Install-Package Antlr -Version 3.1.1
+    $p2 | Install-Package Antlr -Version 3.1.3.42154
+
+    # Act
+    Assert-Throws { $p2 | Uninstall-Package Antlr -Version 3.1.1 } "Unable to find package 'Antlr 3.1.1' in '$($p2.Name)'."
+}
+
+function Test-UninstallSpecificVersionOfPackage {
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-FSharpLibrary
+    $p1 | Install-Package Antlr -Version 3.1.1
+    $p2 | Install-Package Antlr -Version 3.1.3.42154
+
+    # Act
+    $p1 | Uninstall-Package Antlr -Version 3.1.1
+
+    # Assert
+    Assert-Null (Get-ProjectPackage $p1 Antlr 3.1.1)
+    Assert-Null (Get-SolutionPackage Antlr 3.1.1)
+    Assert-SolutionPackage Antlr 3.1.3.42154
+}
+
+function Test-UninstallSpecificVersionOfProjectLevelPackageFromSolutionLevel {        
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-FSharpLibrary
+    $p1 | Install-Package Antlr -Version 3.1.1
+    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    Remove-ProjectItem $p1 packages.config
+    Remove-ProjectItem $p2 packages.config
+
+    Assert-SolutionPackage Antlr 3.1.1
+    Assert-SolutionPackage Antlr 3.1.3.42154
+    @($p1, $p2) | %{ Assert-Null (Get-ProjectPackage $_ Antlr) }
+
+    # Act
+    $p1 | Uninstall-Package Antlr -Version 3.1.1
+
+    # Assert
+    Assert-Null (Get-SolutionPackage Antlr 3.1.1)
+    Assert-NotNull (Get-SolutionPackage Antlr 3.1.3.42154)
+}
+
+function Test-UninstallAmbiguousProjectLevelPackageFromSolutionLevel {    
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-FSharpLibrary
+    $p1 | Install-Package Antlr -Version 3.1.1
+    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    Remove-ProjectItem $p1 packages.config
+    Remove-ProjectItem $p2 packages.config
+
+    Assert-SolutionPackage Antlr 3.1.1
+    Assert-SolutionPackage Antlr 3.1.3.42154
+    @($p1, $p2) | %{ Assert-Null (Get-ProjectPackage $_ Antlr) }
+
+    # Act
+    Assert-Throws { $p1 | Uninstall-Package Antlr } "Unable to find 'Antlr' in '$($p1.Name)' and found multiple versions of 'Antlr' installed. Please specify a version."
+}
+
+function Test-UninstallSolutionOnlyPackageWhenAmbiguous {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-MvcApplication
+    Install-Package SolutionOnlyPackage -Version 1.0 -Source $context.RepositoryRoot
+    Install-Package SolutionOnlyPackage -Version 2.0 -Source $context.RepositoryRoot
+
+    Assert-SolutionPackage SolutionOnlyPackage 1.0
+    Assert-SolutionPackage SolutionOnlyPackage 2.0
+
+    Assert-Throws { Uninstall-Package SolutionOnlyPackage } "Found multiple versions of 'SolutionOnlyPackage' installed. Please specify a version."
 }

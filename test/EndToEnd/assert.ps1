@@ -169,7 +169,7 @@ function Assert-Throws {
         & $Action
     }
     catch {        
-       Assert-AreEqual $_.Exception.Message $ExceptionMessage
+       Assert-AreEqual $ExceptionMessage $_.Exception.Message
        $exceptionThrown = $true
     }
 

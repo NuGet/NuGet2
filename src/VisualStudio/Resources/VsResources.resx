@@ -189,4 +189,13 @@
   <data name="UnknownPackageInProject" xml:space="preserve">
     <value>Unable to find package '{0}' in '{1}'.</value>
   </data>
+  <data name="AmbiguousProjectLevelUninstal" xml:space="preserve">
+    <value>Unable to find '{0}' in '{1}' and found multiple versions of '{0}' installed. Please specify a version.</value>
+  </data>
+  <data name="AmbiguousUninstall" xml:space="preserve">
+    <value>Found multiple versions of '{0}' installed. Please specify a version.</value>
+  </data>
+  <data name="AmbiguousUpdate" xml:space="preserve">
+    <value>Unable to update '{0}'. Found multiple versions installed.</value>
+  </data>
 </root>

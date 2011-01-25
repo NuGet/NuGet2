@@ -63,6 +63,13 @@ namespace NuGet {
             return FindPackages(repository, packageIds, GetFilterExpression);
         }
 
+        public static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
+            return from p in repository.GetPackages()
+                   where p.Id.ToLower() == packageId.ToLower()
+                   orderby p.Id
+                   select p;
+        }
+
         /// <summary>
         /// Since Odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of packages.
@@ -205,13 +212,6 @@ namespace NuGet {
             Expression toLowerExpression = Expression.Call(propertyExpression, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
             // == localPackage.Id
             return Expression.Equal(toLowerExpression, Expression.Constant(value));
-        }
-
-        private static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
-            return from p in repository.GetPackages()
-                   where p.Id.ToLower() == packageId.ToLower()
-                   orderby p.Id
-                   select p;
         }
 
         // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
