@@ -24,8 +24,8 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        [Alias("ProjectName")]
-        public string Project { get; set; }
+        [Alias("Project")]
+        public string ProjectName { get; set; }
         
         protected IProjectManager ProjectManager {
             get {
@@ -70,8 +70,8 @@ namespace NuGet.Cmdlets {
             Project project = null;
 
             // If the user specified a project then use it
-            if (!String.IsNullOrEmpty(Project)) {
-                project = SolutionManager.GetProject(Project);
+            if (!String.IsNullOrEmpty(ProjectName)) {
+                project = SolutionManager.GetProject(ProjectName);
 
                 // If that project was invalid then throw
                 if (project == null) {

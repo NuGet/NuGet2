@@ -24,9 +24,9 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        [Alias("Name")] // <EnvDTE.Project>.Name
+        [Alias("Project")] // <EnvDTE.Project>.Name
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
-        public string[] Project { get; set; }
+        public string[] ProjectName { get; set; }
 
         protected override void ProcessRecordCore() {
             if (!_solutionManager.IsSolutionOpen) {
@@ -36,7 +36,7 @@ namespace NuGet.Cmdlets {
             var projects = new List<Project>();
 
             // if no project specified, use default
-            if (Project == null) {
+            if (ProjectName == null) {
                 Project project = _solutionManager.DefaultProject;
 
                 // if no default project (empty solution), throw terminating
@@ -48,7 +48,7 @@ namespace NuGet.Cmdlets {
             }
             else {
                 // get matching projects, expanding wildcards
-                projects.AddRange(GetProjectsByName(Project));
+                projects.AddRange(GetProjectsByName(ProjectName));
             }
 
             // Create a new app domain so we don't load the assemblies into the host app domain

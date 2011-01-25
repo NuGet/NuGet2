@@ -232,3 +232,15 @@ function Test-AddBindingRedirectToWebsiteWithNonExistingOutputPath {
     # Assert
     Assert-Null $redirects
 }
+
+function Test-InstallCanPipeToFSharpProjects {
+    # Arrange
+    $p = New-FSharpLibrary
+
+    # Act
+    $p | Install-Package elmah
+
+    # Assert
+    Assert-Package $p elmah
+    Assert-SolutionPackage elmah
+}
