@@ -19,7 +19,7 @@ namespace NuGet.Commands {
         public bool NoPrompt { get; set; }
 
         public override void ExecuteCommand() {
-            //Frist argument should be the package ID
+            //First argument should be the package ID
             _packageId = Arguments[0];
             //Second argument should be the package Version
             _packageVersion = Arguments[1];

@@ -61,7 +61,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} (y/n) .
+        ///   Looks up a localized string similar to {0} (y/N) .
         /// </summary>
         internal static string ConsoleConfirmMessage {
             get {
@@ -79,7 +79,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Description was provided for this command..
+        ///   Looks up a localized string similar to No nescription was provided for this command..
         /// </summary>
         internal static string DefaultCommandDescription {
             get {
@@ -88,7 +88,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Canceled.
+        ///   Looks up a localized string similar to Delete canceled.
         /// </summary>
         internal static string DeleteCommandCanceled {
             get {
@@ -97,7 +97,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1} will be deleted from the server, would you like to continue?.
+        ///   Looks up a localized string similar to {0} {1} will be deleted from the server. Would you like to continue?.
         /// </summary>
         internal static string DeleteCommandConfirm {
             get {

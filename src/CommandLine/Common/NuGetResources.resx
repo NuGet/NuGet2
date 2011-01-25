@@ -322,19 +322,19 @@
     <value>'{0}' already exists, use -f to overwrite it.</value>
   </data>
   <data name="DefaultCommandDescription" xml:space="preserve">
-    <value>No Description was provided for this command.</value>
+    <value>No nescription was provided for this command.</value>
   </data>
   <data name="ConsoleConfirmMessage" xml:space="preserve">
-    <value>{0} (y/n) </value>
+    <value>{0} (y/N) </value>
   </data>
   <data name="ConsoleConfirmMessageAccept" xml:space="preserve">
     <value>y</value>
   </data>
   <data name="DeleteCommandCanceled" xml:space="preserve">
-    <value>Delete Canceled</value>
+    <value>Delete canceled</value>
   </data>
   <data name="DeleteCommandConfirm" xml:space="preserve">
-    <value>{0} {1} will be deleted from the server, would you like to continue?</value>
+    <value>{0} {1} will be deleted from the server. Would you like to continue?</value>
   </data>
   <data name="DeleteCommandNoPromptDescription" xml:space="preserve">
     <value>Do not prompt when deleting.</value>
