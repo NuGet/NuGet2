@@ -8,7 +8,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
-        private readonly IDictionary<Project, IProjectManager> _projects;
+        private readonly IDictionary<string, IProjectManager> _projects;
         private readonly IPackageRepository _recentPackagesRepository;
 
         public VsPackageManager(ISolutionManager solutionManager,
@@ -19,7 +19,7 @@ namespace NuGet.VisualStudio {
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
             _sharedRepository = sharedRepository;
-            _projects = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
+            _projects = solutionManager.GetProjects().ToDictionary(p => p.UniqueName, CreateProjectManager);
             _recentPackagesRepository = recentPackagesRepository;
         }
 
@@ -32,7 +32,7 @@ namespace NuGet.VisualStudio {
 
         public virtual IProjectManager GetProjectManager(Project project) {
             IProjectManager projectManager;
-            _projects.TryGetValue(project, out projectManager);
+            _projects.TryGetValue(project.UniqueName, out projectManager);
             return projectManager;
         }
 
