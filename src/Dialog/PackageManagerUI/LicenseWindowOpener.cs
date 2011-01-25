@@ -6,7 +6,7 @@ using System.Windows.Threading;
 namespace NuGet.Dialog.PackageManagerUI {
 
     [Export(typeof(ILicenseWindowOpener))]
-    public class LicenseWindowOpener : ILicenseWindowOpener {
+    public sealed class LicenseWindowOpener : ILicenseWindowOpener {
 
         private readonly Dispatcher _uiDispatcher;
 
