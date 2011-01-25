@@ -47,6 +47,12 @@ Register-TabExpansion 'Uninstall-Package' @{
     'ProjectName' = {
         GetProjectNames
     }
+    'Version' = {
+        $parameters = @{}
+        if ($context.id) { $parameters.filter = $context.id }
+
+        GetPackageVersions (Find-Package @parameters) $context
+    }
 }
 
 Register-TabExpansion 'Update-Package' @{
