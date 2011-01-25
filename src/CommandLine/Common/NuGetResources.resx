@@ -336,4 +336,7 @@
   <data name="DeleteCommandConfirm" xml:space="preserve">
     <value>{0} {1} will be deleted from the server, would you like to continue?</value>
   </data>
+  <data name="DeleteCommandNoPromptDescription" xml:space="preserve">
+    <value>Do not prompt when deleting.</value>
+  </data>
 </root>

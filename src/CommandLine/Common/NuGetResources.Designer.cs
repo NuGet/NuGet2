@@ -133,6 +133,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do not prompt when deleting..
+        /// </summary>
+        internal static string DeleteCommandNoPromptDescription {
+            get {
+                return ResourceManager.GetString("DeleteCommandNoPromptDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
         /// </summary>
         internal static string DeleteCommandSourceDescription {

@@ -15,7 +15,7 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [Option("Do not prompt for delete", AltName="np")]
+        [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
         public override void ExecuteCommand() {
