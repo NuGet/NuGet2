@@ -86,6 +86,10 @@
       <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
       <Name>Dialog</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\VsConsole\Console.Types\Console.Types.csproj">
+      <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
+      <Name>Console.Types</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Test.Utility\Test.Utility.csproj">
       <Project>{F016882A-C798-4446-BB75-D3C393A38B32}</Project>
       <Name>Test.Utility</Name>

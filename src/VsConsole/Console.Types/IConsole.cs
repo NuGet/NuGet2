@@ -12,6 +12,8 @@ namespace NuGetConsole {
         /// </summary>
         IHost Host { get; set; }
 
+        bool ShowDisclaimerHeader { get; }
+
         /// <summary>
         /// Get the console dispatcher which dispatches user interaction.
         /// </summary>

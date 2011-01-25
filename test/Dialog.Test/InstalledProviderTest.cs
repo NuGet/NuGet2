@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -9,9 +12,7 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
-using EnvDTE;
-using System.Threading;
-using System;
+using NuGetConsole;
 
 namespace NuGet.Dialog.Test {
 
@@ -212,7 +213,14 @@ namespace NuGet.Dialog.Test {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
-            return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), mockProgressWindowOpener.Object, scriptExecutor);
+            var services = new ProviderServices(
+                null,
+                mockProgressWindowOpener.Object, 
+                scriptExecutor,
+                new Mock<IConsole>().Object
+            );
+
+            return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), services);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository) {

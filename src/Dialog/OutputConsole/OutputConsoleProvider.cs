@@ -11,6 +11,8 @@ namespace NuGet.OutputWindowConsole {
     [Export(typeof(IOutputConsoleProvider))]
     public class OutputConsoleProvider : IOutputConsoleProvider {
 
+        private IConsole _console;
+
         // MEF container within VS
         [Import]
         public IComponentModel ComponentModel {
@@ -24,18 +26,21 @@ namespace NuGet.OutputWindowConsole {
             set;
         }
 
-        public IConsole CreateOutputConsole() {
-            var outputWindow = (IVsOutputWindow)ServiceProvider.GetService(typeof(SVsOutputWindow));
-            Debug.Assert(outputWindow != null);
+        public IConsole CreateOutputConsole(bool requirePowerShellHost) {
+            if (_console == null) {
+                var outputWindow = (IVsOutputWindow)ServiceProvider.GetService(typeof(SVsOutputWindow));
+                Debug.Assert(outputWindow != null);
 
-            var vsUIShell = (IVsUIShell)ServiceProvider.GetService(typeof(SVsUIShell));
-            Debug.Assert(vsUIShell != null);
+                _console = new OutputConsole(outputWindow);
+            }
 
-            var console = new OutputConsole(outputWindow, vsUIShell);
-            var hostProvider = GetPowerShellHostProvider();
-            console.Host = hostProvider.CreateHost(console, @async: false);
+            // only instantiate the PS host if necessary (e.g. when package contains PS script files)
+            if (requirePowerShellHost && _console.Host == null) {
+                var hostProvider = GetPowerShellHostProvider();
+                _console.Host = hostProvider.CreateHost(_console, @async: false);
+            }
 
-            return console;
+            return _console;
         }
 
         private IHostProvider GetPowerShellHostProvider() {

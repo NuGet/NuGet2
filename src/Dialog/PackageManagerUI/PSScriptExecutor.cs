@@ -57,7 +57,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private IPowerShellHost GetHost() {
             // create the console and instantiate the PS host on demand
-            IConsole console = OutputConsoleProvider.CreateOutputConsole();
+            IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
             IHost host = console.Host;
 
             // start the console 

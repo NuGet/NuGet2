@@ -43,25 +43,27 @@ namespace NuGet.Dialog.PackageManagerUI {
             System.Diagnostics.Debug.Assert(ownerPackage != null);
             _ownerPackage = ownerPackage;
 
+            var services = new ProviderServices(
+                this, 
+                progressWindowOpener, 
+                scriptExecutor, 
+                consoleProvider.CreateOutputConsole(requirePowerShellHost: false));
+
             SetupProviders(
                 dte, 
                 packageManagerFactory, 
                 repositoryFactory, 
                 packageSourceProvider, 
-                progressWindowOpener, 
-                consoleProvider,
-                scriptExecutor,
-                recentPackagesRepository);
+                recentPackagesRepository,
+                services);
         }
 
         private void SetupProviders(DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IProgressWindowOpener progressWindowOpener,
-                                    IOutputConsoleProvider consoleProvider,
-                                    IScriptExecutor scriptExecutor,
-                                    IPackageRepository recentPackagesRepository) {
+                                    IPackageRepository recentPackagesRepository,
+                                    ProviderServices services) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -74,10 +76,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 projectManager,
                 Resources,
                 packageManagerFactory,
-                this,
-                progressWindowOpener,
-                scriptExecutor,
-                recentPackagesRepository);
+                recentPackagesRepository,
+                services);
 
             var updatesProvider = new UpdatesProvider(
                 activeProject,
@@ -86,9 +86,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
-                this,
-                progressWindowOpener,
-                scriptExecutor);
+                services);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -97,17 +95,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
-                this,
-                progressWindowOpener,
-                scriptExecutor);
+                services);
 
             var installedProvider = new InstalledProvider(
                 packageManager, 
                 activeProject,
                 projectManager, 
                 Resources, 
-                progressWindowOpener,
-                scriptExecutor);
+                services);
             
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);

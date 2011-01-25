@@ -58,7 +58,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             SetupRunspace();
             bool successful = LoadStartupScripts();
             if (successful) {
-                DisplayDisclaimerAndHelpText();
+                if (Console.ShowDisclaimerHeader) {
+                    DisplayDisclaimerAndHelpText();
+                }
+
                 LoadProfilesIntoRunspace(_myRunSpace);
 
                 ExecuteInitScripts();

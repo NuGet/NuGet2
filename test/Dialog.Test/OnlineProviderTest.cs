@@ -10,6 +10,7 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using NuGetConsole;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
@@ -282,6 +283,13 @@ namespace NuGet.Dialog.Test {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
+            var services = new ProviderServices(
+                mockLicenseWindowOpener.Object,
+                mockProgressWindowOpener.Object,
+                scriptExecutor,
+                new Mock<IConsole>().Object
+            );
+
             return new OnlineProvider(
                 project,
                 projectManager,
@@ -289,9 +297,7 @@ namespace NuGet.Dialog.Test {
                 repositoryFactory,
                 packageSourceProvider,
                 factory.Object,
-                mockLicenseWindowOpener.Object,
-                mockProgressWindowOpener.Object,
-                scriptExecutor);
+                services);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {

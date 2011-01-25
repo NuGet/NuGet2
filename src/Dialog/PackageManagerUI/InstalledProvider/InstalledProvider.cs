@@ -23,9 +23,8 @@ namespace NuGet.Dialog.Providers {
             Project project,
             IProjectManager projectManager, 
             ResourceDictionary resources,
-            IProgressWindowOpener progressWindowOpener,
-            IScriptExecutor scriptExecutor)
-            : base(project, projectManager, resources, progressWindowOpener, scriptExecutor) {
+            ProviderServices providerServices)
+            : base(project, projectManager, resources, providerServices) {
 
             _packageManager = packageManager;
         }

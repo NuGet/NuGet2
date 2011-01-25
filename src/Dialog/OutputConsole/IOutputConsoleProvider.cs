@@ -2,6 +2,6 @@
 
 namespace NuGet.OutputWindowConsole {
     public interface IOutputConsoleProvider {
-        IConsole CreateOutputConsole();
+        IConsole CreateOutputConsole(bool requirePowerShellHost);
     }
 }
