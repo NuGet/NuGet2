@@ -17,7 +17,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
     [PartCreationPolicy(CreationPolicy.NonShared)]
     [Export]
-    public partial class PackageManagerWindow : DialogWindow, ILicenseWindowOpener {
+    public partial class PackageManagerWindow : DialogWindow {
 
         private const string F1Keyword = "vs.ExtensionManager";
 
@@ -29,9 +29,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IProgressWindowOpener progressWindowOpener,
-                                    IOutputConsoleProvider consoleProvider,
-                                    IScriptExecutor scriptExecutor,
+                                    ProviderServices providerServices,
                                     [Import(ContractConstants.RecentPackagesRepositoryContractName)]
                                     IPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
@@ -47,10 +45,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 dte, 
                 packageManagerFactory, 
                 repositoryFactory, 
-                packageSourceProvider, 
-                progressWindowOpener, 
-                consoleProvider,
-                scriptExecutor,
+                packageSourceProvider,
+                providerServices,
                 recentPackagesRepository);
         }
 
@@ -58,9 +54,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IProgressWindowOpener progressWindowOpener,
-                                    IOutputConsoleProvider consoleProvider,
-                                    IScriptExecutor scriptExecutor,
+                                    ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
@@ -74,10 +68,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 projectManager,
                 Resources,
                 packageManagerFactory,
-                this,
-                progressWindowOpener,
-                scriptExecutor,
-                recentPackagesRepository);
+                recentPackagesRepository,
+                providerServices);
 
             var updatesProvider = new UpdatesProvider(
                 activeProject,
@@ -86,9 +78,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
-                this,
-                progressWindowOpener,
-                scriptExecutor);
+                providerServices);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -97,17 +87,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
-                this,
-                progressWindowOpener,
-                scriptExecutor);
+                providerServices);
 
             var installedProvider = new InstalledProvider(
                 packageManager, 
                 activeProject,
                 projectManager, 
-                Resources, 
-                progressWindowOpener,
-                scriptExecutor);
+                Resources,
+                providerServices);
             
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);
@@ -190,26 +177,6 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void ExecuteSetFocusOnSearchBox(object sender, ExecutedRoutedEventArgs e) {
             explorer.SetFocusOnSearchBox();
-        }
-
-        bool ILicenseWindowOpener.ShowLicenseWindow(IEnumerable<IPackage> packages) {
-            if (Dispatcher.CheckAccess()) {
-                return ShowLicenseWindow(packages);
-            }
-            else {
-                object result = Dispatcher.Invoke(new Func<object, bool>(ShowLicenseWindow), packages);
-                return (bool)result;
-            }
-        }
-
-        private bool ShowLicenseWindow(object dataContext) {
-            var licenseWidow = new LicenseAcceptanceWindow() {
-                Owner = this,
-                DataContext = dataContext
-            };
-
-            bool? dialogResult = licenseWidow.ShowDialog();
-            return dialogResult ?? false;
         }
 
         private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {

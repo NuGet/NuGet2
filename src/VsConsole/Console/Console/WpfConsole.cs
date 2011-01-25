@@ -297,6 +297,12 @@ namespace NuGetConsole.Implementation.Console {
             public InputHistory InputHistory {
                 get { return Invoke(() => _impl.InputHistory); }
             }
+
+            public bool ShowDisclaimerHeader {
+                get {
+                    return true;
+                }
+            }
         }
 
         IHost _host;

@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.VisualStudio.ExtensionsExplorer;
 using System.ComponentModel;
+using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
     public class PackageSortDescriptor : IVsSortDescriptor {

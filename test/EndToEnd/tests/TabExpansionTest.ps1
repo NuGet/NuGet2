@@ -218,3 +218,16 @@ function Test-ComplexCustomTabExpansion {
     # Remove the function from global scope
     rm function:\Foo
 }
+
+function Test-TabExpansionForVersionForUninstallPackage {
+    # Arrange
+    $p = New-WebApplication
+    $p | Install-Package elmah -Version 1.1
+    $p | Install-Package Moq
+
+    # Act
+    $suggestion = TabExpansion "Uninstall-Package elmah -Version "
+
+    # Assert
+    Assert-AreEqual '1.1' $suggestion
+}

@@ -19,22 +19,24 @@ namespace NuGet.OutputWindowConsole {
 
         private IVsOutputWindow _outputWindow;
         private IVsOutputWindowPane _outputWindowPane;
-        private IVsUIShell _vsUIShell;
 
-        public OutputConsole(IVsOutputWindow outputWindow, IVsUIShell vsUIShell) {
+        public OutputConsole(IVsOutputWindow outputWindow) {
             if (outputWindow == null) {
                 throw new ArgumentNullException("outputWindow");
             }
-            if (vsUIShell == null) {
-                throw new ArgumentNullException("vsUIShell");
-            }
+            
             _outputWindow = outputWindow;
-            _vsUIShell = vsUIShell;
         }
 
         public IHost Host {
             get;
             set;
+        }
+
+        public bool ShowDisclaimerHeader {
+            get {
+                return false;
+            }
         }
 
         public IConsoleDispatcher Dispatcher {
@@ -95,15 +97,6 @@ namespace NuGet.OutputWindowConsole {
                     System.Diagnostics.Debug.Assert(result ==  VSConstants.S_OK);
                     System.Diagnostics.Debug.Assert(_outputWindowPane != null);
                 }
-            }
-
-            // try to open the Output tool window, and activate our Package Manager pane
-            IVsWindowFrame outputWindowFrame;
-            Guid outputWindowGuid = new Guid(ToolWindowGuids.Outputwindow);
-            int findResult = _vsUIShell.FindToolWindow((uint)__VSFINDTOOLWIN.FTW_fForceCreate, ref outputWindowGuid, out outputWindowFrame);
-            if (findResult == VSConstants.S_OK && outputWindowFrame != null) {
-                outputWindowFrame.Show();
-                _outputWindowPane.Activate();
             }
         }
 

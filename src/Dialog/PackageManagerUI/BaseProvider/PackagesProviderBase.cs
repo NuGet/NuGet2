@@ -7,6 +7,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
+using NuGetConsole;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -18,19 +19,19 @@ namespace NuGet.Dialog.Providers {
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
         private readonly IProgressWindowOpener _progressWindowOpener;
+        private readonly IScriptExecutor _scriptExecutor;
+        private readonly Lazy<IConsole> _outputConsole;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
         private Project _project;
-        private IScriptExecutor _scriptExecutor;
 
         protected PackagesProviderBase(
             Project project,
             IProjectManager projectManager, 
             ResourceDictionary resources,
-            IProgressWindowOpener progressWindowOpener,
-            IScriptExecutor scriptExecutor) {
+            ProviderServices providerServices) {
 
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
@@ -44,17 +45,14 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("resources");
             }
 
-            if (progressWindowOpener == null) {
-                throw new ArgumentNullException("progressWindowOpener");
-            }
-
-            if (scriptExecutor == null) {
-                throw new ArgumentNullException("scriptExecutor");
+            if (providerServices == null) {
+                throw new ArgumentNullException("providerServices");
             }
 
             _resources = resources;
-            _scriptExecutor = scriptExecutor;
-            _progressWindowOpener = progressWindowOpener;
+            _scriptExecutor = providerServices.ScriptExecutor;
+            _progressWindowOpener = providerServices.ProgressWindow;
+            _outputConsole =  new Lazy<IConsole>(() => providerServices.OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false));
             ProjectManager = projectManager;
             _project = project;
         }
@@ -261,6 +259,9 @@ namespace NuGet.Dialog.Providers {
                 _progressWindowOpener.SetCompleted(successful: false);
             }
 
+            // write a blank line into the output window to separate entries from different operations
+            LogCore(LogMessageLevel.Info, String.Empty);
+
             if (ExecuteCompletedCallback != null) {
                 ExecuteCompletedCallback();
             }
@@ -314,11 +315,14 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void LogCore(LogMessageLevel level, string message, params object[] args) {
+            string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
+
             // for the dialog we ignore debug messages
             if (_progressWindowOpener.IsOpen && level != LogMessageLevel.Debug) {
-                string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
                 _progressWindowOpener.AddMessage(level, formattedMessage);
             }
+
+            _outputConsole.Value.WriteLine(formattedMessage);
         }
 
         protected void RegisterPackageOperationEvents(IPackageManager packageManager) {

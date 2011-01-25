@@ -1,13 +1,14 @@
 ﻿using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
-using NuGet.VisualStudio;
-using NuGet.Dialog.PackageManagerUI;
-using EnvDTE;
+using NuGetConsole;
+using NuGet.OutputWindowConsole;
 
 namespace NuGet.Dialog.Test {
 
@@ -170,7 +171,8 @@ namespace NuGet.Dialog.Test {
             }
 
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
-                base(new Mock<Project>().Object, projectManager, resources, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object) {
+                base(new Mock<Project>().Object, projectManager, resources, 
+                    new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider())) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {

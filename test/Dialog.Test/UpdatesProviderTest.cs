@@ -294,6 +294,13 @@ namespace NuGet.Dialog.Test {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
+            var services = new ProviderServices(
+                licenseWindowOpener,
+                mockProgressWindowOpener.Object,
+                scriptExecutor,
+                new MockOutputConsoleProvider()
+            );
+
             return new UpdatesProvider(
                 project,
                 projectManager,
@@ -301,9 +308,7 @@ namespace NuGet.Dialog.Test {
                 repositoryFactory,
                 packageSourceProvider,
                 factory.Object,
-                licenseWindowOpener,
-                mockProgressWindowOpener.Object,
-                scriptExecutor);
+                services);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {

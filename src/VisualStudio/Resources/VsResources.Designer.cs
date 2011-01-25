@@ -61,6 +61,33 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to find &apos;{0}&apos; in &apos;{1}&apos; and found multiple versions of &apos;{0}&apos; installed. Please specify a version..
+        /// </summary>
+        public static string AmbiguousProjectLevelUninstal {
+            get {
+                return ResourceManager.GetString("AmbiguousProjectLevelUninstal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found multiple versions of &apos;{0}&apos; installed. Please specify a version..
+        /// </summary>
+        public static string AmbiguousUninstall {
+            get {
+                return ResourceManager.GetString("AmbiguousUninstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to update &apos;{0}&apos;. Found multiple versions installed..
+        /// </summary>
+        public static string AmbiguousUpdate {
+            get {
+                return ResourceManager.GetString("AmbiguousUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Each package is licensed to you by its owner. NuGet is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies..
         /// </summary>
         public static string Console_DisclaimerText {

@@ -18,11 +18,9 @@ namespace NuGet.Dialog.Providers {
             IProjectManager projectManager,
             ResourceDictionary resources,
             IVsPackageManagerFactory packageManagerFactory,
-            ILicenseWindowOpener licenseWindowOpener,
-            IProgressWindowOpener progressWindowOpener,
-            IScriptExecutor scriptExecutor,
-            IPackageRepository recentPackagesRepository)
-            : base(project, projectManager, resources, null, null, packageManagerFactory, licenseWindowOpener, progressWindowOpener, scriptExecutor) {
+            IPackageRepository recentPackagesRepository,
+            ProviderServices providerServices)
+            : base(project, projectManager, resources, null, null, packageManagerFactory, providerServices) {
 
             _recentPackagesRepository = recentPackagesRepository;
         }

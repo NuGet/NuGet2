@@ -26,7 +26,7 @@ Register-TabExpansion 'Install-Package' @{
         param($context)
         GetPackageIds (GetPackages $context)
     }
-    'Project' = {
+    'ProjectName' = {
         GetProjectNames
     }
     'Version' = {
@@ -44,8 +44,14 @@ Register-TabExpansion 'Uninstall-Package' @{
 
         GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
     }
-    'Project' = {
+    'ProjectName' = {
         GetProjectNames
+    }
+    'Version' = {
+        $parameters = @{}
+        if ($context.id) { $parameters.filter = $context.id }
+
+        GetPackageVersions (Find-Package @parameters) $context
     }
 }
 
@@ -58,7 +64,7 @@ Register-TabExpansion 'Update-Package' @{
 
         GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
     }
-    'Project' = {
+    'ProjectName' = {
         GetProjectNames
     }
     'Version' = {
@@ -71,8 +77,8 @@ Register-TabExpansion 'Update-Package' @{
     }
 }
 
-Register-TabExpansion 'New-Package' @{ 'Project' = { GetProjectNames } }
-Register-TabExpansion 'Add-BindingRedirect' @{ 'Project' = { GetProjectNames } }
+Register-TabExpansion 'New-Package' @{ 'ProjectName' = { GetProjectNames } }
+Register-TabExpansion 'Add-BindingRedirect' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
 
 function GetPackages($context) { 

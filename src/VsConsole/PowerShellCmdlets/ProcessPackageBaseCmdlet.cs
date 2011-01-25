@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -13,7 +14,9 @@ namespace NuGet.Cmdlets {
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
     public abstract class ProcessPackageBaseCmdlet : NuGetBaseCmdlet {
-        private IProjectManager _projectManager;
+        // If this command is executed by getting the project from the pipeline, then we need we keep track of all of the
+        // project managers since the same cmdlet instance can be used across invocations.
+        private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
 
         protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
@@ -24,16 +27,25 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        [Alias("ProjectName")]
-        public string Project { get; set; }
-        
+        [Alias("Project")]
+        public string ProjectName { get; set; }
+
         protected IProjectManager ProjectManager {
             get {
-                if (_projectManager == null) {
-                    _projectManager = GetProjectManager();
+                // We take a snapshot of the default project, the first time it is accessed so if it changs during
+                // the executing of this cmdlet we won't take it into consideration. (which is really an edge case anyway)
+                string name = ProjectName ?? "Default";
+
+                IProjectManager projectManager;
+                if (!_projectManagers.TryGetValue(name, out projectManager)) {
+                    projectManager = GetProjectManager();
+
+                    if (projectManager != null) {
+                        _projectManagers.Add(name, projectManager);
+                    }
                 }
 
-                return _projectManager;
+                return projectManager;
             }
         }
 
@@ -54,9 +66,9 @@ namespace NuGet.Cmdlets {
                 PackageManager.PackageInstalled -= OnPackageInstalled;
             }
 
-            if (_projectManager != null) {
-                _projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
-                _projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
+            foreach (var projectManager in _projectManagers.Values) {
+                projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
+                projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
             }
 
             WriteLine();
@@ -70,8 +82,8 @@ namespace NuGet.Cmdlets {
             Project project = null;
 
             // If the user specified a project then use it
-            if (!String.IsNullOrEmpty(Project)) {
-                project = SolutionManager.GetProject(Project);
+            if (!String.IsNullOrEmpty(ProjectName)) {
+                project = SolutionManager.GetProject(ProjectName);
 
                 // If that project was invalid then throw
                 if (project == null) {

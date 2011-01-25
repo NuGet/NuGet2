@@ -8,7 +8,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
-        private readonly IDictionary<Project, IProjectManager> _projects;
+        private readonly IDictionary<string, IProjectManager> _projects;
         private readonly IPackageRepository _recentPackagesRepository;
 
         public VsPackageManager(ISolutionManager solutionManager,
@@ -19,7 +19,7 @@ namespace NuGet.VisualStudio {
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
             _sharedRepository = sharedRepository;
-            _projects = solutionManager.GetProjects().ToDictionary(p => p, CreateProjectManager);
+            _projects = solutionManager.GetProjects().ToDictionary(p => p.UniqueName, CreateProjectManager);
             _recentPackagesRepository = recentPackagesRepository;
         }
 
@@ -32,7 +32,7 @@ namespace NuGet.VisualStudio {
 
         public virtual IProjectManager GetProjectManager(Project project) {
             IProjectManager projectManager;
-            _projects.TryGetValue(project, out projectManager);
+            _projects.TryGetValue(project.UniqueName, out projectManager);
             return projectManager;
         }
 
@@ -98,7 +98,11 @@ namespace NuGet.VisualStudio {
             InitializeLogger(logger, projectManager);
 
             bool appliesToProject;
-            IPackage package = FindLocalPackage(projectManager, packageId, out appliesToProject);
+            IPackage package = FindLocalPackage(projectManager,
+                                                packageId,
+                                                version,
+                                                CreateAmbiguousUninstallException,
+                                                out appliesToProject);
 
             if (appliesToProject) {
                 projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
@@ -115,7 +119,11 @@ namespace NuGet.VisualStudio {
             InitializeLogger(logger, projectManager);
 
             bool appliesToProject;
-            IPackage package = FindLocalPackage(projectManager, packageId, out appliesToProject);
+            IPackage package = FindLocalPackage(projectManager,
+                                                packageId,
+                                                null /* version */,
+                                                CreateAmbiguousUpdateException,
+                                                out appliesToProject);
 
             // Find the package we're going to update to
             IPackage newPackage = SourceRepository.FindPackage(packageId, version);
@@ -158,20 +166,39 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private IPackage FindLocalPackage(IProjectManager projectManager, string packageId, out bool appliesToProject) {
+        private IPackage FindLocalPackage(IProjectManager projectManager,
+                                          string packageId,
+                                          Version version,
+                                          Func<IProjectManager, IList<IPackage>, Exception> getAmbiguousMatchException,
+                                          out bool appliesToProject) {
             IPackage package = null;
             bool existsInProject = false;
             appliesToProject = false;
 
             if (projectManager != null) {
                 // Try the project repository first
-                package = projectManager.LocalRepository.FindPackage(packageId);
+                package = projectManager.LocalRepository.FindPackage(packageId, version);
 
                 existsInProject = package != null;
             }
 
             // Fallback to the solution repository (it might be a solution only package)
-            package = package ?? LocalRepository.FindPackage(packageId);
+            if (package == null) {
+                if (version != null) {
+                    // Get the exact package
+                    package = LocalRepository.FindPackage(packageId, version);
+                }
+                else {
+                    // Get all packages by this name to see if we find an ambiguous match
+                    var packages = LocalRepository.FindPackagesById(packageId).ToList();
+                    if (packages.Count > 1) {
+                        throw getAmbiguousMatchException(projectManager, packages);
+                    }
+
+                    // Pick the only one of default if none match
+                    package = packages.SingleOrDefault();
+                }
+            }
 
             // Can't find the package in the solution or in the project then fail
             if (package == null) {
@@ -180,19 +207,7 @@ namespace NuGet.VisualStudio {
                     VsResources.UnknownPackage, packageId));
             }
 
-
-            // Check to see if this package applies to a project based on 3 criteria:
-            // 1. If the package exists in the current project (we assume it was installed into the project in the first place)
-            // 3. The package has project content (i.e. content that can be applied to a project lib or content files)
-            // 2. The package is referenced by any other project
-
-            // This logic will probably fail in one edge case. If there is a meta package that applies to a project
-            // that ended up not being installed in any of the projects and it only exists at solution level.
-            // If this happens, then we think that the following operation applies to the solution instead of showing an error.
-            // To solve that edge case we'd have to walk the graph to find out what the package applies to.
-            appliesToProject = existsInProject ||
-                               package.HasProjectContent() ||
-                               _sharedRepository.IsReferenced(package.Id, package.Version);
+            appliesToProject = IsProjectLevel(package);
 
             if (appliesToProject) {
                 if (!existsInProject) {
@@ -203,7 +218,7 @@ namespace NuGet.VisualStudio {
                             throw new InvalidOperationException(
                                     String.Format(CultureInfo.CurrentCulture,
                                     VsResources.UnknownPackageInProject,
-                                    packageId,
+                                    package.GetFullName(),
                                     projectManager.Project.ProjectName));
                         }
                     }
@@ -221,6 +236,50 @@ namespace NuGet.VisualStudio {
             }
 
             return package;
+        }
+
+        /// <summary>
+        /// Check to see if this package applies to a project based on 2 criteria:
+        /// 1. The package has project content (i.e. content that can be applied to a project lib or content files)
+        /// 2. The package is referenced by any other project
+        /// 
+        /// This logic will probably fail in one edge case. If there is a meta package that applies to a project
+        /// that ended up not being installed in any of the projects and it only exists at solution level.
+        /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
+        /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
+        /// </summary>
+        private bool IsProjectLevel(IPackage package) {            
+            return package.HasProjectContent() || _sharedRepository.IsReferenced(package.Id, package.Version);
+        }
+
+        private Exception CreateAmbiguousUpdateException(IProjectManager projectManager, IList<IPackage> packages) {
+            if (projectManager != null && packages.Any(IsProjectLevel)) {
+                return new InvalidOperationException(
+                                    String.Format(CultureInfo.CurrentCulture,
+                                    VsResources.UnknownPackageInProject,
+                                    packages[0].Id,
+                                    projectManager.Project.ProjectName));
+            }
+
+            return new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.AmbiguousUpdate,
+                    packages[0].Id));
+        }
+
+        private Exception CreateAmbiguousUninstallException(IProjectManager projectManager, IList<IPackage> packages) {
+            if (projectManager != null && packages.Any(IsProjectLevel)) {
+                return new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.AmbiguousProjectLevelUninstal,
+                    packages[0].Id,
+                    projectManager.Project.ProjectName));
+            }
+
+            return new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.AmbiguousUninstall,
+                    packages[0].Id));
         }
 
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {

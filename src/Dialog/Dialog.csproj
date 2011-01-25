@@ -123,6 +123,7 @@
     <Compile Include="OutputConsole\OutputConsoleProvider.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
+    <Compile Include="PackageManagerUI\BaseProvider\ProviderServices.cs" />
     <Compile Include="PackageManagerUI\CachedProjectManager.cs" />
     <Compile Include="PackageManagerUI\Controls\RatingControl.cs" />
     <Compile Include="PackageManagerUI\Controls\StarControl.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
     <Compile Include="PackageManagerUI\IScriptExecutor.cs" />
+    <Compile Include="PackageManagerUI\LicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\MessageHelper.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">

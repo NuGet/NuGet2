@@ -39,7 +39,7 @@
           <maml:name>IgnoreDependencies</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
-          <maml:name>Project</maml:name>
+          <maml:name>ProjectName</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="false" position="named">
@@ -76,7 +76,7 @@
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
-        <maml:name>Project</maml:name>
+        <maml:name>ProjectName</maml:name>
         <maml:description>
           <maml:para>Specifies the project to install the package into. If ommitted, the active project is chosen.</maml:para>
         </maml:description>
@@ -187,12 +187,12 @@
           string
         </command:parameterValue>
       </command:parameter>
-      <command:parameter required="false" position="named">
-        <maml:name>ListAvailable</maml:name>
-        <maml:description>
-          <maml:para>Gets packages available from the online package source.</maml:para>
-        </maml:description>
-      </command:parameter
+        <command:parameter required="false" position="named">
+            <maml:name>ListAvailable</maml:name>
+            <maml:description>
+                <maml:para>Gets packages available from the online package source.</maml:para>
+            </maml:description>
+        </command:parameter>
       <command:parameter required="false" position="named">
           <maml:name>Recent</maml:name>
           <maml:description>
@@ -308,7 +308,7 @@
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
-        <maml:name>Project</maml:name>
+        <maml:name>ProjectName</maml:name>
         <maml:description>
           <maml:para>Specifies the project to uninstall the package from. If ommitted, the default project is chosen.</maml:para>
         </maml:description>
@@ -378,7 +378,7 @@
           <maml:name>IgnoreDependencies</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
-          <maml:name>Project</maml:name>
+          <maml:name>ProjectName</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="false" position="named">
@@ -415,7 +415,7 @@
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
-        <maml:name>Project</maml:name>
+        <maml:name>ProjectName</maml:name>
         <maml:description>
           <maml:para>Specifies the project containing the project to update. If ommitted, the default project is chosen.</maml:para>
         </maml:description>
@@ -534,7 +534,7 @@
       <command:syntaxItem>
         <maml:name>Add-BindingRedirect</maml:name>
         <command:parameter required="true" position="1">
-          <maml:name>Project</maml:name>
+          <maml:name>ProjectName</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
       </command:syntaxItem>
@@ -544,7 +544,7 @@
     <!-- Cmdlet parameter section  -->
     <command:parameters>
       <command:parameter required="true" position="1">
-        <maml:name>Project</maml:name>
+        <maml:name>ProjectName</maml:name>
         <maml:description>
           <maml:para>Specifies the project to analyze and add binding redirects to.</maml:para>
         </maml:description>
