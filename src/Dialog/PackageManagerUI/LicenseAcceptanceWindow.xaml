@@ -7,10 +7,13 @@
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
     xmlns:resources="clr-namespace:NuGet.Dialog"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
-    ResizeMode="NoResize"
+    ResizeMode="CanResize"
+    MinWidth="350"
+    MinHeight="300"
     Width="400"
     SizeToContent="Height"
     ShowInTaskbar="False"
+    WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
     Title="License Acceptance">
     

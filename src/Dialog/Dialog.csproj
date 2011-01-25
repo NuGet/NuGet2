@@ -139,6 +139,7 @@
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
     <Compile Include="PackageManagerUI\IScriptExecutor.cs" />
+    <Compile Include="PackageManagerUI\LicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\MessageHelper.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
