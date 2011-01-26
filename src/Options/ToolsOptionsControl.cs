@@ -5,10 +5,9 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog.ToolsOptionsUI {
+namespace NuGet.Options {
     /// <summary>
     /// Represents the Tools - Options - Package Manager dialog
     /// </summary>
