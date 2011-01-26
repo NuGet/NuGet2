@@ -74,7 +74,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private void ExecuteInitScripts() {
-            if (_solutionManager.IsSolutionOpen) {
+            if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
                 var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
                 var localRepository = packageManager.LocalRepository;
 
