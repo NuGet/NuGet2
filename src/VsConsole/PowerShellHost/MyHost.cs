@@ -73,7 +73,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public override PSHostUserInterface UI {
             get {
                 if (_ui == null) {
-                    _ui = new MyHostUI(_host.Console);
+                    _ui = new MyHostUI(_host);
                 }
                 return _ui;
             }

@@ -9,14 +9,15 @@ using System.Management.Automation.Runspaces;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
+using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
-using NuGet;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
     internal abstract class PowerShellHost : IPowerShellHost, IPathExpansion, IDisposable, IHost {
-        public IConsole Console { get; private set; }
+
+        public IConsole ActiveConsole { get; private set; }
 
         private string _name;
         private object _privateData;
@@ -26,12 +27,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private Pipeline _executingPipeline;
+        private bool? _initialized;
 
-        protected PowerShellHost(IConsole console, string name, bool isAsync, object privateData) {
-            UtilityMethods.ThrowIfArgumentNull(console);
-
-            this.Console = console;
-            this.IsAsync = isAsync;
+        protected PowerShellHost(string name, bool isAsync, object privateData) {
+            IsAsync = isAsync;
 
             // TODO: Take these as ctor arguments
             _packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
@@ -51,25 +50,37 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         /// <summary>
         /// Doing all necessary initialization works before the console accepts user inputs
         /// </summary>
-        public void Initialize() {
-            // we setup the runspace here, rather than loading it on-demand. This is so that we can
-            // load user profile scripts before the command prompt shows up. It also helps with 
-            // tab expansion right from the beginning
-            SetupRunspace();
-            bool successful = LoadStartupScripts();
-            if (successful) {
-                if (Console.ShowDisclaimerHeader) {
+        public void Initialize(IConsole console) {
+            ActiveConsole = console;
+
+            if (_initialized.HasValue) {
+                if (_initialized.Value && console.ShowDisclaimerHeader) {
                     DisplayDisclaimerAndHelpText();
                 }
-
-                LoadProfilesIntoRunspace(_myRunSpace);
-
-                ExecuteInitScripts();
-                _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
             }
             else {
-                IsCommandEnabled = false;
-                DisplayGroupPolicyError();
+
+                // we setup the runspace here, rather than loading it on-demand. This is so that we can
+                // load user profile scripts before the command prompt shows up. It also helps with 
+                // tab expansion right from the beginning
+                SetupRunspace();
+                bool successful = LoadStartupScripts();
+                if (successful) {
+                    if (console.ShowDisclaimerHeader) {
+                        DisplayDisclaimerAndHelpText();
+                    }
+
+                    LoadProfilesIntoRunspace(_myRunSpace);
+
+                    ExecuteInitScripts();
+                    _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
+                }
+                else {
+                    IsCommandEnabled = false;
+                    DisplayGroupPolicyError();
+                }
+
+                _initialized = successful;
             }
         }
 
@@ -232,10 +243,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public bool Execute(string command) {
+        public bool Execute(IConsole console, string command, params object[] inputs) {
+            if (console == null) {
+                throw new ArgumentNullException("console");
+            }
+
+            ActiveConsole = console;
+
             string fullCommand;
             if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {
-                return ExecuteHost(fullCommand, command);
+                return ExecuteHost(fullCommand, command, inputs);
             }
             else {
                 // Add this one piece into history. ExecuteHost adds the last piece.
@@ -252,7 +269,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             ComplexCommand.Clear();
         }
 
-        protected abstract bool ExecuteHost(string fullCommand, string command);
+        protected abstract bool ExecuteHost(string fullCommand, string command, params object[] inputs);
 
         protected void ReportError(ErrorRecord record) {
             Pipeline pipeline = CreatePipeline("$input", false);
@@ -331,28 +348,22 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return pipeline;
         }
 
-        public Collection<PSObject> Invoke(string command, object input = null, bool outputResults = true) {
+        public Collection<PSObject> Invoke(string command, object[] inputs = null, bool outputResults = true) {
             if (string.IsNullOrEmpty(command)) {
                 return null;
             }
 
             using (Pipeline pipeline = CreatePipeline(command, outputResults)) {
-                _executingPipeline = pipeline;
-                try {
-                    return input != null ? pipeline.Invoke(new object[] { input }) : pipeline.Invoke();
-                }
-                finally {
-                    _executingPipeline = null;
-                }
+                return inputs != null ? pipeline.Invoke(inputs) : pipeline.Invoke();
             }
         }
 
-        public bool InvokeAsync(string command, bool outputResults, EventHandler<PipelineStateEventArgs> pipelineStateChanged) {
+        public bool InvokeAsync(string command, object[] inputs, bool outputResults, EventHandler<PipelineStateEventArgs> pipelineStateChanged) {
             if (string.IsNullOrEmpty(command)) {
                 return false;
             }
 
-            Debug.Assert(_executingPipeline == null);
+            //Debug.Assert(_executingPipeline == null);
 
             Pipeline pipeline = CreatePipeline(command, outputResults);
 
@@ -365,6 +376,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     case PipelineState.Failed:
                     case PipelineState.Stopped:
                         _executingPipeline = null;
+                        ActiveConsole = null;
                         ((Pipeline)sender).Dispose();
                         break;
                 }
@@ -372,6 +384,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
             _executingPipeline = pipeline;
 
+            if (inputs != null) {
+                foreach (var input in inputs) {
+                    pipeline.Input.Write(input);
+                }
+            }
+            
             pipeline.InvokeAsync();
             return true;
         }
@@ -392,7 +410,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public SimpleExpansion GetPathExpansions(string line) {
             PSObject expansion = Invoke(
                 "$input|%{$__pc_args=$_}; _TabExpansionPath $__pc_args; Remove-Variable __pc_args -Scope 0",
-                line,
+                new object[] {line},
                 outputResults: false).FirstOrDefault();
             if (expansion != null) {
                 int replaceStart = (int)expansion.Properties["ReplaceStart"].Value;
@@ -414,22 +432,22 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     }
 
     class SyncPowerShellHost : PowerShellHost {
-        public SyncPowerShellHost(IConsole console, string name, object privateData)
-            : base(console, name, false, privateData) {
+        public SyncPowerShellHost(string name, object privateData)
+            : base(name, false, privateData) {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override bool ExecuteHost(string fullCommand, string command) {
+        protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
             DateTime startExecutionTime = DateTime.Now;
 
             try {
-                Invoke(fullCommand);
+                Invoke(fullCommand, inputs);
             }
             catch (RuntimeException e) {
                 ReportError(e.ErrorRecord);
             }
             catch (Exception x) {
-                // If an exception pops up, my console becomes unusable. Eat it.
+                // If an exception pops up, console becomes unusable. Eat it.
                 Debug.Print(x.ToString());
             }
 
@@ -441,16 +459,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     class AsyncPowerShellHost : PowerShellHost, IAsyncHost {
         public event EventHandler ExecuteEnd;
 
-        public AsyncPowerShellHost(IConsole console, string name, object privateData)
-            : base(console, name, true, privateData) {
+        public AsyncPowerShellHost(string name, object privateData)
+            : base(name, true, privateData) {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override bool ExecuteHost(string fullCommand, string command) {
+        protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
             DateTime startExecutionTime = DateTime.Now;
 
             try {
-                return InvokeAsync(fullCommand, true, (sender, e) => {
+                return InvokeAsync(fullCommand, inputs, true, (sender, e) => {
                     switch (e.PipelineStateInfo.State) {
                         case PipelineState.Completed:
                         case PipelineState.Failed:

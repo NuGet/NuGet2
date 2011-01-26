@@ -8,10 +8,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             "Microsoft.Reliability", 
             "CA2000:Dispose objects before losing scope",
             Justification="Can't dispose an object if we want to return it.")]
-        public static IHost CreateHost(IConsole console, string name, bool isAsync, object privateData) {
+        public static IHost CreateHost(string name, bool isAsync, object privateData) {
             return isAsync ?
-                new AsyncPowerShellHost(console, name, privateData) as IHost :
-                new SyncPowerShellHost(console, name, privateData) as IHost;
+                new AsyncPowerShellHost(name, privateData) as IHost :
+                new SyncPowerShellHost(name, privateData) as IHost;
         }
     }
 }

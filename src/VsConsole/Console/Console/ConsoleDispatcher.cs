@@ -54,7 +54,7 @@ namespace NuGetConsole.Implementation.Console {
                 }
 
                 // gives the host a chance to do initialization works before the console starts accepting user inputs
-                host.Initialize();
+                host.Initialize(WpfConsole);
 
                 if (host.IsCommandEnabled) {
                     _dispatcher.Start();
@@ -128,7 +128,7 @@ namespace NuGetConsole.Implementation.Console {
 
                 if (inputLine.Flags.HasFlag(InputLineFlag.Execute)) {
                     string command = inputLine.Text;
-                    bool isExecuted = WpfConsole.Host.Execute(command);
+                    bool isExecuted = WpfConsole.Host.Execute(WpfConsole, command);
                     WpfConsole.InputHistory.Add(command);
                     ParentDispatcher.OnExecute(inputSpan, isExecuted);
                     return Tuple.Create(true, isExecuted);

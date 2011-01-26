@@ -7,9 +7,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
     /// </summary>
     internal class UnsupportedHost : IHost {
 
-        public UnsupportedHost(IConsole console) {
-            // display the error message at the beginning
-            console.Write(Resources.Host_PSNotInstalled, System.Windows.Media.Colors.Red, null);
+        public UnsupportedHost() {
         }
 
         public bool IsCommandEnabled {
@@ -18,7 +16,9 @@ namespace NuGetConsole.Host.PowerShellProvider {
             }
         }
 
-        public void Initialize() {
+        public void Initialize(IConsole console) {
+            // display the error message at the beginning
+            console.Write(Resources.Host_PSNotInstalled, System.Windows.Media.Colors.Red, null);
         }
 
         public string Prompt {
@@ -27,7 +27,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
             }
         }
 
-        public bool Execute(string command) {
+        public bool Execute(IConsole console, string command, object[] inputs) {
             return false;
         }
 

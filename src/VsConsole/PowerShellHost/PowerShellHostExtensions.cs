@@ -47,7 +47,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 historyInfo.Properties.Add(new PSNoteProperty("ExecutionStatus", PipelineState.Completed), true);
                 historyInfo.Properties.Add(new PSNoteProperty("StartExecutionTime", startExecutionTime), true);
                 historyInfo.Properties.Add(new PSNoteProperty("EndExecutionTime", endExecutionTime), true);
-                host.Invoke("$input | Add-History", historyInfo, outputResults: false);
+                host.Invoke("$input | Add-History", new object[] {historyInfo}, outputResults: false);
             }
         }
 

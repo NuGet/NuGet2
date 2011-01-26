@@ -7,10 +7,8 @@ namespace NuGetConsole {
         /// <summary>
         /// Create a new host instance.
         /// </summary>
-        /// <param name="console">The console for the host to use. The host may output text
-        /// to the console in command execution.</param>
         /// <param name="async">Indicates whether to create asynchronous or synchronous host.</param>
         /// <returns>A new host instance.</returns>
-        IHost CreateHost(IConsole console, bool @async);
+        IHost CreateHost(bool @async);
     }
 }

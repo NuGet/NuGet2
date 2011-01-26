@@ -1,13 +1,9 @@
-using System;
 using System.ComponentModel.Composition;
 using System.Runtime.CompilerServices;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.Shell;
-using NuGetConsole.Host.PowerShell;
 using NuGetConsole.Host.PowerShell.Implementation;
 
 namespace NuGetConsole.Host.PowerShellProvider {
+
     [Export(typeof(IHostProvider))]
     [HostName(PowerShellHostProvider.HostName)]
     [DisplayName("NuGet Provider")]
@@ -16,7 +12,6 @@ namespace NuGetConsole.Host.PowerShellProvider {
         /// PowerConsole host name of PowerShell host.
         /// </summary>
         /// <remarks>
-        /// Note: PowerConsole\Impl\PowerConsole\Settings.cs copies this name as default host. Keep in sync.
         /// </remarks>
         public const string HostName = "NuGetConsole.Host.PowerShell";
 
@@ -25,18 +20,20 @@ namespace NuGetConsole.Host.PowerShellProvider {
         /// </summary>
         public const string PowerConsoleHostName = "Package Manager Host";
 
-        public IHost CreateHost(IConsole console, bool @async) {
-            bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
-            if (isPowerShell2Installed) {
-                return CreatePowerShellHost(console, @async);
-            }
-            else {
-                return new UnsupportedHost(console);
-            }
-        }
+        private IHost _host;
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static IHost CreatePowerShellHost(IConsole console, bool @async) {
+        public IHost CreateHost(bool @async) {
+            if (_host == null) {
+                bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
+                if (isPowerShell2Installed) {
+                    _host = CreatePowerShellHost(@async);
+                }
+                else {
+                    _host = new UnsupportedHost();
+                }
+            }
+
+            return _host;
 
             // backdoor: allow turning off async mode by setting enviroment variable NuGetSyncMode=1
             string syncModeFlag = Environment.GetEnvironmentVariable("NuGetSyncMode", EnvironmentVariableTarget.User);
@@ -44,8 +41,8 @@ namespace NuGetConsole.Host.PowerShellProvider {
                 @async = false;
             }
 
-            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, @async, new Commander(console));
-            return host;
+        [MethodImpl(MethodImplOptions.NoInlining)]
+            return PowerShellHostService.CreateHost(PowerConsoleHostName, @async, new Commander(null));
         }
 
         class Commander {

@@ -3,10 +3,17 @@ using System.Management.Automation.Host;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     class MyHostRawUserInterface : PSHostRawUserInterface {
-        IConsole Console { get; set; }
 
-        public MyHostRawUserInterface(IConsole console) {
-            this.Console = console;
+        private PowerShellHost _host;
+
+        private IConsole Console {
+            get {
+                return _host.ActiveConsole;
+            }
+        }
+
+        public MyHostRawUserInterface(PowerShellHost host) {
+            _host = host;
         }
 
         public override ConsoleColor BackgroundColor {

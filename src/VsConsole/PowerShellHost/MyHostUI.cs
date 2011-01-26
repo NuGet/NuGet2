@@ -9,12 +9,18 @@ using System.Windows.Media;
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class MyHostUI : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
+        
+        private PowerShellHost _host;
 
-        private IConsole Console { get; set; }
+        private IConsole Console {
+            get {
+                return _host.ActiveConsole;
+            }
+        }
 
-        public MyHostUI(IConsole console) {
-            UtilityMethods.ThrowIfArgumentNull(console);
-            this.Console = console;
+        public MyHostUI(PowerShellHost host) {
+            UtilityMethods.ThrowIfArgumentNull(host);
+            _host = host;
         }
 
         public override Dictionary<string, PSObject> Prompt(
@@ -46,7 +52,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public override PSHostRawUserInterface RawUI {
             get {
                 if (_rawUI == null) {
-                    _rawUI = new MyHostRawUserInterface(Console);
+                    _rawUI = new MyHostRawUserInterface(_host);
                 }
                 return _rawUI;
             }

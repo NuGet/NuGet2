@@ -43,7 +43,6 @@
     <Compile Include="IConsoleStatus.cs" />
     <Compile Include="IPathExpansion.cs" />
     <Compile Include="IPowerConsoleWindow.cs" />
-    <Compile Include="IPowerShellHost.cs" />
     <Compile Include="ITabExpansion.cs" />
     <Compile Include="IWpfConsole.cs" />
     <Compile Include="IWpfConsoleService.cs" />
