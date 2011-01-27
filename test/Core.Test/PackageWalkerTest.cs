@@ -1,11 +1,10 @@
-namespace NuGet.Test {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using NuGet.Test.Mocks;
-    using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NuGet.Test.Mocks;
 
+namespace NuGet.Test {    
     [TestClass]
     public class PackageWalkerTest {
         [TestMethod]
@@ -227,6 +226,48 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void UninstallWalkerIgnoresMissingDependencies() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            // A -> [B, C]
+            // B -> [D]
+            // C -> [D]
+            
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    new PackageDependency("B"),
+                                                                    new PackageDependency("C")
+                                                                });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    new PackageDependency("D")
+                                                                });
+
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0");
+
+            localRepository.AddPackage(packageA);
+            localRepository.AddPackage(packageC);
+            localRepository.AddPackage(packageD);
+
+            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
+                                                               new DependentsWalker(localRepository),
+                                                               NullLogger.Instance,
+                                                               removeDependencies: true,
+                                                               forceRemove: false);
+
+            // Act
+            var packages = resolver.ResolveOperations(packageA)
+                                   .ToDictionary(p => p.Package.Id);
+
+            // Assert
+            Assert.AreEqual(3, packages.Count);
+            Assert.IsNotNull(packages["A"]);
+            Assert.IsNotNull(packages["C"]);
+            Assert.IsNotNull(packages["D"]);
+        }
+
+        [TestMethod]
         public void ResolveDependenciesForUninstallDiamondDependencyGraph() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -396,30 +437,6 @@ namespace NuGet.Test {
             Assert.AreEqual(2, packages.Count);
             Assert.IsNotNull(packages["A"]);
             Assert.IsNotNull(packages["B"]);
-        }
-
-        [TestMethod]
-        public void ResolveDependenciesForUninstallPackageWithMissingDependencyAndRemoveDependenciesThrows() {
-            // Arrange
-            var localRepository = new MockPackageRepository();
-
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                            dependencies: new List<PackageDependency> {
-                                                                    new PackageDependency("B")
-                                                                });
-
-            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
-
-            localRepository.AddPackage(packageA);
-
-            IPackageOperationResolver resolver = new UninstallWalker(localRepository,
-                                                               new DependentsWalker(localRepository),
-                                                               NullLogger.Instance,
-                                                               removeDependencies: true,
-                                                               forceRemove: false);
-
-            // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to locate dependency 'B'. It may have been uninstalled.");
         }
 
         [TestMethod]

@@ -19,6 +19,12 @@ namespace NuGet {
             }
         }
 
+        protected virtual bool SkipDependencyResolveError {
+            get {
+                return false;
+            }
+        }
+
         protected virtual bool IgnoreDependencies {
             get {
                 return false;
@@ -47,8 +53,14 @@ namespace NuGet {
                     IPackage resolvedDependency = Marker.FindDependency(dependency) ??
                                                   ResolveDependency(dependency);
 
-                    if (resolvedDependency == null) {
+                    if (resolvedDependency == null) {                        
                         OnDependencyResolveError(dependency);
+                        // If we're skipping dependency resolve errros then move on to the next
+                        // dependency
+                        if (SkipDependencyResolveError) {
+                            continue;
+                        }
+
                         return;
                     }
 
