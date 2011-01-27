@@ -142,6 +142,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 new SessionStateVariableEntry("DTE", (DTE2)dte, "Visual Studio DTE automation object",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
+            // The constructor expects Tuple<string, object>. We can’t let Tuple.Create() infer the type here because it will 
+            // infer it as Tuple<string, PackageManagerFactory>, which can’t be converted to Tuple<string, object>.
+            // Thus we have to provide explicity generic type arguments for Tuple.Create().
             _myHost = new MyHost(this, _name, _privateData, Tuple.Create<string, object>("packageManagerFactory", _packageManagerFactory));
             _myRunSpace = RunspaceFactory.CreateRunspace(_myHost, initialSessionState);
 
