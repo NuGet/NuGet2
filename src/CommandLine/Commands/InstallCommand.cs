@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -33,7 +34,7 @@ namespace NuGet.Commands {
             }
 
             IPackageRepository packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl));
-            var packageManager = new PackageManager(packageRepository, "packages");
+            var packageManager = new PackageManager(packageRepository, Directory.GetCurrentDirectory());
 
             packageManager.Logger = new Logger { Console = Console };
 
