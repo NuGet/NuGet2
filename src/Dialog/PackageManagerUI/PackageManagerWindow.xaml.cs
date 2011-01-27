@@ -31,8 +31,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
-                                    [Import(ContractConstants.RecentPackagesRepositoryContractName)]
-                                    IPackageRepository recentPackagesRepository)
+                                    IRecentPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
 
             InitializeComponent();

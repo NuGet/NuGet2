@@ -24,7 +24,7 @@ namespace NuGet.Cmdlets {
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IPackageRepository>(ContractConstants.RecentPackagesRepositoryContractName)) {
+                   ServiceLocator.GetInstance<IRecentPackageRepository>()) {
         }
 
         public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory,

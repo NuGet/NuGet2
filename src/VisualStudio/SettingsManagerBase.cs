@@ -55,7 +55,7 @@ namespace NuGet.VisualStudio {
             userSettingsStore.SetString(settingsRoot, property, value);
         }
 
-        protected void ClearAllSubstrings(string settingsRoot) {
+        protected void ClearAllSettings(string settingsRoot) {
             WritableSettingsStore userSettingsStore = _settingsManager.Value.GetWritableSettingsStore(SettingsScope.UserSettings);
             userSettingsStore.DeleteCollection(settingsRoot);
         }

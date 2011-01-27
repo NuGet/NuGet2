@@ -67,7 +67,7 @@ namespace NuGet.VisualStudio {
 
         public void ClearPackageMetadata() {
             // delete everything under NuGet\Mru
-            ClearAllSubstrings(MruSettingsRoot);
+            ClearAllSettings(MruSettingsRoot);
         }
 
         private class PersistencePackageMetadata : IPersistencePackageMetadata {

@@ -62,7 +62,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContractConstants.cs" />
     <Compile Include="IRepositorySettings.cs" />
     <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="MSBuildProjectExtensions.cs" />

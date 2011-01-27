@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -7,7 +8,7 @@ using NuGet.Test;
 namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.Collections.Generic;
+    
 
     [TestClass]
     public class RecentPackageRepositoryTest {

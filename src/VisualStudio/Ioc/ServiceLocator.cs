@@ -36,8 +36,6 @@ namespace NuGet.VisualStudio {
             _container.ComposeExportedValue(dte);
             // Add DTE's IServiceProvider
             _container.ComposeExportedValue(dteServiceProvider);
-            // Add the package to the container
-            _container.ComposeExportedValue(package);
             // Add Package's IServiceProvider
             _container.ComposeExportedValue("PackageServiceProvider", serviceProvider);
 

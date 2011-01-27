@@ -8,7 +8,6 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio {
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [Export(ContractConstants.RecentPackagesRepositoryContractName, typeof(IPackageRepository))]
     [Export(typeof(IRecentPackageRepository))]
     public class RecentPackagesRepository : IPackageRepository, IRecentPackageRepository {
 
