@@ -24,7 +24,7 @@ function Get-ProjectRepository {
         $Project
     )
     
-    $packageManager = $packageManagerFactory.CreatePackageManager()    
+    $packageManager = $host.PrivateData.packageManagerFactory.CreatePackageManager()    
     $fileSystem = New-Object NuGet.PhysicalFileSystem((Get-ProjectDir $Project))
     New-Object NuGet.PackageReferenceRepository($fileSystem, $packageManager.LocalRepository)
 }

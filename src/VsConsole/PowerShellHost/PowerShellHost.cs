@@ -142,11 +142,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 new SessionStateVariableEntry("DTE", (DTE2)dte, "Visual Studio DTE automation object",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
 
-            initialSessionState.Variables.Add(
-                new SessionStateVariableEntry("packageManagerFactory", _packageManagerFactory, "Package Manager Factory",
-                    ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
-
-            _myHost = new MyHost(this, _name, _privateData);
+            _myHost = new MyHost(this, _name, _privateData, Tuple.Create<string, object>("packageManagerFactory", _packageManagerFactory));
             _myRunSpace = RunspaceFactory.CreateRunspace(_myHost, initialSessionState);
 
             // if is sync, set UseCurrentThread for Invoke
