@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.Services.Client;
-using System.Diagnostics;
-using System.Linq;
+using System.Globalization;
 using System.Linq.Expressions;
+using NuGet.Resources;
 
 namespace NuGet {
     public class DataServiceQueryWrapper<T> : IDataServiceQuery<T> {
@@ -13,7 +14,8 @@ namespace NuGet {
         private readonly IDataServiceContext _context;
         private readonly Type _concreteType;
 
-        public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query): this(context, query, typeof(T)) {
+        public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query)
+            : this(context, query, typeof(T)) {
         }
 
         public DataServiceQueryWrapper(IDataServiceContext context, DataServiceQuery query, Type concreteType) {
@@ -24,7 +26,7 @@ namespace NuGet {
             if (query == null) {
                 throw new ArgumentNullException("query");
             }
-           
+
             _context = context;
             _query = query;
             _concreteType = concreteType;
@@ -39,11 +41,27 @@ namespace NuGet {
         }
 
         public TResult Execute<TResult>(Expression expression) {
-            return _query.Provider.Execute<TResult>(GetInnerExpression(expression));
+            try {
+                return _query.Provider.Execute<TResult>(GetInnerExpression(expression));
+            }
+            catch (Exception exception) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuGetResources.InvalidFeed,
+                    _context.BaseUri), exception);
+            }
         }
 
         public object Execute(Expression expression) {
-            return _query.Provider.Execute(GetInnerExpression(expression));
+            try {
+                return _query.Provider.Execute(GetInnerExpression(expression));
+            }
+            catch (Exception exception) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuGetResources.InvalidFeed,
+                    _context.BaseUri), exception);
+            }
         }
 
         public IDataServiceQuery<TElement> CreateQuery<TElement>(Expression expression) {
@@ -59,7 +77,17 @@ namespace NuGet {
         }
 
         private IEnumerable<T> GetAll() {
-            var results = _query.Execute();
+            IEnumerable results;
+
+            try {
+                results = _query.Execute();
+            }
+            catch (Exception exception) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture, 
+                    NuGetResources.InvalidFeed,
+                    _context.BaseUri), exception);
+            }
 
             DataServiceQueryContinuation continuation = null;
             do {

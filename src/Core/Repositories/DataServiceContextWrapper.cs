@@ -16,6 +16,12 @@ namespace NuGet {
             _context = new DataServiceContext(serviceRoot);
         }
 
+        public Uri BaseUri {
+            get {
+                return _context.BaseUri;
+            }
+        }
+
         public event EventHandler<SendingRequestEventArgs> SendingRequest {
             add {
                 _context.SendingRequest += value;
