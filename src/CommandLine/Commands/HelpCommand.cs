@@ -118,12 +118,12 @@ namespace NuGet.Commands {
                 //Get the max option width
                 int maxOptionWidth = options.Max(o => o.Value.Name.Length);
                 //Get the max altname option width
-                int maxAltOptionWidth = options.Max(o => o.Key.AltName.Length);
+                int maxAltOptionWidth = options.Max(o => (o.Key.AltName ?? String.Empty).Length);
 
 
                 foreach (var o in options) {
                     Console.Write(" {0, -" + (maxOptionWidth + 2) + "}", o.Value.Name);
-                    Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", "(" + o.Key.AltName + ")");
+                    Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", GetAltText(o.Key.AltName));
                     Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
 
                 }
