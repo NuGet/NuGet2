@@ -231,6 +231,76 @@ namespace NuGet.Dialog.Test {
             manualEvent.WaitOne();
         }
 
+        [TestMethod]
+        public void ExecuteMethodDoesNotInstallPackagesWithInitScript() {
+            // source repo has A, B, C
+            // solution repo has A
+            // project repo has C
+
+            // install B
+
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world" }, tools: new string[] { "init.ps1" });
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            var solutionRepository = new MockPackageRepository();
+            solutionRepository.AddPackage(packageA);
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.Add(packageC);
+
+            var projectManager = CreateProjectManager(localRepository, solutionRepository);
+
+            var project = new Mock<Project>();
+            var scriptExecutor = new Mock<IScriptExecutor>();
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
+
+            var provider = CreateOnlineProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object);
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA);
+            firstTreeNode.Repository.AddPackage(packageB);
+            firstTreeNode.Repository.AddPackage(packageC);
+
+            provider.SelectedNode = firstTreeNode;
+
+            ManualResetEvent manualEvent = new ManualResetEvent(false);
+
+            provider.ExecuteCompletedCallback = delegate {
+                try {
+                    // Assert
+
+                    // init.ps1 shouldn't be executed
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "init.ps1", packageB, project.Object, It.IsAny<ILogger>()), Times.Never());
+
+                    // InstallPackage() should not get called
+                    packageManager.Verify(p => p.InstallPackage(
+                       projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>()), Times.Never());
+                }
+                finally {
+                    manualEvent.Set();
+                }
+            };
+
+            var extensionB = new PackageItem(provider, packageB, null);
+
+            // Act
+            provider.Execute(extensionB);
+
+            // do not allow the method to return
+            manualEvent.WaitOne();
+        }
+
         private static OnlineProvider CreateOnlineProvider(
             IVsPackageManager packageManager = null,
             IProjectManager projectManager = null,

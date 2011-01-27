@@ -120,8 +120,8 @@ namespace NuGet.Dialog.Providers {
                     throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
                 }
                 else {
-                    var initScriptPackages = scriptPackages.Where(p => p.HasPowerShellScript(new string[] { "init.ps1" }));
-                    if (initScriptPackages.Any()) {
+                    var hasInitScriptPackages = scriptPackages.Any(p => p.HasPowerShellScript(new[] { "init.ps1" }));
+                    if (hasInitScriptPackages) {
                         throw new InvalidOperationException(Resources.Dialog_PackageHasInitScript);
                     }
                 }
