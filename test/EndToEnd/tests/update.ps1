@@ -134,3 +134,78 @@ function Test-UpdateAmbiguousProjectLevelPackageNoInstalledInProjectThrows {
     # Act
     Assert-Throws { $p1 | Update-Package Antlr } "Unable to find package 'Antlr' in '$($p1.Name)'."
 }
+
+function Test-SubTreeUpdateWithDependencyInUse {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p E 1.0
+    Assert-Package $p F 1.0
+    Assert-Package $p C 1.0
+    Assert-Package $p D 1.0
+
+    $p | Update-Package F -Source $context.RepositoryPath
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p E 1.0
+    Assert-Package $p F 2.0
+    Assert-Package $p C 1.0
+    Assert-Package $p D 1.0
+    Assert-Package $p G 1.0
+}
+
+function Test-ComplexUpdateSubTree {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p E 1.0
+    Assert-Package $p F 1.0
+    Assert-Package $p C 1.0
+    Assert-Package $p D 1.0
+
+
+    $p | Update-Package E -Source $context.RepositoryPath
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p E 2.0
+    Assert-Package $p F 1.0
+    Assert-Package $p C 1.0
+    Assert-Package $p D 1.0
+    Assert-Package $p G 1.0
+}
+
+function Test-SubTreeUpdateWithConflict {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath
+    $p | Install-Package G -Source $context.RepositoryPath
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p C 1.0
+    Assert-Package $p D 1.0
+    Assert-Package $p G 1.0
+
+    Assert-Throws { $p | Update-Package C -Source $context.RepositoryPath } "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'."
+}

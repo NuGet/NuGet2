@@ -111,12 +111,20 @@ namespace NuGet.Dialog.Providers {
 
             IList<PackageOperation> operations = walker.ResolveOperations(item.PackageIdentity).ToList();
 
-            IEnumerable<IPackage> scriptPackages = from o in operations
-                                                   where o.Package.HasPowerShellScript()
-                                                   select o.Package;
+            IList<IPackage> scriptPackages = (from o in operations
+                                              where o.Package.HasPowerShellScript()
+                                              select o.Package).ToList();
 
-            if (scriptPackages.Any() && !RegistryHelper.CheckIfPowerShell2Installed()) {
-                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+            if (scriptPackages.Count > 0) {
+                if (!RegistryHelper.CheckIfPowerShell2Installed()) {
+                    throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+                }
+                else {
+                    var initScriptPackages = scriptPackages.Where(p => p.HasPowerShellScript(new string[] { "init.ps1" }));
+                    if (initScriptPackages.Any()) {
+                        throw new InvalidOperationException(Resources.Dialog_PackageHasInitScript);
+                    }
+                }
             }
 
             IEnumerable<IPackage> licensePackages = from o in operations
@@ -143,7 +151,7 @@ namespace NuGet.Dialog.Providers {
             finally {
                 UnregisterPackageOperationEvents(activePackageManager);
             }
-            
+
             return true;
         }
 

@@ -100,12 +100,13 @@ namespace NuGet {
                     return;
                 }
 
-                // Uninstall the conflicting package
+                // Uninstall the conflicting package. We set throw on conflicts to false since we've
+                // already decided that there were no conflicts based on the above code.
                 var resolver = new UninstallWalker(conflictResult.Repository,
                                                    conflictResult.DependentsResolver,
                                                    NullLogger.Instance,
-                                                   !IgnoreDependencies,
-                                                   forceRemove: true);
+                                                   removeDependencies: !IgnoreDependencies,
+                                                   forceRemove: false) { ThrowOnConflicts = false };
 
                 foreach (var operation in resolver.ResolveOperations(conflictResult.Package)) {
                     // Keep a separate set of packages to uninstall so we have a fast way to check

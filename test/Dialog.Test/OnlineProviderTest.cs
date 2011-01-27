@@ -170,7 +170,7 @@ namespace NuGet.Dialog.Test {
 
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
-            var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world"}, tools: new string[] { "install.ps1", "init.ps1" } );
+            var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world"}, tools: new string[] { "install.ps1", "uninstall.ps1" } );
             var packageC = PackageUtility.CreatePackage("C", "3.0");
 
             var solutionRepository = new MockPackageRepository();

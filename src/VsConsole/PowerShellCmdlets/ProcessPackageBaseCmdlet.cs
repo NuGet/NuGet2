@@ -34,7 +34,7 @@ namespace NuGet.Cmdlets {
             get {
                 // We take a snapshot of the default project, the first time it is accessed so if it changs during
                 // the executing of this cmdlet we won't take it into consideration. (which is really an edge case anyway)
-                string name = ProjectName ?? "Default";
+                string name = ProjectName ?? String.Empty;
 
                 IProjectManager projectManager;
                 if (!_projectManagers.TryGetValue(name, out projectManager)) {

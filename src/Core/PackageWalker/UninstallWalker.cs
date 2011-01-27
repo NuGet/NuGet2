@@ -29,6 +29,7 @@ namespace NuGet {
             Repository = repository;
             DependentsResolver = dependentsResolver;
             Force = forceRemove;
+            ThrowOnConflicts = true;
             Operations = new Stack<PackageOperation>();
             _removeDependencies = removeDependencies;
         }
@@ -49,6 +50,12 @@ namespace NuGet {
             }
         }
 
+        protected override bool SkipDependencyResolveError {
+            get {
+                return true;
+            }
+        }
+
         private Stack<PackageOperation> Operations {
             get;
             set;
@@ -58,6 +65,8 @@ namespace NuGet {
             get;
             private set;
         }
+
+        public bool ThrowOnConflicts { get; set; }
 
         protected IDependentsResolver DependentsResolver {
             get;
@@ -72,7 +81,7 @@ namespace NuGet {
                     // We're going to uninstall this package even though other packages depend on it                    
                     _forcedRemoved[package] = dependents;
                 }
-                else {
+                else if (ThrowOnConflicts) {
                     // We're not ignoring dependents so raise an error telling the user what the dependents are
                     throw CreatePackageHasDependentsException(package, dependents);
                 }
@@ -80,7 +89,7 @@ namespace NuGet {
         }
 
         protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
-            if (!Force) {                
+            if (!Force) {
                 IEnumerable<IPackage> dependents = GetDependents(dependency);
 
                 // If this isn't a force remove and other packages depend on this dependency
@@ -121,10 +130,7 @@ namespace NuGet {
         }
 
         protected override void OnDependencyResolveError(PackageDependency dependency) {
-            throw new InvalidOperationException(
-                                String.Format(CultureInfo.CurrentCulture,
-                                NuGetResources.UnableToLocateDependency,
-                                dependency));
+            Logger.Log(MessageLevel.Warning, NuGetResources.UnableToLocateDependency, dependency);
         }
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
