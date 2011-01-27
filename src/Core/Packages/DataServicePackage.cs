@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Services.Common;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
 
 namespace NuGet {
     [DataServiceKey("Id", "Version")]
@@ -192,14 +193,13 @@ namespace NuGet {
             return this.GetFullName();
         }
 
-        private IPackage DownloadAndVerifyPackage() {
-            if (!String.IsNullOrEmpty(PackageHash)) {
-                byte[] hashBytes = Convert.FromBase64String(PackageHash);
-                return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, useCache: true);
+        internal IPackage DownloadAndVerifyPackage() {
+            if (String.IsNullOrEmpty(PackageHash)) {
+                throw new InvalidOperationException(NuGetResources.PackageContentsVerifyError);
             }
-            else {
-                return _packageDownloader.DownloadPackage(DownloadUrl);
-            }
+
+            byte[] hashBytes = Convert.FromBase64String(PackageHash);
+            return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, useCache: true);
         }
 
         /// <summary>
