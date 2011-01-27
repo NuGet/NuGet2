@@ -31,21 +31,6 @@ namespace NuGet.Server.DataServices {
             return new PackageContext(Repository);
         }
 
-        protected override void OnStartProcessingRequest(ProcessRequestArgs args) {
-            base.OnStartProcessingRequest(args);
-
-            HttpRequestBase request = new HttpRequestWrapper(HttpContext.Current.Request);
-            DateTime lastModified = Directory.GetLastWriteTimeUtc(PackageUtility.PackagePhysicalPath);
-
-            if (request.IsUnmodified(lastModified)) {
-                throw new DataServiceException(304, null);
-            }
-
-            HttpCachePolicy cachePolicy = HttpContext.Current.Response.Cache;
-            cachePolicy.SetCacheability(HttpCacheability.Public);
-            cachePolicy.SetLastModified(lastModified);
-        }
-
         public void DeleteStream(object entity, DataServiceOperationContext operationContext) {
             throw new NotSupportedException();
         }
