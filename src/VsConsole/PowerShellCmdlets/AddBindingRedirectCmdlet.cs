@@ -24,7 +24,6 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        [Alias("Project")] // <EnvDTE.Project>.Name
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
         public string[] ProjectName { get; set; }
 
