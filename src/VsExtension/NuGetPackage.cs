@@ -9,7 +9,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Dialog.PackageManagerUI;
-using NuGet.Dialog.ToolsOptionsUI;
+using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole.Implementation;
@@ -27,6 +27,7 @@ namespace NuGet.Tools {
         Orientation = ToolWindowOrientation.Right)]
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
     [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
+    [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent packages", 101, 102, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
@@ -82,7 +83,7 @@ namespace NuGet.Tools {
         }
 
         private void ShowSettingsWindow(object sender, EventArgs args) {
-            ShowOptionPage(typeof(NuGet.Dialog.ToolsOptionsUI.ToolsOptionsPage));
+            ShowOptionPage(typeof(ToolsOptionsPage));
         }
 
         /// <summary>

@@ -47,5 +47,14 @@ namespace NuGet.Test {
             Assert.IsFalse(dependencies[1].VersionSpec.IsMaxInclusive);
             Assert.AreEqual(new Version("5.0"), dependencies[1].VersionSpec.MaxVersion);
         }
+
+        [TestMethod]
+        public void DownloadAndVerifyThrowsIfPackageHashIsNull() {
+            // Arrange
+            var servicePackage = new DataServicePackage();
+
+            // Act & Asert
+            ExceptionAssert.Throws<InvalidOperationException>(() => servicePackage.DownloadAndVerifyPackage(), "Failed to download package correctly. The contents of the package could not be verified.");
+        }
     }
 }

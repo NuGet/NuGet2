@@ -1,5 +1,5 @@
 using System.Windows.Forms;
-namespace NuGet.Dialog.ToolsOptionsUI {
+namespace NuGet.Options {
     partial class ToolsOptionsControl {
         /// <summary> 
         /// Required designer variable.

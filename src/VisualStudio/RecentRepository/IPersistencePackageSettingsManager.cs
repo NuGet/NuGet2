@@ -16,5 +16,10 @@ namespace NuGet.VisualStudio {
         /// Saves the specified package metadata to the settings store.
         /// </summary>
         void SavePackageMetadata(IEnumerable<IPersistencePackageMetadata> packageMetadata);
+
+        /// <summary>
+        /// Clear all package metadata from the settings store.
+        /// </summary>
+        void ClearPackageMetadata();
     }
 }

@@ -10,7 +10,9 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IPersistencePackageSettingsManager))]
     public class VsPersistencePackageSettingsManager : SettingsManagerBase, IPersistencePackageSettingsManager {
 
-        private const string SettingsRootTemplate = "NuGet\\Mru\\Package";
+        private const string MruSettingsRoot = "NuGet\\Mru";
+        // template = NuGet\Mru\Package
+        private const string SettingsRootTemplate = MruSettingsRoot + "\\Package";
         private static readonly string[] SettingsProperties = new string[] { "Id", "Version", "Source" };
 
         [ImportingConstructor]
@@ -61,6 +63,11 @@ namespace NuGet.VisualStudio {
                 WriteStrings(settingsRoot, SettingsProperties, values);
                 count++;
             }
+        }
+
+        public void ClearPackageMetadata() {
+            // delete everything under NuGet\Mru
+            ClearAllSettings(MruSettingsRoot);
         }
 
         private class PersistencePackageMetadata : IPersistencePackageMetadata {

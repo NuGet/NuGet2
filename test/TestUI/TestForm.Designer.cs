@@ -1,4 +1,4 @@
-using NuGet.Dialog.ToolsOptionsUI;
+using NuGet.Options;
 
 namespace NuGet.TestUI
 {

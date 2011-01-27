@@ -42,9 +42,9 @@
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Dialog\Dialog.csproj">
-      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
-      <Name>Dialog</Name>
+    <ProjectReference Include="..\..\src\Options\Options.csproj">
+      <Project>{53AB7187-CDF3-48B5-B90E-8919D3CB904D}</Project>
+      <Name>Options</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>

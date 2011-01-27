@@ -1,15 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.ComponentModel.Design;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.Providers;
-using NuGet.OutputWindowConsole;
 using NuGet.VisualStudio;
 using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
@@ -21,25 +21,25 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private const string F1Keyword = "vs.ExtensionManager";
 
-        private readonly DTEPackage _ownerPackage;
+        private readonly IServiceProvider _serviceProvider;
 
         [ImportingConstructor]
-        public PackageManagerWindow(DTEPackage ownerPackage,
+        public PackageManagerWindow([Import("PackageServiceProvider")]
+                                    IServiceProvider serviceProvider,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
-                                    [Import(ContractConstants.RecentPackagesRepositoryContractName)]
-                                    IPackageRepository recentPackagesRepository)
+                                    IRecentPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
 
             InitializeComponent();
 
             InsertDisclaimerElement();
 
-            System.Diagnostics.Debug.Assert(ownerPackage != null);
-            _ownerPackage = ownerPackage;
+            // this is the service provider from VsPackage, not from DTE
+            _serviceProvider = serviceProvider;
 
             SetupProviders(
                 dte, 
@@ -164,7 +164,19 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
-            _ownerPackage.ShowOptionPage(typeof(ToolsOptionsUI.ToolsOptionsPage));
+
+            ShowOptionsPage();
+        }
+
+        private void ShowOptionsPage() {
+            // GUID of our options page, defined in ToolsOptionsPage.cs
+            const string targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
+
+            var command = new CommandID(
+                VSConstants.GUID_VSStandardCommandSet97,
+                VSConstants.cmdidToolsOptions);
+            var mcs = (MenuCommandService)_serviceProvider.GetService(typeof(IMenuCommandService));
+            mcs.GlobalInvoke(command, targetGUID);
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {

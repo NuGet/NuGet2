@@ -30,11 +30,7 @@ namespace NuGet {
             string userAgent = String.Format(CultureInfo.InvariantCulture, UserAgent, version, Environment.OSVersion);
             _httpClient.UserAgent = userAgent;
         }
-
-        public IPackage DownloadPackage(Uri uri) {
-            return DownloadPackage(uri, packageHash: null, useCache: true);
-        }
-
+        
         [SuppressMessage(
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",

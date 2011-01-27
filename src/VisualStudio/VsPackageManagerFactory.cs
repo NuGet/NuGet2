@@ -9,7 +9,7 @@ namespace NuGet.VisualStudio {
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IRepositorySettings _repositorySettings;
-        private readonly IPackageRepository _recentPackageRepository;
+        private readonly IRecentPackageRepository _recentPackageRepository;
 
         private RepositoryInfo _repositoryInfo;
 
@@ -18,8 +18,7 @@ namespace NuGet.VisualStudio {
                                        IPackageRepositoryFactory repositoryFactory,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
-                                       [Import(ContractConstants.RecentPackagesRepositoryContractName)]
-                                       IPackageRepository recentPackagesRepository) {
+                                       IRecentPackageRepository recentPackagesRepository) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -7,6 +8,7 @@ using NuGet.Test;
 namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
+    
 
     [TestClass]
     public class RecentPackageRepositoryTest {
@@ -76,6 +78,19 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(new Version("2.0"), packages[0].Version);
         }
 
+        [TestMethod]
+        public void CallingClearMethodClearsAllPackagesFromSettingsStore() {
+            // Arrange
+            var repository = CreateRecentPackageRepository();
+
+            // Act
+            repository.Clear();
+            var packages = repository.GetPackages().ToList();
+
+            // Assert
+            Assert.AreEqual(0, packages.Count);
+        }
+
         private RecentPackagesRepository CreateRecentPackageRepository(bool empty = false) {
             var packageA = PackageUtility.CreatePackage("A", "1.0");
             var packageB = PackageUtility.CreatePackage("C", "2.0");
@@ -88,16 +103,16 @@ namespace NuGet.VisualStudio.Test {
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             mockRepositoryFactory.Setup(f => f.CreateRepository(It.IsAny<PackageSource>())).Returns(mockRepository.Object);
 
-            var mockSettingsManager = new Mock<IPersistencePackageSettingsManager>();
+            var mockSettingsManager = new MockSettingsManager();
 
             if (!empty) {
                 var A = new PersistencePackageMetadata("A", "1.0", "bing.com");
                 var B = new PersistencePackageMetadata("B", "2.0", "live.com");
 
-                mockSettingsManager.Setup(p => p.LoadPackageMetadata(It.IsAny<int>())).Returns(new IPersistencePackageMetadata[] { A, B });
+                mockSettingsManager.SavePackageMetadata(new IPersistencePackageMetadata[] { A, B });
             }
 
-            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockSettingsManager.Object);
+            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockSettingsManager);
         }
 
         private class PersistencePackageMetadata : IPersistencePackageMetadata {
@@ -111,6 +126,24 @@ namespace NuGet.VisualStudio.Test {
             public string Id { get; private set; }
             public Version Version { get; private set; }
             public string Source { get; private set; }
+        }
+
+        private class MockSettingsManager : IPersistencePackageSettingsManager {
+
+            List<IPersistencePackageMetadata> _items = new List<IPersistencePackageMetadata>();
+
+            public System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
+                return _items.Take(maximumCount);
+            }
+
+            public void SavePackageMetadata(System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> packageMetadata) {
+                _items.Clear();
+                _items.AddRange(packageMetadata);
+            }
+
+            public void ClearPackageMetadata() {
+                _items.Clear();
+            }
         }
     }
 }

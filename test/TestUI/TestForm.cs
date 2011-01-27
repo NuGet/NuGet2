@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using NuGet.Dialog.ToolsOptionsUI;
+using NuGet.Options;
 
 namespace NuGet.TestUI {
     public partial class TestForm : Form {

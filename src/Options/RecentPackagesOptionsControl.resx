@@ -117,148 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Dialog_Close" xml:space="preserve">
-    <value>_Close</value>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ClearButton.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
   </data>
-  <data name="Dialog_CreatedByLabel" xml:space="preserve">
-    <value>Created by:</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ClearButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
   </data>
-  <data name="Dialog_DependenciesLabel" xml:space="preserve">
-    <value>Dependencies:</value>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="ClearButton.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 14</value>
   </data>
-  <data name="Dialog_DownloadsLabel" xml:space="preserve">
-    <value>Downloads:</value>
+  <data name="ClearButton.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>10, 1, 10, 1</value>
   </data>
-  <data name="Dialog_InstallButton" xml:space="preserve">
-    <value>_Install</value>
+  <data name="ClearButton.Size" type="System.Drawing.Size, System.Drawing">
+    <value>225, 29</value>
   </data>
-  <data name="Dialog_InstalledProvider" xml:space="preserve">
-    <value>Installed packages</value>
+  <data name="ClearButton.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
   </data>
-  <data name="Dialog_InstalledProviderNoItem" xml:space="preserve">
-    <value>No packages are installed in the current project.</value>
+  <data name="ClearButton.Text" xml:space="preserve">
+    <value>&amp;Clear the recent packages list</value>
   </data>
-  <data name="Dialog_InstallProgress" xml:space="preserve">
-    <value>Installing...</value>
+  <data name="&gt;&gt;ClearButton.Name" xml:space="preserve">
+    <value>ClearButton</value>
   </data>
-  <data name="Dialog_MessageBoxTitle" xml:space="preserve">
-    <value>Operation failed</value>
+  <data name="&gt;&gt;ClearButton.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Dialog_MoreInfo" xml:space="preserve">
-    <value>More Information</value>
+  <data name="&gt;&gt;ClearButton.Parent" xml:space="preserve">
+    <value>$this</value>
   </data>
-  <data name="Dialog_NoDependencyLabel" xml:space="preserve">
-    <value>No Dependencies</value>
+  <data name="&gt;&gt;ClearButton.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
-  <data name="Dialog_OnlineProvider" xml:space="preserve">
-    <value>Online</value>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>8, 16</value>
   </data>
-  <data name="Dialog_OnlineProviderNoItem" xml:space="preserve">
-    <value>No packages found in the current package source.</value>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>531, 151</value>
   </data>
-  <data name="Dialog_OperationSucceeded" xml:space="preserve">
-    <value>Operation succeeded.</value>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>RecentPackagesOptionsControl</value>
   </data>
-  <data name="Dialog_PackageDisclaimer" xml:space="preserve">
-    <value>Each item above may have sub-dependencies subject to additional license agreements.</value>
-  </data>
-  <data name="Dialog_PackageHasPSScript" xml:space="preserve">
-    <value>This package (or one of its dependencies) contains PowerShell scripts but the PowerShell 2.0 (or newer) runtime is not installed on this machine.</value>
-  </data>
-  <data name="Dialog_PackageInstalledTooltip" xml:space="preserve">
-    <value>This package is already installed.</value>
-  </data>
-  <data name="Dialog_PackageUpdatedTooltip" xml:space="preserve">
-    <value>This package is already updated.</value>
-  </data>
-  <data name="Dialog_RatingLabel" xml:space="preserve">
-    <value>Rating:</value>
-  </data>
-  <data name="Dialog_RatingTooltip" xml:space="preserve">
-    <value>{0:f1} stars</value>
-  </data>
-  <data name="Dialog_ReportAbuse" xml:space="preserve">
-    <value>Report Abuse</value>
-  </data>
-  <data name="Dialog_RootNodeAll" xml:space="preserve">
-    <value>All</value>
-  </data>
-  <data name="Dialog_RootNodeSearch" xml:space="preserve">
-    <value>Search Results</value>
-  </data>
-  <data name="Dialog_Settings" xml:space="preserve">
-    <value>_Settings</value>
-  </data>
-  <data name="Dialog_SortAscending" xml:space="preserve">
-    <value>Ascending</value>
-  </data>
-  <data name="Dialog_SortDescending" xml:space="preserve">
-    <value>Descending</value>
-  </data>
-  <data name="Dialog_SortOption_HighestRated" xml:space="preserve">
-    <value>Highest Rated</value>
-  </data>
-  <data name="Dialog_SortOption_MostDownloads" xml:space="preserve">
-    <value>Most Downloads</value>
-  </data>
-  <data name="Dialog_SortOption_Name" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="Dialog_Title" xml:space="preserve">
-    <value>Add Library Package Reference</value>
-  </data>
-  <data name="Dialog_UninstallButton" xml:space="preserve">
-    <value>_Uninstall</value>
-  </data>
-  <data name="Dialog_UninstallProgress" xml:space="preserve">
-    <value>Uninstalling...</value>
-  </data>
-  <data name="Dialog_UpdateButton" xml:space="preserve">
-    <value>_Update</value>
-  </data>
-  <data name="Dialog_UpdateProgress" xml:space="preserve">
-    <value>Updating...</value>
-  </data>
-  <data name="Dialog_UpdateProvider" xml:space="preserve">
-    <value>Updates</value>
-  </data>
-  <data name="Dialog_UpdatesProviderNoItem" xml:space="preserve">
-    <value>No package updates are available from the selected package source.</value>
-  </data>
-  <data name="Dialog_VersionLabel" xml:space="preserve">
-    <value>Version:</value>
-  </data>
-  <data name="Dialog_VotesCount" xml:space="preserve">
-    <value>({0} Votes)</value>
-  </data>
-  <data name="License_Accept" xml:space="preserve">
-    <value>I _Accept</value>
-  </data>
-  <data name="License_Decline" xml:space="preserve">
-    <value>I _Decline</value>
-  </data>
-  <data name="License_HeaderText" xml:space="preserve">
-    <value>The following package(s) require a click-to-accept license:</value>
-  </data>
-  <data name="License_LicenseText" xml:space="preserve">
-    <value>By clicking "I Accept," you agree to the license terms for the package(s) listed above. If you do not agree to the license terms, click "I Decline."</value>
-  </data>
-  <data name="License_ViewLicense" xml:space="preserve">
-    <value>View License Terms</value>
-  </data>
-  <data name="Dialog_OperationFailed" xml:space="preserve">
-    <value>Operation failed.</value>
-  </data>
-  <data name="Dialog_HostSetupFailed" xml:space="preserve">
-    <value>This package (or one of its dependencies) contains PowerShell scripts but attempt to load the PowerShell .</value>
-  </data>
-  <data name="Dialog_RecentProvider" xml:space="preserve">
-    <value>Recent packages</value>
-  </data>
-  <data name="Dialog_RecentProviderNoItem" xml:space="preserve">
-    <value>There are no recently installed packages.</value>
-  </data>
-  <data name="Dialog_PackageHasInitScript" xml:space="preserve">
-    <value>This package (or one of its dependencies) contains an init.ps1 file and needs to be installed from the Package Manager Console.</value>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

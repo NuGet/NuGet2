@@ -38,12 +38,9 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Design" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="UIAutomationProvider" />
@@ -177,15 +174,6 @@
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ToolsOptionsUI\ToolsOptionsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ToolsOptionsUI\ToolsOptionsControl.Designer.cs">
-      <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ToolsOptionsUI\ToolsOptionsPage.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PackageManagerUI\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -197,9 +185,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ToolsOptionsUI\ToolsOptionsControl.resx">
-      <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

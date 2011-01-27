@@ -86,6 +86,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellCmdlets.Test", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHost.Test", "test\PowerShellHost.Test\PowerShellHost.Test.csproj", "{82AB7D04-FA51-4707-8A1F-62B29AC23E6D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Options", "src\Options\Options.csproj", "{53AB7187-CDF3-48B5-B90E-8919D3CB904D}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = NuGet.vsmdi
@@ -228,6 +230,12 @@ Global
 		{82AB7D04-FA51-4707-8A1F-62B29AC23E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82AB7D04-FA51-4707-8A1F-62B29AC23E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82AB7D04-FA51-4707-8A1F-62B29AC23E6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53AB7187-CDF3-48B5-B90E-8919D3CB904D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,8 +8,8 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio {
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [Export(ContractConstants.RecentPackagesRepositoryContractName, typeof(IPackageRepository))]
-    public class RecentPackagesRepository : IPackageRepository {
+    [Export(typeof(IRecentPackageRepository))]
+    public class RecentPackagesRepository : IPackageRepository, IRecentPackageRepository {
 
         private const string SourceValue = "(MRU)";
         private const int MaximumPackageCount = 20;
@@ -89,6 +89,11 @@ namespace NuGet.VisualStudio {
 
         public void RemovePackage(IPackage package) {
             throw new NotSupportedException();
+        }
+
+        public void Clear() {
+            _packages.Clear();
+            _settingsManager.ClearPackageMetadata();
         }
 
         private IEnumerable<IPersistencePackageMetadata> LoadPackageMetadataFromSettingsStore() {

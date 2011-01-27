@@ -1,18 +1,18 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
 
-namespace NuGet.Dialog.ToolsOptionsUI {
+namespace NuGet.Options {
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.Interoperability", 
+        "Microsoft.Interoperability",
         "CA1408:DoNotUseAutoDualClassInterfaceType")]
-    [Guid("2819C3B6-FC75-4CD5-8C77-877903DE864C")]
+    [Guid("0F052CF7-BF62-4743-B190-87FA4D49421E")]
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.AutoDual)]
-    public class ToolsOptionsPage : DialogPage, IServiceProvider {
-        private ToolsOptionsControl _optionsWindow;
+    public class RecentPackagesPage : DialogPage, IServiceProvider {
+        private RecentPackagesOptionsControl _optionsWindow;
 
         //We override the base implementation of LoadSettingsFromStorage and SaveSettingsToStorage
         //since we already provide settings persistance using the SettingsManager. These two APIs
@@ -32,27 +32,12 @@ namespace NuGet.Dialog.ToolsOptionsUI {
         protected override void OnActivate(CancelEventArgs e) {
             base.OnActivate(e);
             this.OptionsControl.Font = VsShellUtilities.GetEnvironmentFont(this);
-            this.OptionsControl.InitializeOnActivated();
         }
 
-        protected override void OnApply(PageApplyEventArgs e) {
-            // Do not need to call base.OnApply() here.
-            bool wasApplied = this.OptionsControl.ApplyChangedSettings();
-            if (!wasApplied) {
-                e.ApplyBehavior = ApplyKind.CancelNoNavigate;
-            }
-        }
-
-        protected override void OnClosed(EventArgs e) {
-            base.OnClosed(e);
-            this.OptionsControl.ClearSettings();
-        }
-
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        private ToolsOptionsControl OptionsControl {
+        private RecentPackagesOptionsControl OptionsControl {
             get {
                 if (_optionsWindow == null) {
-                    _optionsWindow = new ToolsOptionsControl();
+                    _optionsWindow = new RecentPackagesOptionsControl();
                     _optionsWindow.Location = new Point(0, 0);
                 }
 
