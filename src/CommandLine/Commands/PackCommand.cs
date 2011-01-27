@@ -48,10 +48,17 @@ namespace NuGet.Commands {
 
             string outputPath = Path.Combine(OutputDirectory ?? Directory.GetCurrentDirectory(), outputFile);
 
-            using (Stream stream = File.Create(outputPath)) {
-                builder.Save(stream);
+            try {
+                using (Stream stream = File.Create(outputPath)) {
+                    builder.Save(stream);
+                }
             }
-
+            catch {
+                if(File.Exists(outputPath)){
+                    File.Delete(outputPath);
+                }
+                throw;
+            }
             if (Verbose) {
                 Console.WriteLine();
 
@@ -61,6 +68,7 @@ namespace NuGet.Commands {
                 }
                 Console.WriteLine();
             }
+            
 
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
         }
