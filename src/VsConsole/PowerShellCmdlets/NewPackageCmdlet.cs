@@ -28,8 +28,7 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        [Alias("ProjectName")]
-        public string Project { get; set; }
+        public string ProjectName { get; set; }
 
         [Parameter(Mandatory = true, Position = 1)]
         [Alias("Spec")]
@@ -51,7 +50,7 @@ namespace NuGet.Cmdlets {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            string projectName = Project;
+            string projectName = ProjectName;
 
             // no project specified - choose default
             if (String.IsNullOrEmpty(projectName)) {

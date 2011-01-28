@@ -209,11 +209,15 @@ function Test-FSharpSimpleWithAssemblyReference {
 }
 
 function Test-WebsiteInstallPackageWithRootNamespae {
+    param(
+        $context
+    )
+
     # Arrange
     $p = New-WebSite
     
     # Act
-    Install-Package PackageWithRootNamespaceFileTransform -Project $p.Name
+    $p | Install-Package PackageWithRootNamespaceFileTransform -Source $context.RepositoryRoot
     
     # Assert
     Assert-NotNull (Get-ProjectItem $p foo.cs)

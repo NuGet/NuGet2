@@ -209,3 +209,29 @@ function Test-SubTreeUpdateWithConflict {
 
     Assert-Throws { $p | Update-Package C -Source $context.RepositoryPath } "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'."
 }
+
+function Test-AddingBindingRedirectAfterUpdate {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath
+    Assert-Package $p A 1.0
+    Assert-Package $p B 1.0
+    $p | Install-Package C -Source $context.RepositoryPath
+    Assert-Package $p C 1.0
+    Assert-Package $p B 2.0
+    Assert-Null (Get-SolutionPackage B 1.0)
+
+    Build-Project $p
+
+    $redirect = $p | Add-BindingRedirect
+
+    Assert-AreEqual B $redirect.Name
+    Assert-AreEqual '0.0.0.0-2.0.0.0' $redirect.OldVersion
+    Assert-AreEqual '2.0.0.0' $redirect.NewVersion
+}

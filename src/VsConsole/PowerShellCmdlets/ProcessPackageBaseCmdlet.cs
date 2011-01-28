@@ -27,7 +27,6 @@ namespace NuGet.Cmdlets {
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        [Alias("Project")]
         public string ProjectName { get; set; }
 
         protected IProjectManager ProjectManager {

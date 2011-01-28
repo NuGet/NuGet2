@@ -232,6 +232,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error while processing the request. Please verify that &apos;{0}&apos; is a valid feed..
+        /// </summary>
+        internal static string InvalidFeed {
+            get {
+                return ResourceManager.GetString("InvalidFeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package id &apos;{0}&apos; is invalid..
         /// </summary>
         internal static string InvalidPackageId {
@@ -471,6 +480,15 @@ namespace NuGet.Resources {
         internal static string UnableToResolveDependency {
             get {
                 return ResourceManager.GetString("UnableToResolveDependency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The package source named &apos;{0}&apos; is either invalid or not available and thus is currently unreachable..
+        /// </summary>
+        internal static string UnavailablePackageSource {
+            get {
+                return ResourceManager.GetString("UnavailablePackageSource", resourceCulture);
             }
         }
         

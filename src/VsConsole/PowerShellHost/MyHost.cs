@@ -10,12 +10,17 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         string _name;
         PSObject _privateData;
 
-        public MyHost(PowerShellHost host, string name, object privateData) {
+        public MyHost(PowerShellHost host, string name, object privateData, params Tuple<string, object>[] extraData) {
             UtilityMethods.ThrowIfArgumentNull(host);
 
             _host = host;
             _name = name;
-            _privateData = (privateData != null ? new PSObject(privateData) : null);
+            _privateData = (privateData != null ? new PSObject(privateData) : new PSObject());
+
+            // add extra data as note properties
+            foreach (var tuple in extraData) {
+                _privateData.Properties.Add(new PSNoteProperty(tuple.Item1, tuple.Item2));
+            }
         }
 
         CultureInfo _culture = Thread.CurrentThread.CurrentCulture;

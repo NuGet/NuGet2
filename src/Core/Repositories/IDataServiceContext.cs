@@ -4,6 +4,7 @@ using System.Data.Services.Client;
 
 namespace NuGet {
     public interface IDataServiceContext {
+        Uri BaseUri { get; }
         bool IgnoreMissingProperties { get; set; }
 
         event EventHandler<SendingRequestEventArgs> SendingRequest;

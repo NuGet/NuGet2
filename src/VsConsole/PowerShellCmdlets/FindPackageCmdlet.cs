@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-
 using NuGet.VisualStudio;
 
 namespace NuGet.Cmdlets {
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     [OutputType(typeof(IPackage))]
     public class FindPackageCmdlet : GetPackageCmdlet {
-
         private const int MaxReturnedPackages = 30;
 
         public FindPackageCmdlet()
@@ -41,18 +39,23 @@ namespace NuGet.Cmdlets {
                 packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
 
-            packages = packages.OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id);
-            
-            return packages;
+            return packages.OrderByDescending(p => p.DownloadCount)
+                           .ThenBy(p => p.Id)
+                           .DistinctLast(PackageEqualityComparer.Id);
         }
 
         protected override IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
             IPackageRepository localRepository = PackageManager.LocalRepository;
             var packagesToUpdate = localRepository.GetPackages();
+
             if (!String.IsNullOrEmpty(Filter)) {
                 packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
-            return sourceRepository.GetUpdates(packagesToUpdate).OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id);
+
+            return sourceRepository.GetUpdates(packagesToUpdate)
+                                   .OrderByDescending(p => p.DownloadCount)
+                                   .ThenBy(p => p.Id)
+                                   .DistinctLast(PackageEqualityComparer.Id);
         }
 
         protected override void Log(MessageLevel level, string formattedMessage) {

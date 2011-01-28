@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using NuGet.Resources;
 
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
@@ -30,8 +32,19 @@ namespace NuGet {
             if (uri.IsFile) {
                 return new LocalPackageRepository(uri.LocalPath);
             }
+
+            try {
+                uri = _httpClient.GetRedirectedUri(uri);
+            }
+            catch (Exception exception) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuGetResources.UnavailablePackageSource, packageSource), 
+                    exception);
+            }
+
             // Make sure we get resolve any fwlinks before creating the repository
-            return new DataServicePackageRepository(_httpClient.GetRedirectedUri(uri), _httpClient);
+            return new DataServicePackageRepository(uri, _httpClient);
         }
     }
 }

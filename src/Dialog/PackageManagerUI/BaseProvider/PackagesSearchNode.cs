@@ -45,7 +45,7 @@ namespace NuGet.Dialog.Providers {
 
                 if (IsSelected) {
                     ResetQuery();
-                    Refresh();
+                    LoadPage(1);
                 }
             }
         }

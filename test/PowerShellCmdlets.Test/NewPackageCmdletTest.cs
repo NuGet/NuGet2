@@ -30,7 +30,7 @@ namespace NuGet.Cmdlets.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "test", projects: new[] { TestUtils.GetProject("test") });
             var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
-            cmdlet.Project = project;
+            cmdlet.ProjectName = project;
 
             // Act and Assert            
             ExceptionAssert.Throws<ItemNotFoundException>(() => cmdlet.GetResults(),
@@ -46,7 +46,7 @@ namespace NuGet.Cmdlets.Test {
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "test.cs", "assembly.info", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
             var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
-            cmdlet.Project = projectName;
+            cmdlet.ProjectName = projectName;
 
             // Act and Assert
             ExceptionAssert.Throws<ItemNotFoundException>(() => cmdlet.GetResults(),
@@ -62,7 +62,7 @@ namespace NuGet.Cmdlets.Test {
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "foo.nuspec", "bar.nuspec", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
             var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
-            cmdlet.Project = projectName;
+            cmdlet.ProjectName = projectName;
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),

@@ -37,6 +37,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             InitializeComponent();
 
             InsertDisclaimerElement();
+            AdjustSortComboBoxWidth();
 
             // this is the service provider from VsPackage, not from DTE
             _serviceProvider = serviceProvider;
@@ -230,6 +231,19 @@ namespace NuGet.Dialog.PackageManagerUI {
 
                     // add the inner grid to the first column of the original grid
                     grid.Children.Add(innerGrid);
+                }
+            }
+        }
+
+        private void AdjustSortComboBoxWidth() {
+            Grid grid = LogicalTreeHelper.FindLogicalNode(explorer, "resGrid") as Grid;
+            if (grid != null) {
+                var sortCombo = FindChildElementByNameOrType(grid, "cmb_SortOrder", typeof(SortCombo)) as SortCombo;
+                if (sortCombo != null) {
+                    // The default style fixes the Sort combo control's width to 160, which is bad for localization.
+                    // We fix it by setting Min width as 160, and let the control resize to content.
+                    sortCombo.ClearValue(FrameworkElement.WidthProperty);
+                    sortCombo.MinWidth = 160;
                 }
             }
         }

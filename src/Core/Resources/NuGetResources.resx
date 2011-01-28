@@ -270,4 +270,10 @@
   <data name="InvalidPackageId" xml:space="preserve">
     <value>Package id '{0}' is invalid.</value>
   </data>
+  <data name="InvalidFeed" xml:space="preserve">
+    <value>There was an error while processing the request. Please verify that '{0}' is a valid feed.</value>
+  </data>
+  <data name="UnavailablePackageSource" xml:space="preserve">
+    <value>The package source named '{0}' is either invalid or not available and thus is currently unreachable.</value>
+  </data>
 </root>

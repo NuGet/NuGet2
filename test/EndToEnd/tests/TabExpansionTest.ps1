@@ -6,7 +6,7 @@ function Test-TabExpansionForInstallPackageShowSuggestionsForPackageId {
     $suggestions = TabExpansion 'Install-Package ' ''
 
     # Assert
-    Assert-True $suggestions.Count -gt 30
+    Assert-True ($suggestions.Count -eq 30)
 }
 
 function Test-TabExpansionForInstallPackageShowSuggestionsForPackageIdWithFilter {
@@ -15,7 +15,7 @@ function Test-TabExpansionForInstallPackageShowSuggestionsForPackageIdWithFilter
     $suggestions = TabExpansion 'Install-Package sql' 'sql'
 
     # Assert
-    Assert-True $suggestions.Count -gt 0
+    Assert-True ($suggestions.Count -gt 0)
     $suggestions | ForEach-Object { Assert-True $_.StartsWith('sql', 'OrdinalIgnoreCase') }
 }
 
@@ -25,8 +25,8 @@ function Test-TabExpansionForInstallPackageSupportsVersion {
 
     # Assert
     Assert-AreEqual 2 $suggestions.Count
-    Assert-AreEqual '3.1.1' $suggestions[0]
-    Assert-AreEqual '3.1.3.42154' $suggestions[1]
+    Assert-AreEqual '3.1.3.42154' $suggestions[0]
+    Assert-AreEqual '3.1.1' $suggestions[1]
 }
 
 function Test-TabExpansionForInstallPackageShowSuggestionsForProjectName {
@@ -112,10 +112,10 @@ function Test-TabExpansionForUpdatePackageShowSuggestionsForPackageId {
 
     # Act
     $suggestions = TabExpansion 'Update-Package ' ''
-    $nhibernateUpdates = $suggestions | Where-Object { 'NHibernate' -eq $_ }
+    $nhibernateUpdates = @($suggestions | Where-Object { 'NHibernate' -eq $_ })
 
     # Assert
-    Assert-True $nhibernateUpdates.count -ge 1
+    Assert-True ($nhibernateUpdates.count -ge 1)
 }
 
 function Test-TabExpansionForUpdatePackageShowSuggestionsForProjectNames {
