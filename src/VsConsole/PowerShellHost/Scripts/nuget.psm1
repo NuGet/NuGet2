@@ -31,7 +31,20 @@ Register-TabExpansion 'Install-Package' @{
     }
     'Version' = {
         param($context)
-        GetPackageVersions (GetPackages $context) $context 
+
+        $parameters = @{}
+
+        if ($context.Id) { $parameters.filter = $context.Id }
+        if ($context.Source) { $parameters.source = $context.Source }
+
+        if($context.Source) {
+            $packages = Get-Package @parameters -Remote -ErrorAction SilentlyContinue
+        }
+        else {
+            $packages = Get-Package @parameters -Remote -ErrorAction SilentlyContinue
+        }
+
+        GetPackageVersions $packages $context 
     }
 }
 
@@ -51,7 +64,7 @@ Register-TabExpansion 'Uninstall-Package' @{
         $parameters = @{}
         if ($context.id) { $parameters.filter = $context.id }
 
-        GetPackageVersions (Find-Package @parameters) $context
+        GetPackageVersions (Get-Package @parameters) $context
     }
 }
 
@@ -73,7 +86,7 @@ Register-TabExpansion 'Update-Package' @{
         $parameters = @{}
         if ($context.id) { $parameters.filter = $context.id }
 
-        GetPackageVersions (Find-Package -Remote @parameters) $context
+        GetPackageVersions (Get-Package -Remote @parameters) $context
     }
 }
 
@@ -81,9 +94,9 @@ Register-TabExpansion 'New-Package' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Add-BindingRedirect' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
 
-function GetPackages($context) { 
-    
+function GetPackages($context) {  
     $parameters = @{}
+
     if ($context.Id) { $parameters.filter = $context.Id }
     if ($context.Source) { $parameters.source = $context.Source }
 
@@ -99,11 +112,11 @@ function GetProjectNames {
 }
 
 function GetPackageIds($packages) {
-    $packages | Group-Object Id | Select -ExpandProperty Name
+    $packages | Select -ExpandProperty Id
 }
 
 function GetPackageVersions($packages, $context) {
-    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version | Sort-Object
+    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version | Sort-Object -Descending
 }
 
 function NugetTabExpansion($line, $lastWord) {

@@ -69,7 +69,7 @@ namespace NuGet.Cmdlets {
         public string Source { get; set; }
 
         [Parameter]
-        [ValidateRange(0, int.MaxValue)]
+        [ValidateRange(0, Int32.MaxValue)]
         public int First {
             get {
                 return _firstValue;
@@ -81,7 +81,7 @@ namespace NuGet.Cmdlets {
         }
 
         [Parameter]
-        [ValidateRange(0, int.MaxValue)]
+        [ValidateRange(0, Int32.MaxValue)]
         public int Skip { get; set; }
 
         /// <summary>

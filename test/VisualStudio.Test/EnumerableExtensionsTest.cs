@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Dialog.Extensions;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class EnumerableExtensionsTest {
         [TestMethod]

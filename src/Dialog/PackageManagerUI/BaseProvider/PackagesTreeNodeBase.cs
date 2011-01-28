@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Internal.Web.Utils;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.Extensions;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]

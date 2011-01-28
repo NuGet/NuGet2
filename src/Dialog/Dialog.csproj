@@ -112,7 +112,6 @@
     <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\PackageExtensions.cs" />
     <Compile Include="Extensions\QueryExtensions.cs" />
     <Compile Include="OutputConsole\IOutputConsoleProvider.cs" />
