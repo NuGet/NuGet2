@@ -79,7 +79,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Description was provided for this command..
+        ///   Looks up a localized string similar to No description was provided for this command..
         /// </summary>
         internal static string DefaultCommandDescription {
             get {

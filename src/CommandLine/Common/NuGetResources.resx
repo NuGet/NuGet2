@@ -322,7 +322,7 @@
     <value>'{0}' already exists, use -f to overwrite it.</value>
   </data>
   <data name="DefaultCommandDescription" xml:space="preserve">
-    <value>No Description was provided for this command.</value>
+    <value>No description was provided for this command.</value>
   </data>
   <data name="ConsoleConfirmMessage" xml:space="preserve">
     <value>{0} (y/N) </value>

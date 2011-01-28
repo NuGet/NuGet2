@@ -131,6 +131,30 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt" });
         }
 
+        [TestMethod]
+        public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
+            string expectedPackage = Path.Combine(SpecificFilesFolder, "hello world.1.1.1.nupkg");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>hello world</id>
+    <version>1.1.1</version>
+    <authors>Bar</authors>
+    <description>Foo</description>
+    <language>en-US</language>
+  </metadata>
+</package>");
+
+            // Act
+            Tuple<int, string> result = CommandRunner.Run(NugetExePath, SpecificFilesFolder, "pack", true);
+
+            // Assert
+            Assert.AreEqual(1, result.Item1);
+            Assert.IsFalse(File.Exists(expectedPackage));
+        }
+
         private void VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
             var package = new ZipPackage(packageFile);
             var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToList();
