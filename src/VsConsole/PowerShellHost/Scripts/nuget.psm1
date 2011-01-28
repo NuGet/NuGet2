@@ -37,14 +37,7 @@ Register-TabExpansion 'Install-Package' @{
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
 
-        if($context.Source) {
-            $packages = Get-Package @parameters -Remote -ErrorAction SilentlyContinue
-        }
-        else {
-            $packages = Get-Package @parameters -Remote -ErrorAction SilentlyContinue
-        }
-
-        GetPackageVersions $packages $context 
+        GetPackageVersions (Get-Package @parameters -Remote -ErrorAction SilentlyContinue) $context 
     }
 }
 
@@ -100,10 +93,6 @@ function GetPackages($context) {
     if ($context.Id) { $parameters.filter = $context.Id }
     if ($context.Source) { $parameters.source = $context.Source }
 
-    if($source) {
-        return Find-Package @parameters -Remote -ErrorAction SilentlyContinue
-    }
-    
     return Find-Package @parameters -Remote -ErrorAction SilentlyContinue
 }
 
