@@ -42,6 +42,14 @@ namespace NuGet.Dialog.PackageManagerUI {
             // this is the service provider from VsPackage, not from DTE
             _serviceProvider = serviceProvider;
 
+            // replace the ConsoleOutputProvider with SmartOutputConsoleProvider so that we can clear 
+            // the console the first time an entry is written to it
+            providerServices = new ProviderServices(
+                providerServices.LicenseWindow,
+                providerServices.ProgressWindow,
+                providerServices.ScriptExecutor,
+                new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider));
+
             SetupProviders(
                 dte, 
                 packageManagerFactory, 

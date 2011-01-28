@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
@@ -76,6 +75,10 @@ namespace NuGet.Dialog.Providers {
             get {
                 return Dialog.Resources.Dialog_UpdateProgress;
             }
+        }
+
+        protected override string GetProgressMessage(IPackage package) {
+            return Resources.Dialog_UpdateProgress + package.ToString();
         }
     }
 }
