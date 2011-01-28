@@ -29,7 +29,7 @@
     
     <PropertyGroup>
         <MajorVersion>1</MajorVersion>
-        <MinorVersion>1</MinorVersion>
+        <MinorVersion>2</MinorVersion>
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
         
