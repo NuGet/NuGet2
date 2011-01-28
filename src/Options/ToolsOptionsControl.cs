@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using NuGet.VisualStudio;
 
@@ -25,14 +24,14 @@ namespace NuGet.Options {
         public ToolsOptionsControl(IPackageSourceProvider packageSourceProvider) {
             _packageSourceProvider = packageSourceProvider;
             InitializeComponent();
-            SetupDataBindings();
+            SetupEventHandlers();
         }
 
         public ToolsOptionsControl()
             : this(ServiceLocator.GetInstance<IPackageSourceProvider>()) {
         }
 
-        private void SetupDataBindings() {
+        private void SetupEventHandlers() {
             NewPackageName.TextChanged += (o, e) => UpdateUI();
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
             MoveUpButton.Click += (o, e) => MoveSelectedItem(-1);
@@ -208,7 +207,6 @@ namespace NuGet.Options {
             NewPackageSource.Text = String.Empty;
             NewPackageName.Focus();
         }
-
 
         private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
             if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListBox.SelectedItem != null) {

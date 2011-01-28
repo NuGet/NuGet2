@@ -38,7 +38,11 @@ namespace NuGet.Options {
             this.MoveUpButton = new System.Windows.Forms.Button();
             this.MoveDownButton = new System.Windows.Forms.Button();
             this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.PackageSourcesContextMenu.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // HeaderLabel
@@ -109,6 +113,7 @@ namespace NuGet.Options {
             // 
             resources.ApplyResources(this.PackageSourcesListBox, "PackageSourcesListBox");
             this.PackageSourcesListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tableLayoutPanel1.SetColumnSpan(this.PackageSourcesListBox, 2);
             this.PackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
             this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.PackageSourcesListBox.FormattingEnabled = true;
@@ -117,22 +122,38 @@ namespace NuGet.Options {
             this.PackageSourcesListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyUp);
             this.PackageSourcesListBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseUp);
             // 
+            // tableLayoutPanel1
+            // 
+            resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
+            this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.addButton, 2, 2);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            // 
+            // tableLayoutPanel2
+            // 
+            resources.ApplyResources(this.tableLayoutPanel2, "tableLayoutPanel2");
+            this.tableLayoutPanel2.Controls.Add(this.MoveUpButton, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.removeButton, 0, 2);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            // 
             // ToolsOptionsControl
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.NewPackageNameLabel);
-            this.Controls.Add(this.NewPackageName);
-            this.Controls.Add(this.NewPackageSourceLabel);
-            this.Controls.Add(this.NewPackageSource);
-            this.Controls.Add(this.addButton);
             this.Controls.Add(this.HeaderLabel);
-            this.Controls.Add(this.PackageSourcesListBox);
-            this.Controls.Add(this.MoveDownButton);
-            this.Controls.Add(this.MoveUpButton);
-            this.Controls.Add(this.removeButton);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ToolsOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -152,5 +173,7 @@ namespace NuGet.Options {
         private Button MoveUpButton;
         private Button MoveDownButton;
         private ListBox PackageSourcesListBox;
+        private TableLayoutPanel tableLayoutPanel1;
+        private TableLayoutPanel tableLayoutPanel2;
     }
 }

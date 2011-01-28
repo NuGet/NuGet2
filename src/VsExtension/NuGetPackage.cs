@@ -25,9 +25,8 @@ namespace NuGet.Tools {
         Style = VsDockStyle.Tabbed,
         Window = "28836128-FC2C-11D2-A433-00C04F72D18A",
         Orientation = ToolWindowOrientation.Right)]
-    [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
-    [ProvideProfile(typeof(ToolsOptionsPage), "Package Manager", "General", 101, 102, true)]
-    [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent packages", 101, 102, true)]
+    [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
+    [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent Packages", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
