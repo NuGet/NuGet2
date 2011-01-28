@@ -41,27 +41,11 @@ namespace NuGet {
         }
 
         public TResult Execute<TResult>(Expression expression) {
-            try {
-                return _query.Provider.Execute<TResult>(GetInnerExpression(expression));
-            }
-            catch (Exception exception) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.InvalidFeed,
-                    _context.BaseUri), exception);
-            }
+            return Execute(() => _query.Provider.Execute<TResult>(GetInnerExpression(expression)));
         }
 
         public object Execute(Expression expression) {
-            try {
-                return _query.Provider.Execute(GetInnerExpression(expression));
-            }
-            catch (Exception exception) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.InvalidFeed,
-                    _context.BaseUri), exception);
-            }
+            return Execute(() => _query.Provider.Execute(GetInnerExpression(expression)));
         }
 
         public IDataServiceQuery<TElement> CreateQuery<TElement>(Expression expression) {
@@ -77,17 +61,7 @@ namespace NuGet {
         }
 
         private IEnumerable<T> GetAll() {
-            IEnumerable results;
-
-            try {
-                results = _query.Execute();
-            }
-            catch (Exception exception) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, 
-                    NuGetResources.InvalidFeed,
-                    _context.BaseUri), exception);
-            }
+            IEnumerable results = Execute(_query.Execute);
 
             DataServiceQueryContinuation continuation = null;
             do {
@@ -110,6 +84,18 @@ namespace NuGet {
 
         public override string ToString() {
             return _query.ToString();
+        }
+
+        private TResult Execute<TResult>(Func<TResult> action) {
+            try {
+                return action();
+            }
+            catch (Exception exception) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    NuGetResources.InvalidFeed,
+                    _context.BaseUri), exception);
+            }
         }
     }
 }
