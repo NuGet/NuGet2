@@ -1,154 +1,118 @@
 using System;
 using System.Management.Automation.Host;
 
-namespace NuGetConsole.Host.PowerShell.Implementation
-{
-    class MyHostRawUserInterface : PSHostRawUserInterface
-    {
+namespace NuGetConsole.Host.PowerShell.Implementation {
+    class MyHostRawUserInterface : PSHostRawUserInterface {
         IConsole Console { get; set; }
 
-        public MyHostRawUserInterface(IConsole console)
-        {
+        public MyHostRawUserInterface(IConsole console) {
             this.Console = console;
         }
 
-        public override ConsoleColor BackgroundColor
-        {
-            get
-            {
+        public override ConsoleColor BackgroundColor {
+            get {
                 // default color controlled by Visual Studio
                 return MyHostUI.NoColor;
             }
-            set
-            {
+            set {
             }
         }
 
-        public override Size BufferSize
-        {
-            get
-            {
+        public override Size BufferSize {
+            get {
                 return new Size(Console.ConsoleWidth, 0);
             }
-            set
-            {
+            set {
                 throw new NotImplementedException();
             }
         }
 
-        public override Coordinates CursorPosition
-        {
-            get
-            {
+        public override Coordinates CursorPosition {
+            get {
                 throw new NotImplementedException();
             }
-            set
-            {
+            set {
                 throw new NotImplementedException();
             }
         }
 
-        public override int CursorSize
-        {
-            get
-            {
+        public override int CursorSize {
+            get {
                 throw new NotImplementedException();
             }
-            set
-            {
+            set {
                 throw new NotImplementedException();
             }
         }
 
-        public override void FlushInputBuffer()
-        {
+        public override void FlushInputBuffer() {
             throw new NotImplementedException();
         }
 
-        public override ConsoleColor ForegroundColor
-        {
-            get
-            {
+        public override ConsoleColor ForegroundColor {
+            get {
                 // default color controlled by Visual Studio
                 return MyHostUI.NoColor;
             }
-            set
-            {
+            set {
             }
         }
 
-        public override BufferCell[,] GetBufferContents(Rectangle rectangle)
-        {
+        public override BufferCell[,] GetBufferContents(Rectangle rectangle) {
             throw new NotImplementedException();
         }
 
-        public override bool KeyAvailable
-        {
+        public override bool KeyAvailable {
             get { throw new NotImplementedException(); }
         }
 
-        public override Size MaxPhysicalWindowSize
-        {
+        public override Size MaxPhysicalWindowSize {
             get { throw new NotImplementedException(); }
         }
 
-        public override Size MaxWindowSize
-        {
+        public override Size MaxWindowSize {
             get { throw new NotImplementedException(); }
         }
 
-        public override KeyInfo ReadKey(ReadKeyOptions options)
-        {
+        public override KeyInfo ReadKey(ReadKeyOptions options) {
             throw new NotImplementedException();
         }
 
-        public override void ScrollBufferContents(Rectangle source, Coordinates destination, Rectangle clip, BufferCell fill)
-        {
+        public override void ScrollBufferContents(Rectangle source, Coordinates destination, Rectangle clip, BufferCell fill) {
             throw new NotImplementedException();
         }
 
-        public override void SetBufferContents(Rectangle rectangle, BufferCell fill)
-        {
+        public override void SetBufferContents(Rectangle rectangle, BufferCell fill) {
             throw new NotImplementedException();
         }
 
-        public override void SetBufferContents(Coordinates origin, BufferCell[,] contents)
-        {
+        public override void SetBufferContents(Coordinates origin, BufferCell[,] contents) {
             throw new NotImplementedException();
         }
 
-        public override Coordinates WindowPosition
-        {
-            get
-            {
+        public override Coordinates WindowPosition {
+            get {
                 throw new NotImplementedException();
             }
-            set
-            {
+            set {
                 throw new NotImplementedException();
             }
         }
 
-        public override Size WindowSize
-        {
-            get
-            {
+        public override Size WindowSize {
+            get {
                 return new Size(Console.ConsoleWidth, 0);
             }
-            set
-            {
+            set {
                 throw new NotImplementedException();
             }
         }
 
-        public override string WindowTitle
-        {
-            get
-            {
+        public override string WindowTitle {
+            get {
                 throw new NotImplementedException();
             }
-            set
-            {
+            set {
                 throw new NotImplementedException();
             }
         }
