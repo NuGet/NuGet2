@@ -113,6 +113,7 @@
                 Margin="12"
                 MinWidth="75" 
                 MinHeight="23"
+                Padding="4,0,4,0"
                 Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" 
                 Content="{x:Static resources:Resources.Dialog_Settings}" />
 
@@ -123,6 +124,7 @@
                 Margin="12"
                 MinWidth="75" 
                 MinHeight="23" 
+                Padding="4,0,4,0"
                 Command="ApplicationCommands.Close" 
                 Content="{x:Static resources:Resources.Dialog_Close}" 
                 IsCancel="True" />
