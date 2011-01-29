@@ -17,8 +17,6 @@ namespace NuGet.Dialog.PackageManagerUI {
             if (_isFirstTime) {
                 // the first time the console is accessed after dialog is opened, we clear the console.
                 console.Clear();
-            }
-            else {
                 _isFirstTime = false;
             }
 
