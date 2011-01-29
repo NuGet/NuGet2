@@ -47,7 +47,7 @@ namespace NuGet.Commands {
         }
 
         public void ViewHelp() {
-            Console.WriteLine("{0} Version: {1}", _productName, Assembly.GetEntryAssembly().GetName().Version);
+            Console.WriteLine("{0} Version: {1}", _productName, this.GetType().Assembly.GetName().Version);
             Console.WriteLine("usage: {0} <command> [args] [options] ", _commandExe);
             Console.WriteLine("Type '{0} help <command>' for help on a specific command.", _commandExe);
             Console.WriteLine();

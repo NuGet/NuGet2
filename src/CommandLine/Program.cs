@@ -17,7 +17,7 @@ namespace NuGet {
         public ICommandManager Manager { get; set; }
 
         public void Initialize() {
-            using (AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(Assembly.GetExecutingAssembly()))) {
+            using (AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(this.GetType().Assembly))) {
                 using (var container = new CompositionContainer(catalog)) {
                     container.ComposeExportedValue<IPackageRepositoryFactory>(PackageRepositoryFactory.Default);
                     container.ComposeParts(this);
@@ -25,19 +25,19 @@ namespace NuGet {
             }
         }
 
-        public static int Main(string[] args) {            
-            // Import Dependecies  
-            var p = new Program();
-            p.Initialize();
-
-            // Add commands to the manager
-            foreach (ICommand command in p.Commands) {
-                p.Manager.RegisterCommand(command);
-            }
-
-            CommandLineParser parser = new CommandLineParser(p.Manager);
-
+        public static int Main(string[] args) {
             try {
+                // Import Dependecies  
+                var p = new Program();
+                p.Initialize();
+
+                // Add commands to the manager
+                foreach (ICommand cmd in p.Commands) {
+                    p.Manager.RegisterCommand(cmd);
+                }
+
+                CommandLineParser parser = new CommandLineParser(p.Manager);
+            
                 // Parse the command
                 ICommand command = parser.ParseCommandLine(args) ?? p.HelpCommand;
 

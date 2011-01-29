@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
 
 namespace NuGet.Test.Integration.NuGetCommandLine {
     [TestClass]
@@ -14,6 +15,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private const string SpecificFilesFolder = @".\specific_files\";
         private const string NugetExePath = @".\NuGet.exe";
 
+        private StringWriter consoleOutput;
+        private TextWriter originalConsoleOutput;
+        private TextWriter originalErrorConsoleOutput;
+
+
         [TestInitialize]
         public void Initialize() {
             DeleteDirs();
@@ -23,31 +29,47 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             Directory.CreateDirectory(TwoSpecsFolder);
             Directory.CreateDirectory(SpecificFilesFolder);
             Directory.CreateDirectory(OutputFolder);
+
+            originalConsoleOutput = System.Console.Out;
+            originalErrorConsoleOutput = System.Console.Error;
+            consoleOutput = new StringWriter();
+            System.Console.SetOut(consoleOutput);
+            System.Console.SetError(consoleOutput);
         }
 
         [TestCleanup]
         public void Cleanup() {
             DeleteDirs();
+            System.Console.SetOut(originalConsoleOutput);
+            System.Console.SetError(originalErrorConsoleOutput);
         }
 
 
         [TestMethod]
         public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand() {
+            // Arrange 
+            string[] args = new string[0];
+            
             // Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, NoSpecsfolder, string.Empty, true);
+            int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result.Item1);
-            Assert.IsTrue(result.Item2.Contains("usage: NuGet <command> [args] [options]"));
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("usage: NuGet <command> [args] [options]"));
         }
 
         [TestMethod]
         public void PackageCommand_ThrowsWhenPassingNoArgsAndThereAreNoNuSpecFiles() {
+            // Arrange 
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(NoSpecsfolder);
+
             // Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, NoSpecsfolder, "pack", true);
+            int result = Program.Main(args);
+
             // Assert
-            Assert.AreEqual(1, result.Item1);
-            Assert.AreEqual("Please specify a nuspec file to use.", result.Item2.Trim());
+            Assert.AreEqual(1, result);
+            Assert.AreEqual("Please specify a nuspec file to use.", consoleOutput.ToString().Trim());
         }
 
         [TestMethod]
@@ -57,13 +79,15 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
             string nuspecFile2 = Path.Combine(TwoSpecsFolder, "antlr2.nuspec");
             File.WriteAllText(nuspecFile2, NuSpecFileContext.FileContents);
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(TwoSpecsFolder);
 
             // Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, TwoSpecsFolder, "pack", true);
+            int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result.Item1);
-            Assert.AreEqual("Please specify a nuspec file to use.", result.Item2.Trim());
+            Assert.AreEqual(1, result);
+            Assert.AreEqual("Please specify a nuspec file to use.", consoleOutput.ToString().Trim());
         }
 
         [TestMethod]
@@ -72,29 +96,33 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
             File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(OneSpecfolder);
 
             //Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, OneSpecfolder, "pack", true);
+            int result = Program.Main(args);
 
             //Assert
-            Assert.AreEqual(0, result.Item1);
-            Assert.IsTrue(result.Item2.Contains("Successfully created package"));
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
         }
 
         [TestMethod]
         public void PackageCommand_CreatesPackageWhenPassingBasePath() {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "Antlr.nuspec");
-            string expectedPackage = Path.Combine(OutputFolder, "Antlr.3.1.1.nupkg");
+            string expectedPackage = Path.Combine("..\\output\\", "Antlr.3.1.1.nupkg");
             File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            string[] args = new string[] { "pack", "-o", "..\\output\\" };
+            Directory.SetCurrentDirectory(OneSpecfolder);
 
             //Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, OneSpecfolder, "pack -o " + @"..\output\", true);
+            int result = Program.Main(args);
 
             //Assert
-            Assert.AreEqual(0, result.Item1);
-            Assert.IsTrue(result.Item2.Contains("Successfully created package"));
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
             Assert.IsTrue(File.Exists(expectedPackage));
         }
 
@@ -102,7 +130,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
-            string expectedPackage = Path.Combine(SpecificFilesFolder, "test.1.1.1.nupkg");
+            string expectedPackage = "test.1.1.1.nupkg";
             File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
             File.WriteAllText(Path.Combine(SpecificFilesFolder, "file2.txt"), "file 2");
             File.WriteAllText(Path.Combine(SpecificFilesFolder, "file3.txt"), "file 3");
@@ -119,13 +147,15 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
     <file src=""file1.txt"" target=""content"" />
   </files>
 </package>");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
 
             // Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, SpecificFilesFolder, "pack", true);
+            int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result.Item1);
-            Assert.IsTrue(result.Item2.Contains("Successfully created package"));
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
             Assert.IsTrue(File.Exists(expectedPackage));
 
             VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt" });
@@ -135,7 +165,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
-            string expectedPackage = Path.Combine(SpecificFilesFolder, "hello world.1.1.1.nupkg");
+            string expectedPackage = "hello world.1.1.1.nupkg";
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -146,12 +176,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
     <language>en-US</language>
   </metadata>
 </package>");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
 
             // Act
-            Tuple<int, string> result = CommandRunner.Run(NugetExePath, SpecificFilesFolder, "pack", true);
+            int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result.Item1);
+            Assert.AreEqual(1, result);
             Assert.IsFalse(File.Exists(expectedPackage));
         }
 
