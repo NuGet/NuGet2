@@ -61,6 +61,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        public static string AggregateSourceName {
+            get {
+                return ResourceManager.GetString("AggregateSourceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to find &apos;{0}&apos; in &apos;{1}&apos; and found multiple versions of &apos;{0}&apos; installed. Please specify a version..
         /// </summary>
         public static string AmbiguousProjectLevelUninstal {
@@ -228,6 +237,15 @@ namespace NuGet.VisualStudio.Resources {
         public static string NoUpdatesAvailable {
             get {
                 return ResourceManager.GetString("NoUpdatesAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NuGet official package source.
+        /// </summary>
+        public static string OfficialSourceName {
+            get {
+                return ResourceManager.GetString("OfficialSourceName", resourceCulture);
             }
         }
         

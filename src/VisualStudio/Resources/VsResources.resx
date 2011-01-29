@@ -198,4 +198,10 @@
   <data name="AmbiguousUpdate" xml:space="preserve">
     <value>Unable to update '{0}'. Found multiple versions installed.</value>
   </data>
+  <data name="AggregateSourceName" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="OfficialSourceName" xml:space="preserve">
+    <value>NuGet official package source</value>
+  </data>
 </root>
