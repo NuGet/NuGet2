@@ -164,6 +164,7 @@
     </Compile>
     <Compile Include="PackageManagerUI\PSScriptExecutor.cs" />
     <Compile Include="PackageManagerUI\RecentProvider\RecentProvider.cs" />
+    <Compile Include="PackageManagerUI\SmartOutputConsoleProvider.cs" />
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
     <Compile Include="PackageManagerUI\ProgressWindowOpener.cs" />
     <Compile Include="Resources.Designer.cs">

@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 using NuGetConsole.Host.PowerShellProvider;
 
@@ -105,6 +104,10 @@ namespace NuGet.Dialog.Providers {
             get {
                 return Dialog.Resources.Dialog_UninstallProgress;
             }
+        }
+
+        protected override string GetProgressMessage(IPackage package) {
+            return Resources.Dialog_UninstallProgress + package.ToString();
         }
     }
 }

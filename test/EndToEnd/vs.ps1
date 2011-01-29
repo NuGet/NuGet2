@@ -74,7 +74,7 @@ function New-Project {
     $dte.Solution.AddFromTemplate($projectTemplateFilePath, $destPath, $projectName, $false) | Out-Null
     
     # Close all active documents
-    $dte.Documents | %{ $_.Close() }
+    $dte.Documents | %{ try { $_.Close() } catch { } }
     
     # Set the focus back on the shell
     $window.SetFocus()
@@ -115,6 +115,10 @@ function New-FSharpLibrary {
 
 function New-FSharpConsoleApplication {
     New-Project FSharpConsoleApplication
+}
+
+function New-WPFApplication {
+    New-Project WPFApplication
 }
 
 function Build-Project {

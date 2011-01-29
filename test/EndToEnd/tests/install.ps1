@@ -259,3 +259,43 @@ function Test-PipingMultipleProjectsToInstall {
     # Assert
     $projects | %{ Assert-Package $_ elmah }
 }
+
+function Test-InstallPackageWithNestedContentFile {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WpfApplication
+
+    # Act
+    $p | Install-Package PackageWithNestedFile -Source $context.RepositoryRoot
+
+    $item = Get-ProjectItem $p TestMainWindow.xaml
+    Assert-NotNull $item
+    Assert-NotNull $item.ProjectItems.Item("TestMainWindow.xaml.cs")
+    Assert-Package $p PackageWithNestedFile 1.0
+    Assert-SolutionPackage PackageWithNestedFile 1.0
+}
+
+function Test-InstallPackageWithNestedAspxContentFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebApplication
+
+    $files = @('Global.asax', 'Site.master', 'About.aspx')
+
+    # Act
+    $p | Install-Package PackageWithNestedAspxFiles -Source $context.RepositoryRoot
+
+    # Assert
+    $files | %{ 
+        $item = Get-ProjectItem $p $_
+        Assert-NotNull $item
+        Assert-NotNull $item.ProjectItems.Item("$_.cs")
+    }
+
+    Assert-Package $p PackageWithNestedAspxFiles 1.0
+    Assert-SolutionPackage PackageWithNestedAspxFiles 1.0
+}

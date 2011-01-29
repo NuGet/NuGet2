@@ -52,7 +52,7 @@ namespace NuGet.Dialog.Providers {
             _resources = resources;
             _scriptExecutor = providerServices.ScriptExecutor;
             _progressWindowOpener = providerServices.ProgressWindow;
-            _outputConsole =  new Lazy<IConsole>(() => providerServices.OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false));
+            _outputConsole = new Lazy<IConsole>(() => providerServices.OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false));
             ProjectManager = projectManager;
             _project = project;
         }
@@ -217,7 +217,12 @@ namespace NuGet.Dialog.Providers {
             AddSearchNode();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Globalization", 
+            "CA1303:Do not pass literals as localized parameters", 
+            MessageId = "NuGet.Dialog.Providers.PackagesProviderBase.WriteLineToOutputWindow(System.String)",
+            Justification = "No need to localize the --- strings"), 
+        System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public virtual void Execute(PackageItem item) {
             if (OperationCoordinator.IsBusy) {
                 return;
@@ -230,6 +235,10 @@ namespace NuGet.Dialog.Providers {
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
             worker.RunWorkerAsync(item);
+
+            // write an introductory sentence before every operation starts to make the console easier to read
+            string progressMessage = GetProgressMessage(item.PackageIdentity);
+            WriteLineToOutputWindow("------- " + progressMessage + " -------");
 
             ShowProgressWindow();
         }
@@ -260,7 +269,8 @@ namespace NuGet.Dialog.Providers {
             }
 
             // write a blank line into the output window to separate entries from different operations
-            LogCore(LogMessageLevel.Info, String.Empty);
+            WriteLineToOutputWindow(new string('=', 30));
+            WriteLineToOutputWindow();
 
             if (ExecuteCompletedCallback != null) {
                 ExecuteCompletedCallback();
@@ -285,6 +295,10 @@ namespace NuGet.Dialog.Providers {
         public abstract IVsExtension CreateExtension(IPackage package);
 
         public abstract bool CanExecute(PackageItem item);
+
+        protected virtual string GetProgressMessage(IPackage package) {
+            return package.ToString();
+        }
 
         /// <summary>
         /// This method is called on background thread.
@@ -322,7 +336,11 @@ namespace NuGet.Dialog.Providers {
                 _progressWindowOpener.AddMessage(level, formattedMessage);
             }
 
-            _outputConsole.Value.WriteLine(formattedMessage);
+            WriteLineToOutputWindow(formattedMessage);
+        }
+
+        protected void WriteLineToOutputWindow(string message = "") {
+            _outputConsole.Value.WriteLine(message);
         }
 
         protected void RegisterPackageOperationEvents(IPackageManager packageManager) {

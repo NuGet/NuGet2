@@ -11,7 +11,9 @@ namespace NuGet {
         public static void AddFiles(this IProjectSystem project,
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers) {
-            foreach (IPackageFile file in files) {
+            // BUG 636: We add the files with the longest path first so that vs picks up code behind files.
+            // This shouldn't matter for any other scenario.
+            foreach (IPackageFile file in files.OrderByDescending(p => p.Path)) {
                 // Remove the redundant folder from the path
                 string path = RemoveContentDirectory(file.Path);
 

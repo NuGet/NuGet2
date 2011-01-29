@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGetConsole;
@@ -49,22 +47,14 @@ namespace NuGet.OutputWindowConsole {
             }
         }
 
-        private void EnsureStarted() {
-            if (_outputWindowPane == null) {
-                Start();
-            }
-        }
-
         public void Write(string text) {
             if (String.IsNullOrEmpty(text)) {
                 return;
             }
 
-            EnsureStarted();
+            Start();
 
-            foreach (string s in WrapText(text)) {
-                _outputWindowPane.OutputStringThreadSafe(s);
-            }
+            _outputWindowPane.OutputStringThreadSafe(text);
         }
 
         public void WriteLine(string text) {
@@ -83,7 +73,7 @@ namespace NuGet.OutputWindowConsole {
         }
 
         public void Clear() {
-            EnsureStarted();
+            Start();
             _outputWindowPane.Clear();
         }
 
@@ -102,31 +92,6 @@ namespace NuGet.OutputWindowConsole {
 
         public void ClearConsole() {
             Clear();
-        }
-
-        /// <summary>
-        /// Break the string into multiple lines, each line doesn't exceed ConsoleWidth value
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns>collection of strings, each corresponding to one line</returns>
-        private IEnumerable<string> WrapText(string text) {
-            string[] words = text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < words.Length; ++i) {
-                if (builder.Length > 0) {
-                    builder.Append(' ');
-                }
-                builder.Append(words[i]);
-
-                if (i + 1 == words.Length || builder.Length + words[i + 1].Length > ConsoleWidth) {
-                    if (i + 1 < words.Length) {
-                        builder.AppendLine();
-                    }
-                    yield return builder.ToString();
-                    builder.Clear();
-                }
-            }
         }
     }
 }

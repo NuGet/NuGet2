@@ -1,67 +1,75 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="NuGet.Dialog.Providers.PackagesProviderBase" Collapsed="true">
-    <Position X="6.5" Y="0.5" Width="1.75" />
+    <Position X="6.25" Y="0.5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>EAAaIAAAAggEAAQEAEAAAIAAAQAEQAAFAAAAAAAiAAA=</HashCode>
+      <HashCode>EEAaIAAMEskMAAwMEWQQRIAAIUgkUgAFAAIgEAAgAAE=</HashCode>
       <FileName>PackageManagerUI\BaseProvider\PackagesProviderBase.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="NuGet.Dialog.Providers.PackagesSearchNode" Collapsed="true">
-    <Position X="9.5" Y="6" Width="1.75" />
+    <Position X="6.75" Y="8" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAQAAAACAIAAAA=</HashCode>
+      <HashCode>AAACAAAAAABAAAAAAAAAAAQAAAAAAAAQAAAACAIAAAA=</HashCode>
       <FileName>PackageManagerUI\BaseProvider\PackagesSearchNode.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.PackagesTreeNodeBase" Collapsed="true">
-    <Position X="6.75" Y="4.25" Width="1.75" />
+    <Position X="3.75" Y="6.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>IAAgAzAQABFUEIoEAAEAQCSBhAAIAgAAAAhCCAAAEFI=</HashCode>
+      <HashCode>LAEoAzAQABFUEIokABEIQCSAhAAYAgAAAAlCGAAAEFY=</HashCode>
       <FileName>PackageManagerUI\BaseProvider\PackagesTreeNodeBase.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NuGet.Dialog.Providers.SimpleTreeNode" Collapsed="true">
-    <Position X="5.75" Y="6" Width="1.5" />
+    <Position X="2.75" Y="8" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAABABAAAAAAAAAQAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <HashCode>AAAAAAIAAABABAAAAAAAAAQAAAAAAAAAAAAACAAAAAA=</HashCode>
       <FileName>PackageManagerUI\BaseProvider\SimpleTreeNode.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.UpdatesTreeNode" Collapsed="true">
-    <Position X="4" Y="6" Width="1.5" />
+    <Position X="2.75" Y="9.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAABAAAAAAAAAQAAAAgAAAAAAAASAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASAAAAAA=</HashCode>
       <FileName>PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.InstalledProvider" Collapsed="true">
     <Position X="4.5" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAAEAAAAQAAQAEQAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AEAABAABEAAAAAAAEEAARAQAAQAEQAAAAAAAAAAAAAA=</HashCode>
       <FileName>PackageManagerUI\InstalledProvider\InstalledProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.OnlineProvider" Collapsed="true">
-    <Position X="6.75" Y="2" Width="1.5" />
+    <Position X="7.75" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQQQEAAAAQAAQAEQAAAAAAAACQAAAA=</HashCode>
+      <HashCode>AMAABAAAEAAAAgAAEEAABAQAAQAEQEAQAAAAADQAAAA=</HashCode>
       <FileName>PackageManagerUI\OnlineProvider\OnlineProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.UpdatesProvider" Collapsed="true">
-    <Position X="9" Y="2" Width="1.5" />
+    <Position X="9" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAAEAAAAQAAQAEwAAAAAAABAAAAAA=</HashCode>
+      <HashCode>AMAABAAAAAAAAAAAEEAAAAQAAQAAQAAAAAAAABAAAAA=</HashCode>
       <FileName>PackageManagerUI\UpdatesProvider\UpdatesProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.EmptyTreeNode" Collapsed="true">
-    <Position X="7.75" Y="6" Width="1.5" />
+    <Position X="4.75" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAACAAAAAA=</HashCode>
       <FileName>PackageManagerUI\OnlineProvider\EmptyTreeNode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuGet.Dialog.Providers.RecentProvider" Collapsed="true">
+    <Position X="6.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAEAAAQAQAAAAEQAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PackageManagerUI\RecentProvider\RecentProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

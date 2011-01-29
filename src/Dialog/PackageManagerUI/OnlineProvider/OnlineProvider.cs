@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
@@ -97,11 +98,8 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-
             var activePackageManager = GetActivePackageManager();
-            if (activePackageManager == null) {
-                return false;
-            }
+            Debug.Assert(activePackageManager != null);
 
             var walker = new InstallWalker(
                 ProjectManager.LocalRepository,
@@ -184,6 +182,10 @@ namespace NuGet.Dialog.Providers {
             get {
                 return Dialog.Resources.Dialog_InstallProgress;
             }
+        }
+
+        protected override string GetProgressMessage(IPackage package) {
+            return Resources.Dialog_InstallProgress + package.ToString();
         }
     }
 }
