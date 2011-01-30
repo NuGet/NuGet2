@@ -128,7 +128,7 @@
         <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
             <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
         </CommandPlacement>
-        <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+        <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x390">
             <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
         </CommandPlacement>
         <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x290">
