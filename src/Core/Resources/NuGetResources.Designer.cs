@@ -151,7 +151,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Removed file &apos;{0}&apos; to folder &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Removed file &apos;{0}&apos; from folder &apos;{1}&apos;..
         /// </summary>
         internal static string Debug_RemovedFileFromFolder {
             get {
