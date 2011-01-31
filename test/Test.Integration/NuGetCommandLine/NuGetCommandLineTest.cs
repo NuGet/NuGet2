@@ -18,6 +18,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private StringWriter consoleOutput;
         private TextWriter originalConsoleOutput;
         private TextWriter originalErrorConsoleOutput;
+        private string startingDirectory;
 
 
         [TestInitialize]
@@ -35,6 +36,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             consoleOutput = new StringWriter();
             System.Console.SetOut(consoleOutput);
             System.Console.SetError(consoleOutput);
+            startingDirectory = Directory.GetCurrentDirectory();
         }
 
         [TestCleanup]
@@ -42,6 +44,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             DeleteDirs();
             System.Console.SetOut(originalConsoleOutput);
             System.Console.SetError(originalErrorConsoleOutput);
+            Directory.SetCurrentDirectory(startingDirectory);
         }
 
 
