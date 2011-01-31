@@ -39,7 +39,6 @@ namespace NuGet.Dialog.PackageManagerUI {
 
                 // logging to both the Output window and progress window.
                 logger.Log(MessageLevel.Info, logMessage);
-                WriteHost(logMessage);
 
                 PSHost.Invoke(
                     "$__pc_args=@(); $input|%{$__pc_args+=$_}; & '" + fullPath + "' $__pc_args[0] $__pc_args[1] $__pc_args[2] $__pc_args[3]; Remove-Variable __pc_args -Scope 0",
@@ -49,10 +48,6 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
             
             return false;
-        }
-
-        private void WriteHost(string message) {
-            PSHost.Invoke("Write-Host '" + message.Replace("'", "''") + "'", null, true);
         }
 
         private IPowerShellHost GetHost() {
