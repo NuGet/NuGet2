@@ -130,7 +130,7 @@
         Get-Package
       </command:name>
       <maml:description>
-        <maml:para>Gets the set of packages available from the package source.</maml:para>
+        <maml:para>Gets the set of packages available from the package source. Use the -ListAvailable flag to list packages available from the package source.</maml:para>
       </maml:description>
       <maml:copyright>
         <maml:para></maml:para>
@@ -141,7 +141,7 @@
     </command:details>
 
     <maml:description>
-      <maml:para>Gets the set of packages available from the package source. Defaults to only showing the list of installed packages.</maml:para>
+      <maml:para>Gets the set of packages available from the package source. Defaults to only showing the list of installed packages. Use the -ListAvailable flag to list packages available from the package source.</maml:para>
     </maml:description>
 
     <!-- Cmdlet syntax section-->
