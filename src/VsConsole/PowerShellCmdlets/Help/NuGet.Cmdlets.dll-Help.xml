@@ -516,7 +516,7 @@
       <command:parameter required="true" position="1">
         <maml:name>SpecFile</maml:name>
         <maml:description>
-          <maml:para>Specifies the NuSpec file used to create the package. If omitted, the NuSpec file within the current project is used if there is only one.</maml:para>
+          <maml:para>Specifies the NuSpec file used to create the package. If omitted, the NuSpec file within the current project is used if there is only one such file.</maml:para>
         </maml:description>
         <command:parameterValue required="true">string</command:parameterValue>
       </command:parameter>

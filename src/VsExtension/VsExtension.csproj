@@ -49,6 +49,7 @@
     <Content Include="..\VsConsole\PowerShellCmdlets\Help\NuGet.Cmdlets.dll-Help.xml">
       <Link>NuGet.Cmdlets.dll-Help.xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\Profile.ps1">
       <Link>Scripts\Profile.ps1</Link>
