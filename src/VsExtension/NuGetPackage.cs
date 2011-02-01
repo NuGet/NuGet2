@@ -28,6 +28,10 @@ namespace NuGet.Tools {
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent Packages", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
+    [FontAndColorsRegistration(
+        "Package Manager Console", 
+        NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString, 
+        "{" + GuidList.guidNuGetPkgString + "}")]
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
         private DTE _dte;

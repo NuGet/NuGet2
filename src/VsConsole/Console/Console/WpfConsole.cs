@@ -453,9 +453,11 @@ namespace NuGetConsole.Implementation.Console {
                     if (propCategoryContainer != null) {
                         IVsTextEditorPropertyContainer propContainer;
                         Guid guidPropCategory = EditorDefGuidList.guidEditPropCategoryViewMasterSettings;
-                        propCategoryContainer.GetPropertyCategory(ref guidPropCategory, out propContainer);
-                        propContainer.SetProperty(VSEDITPROPID.VSEDITPROPID_ViewGeneral_FontCategory, EditorDefGuidList.guidCommandWindowFontCategory);
-                        propContainer.SetProperty(VSEDITPROPID.VSEDITPROPID_ViewGeneral_ColorCategory, EditorDefGuidList.guidCommandWindowFontCategory);
+                        int hr = propCategoryContainer.GetPropertyCategory(ref guidPropCategory, out propContainer);
+                        if (hr == 0) {
+                            propContainer.SetProperty(VSEDITPROPID.VSEDITPROPID_ViewGeneral_FontCategory, GuidList.guidPackageManagerConsoleFontAndColorCategory);
+                            propContainer.SetProperty(VSEDITPROPID.VSEDITPROPID_ViewGeneral_ColorCategory, GuidList.guidPackageManagerConsoleFontAndColorCategory);
+                        }
                     }
 
                     // add myself as IConsole

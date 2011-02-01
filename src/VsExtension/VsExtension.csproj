@@ -30,6 +30,7 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="FontAndColorsRegistrationAttribute.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="NuGetPackage.cs" />
