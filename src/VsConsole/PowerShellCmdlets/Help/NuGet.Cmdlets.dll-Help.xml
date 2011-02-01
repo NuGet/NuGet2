@@ -484,11 +484,55 @@
 
     <!-- Cmdlet syntax section-->
     <command:syntax>
-
+      <command:syntaxItem>
+        <maml:name>New-Package</maml:name>
+        <command:parameter required="false" position="0">
+          <maml:name>Project</maml:name>
+          <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" position="1">
+          <maml:name>SpecFile</maml:name>
+          <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" position="2">
+          <maml:name>TargetFile </maml:name>
+          <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>NoClobber</maml:name>
+        </command:parameter>
+      </command:syntaxItem>
     </command:syntax>
 
     <!-- Cmdlet parameter section  -->
     <command:parameters>
+      <command:parameter required="false" position="0">
+        <maml:name>Project</maml:name>
+        <maml:description>
+          <maml:para>Specifies the project containing the NuSpec file to use when creating the package. If omitted, the current project selected in the console is used.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="true" position="1">
+        <maml:name>SpecFile</maml:name>
+        <maml:description>
+          <maml:para>Specifies the NuSpec file used to create the package. If omitted, the NuSpec file within the current project is used if there is only one.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="true" position="2">
+        <maml:name>TargetFile </maml:name>
+        <maml:description>
+          <maml:para>Specifes the full name of the output NuPkg file.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">string</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>NoClobber</maml:name>
+        <maml:description>
+          <maml:para>If specified, the target file is not overwritten.</maml:para>
+        </maml:description>
+      </command:parameter>
     </command:parameters>
 
     <!-- Link section  -->
