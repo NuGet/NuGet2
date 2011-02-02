@@ -73,22 +73,32 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We don't want execution of init scripts to crash our console.")]
         private void ExecuteInitScripts() {
             if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
-                var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
-                var localRepository = packageManager.LocalRepository;
+                try {
+                    var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
+                    var localRepository = packageManager.LocalRepository;
 
-                // invoke init.ps1 files in the order of package dependency.
-                // if A -> B, we invoke B's init.ps1 before A's.
+                    // invoke init.ps1 files in the order of package dependency.
+                    // if A -> B, we invoke B's init.ps1 before A's.
 
-                var sorter = new PackageSorter();
-                var sortedPackages = sorter.GetPackagesByDependencyOrder(localRepository);
+                    var sorter = new PackageSorter();
+                    var sortedPackages = sorter.GetPackagesByDependencyOrder(localRepository);
 
-                foreach (var package in sortedPackages) {
-                    string installPath = packageManager.PathResolver.GetInstallPath(package);
+                    foreach (var package in sortedPackages) {
+                        string installPath = packageManager.PathResolver.GetInstallPath(package);
 
-                    this.AddPathToEnvironment(Path.Combine(installPath, "tools"));
-                    this.ExecuteScript(installPath, "tools\\init.ps1", package);
+                        this.AddPathToEnvironment(Path.Combine(installPath, "tools"));
+                        this.ExecuteScript(installPath, "tools\\init.ps1", package);
+                    }
+                }
+                catch (Exception ex) {
+                    // if execution of Init scripts fails, do not let it crash our console
+                    ReportError(ex);
                 }
             }
         }
