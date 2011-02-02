@@ -25,15 +25,15 @@ namespace NuGet.Tools {
         }
 
         public override void Register(RegistrationContext context) {
-            var key = context.CreateKey(CategoryKey);
-
-            key.SetValue("Category", CategoryGuid);
-            key.SetValue("Package", PackageGuid);
-            key.SetValue("NameID", CategoryNameResourceID);
-            key.SetValue("ToolWindowPackage", ToolWindowPackageGuid);
+            using (var key = context.CreateKey(CategoryKey)) {
+                key.SetValue("Category", CategoryGuid);
+                key.SetValue("Package", PackageGuid);
+                key.SetValue("NameID", CategoryNameResourceID);
+                key.SetValue("ToolWindowPackage", ToolWindowPackageGuid);
 
             // IMPORTANT: without calling Close() the values won't be persisted to registry.
-            key.Close();
+                key.Close();
+            }
         }
 
         public override void Unregister(RegistrationContext context) {
