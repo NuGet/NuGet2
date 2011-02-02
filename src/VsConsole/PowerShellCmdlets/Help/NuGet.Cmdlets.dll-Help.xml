@@ -487,11 +487,11 @@
       <command:syntaxItem>
         <maml:name>New-Package</maml:name>
         <command:parameter required="false" position="0">
-          <maml:name>Project</maml:name>
+          <maml:name>ProjectName</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="true" position="1">
-          <maml:name>SpecFile</maml:name>
+          <maml:name>SpecFileName</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="true" position="2">
@@ -507,14 +507,14 @@
     <!-- Cmdlet parameter section  -->
     <command:parameters>
       <command:parameter required="false" position="0">
-        <maml:name>Project</maml:name>
+        <maml:name>ProjectName</maml:name>
         <maml:description>
           <maml:para>Specifies the project containing the NuSpec file to use when creating the package. If omitted, the current project selected in the console is used.</maml:para>
         </maml:description>
         <command:parameterValue required="true">string</command:parameterValue>
       </command:parameter>
       <command:parameter required="true" position="1">
-        <maml:name>SpecFile</maml:name>
+        <maml:name>SpecFileName</maml:name>
         <maml:description>
           <maml:para>Specifies the NuSpec file used to create the package. If omitted, the NuSpec file within the current project is used if there is only one such file.</maml:para>
         </maml:description>
