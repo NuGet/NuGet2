@@ -30,12 +30,11 @@ namespace NuGet.Cmdlets {
         [ValidateNotNullOrEmpty]
         public string ProjectName { get; set; }
 
-        [Parameter(Mandatory = true, Position = 1)]
-        [Alias("Spec")]
+        [Parameter(Position = 1)]
         [ValidateNotNullOrEmpty]
-        public string SpecFile { get; set; }
+        public string SpecFileName { get; set; }
 
-        [Parameter(Mandatory = true, Position = 2)]
+        [Parameter(Position = 2)]
         [ValidateNotNullOrEmpty]
         public string TargetFile { get; set; }
 
@@ -84,28 +83,11 @@ namespace NuGet.Cmdlets {
         }
 
         private string GetSpecFilePath(Project projectIns) {
-            string filePath = null;
             string specFilePath = null;
             ProjectItem specFile = null;
 
-            // spec file provided?
-            if (SpecFile != null) {
-                string errorMessage;
-                bool? exists;
-
-                // yes, so translate from PSPath to win32 path
-                if (!TryTranslatePSPath(SpecFile, out filePath, out exists, out errorMessage)) {
-                    // terminating
-                    ErrorHandler.HandleException(
-                        new ItemNotFoundException(Resources.Cmdlet_InvalidPathSyntax),
-                        terminating: true,
-                        errorId: NuGetErrorId.FileNotFound,
-                        category: ErrorCategory.InvalidArgument,
-                        target: SpecFile);
-                }
-            }
             try {
-                specFile = FindSpecFile(projectIns, filePath).SingleOrDefault();
+                specFile = FindSpecFile(projectIns, SpecFileName).SingleOrDefault();
             }
             catch (InvalidOperationException) {
                 // SingleOrDefault will throw if more than one spec files were found
@@ -124,47 +106,33 @@ namespace NuGet.Cmdlets {
                     terminating: true,
                     errorId: NuGetErrorId.NuspecFileNotFound,
                     category: ErrorCategory.ObjectNotFound,
-                    target: SpecFile);
+                    target: SpecFileName);
             }
             else {
                 specFilePath = specFile.FileNames[0];
             }
+
             return specFilePath;
         }
 
         private string GetTargetFilePath(Project projectIns, PackageBuilder builder) {
-            string outputFilePath = null;
-            string filePath;
-            bool? exists;
-            string errorMessage;
-
-            if (TryTranslatePSPath(TargetFile, out filePath, out exists, out errorMessage)) {
-
-                // Get the output file path
-                outputFilePath = GetPackageFilePath(filePath, projectIns.FullName, builder.Id, builder.Version);
-
-                // prevent overwrite if -NoClobber specified
-                if (exists == true && NoClobber.IsPresent) {
-                    // terminating
-                    ErrorHandler.HandleException(
-                        new UnauthorizedAccessException(String.Format(
-                            CultureInfo.CurrentCulture,
-                            Resources.Cmdlet_FileExistsNoClobber, TargetFile)),
-                        terminating: true,
-                        errorId: NuGetErrorId.FileExistsNoClobber,
-                        category: ErrorCategory.PermissionDenied,
-                        target: TargetFile);
-                }
-            }
-            else {
+            // Get the output file path
+            string outputFilePath = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);
+            
+            bool fileExists = File.Exists(outputFilePath);
+            // prevent overwrite if -NoClobber specified
+            if (fileExists && NoClobber.IsPresent) {
                 // terminating
                 ErrorHandler.HandleException(
-                    new ItemNotFoundException(Resources.Cmdlet_InvalidPathSyntax),
+                    new UnauthorizedAccessException(String.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.Cmdlet_FileExistsNoClobber, TargetFile)),
                     terminating: true,
-                    errorId: NuGetErrorId.FileNotFound,
-                    category: ErrorCategory.InvalidArgument,
-                    target: SpecFile);
+                    errorId: NuGetErrorId.FileExistsNoClobber,
+                    category: ErrorCategory.PermissionDenied,
+                    target: TargetFile);
             }
+                        
             return outputFilePath;
         }
 
@@ -189,7 +157,9 @@ namespace NuGet.Cmdlets {
 
         private static IEnumerable<ProjectItem> FindSpecFile(EnvDTE.Project projectIns, string specFile) {
             if (!String.IsNullOrEmpty(specFile)) {
-                yield return projectIns.ProjectItems.Item(specFile);
+                ProjectItem projectItem = null;
+                projectIns.ProjectItems.TryGetFile(specFile, out projectItem);
+                yield return projectItem;
             }
             else {
                 // Verify if the project has exactly one file with the .nuspec extension. 

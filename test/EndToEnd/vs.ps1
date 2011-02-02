@@ -263,3 +263,14 @@ function Get-ProjectItem {
        return  ,$projectItems
     }
 }
+
+function Add-File {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [string]$FilePath
+    )
+    
+    $Project.ProjectItems.AddFromFileCopy($FilePath) | out-null
+}
