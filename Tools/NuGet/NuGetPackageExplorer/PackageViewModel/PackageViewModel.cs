@@ -4,10 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using NuGet;
+using Microsoft.Win32;
 
 namespace PackageExplorerViewModel {
    
-    public class PackageViewModel : INotifyPropertyChanged, IShowFileContentHandler {
+    public class PackageViewModel : INotifyPropertyChanged, IPackageViewModel {
 
         private readonly IPackage _package;
         private IList<PackagePart> _packageParts;
@@ -81,9 +82,32 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public void ShowFile(string name, string content) {
+        void IPackageViewModel.ShowFile(string name, string content) {
             CurrentFileName = name;
             CurrentFileContent = content;
+        }
+
+        bool IPackageViewModel.OpenSaveFileDialog(string defaultName, out string selectedFileName)
+        {
+            var dialog = new SaveFileDialog()
+            {
+                OverwritePrompt = true,
+                Title = "Save " + defaultName,
+                Filter = "All files (*.*)|*.*",
+                FileName = defaultName
+            };
+
+            bool? result = dialog.ShowDialog();
+            if (result ?? false)
+            {
+                selectedFileName = dialog.FileName;
+                return true;
+            }
+            else
+            {
+                selectedFileName = null;
+                return false;
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ using NuGet;
 namespace PackageExplorerViewModel {
     internal static class PathToTreeConverter {
 
-        public static PackageFolder Convert(List<IPackageFile> paths, IShowFileContentHandler showFileContentHandler) {
+        public static PackageFolder Convert(List<IPackageFile> paths, IPackageViewModel showFileContentHandler) {
             if (paths == null) {
                 throw new ArgumentNullException("paths");
             }
@@ -21,14 +21,14 @@ namespace PackageExplorerViewModel {
             return root;
         }
 
-        private static void Parse(PackageFolder root, List<Tuple<IPackageFile, string[]>> parsedPaths, int level, int start, int end, IShowFileContentHandler showFileContentHandler) {
+        private static void Parse(PackageFolder root, List<Tuple<IPackageFile, string[]>> parsedPaths, int level, int start, int end, IPackageViewModel showFileContentHandler) {
             int i = start;
             while (i < end) {
                 string s = parsedPaths[i].Item2[level];
 
                 if (parsedPaths[i].Item2.Length == level + 1) {
                     // it's a file
-                    root.Children.Add(new PackageFile(parsedPaths[i].Item1, s) { ShowFileContentHandler = showFileContentHandler });
+                    root.Children.Add(new PackageFile(parsedPaths[i].Item1, s) { PackageViewModel = showFileContentHandler });
                     i++;
                 }
                 else {

@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Windows.Input;
 using NuGet;
-using System.IO;
 
 namespace PackageExplorerViewModel {
     internal class SaveContentCommand : ICommand {
 
-        private IPackageFile _file;
+        private PackageFile _file;
+        private IPackageViewModel _packageViewModel;
 
-        public SaveContentCommand(IPackageFile file) {
+        public SaveContentCommand(PackageFile file, IPackageViewModel packageViewModel) {
             _file = file;
+            _packageViewModel = packageViewModel;
         }
 
         public bool CanExecute(object parameter) {
@@ -25,20 +24,15 @@ namespace PackageExplorerViewModel {
             SaveFile(_file);
         }
 
-        private void SaveFile(IPackageFile file) {
-            //SaveFileDialog dialog = new SaveFileDialog() {
-            //    OverwritePrompt = true,
-            //    Title = "Save " + file.Name,
-            //    Filter = "All files (*.*)|*.*",
-            //    FileName = file.Name
-            //};
-
-            //bool? result = dialog.ShowDialog();
-            //if (result ?? false) {
-            //    using (FileStream fileStream = File.OpenWrite(dialog.FileName)) {
-            //        CopyStream(file.GetStream(), fileStream);
-            //    }
-            //}
+        private void SaveFile(PackageFile file) {
+            string selectedFileName;
+            if (_packageViewModel.OpenSaveFileDialog(file.Name, out selectedFileName))
+            {
+                using (FileStream fileStream = File.OpenWrite(selectedFileName))
+                {
+                    CopyStream(file.GetStream(), fileStream);
+                }
+            }
         }
 
         private void CopyStream(Stream source, Stream target) {

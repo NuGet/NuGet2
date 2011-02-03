@@ -7,29 +7,27 @@ using NuGet;
 namespace PackageExplorerViewModel {
     internal class ViewContentCommand : ICommand {
 
-        private readonly IPackageFile _file;
-        private readonly string _name;
-        private readonly IShowFileContentHandler _showFileContentHandler;
+        private readonly PackageFile _file;
+        private readonly IPackageViewModel _showFileContentHandler;
 
-        public ViewContentCommand(IPackageFile file, string name, IShowFileContentHandler showFileContentHandler) {
+        public ViewContentCommand(PackageFile file, IPackageViewModel showFileContentHandler) {
             _file = file;
-            _name = name;
             _showFileContentHandler = showFileContentHandler;
         }
 
         public bool CanExecute(object parameter) {
-            return !IsBinaryFile(_file.Path);
+            return !IsBinaryFile(_file.Name);
         }
 
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
             if (_showFileContentHandler != null) {
-                _showFileContentHandler.ShowFile(_name, ReadFileContent(_file));
+                _showFileContentHandler.ShowFile(_file.Name, ReadFileContent(_file));
             }
         }
 
-        private string ReadFileContent(IPackageFile file) {
+        private string ReadFileContent(PackageFile file) {
             using (StreamReader reader = new StreamReader(file.GetStream())) {
                 return reader.ReadToEnd();
             }
