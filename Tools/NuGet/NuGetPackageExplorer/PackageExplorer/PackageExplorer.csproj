@@ -48,6 +48,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -61,17 +62,15 @@
   <PropertyGroup>
     <ApplicationIcon>nupack.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
-    <NoWin32Manifest>true</NoWin32Manifest>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>NuGet key.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>928D4439EDB05A661237CFE4F0730B6C7A7AFFB9</ManifestCertificateThumbprint>
@@ -81,6 +80,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -105,10 +110,7 @@
     </ApplicationDefinition>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\CountToVisibilityConverter.cs" />
-    <Compile Include="PackagePart\PackageFile.cs" />
-    <Compile Include="PackagePart\PackageFolder.cs" />
-    <Compile Include="PackagePart\PackagePart.cs" />
-    <Compile Include="PackagePart\PathToTreeConverter.cs" />
+    <Compile Include="Converters\HalfLengthConverter.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -125,33 +127,6 @@
     </Compile>
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\StringCollectionsToStringConverter.cs" />
-    <Compile Include="Core\Constants.cs" />
-    <Compile Include="Core\IPackage.cs" />
-    <Compile Include="Core\IPackageAssemblyReference.cs" />
-    <Compile Include="Core\IPackageFile.cs" />
-    <Compile Include="Core\IPackageMetadata.cs" />
-    <Compile Include="Core\IPackagePathResolver.cs" />
-    <Compile Include="Core\IServerPackageMetadata.cs" />
-    <Compile Include="Core\IVersionSpec.cs" />
-    <Compile Include="Core\Manifest.cs" />
-    <Compile Include="Core\ManifestDependency.cs" />
-    <Compile Include="Core\ManifestFile.cs" />
-    <Compile Include="Core\ManifestMetadata.cs" />
-    <Compile Include="Core\NuGetResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NuGetResources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Core\ObjectExtensions.cs" />
-    <Compile Include="Core\PackageDependency.cs" />
-    <Compile Include="Core\PackageUtility.cs" />
-    <Compile Include="Core\StringExtensions.cs" />
-    <Compile Include="Core\UriUtility.cs" />
-    <Compile Include="Core\VersionSpec.cs" />
-    <Compile Include="Core\VersionUtility.cs" />
-    <Compile Include="Core\ZipPackage.cs" />
-    <Compile Include="Core\ZipPackageAssemblyReference.cs" />
-    <Compile Include="Core\ZipPackageFile.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -165,14 +140,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <EmbeddedResource Include="Core\NuGetResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>NuGet.Resources</CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Core\nuspec.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -187,6 +154,7 @@
   <ItemGroup>
     <None Include="NuGet key.pfx" />
     <None Include="PackageExplorer_TemporaryKey.pfx" />
+    <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
@@ -220,6 +188,16 @@
       <Progid>NuGet.Package</Progid>
       <DefaultIcon>nuspec.ico</DefaultIcon>
     </FileAssociation>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{57B4C84E-427E-4041-A4E0-14A3C00E6BA5}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PackageViewModel\PackageViewModel.csproj">
+      <Project>{A1E66420-E485-4719-A37F-5B49AAFB43AB}</Project>
+      <Name>PackageViewModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

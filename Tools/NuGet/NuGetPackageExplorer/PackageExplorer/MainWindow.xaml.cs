@@ -1,12 +1,11 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Shell;
 using Microsoft.Win32;
 using NuGet;
+using PackageExplorerViewModel;
 
 namespace PackageExplorer {
     /// <summary>
@@ -21,7 +20,32 @@ namespace PackageExplorer {
             BuildStatusItem.Content = "Build " + typeof(MainWindow).Assembly.GetName().Version.ToString();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e) {
+        internal void LoadPackage(string packagePath) {
+            ZipPackage package = null;
+            try {
+                package = new ZipPackage(packagePath);
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (package != null) {
+                DataContext = new PackageViewModel(package, packagePath);
+                AddToRecentJumpList(packagePath);
+            }
+        }
+
+        private void AddToRecentJumpList(string path) {
+            JumpList.SetJumpList(Application.Current, _jumpList);
+
+            var jumpPath = new JumpPath { Path = path };
+            JumpList.AddToRecentCategory(jumpPath);
+
+            _jumpList.Apply();
+        }
+
+        private void OpenMenuItem_Click(object sender, RoutedEventArgs e) {
             OpenFileDialog dialog = new OpenFileDialog() {
                 CheckFileExists = true,
                 CheckPathExists = true,
@@ -37,40 +61,7 @@ namespace PackageExplorer {
             }
         }
 
-        internal void LoadPackage(string packagePath) {
-            ZipPackage package = null;
-            try { 
-                package = new ZipPackage(packagePath);
-            }
-            catch (Exception ex) {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            if (package != null) {
-                this.DataContext = package;
-                this.Title = PackageExplorer.Resources.Resources.Dialog_Title + " - " + package.ToString();
-                PackageName.Text = packagePath;
-                PackagePartView.ItemsSource = PathToTreeConverter.Convert(package.GetFiles().ToList()).Children;
-                CloseFileContent();
-
-                AddToRecentJumpList(packagePath);
-            }
-        }
-
-        private void AddToRecentJumpList(string path) {
-            JumpList.SetJumpList(Application.Current, _jumpList);
-
-            var jumpPath = new JumpPath { Path = path };
-            JumpList.AddToRecentCategory(jumpPath);
-
-            _jumpList.Apply();
-        }
-
-        private void Hyperlink_Click(object sender, RoutedEventArgs e) {
-            var link = (Hyperlink)sender;
-            UriHelper.OpenExternalLink(link.NavigateUri);
-        }
+        #region Drag & drop
 
         private void Window_DragOver(object sender, DragEventArgs e) {
             var data = e.Data;
@@ -109,79 +100,19 @@ namespace PackageExplorer {
             }
         }
 
-        private void SaveAs_Click(object sender, RoutedEventArgs e) {
-            MenuItem mi = (MenuItem)sender;
-            PackageFile file = mi.DataContext as PackageFile;
-            if (file != null) {
-                SaveFile(file);
-            }
+        #endregion
+
+        private void Hyperlink_Click(object sender, RoutedEventArgs e) {
+            var link = (Hyperlink)sender;
+            UriHelper.OpenExternalLink(link.NavigateUri);
         }
 
-        private void SaveFile(PackageFile file) {
-            SaveFileDialog dialog = new SaveFileDialog() {
-                OverwritePrompt = true,
-                Title = "Save " + file.Name,
-                Filter = "All files (*.*)|*.*",
-                FileName = file.Name
-            };
-
-            bool? result = dialog.ShowDialog(this);
-            if (result ?? false) {
-                using (FileStream fileStream = File.OpenWrite(dialog.FileName)) {
-                    CopyStream(file.GetStream(), fileStream);
-                }
-            }
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e) {
+            Close();
         }
 
-        private void CopyStream(Stream source, Stream target) {
-            byte[] buffer = new byte[1024 * 4];
-            int count;
-            while ((count = source.Read(buffer, 0, buffer.Length)) > 0) {
-                target.Write(buffer, 0, count);
-            }
-        }
-
-        private void ViewContent_Click(object sender, RoutedEventArgs e) {
-            MenuItem mi = (MenuItem)sender;
-            PackageFile file = mi.DataContext as PackageFile;
-            if (file != null) {
-                ShowFileContent(file);
-            }
-        }
-
-        private static string[] BinaryFileExtensions = new string[] { 
-            ".DLL", ".EXE", ".CHM", ".PDF", ".DOCX", ".DOC", ".JPG", ".PNG", ".GIF", ".RTF", ".PDB"
-        };
-
-        private bool IsBinaryFile(string path) {
-            // TODO: check for content type of the file here
-            string extension = Path.GetExtension(path).ToUpper();
-            return BinaryFileExtensions.Any(p => p.Equals(extension));
-        }
-
-        private void CloseFileContent() {
-            FileContentBorder.Visibility = Visibility.Collapsed;
-            ContentGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Auto);
-            FileContent.Text = String.Empty;
-            FileContentBorder.Header = String.Empty;
-        }
-
-        private void ShowFileContent(PackageFile file) {
-            if (IsBinaryFile(file.Name)) {
-                MessageBox.Show("Unable to show binary files.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            else {
-                ContentGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
-                FileContentBorder.Visibility = Visibility.Visible;
-                FileContentBorder.Header = file.Name;
-                FileContent.Text = LoadFileContent(file);
-            }
-        }
-
-        private string LoadFileContent(PackageFile file) {
-            using (StreamReader reader = new StreamReader(file.GetStream())) {
-                return reader.ReadToEnd();
-            }
+        private void CloseMenuItem_Click(object sender, RoutedEventArgs e) {
+            DataContext = null;
         }
     }
 }

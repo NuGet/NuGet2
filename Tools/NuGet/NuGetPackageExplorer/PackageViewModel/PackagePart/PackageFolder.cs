@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PackageExplorer {
+namespace PackageExplorerViewModel {
     public class PackageFolder : PackagePart {
 
         public IList<PackagePart> Children { get; private set; }
