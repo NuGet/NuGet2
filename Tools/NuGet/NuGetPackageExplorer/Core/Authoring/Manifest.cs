@@ -15,7 +15,7 @@ using NuGet.Resources;
 namespace NuGet {
     [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
     public class Manifest {
-        private const string SchemaResourceName = "NuGet.nuspec.xsd";
+        private const string SchemaResourceName = "NuGet.Authoring.nuspec.xsd";
 
         public Manifest() {
             Metadata = new ManifestMetadata();

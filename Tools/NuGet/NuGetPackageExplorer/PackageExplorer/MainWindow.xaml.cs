@@ -114,5 +114,13 @@ namespace PackageExplorer {
         private void CloseMenuItem_Click(object sender, RoutedEventArgs e) {
             DataContext = null;
         }
+
+        private void AboutMenuItem_Click(object sender, RoutedEventArgs e) {
+            MessageBox.Show(
+                "Author: Luan Nguyen. For more information, visit http://nuget.codeplex.com.",
+                PackageExplorer.Resources.Resources.Dialog_Title, 
+                MessageBoxButton.OK, 
+                MessageBoxImage.Information);
+        }
     }
 }

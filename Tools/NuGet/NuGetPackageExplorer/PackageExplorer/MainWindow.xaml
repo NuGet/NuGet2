@@ -19,13 +19,16 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="TemplateStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <viewmodel:DisabledCommand x:Key="DisabledCommand" />
 
             <ContextMenu x:Key="SharedContextMenu">
                 <MenuItem Header="_View Content" Command="{Binding ViewCommand}" />
                 <MenuItem Header="_Save As..." Command="{Binding SaveCommand}" />
             </ContextMenu>
 
-            <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
+            <self:BooleanToVisibilityConverter x:Key="invertedBoolToVis" Inverted="True" />
+            <self:BooleanToVisibilityConverter x:Key="boolToVis" />
             <self:CountToVisibilityConverter x:Key="countConverter" />
             <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
             <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
@@ -157,16 +160,20 @@
         <Menu>
             <MenuItem Header="_File">
                 <MenuItem Header="_Open" Click="OpenMenuItem_Click" />
-                <MenuItem Header="_Save" />
-                <MenuItem Header="Save _As..." />
+                <MenuItem Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" />
+                <MenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
                 <Separator />
                 <MenuItem Header="_Close" Click="CloseMenuItem_Click" />
                 <Separator />
                 <MenuItem Header="E_xit" Click="ExitMenuItem_Click" />
             </MenuItem>
+
+            <MenuItem Header="_Edit">
+                <MenuItem Header="Edit _Package" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" />
+            </MenuItem>
             
             <MenuItem Header="_Help">
-                <MenuItem Header="About..." />
+                <MenuItem Header="About..." Click="AboutMenuItem_Click" />
             </MenuItem>
         </Menu>
 
@@ -183,17 +190,31 @@
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.RowSpan="2" BorderThickness="1" BorderBrush="DarkGray" Margin="3" Header="Package metadata" FlowDirection="LeftToRight" FontSize="12">
-                <ContentControl Content="{Binding PackageMetadata}" ContentTemplate="{StaticResource PackageDetailTemplate}" Visibility="{Binding DataContext, Converter={StaticResource NullToVisibilityConverter}, RelativeSource={RelativeSource Self}}">
-                </ContentControl>
+                <Grid>
+                    <ContentControl 
+                        Content="{Binding PackageMetadata}" 
+                        ContentTemplate="{StaticResource PackageDetailTemplate}" 
+                        Visibility="{Binding IsInEditMode, Converter={StaticResource invertedBoolToVis}, FallbackValue=Collapsed}">
+                    </ContentControl>
+
+                    <ContentControl 
+                        Content="{Binding PackageMetadata}"
+                        Visibility="{Binding IsInEditMode, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate>
+                                <self:PackageMetadataEditor />
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Grid>
             </GroupBox>
 
-            <GroupBox x:Name="PackageContentBorder" BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents" HorizontalContentAlignment="Left" FontSize="12">
-                <TreeView x:Name="PackagePartView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents" HorizontalContentAlignment="Left" FontSize="12">
+                <TreeView ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
                 </TreeView>
             </GroupBox>
             
             <GroupBox
-                x:Name="FileContentBorder"
                 Header="{Binding CurrentFileName}"
                 Visibility="{Binding CurrentFileName, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}"
                 Height="{Binding ActualHeight, ElementName=ContentGrid, Converter={StaticResource lengthConverter}}"
@@ -216,7 +237,7 @@
         </Grid>
         
         <StatusBar Grid.Row="2">
-            <StatusBarItem x:Name="PackageName" Content="{Binding PackageSource}" />
+            <StatusBarItem Content="{Binding PackageSource}" />
             <StatusBarItem x:Name="BuildStatusItem" HorizontalAlignment="Right" />
         </StatusBar>
     </Grid>

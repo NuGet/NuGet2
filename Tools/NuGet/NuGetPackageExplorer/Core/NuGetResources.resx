@@ -150,4 +150,13 @@
   <data name="PackageDoesNotContainManifest" xml:space="preserve">
     <value>Package does not contain a manifest.</value>
   </data>
+  <data name="CannotCreateEmptyPackage" xml:space="preserve">
+    <value>Cannot create a package that has no dependencies nor content.</value>
+  </data>
+  <data name="InvalidPackageId" xml:space="preserve">
+    <value>Package id '{0}' is invalid.</value>
+  </data>
+  <data name="PackageAuthoring_FileNotFound" xml:space="preserve">
+    <value>File not found: '{0}'.</value>
+  </data>
 </root>

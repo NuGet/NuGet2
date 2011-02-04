@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
-using NuGet;
 using Microsoft.Win32;
+using NuGet;
 
 namespace PackageExplorerViewModel {
    
@@ -14,6 +14,8 @@ namespace PackageExplorerViewModel {
         private IList<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
+        private ICommand _saveCommand, _editPackageCommand;
+        private bool _isInEditMode;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -26,8 +28,16 @@ namespace PackageExplorerViewModel {
             PackageSource = source;
         }
 
-        public string PackageSource { 
-            get; private set; 
+        public bool IsInEditMode {
+            get {
+                return _isInEditMode;
+            }
+            private set {
+                if (_isInEditMode != value) {
+                    _isInEditMode = value;
+                    RaisePropertyChangeEvent("IsInEditMode");
+                }
+            }
         }
 
         public string WindowTitle {
@@ -82,6 +92,32 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public ICommand SaveCommand {
+            get {
+                if (_saveCommand == null) {
+                    _saveCommand = new SavePackageCommand(this, _package);
+                }
+                return _saveCommand;
+            }
+        }
+
+        public ICommand EditCommand {
+            get {
+                if (_editPackageCommand == null) {
+                    _editPackageCommand = new EditPackageCommand(this, _package);
+                }
+
+                return _editPackageCommand;
+            }
+        }
+
+        #region IPackageViewModel interface
+
+        public string PackageSource {
+            get;
+            private set;
+        }
+
         void IPackageViewModel.ShowFile(string name, string content) {
             CurrentFileName = name;
             CurrentFileContent = content;
@@ -109,5 +145,20 @@ namespace PackageExplorerViewModel {
                 return false;
             }
         }
+
+        IEnumerable<IPackageFile> IPackageViewModel.GetFiles() {
+            return _package.GetFiles();
+        }
+
+        void IPackageViewModel.SetEditMode() {
+            IsInEditMode = true;
+        }
+
+        void IPackageViewModel.CancelEditMode() {
+            IsInEditMode = false;
+        }
+
+        #endregion
+
     }
 }

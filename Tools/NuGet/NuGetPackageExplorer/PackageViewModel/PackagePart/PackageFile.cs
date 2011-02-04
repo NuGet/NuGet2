@@ -28,7 +28,7 @@ namespace PackageExplorerViewModel {
         public ICommand ViewCommand {
             get {
                 if (_viewCommand == null) {
-                    _viewCommand = new ViewContentCommand(this, PackageViewModel);
+                    _viewCommand = new ViewContentCommand(PackageViewModel, this);
                 }
 
                 return _viewCommand;
@@ -38,7 +38,7 @@ namespace PackageExplorerViewModel {
         public ICommand SaveCommand {
             get {
                 if (_saveCommand == null) {
-                    _saveCommand = new SaveContentCommand(this, PackageViewModel);
+                    _saveCommand = new SaveContentCommand(PackageViewModel, this);
                 }
 
                 return _saveCommand;

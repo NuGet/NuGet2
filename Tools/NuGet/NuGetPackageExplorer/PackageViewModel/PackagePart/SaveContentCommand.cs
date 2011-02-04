@@ -9,7 +9,7 @@ namespace PackageExplorerViewModel {
         private PackageFile _file;
         private IPackageViewModel _packageViewModel;
 
-        public SaveContentCommand(PackageFile file, IPackageViewModel packageViewModel) {
+        public SaveContentCommand(IPackageViewModel packageViewModel, PackageFile file) {
             _file = file;
             _packageViewModel = packageViewModel;
         }

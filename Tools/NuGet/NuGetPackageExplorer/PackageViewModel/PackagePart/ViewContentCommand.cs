@@ -8,11 +8,11 @@ namespace PackageExplorerViewModel {
     internal class ViewContentCommand : ICommand {
 
         private readonly PackageFile _file;
-        private readonly IPackageViewModel _showFileContentHandler;
+        private readonly IPackageViewModel _packageViewModel;
 
-        public ViewContentCommand(PackageFile file, IPackageViewModel showFileContentHandler) {
+        public ViewContentCommand(IPackageViewModel packageViewModel, PackageFile file) {
             _file = file;
-            _showFileContentHandler = showFileContentHandler;
+            _packageViewModel = packageViewModel;
         }
 
         public bool CanExecute(object parameter) {
@@ -22,8 +22,8 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            if (_showFileContentHandler != null) {
-                _showFileContentHandler.ShowFile(_file.Name, ReadFileContent(_file));
+            if (_packageViewModel != null) {
+                _packageViewModel.ShowFile(_file.Name, ReadFileContent(_file));
             }
         }
 
