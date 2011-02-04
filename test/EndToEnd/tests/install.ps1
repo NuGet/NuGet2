@@ -190,9 +190,9 @@ function Test-FSharpSimpleInstallWithContentFiles {
     # Assert
     Assert-Package $p jquery
     Assert-SolutionPackage jquery
-    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.4.4.js)
-    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.4.4.min.js)
-    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.4.4-vsdoc.js)
+    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5.js)
+    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5.min.js)
+    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5-vsdoc.js)
 }
 
 function Test-FSharpSimpleWithAssemblyReference {

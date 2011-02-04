@@ -12,7 +12,7 @@ function Test-TabExpansionForInstallPackageShowSuggestionsForPackageId {
 function Test-TabExpansionForInstallPackageShowSuggestionsForPackageIdWithFilter {
 
     # Act
-    $suggestions = TabExpansion 'Install-Package sql' 'sql'
+    $suggestions = @(TabExpansion 'Install-Package sql' 'sql')
 
     # Assert
     Assert-True ($suggestions.Count -gt 0)
