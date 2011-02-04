@@ -15,7 +15,9 @@ namespace PackageExplorer {
                 }
                 else {
                     IEnumerable<string> parts = (IEnumerable<string>)value;
-                    return String.Join(", ", parts);
+                    if (parts != null) {
+                        return String.Join(", ", parts);
+                    }
                 }
             }
 

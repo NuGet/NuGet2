@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using NuGet.Resources;
+using NuGet;
 
 namespace NuGet {
     [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
@@ -109,6 +110,8 @@ namespace NuGet {
         }
 
         private static void ValidateManifestSchema(XDocument document) {
+            CheckSchemaVersion(document);
+
             // Create the schema set
             var schemaSet = new XmlSchemaSet();
             using (Stream schemaStream = GetSchemaStream()) {
@@ -122,6 +125,26 @@ namespace NuGet {
                     throw new InvalidOperationException(e.Message);
                 }
             });
+        }
+
+        private static void CheckSchemaVersion(XDocument document) {
+            // Get the metadata node and look for the schemaVersion attribute
+            XElement metadata = document.Root.Element(XName.Get("metadata", Constants.ManifestSchemaNamespace));
+            if (metadata != null) {
+                string schemaVersionString = metadata.GetOptionalAttributeValue("schemaVersion");
+
+                // If there is any schemaVersion attribute then fail
+                if (!String.IsNullOrEmpty(schemaVersionString)) {
+                    // Get the package id for error reporting.
+                    string packageId = metadata.GetOptionalElementValue("id", Constants.ManifestSchemaNamespace);
+
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                                      NuGetResources.IncompatibleSchema,
+                                      packageId,
+                                      typeof(Manifest).Assembly.GetNameSafe().Version));
+                }
+            }
         }
 
         private static Stream GetSchemaStream() {

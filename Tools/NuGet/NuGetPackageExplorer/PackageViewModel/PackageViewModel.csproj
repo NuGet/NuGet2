@@ -51,11 +51,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ApplyEditCommand.cs" />
+    <Compile Include="Commands\CancelEditCommand.cs" />
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
     <Compile Include="IPackageViewMode.cs" />
-    <Compile Include="PackageMetadata.cs" />
+    <Compile Include="EditablePackageMetadata.cs" />
     <Compile Include="PackagePart\PackageFile.cs" />
     <Compile Include="PackagePart\PackageFolder.cs" />
     <Compile Include="PackagePart\PackagePart.cs" />

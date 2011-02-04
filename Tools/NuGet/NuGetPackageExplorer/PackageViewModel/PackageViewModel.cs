@@ -11,10 +11,13 @@ namespace PackageExplorerViewModel {
     public class PackageViewModel : INotifyPropertyChanged, IPackageViewModel {
 
         private readonly IPackage _package;
+        private IPackageMetadata _packageMetadata;
+        private readonly EditablePackageMetadata _editablePackageMetadata;
         private IList<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
-        private ICommand _saveCommand, _editPackageCommand;
+        private ICommand _saveCommand, _editCommand;
+        private ICommand _cancelCommand, _applyCommand;
         private bool _isInEditMode;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -24,7 +27,8 @@ namespace PackageExplorerViewModel {
                 throw new ArgumentNullException("package");
             }
             _package = package;
-
+            _packageMetadata = _package;
+            _editablePackageMetadata = new EditablePackageMetadata();
             PackageSource = source;
         }
 
@@ -48,7 +52,19 @@ namespace PackageExplorerViewModel {
 
         public IPackageMetadata PackageMetadata {
             get {
-                return _package;
+                return _packageMetadata;
+            }
+            private set {
+                if (_packageMetadata != value) {
+                    _packageMetadata = value;
+                    RaisePropertyChangeEvent("PackageMetadata");
+                }
+            }
+        }
+
+        public EditablePackageMetadata EditablePackageMetadata {
+            get {
+                return _editablePackageMetadata;
             }
         }
 
@@ -92,10 +108,12 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        #region Commands
+
         public ICommand SaveCommand {
             get {
                 if (_saveCommand == null) {
-                    _saveCommand = new SavePackageCommand(this, _package);
+                    _saveCommand = new SavePackageCommand(this);
                 }
                 return _saveCommand;
             }
@@ -103,15 +121,36 @@ namespace PackageExplorerViewModel {
 
         public ICommand EditCommand {
             get {
-                if (_editPackageCommand == null) {
-                    _editPackageCommand = new EditPackageCommand(this, _package);
+                if (_editCommand == null) {
+                    _editCommand = new EditPackageCommand(this);
                 }
-
-                return _editPackageCommand;
+                return _editCommand;
             }
         }
 
-        #region IPackageViewModel interface
+        public ICommand CancelCommand {
+            get {
+                if (_cancelCommand == null) {
+                    _cancelCommand = new CancelEditCommand(this);
+                }
+
+                return _cancelCommand;
+            }
+        }
+
+        public ICommand ApplyCommand {
+            get {
+                if (_applyCommand == null) {
+                    _applyCommand = new ApplyEditCommand(this);
+                }
+
+                return _applyCommand;
+            }
+        }
+
+        #endregion
+
+        #region IPackageViewModel interface implementations
 
         public string PackageSource {
             get;
@@ -150,7 +189,9 @@ namespace PackageExplorerViewModel {
             return _package.GetFiles();
         }
 
-        void IPackageViewModel.SetEditMode() {
+        void IPackageViewModel.StartEditMode() {
+            _editablePackageMetadata.CopyFrom(PackageMetadata);
+            RaisePropertyChangeEvent("EditablePackageMetadata");
             IsInEditMode = true;
         }
 
@@ -158,7 +199,11 @@ namespace PackageExplorerViewModel {
             IsInEditMode = false;
         }
 
+        void IPackageViewModel.ApplyPackageMetadataChanges() {
+            PackageMetadata = EditablePackageMetadata.Clone();
+            IsInEditMode = false;
+        }
+        
         #endregion
-
     }
 }

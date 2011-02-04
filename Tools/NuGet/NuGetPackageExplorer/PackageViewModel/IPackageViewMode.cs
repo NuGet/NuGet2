@@ -1,10 +1,10 @@
-﻿
-using NuGet;
+﻿using NuGet;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace PackageExplorerViewModel {
 
-    public interface IPackageViewModel {
+    public interface IPackageViewModel : INotifyPropertyChanged {
 
         string PackageSource { get; }
 
@@ -13,9 +13,15 @@ namespace PackageExplorerViewModel {
         bool OpenSaveFileDialog(string defaultName, out string selectedFileName);
 
         IEnumerable<IPackageFile> GetFiles();
+          
+        bool IsInEditMode { get; }
 
-        void SetEditMode();
+        void StartEditMode();
 
         void CancelEditMode();
+
+        void ApplyPackageMetadataChanges();
+
+        IPackageMetadata PackageMetadata { get; }
     }
 }

@@ -62,6 +62,7 @@
     <Compile Include="Packages\IPackageMetadata.cs" />
     <Compile Include="Packages\IPackagePathResolver.cs" />
     <Compile Include="Packages\IServerPackageMetadata.cs" />
+    <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
     <Compile Include="Authoring\Manifest.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Packages\ZipPackage.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageFile.cs" />
+    <Compile Include="Utility\XElementExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetResources.resx">

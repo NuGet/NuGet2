@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Windows.Input;
-using NuGet;
 
 namespace PackageExplorerViewModel {
-    internal class EditPackageCommand : CommandBase, ICommand {
+    internal class CancelEditCommand : CommandBase, ICommand {
 
-        public EditPackageCommand(IPackageViewModel viewModel) : base(viewModel) {
+        public CancelEditCommand(IPackageViewModel packageViewModel) : base(packageViewModel) {
         }
 
         public bool CanExecute(object parameter) {
@@ -15,7 +17,7 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            ViewModel.StartEditMode();
+             ViewModel.CancelEditMode();
         }
     }
 }

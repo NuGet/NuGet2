@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Shell;
 using Microsoft.Win32;
 using NuGet;
@@ -113,6 +114,11 @@ namespace PackageExplorer {
 
         private void CloseMenuItem_Click(object sender, RoutedEventArgs e) {
             DataContext = null;
+        }
+
+        private void CanCloseMenuItem(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = DataContext != null;
+            e.Handled = true;
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e) {

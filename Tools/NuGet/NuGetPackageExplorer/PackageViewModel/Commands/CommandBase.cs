@@ -7,13 +7,10 @@ using NuGet;
 namespace PackageExplorerViewModel {
     internal class CommandBase {
 
-        protected CommandBase(IPackageViewModel viewModel, IPackage package) {
+        protected CommandBase(IPackageViewModel viewModel) {
             this.ViewModel = viewModel;
-            this.Package = package;
         }
 
         protected IPackageViewModel ViewModel { get; private set; }
-
-        protected IPackage Package { get; private set; }
     }
 }

@@ -16,51 +16,61 @@
         </Style>
     </UserControl.Resources>
 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+                <!-- Id -->
+                <StackPanel Orientation="Horizontal" Grid.Row="0">
+                    <Label Target="IdBox" Style="{StaticResource LabelStyle}" Content="_Id" />
+                    <TextBox x:Name="IdBox" Style="{StaticResource TextBoxStyle}" Text="{Binding EditablePackageMetadata.Id}" />
+                </StackPanel>
 
-            <!-- Id -->
-            <StackPanel Orientation="Horizontal" Grid.Row="0">
-                <Label Target="IdBox" Style="{StaticResource LabelStyle}" Content="_Id" />
-                <TextBox x:Name="IdBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Id}" />
-            </StackPanel>
+                <!-- Version -->
+                <!--<StackPanel Orientation="Horizontal" Grid.Row="1">
+                    <Label Target="VersionBox" Style="{StaticResource LabelStyle}" Content="_Version" />
+                    <TextBox x:Name="VersionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Version}" />
+                </StackPanel>-->
 
-            <!-- Version -->
-            <StackPanel Orientation="Horizontal" Grid.Row="1">
-                <Label Target="VersionBox" Style="{StaticResource LabelStyle}" Content="_Version" />
-                <TextBox x:Name="VersionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Version}" />
-            </StackPanel>
+                <!-- Title -->
+                <StackPanel Orientation="Horizontal" Grid.Row="2">
+                    <Label Target="TitleBox" Style="{StaticResource LabelStyle}" Content="_Title" />
+                    <TextBox x:Name="TitleBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Title}" />
+                </StackPanel>
 
-            <!-- Title -->
-            <StackPanel Orientation="Horizontal" Grid.Row="2">
-                <Label Target="TitleBox" Style="{StaticResource LabelStyle}" Content="_Title" />
-                <TextBox x:Name="TitleBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Title}" />
-            </StackPanel>
-            
-            
-            <!-- Button -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="14">
-                <Button Content="_Update" Margin="0,0,5,0" />
-                <Button Content="_Cancel" Margin="5,0,0,0" />
-            </StackPanel>
-        </Grid>
-    </ScrollViewer>
+                <!-- Description -->
+                <StackPanel Orientation="Horizontal" Grid.Row="3">
+                    <Label Target="DescriptionBox" Style="{StaticResource LabelStyle}" Content="_Description" />
+                    <TextBox x:Name="DescriptionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Description}" />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Button -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="_OK" Margin="0,0,5,0" Command="{Binding ApplyCommand}" />
+            <Button Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </Grid>
 </UserControl>

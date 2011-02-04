@@ -10,7 +10,7 @@
         MinWidth="400" 
         MinHeight="300" 
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
-        AllowDrop="True" 
+        AllowDrop="True"
         DragOver="Window_DragOver" 
         Drop="Window_Drop">
 
@@ -150,6 +150,16 @@
         </ResourceDictionary>
     </Window.Resources>
     
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="O" Command="Open" />
+        <KeyBinding Modifiers="Control" Key="F4" Command="Close" />
+    </Window.InputBindings>
+    
+    <Window.CommandBindings>
+        <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
+        <CommandBinding Command="Close" Executed="CloseMenuItem_Click" CanExecute="CanCloseMenuItem" />
+    </Window.CommandBindings>
+    
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -157,13 +167,14 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Menu bar -->
         <Menu>
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="OpenMenuItem_Click" />
+                <MenuItem Command="Open" />
                 <MenuItem Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" />
                 <MenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
                 <Separator />
-                <MenuItem Header="_Close" Click="CloseMenuItem_Click" />
+                <MenuItem Command="Close" />
                 <Separator />
                 <MenuItem Header="E_xit" Click="ExitMenuItem_Click" />
             </MenuItem>
@@ -177,7 +188,8 @@
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Row="1" x:Name="ContentGrid">
+        <!-- Main content -->
+        <Grid Grid.Row="1" x:Name="ContentGrid" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
             
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -194,22 +206,15 @@
                     <ContentControl 
                         Content="{Binding PackageMetadata}" 
                         ContentTemplate="{StaticResource PackageDetailTemplate}" 
-                        Visibility="{Binding IsInEditMode, Converter={StaticResource invertedBoolToVis}, FallbackValue=Collapsed}">
+                        Visibility="{Binding IsInEditMode, Converter={StaticResource invertedBoolToVis}}">
                     </ContentControl>
 
-                    <ContentControl 
-                        Content="{Binding PackageMetadata}"
-                        Visibility="{Binding IsInEditMode, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}">
-                        <ContentControl.ContentTemplate>
-                            <DataTemplate>
-                                <self:PackageMetadataEditor />
-                            </DataTemplate>
-                        </ContentControl.ContentTemplate>
-                    </ContentControl>
+                    <self:PackageMetadataEditor 
+                        Visibility="{Binding IsInEditMode, Converter={StaticResource boolToVis}}" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents" HorizontalContentAlignment="Left" FontSize="12">
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents" FontSize="12">
                 <TreeView ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
                 </TreeView>
             </GroupBox>
@@ -236,6 +241,7 @@
             </GroupBox>
         </Grid>
         
+        <!-- Status bar -->
         <StatusBar Grid.Row="2">
             <StatusBarItem Content="{Binding PackageSource}" />
             <StatusBarItem x:Name="BuildStatusItem" HorizontalAlignment="Right" />

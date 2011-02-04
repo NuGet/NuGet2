@@ -159,4 +159,7 @@
   <data name="PackageAuthoring_FileNotFound" xml:space="preserve">
     <value>File not found: '{0}'.</value>
   </data>
+  <data name="IncompatibleSchema" xml:space="preserve">
+    <value>The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version.</value>
+  </data>
 </root>
