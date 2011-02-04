@@ -232,6 +232,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version..
+        /// </summary>
+        internal static string IncompatibleSchema {
+            get {
+                return ResourceManager.GetString("IncompatibleSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There was an error while processing the request. Please verify that &apos;{0}&apos; is a valid feed..
         /// </summary>
         internal static string InvalidFeed {

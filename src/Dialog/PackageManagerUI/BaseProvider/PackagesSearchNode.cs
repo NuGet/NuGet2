@@ -40,13 +40,11 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("newSearchText");
             }
 
-            if (_searchText != newSearchText) {
-                _searchText = newSearchText;
+            _searchText = newSearchText;
 
-                if (IsSelected) {
-                    ResetQuery();
-                    LoadPage(1);
-                }
+            if (IsSelected) {
+                ResetQuery();
+                LoadPage(1);
             }
         }
 

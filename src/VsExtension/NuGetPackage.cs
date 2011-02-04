@@ -19,7 +19,7 @@ namespace NuGet.Tools {
     /// This is the class that implements the package exposed by this assembly.
     /// </summary>
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", "1.1", IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(PowerConsoleToolWindow),
         Style = VsDockStyle.Tabbed,
@@ -28,6 +28,10 @@ namespace NuGet.Tools {
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent Packages", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
+    [FontAndColorsRegistration(
+        "Package Manager Console", 
+        NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString, 
+        "{" + GuidList.guidNuGetPkgString + "}")]
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
         private DTE _dte;
