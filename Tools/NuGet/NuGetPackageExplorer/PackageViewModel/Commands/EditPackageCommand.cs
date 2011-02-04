@@ -6,10 +6,19 @@ namespace PackageExplorerViewModel {
     internal class EditPackageCommand : CommandBase, ICommand {
 
         public EditPackageCommand(IPackageViewModel viewModel) : base(viewModel) {
+            viewModel.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnPropertyChanged);
+        }
+
+        void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+            if (e.PropertyName.Equals("IsInEditMode")) {
+                if (CanExecuteChanged != null) {
+                    CanExecuteChanged(this, EventArgs.Empty);
+                }
+            }
         }
 
         public bool CanExecute(object parameter) {
-            return true;
+            return !ViewModel.IsInEditMode;
         }
 
         public event EventHandler CanExecuteChanged;

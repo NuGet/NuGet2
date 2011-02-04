@@ -111,6 +111,8 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\CountToVisibilityConverter.cs" />
     <Compile Include="Converters\HalfLengthConverter.cs" />
+    <Compile Include="Converters\UriConverter.cs" />
+    <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="PackageMetadataEditor.xaml.cs">
       <DependentUpon>PackageMetadataEditor.xaml</DependentUpon>
     </Compile>

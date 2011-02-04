@@ -126,6 +126,9 @@
   <data name="Dialog_IdLabel" xml:space="preserve">
     <value>Id:</value>
   </data>
+  <data name="Dialog_LanguageLabel" xml:space="preserve">
+    <value>Language:</value>
+  </data>
   <data name="Dialog_MoreInfo" xml:space="preserve">
     <value>More Information</value>
   </data>

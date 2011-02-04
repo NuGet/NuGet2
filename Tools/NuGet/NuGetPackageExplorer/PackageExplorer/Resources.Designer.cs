@@ -88,6 +88,15 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language:.
+        /// </summary>
+        public static string Dialog_LanguageLabel {
+            get {
+                return ResourceManager.GetString("Dialog_LanguageLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to More Information.
         /// </summary>
         public static string Dialog_MoreInfo {

@@ -3,16 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:self="clr-namespace:PackageExplorer"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.Resources>
+        <self:VersionConverter x:Key="VersionConverter" />
+        <self:UriConverter x:Key="UriConverter" />
+        
         <Style TargetType="{x:Type Label}" x:Key="LabelStyle">
+            <Setter Property="Margin" Value="0, 2, 0, 0" />
+        </Style>
 
+        <Style TargetType="{x:Type Label}" x:Key="RequiredLabelStyle" BasedOn="{StaticResource LabelStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
         <Style TargetType="{x:Type TextBox}" x:Key="TextBoxStyle">
-            <Setter Property="Width" Value="200" />
+            <Setter Property="Margin" Value="0, 4, 3, 0" />
+        </Style>
+
+        <Style TargetType="{x:Type CheckBox}" x:Key="CheckBoxStyle">
+            <Setter Property="Margin" Value="5, 4, 3, 2" />
+        </Style>
+
+        <Style TargetType="{x:Type ComboBox}" x:Key="ComboBoxStyle">
+            <Setter Property="Margin" Value="0, 4, 3, 0" />
         </Style>
     </UserControl.Resources>
 
@@ -24,7 +40,13 @@
         
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -46,41 +68,67 @@
                 </Grid.BindingGroup>
 
                 <!-- Id -->
-                <StackPanel Orientation="Horizontal" Grid.Row="0">
-                    <Label Target="IdBox" Style="{StaticResource LabelStyle}" Content="_Id" />
-                    <TextBox x:Name="IdBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Id}" />
-                </StackPanel>
+                <Label Grid.Row="0" Grid.Column="0" Target="IdBox" Style="{StaticResource RequiredLabelStyle}" Content="_Id" />
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="IdBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Id}" />
 
                 <!-- Version -->
-                <!--<StackPanel Orientation="Horizontal" Grid.Row="1">
-                    <Label Target="VersionBox" Style="{StaticResource LabelStyle}" Content="_Version" />
-                    <TextBox x:Name="VersionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding Version}" />
-                </StackPanel>-->
+                <Label Grid.Row="1" Grid.Column="0" Target="VersionBox" Style="{StaticResource RequiredLabelStyle}" Content="_Version" />
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="VersionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Version, Converter={StaticResource VersionConverter}}" />
 
                 <!-- Title -->
-                <StackPanel Orientation="Horizontal" Grid.Row="2">
-                    <Label Target="TitleBox" Style="{StaticResource LabelStyle}" Content="_Title" />
-                    <TextBox x:Name="TitleBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Title}" />
-                </StackPanel>
+                <Label Grid.Row="2" Grid.Column="0" Target="TitleBox" Style="{StaticResource LabelStyle}" Content="_Title" />
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="TitleBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Title}" />
 
                 <!-- Authors -->
-                <!--<StackPanel Orientation="Horizontal" Grid.Row="3">
-                    <Label Target="AuthorsBox" Style="{StaticResource LabelStyle}" Content="_Authors" />
-                    <TextBox x:Name="AuthorsBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Authors}" />
-                </StackPanel>-->
+                <Label Grid.Row="3" Grid.Column="0" Target="AuthorsBox" Style="{StaticResource RequiredLabelStyle}" Content="_Authors" />
+                <TextBox Grid.Row="3" Grid.Column="1" x:Name="AuthorsBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Authors}" />
+
+                <!-- Owners -->
+                <Label Grid.Row="4" Grid.Column="0" Target="OwnersBox" Style="{StaticResource LabelStyle}" Content="_Owners" />
+                <TextBox Grid.Row="4" Grid.Column="1" x:Name="OwnersBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Owners}" />
+
+                <!-- IconUrl -->
+                <Label Grid.Row="5" Grid.Column="0" Target="IconUrlBox" Style="{StaticResource LabelStyle}" Content="Icon _Url" />
+                <TextBox Grid.Row="5" Grid.Column="1" x:Name="IconUrlBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.IconUrl, Converter={StaticResource UriConverter}}" />
+
+                <!-- ProjectUrl -->
+                <Label Grid.Row="6" Grid.Column="0" Target="ProjectUrlBox" Style="{StaticResource LabelStyle}" Content="_Project Url" />
+                <TextBox Grid.Row="6" Grid.Column="1" x:Name="ProjectUrlBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.ProjectUrl, Converter={StaticResource UriConverter}}" />
+
+                <!-- Require License Acceptan -->
+                <CheckBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="{Binding PackageMetadata.RequireLicenseAcceptance}" Content="_Require License Acceptance" Style="{StaticResource CheckBoxStyle}" />
+                
+                <!-- LicenseUrl -->
+                <Label Grid.Row="9" Grid.Column="0" Target="LicenseUrlBox" Style="{StaticResource LabelStyle}" Content="_License Url" />
+                <TextBox Grid.Row="9" Grid.Column="1" x:Name="LicenseUrlBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.LicenseUrl, Converter={StaticResource UriConverter}}" />
 
                 <!-- Description -->
-                <!--<StackPanel Orientation="Horizontal" Grid.Row="8">
-                    <Label Target="DescriptionBox" Style="{StaticResource LabelStyle}" Content="_Description" />
-                    <TextBox x:Name="DescriptionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Description}" />
-                </StackPanel>-->
+                <Label Grid.Row="10" Grid.Column="0" Target="DescriptionBox" Style="{StaticResource RequiredLabelStyle}" Content="_Description" />
+                <TextBox Grid.Row="10" Grid.Column="1" Height="80" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" x:Name="DescriptionBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Description}" AcceptsReturn="True" />
+
+                <!-- Summary -->
+                <Label Grid.Row="11" Grid.Column="0" Target="SummaryBox" Style="{StaticResource LabelStyle}" Content="_Summary" />
+                <TextBox Grid.Row="11" Grid.Column="1" Height="80" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" x:Name="SummaryBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Summary}" AcceptsReturn="True" />
+
+                <!-- Language -->
+                <Label Grid.Row="12" Grid.Column="0" Target="LanguageBox" Style="{StaticResource LabelStyle}" Content="La_nguage" />
+                <ComboBox Grid.Row="12" Grid.Column="1" x:Name="LanguageBox" SelectedItem="{Binding PackageMetadata.Language}" HorizontalAlignment="Left" Style="{StaticResource ComboBoxStyle}" />
+
+                <!-- Tags -->
+                <Label Grid.Row="13" Grid.Column="0" Target="TagsBox" Style="{StaticResource LabelStyle}" Content="Ta_gs" />
+                <TextBox Grid.Row="13" Grid.Column="1" x:Name="TagsBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Tags}" />
+
+                <!-- Dependencies -->
+                <Label Grid.Row="14" Grid.Column="0" Style="{StaticResource LabelStyle}" Content="Dependen_cies" />
+                <!--<TextBox Grid.Row="14" Grid.Column="1" x:Name="DependenciesBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Dep}" />-->
+
             </Grid>
         </ScrollViewer>
 
         <!-- Button -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="_OK" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
-            <Button Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
+            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="7,0,7,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
+            <Button x:Name="CancelButton" Padding="7,0,7,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
         </StackPanel>
     </Grid>
 </UserControl>

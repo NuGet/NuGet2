@@ -17,8 +17,8 @@ namespace PackageExplorerViewModel {
             this.Id = source.Id;
             this.Version = source.Version;
             this.Title = source.Title;
-            //this.Authors = source.Authors;
-            //this.Owners = source.Owners;
+            this.Authors = ConvertToString(source.Authors);
+            this.Owners = ConvertToString(source.Owners);
             this.IconUrl = source.IconUrl;
             this.LicenseUrl = source.LicenseUrl;
             this.ProjectUrl = source.ProjectUrl;
@@ -27,14 +27,14 @@ namespace PackageExplorerViewModel {
             this.Summary = source.Summary;
             this.Language = source.Language;
             this.Tags = source.Tags;
-            //this.Dependencies = source.Dependencies;
+            this.Dependencies = new List<PackageDependency>(source.Dependencies);
         }
 
         public string Id { get; set; }
         public Version Version { get; set; }
         public string Title { get; set; }
-        public string Authors { get; private set; }
-        public string Owners { get; private set; }
+        public string Authors { get; set; }
+        public string Owners { get; set; }
         public Uri IconUrl { get; set; }
         public Uri LicenseUrl { get; set; }
         public Uri ProjectUrl { get; set; }
@@ -47,16 +47,22 @@ namespace PackageExplorerViewModel {
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
-                string authors = this.Authors;
-                return authors == null ? Enumerable.Empty<string>() : authors.Split(',');
+                return SplitString(this.Authors);
             }
         }
 
         IEnumerable<string> IPackageMetadata.Owners {
             get {
-                string owners = this.Owners;
-                return owners == null ? Enumerable.Empty<string>() : owners.Split(',');
+                return SplitString(this.Owners);
             }
+        }
+
+        private IEnumerable<string> SplitString(string text) {
+            return text == null ? Enumerable.Empty<string>() : text.Split(',').Select(a => a.Trim());
+        }
+
+        private string ConvertToString(IEnumerable<string> items) {
+            return String.Join(", ", items);
         }
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {

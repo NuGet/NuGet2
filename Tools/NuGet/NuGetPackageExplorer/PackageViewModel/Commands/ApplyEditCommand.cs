@@ -17,10 +17,11 @@ namespace PackageExplorerViewModel {
         public void Execute(object parameter) {
             var bindingGroup = parameter as BindingGroup;
             if (bindingGroup != null) {
-                bindingGroup.CommitEdit();
+                bool valid = bindingGroup.CommitEdit();
+                if (valid) {
+                    ViewModel.CommitEdit();
+                }
             }
-
-            ViewModel.CommitEdit();
         }
     }
 }

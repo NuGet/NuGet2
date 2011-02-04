@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Globalization;
 
 namespace PackageExplorer {
     /// <summary>
@@ -19,6 +20,11 @@ namespace PackageExplorer {
     public partial class PackageMetadataEditor : UserControl {
         public PackageMetadataEditor() {
             InitializeComponent();
+            PopulateLanguagesForLanguageBox();
+        }
+
+        private void PopulateLanguagesForLanguageBox() {
+            LanguageBox.ItemsSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures).Select(c => c.Name).OrderBy(p => p, StringComparer.OrdinalIgnoreCase);
         }
 
         public BindingGroup MetadataBindingGroup {
