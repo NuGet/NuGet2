@@ -46,7 +46,7 @@ namespace PackageExplorerViewModel {
         private void SavePackage(string packageSource) {
             var builder = new PackageBuilder();
             builder.Files.AddRange(ViewModel.GetFiles());
-            
+            // TODO
 
             using (Stream stream = File.OpenWrite(packageSource)) {
                 builder.Save(stream);

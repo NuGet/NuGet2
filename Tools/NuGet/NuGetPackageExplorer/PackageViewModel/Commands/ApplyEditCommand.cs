@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace PackageExplorerViewModel {
@@ -17,7 +15,12 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            ViewModel.ApplyPackageMetadataChanges();
+            var bindingGroup = parameter as BindingGroup;
+            if (bindingGroup != null) {
+                bindingGroup.CommitEdit();
+            }
+
+            ViewModel.CommitEdit();
         }
     }
 }

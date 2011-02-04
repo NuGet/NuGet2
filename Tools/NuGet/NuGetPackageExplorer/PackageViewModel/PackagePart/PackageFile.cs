@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using NuGet;
 using System.Windows.Input;
+using NuGet;
 
 namespace PackageExplorerViewModel {
     public class PackageFile : PackagePart {

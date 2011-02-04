@@ -11,8 +11,7 @@ namespace PackageExplorerViewModel {
     public class PackageViewModel : INotifyPropertyChanged, IPackageViewModel {
 
         private readonly IPackage _package;
-        private IPackageMetadata _packageMetadata;
-        private readonly EditablePackageMetadata _editablePackageMetadata;
+        private EditablePackageMetadata _packageMetadata;
         private IList<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
@@ -27,8 +26,7 @@ namespace PackageExplorerViewModel {
                 throw new ArgumentNullException("package");
             }
             _package = package;
-            _packageMetadata = _package;
-            _editablePackageMetadata = new EditablePackageMetadata();
+            _packageMetadata = new EditablePackageMetadata(_package);
             PackageSource = source;
         }
 
@@ -46,11 +44,11 @@ namespace PackageExplorerViewModel {
 
         public string WindowTitle {
             get {
-                return Resources.Dialog_Title + " - " + _package.ToString();
+                return Resources.Dialog_Title + " - " + _packageMetadata.ToString();
             }
         }
 
-        public IPackageMetadata PackageMetadata {
+        public EditablePackageMetadata PackageMetadata {
             get {
                 return _packageMetadata;
             }
@@ -59,12 +57,6 @@ namespace PackageExplorerViewModel {
                     _packageMetadata = value;
                     RaisePropertyChangeEvent("PackageMetadata");
                 }
-            }
-        }
-
-        public EditablePackageMetadata EditablePackageMetadata {
-            get {
-                return _editablePackageMetadata;
             }
         }
 
@@ -95,10 +87,28 @@ namespace PackageExplorerViewModel {
         public IList<PackagePart> PackageParts {
             get {
                 if (_packageParts == null) {
-                    _packageParts = PathToTreeConverter.Convert(_package.GetFiles().ToList(), this).Children;
+                    PackageFolder root = PathToTreeConverter.Convert(_package.GetFiles().ToList());
+                    _packageParts = root.Children;
+
+                    AssignViewModelToFiles(root);
                 }
 
                 return _packageParts;
+            }
+        }
+
+        private void AssignViewModelToFiles(PackageFolder root) {
+            foreach (var part in root.Children) {
+                var file = part as PackageFile;
+                if (file != null) {
+                    file.PackageViewModel = this;
+                }
+                else {
+                    var folder = part as PackageFolder;
+                    if (folder != null) {
+                        AssignViewModelToFiles(folder);
+                    }
+                }
             }
         }
 
@@ -157,6 +167,11 @@ namespace PackageExplorerViewModel {
             private set;
         }
 
+        public bool HasEdit {
+            get;
+            private set;
+        }
+
         void IPackageViewModel.ShowFile(string name, string content) {
             CurrentFileName = name;
             CurrentFileContent = content;
@@ -189,19 +204,18 @@ namespace PackageExplorerViewModel {
             return _package.GetFiles();
         }
 
-        void IPackageViewModel.StartEditMode() {
-            _editablePackageMetadata.CopyFrom(PackageMetadata);
-            RaisePropertyChangeEvent("EditablePackageMetadata");
+        void IPackageViewModel.BegingEdit() {
             IsInEditMode = true;
         }
 
-        void IPackageViewModel.CancelEditMode() {
+        void IPackageViewModel.CancelEdit() {
             IsInEditMode = false;
         }
 
-        void IPackageViewModel.ApplyPackageMetadataChanges() {
-            PackageMetadata = EditablePackageMetadata.Clone();
+        void IPackageViewModel.CommitEdit() {
+            HasEdit = true;
             IsInEditMode = false;
+            RaisePropertyChangeEvent("WindowTitle");
         }
         
         #endregion

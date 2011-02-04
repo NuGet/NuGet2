@@ -65,8 +65,8 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public EditablePackageMetadata Clone() {
-            return new EditablePackageMetadata(this);
+        public override string ToString() {
+            return Id + " " + Version.ToString();
         }
     }
 }

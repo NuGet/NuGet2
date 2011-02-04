@@ -20,5 +20,9 @@ namespace PackageExplorer {
         public PackageMetadataEditor() {
             InitializeComponent();
         }
+
+        public BindingGroup MetadataBindingGroup {
+            get { return PackageMetadataGroup; }
+        }
     }
 }

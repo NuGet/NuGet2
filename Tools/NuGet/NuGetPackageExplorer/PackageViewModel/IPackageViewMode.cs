@@ -1,6 +1,6 @@
-﻿using NuGet;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
+using NuGet;
 
 namespace PackageExplorerViewModel {
 
@@ -13,15 +13,15 @@ namespace PackageExplorerViewModel {
         bool OpenSaveFileDialog(string defaultName, out string selectedFileName);
 
         IEnumerable<IPackageFile> GetFiles();
+
+        bool HasEdit { get; }
           
         bool IsInEditMode { get; }
 
-        void StartEditMode();
+        void BegingEdit();
 
-        void CancelEditMode();
+        void CancelEdit();
 
-        void ApplyPackageMetadataChanges();
-
-        IPackageMetadata PackageMetadata { get; }
+        void CommitEdit();
     }
 }

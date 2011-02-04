@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Windows.Data;
 using System.Windows.Input;
-using NuGet;
 
 namespace PackageExplorerViewModel {
     internal class EditPackageCommand : CommandBase, ICommand {
@@ -15,7 +15,12 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            ViewModel.StartEditMode();
+            var bindingGroup = parameter as BindingGroup;
+            if (bindingGroup != null) {
+                bindingGroup.BeginEdit();
+            }
+
+            ViewModel.BegingEdit();
         }
     }
 }
