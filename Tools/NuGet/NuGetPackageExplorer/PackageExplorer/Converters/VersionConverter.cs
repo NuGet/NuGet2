@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Data;
-using System.Globalization;
 
 namespace PackageExplorer {
 
@@ -14,12 +13,17 @@ namespace PackageExplorer {
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             string stringValue = (string)value;
-            Version version;
-            if (Version.TryParse(stringValue, out version)) {
-                return version;
+            if (String.IsNullOrWhiteSpace(stringValue)) {
+                return null;
             }
             else {
-                return DependencyProperty.UnsetValue;
+                Version version;
+                if (Version.TryParse(stringValue, out version)) {
+                    return version;
+                }
+                else {
+                    return DependencyProperty.UnsetValue;
+                }
             }
         }
     }

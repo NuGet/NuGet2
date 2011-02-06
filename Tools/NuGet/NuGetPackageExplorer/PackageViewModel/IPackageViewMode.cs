@@ -6,13 +6,15 @@ namespace PackageExplorerViewModel {
 
     public interface IPackageViewModel : INotifyPropertyChanged {
 
-        string PackageSource { get; }
+        string PackageSource { get; set; }
 
         void ShowFile(string name, string content);
 
         bool OpenSaveFileDialog(string defaultName, out string selectedFileName);
 
         IEnumerable<IPackageFile> GetFiles();
+
+        IPackageMetadata PackageMetadata { get; }
 
         bool HasEdit { get; }
           

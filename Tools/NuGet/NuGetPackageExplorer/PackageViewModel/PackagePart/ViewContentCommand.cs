@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using NuGet;
 
 namespace PackageExplorerViewModel {
     internal class ViewContentCommand : ICommand {

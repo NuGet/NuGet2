@@ -158,6 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\packageicon.png" />
+    <Resource Include="Images\openHS.png" />
+    <Resource Include="Images\saveHS.png" />
+    <Resource Include="Images\CopyHS.png" />
+    <Resource Include="Images\CutHS.png" />
+    <Resource Include="Images\PasteHS.png" />
+    <Resource Include="Images\DeleteHS.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Input;
-using NuGet;
-using System.ComponentModel;
 
 namespace PackageExplorerViewModel {
     internal class SaveContentCommand : ICommand {

@@ -18,6 +18,7 @@ namespace PackageExplorerViewModel {
         private ICommand _saveCommand, _editCommand;
         private ICommand _cancelCommand, _applyCommand;
         private bool _isInEditMode;
+        private string _packageSource;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -163,13 +164,22 @@ namespace PackageExplorerViewModel {
         #region IPackageViewModel interface implementations
 
         public string PackageSource {
-            get;
-            private set;
+            get { return _packageSource; }
+            set {
+                if (_packageSource != value) {
+                    _packageSource = value;
+                    RaisePropertyChangeEvent("PackageSource");
+                }
+            }
         }
 
         public bool HasEdit {
             get;
             private set;
+        }
+
+        IPackageMetadata IPackageViewModel.PackageMetadata {
+            get { return this.PackageMetadata; }
         }
 
         void IPackageViewModel.ShowFile(string name, string content) {
@@ -205,15 +215,20 @@ namespace PackageExplorerViewModel {
         }
 
         void IPackageViewModel.BegingEdit() {
+            // raise the property change event here to force the edit form to rebind 
+            // all controls, which will erase all error states, if any, left over from the previous edit
+            RaisePropertyChangeEvent("PackageMetadata");
             IsInEditMode = true;
         }
 
         void IPackageViewModel.CancelEdit() {
+            PackageMetadata.ResetErrors();
             IsInEditMode = false;
         }
 
         void IPackageViewModel.CommitEdit() {
             HasEdit = true;
+            PackageMetadata.ResetErrors();
             IsInEditMode = false;
             RaisePropertyChangeEvent("WindowTitle");
         }

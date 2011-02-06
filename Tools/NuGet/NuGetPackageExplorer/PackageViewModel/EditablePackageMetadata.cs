@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using NuGet;
 
 namespace PackageExplorerViewModel {
 
-    public class EditablePackageMetadata : IPackageMetadata {
+    public class EditablePackageMetadata : IPackageMetadata, IDataErrorInfo, INotifyPropertyChanged {
+
+        private readonly Dictionary<string, string> _propertyErrors = new Dictionary<string, string>();
+
         public EditablePackageMetadata() {
         }
 
@@ -30,19 +34,216 @@ namespace PackageExplorerViewModel {
             this.Dependencies = new List<PackageDependency>(source.Dependencies);
         }
 
-        public string Id { get; set; }
-        public Version Version { get; set; }
-        public string Title { get; set; }
-        public string Authors { get; set; }
-        public string Owners { get; set; }
-        public Uri IconUrl { get; set; }
-        public Uri LicenseUrl { get; set; }
-        public Uri ProjectUrl { get; set; }
-        public bool RequireLicenseAcceptance { get; set; }
-        public string Description { get; set; }
-        public string Summary { get; set; }
-        public string Language { get; set; }
-        public string Tags { get; set; }
+        private string _id;
+
+        public string Id { 
+            get {
+                return _id;
+            }
+            set {
+                try {
+                    if (String.IsNullOrWhiteSpace(value)) {
+                        throw new ArgumentException("Id is required.");
+                    }
+
+                    PackageIdValidator.ValidatePackageId(value);
+                }
+                catch (Exception ex) {
+                    SetError("Id", ex.Message);
+                    throw;
+                }
+
+                SetError("Id", null);
+                if (_id != value) {
+                    _id = value;
+                    RaisePropertyChange("Id");
+                }
+            }
+        }
+
+        private Version _version;
+        public Version Version {
+            get { return _version; }
+            set {
+                if (value == null) {
+                    string message = "Version is required.";
+                    SetError("Version", message);
+                    throw new ArgumentException(message);
+                }
+
+                SetError("Version", null);
+                if (_version != value) {
+                    _version = value;
+                    RaisePropertyChange("Version");
+                }
+            }
+        }
+
+        private string _title;
+
+        public string Title {
+            get {
+                return _title;
+            }
+            set {
+                if (_title != value) {
+                    _title = value;
+                    RaisePropertyChange("Title");
+                }
+            }
+        }
+
+        private string _authors;
+
+        public string Authors 
+        {
+            get { return _authors; }
+            set {
+                if (String.IsNullOrWhiteSpace(value)) {
+                    string message = "Authors is required.";
+                    SetError("Authors", message);
+                    throw new ArgumentException(message);
+                }
+
+                SetError("Authors", null);
+                if (_authors != value) {
+                    _authors = value;
+                    RaisePropertyChange("Authors");
+                }
+                
+            }
+        }
+
+        private string _owners;
+
+        public string Owners {
+            get {
+                return _owners;
+            }
+            set {
+                if (_owners != value) {
+                    _owners = value;
+                    RaisePropertyChange("Owners");
+                }
+            }
+        }
+
+        private Uri _iconUrl;
+
+        public Uri IconUrl {
+            get {
+                return _iconUrl;
+            }
+            set {
+                if (_iconUrl != value) {
+                    _iconUrl = value;
+                    RaisePropertyChange("IconUrl");
+                }
+            }
+        }
+
+        private Uri _licenseUrl;
+
+        public Uri LicenseUrl {
+            get {
+                return _licenseUrl;
+            }
+            set {
+                if (_licenseUrl != value) {
+                    _licenseUrl = value;
+                    RaisePropertyChange("LicenseUrl");
+                }
+            }
+        }
+
+        private Uri _projectUrl;
+
+        public Uri ProjectUrl {
+            get {
+                return _projectUrl;
+            }
+            set {
+                if (_projectUrl != value) {
+                    _projectUrl = value;
+                    RaisePropertyChange("ProjectUrl");
+                }
+            }
+        }
+        
+        private bool _requireLicenseAcceptance; 
+        public bool RequireLicenseAcceptance {
+            get { return _requireLicenseAcceptance; }
+            set {
+                if (value != _requireLicenseAcceptance) {
+                    _requireLicenseAcceptance = value;
+                    RaisePropertyChange("RequireLicenseAcceptance");
+                    RaisePropertyChange("LicenseUrl");
+                }
+            }
+        }
+
+        private string _description;
+
+        public string Description {
+            get { return _description; }
+            set {
+                if (String.IsNullOrWhiteSpace(value)) {
+                    string message = "Description is required.";
+                    SetError("Description", message);
+                    throw new ArgumentException(message);
+                }
+
+                SetError("Description", null);
+
+                if (_description != value) {
+                    _description = value;
+                    RaisePropertyChange("Description");
+                }
+            }
+        }
+
+        private string _summary;
+
+        public string Summary {
+            get {
+                return _summary;
+            }
+            set {
+                if (_summary != value) {
+                    _summary = value;
+                    RaisePropertyChange("Summary");
+                }
+            }
+        }
+
+        private string _language;
+
+        public string Language {
+            get {
+                return _language;
+            }
+            set {
+                if (_language != value) {
+                    _language = value;
+                    RaisePropertyChange("Language");
+                }
+            }
+        }
+
+        private string _tags;
+
+        public string Tags {
+            get {
+                return _tags;
+            }
+            set {
+                if (_tags != value) {
+                    _tags = value;
+                    RaisePropertyChange("Tags");
+                }
+            }
+        }
+
         public IList<PackageDependency> Dependencies { get; private set; }
 
         IEnumerable<string> IPackageMetadata.Authors {
@@ -73,6 +274,52 @@ namespace PackageExplorerViewModel {
 
         public override string ToString() {
             return Id + " " + Version.ToString();
+        }
+
+        public string Error {
+            get {
+                return null;
+            }
+        }
+
+        public string this[string columnName] {
+            get { return IsValid(columnName); }
+        }
+
+        private string IsValid(string propertyName) {
+
+            if (propertyName == "LicenseUrl") {
+                if (RequireLicenseAcceptance && LicenseUrl == null) {
+                    string message = "Enabling license acceptance requires a license url.";
+                    return message;
+                }
+            }
+
+            string error;
+            _propertyErrors.TryGetValue(propertyName, out error);
+            return error;
+        }
+
+        private void SetError(string property, string error) {
+
+            if (String.IsNullOrEmpty(error)) {
+                _propertyErrors.Remove(property);
+            }
+            else {
+                _propertyErrors[property] = error;
+            }
+        }
+
+        public void ResetErrors() {
+            _propertyErrors.Clear();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChange(string propertyName) {
+            if (PropertyChanged != null) {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }
