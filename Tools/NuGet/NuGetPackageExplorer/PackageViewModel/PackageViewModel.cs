@@ -7,7 +7,7 @@ using Microsoft.Win32;
 using NuGet;
 
 namespace PackageExplorerViewModel {
-   
+
     public class PackageViewModel : INotifyPropertyChanged, IPackageViewModel {
 
         private readonly IPackage _package;
@@ -15,8 +15,7 @@ namespace PackageExplorerViewModel {
         private IList<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
-        private ICommand _saveCommand, _editCommand;
-        private ICommand _cancelCommand, _applyCommand;
+        private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand;
         private bool _isInEditMode;
         private string _packageSource;
 
@@ -187,10 +186,8 @@ namespace PackageExplorerViewModel {
             CurrentFileContent = content;
         }
 
-        bool IPackageViewModel.OpenSaveFileDialog(string defaultName, out string selectedFileName)
-        {
-            var dialog = new SaveFileDialog()
-            {
+        bool IPackageViewModel.OpenSaveFileDialog(string defaultName, out string selectedFileName) {
+            var dialog = new SaveFileDialog() {
                 OverwritePrompt = true,
                 Title = "Save " + defaultName,
                 Filter = "All files (*.*)|*.*",
@@ -198,13 +195,11 @@ namespace PackageExplorerViewModel {
             };
 
             bool? result = dialog.ShowDialog();
-            if (result ?? false)
-            {
+            if (result ?? false) {
                 selectedFileName = dialog.FileName;
                 return true;
             }
-            else
-            {
+            else {
                 selectedFileName = null;
                 return false;
             }
@@ -232,7 +227,11 @@ namespace PackageExplorerViewModel {
             IsInEditMode = false;
             RaisePropertyChangeEvent("WindowTitle");
         }
-        
+
+        void IPackageViewModel.OnSaved() {
+            HasEdit = false;
+        }
+
         #endregion
     }
 }

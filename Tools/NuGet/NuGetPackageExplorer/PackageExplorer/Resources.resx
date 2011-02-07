@@ -123,6 +123,9 @@
   <data name="Dialog_DependenciesLabel" xml:space="preserve">
     <value>Dependencies:</value>
   </data>
+  <data name="Dialog_HelpAbout" xml:space="preserve">
+    <value>For more information, visit http://nuget.codeplex.com.</value>
+  </data>
   <data name="Dialog_IdLabel" xml:space="preserve">
     <value>Id:</value>
   </data>
@@ -135,6 +138,9 @@
   <data name="Dialog_NoDependencyLabel" xml:space="preserve">
     <value>No Dependencies</value>
   </data>
+  <data name="Dialog_OpenFileFilter" xml:space="preserve">
+    <value>NuGet package file (*.nupkg)|*.nupkg</value>
+  </data>
   <data name="Dialog_OwnersLabel" xml:space="preserve">
     <value>Owners:</value>
   </data>
@@ -143,6 +149,9 @@
   </data>
   <data name="Dialog_RequireLicenseLabel" xml:space="preserve">
     <value>Require License Acceptance:</value>
+  </data>
+  <data name="Dialog_SaveQuestion" xml:space="preserve">
+    <value>You have unsaved changes. Do you want to save your changes?</value>
   </data>
   <data name="Dialog_TagLabel" xml:space="preserve">
     <value>Tags:</value>

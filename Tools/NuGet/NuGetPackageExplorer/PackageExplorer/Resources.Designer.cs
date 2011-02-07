@@ -79,6 +79,15 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For more information, visit http://nuget.codeplex.com..
+        /// </summary>
+        public static string Dialog_HelpAbout {
+            get {
+                return ResourceManager.GetString("Dialog_HelpAbout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Id:.
         /// </summary>
         public static string Dialog_IdLabel {
@@ -115,6 +124,15 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NuGet package file (*.nupkg)|*.nupkg.
+        /// </summary>
+        public static string Dialog_OpenFileFilter {
+            get {
+                return ResourceManager.GetString("Dialog_OpenFileFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Owners:.
         /// </summary>
         public static string Dialog_OwnersLabel {
@@ -138,6 +156,15 @@ namespace PackageExplorer.Resources {
         public static string Dialog_RequireLicenseLabel {
             get {
                 return ResourceManager.GetString("Dialog_RequireLicenseLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have unsaved changes. Do you want to save your changes?.
+        /// </summary>
+        public static string Dialog_SaveQuestion {
+            get {
+                return ResourceManager.GetString("Dialog_SaveQuestion", resourceCulture);
             }
         }
         

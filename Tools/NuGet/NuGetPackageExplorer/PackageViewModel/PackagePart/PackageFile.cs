@@ -12,7 +12,7 @@ namespace PackageExplorerViewModel {
 
         public IPackageViewModel PackageViewModel { get; set; }
 
-        public PackageFile(IPackageFile file, string name) : base(name) {
+        public PackageFile(IPackageFile file, string name) : base(name, file.Path) {
             if (file == null) {
                 throw new ArgumentNullException("file");
             }

@@ -13,7 +13,7 @@ namespace PackageExplorerViewModel {
 
             paths.Sort((p1, p2) => String.Compare(p1.Path, p2.Path, StringComparison.OrdinalIgnoreCase));
 
-            PackageFolder root = new PackageFolder("Root");
+            PackageFolder root = new PackageFolder("Root", "");
 
             List<Tuple<IPackageFile, string[]>> parsedPaths = paths.Select(p => Tuple.Create(p, p.Path.Split('\\'))).ToList();
             Parse(root, parsedPaths, 0, 0, parsedPaths.Count);
@@ -36,7 +36,15 @@ namespace PackageExplorerViewModel {
                     int j = i;
                     while (j < end && level < parsedPaths[j].Item2.Length && parsedPaths[j].Item2[level] == s) j++;
 
-                    PackageFolder folder = new PackageFolder(s);
+                    string path;
+                    if (root.Path == String.Empty) {
+                        path = s;
+                    }
+                    else {
+                        path = root.Path + "\\" + s;
+                    }
+
+                    PackageFolder folder = new PackageFolder(s, path);
                     root.Children.Add(folder);
                     Parse(folder, parsedPaths, level + 1, i, j);
 

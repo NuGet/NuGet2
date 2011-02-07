@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using NuGet;
 
@@ -53,8 +54,30 @@ namespace PackageExplorerViewModel {
             // add files
             builder.Files.AddRange(ViewModel.GetFiles());
 
-            using (Stream stream = File.Create(targetFileName)) {
-                builder.Save(stream);
+            // create package in the temprary file first in case the operation fails which would
+            // override existing file with a 0-byte file.
+            string tempFileName = Path.GetTempFileName();
+            try {
+                using (Stream stream = File.Create(tempFileName)) {
+                    builder.Save(stream);
+                }
+
+                File.Copy(tempFileName, targetFileName, true);
+
+                ViewModel.OnSaved();
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message, Resources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally {
+                try {
+                    if (File.Exists(tempFileName)) {
+                        File.Delete(tempFileName);
+                    }
+                }
+                catch {
+                    // don't care if this fails
+                }
             }
         }
 

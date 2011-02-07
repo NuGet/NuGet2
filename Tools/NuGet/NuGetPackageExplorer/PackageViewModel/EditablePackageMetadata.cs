@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using NuGet;
+using System.Collections.ObjectModel;
 
 namespace PackageExplorerViewModel {
 
@@ -31,7 +32,7 @@ namespace PackageExplorerViewModel {
             this.Summary = source.Summary;
             this.Language = source.Language;
             this.Tags = source.Tags;
-            this.Dependencies = new List<PackageDependency>(source.Dependencies);
+            this.Dependencies = new ObservableCollection<EditablePackageDependency>(source.Dependencies.Select(ConvertToEditablePackageDependency));
         }
 
         private string _id;
@@ -110,7 +111,6 @@ namespace PackageExplorerViewModel {
                     _authors = value;
                     RaisePropertyChange("Authors");
                 }
-                
             }
         }
 
@@ -244,7 +244,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public IList<PackageDependency> Dependencies { get; private set; }
+        public ObservableCollection<EditablePackageDependency> Dependencies { get; private set; }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
@@ -268,7 +268,7 @@ namespace PackageExplorerViewModel {
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
-                return this.Dependencies;
+                return this.Dependencies.Select(ConvertToPackageDependency);
             }
         }
 
@@ -301,13 +301,20 @@ namespace PackageExplorerViewModel {
         }
 
         private void SetError(string property, string error) {
-
             if (String.IsNullOrEmpty(error)) {
                 _propertyErrors.Remove(property);
             }
             else {
                 _propertyErrors[property] = error;
             }
+        }
+
+        private EditablePackageDependency ConvertToEditablePackageDependency(PackageDependency pd) {
+            return new EditablePackageDependency(pd.Id, pd.VersionSpec);
+        }
+
+        private PackageDependency ConvertToPackageDependency(EditablePackageDependency pd) {
+            return new PackageDependency(pd.Id, pd.VersionSpec);
         }
 
         public void ResetErrors() {

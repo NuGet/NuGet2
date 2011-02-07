@@ -12,7 +12,8 @@
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
         AllowDrop="True"
         DragOver="Window_DragOver" 
-        Drop="Window_Drop">
+        Drop="Window_Drop"
+        Closing="Window_Closing">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -34,6 +35,7 @@
             <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
             <self:HalfLengthConverter x:Key="lengthConverter" />
+            <self:UpperCaseConverter x:Key="upperCaseConverter" />
 
             <!-- data template for the package details pane -->
             <DataTemplate x:Key="PackageDetailTemplate">
@@ -139,24 +141,52 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type viewmodel:PackageFile}">
-                <TextBlock Text="{Binding Name}" ContextMenu="{StaticResource SharedContextMenu}">
+                <TextBlock x:Name="Header" Text="{Binding Name}" ContextMenu="{StaticResource SharedContextMenu}">
                 </TextBlock>
+
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INSTALL.PS1">
+                        <Setter TargetName="Header" Property="Foreground" Value="Blue" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\UNINSTALL.PS1">
+                        <Setter TargetName="Header" Property="Foreground" Value="Blue" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INIT.PS1">
+                        <Setter TargetName="Header" Property="Foreground" Value="Blue" />
+                    </DataTrigger>
+                    
+                </DataTemplate.Triggers>
             </DataTemplate>
 
             <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock x:Name="Header" Text="{Binding Name}" FontWeight="SemiBold" />
+
+                <HierarchicalDataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="LIB">
+                        <Setter TargetName="Header" Property="Foreground" Value="DarkRed" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="CONTENT">
+                        <Setter TargetName="Header" Property="Foreground" Value="DarkRed" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS">
+                        <Setter TargetName="Header" Property="Foreground" Value="DarkRed" />
+                    </DataTrigger>
+                </HierarchicalDataTemplate.Triggers>
             </HierarchicalDataTemplate>
         </ResourceDictionary>
     </Window.Resources>
     
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="O" Command="Open" />
-        <KeyBinding Modifiers="Control" Key="F4" Command="Close" />
     </Window.InputBindings>
     
     <Window.CommandBindings>
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
-        <CommandBinding Command="Close" Executed="CloseMenuItem_Click" CanExecute="CanCloseMenuItem" />
+        <CommandBinding Command="Close" Executed="ExitMenuItem_Click" />
     </Window.CommandBindings>
     
     <Grid x:Name="LayoutRoot">
@@ -174,20 +204,14 @@
                         <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/openHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">
+                <MenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/saveHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
                 <Separator />
-                <MenuItem Command="Close">
-                    <MenuItem.Icon>
-                        <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/DeleteHS.png" />
-                    </MenuItem.Icon>
-                </MenuItem>
-                <Separator />
-                <MenuItem Header="E_xit" Click="ExitMenuItem_Click" />
+                <MenuItem Command="Close" Header="E_xit" />
             </MenuItem>
 
             <MenuItem Header="_Edit">

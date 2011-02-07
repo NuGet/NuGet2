@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Shell;
 using Microsoft.Win32;
 using NuGet;
 using PackageExplorerViewModel;
+
+using StringResources = PackageExplorer.Resources.Resources;
 
 namespace PackageExplorer {
     /// <summary>
@@ -27,7 +28,11 @@ namespace PackageExplorer {
                 package = new ZipPackage(packagePath);
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    ex.Message, 
+                    StringResources.Dialog_Title, 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
                 return;
             }
 
@@ -37,23 +42,19 @@ namespace PackageExplorer {
             }
         }
 
-        private void AddToRecentJumpList(string path) {
-            JumpList.SetJumpList(Application.Current, _jumpList);
-
-            var jumpPath = new JumpPath { Path = path };
-            JumpList.AddToRecentCategory(jumpPath);
-
-            _jumpList.Apply();
-        }
-
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e) {
+            bool canceled = AskToSaveCurrentFile();
+            if (canceled) {
+                return;
+            }
+
             OpenFileDialog dialog = new OpenFileDialog() {
                 CheckFileExists = true,
                 CheckPathExists = true,
                 DefaultExt = Constants.PackageExtension,
                 Multiselect = false,
                 ValidateNames = true,
-                Filter = "NuGet package file (*.nupkg)|*.nupkg"
+                Filter = StringResources.Dialog_OpenFileFilter
             };
 
             bool? result = dialog.ShowDialog();
@@ -94,8 +95,12 @@ namespace PackageExplorer {
                         f => f.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase));
 
                     if (firstFile != null) {
-                        LoadPackage(firstFile);
                         e.Handled = true;
+
+                        bool canceled = AskToSaveCurrentFile();
+                        if (!canceled) {
+                            LoadPackage(firstFile);
+                        }
                     }
                 }
             }
@@ -112,21 +117,63 @@ namespace PackageExplorer {
             Close();
         }
 
-        private void CloseMenuItem_Click(object sender, RoutedEventArgs e) {
-            DataContext = null;
-        }
-
-        private void CanCloseMenuItem(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = DataContext != null;
-            e.Handled = true;
-        }
-
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
-                "For more information, visit http://nuget.codeplex.com.",
-                PackageExplorer.Resources.Resources.Dialog_Title, 
+                StringResources.Dialog_HelpAbout,
+                StringResources.Dialog_Title, 
                 MessageBoxButton.OK, 
                 MessageBoxImage.Information);
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+            bool isCanceled = AskToSaveCurrentFile();
+            e.Cancel = isCanceled;
+        }
+
+        /// <summary>
+        /// Asks user to save the current file before doing something (e.g. exit, open a new file)
+        /// </summary>
+        /// <returns>true if user cancels the impending action</returns>
+        private bool AskToSaveCurrentFile() {
+            
+            if (HasUnsavedChanges) {
+                // if there is unsaved changes, ask user for confirmation
+                var result = MessageBox.Show(
+                    StringResources.Dialog_SaveQuestion,
+                    PackageExplorer.Resources.Resources.Dialog_Title,
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Cancel) {
+                    return true;
+                }
+
+                if (result == MessageBoxResult.Yes) {
+                    var saveCommand = SaveMenuItem.Command;
+                    const string parameter = "Save";
+                    if (saveCommand.CanExecute(parameter)) {
+                        saveCommand.Execute(parameter);
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool HasUnsavedChanges {
+            get {
+                var viewModel = (PackageViewModel) DataContext;
+                return (viewModel != null && viewModel.HasEdit);
+            }
+        }
+
+        private void AddToRecentJumpList(string path) {
+            JumpList.SetJumpList(Application.Current, _jumpList);
+
+            var jumpPath = new JumpPath { Path = path };
+            JumpList.AddToRecentCategory(jumpPath);
+
+            _jumpList.Apply();
         }
     }
 }

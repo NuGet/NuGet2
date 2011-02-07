@@ -111,8 +111,10 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\CountToVisibilityConverter.cs" />
     <Compile Include="Converters\HalfLengthConverter.cs" />
+    <Compile Include="Converters\UpperCaseConverter.cs" />
     <Compile Include="Converters\UriConverter.cs" />
     <Compile Include="Converters\VersionConverter.cs" />
+    <Compile Include="Converters\VersionSpecConverter.cs" />
     <Compile Include="PackageMetadataEditor.xaml.cs">
       <DependentUpon>PackageMetadataEditor.xaml</DependentUpon>
     </Compile>
@@ -163,7 +165,6 @@
     <Resource Include="Images\CopyHS.png" />
     <Resource Include="Images\CutHS.png" />
     <Resource Include="Images\PasteHS.png" />
-    <Resource Include="Images\DeleteHS.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

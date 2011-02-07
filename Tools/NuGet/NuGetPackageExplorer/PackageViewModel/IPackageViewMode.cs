@@ -25,5 +25,7 @@ namespace PackageExplorerViewModel {
         void CancelEdit();
 
         void CommitEdit();
+
+        void OnSaved();
     }
 }

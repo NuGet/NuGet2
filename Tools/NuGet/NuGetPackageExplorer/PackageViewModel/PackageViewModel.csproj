@@ -43,6 +43,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,6 +57,7 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
+    <Compile Include="EditablePackageDependency.cs" />
     <Compile Include="IPackageViewMode.cs" />
     <Compile Include="EditablePackageMetadata.cs" />
     <Compile Include="PackagePart\PackageFile.cs" />

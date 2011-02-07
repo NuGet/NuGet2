@@ -11,6 +11,7 @@
 
     <UserControl.Resources>
         <self:VersionConverter x:Key="VersionConverter" />
+        <self:VersionSpecConverter x:Key="VersionSpecConverter" />
         <self:UriConverter x:Key="UriConverter" />
         
         <Style TargetType="{x:Type Label}" x:Key="LabelStyle">
@@ -45,13 +46,16 @@
             <Setter Property="Margin" Value="0, 4, 3, 0" />
         </Style>
         
-        <DataTemplate DataType="{x:Type core:PackageDependency}">
-            <Grid>
+        <DataTemplate DataType="{x:Type core:PackageDependency}" x:Key="PackageDependencyTemplate">
+            <Grid BindingGroup="{Binding ElementName=PackageMetadataGroup, NotifyOnValidationError=True}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
+
+                <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="0" Text="{Binding Id, ValidatesOnExceptions=True}" />
+                <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="1" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, ValidatesOnExceptions=True}" />
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -70,6 +74,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -148,11 +153,8 @@
 
                 <!-- Dependencies -->
                 <Label Grid.Row="14" Grid.Column="0" Style="{StaticResource LabelStyle}" Content="Dependen_cies" />
-                
-                <ItemsControl>
-                    
+                <ItemsControl Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding PackageMetadata.Dependencies}" ItemTemplate="{StaticResource PackageDependencyTemplate}">                   
                 </ItemsControl>
-                <!--<TextBox Grid.Row="14" Grid.Column="1" x:Name="DependenciesBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Dep}" />-->
 
             </Grid>
         </ScrollViewer>
