@@ -15,7 +15,7 @@
     ShowInTaskbar="False"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
-    Title="License Acceptance">
+    Title="{x:Static resources:Resources.License_DialogTitle}">
     
     <Window.Resources>
         <Style TargetType="{x:Type Button}">
