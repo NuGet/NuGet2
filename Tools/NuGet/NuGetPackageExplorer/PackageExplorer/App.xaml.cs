@@ -22,7 +22,7 @@ namespace PackageExplorer {
 
             if (AppDomain.CurrentDomain.SetupInformation != null && 
                 AppDomain.CurrentDomain.SetupInformation.ActivationArguments != null) {
-                // click-once deployement
+                // click-once deployment
                 var activationData = AppDomain.CurrentDomain.SetupInformation.ActivationArguments.ActivationData;
                 if (activationData != null && activationData.Length > 0) {
                     string file = activationData[0];

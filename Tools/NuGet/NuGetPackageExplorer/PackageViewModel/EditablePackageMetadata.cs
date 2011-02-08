@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using NuGet;
-using System.Collections.ObjectModel;
 
 namespace PackageExplorerViewModel {
 
@@ -33,6 +33,11 @@ namespace PackageExplorerViewModel {
             this.Language = source.Language;
             this.Tags = source.Tags;
             this.Dependencies = new ObservableCollection<EditablePackageDependency>(source.Dependencies.Select(ConvertToEditablePackageDependency));
+            this.Dependencies.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Dependencies_CollectionChanged);
+        }
+
+        void Dependencies_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            RaisePropertyChange("Dependencies");
         }
 
         private string _id;

@@ -6,7 +6,7 @@ using NuGet;
 
 namespace PackageExplorerViewModel {
 
-    public class EditablePackageDependency : INotifyPropertyChanged {
+    public class EditablePackageDependency : INotifyPropertyChanged, IDataErrorInfo {
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -26,7 +26,7 @@ namespace PackageExplorerViewModel {
             }
             set {
                 if (String.IsNullOrEmpty(value)) {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentException("Id is required.");
                 }
 
                 PackageIdValidator.ValidatePackageId(value);
@@ -108,6 +108,33 @@ namespace PackageExplorerViewModel {
             if (PropertyChanged != null) {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        public string Error {
+            get { return null; }
+        }
+
+        public string this[string columnName] {
+            get { return IsValid(columnName); }
+        }
+
+        private string IsValid(string columnName) {
+            if (columnName == "Id") {
+                if (String.IsNullOrEmpty(Id)) {
+                    return "Id is required.";
+                }
+
+                if (!PackageIdValidator.IsValidPackageId(Id)) {
+                    return "Value '" + Id + "' cannot be converted.";
+                }
+            }
+            else if (columnName == "VersionSpec") {
+                if (VersionSpec == null) {
+                    return "Dependency version is required.";
+                }
+            }
+
+            return null;
         }
     }
 }

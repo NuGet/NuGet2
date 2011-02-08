@@ -47,15 +47,16 @@
         </Style>
         
         <DataTemplate DataType="{x:Type core:PackageDependency}" x:Key="PackageDependencyTemplate">
-            <Grid BindingGroup="{Binding ElementName=PackageMetadataGroup, NotifyOnValidationError=True}">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="0" Text="{Binding Id, ValidatesOnExceptions=True}" />
-                <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="1" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, ValidatesOnExceptions=True}" />
+                <TextBox Margin="0,4,5,0" Style="{StaticResource TextBoxStyle}" Grid.Column="0" Text="{Binding Id, BindingGroupName=PackageMetadataGroup, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}" />
+                <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="1" Text="{Binding VersionSpec, BindingGroupName=PackageMetadataGroup, Converter={StaticResource VersionSpecConverter}, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}" />
+                <Button Content="--" Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveDependencyButtonClicked" />
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -74,6 +75,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -152,10 +154,23 @@
                 <TextBox Grid.Row="13" Grid.Column="1" x:Name="TagsBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.Tags}" />
 
                 <!-- Dependencies -->
-                <Label Grid.Row="14" Grid.Column="0" Style="{StaticResource LabelStyle}" Content="Dependen_cies" />
-                <ItemsControl Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding PackageMetadata.Dependencies}" ItemTemplate="{StaticResource PackageDependencyTemplate}">                   
-                </ItemsControl>
+                <GroupBox Grid.Row="14" Grid.ColumnSpan="2" Header="Dependen_cies" Margin="0,4,0,0">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="3,4,3,0" Grid.Row="15" Grid.ColumnSpan="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
+                            <TextBlock Grid.Column="0" Text="Id" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="Version" HorizontalAlignment="Center" />
+                            <Button Grid.Column="2" Content="+" HorizontalAlignment="Center" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked" />
+                        </Grid>
+                        <ItemsControl x:Name="DependencyList" Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,4,3,0" ItemsSource="{Binding PackageMetadata.Dependencies}" ItemTemplate="{StaticResource PackageDependencyTemplate}">
+                        </ItemsControl>
+                    </StackPanel>
+                </GroupBox>
             </Grid>
         </ScrollViewer>
 
@@ -166,4 +181,3 @@
         </StackPanel>
     </Grid>
 </UserControl>
-    

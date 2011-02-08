@@ -3,6 +3,10 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Data;
+using PackageExplorerViewModel;
+using System.ComponentModel;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace PackageExplorer {
     /// <summary>
@@ -20,6 +24,23 @@ namespace PackageExplorer {
 
         public BindingGroup MetadataBindingGroup {
             get { return PackageMetadataGroup; }
+        }
+
+        private void RemoveDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
+            var button = (Button)sender;
+            var item = (EditablePackageDependency)button.DataContext;
+
+            var collection = DependencyList.ItemsSource as IList<EditablePackageDependency>;
+            if (collection != null) {
+                collection.Remove(item);
+            }
+        }
+
+        private void AddDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
+            var collection = DependencyList.ItemsSource as IList<EditablePackageDependency>;
+            if (collection != null) {
+                collection.Add(new EditablePackageDependency());
+            }
         }
     }
 }
