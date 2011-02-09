@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Management.Automation;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     /// <summary>
     /// Interface defining common NuGet Cmdlet error handling and generation operations.
     /// </summary>
@@ -17,7 +17,7 @@ namespace NuGet.Cmdlets {
         /// </summary>
         /// <param name="exception">The exception representing the error condition.</param>
         /// <param name="terminating">If true, write a terminating error else write to error stream.</param>
-        /// <param name="errorId">The local-agnostic error id to use. Well-known error ids are defined in <see cref="NuGet.Cmdlets.NuGetErrorId"/>.</param>
+        /// <param name="errorId">The local-agnostic error id to use. Well-known error ids are defined in <see cref="NuGet.PowerShell.Commands.NuGetErrorId"/>.</param>
         /// <param name="category">The PowerShell ErrorCategory to use.</param>
         /// <param name="target">The context object associated with this error condition. This may be null.</param>
         void HandleException(Exception exception, bool terminating, string errorId = NuGetErrorId.CmdletUnhandledException, ErrorCategory category = ErrorCategory.NotSpecified, object target = null);

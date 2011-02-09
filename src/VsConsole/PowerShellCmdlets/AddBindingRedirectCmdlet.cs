@@ -7,17 +7,17 @@ using EnvDTE;
 using NuGet.Runtime;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Add, "BindingRedirect")]
     [OutputType(typeof(AssemblyBinding))]
-    public class AddBindingRedirectCmdlet : NuGetBaseCmdlet {
+    public class AddBindingRedirectCommand : NuGetBaseCommand {
         private readonly ISolutionManager _solutionManager;
 
-        public AddBindingRedirectCmdlet()
+        public AddBindingRedirectCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public AddBindingRedirectCmdlet(ISolutionManager solutionManager)
+        public AddBindingRedirectCommand(ISolutionManager solutionManager)
             : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }

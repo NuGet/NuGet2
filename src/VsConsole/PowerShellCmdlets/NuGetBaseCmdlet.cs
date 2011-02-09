@@ -8,16 +8,16 @@ using System.Reflection;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     /// <summary>
     /// This is the base class for all NuGet cmdlets.
     /// </summary>
-    public abstract class NuGetBaseCmdlet : PSCmdlet, ILogger, IErrorHandler {
+    public abstract class NuGetBaseCommand : PSCmdlet, ILogger, IErrorHandler {
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
 
-        protected NuGetBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
+        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
         }

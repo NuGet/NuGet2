@@ -4,13 +4,15 @@ using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     [OutputType(typeof(IPackage))]
-    public class FindPackageCmdlet : GetPackageCmdlet {
+    public class FindPackageCommand : GetPackageCommand {
         private const int MaxReturnedPackages = 30;
 
-        public FindPackageCmdlet()
+        public FindPackageCommand()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
@@ -18,7 +20,7 @@ namespace NuGet.Cmdlets {
                    ServiceLocator.GetInstance<IRecentPackageRepository>()) {
         }
 
-        public FindPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
+        public FindPackageCommand(IPackageRepositoryFactory repositoryFactory,
                           IPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
                           IVsPackageManagerFactory packageManagerFactory,

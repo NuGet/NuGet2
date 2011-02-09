@@ -6,7 +6,7 @@ using Moq;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
-namespace NuGet.Cmdlets.Test {
+namespace NuGet.PowerShell.Commands.Test {
     using PackageUtility = NuGet.Test.PackageUtility;
 
     [TestClass]
@@ -97,10 +97,10 @@ namespace NuGet.Cmdlets.Test {
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static FindPackageCmdlet BuildCmdlet(bool isSolutionOpen = true) {
+        private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
-            return new FindPackageCmdlet(
+            return new FindPackageCommand(
                 GetRepositoryFactory(), 
                 GetSourceProvider(), 
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 

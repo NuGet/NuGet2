@@ -8,17 +8,17 @@ using EnvDTE;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
 
     /// <summary>
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
-    public abstract class ProcessPackageBaseCmdlet : NuGetBaseCmdlet {
+    public abstract class ProcessPackageBaseCommand : NuGetBaseCommand {
         // If this command is executed by getting the project from the pipeline, then we need we keep track of all of the
         // project managers since the same cmdlet instance can be used across invocations.
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
 
-        protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+        protected ProcessPackageBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
         }
 

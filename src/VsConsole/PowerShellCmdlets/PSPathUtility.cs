@@ -5,7 +5,7 @@ using System.Management.Automation;
 using Microsoft.Internal.Web.Utils;
 using Microsoft.PowerShell.Commands;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     public static class PSPathUtility {
         /// <summary>
         /// Translate a PSPath into a System.IO.* friendly Win32 path.

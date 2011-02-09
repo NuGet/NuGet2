@@ -2,20 +2,20 @@ using System;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
 
     /// <summary>
     /// This command uninstalls the specified package from the specified project.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
-    public class UninstallPackageCmdlet : ProcessPackageBaseCmdlet {
+    public class UninstallPackageCommand : ProcessPackageBaseCommand {
 
-        public UninstallPackageCmdlet()
+        public UninstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
-        public UninstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+        public UninstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
         }
 

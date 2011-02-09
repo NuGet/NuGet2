@@ -8,7 +8,7 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
-namespace NuGet.Cmdlets.Test {
+namespace NuGet.PowerShell.Commands.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
@@ -286,7 +286,7 @@ namespace NuGet.Cmdlets.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
-            var cmdlet = new Mock<GetPackageCmdlet>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, new Mock<IPackageRepository>().Object) { CallBase = true }.Object;
+            var cmdlet = new Mock<GetPackageCommand>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, new Mock<IPackageRepository>().Object) { CallBase = true }.Object;
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act and Assert
@@ -323,7 +323,7 @@ namespace NuGet.Cmdlets.Test {
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static GetPackageCmdlet BuildCmdlet(bool isSolutionOpen = true, IPackageRepository recentPackageRepository = null) {
+        private static GetPackageCommand BuildCmdlet(bool isSolutionOpen = true, IPackageRepository recentPackageRepository = null) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
 
@@ -331,7 +331,7 @@ namespace NuGet.Cmdlets.Test {
                 recentPackageRepository = new Mock<IPackageRepository>().Object;
             }
 
-            return new GetPackageCmdlet(
+            return new GetPackageCommand(
                 GetRepositoryFactory(), 
                 GetSourceProvider(), 
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 

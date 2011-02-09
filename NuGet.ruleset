@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="NuGet Code Analysis Rules" ToolsVersion="10.0">
+  <RuleHintPaths>
+    <Path>.\FxCop\Microsoft.PowerShell.CodeAnalysis.dll</Path>
+  </RuleHintPaths>
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1000" Action="Error" />
@@ -232,5 +235,23 @@
     <Rule Id="CA2241" Action="Error" />
     <Rule Id="CA2242" Action="Error" />
     <Rule Id="CA2243" Action="Error" />
+    <Rule Id="PS1001" Action="Error" />
+    <Rule Id="PS1002" Action="Error" />
+    <Rule Id="PS1003" Action="Error" />
+    <Rule Id="PS1004" Action="Error" />
+    <Rule Id="PS1005" Action="Error" />
+    <Rule Id="PS1006" Action="Error" />
+    <Rule Id="PS1007" Action="Error" />
+    <Rule Id="PS1008" Action="Error" />
+    <Rule Id="PS1010" Action="Error" />
+    <Rule Id="PS1011" Action="Error" />
+    <Rule Id="PS1012" Action="Error" />
+    <Rule Id="PS1013" Action="Error" />
+    <Rule Id="PS1014" Action="Error" />
+    <Rule Id="PS1015" Action="Error" />
+    <Rule Id="PS1101" Action="Error" />
+    <Rule Id="PS1102" Action="Error" />
+    <Rule Id="PS1103" Action="Error" />
+    <Rule Id="PS1104" Action="Error" />
   </Rules>
 </RuleSet>

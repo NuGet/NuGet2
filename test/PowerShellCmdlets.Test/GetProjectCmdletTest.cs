@@ -4,7 +4,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.VisualStudio.Test;
 
-namespace NuGet.Cmdlets.Test {
+namespace NuGet.PowerShell.Commands.Test {
     [TestClass]
     public class GetProjectCmdletTest {
         [TestMethod]
@@ -64,12 +64,12 @@ namespace NuGet.Cmdlets.Test {
             Assert.AreEqual(3, result.Count());
         }
 
-        private static GetProjectCmdlet BuildCmdlet() {
+        private static GetProjectCommand BuildCmdlet() {
             var projects = new[] { 
                 TestUtils.GetProject("ConsoleApplication1"), TestUtils.GetProject("WebSite1"), TestUtils.GetProject("TestProject1") 
             };
             var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "ConsoleApplication1", projects: projects);
-            return new GetProjectCmdlet(solutionManager);
+            return new GetProjectCommand(solutionManager);
         }
     }
 }

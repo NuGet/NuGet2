@@ -8,7 +8,7 @@ using NuGet.Test;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
-namespace NuGet.Cmdlets.Test {
+namespace NuGet.PowerShell.Commands.Test {
     [TestClass]
     public class NewPackageCmdletTest {
         [TestMethod]
@@ -16,7 +16,7 @@ namespace NuGet.Cmdlets.Test {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var cmdlet = new NewPackageCmdlet(TestUtils.GetSolutionManager(isSolutionOpen: false, defaultProjectName: null), packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false, defaultProjectName: null), packageManagerFactory.Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "The current environment doesn't have a solution open.");
@@ -29,7 +29,7 @@ namespace NuGet.Cmdlets.Test {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "test", projects: new[] { TestUtils.GetProject("test") });
-            var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object);
             cmdlet.ProjectName = project;
 
             // Act and Assert            
@@ -45,7 +45,7 @@ namespace NuGet.Cmdlets.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "test.cs", "assembly.info", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
-            var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object);
             cmdlet.ProjectName = projectName;
 
             // Act and Assert
@@ -61,7 +61,7 @@ namespace NuGet.Cmdlets.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "foo.nuspec", "bar.nuspec", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
-            var cmdlet = new NewPackageCmdlet(solutionManager, packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object);
             cmdlet.ProjectName = projectName;
 
             // Act and Assert
@@ -78,7 +78,7 @@ namespace NuGet.Cmdlets.Test {
                                           select new PhysicalPackageFile { TargetPath = f });
 
             // Act
-            NewPackageCmdlet.RemoveExludedFiles(packageBuilder);
+            NewPackageCommand.RemoveExludedFiles(packageBuilder);
 
             // Assert
             Assert.AreEqual(@"\baz\1.cs", packageBuilder.Files.Single().Path);
@@ -93,7 +93,7 @@ namespace NuGet.Cmdlets.Test {
             var version = new Version("1.1");
 
             // Act
-            var packagePath = NewPackageCmdlet.GetPackageFilePath(outputFile, projectPath, id, version);
+            var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
 
             // Assert
             Assert.AreEqual(packagePath, Path.Combine(projectPath, outputFile));
@@ -108,7 +108,7 @@ namespace NuGet.Cmdlets.Test {
             var version = new Version("1.1");
 
             // Act
-            var packagePath = NewPackageCmdlet.GetPackageFilePath(outputFile, projectPath, id, version);
+            var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
 
             // Assert
             Assert.AreEqual(packagePath, outputFile);
@@ -123,7 +123,7 @@ namespace NuGet.Cmdlets.Test {
             var version = new Version("1.1");
 
             // Act
-            var packagePath = NewPackageCmdlet.GetPackageFilePath(outputFile, projectPath, id, version);
+            var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
 
             // Assert
             Assert.AreEqual(packagePath, Path.Combine(projectPath, id + "." + version + ".nupkg"));

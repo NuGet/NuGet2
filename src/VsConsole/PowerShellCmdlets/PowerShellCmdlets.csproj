@@ -8,7 +8,7 @@
     <ProjectGuid>{84AC92A6-06B4-41B7-81EC-EFE91356D17C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuGet.Cmdlets</RootNamespace>
+    <RootNamespace>NuGet.PowerShell.Commands</RootNamespace>
     <AssemblyName>NuGet.Cmdlets</AssemblyName>
     <CodeAnalysisRuleSet>..\..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>

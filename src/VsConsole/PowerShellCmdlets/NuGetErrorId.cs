@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     /// <summary>
     /// This class houses locale-agnostic error identifiers which aid
     /// users searching for solutions to problems that may be in a different

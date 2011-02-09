@@ -3,19 +3,19 @@ using System.Management.Automation;
 
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     /// <summary>
     /// This command installs the specified package into the specified project.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Install, "Package")]
-    public class InstallPackageCmdlet : ProcessPackageBaseCmdlet {
+    public class InstallPackageCommand : ProcessPackageBaseCommand {
 
-        public InstallPackageCmdlet()
+        public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
-        public InstallPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+        public InstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
         }
 

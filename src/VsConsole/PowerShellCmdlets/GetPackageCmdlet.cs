@@ -5,21 +5,22 @@ using System.Management.Automation;
 
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
 
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
-    public class GetPackageCmdlet : NuGetBaseCmdlet {
+    public class GetPackageCommand : NuGetBaseCommand {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepository _recentPackagesRepository;
         private int _firstValue;
         private bool _firstValueSpecified;
 
-        public GetPackageCmdlet()
+        public GetPackageCommand()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
@@ -27,7 +28,7 @@ namespace NuGet.Cmdlets {
                    ServiceLocator.GetInstance<IRecentPackageRepository>()) {
         }
 
-        public GetPackageCmdlet(IPackageRepositoryFactory repositoryFactory,
+        public GetPackageCommand(IPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,

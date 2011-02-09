@@ -7,22 +7,22 @@ using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
 
     /// <summary>
     /// This command creates new package file.
     /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
-    public class NewPackageCmdlet : NuGetBaseCmdlet {
+    public class NewPackageCommand : NuGetBaseCommand {
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
-        public NewPackageCmdlet()
+        public NewPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
-        public NewPackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+        public NewPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
         }
 

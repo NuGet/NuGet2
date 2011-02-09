@@ -2,20 +2,20 @@ using System;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
 
     /// <summary>
     /// This project updates the specfied package to the specfied project.
     /// </summary>
     [Cmdlet(VerbsData.Update, "Package")]
-    public class UpdatePackageCmdlet : ProcessPackageBaseCmdlet {
+    public class UpdatePackageCommand : ProcessPackageBaseCommand {
 
-        public UpdatePackageCmdlet()
+        public UpdatePackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>()) {
         }
 
-        public UpdatePackageCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
+        public UpdatePackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
         }
 

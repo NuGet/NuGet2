@@ -4,21 +4,22 @@ using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Cmdlets {
+namespace NuGet.PowerShell.Commands {
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification="Will investiage this one.")]
     [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(Project))]
-    public class GetProjectCmdlet : NuGetBaseCmdlet {
+    public class GetProjectCommand : NuGetBaseCommand {
         private readonly ISolutionManager _solutionManager;
 
-        public GetProjectCmdlet()
+        public GetProjectCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public GetProjectCmdlet(ISolutionManager solutionManager)
+        public GetProjectCommand(ISolutionManager solutionManager)
             : base(solutionManager, null) {
             _solutionManager = solutionManager;
         }
