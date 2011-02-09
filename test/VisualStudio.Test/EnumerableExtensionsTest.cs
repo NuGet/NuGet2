@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio.Test {
             var items = Enumerable.Empty<Item>();
 
             // Act
-            var result = items.DistinctLast(new ItemNameComparer()).ToList();
+            var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
             Assert.AreEqual(0, result.Count);
@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio.Test {
             var items = new Item[] { new Item { Name = "John", Age = 10 } };
 
             // Act
-            var result = items.DistinctLast(new ItemNameComparer()).ToList();
+            var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
             Assert.AreEqual(1, result.Count);
@@ -34,38 +34,38 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void DiscintLastThreeSimilarElements() {
             // Arrange
-            var items = new Item[] { new Item { Name = "John", Age = 10 },
-                                     new Item { Name = "John", Age = 20 },
+            var items = new Item[] { new Item { Name = "John", Age = 410 },
+                                     new Item { Name = "John", Age = 550 },
                                      new Item { Name = "John", Age = 30 }};
 
             // Act
-            var result = items.DistinctLast(new ItemNameComparer()).ToList();
+            var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("John", result[0].Name);
-            Assert.AreEqual(30, result[0].Age);
+            Assert.AreEqual(550, result[0].Age);
         }
 
         [TestMethod]
         public void DiscintLastMultipleSimilarElements() {
             // Arrange
             var items = new Item[] { new Item { Name = "Phil", Age = 1 },
-                                     new Item { Name = "John", Age = 10 },
+                                     new Item { Name = "John", Age = 40 },
                                      new Item { Name = "John", Age = 20 },
                                      new Item { Name = "John", Age = 30 },
                                      new Item { Name = "David", Age = 10 },
                                      new Item { Name = "David", Age = 20 }};
 
             // Act
-            var result = items.DistinctLast(new ItemNameComparer()).ToList();
+            var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual("Phil", result[0].Name);
             Assert.AreEqual(1, result[0].Age);
             Assert.AreEqual("John", result[1].Name);
-            Assert.AreEqual(30, result[1].Age);
+            Assert.AreEqual(40, result[1].Age);
             Assert.AreEqual("David", result[2].Name);
             Assert.AreEqual(20, result[2].Age);
         }
@@ -73,6 +73,12 @@ namespace NuGet.VisualStudio.Test {
         private class Item {
             public string Name { get; set; }
             public int Age { get; set; }
+        }
+
+        private class ItemAgeComparer : IComparer<Item> {
+            public int Compare(Item x, Item y) {
+                return x.Age.CompareTo(y.Age);
+            }
         }
 
         private class ItemNameComparer : IEqualityComparer<Item> {
