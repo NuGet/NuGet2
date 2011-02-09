@@ -61,10 +61,6 @@
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
       <Name>VisualStudio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Console\Console.csproj">
-      <Project>{50E33DA2-AF14-486D-81B8-BD8409744A38}</Project>
-      <Name>Console</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\..\CodeAnalysisDictionary.xml">
