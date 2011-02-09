@@ -112,7 +112,7 @@ namespace NuGet.Dialog.Providers {
                     EnsureExtensionCollection();
                     LoadPage(1);
                 }
-                
+
                 return _extensions;
             }
         }
@@ -227,8 +227,8 @@ namespace NuGet.Dialog.Providers {
             }
 
             Task.Factory.StartNew(
-                (state) => ExecuteAsync(pageNumber, _currentCancellationSource.Token), 
-                _currentCancellationSource, 
+                (state) => ExecuteAsync(pageNumber, _currentCancellationSource.Token),
+                _currentCancellationSource,
                 _currentCancellationSource.Token).ContinueWith(QueryExecutionCompleted, uiScheduler);
         }
 
@@ -277,10 +277,10 @@ namespace NuGet.Dialog.Providers {
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
             }
 
-            IList<IPackage> packages = _query.DistinctLast(PackageEqualityComparer.Id)
-                                                   .Skip((pageNumber - 1) * PageSize)
-                                                   .Take(PageSize)
-                                                   .ToList();
+            IList<IPackage> packages = _query.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version)
+                                             .Skip((pageNumber - 1) * PageSize)
+                                             .Take(PageSize)
+                                             .ToList();
 
             if (packages.Count < PageSize) {
                 _totalCount = (pageNumber - 1) * PageSize + packages.Count;

@@ -41,7 +41,7 @@ namespace NuGet.Cmdlets {
 
             return packages.OrderByDescending(p => p.DownloadCount)
                            .ThenBy(p => p.Id)
-                           .DistinctLast(PackageEqualityComparer.Id);
+                           .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
         protected override IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
@@ -55,7 +55,7 @@ namespace NuGet.Cmdlets {
             return sourceRepository.GetUpdates(packagesToUpdate)
                                    .OrderByDescending(p => p.DownloadCount)
                                    .ThenBy(p => p.Id)
-                                   .DistinctLast(PackageEqualityComparer.Id);
+                                   .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
         protected override void Log(MessageLevel level, string formattedMessage) {
