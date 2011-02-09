@@ -27,6 +27,7 @@ namespace NuGet.VisualStudio {
             _solutionEvents = _dte.Events.SolutionEvents;
             _solutionEvents.Opened += OnSolutionOpened;
             _solutionEvents.BeforeClosing += OnBeforeClosing;
+            _solutionEvents.AfterClosing += OnAfterClosing;
             _solutionEvents.ProjectAdded += OnProjectAdded;
             _solutionEvents.ProjectRemoved += OnProjectRemoved;
             _solutionEvents.ProjectRenamed += OnProjectRenamed;
@@ -110,6 +111,9 @@ namespace NuGet.VisualStudio {
             DefaultProjectName = null;
             _projectCache = null;
             RaiseEvent(SolutionClosing);
+        }
+
+        private void OnAfterClosing() {
             RaiseEvent(ProjectCollectionChanged);
         }
 
