@@ -14,5 +14,16 @@ namespace NuGetConsole {
         /// Get the editor's IVsTextView for further direct interaction.
         /// </summary>
         object VsTextView { get; }
+
+        /// <summary>
+        /// Tells the Wpf console to disable itself. This gets called when the host sets 
+        /// IsCommandEnabled=false after Initialize() phase.
+        /// </summary>
+        void Disable();
+
+        /// <summary>
+        /// Tells the Wpf console to update its state when command is executing.
+        /// </summary>
+        void SetExecutionMode(bool isExecuting);
     }
 }

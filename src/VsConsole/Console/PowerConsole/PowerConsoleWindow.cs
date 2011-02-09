@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio;
 
 namespace NuGetConsole.Implementation.PowerConsole {
     [Export(typeof(IPowerConsoleWindow))]
@@ -73,49 +73,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
                     _activeHost = value;
                     _activeHostInfo = null;
                     this.ActiveHostChanged.Raise(this);
-                }
-            }
-        }
-
-        // represent the default feed
-        public string ActiveHostSetting {
-            get {
-                HostInfo hi = ActiveHostInfo;
-                return (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) ?
-                    ActiveHostInfo.WpfConsole.Host.Setting :
-                    null;
-            }
-            set {
-                HostInfo hi = ActiveHostInfo;
-                if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
-                    hi.WpfConsole.Host.Setting = value;
-                }
-            }
-        }
-
-        public string[] AvailableHostSettings {
-            get {
-                return ActiveHostInfo.WpfConsole.Host.GetAvailableSettings();
-            }
-        }
-
-        public string[] AvailableProjects {
-            get {
-                return ActiveHostInfo.WpfConsole.Host.GetAvailableProjects();
-            }
-        }
-
-        public string DefaultProject {
-            get {
-                HostInfo hi = ActiveHostInfo;
-                return (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) ?
-                    ActiveHostInfo.WpfConsole.Host.DefaultProject :
-                    null;
-            }
-            set {
-                HostInfo hi = ActiveHostInfo;
-                if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
-                    hi.WpfConsole.Host.DefaultProject = value;
                 }
             }
         }

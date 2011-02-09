@@ -9,9 +9,9 @@ using System.Management.Automation.Runspaces;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
+using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
-using NuGet;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
@@ -22,10 +22,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private object _privateData;
         private Runspace _myRunSpace;
         private MyHost _myHost;
-        private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private Pipeline _executingPipeline;
+        private readonly Lazy<IHostSettings> _hostSettings;
 
         protected PowerShellHost(IConsole console, string name, bool isAsync, object privateData) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -33,14 +33,20 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             this.Console = console;
             this.IsAsync = isAsync;
 
-            // TODO: Take these as ctor arguments
-            _packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
+            var packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
             _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
             _packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
+            _hostSettings = new Lazy<IHostSettings>(() => new PowerShellHostSettings(_solutionManager, packageSourceProvider));
 
             _name = name;
             _privateData = privateData;
             IsCommandEnabled = true;
+        }
+
+        public IHostSettings Settings {
+            get {
+                return _hostSettings.Value;
+            }
         }
 
         public bool IsCommandEnabled {
@@ -270,44 +276,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         protected void ReportError(Exception exception) {
             _myHost.UI.WriteErrorLine((exception.InnerException ?? exception).Message);
-        }
-
-        public string Setting {
-            get {
-                var activePackageSource = _packageSourceProvider.ActivePackageSource;
-                return activePackageSource == null ? null : activePackageSource.Name;
-            }
-            set {
-                if (string.IsNullOrEmpty(value)) {
-                    throw new ArgumentNullException("value");
-                }
-
-                _packageSourceProvider.ActivePackageSource =
-                    _packageSourceProvider.GetPackageSources().FirstOrDefault(
-                        ps => ps.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
-            }
-        }
-
-        public string[] GetAvailableSettings() {
-            return _packageSourceProvider.GetPackageSources().Select(ps => ps.Name).ToArray();
-        }
-
-        public string DefaultProject {
-            get {
-                Debug.Assert(_solutionManager != null);
-                return _solutionManager.DefaultProjectName;
-            }
-            set {
-                Debug.Assert(_solutionManager != null);
-                _solutionManager.DefaultProjectName = value;
-            }
-        }
-
-        public string[] GetAvailableProjects() {
-            Debug.Assert(_solutionManager != null);
-
-            return (from p in _solutionManager.GetProjects()
-                    select p.Name).ToArray();
         }
 
         #region IPowerShellHost

@@ -40,6 +40,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
     <Compile Include="PowerShellHostExtensions.cs" />
+    <Compile Include="PowerShellHostSettings.cs" />
     <Compile Include="PSTypeWrapper.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="CommandTokenizer.cs" />

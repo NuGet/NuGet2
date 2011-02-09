@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace NuGetConsole {
     /// <summary>
@@ -37,13 +36,10 @@ namespace NuGetConsole {
         /// </summary>
         void Abort();
 
-        string Setting { get; set; }
-
-        string[] GetAvailableSettings();
-
-        string DefaultProject { get; set; }
-
-        string[] GetAvailableProjects();
+        /// <summary>
+        /// Get host settings
+        /// </summary>
+        IHostSettings Settings { get; }
     }
 
     /// <summary>

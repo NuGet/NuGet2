@@ -40,6 +40,7 @@
     <Compile Include="IHost.cs" />
     <Compile Include="IHostMetadata.cs" />
     <Compile Include="IHostProvider.cs" />
+    <Compile Include="IHostSettings.cs" />
     <Compile Include="IPathExpansion.cs" />
     <Compile Include="IPowerConsoleWindow.cs" />
     <Compile Include="IPowerShellHost.cs" />

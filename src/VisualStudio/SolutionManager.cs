@@ -13,11 +13,7 @@ namespace NuGet.VisualStudio {
     public class SolutionManager : ISolutionManager {
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;
-
         private Dictionary<string, Project> _projectCache;
-        private EventHandler _solutionOpened;
-        private EventHandler _solutionClosing;
-
 
         [ImportingConstructor]
         private SolutionManager(DTE dte) {
@@ -56,23 +52,10 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public event EventHandler SolutionOpened {
-            add {
-                _solutionOpened += value;
-            }
-            remove {
-                _solutionOpened -= value;
-            }
-        }
+        public event EventHandler ProjectCollectionChanged;
+        public event EventHandler SolutionOpened;
+        public event EventHandler SolutionClosing;
 
-        public event EventHandler SolutionClosing {
-            add {
-                _solutionClosing += value;
-            }
-            remove {
-                _solutionClosing -= value;
-            }
-        }
 
         /// <summary>
         /// Gets a value indicating whether there is a solution open in the IDE.
@@ -123,13 +106,11 @@ namespace NuGet.VisualStudio {
             }
         }
 
-
         private void OnBeforeClosing() {
             DefaultProjectName = null;
             _projectCache = null;
-            if (_solutionClosing != null) {
-                _solutionClosing(this, EventArgs.Empty);
-            }
+            RaiseEvent(SolutionClosing);
+            RaiseEvent(ProjectCollectionChanged);
         }
 
         private void OnProjectRenamed(Project project, string oldName) {
@@ -148,6 +129,8 @@ namespace NuGet.VisualStudio {
                 if (oldName.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
                     DefaultProjectName = project.Name;
                 }
+
+                RaiseEvent(ProjectCollectionChanged);
             }
         }
 
@@ -159,6 +142,8 @@ namespace NuGet.VisualStudio {
             if (project.Name.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
                 DefaultProjectName = String.Empty;
             }
+
+            RaiseEvent(ProjectCollectionChanged);
         }
 
         private void OnProjectAdded(Project project) {
@@ -169,15 +154,16 @@ namespace NuGet.VisualStudio {
                 if (String.IsNullOrEmpty(DefaultProjectName)) {
                     DefaultProjectName = project.Name;
                 }
+
+                RaiseEvent(ProjectCollectionChanged);
             }
         }
 
         private void OnSolutionOpened() {
             EnsureProjectCache();
             SetDefaultProject();
-            if (_solutionOpened != null) {
-                _solutionOpened(this, EventArgs.Empty);
-            }
+            RaiseEvent(SolutionOpened);
+            RaiseEvent(ProjectCollectionChanged);
         }
 
         private void EnsureProjectCache() {
@@ -211,6 +197,12 @@ namespace NuGet.VisualStudio {
             return (from project in _projectCache.Values
                     where project.UniqueName.Equals(startupProjectName, StringComparison.OrdinalIgnoreCase)
                     select project.Name).FirstOrDefault();
+        }
+
+        private void RaiseEvent(EventHandler handler) {
+            if (handler != null) {
+                handler(this, EventArgs.Empty);
+            }
         }
     }
 }

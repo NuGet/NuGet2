@@ -107,6 +107,9 @@
     <Compile Include="..\..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Console\ToolWindowControl.xaml.cs">
+      <DependentUpon>ToolWindowControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Guids.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PkgCmdID.cs">
@@ -144,7 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -155,10 +158,29 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
+      <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
+      <Name>VisualStudio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
       <Name>Console.Types</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Console\ToolWindowControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\StopHS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\settings.png" />
   </ItemGroup>
   <Choose>
     <When Condition="Exists($(VsSdkTargets))" />

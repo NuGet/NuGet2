@@ -5,6 +5,12 @@ using EnvDTE;
 
 namespace NuGet.VisualStudio {
     public interface ISolutionManager {
+
+        /// <summary>
+        /// Raised when the collection of projects in the current solution changes
+        /// </summary>
+        event EventHandler ProjectCollectionChanged;
+
         event EventHandler SolutionOpened;
         event EventHandler SolutionClosing;
 

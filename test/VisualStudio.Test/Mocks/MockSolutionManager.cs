@@ -5,11 +5,16 @@ using EnvDTE;
 namespace NuGet.VisualStudio.Test.Mocks {
     public abstract class MockSolutionManager : ISolutionManager {
         public event EventHandler SolutionOpened;
-
+        
         public event EventHandler SolutionClosing;
 
         public abstract string SolutionDirectory {
             get;
+        }
+
+        event EventHandler ISolutionManager.ProjectCollectionChanged {
+            add {}
+            remove {}
         }
 
         public abstract bool IsSolutionOpen { get; }

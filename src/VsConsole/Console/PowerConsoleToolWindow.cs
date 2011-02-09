@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,12 +46,6 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        bool IsToolbarEnabled {
-            get {
-                return (_wpfConsole != null && _wpfConsole.Host != null && _wpfConsole.Host.IsCommandEnabled);
-            }
-        }
-
         /// <summary>
         /// Standard constructor for the tool window.
         /// </summary>
@@ -61,38 +54,6 @@ namespace NuGetConsole.Implementation {
             this.Caption = Resources.ToolWindowTitle;
             this.BitmapResourceID = 301;
             this.BitmapIndex = 0;
-            this.ToolBar = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.idToolbar);
-        }
-
-        protected override void Initialize() {
-            base.Initialize();
-
-            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (mcs != null) {
-                // Get list command for the Feed combo
-                CommandID sourcesListCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidSourcesList);
-                mcs.AddCommand(new OleMenuCommand(SourcesList_Exec, sourcesListCommandID));
-
-                // invoke command for the Feed combo
-                CommandID sourcesCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidSources);
-                mcs.AddCommand(new OleMenuCommand(Sources_Exec, sourcesCommandID));
-
-                // get default project command
-                CommandID projectsListCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidProjectsList);
-                mcs.AddCommand(new OleMenuCommand(ProjectsList_Exec, projectsListCommandID));
-
-                // invoke command for the Default project combo
-                CommandID projectsCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidProjects);
-                mcs.AddCommand(new OleMenuCommand(Projects_Exec, projectsCommandID));
-
-                // clear console command
-                CommandID clearHostCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidClearHost);
-                mcs.AddCommand(new OleMenuCommand(ClearHost_Exec, clearHostCommandID));
-
-                // terminate command execution command
-                CommandID stopHostCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidStopHost);
-                mcs.AddCommand(new OleMenuCommand(StopHost_Exec, stopHostCommandID));
-            }
         }
 
         public override void OnToolWindowCreated() {
@@ -139,15 +100,6 @@ namespace NuGetConsole.Implementation {
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
         int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
-            
-            if (!IsToolbarEnabled) {
-                // disbale all buttons on the toolbar
-                if (pguidCmdGroup == GuidList.guidNuGetCmdSet) {
-                    prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_SUPPORTED;
-                    return VSConstants.S_OK;
-                }
-            }
-
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;
 
             if (this.VsTextView != null) {
@@ -184,85 +136,6 @@ namespace NuGetConsole.Implementation {
             }
 
             return hr;
-        }
-
-        void SourcesList_Exec(object sender, EventArgs e) {
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null || args.OutValue == IntPtr.Zero) {
-                    throw new ArgumentException("Invalid argument", "e");
-                }
-                Marshal.GetNativeVariantForObject(PowerConsoleWindow.AvailableHostSettings, args.OutValue);
-            }
-        }
-
-        /// <summary>
-        /// Called to retrieve current combo item name or to select a new item.
-        /// </summary>
-        void Sources_Exec(object sender, EventArgs e) {
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null && args.InValue is int) // Selected a feed
-                {
-                    int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.AvailableHostSettings.Length) {
-                        PowerConsoleWindow.ActiveHostSetting = PowerConsoleWindow.AvailableHostSettings[index];
-                    }
-                }
-                else if (args.OutValue != IntPtr.Zero) // Query selected feed name
-                {
-                    string displayName = PowerConsoleWindow.ActiveHostSetting ?? string.Empty;
-                    Marshal.GetNativeVariantForObject(displayName, args.OutValue);
-                }
-            }
-        }
-
-        void ProjectsList_Exec(object sender, EventArgs e) {
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null || args.OutValue == IntPtr.Zero) {
-                    throw new ArgumentException("Invalid argument", "e");
-                }
-
-                // get project list here
-                Marshal.GetNativeVariantForObject(PowerConsoleWindow.AvailableProjects, args.OutValue);
-            }
-        }
-
-        /// <summary>
-        /// Called to retrieve current combo item name or to select a new item.
-        /// </summary>
-        void Projects_Exec(object sender, EventArgs e) {
-            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null && args.InValue is int) // Selected a default projects
-                {
-                    int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.AvailableProjects.Length) {
-                        PowerConsoleWindow.DefaultProject = PowerConsoleWindow.AvailableProjects[index];
-                    }
-                }
-                else if (args.OutValue != IntPtr.Zero) // Query default project name
-                {
-                    string displayName = PowerConsoleWindow.DefaultProject ?? string.Empty;
-                    Marshal.GetNativeVariantForObject(displayName, args.OutValue);
-                }
-            }
-        }
-
-        /// <summary>
-        /// ClearHost command handler.
-        /// </summary>
-        void ClearHost_Exec(object sender, EventArgs e) {
-            if (WpfConsole != null) {
-                WpfConsole.Dispatcher.ClearConsole();
-            }
-        }
-
-        void StopHost_Exec(object sender, EventArgs e) {
-            if (WpfConsole != null) {
-                WpfConsole.Host.Abort();
-            }
         }
 
         HostInfo ActiveHostInfo {
@@ -338,14 +211,11 @@ namespace NuGetConsole.Implementation {
             // Try start the console session now. This needs to be after the console
             // pane getting focus to avoid incorrect initial editor layout.
             if (WpfConsole != null && WpfConsole.Content == consolePane) {
-
-                if (WpfConsole.Host.IsCommandEnabled) {
-                    try {
-                        WpfConsole.Dispatcher.Start();
-                    }
-                    catch (Exception x) {
-                        WpfConsole.WriteLine(x.ToString());
-                    }
+                try {
+                    WpfConsole.Dispatcher.Start();
+                }
+                catch (Exception x) {
+                    WpfConsole.WriteLine(x.ToString());
                 }
             }
         }
