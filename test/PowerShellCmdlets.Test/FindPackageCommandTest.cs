@@ -10,7 +10,7 @@ namespace NuGet.PowerShell.Commands.Test {
     using PackageUtility = NuGet.Test.PackageUtility;
 
     [TestClass]
-    public class FindPackageCmdletTest  {
+    public class FindPackageCommandTest  {
         [TestMethod]
         public void FindPackageFiltersByIdWhenSwitchIsSpecified() {
             // Arrange 

@@ -13,7 +13,7 @@ namespace NuGet.PowerShell.Commands.Test {
     using PackageUtility = NuGet.Test.PackageUtility;
 
     [TestClass]
-    public class GetPackageCmdletTest {
+    public class GetPackageCommandTest {
         [TestMethod]
         public void GetPackageReturnsAllInstalledPackagesWhenNoParametersAreSpecified() {
             // Arrange 

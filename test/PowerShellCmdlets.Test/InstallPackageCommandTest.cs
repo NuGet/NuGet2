@@ -9,13 +9,13 @@ using NuGet.VisualStudio.Test;
 
 namespace NuGet.PowerShell.Commands.Test {
     [TestClass]
-    public class UpdatePackageCmdletTest {
+    public class InstallPackageCommandTest {
         [TestMethod]
-        public void UpdatePackageCmdletThrowsWhenSolutionIsClosed() {
+        public void InstallPackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object);
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
@@ -23,14 +23,14 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
-        public void UpdatePackageCmdletUsesPackageManangerWithSourceIfSpecified() {
+        public void InstallPackageCmdletUsesPackageManangerWithSourceIfSpecified() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             var vsPackageManager = new MockVsPackageManager();
             var sourceVsPackageManager = new MockVsPackageManager();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             packageManagerFactory.Setup(m => m.CreatePackageManager("somesource")).Returns(sourceVsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
             cmdlet.Object.Source = "somesource";
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
@@ -43,12 +43,12 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
-        public void UpdatePackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
+        public void InstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
 
@@ -61,34 +61,15 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
-        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectly() {
+        public void InstallPackageCmdletPassesIgnoreDependencySwitchCorrectly() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
-
-            // Act
-            cmdlet.Object.Execute();
-
-            // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"),  vsPackageManager.Version);
-            Assert.IsTrue(vsPackageManager.UpdateDependencies);
-        }
-
-        [TestMethod]
-        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectlyWhenPresent() {
-            // Arrange
-            var vsPackageManager = new MockVsPackageManager();
-            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.IgnoreDependencies = new SwitchParameter(isPresent: true);
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
 
             // Act
             cmdlet.Object.Execute();
@@ -96,7 +77,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Assert
             Assert.AreEqual("my-id", vsPackageManager.PackageId);
             Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
-            Assert.IsFalse(vsPackageManager.UpdateDependencies);
+            Assert.IsTrue(vsPackageManager.IgnoreDependencies);
         }
 
         private class MockVsPackageManager : VsPackageManager {
@@ -113,13 +94,13 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public Version Version { get; set; }
 
-            public bool UpdateDependencies { get; set; }
+            public bool IgnoreDependencies { get; set; }
 
-            public override void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger) {
+            public override void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;
-                UpdateDependencies = updateDependencies;
+                IgnoreDependencies = ignoreDependencies;
             }
 
             public override IProjectManager GetProjectManager(Project project) {

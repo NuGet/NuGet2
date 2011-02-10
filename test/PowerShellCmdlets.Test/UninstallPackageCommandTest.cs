@@ -9,7 +9,7 @@ using NuGet.VisualStudio.Test;
 
 namespace NuGet.PowerShell.Commands.Test {
     [TestClass]
-    public class UninstallPackageCmdletTest {
+    public class UninstallPackageCommandTest {
         [TestMethod]
         public void UninstallPackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange

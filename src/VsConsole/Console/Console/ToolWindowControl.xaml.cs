@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using NuGet.VisualStudio;
 
 namespace NuGetConsole.Implementation.Console {

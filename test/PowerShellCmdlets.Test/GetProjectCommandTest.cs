@@ -6,7 +6,7 @@ using NuGet.VisualStudio.Test;
 
 namespace NuGet.PowerShell.Commands.Test {
     [TestClass]
-    public class GetProjectCmdletTest {
+    public class GetProjectCommandTest {
         [TestMethod]
         public void GetProjectCmdletReturnsDefaultProjectWhenNoFlagsAreSet() {
             // Arrange

@@ -31,17 +31,17 @@
     <Compile Include="..\..\..\Common\CommonResources.cs">
       <Link>CommonResources.cs</Link>
     </Compile>
-    <Compile Include="AddBindingRedirectCmdlet.cs" />
-    <Compile Include="FindPackageCmdlet.cs" />
-    <Compile Include="GetPackageCmdlet.cs" />
-    <Compile Include="GetProjectCmdlet.cs" />
+    <Compile Include="AddBindingRedirectCommand.cs" />
+    <Compile Include="FindPackageCommand.cs" />
+    <Compile Include="GetPackageCommand.cs" />
+    <Compile Include="GetProjectCommand.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IErrorHandler.cs" />
-    <Compile Include="InstallPackageCmdlet.cs" />
-    <Compile Include="NewPackageCmdlet.cs" />
-    <Compile Include="NuGetBaseCmdlet.cs" />
+    <Compile Include="InstallPackageCommand.cs" />
+    <Compile Include="NewPackageCommand.cs" />
+    <Compile Include="NuGetBaseCommand.cs" />
     <Compile Include="NuGetErrorId.cs" />
-    <Compile Include="ProcessPackageBaseCmdlet.cs" />
+    <Compile Include="ProcessPackageBaseCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSPathUtility.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -49,8 +49,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UninstallPackageCmdlet.cs" />
-    <Compile Include="UpdatePackageCmdlet.cs" />
+    <Compile Include="UninstallPackageCommand.cs" />
+    <Compile Include="UpdatePackageCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">
