@@ -28,6 +28,12 @@ namespace NuGetConsole {
         int ConsoleWidth { get; }
 
         /// <summary>
+        /// Display progress data for the current command
+        /// </summary>
+        /// <param name="data"></param>
+        void WriteProgress(ProgressData data);
+
+        /// <summary>
         /// Write text to the console.
         /// </summary>
         /// <param name="text">The text content.</param>

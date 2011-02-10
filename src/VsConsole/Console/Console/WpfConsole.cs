@@ -281,6 +281,10 @@ namespace NuGetConsole.Implementation.Console {
                 Invoke(_impl.Disable);
             }
 
+            public void WriteProgress(ProgressData data) {
+                Invoke(()=>_impl.WriteProgress(data));
+            }
+
             public void SetExecutionMode(bool isExecuting) {
                 Invoke(() => _impl.SetExecutionMode(isExecuting));
             }
@@ -447,6 +451,12 @@ namespace NuGetConsole.Implementation.Console {
         public void SetExecutionMode(bool isExecuting) {
             if (_content != null) {
                 _content.SetExecutionMode(isExecuting);
+            }
+        }
+
+        public void WriteProgress(ProgressData data) {
+            if (_content != null) {
+                _content.ShowProgress(data);
             }
         }
 

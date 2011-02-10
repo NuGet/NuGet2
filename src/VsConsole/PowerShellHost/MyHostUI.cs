@@ -7,10 +7,10 @@ using System.Security;
 using System.Windows.Media;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-    class MyHostUI : PSHostUserInterface {
+    internal class MyHostUI : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
 
-        IConsole Console { get; set; }
+        private IConsole Console { get; set; }
 
         public MyHostUI(IConsole console) {
             UtilityMethods.ThrowIfArgumentNull(console);
@@ -129,6 +129,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         public override void WriteProgress(long sourceId, ProgressRecord record) {
+            Console.WriteProgress(new ProgressData(record.CurrentOperation, record.PercentComplete));
         }
 
         public override void WriteVerboseLine(string message) {

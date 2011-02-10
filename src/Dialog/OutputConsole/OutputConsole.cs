@@ -72,6 +72,9 @@ namespace NuGet.OutputWindowConsole {
             }
         }
 
+        public void WriteProgress(ProgressData data) {
+        }
+
         public void Clear() {
             Start();
             _outputWindowPane.Clear();

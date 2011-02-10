@@ -5,10 +5,10 @@ using System.Management.Automation.Host;
 using System.Threading;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-    class MyHost : PSHost {
-        PowerShellHost _host;
-        string _name;
-        PSObject _privateData;
+    internal class MyHost : PSHost {
+        private PowerShellHost _host;
+        private string _name;
+        private PSObject _privateData;
 
         public MyHost(PowerShellHost host, string name, object privateData, params Tuple<string, object>[] extraData) {
             UtilityMethods.ThrowIfArgumentNull(host);

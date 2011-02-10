@@ -13,6 +13,8 @@ namespace NuGetConsole.Implementation.Console {
         private readonly IHost _host;
         private readonly IWpfConsole _console;
         private readonly IHostSettings _hostSettings;
+        private ProgressBar _progressBar;
+        private TextBlock _progressText;
 
         public ToolWindowControl(FrameworkElement editor, IHost host, IWpfConsole console) {
             InitializeComponent();
@@ -78,6 +80,50 @@ namespace NuGetConsole.Implementation.Console {
             foreach (FrameworkElement element in MainToolBar.Items) {
                 element.Visibility = (element == StopButton) ? stopButtonVisible : isVisible;
             }
+
+            // hide the progress bar if execution completes.
+            if (!executing && _progressBar != null) {
+                _progressBar.Visibility = Visibility.Collapsed;
+                _progressText.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        internal void ShowProgress(ProgressData data) {
+            if (_progressBar == null) {
+                // delay creating the ProgressBar control. Most of the time we don't need it.
+                _progressBar = CreateProgressBarControl();
+                MainToolBar.Items.Add(_progressBar);
+
+                _progressText = CreateProgressTextControl();
+                MainToolBar.Items.Add(_progressText);
+            }
+
+            if (!String.IsNullOrEmpty(data.CurrentOperation)) {
+                _progressText.Text = data.CurrentOperation;
+                _progressText.Visibility = Visibility.Visible;
+            }
+
+            _progressBar.Value = data.PercentComplete;
+            _progressBar.Visibility = Visibility.Visible;
+        }
+
+        private ProgressBar CreateProgressBarControl() {
+            var control = new ProgressBar {
+                Minimum = 0,
+                Maximum = 100,
+                Width = 250,
+                Margin = new Thickness(5,2,0,2)
+            };
+
+            return control;
+        }
+
+        private TextBlock CreateProgressTextControl() {
+            var textBlock = new TextBlock() {
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(10,2,0,2)
+            };
+            return textBlock;
         }
 
         private void PackageSourceSelected(object sender, SelectionChangedEventArgs e) {
