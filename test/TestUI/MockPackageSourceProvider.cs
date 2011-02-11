@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using NuGet.VisualStudio;
@@ -6,11 +5,6 @@ using NuGet.VisualStudio;
 namespace NuGet.TestUI {
     class MockPackageSourceProvider : IPackageSourceProvider {
         private IList<PackageSource> _packageSources = new List<PackageSource>();
-
-        event EventHandler IPackageSourceProvider.PackageSourcesChanged {
-            add { }
-            remove { }
-        }
 
         public PackageSource ActivePackageSource {
             get;

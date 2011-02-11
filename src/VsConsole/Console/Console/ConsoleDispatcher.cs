@@ -59,10 +59,6 @@ namespace NuGetConsole.Implementation.Console {
                 if (host.IsCommandEnabled) {
                     _dispatcher.Start();
                 }
-                else {
-                    // if the host doesn't enable command, disable the console
-                    WpfConsole.Disable();
-                }
             }
         }
 
@@ -92,17 +88,8 @@ namespace NuGetConsole.Implementation.Console {
         abstract class Dispatcher {
             protected ConsoleDispatcher ParentDispatcher { get; private set; }
             protected IPrivateWpfConsole WpfConsole { get; private set; }
-            private bool _isExecuting;
 
-            public bool IsExecuting {
-                get {
-                    return _isExecuting;
-                }
-                protected set {
-                    _isExecuting = value;
-                    WpfConsole.SetExecutionMode(_isExecuting);
-                }
-            }
+            public bool IsExecuting { get; protected set; }
 
             protected Dispatcher(ConsoleDispatcher parentDispatcher) {
                 ParentDispatcher = parentDispatcher;

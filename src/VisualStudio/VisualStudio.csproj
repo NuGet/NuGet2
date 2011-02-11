@@ -54,7 +54,6 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Design" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
@@ -64,7 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="IOptionsDialogOpener.cs" />
     <Compile Include="IRepositorySettings.cs" />
     <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="MSBuildProjectExtensions.cs" />
@@ -78,7 +76,6 @@
     <Compile Include="RecentRepository\VsPersistencePackageSettingsManager.cs" />
     <Compile Include="RepositorySettings.cs" />
     <Compile Include="SettingsManagerBase.cs" />
-    <Compile Include="OptionsDialogOpener.cs" />
     <Compile Include="VsFileSystemProvider.cs" />
     <Compile Include="VsPackageManagerFactory.cs" />
     <Compile Include="DTEExtensions.cs" />

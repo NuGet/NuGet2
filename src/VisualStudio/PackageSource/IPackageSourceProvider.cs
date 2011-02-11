@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,11 +9,8 @@ namespace NuGet.VisualStudio {
             "CA1024:UsePropertiesWhereAppropriate",
             Justification = "This method is potentially expensive.")]
         IEnumerable<PackageSource> GetPackageSources();
+        void AddPackageSource(PackageSource source);
+        bool RemovePackageSource(PackageSource source);
         void SetPackageSources(IEnumerable<PackageSource> sources);
-
-        /// <summary>
-        /// Raised when either the package source collection changes OR when the active package source changes.
-        /// </summary>
-        event EventHandler PackageSourcesChanged;
     }
 }

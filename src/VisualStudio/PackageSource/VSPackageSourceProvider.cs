@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using NuGet.VisualStudio.Resources;
@@ -27,8 +26,6 @@ namespace NuGet.VisualStudio {
             AddOfficialPackageSourceIfNeeded();
         }
 
-        public event EventHandler PackageSourcesChanged;
-
         public PackageSource ActivePackageSource {
             get {
                 return _activePackageSource;
@@ -42,8 +39,6 @@ namespace NuGet.VisualStudio {
 
                 // persist the value into VS settings store
                 _settingsManager.ActivePackageSourceString = SerializationHelper.Serialize(value);
-
-                RaisePackageSourcesChangedEvent();
             }
         }
 
@@ -55,7 +50,7 @@ namespace NuGet.VisualStudio {
             return _packageSources;
         }
 
-        internal void AddPackageSource(PackageSource source) {
+        public void AddPackageSource(PackageSource source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -72,7 +67,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        internal bool RemovePackageSource(PackageSource source) {
+        public bool RemovePackageSource(PackageSource source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -102,8 +97,6 @@ namespace NuGet.VisualStudio {
             }
 
             PersistPackageSources();
-
-            RaisePackageSourcesChangedEvent();
         }
 
         private void PersistPackageSources() {
@@ -178,12 +171,6 @@ namespace NuGet.VisualStudio {
             }
 
             PersistPackageSources();
-        }
-
-        private void RaisePackageSourcesChangedEvent() {
-            if (PackageSourcesChanged != null) {
-                PackageSourcesChanged(this, EventArgs.Empty);
-            }
         }
     }
 }

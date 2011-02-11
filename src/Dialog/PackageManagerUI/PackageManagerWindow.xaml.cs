@@ -21,10 +21,11 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private const string F1Keyword = "vs.ExtensionManager";
 
-        private readonly IOptionsDialogOpener _optionsDialogOpener;
+        private readonly IServiceProvider _serviceProvider;
 
         [ImportingConstructor]
-        public PackageManagerWindow(IOptionsDialogOpener optionsDialogOpener,
+        public PackageManagerWindow([Import("PackageServiceProvider")]
+                                    IServiceProvider serviceProvider,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -38,7 +39,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
 
-            _optionsDialogOpener = optionsDialogOpener;
+            // this is the service provider from VsPackage, not from DTE
+            _serviceProvider = serviceProvider;
 
             // replace the ConsoleOutputProvider with SmartOutputConsoleProvider so that we can clear 
             // the console the first time an entry is written to it
@@ -171,7 +173,19 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
             this.Close();
-            _optionsDialogOpener.OpenOptionsDialog(NuGetOptionsPage.PackageSources);
+
+            ShowOptionsPage();
+        }
+
+        private void ShowOptionsPage() {
+            // GUID of our options page, defined in ToolsOptionsPage.cs
+            const string targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
+
+            var command = new CommandID(
+                VSConstants.GUID_VSStandardCommandSet97,
+                VSConstants.cmdidToolsOptions);
+            var mcs = (MenuCommandService)_serviceProvider.GetService(typeof(IMenuCommandService));
+            mcs.GlobalInvoke(command, targetGUID);
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {
