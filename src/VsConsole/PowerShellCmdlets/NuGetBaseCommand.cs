@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -16,10 +17,21 @@ namespace NuGet.PowerShell.Commands {
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
+        private ProgressRecordCollection _progressRecordCache;
 
         protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
+        }
+
+        private ProgressRecordCollection ProgressRecordCache {
+            get {
+                if (_progressRecordCache == null) {
+                    _progressRecordCache = new ProgressRecordCollection();
+                }
+
+                return _progressRecordCache;
+            }
         }
 
         protected IErrorHandler ErrorHandler {
@@ -234,6 +246,30 @@ namespace NuGet.PowerShell.Commands {
             }
             else {
                 Host.UI.WriteLine(message);
+            }
+        }
+
+        protected void WriteProgress(int activityId, string operation, int percentComplete) {
+            ProgressRecord progressRecord;
+
+            // retrieve the ProgressRecord object for this particular activity id from the cache.
+            if (ProgressRecordCache.Contains(activityId)) {
+                progressRecord = ProgressRecordCache[activityId];
+            }
+            else {
+                progressRecord = new ProgressRecord(activityId, operation, operation);
+                ProgressRecordCache.Add(progressRecord);
+            }
+
+            progressRecord.CurrentOperation = operation;
+            progressRecord.PercentComplete = percentComplete;
+
+            WriteProgress(progressRecord);
+        }
+
+        private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord> {
+            protected override int GetKeyForItem(ProgressRecord item) {
+                return item.ActivityId;
             }
         }
     }

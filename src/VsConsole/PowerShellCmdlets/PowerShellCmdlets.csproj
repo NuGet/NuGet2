@@ -42,6 +42,7 @@
     <Compile Include="NuGetBaseCommand.cs" />
     <Compile Include="NuGetErrorId.cs" />
     <Compile Include="ProcessPackageBaseCommand.cs" />
+    <Compile Include="ProgressActivityIds.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSPathUtility.cs" />
     <Compile Include="Resources.Designer.cs">

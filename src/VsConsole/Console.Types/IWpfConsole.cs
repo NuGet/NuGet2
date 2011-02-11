@@ -11,6 +11,11 @@ namespace NuGetConsole {
         object Content { get; }
 
         /// <summary>
+        /// Tells the Wpf console to update its state when command is executing.
+        /// </summary>
+        void SetExecutionMode(bool isExecuting);
+
+        /// <summary>
         /// Get the editor's IVsTextView for further direct interaction.
         /// </summary>
         object VsTextView { get; }

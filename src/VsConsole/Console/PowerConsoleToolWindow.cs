@@ -26,7 +26,7 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Get VS IComponentModel service.
         /// </summary>
-        IComponentModel ComponentModel {
+        private IComponentModel ComponentModel {
             get {
                 return this.GetService<IComponentModel>(typeof(SComponentModel));
             }
@@ -35,19 +35,19 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Get IWpfConsoleService through MEF.
         /// </summary>
-        IWpfConsoleService WpfConsoleService {
+        private IWpfConsoleService WpfConsoleService {
             get {
                 return ComponentModel.GetService<IWpfConsoleService>();
             }
         }
 
-        PowerConsoleWindow PowerConsoleWindow {
+        private PowerConsoleWindow PowerConsoleWindow {
             get {
                 return ComponentModel.GetService<IPowerConsoleWindow>() as PowerConsoleWindow;
             }
         }
 
-        bool IsToolbarEnabled {
+        private bool IsToolbarEnabled {
             get {
                 return (_wpfConsole != null && _wpfConsole.Host != null && _wpfConsole.Host.IsCommandEnabled);
             }
@@ -102,7 +102,7 @@ namespace NuGetConsole.Implementation {
             windowFrame.SetGuidProperty((int)__VSFPROPID.VSFPROPID_InheritKeyBindings, ref cmdUi);
 
             PowerConsoleWindow.ActiveHostChanged += PowerConsoleWindow_ActiveHostChanged;
-            
+
             // pause for a tiny moment to let the tool window open before initializing the host
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(0);
@@ -139,7 +139,7 @@ namespace NuGetConsole.Implementation {
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
         int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
-            
+
             if (!IsToolbarEnabled) {
                 // disbale all buttons on the toolbar
                 if (pguidCmdGroup == GuidList.guidNuGetCmdSet) {
@@ -186,7 +186,7 @@ namespace NuGetConsole.Implementation {
             return hr;
         }
 
-        void SourcesList_Exec(object sender, EventArgs e) {
+        private void SourcesList_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null) {
                 if (args.InValue != null || args.OutValue == IntPtr.Zero) {
@@ -199,7 +199,7 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Called to retrieve current combo item name or to select a new item.
         /// </summary>
-        void Sources_Exec(object sender, EventArgs e) {
+        private void Sources_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null) {
                 if (args.InValue != null && args.InValue is int) // Selected a feed
@@ -217,7 +217,7 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        void ProjectsList_Exec(object sender, EventArgs e) {
+        private void ProjectsList_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null) {
                 if (args.InValue != null || args.OutValue == IntPtr.Zero) {
@@ -232,7 +232,7 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Called to retrieve current combo item name or to select a new item.
         /// </summary>
-        void Projects_Exec(object sender, EventArgs e) {
+        private void Projects_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null) {
                 if (args.InValue != null && args.InValue is int) // Selected a default projects
@@ -253,25 +253,25 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// ClearHost command handler.
         /// </summary>
-        void ClearHost_Exec(object sender, EventArgs e) {
+        private void ClearHost_Exec(object sender, EventArgs e) {
             if (WpfConsole != null) {
                 WpfConsole.Dispatcher.ClearConsole();
             }
         }
 
-        void StopHost_Exec(object sender, EventArgs e) {
+        private void StopHost_Exec(object sender, EventArgs e) {
             if (WpfConsole != null) {
                 WpfConsole.Host.Abort();
             }
         }
 
-        HostInfo ActiveHostInfo {
+        private HostInfo ActiveHostInfo {
             get {
                 return PowerConsoleWindow.ActiveHostInfo;
             }
         }
 
-        void PowerConsoleWindow_ActiveHostChanged(object sender, EventArgs e) {
+        private void PowerConsoleWindow_ActiveHostChanged(object sender, EventArgs e) {
             // Reset local caching variables
             _wpfConsole = null;
             _vsTextView = null;
@@ -296,7 +296,7 @@ namespace NuGetConsole.Implementation {
         /// In this case, we need to set focus in its Loaded event.
         /// </summary>
         /// <param name="consolePane"></param>
-        void PendingMoveFocus(FrameworkElement consolePane) {
+        private void PendingMoveFocus(FrameworkElement consolePane) {
             if (consolePane.IsLoaded && consolePane.IsConnectedToPresentationSource()) {
                 PendingFocusPane = null;
                 MoveFocus(consolePane);
@@ -306,8 +306,8 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        FrameworkElement _pendingFocusPane;
-        FrameworkElement PendingFocusPane {
+        private FrameworkElement _pendingFocusPane;
+        private FrameworkElement PendingFocusPane {
             get {
                 return _pendingFocusPane;
             }
@@ -322,7 +322,7 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        void PendingFocusPane_Loaded(object sender, RoutedEventArgs e) {
+        private void PendingFocusPane_Loaded(object sender, RoutedEventArgs e) {
             MoveFocus(PendingFocusPane);
             PendingFocusPane = null;
         }
@@ -331,7 +331,7 @@ namespace NuGetConsole.Implementation {
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We really don't want exceptions from the console to bring down VS")]
-        void MoveFocus(FrameworkElement consolePane) {
+        private void MoveFocus(FrameworkElement consolePane) {
             // TAB focus into editor (consolePane.Focus() does not work due to editor layouts)
             consolePane.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
 
@@ -350,13 +350,13 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        IWpfConsole _wpfConsole;
+        private IWpfConsole _wpfConsole;
 
         /// <summary>
         /// Get the WpfConsole of the active host.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        IWpfConsole WpfConsole {
+        private IWpfConsole WpfConsole {
             get {
                 if (_wpfConsole == null) {
                     if (ActiveHostInfo != null) {
@@ -377,12 +377,12 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        IVsTextView _vsTextView;
+        private IVsTextView _vsTextView;
 
         /// <summary>
         /// Get the VsTextView of current WpfConsole if exists.
         /// </summary>
-        IVsTextView VsTextView {
+        private IVsTextView VsTextView {
             get {
                 if (_vsTextView == null && _wpfConsole != null) {
                     _vsTextView = (IVsTextView)(WpfConsole.VsTextView);
@@ -391,12 +391,12 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        Border _consoleParentPane;
+        private Border _consoleParentPane;
 
         /// <summary>
         /// Get the parent pane of console panes. This serves as the Content of this tool window.
         /// </summary>
-        Border ConsoleParentPane {
+        private Border ConsoleParentPane {
             get {
                 if (_consoleParentPane == null) {
                     // display the text "initializing..." while the host is initialized.

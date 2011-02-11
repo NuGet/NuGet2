@@ -79,6 +79,15 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Retrieving packages....
+        /// </summary>
+        internal static string Cmdlet_GetPackageProgress {
+            get {
+                return ResourceManager.GetString("Cmdlet_GetPackageProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device..
         /// </summary>
         internal static string Cmdlet_InstallSuccessDisclaimerText {

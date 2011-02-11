@@ -89,7 +89,17 @@ namespace NuGetConsole.Implementation.Console {
             protected ConsoleDispatcher ParentDispatcher { get; private set; }
             protected IPrivateWpfConsole WpfConsole { get; private set; }
 
-            public bool IsExecuting { get; protected set; }
+            private bool _isExecuting;
+
+            public bool IsExecuting {
+                get {
+                    return _isExecuting;
+                }
+                protected set {
+                    _isExecuting = value;
+                    WpfConsole.SetExecutionMode(_isExecuting);
+                }
+            }
 
             protected Dispatcher(ConsoleDispatcher parentDispatcher) {
                 ParentDispatcher = parentDispatcher;

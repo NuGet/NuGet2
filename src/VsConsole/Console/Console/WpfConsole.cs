@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -23,6 +24,8 @@ namespace NuGetConsole.Implementation.Console {
         IServiceProvider ServiceProvider { get; set; }
         public string ContentTypeName { get; private set; }
         public string HostName { get; private set; }
+        private IVsStatusbar _vsStatusBar;
+        private uint _pdwCookieForStatusBar;
 
         public event EventHandler<EventArgs<Tuple<SnapshotSpan, Color?, Color?>>> NewColorSpan;
         public event EventHandler ConsoleCleared;
@@ -46,14 +49,23 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IOleServiceProvider OleServiceProvider {
+        private IVsStatusbar VsStatusBar {
+            get {
+                if (_vsStatusBar == null) {
+                    _vsStatusBar = ServiceProvider.GetService<IVsStatusbar>(typeof(SVsStatusbar));
+                }
+                return _vsStatusBar;
+            }
+        }
+
+        private IOleServiceProvider OleServiceProvider {
             get {
                 return ServiceProvider.GetService<IOleServiceProvider>(typeof(IOleServiceProvider));
             }
         }
 
-        IContentType _contentType;
-        IContentType ContentType {
+        private IContentType _contentType;
+        private IContentType ContentType {
             get {
                 if (_contentType == null) {
                     _contentType = Factory.ContentTypeRegistryService.GetContentType(this.ContentTypeName);
@@ -67,8 +79,8 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IVsTextBuffer _bufferAdapter;
-        IVsTextBuffer VsTextBuffer {
+        private IVsTextBuffer _bufferAdapter;
+        private IVsTextBuffer VsTextBuffer {
             get {
                 if (_bufferAdapter == null) {
                     _bufferAdapter = Factory.VsEditorAdaptersFactoryService.CreateVsTextBufferAdapter(OleServiceProvider, ContentType);
@@ -79,7 +91,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IWpfTextView _wpfTextView;
+        private IWpfTextView _wpfTextView;
         public IWpfTextView WpfTextView {
             get {
                 if (_wpfTextView == null) {
@@ -90,7 +102,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IWpfTextViewHost WpfTextViewHost {
+        private IWpfTextViewHost WpfTextViewHost {
             get {
                 IVsUserData userData = VsTextView as IVsUserData;
                 object data;
@@ -119,8 +131,8 @@ namespace NuGetConsole.Implementation.Console {
             All
         };
 
-        IReadOnlyRegion _readOnlyRegionBegin;
-        IReadOnlyRegion _readOnlyRegionBody;
+        private IReadOnlyRegion _readOnlyRegionBegin;
+        private IReadOnlyRegion _readOnlyRegionBody;
 
         private void SetReadOnlyRegionType(ReadOnlyRegionType value) {
             ITextBuffer buffer = WpfTextView.TextBuffer;
@@ -272,12 +284,16 @@ namespace NuGetConsole.Implementation.Console {
                 Invoke(_impl.Clear);
             }
 
+            public void SetExecutionMode(bool isExecuting) {
+                Invoke(() => _impl.SetExecutionMode(isExecuting));
+            }
+
             public object Content {
                 get { return Invoke(() => _impl.Content); }
             }
 
-            public void WriteProgress(ProgressData data) {
-                //Invoke(()=>_impl.WriteProgress(data));
+            public void WriteProgress(string operation, int percentComplete) {
+                Invoke(()=>_impl.WriteProgress(operation, percentComplete));
             }
 
             public object VsTextView {
@@ -417,6 +433,38 @@ namespace NuGetConsole.Implementation.Console {
                 // Replace all text after InputLineStart with new text
                 WpfTextView.TextBuffer.Replace(AllInputExtent, input);
                 WpfTextView.Caret.EnsureVisible();
+            }
+        }
+
+        private void WriteProgress(string operation, int percentComplete) {
+            if (operation == null) {
+                throw new ArgumentNullException("operation");
+            }
+
+            if (percentComplete < 0 || percentComplete > 100) {
+                throw new ArgumentOutOfRangeException("percentComplete");
+            }
+
+            VsStatusBar.Progress(
+                ref _pdwCookieForStatusBar,
+                1 /* in progress */,
+                operation,
+                (uint)percentComplete,
+                (uint)100);
+        }
+
+        private void HideProgress() {
+            VsStatusBar.Progress(
+                ref _pdwCookieForStatusBar,
+                0 /* completed */,
+                String.Empty,
+                (uint)100,
+                (uint)100);
+        }
+
+        public void SetExecutionMode(bool isExecuting) {
+            if (!isExecuting) {
+                HideProgress();
             }
         }
 

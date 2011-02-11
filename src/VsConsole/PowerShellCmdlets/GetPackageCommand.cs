@@ -175,7 +175,12 @@ namespace NuGet.PowerShell.Commands {
             return sourceRepository.GetUpdates(packagesToUpdate);
         }
 
-        private void WritePackages(IEnumerable<IPackage> packages) {
+        private void WritePackages(IQueryable<IPackage> packages) {
+            
+            int total;
+            int packagesSoFar = 0;
+            bool showProgress = ShouldShowProgress(packages, out total);
+
             bool hasPackage = false;
             foreach (var package in packages) {
                 // exit early if ctrl+c pressed
@@ -184,6 +189,16 @@ namespace NuGet.PowerShell.Commands {
                 }
                 hasPackage = true;
                 WriteObject(package);
+
+                if (showProgress) {
+                    packagesSoFar++;
+
+                    // only update progress after every 20 packages 
+                    if (packagesSoFar % 20 == 0) {
+                        WriteProgress(
+                            ProgressActivityIds.GetPackageId, Resources.Cmdlet_GetPackageProgress, (packagesSoFar * 100 / total));
+                    }
+                }
             }
 
             if (!hasPackage) {
@@ -197,6 +212,36 @@ namespace NuGet.PowerShell.Commands {
                     Log(MessageLevel.Info, Resources.Cmdlet_NoRecentPackages);
                 }
             }
+        }
+
+        private bool ShouldShowProgress(IQueryable<IPackage> packages, out int total) {
+            const int ThresholdToShowProgress = 20;
+
+            bool showProgress = UseRemoteSource;
+
+            total = 0;
+            if (showProgress) {
+                total = int.MaxValue;
+
+                if (_firstValueSpecified) {
+                    // work around issue with AggregateQuery not reporting accurate result in this case
+                    total = Math.Min(total, First);
+                }
+
+                // if there are too few packages, don't bother to show progress.
+                if (total < ThresholdToShowProgress) {
+                    showProgress = false;
+                }
+                else {
+                    // calling packages.Count() will potentially make a web request,
+                    // so we try to avoid it if possible
+                    total = Math.Min(total, packages.Count());
+
+                    showProgress = total >= ThresholdToShowProgress;
+                }
+            }
+
+            return showProgress;
         }
     }
 }

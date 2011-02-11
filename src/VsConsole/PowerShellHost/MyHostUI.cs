@@ -129,7 +129,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         public override void WriteProgress(long sourceId, ProgressRecord record) {
-            Console.WriteProgress(new ProgressData(record.CurrentOperation, record.PercentComplete));
+            Console.WriteProgress(record.CurrentOperation, record.PercentComplete);
         }
 
         public override void WriteVerboseLine(string message) {

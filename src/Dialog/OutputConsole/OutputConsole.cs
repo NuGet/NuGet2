@@ -72,7 +72,7 @@ namespace NuGet.OutputWindowConsole {
             }
         }
 
-        public void WriteProgress(ProgressData data) {
+        public void WriteProgress(string operation, int percentComplete) {
         }
 
         public void Clear() {

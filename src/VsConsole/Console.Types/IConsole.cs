@@ -30,8 +30,7 @@ namespace NuGetConsole {
         /// <summary>
         /// Display progress data for the current command
         /// </summary>
-        /// <param name="data"></param>
-        void WriteProgress(ProgressData data);
+        void WriteProgress(string currentOperation, int percentComplete);
 
         /// <summary>
         /// Write text to the console.

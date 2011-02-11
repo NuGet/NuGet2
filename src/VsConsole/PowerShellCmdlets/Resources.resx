@@ -168,4 +168,7 @@
   <data name="Cmdlet_NoRecentPackages" xml:space="preserve">
     <value>There are no recently installed packages.</value>
   </data>
+  <data name="Cmdlet_GetPackageProgress" xml:space="preserve">
+    <value>Retrieving packages...</value>
+  </data>
 </root>
