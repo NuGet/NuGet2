@@ -66,7 +66,6 @@
     <Compile Include="IRepositorySettings.cs" />
     <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="MSBuildProjectExtensions.cs" />
-    <Compile Include="NuGetOptionsPage.cs" />
     <Compile Include="ProjectSystems\FSharpProjectSystem.cs" />
     <Compile Include="RecentRepository\IPersistencePackageSettingsManager.cs" />
     <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />

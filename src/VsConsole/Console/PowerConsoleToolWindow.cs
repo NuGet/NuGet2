@@ -192,7 +192,7 @@ namespace NuGetConsole.Implementation {
                 if (args.InValue != null || args.OutValue == IntPtr.Zero) {
                     throw new ArgumentException("Invalid argument", "e");
                 }
-                Marshal.GetNativeVariantForObject(PowerConsoleWindow.AvailableHostSettings, args.OutValue);
+                Marshal.GetNativeVariantForObject(PowerConsoleWindow.PackageSources, args.OutValue);
             }
         }
 
@@ -205,13 +205,13 @@ namespace NuGetConsole.Implementation {
                 if (args.InValue != null && args.InValue is int) // Selected a feed
                 {
                     int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.AvailableHostSettings.Length) {
-                        PowerConsoleWindow.ActiveHostSetting = PowerConsoleWindow.AvailableHostSettings[index];
+                    if (index >= 0 && index < PowerConsoleWindow.PackageSources.Length) {
+                        PowerConsoleWindow.ActivePackageSource = PowerConsoleWindow.PackageSources[index];
                     }
                 }
                 else if (args.OutValue != IntPtr.Zero) // Query selected feed name
                 {
-                    string displayName = PowerConsoleWindow.ActiveHostSetting ?? string.Empty;
+                    string displayName = PowerConsoleWindow.ActivePackageSource ?? string.Empty;
                     Marshal.GetNativeVariantForObject(displayName, args.OutValue);
                 }
             }

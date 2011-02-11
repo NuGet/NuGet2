@@ -34,7 +34,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
         public void Abort() {
         }
 
-        public string Setting {
+        public string ActivePackageSource {
             get {
                 return String.Empty;
             }
@@ -42,7 +42,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
             }
         }
 
-        public string[] GetAvailableSettings() {
+        public string[] GetPackageSources() {
             return new string[0];
         }
 

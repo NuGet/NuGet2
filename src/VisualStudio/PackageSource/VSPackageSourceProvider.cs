@@ -50,7 +50,7 @@ namespace NuGet.VisualStudio {
             return _packageSources;
         }
 
-        public void AddPackageSource(PackageSource source) {
+        internal void AddPackageSource(PackageSource source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -67,7 +67,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public bool RemovePackageSource(PackageSource source) {
+        internal bool RemovePackageSource(PackageSource source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }

@@ -102,8 +102,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-
-        enum ReadOnlyRegionType {
+        private enum ReadOnlyRegionType {
             /// <summary>
             /// No ReadOnly region. The whole text buffer allows edit.
             /// </summary>
@@ -122,7 +121,6 @@ namespace NuGetConsole.Implementation.Console {
 
         IReadOnlyRegion _readOnlyRegionBegin;
         IReadOnlyRegion _readOnlyRegionBody;
-
 
         private void SetReadOnlyRegionType(ReadOnlyRegionType value) {
             ITextBuffer buffer = WpfTextView.TextBuffer;
@@ -271,7 +269,7 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public void Clear() {
-                Invoke(() => _impl.Clear());
+                Invoke(_impl.Clear);
             }
 
             public object Content {
@@ -279,7 +277,7 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public void WriteProgress(ProgressData data) {
-                Invoke(()=>_impl.WriteProgress(data));
+                //Invoke(()=>_impl.WriteProgress(data));
             }
 
             public object VsTextView {
@@ -434,13 +432,7 @@ namespace NuGetConsole.Implementation.Console {
             // Raise event
             ConsoleCleared.Raise(this);
         }
-
-            }
-        }
-
-        public void WriteProgress(ProgressData data) {
-            if (_content != null) {
-                _content.ShowProgress(data);
+        
         public void ClearConsole() {
             if (_inputLineStart != null) {
                 Dispatcher.ClearConsole();

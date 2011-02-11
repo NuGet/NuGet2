@@ -272,7 +272,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             _myHost.UI.WriteErrorLine((exception.InnerException ?? exception).Message);
         }
 
-        public string Setting {
+        public string ActivePackageSource {
             get {
                 var activePackageSource = _packageSourceProvider.ActivePackageSource;
                 return activePackageSource == null ? null : activePackageSource.Name;
@@ -288,7 +288,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public string[] GetAvailableSettings() {
+        public string[] GetPackageSources() {
             return _packageSourceProvider.GetPackageSources().Select(ps => ps.Name).ToArray();
         }
 

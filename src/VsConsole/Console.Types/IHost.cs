@@ -37,9 +37,9 @@ namespace NuGetConsole {
         /// </summary>
         void Abort();
 
-        string Setting { get; set; }
+        string ActivePackageSource { get; set; }
 
-        string[] GetAvailableSettings();
+        string[] GetPackageSources();
 
         string DefaultProject { get; set; }
 

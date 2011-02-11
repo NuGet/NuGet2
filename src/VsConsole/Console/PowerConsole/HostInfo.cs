@@ -37,7 +37,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
                 if (_wpfConsole == null) {
                     _wpfConsole = Factory.WpfConsoleService.CreateConsole(
                         Factory.ServiceProvider, PowerConsoleWindow.ContentType, HostName);
-                    _wpfConsole.Host = HostProvider.Value.CreateHost(_wpfConsole, @async: true);
+                    _wpfConsole.Host = HostProvider.Value.CreateHost(_wpfConsole, @async: false);
                 }
                 return _wpfConsole;
             }

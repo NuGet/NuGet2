@@ -72,30 +72,30 @@ namespace NuGetConsole.Implementation.PowerConsole {
                 if (!string.Equals(_activeHost, value) && HostInfos.ContainsKey(value)) {
                     _activeHost = value;
                     _activeHostInfo = null;
-                    this.ActiveHostChanged.Raise(this);
+                    ActiveHostChanged.Raise(this);
                 }
             }
         }
 
         // represent the default feed
-        public string ActiveHostSetting {
+        public string ActivePackageSource {
             get {
                 HostInfo hi = ActiveHostInfo;
                 return (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) ?
-                    ActiveHostInfo.WpfConsole.Host.Setting :
+                    ActiveHostInfo.WpfConsole.Host.ActivePackageSource :
                     null;
             }
             set {
                 HostInfo hi = ActiveHostInfo;
                 if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
-                    hi.WpfConsole.Host.Setting = value;
+                    hi.WpfConsole.Host.ActivePackageSource = value;
                 }
             }
         }
 
-        public string[] AvailableHostSettings {
+        public string[] PackageSources {
             get {
-                return ActiveHostInfo.WpfConsole.Host.GetAvailableSettings();
+                return ActiveHostInfo.WpfConsole.Host.GetPackageSources();
             }
         }
 
