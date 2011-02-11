@@ -72,6 +72,7 @@ function Test-UpdatingPackageWithSharedDependency {
     Assert-Null (Get-SolutionPackage B 1.0)
     Assert-Null (Get-SolutionPackage C 1.0)
     Assert-Null (Get-SolutionPackage A 2.0)
+    Assert-Null (Get-SolutionPackage A 1.0)
 }
 
 function Test-UpdateWithoutPackageInstalledThrows {
@@ -234,4 +235,53 @@ function Test-AddingBindingRedirectAfterUpdate {
     Assert-AreEqual B $redirect.Name
     Assert-AreEqual '0.0.0.0-2.0.0.0' $redirect.OldVersion
     Assert-AreEqual '2.0.0.0' $redirect.NewVersion
+}
+
+
+function Test-UpdatePackageWithOlderVersionOfSharedDependencyInUse {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package K -Source $context.RepositoryPath
+    Assert-Package $p K 1.0
+    Assert-Package $p A 1.0
+    Assert-SolutionPackage K 1.0
+    Assert-SolutionPackage A 1.0
+
+    $p | Install-Package D -Version 1.0 -Source $context.RepositoryPath
+    Assert-Package $p D 1.0
+    Assert-Package $p B 1.0
+    Assert-Package $p C 1.0
+    Assert-SolutionPackage D 1.0
+    Assert-SolutionPackage B 1.0
+    Assert-SolutionPackage C 1.0
+
+    $p | Update-Package D -Source $context.RepositoryPath
+    Assert-Package $p K 1.0
+    Assert-Package $p D 2.0
+    Assert-Package $p B 2.0
+    Assert-Package $p C 2.0
+    Assert-Package $p G 1.0
+    Assert-Package $p A 2.0
+    Assert-SolutionPackage K 1.0
+    Assert-SolutionPackage D 2.0
+    Assert-SolutionPackage B 2.0
+    Assert-SolutionPackage C 2.0
+    Assert-SolutionPackage G 1.0
+    Assert-SolutionPackage A 2.0
+
+    # Make sure the old package(s) are removed
+    Assert-Null (Get-ProjectPackage $p D 1.0)
+    Assert-Null (Get-ProjectPackage $p B 1.0)
+    Assert-Null (Get-ProjectPackage $p C 1.0)
+    Assert-Null (Get-ProjectPackage $p A 1.0)
+    Assert-Null (Get-SolutionPackage D 1.0)
+    Assert-Null (Get-SolutionPackage B 1.0)
+    Assert-Null (Get-SolutionPackage C 1.0)
+    Assert-Null (Get-SolutionPackage A 1.0)
 }

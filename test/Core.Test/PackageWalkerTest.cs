@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Test.Mocks;
 
-namespace NuGet.Test {    
+namespace NuGet.Test {
     [TestClass]
     public class PackageWalkerTest {
         [TestMethod]
@@ -232,7 +232,7 @@ namespace NuGet.Test {
             // A -> [B, C]
             // B -> [D]
             // C -> [D]
-            
+
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
                                                                     new PackageDependency("B"),
@@ -406,6 +406,147 @@ namespace NuGet.Test {
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'.");
+        }
+
+        [TestMethod]
+        public void ResolveOperationsForInstallSameDependencyAtDifferentLevelsInGraph() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+
+            // A1 -> B1, C1
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.0"),
+                                                                    PackageDependency.CreateDependency("C", "1.0")
+                                                                });
+            // B1
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0");
+
+            // C1 -> B1, D1
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.0"),
+                                                                    PackageDependency.CreateDependency("D", "1.0")
+                                                                });
+
+            // D1 -> B1
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.0")
+                                                                });
+
+
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageD);
+
+
+
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
+                                                                   sourceRepository,
+                                                                   NullLogger.Instance,
+                                                                   ignoreDependencies: false);
+
+            // Act & Assert
+            var packages = resolver.ResolveOperations(packageA).ToList();
+            Assert.AreEqual(4, packages.Count);
+            Assert.AreEqual("B", packages[0].Package.Id);
+            Assert.AreEqual("D", packages[1].Package.Id);
+            Assert.AreEqual("C", packages[2].Package.Id);
+            Assert.AreEqual("A", packages[3].Package.Id);
+        }
+
+        [TestMethod]
+        public void ResolveDependenciesForInstallSameDependencyAtDifferentLevelsInGraphDuringUpdate() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+
+            // A1 -> B1, C1
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                            content: new[] { "A1" },
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.0"),
+                                                                    PackageDependency.CreateDependency("C", "1.0")
+                                                                });
+            // B1
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0", new[] { "B1" });
+
+            // C1 -> B1, D1
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0",
+                                                            content: new[] { "C1" },
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.0"),
+                                                                    PackageDependency.CreateDependency("D", "1.0")
+                                                                });
+
+            // D1 -> B1
+            IPackage packageD = PackageUtility.CreatePackage("D", "1.0",
+                                                            content: new[] { "A1" },
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.0")
+                                                                });
+
+            // A2 -> B2, C2
+            IPackage packageA2 = PackageUtility.CreatePackage("A", "2.0",
+                                                            content: new[] { "A2" },
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "2.0"),
+                                                                    PackageDependency.CreateDependency("C", "2.0")
+                                                                });
+            // B2
+            IPackage packageB2 = PackageUtility.CreatePackage("B", "2.0", new[] { "B2" });
+
+            // C2 -> B2, D2
+            IPackage packageC2 = PackageUtility.CreatePackage("C", "2.0",
+                                                            content: new[] { "C2" },
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "2.0"),
+                                                                    PackageDependency.CreateDependency("D", "2.0")
+                                                                });
+
+            // D2 -> B2
+            IPackage packageD2 = PackageUtility.CreatePackage("D", "2.0",
+                                                            content: new[] { "D2" },
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "2.0")
+                                                                });
+
+
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageD);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB2);
+            sourceRepository.AddPackage(packageC2);
+            sourceRepository.AddPackage(packageD2);
+
+            localRepository.AddPackage(packageA);
+            localRepository.AddPackage(packageB);
+            localRepository.AddPackage(packageC);
+            localRepository.AddPackage(packageD);
+
+
+
+            IPackageOperationResolver resolver = new ProjectInstallWalker(localRepository,
+                                                                          sourceRepository,
+                                                                          new DependentsWalker(localRepository),
+                                                                          NullLogger.Instance,
+                                                                          ignoreDependencies: false);
+
+            var operations = resolver.ResolveOperations(packageA2).ToList();
+            Assert.AreEqual(8, operations.Count);
+            AssertOperation("A", "1.0", PackageAction.Uninstall, operations[0]);
+            AssertOperation("C", "1.0", PackageAction.Uninstall, operations[1]);
+            AssertOperation("D", "1.0", PackageAction.Uninstall, operations[2]);
+            AssertOperation("B", "1.0", PackageAction.Uninstall, operations[3]);
+            AssertOperation("B", "2.0", PackageAction.Install, operations[4]);
+            AssertOperation("D", "2.0", PackageAction.Install, operations[5]);
+            AssertOperation("C", "2.0", PackageAction.Install, operations[6]);
+            AssertOperation("A", "2.0", PackageAction.Install, operations[7]);
         }
 
         [TestMethod]
@@ -713,7 +854,7 @@ namespace NuGet.Test {
             // C 1.1 -> D 1.0
 
             var A10 = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { PackageDependency.CreateDependency("B", "1.0") });
-            
+
             var repository = new MockPackageRepository() {
                 PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
                 PackageUtility.CreatePackage("B", "1.0", dependencies: new[] { PackageDependency.CreateDependency("C", "1.1") }),
@@ -745,6 +886,12 @@ namespace NuGet.Test {
             Assert.AreEqual(new Version("1.0.9"), packages[2].Package.Version);
             Assert.AreEqual("A", packages[3].Package.Id);
             Assert.AreEqual(new Version("1.0"), packages[3].Package.Version);
+        }
+
+        private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation) {
+            Assert.AreEqual(expectedAction, operation.Action);
+            Assert.AreEqual(expectedId, operation.Package.Id);
+            Assert.AreEqual(new Version(expectedVersion), operation.Package.Version);
         }
 
         private class TestWalker : PackageWalker {

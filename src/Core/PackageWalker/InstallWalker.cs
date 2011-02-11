@@ -8,7 +8,7 @@ using NuGet.Resources;
 namespace NuGet {
     public class InstallWalker : PackageWalker, IPackageOperationResolver {
         private readonly bool _ignoreDependencies;
-        private readonly HashSet<IPackage> _packagesToUninstall = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
+        private readonly OperationLookup _operations;
 
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
@@ -29,7 +29,7 @@ namespace NuGet {
             Logger = logger;
             SourceRepository = sourceRepository;
             _ignoreDependencies = ignoreDependencies;
-            Operations = new List<PackageOperation>();
+            _operations = new OperationLookup();
         }
 
         protected ILogger Logger {
@@ -54,8 +54,9 @@ namespace NuGet {
         }
 
         protected IList<PackageOperation> Operations {
-            get;
-            private set;
+            get {
+                return _operations.ToList();
+            }
         }
 
         protected virtual ConflictResult GetConflict(string packageId) {
@@ -96,7 +97,7 @@ namespace NuGet {
                 // If this package isn't part of the current graph (i.e. hasn't been visited yet) and
                 // is marked for removal, then do nothing. This is so we don't get unnecessary duplicates.
                 if (!Marker.Contains(conflictResult.Package) &&
-                    _packagesToUninstall.Contains(conflictResult.Package)) {
+                    _operations.Contains(conflictResult.Package, PackageAction.Uninstall)) {
                     return;
                 }
 
@@ -109,16 +110,21 @@ namespace NuGet {
                                                    forceRemove: false) { ThrowOnConflicts = false };
 
                 foreach (var operation in resolver.ResolveOperations(conflictResult.Package)) {
-                    // Keep a separate set of packages to uninstall so we have a fast way to check
-                    // if a package is being uninstalled
-                    _packagesToUninstall.Add(operation.Package);
-                    Operations.Add(operation);
+                    _operations.AddOperation(operation);
                 }
             }
         }
 
         protected override void OnAfterPackageWalk(IPackage package) {
-            Operations.Add(new PackageOperation(package, PackageAction.Install));
+            if (!Repository.Exists(package)) {
+                // Don't add the package for installation if it already exists in the repository
+                _operations.AddOperation(new PackageOperation(package, PackageAction.Install));
+            }
+            else {
+                // If we already added an entry for removing this package then remove it 
+                // (it's equivalent for doing +P since we're removing a -P from the list)
+                _operations.RemoveOperation(package, PackageAction.Uninstall);
+            }
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
@@ -150,9 +156,8 @@ namespace NuGet {
         }
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
-            Operations.Clear();
+            _operations.Clear();
             Marker.Clear();
-            _packagesToUninstall.Clear();
 
             Walk(package);
             return Operations.Reduce();
@@ -161,9 +166,7 @@ namespace NuGet {
 
         private IEnumerable<IPackage> GetDependents(ConflictResult conflict) {
             // Skip all dependents that are marked for uninstall
-            IEnumerable<IPackage> packages = from o in Operations
-                                             where o.Action == PackageAction.Uninstall
-                                             select o.Package;
+            IEnumerable<IPackage> packages = _operations.GetPackages(PackageAction.Uninstall);
 
             return conflict.DependentsResolver.GetDependents(conflict.Package)
                                               .Except(packages, PackageEqualityComparer.IdAndVersion);
@@ -204,6 +207,61 @@ namespace NuGet {
             Func<IPackage, bool> versionMatcher = dependency.VersionSpec.ToDelegate();
 
             return versionMatcher(targetPackage);
+        }
+
+        /// <summary>
+        /// Operation lookup encapsulates an operation list and another efficient data structure for finding package operations
+        /// by package id, version and PackageAction.
+        /// </summary>
+        private class OperationLookup {
+            private readonly List<PackageOperation> _operations = new List<PackageOperation>();
+            private readonly Dictionary<PackageAction, Dictionary<IPackage, PackageOperation>> _operationLookup = new Dictionary<PackageAction, Dictionary<IPackage, PackageOperation>>();
+
+            internal void Clear() {
+                _operations.Clear();
+                _operationLookup.Clear();
+            }
+
+            internal IList<PackageOperation> ToList() {
+                return _operations;
+            }
+
+            internal IEnumerable<IPackage> GetPackages(PackageAction action) {
+                Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
+                if (dictionary != null) {
+                    return dictionary.Keys;
+                }
+                return Enumerable.Empty<IPackage>();
+            }
+
+            internal void AddOperation(PackageOperation operation) {
+                _operations.Add(operation);
+                Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(operation.Action, createIfNotExists: true);
+                dictionary.Add(operation.Package, operation);
+            }
+
+            internal void RemoveOperation(IPackage package, PackageAction action) {
+                Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
+                PackageOperation operation;
+                if (dictionary != null && dictionary.TryGetValue(package, out operation)) {
+                    dictionary.Remove(package);
+                    _operations.Remove(operation);
+                }
+            }
+
+            internal bool Contains(IPackage package, PackageAction action) {
+                Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
+                return dictionary != null && dictionary.ContainsKey(package);
+            }
+
+            private Dictionary<IPackage, PackageOperation> GetPackageLookup(PackageAction action, bool createIfNotExists = false) {
+                Dictionary<IPackage, PackageOperation> packages;
+                if (!_operationLookup.TryGetValue(action, out packages) && createIfNotExists) {
+                    packages = new Dictionary<IPackage, PackageOperation>(PackageEqualityComparer.IdAndVersion);
+                    _operationLookup.Add(action, packages);
+                }
+                return packages;
+            }
         }
     }
 }
