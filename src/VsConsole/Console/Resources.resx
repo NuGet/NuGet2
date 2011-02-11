@@ -117,27 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Toolbar_ClearConsoleButton" xml:space="preserve">
-    <value>Clear Console</value>
-  </data>
-  <data name="Toolbar_DefaultProjectLabel" xml:space="preserve">
-    <value>Default pro_ject:</value>
-  </data>
-  <data name="Toolbar_DefaultProjectsTooltip" xml:space="preserve">
-    <value>Default Project</value>
-  </data>
-  <data name="Toolbar_OptionsDialogButton" xml:space="preserve">
-    <value>Open Package Manager Option Page</value>
-  </data>
-  <data name="Toolbar_PackageSourcesLabel" xml:space="preserve">
-    <value>Pac_kage Sources:</value>
-  </data>
-  <data name="Toolbar_PackageSourcesTooltip" xml:space="preserve">
-    <value>Active Package Source</value>
-  </data>
-  <data name="Toolbar_StopCommandButton" xml:space="preserve">
-    <value>Stop Command Execution</value>
-  </data>
   <data name="ToolWindowInitializing" xml:space="preserve">
     <value>Initializing PowerShell host...</value>
   </data>

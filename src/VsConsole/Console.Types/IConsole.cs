@@ -12,9 +12,6 @@ namespace NuGetConsole {
         /// </summary>
         IHost Host { get; set; }
 
-        /// <summary>
-        /// Indicates whether this console wants to show a disclaimer header.
-        /// </summary>
         bool ShowDisclaimerHeader { get; }
 
         /// <summary>

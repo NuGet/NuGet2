@@ -16,6 +16,12 @@ namespace NuGetConsole {
         string ActiveHost { get; set; }
 
         /// <summary>
+        /// Gets or sets the active host setting.
+        /// </summary>
+        /// <value>The active host setting.</value>
+        string ActiveHostSetting { get; set; }
+
+        /// <summary>
         /// Show the tool window.
         /// </summary>
         void Show();

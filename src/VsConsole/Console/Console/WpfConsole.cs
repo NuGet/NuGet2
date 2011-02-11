@@ -123,6 +123,7 @@ namespace NuGetConsole.Implementation.Console {
         IReadOnlyRegion _readOnlyRegionBegin;
         IReadOnlyRegion _readOnlyRegionBody;
 
+
         private void SetReadOnlyRegionType(ReadOnlyRegionType value) {
             ITextBuffer buffer = WpfTextView.TextBuffer;
             ITextSnapshot snapshot = buffer.CurrentSnapshot;
@@ -270,19 +271,11 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public void Clear() {
-                Invoke(_impl.Clear);
+                Invoke(() => _impl.Clear());
             }
 
             public object Content {
                 get { return Invoke(() => _impl.Content); }
-            }
-
-            public void Disable() {
-                Invoke(_impl.Disable);
-            }
-
-            public void SetExecutionMode(bool isExecuting) {
-                Invoke(() => _impl.SetExecutionMode(isExecuting));
             }
 
             public object VsTextView {
@@ -438,18 +431,6 @@ namespace NuGetConsole.Implementation.Console {
             ConsoleCleared.Raise(this);
         }
 
-        public void Disable() {
-            if (_content != null) {
-                _content.DisableToolBar();
-            }
-        }
-
-        public void SetExecutionMode(bool isExecuting) {
-            if (_content != null) {
-                _content.SetExecutionMode(isExecuting);
-            }
-        }
-
         public void ClearConsole() {
             if (_inputLineStart != null) {
                 Dispatcher.ClearConsole();
@@ -502,14 +483,9 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        private ToolWindowControl _content;
         public object Content {
             get {
-                if (_content == null) {
-                    _content = new ToolWindowControl(WpfTextViewHost.HostControl, Host, MarshalledConsole);
-                }
-
-                return _content;
+                return WpfTextViewHost.HostControl;
             }
         }
     }
