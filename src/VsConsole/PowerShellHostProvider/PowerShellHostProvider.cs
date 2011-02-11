@@ -38,8 +38,13 @@ namespace NuGetConsole.Host.PowerShellProvider {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static IHost CreatePowerShellHost(IConsole console, bool @async) {
 
-            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, @async, new Commander(console));
+            // backdoor: allow turning off async mode by setting enviroment variable NuGetSyncMode=1
+            string syncModeFlag = Environment.GetEnvironmentVariable("NuGetSyncMode", EnvironmentVariableTarget.User);
+            if (syncModeFlag == "1") {
+                @async = false;
+            }
 
+            IHost host = PowerShellHostService.CreateHost(console, PowerConsoleHostName, @async, new Commander(console));
             return host;
         }
 
