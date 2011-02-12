@@ -79,7 +79,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For more information, visit http://nuget.codeplex.com..
+        ///   Looks up a localized string similar to Author: Luan Nguyen. For more information, visit http://nuget.codeplex.com..
         /// </summary>
         public static string Dialog_HelpAbout {
             get {
@@ -160,7 +160,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You have unsaved changes. Do you want to save your changes?.
+        ///   Looks up a localized string similar to Do you want to save your changes to {0}?.
         /// </summary>
         public static string Dialog_SaveQuestion {
             get {

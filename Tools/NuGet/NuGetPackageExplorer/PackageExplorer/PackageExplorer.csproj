@@ -118,6 +118,11 @@
     <Compile Include="PackageMetadataEditor.xaml.cs">
       <DependentUpon>PackageMetadataEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -165,10 +170,21 @@
     <Resource Include="Images\CopyHS.png" />
     <Resource Include="Images\CutHS.png" />
     <Resource Include="Images\PasteHS.png" />
+    <Resource Include="Images\NoteHS.png" />
+    <Resource Include="Images\Tools.png" />
+    <Resource Include="Images\Add.png" />
+    <Resource Include="Images\Delete.png" />
+    <Resource Include="Images\Web.png" />
+    <Resource Include="Images\Lib.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Properties\app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">

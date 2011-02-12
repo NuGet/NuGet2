@@ -13,7 +13,13 @@
         <self:VersionConverter x:Key="VersionConverter" />
         <self:VersionSpecConverter x:Key="VersionSpecConverter" />
         <self:UriConverter x:Key="UriConverter" />
-        
+
+        <Style x:Key="ImageStyle" TargetType="{x:Type Image}">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Stretch" Value="Uniform" />
+        </Style>
+
         <Style TargetType="{x:Type Label}" x:Key="LabelStyle">
             <Setter Property="Margin" Value="0, 2, 0, 0" />
         </Style>
@@ -56,7 +62,9 @@
 
                 <TextBox Margin="0,4,5,0" Style="{StaticResource TextBoxStyle}" Grid.Column="0" Text="{Binding Id, BindingGroupName=PackageMetadataGroup, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}" />
                 <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="1" Text="{Binding VersionSpec, BindingGroupName=PackageMetadataGroup, Converter={StaticResource VersionSpecConverter}, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}" />
-                <Button Content="--" Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveDependencyButtonClicked" />
+                <Button Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveDependencyButtonClicked">
+                    <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
+                </Button>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -165,7 +173,9 @@
 
                             <TextBlock Grid.Column="0" Text="Id" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="Version" HorizontalAlignment="Center" />
-                            <Button Grid.Column="2" Content="+" HorizontalAlignment="Center" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked" />
+                            <Button Grid.Column="2" HorizontalAlignment="Center" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
+                                <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
+                            </Button>
                         </Grid>
                         <ItemsControl x:Name="DependencyList" Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,4,3,0" ItemsSource="{Binding PackageMetadata.Dependencies}" ItemTemplate="{StaticResource PackageDependencyTemplate}">
                         </ItemsControl>
@@ -177,7 +187,7 @@
         <!-- Button -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 8, 0, 0">
             <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="7,0,7,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
-            <Button x:Name="CancelButton" Padding="7,0,7,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
+            <Button  x:Name="CancelButton" Padding="7,0,7,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
         </StackPanel>
     </Grid>
 </UserControl>

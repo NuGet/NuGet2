@@ -1,12 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Data;
 using PackageExplorerViewModel;
-using System.ComponentModel;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace PackageExplorer {
     /// <summary>

@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Shell;
 using Microsoft.Win32;
 using NuGet;
+using PackageExplorer.Properties;
 using PackageExplorerViewModel;
-
 using StringResources = PackageExplorer.Resources.Resources;
 
 namespace PackageExplorer {
@@ -18,6 +20,11 @@ namespace PackageExplorer {
 
         public MainWindow() {
             InitializeComponent();
+
+            try {
+                LoadSettings();
+            }
+            catch (Exception) { }
 
             BuildStatusItem.Content = "Build " + typeof(MainWindow).Assembly.GetName().Version.ToString();
         }
@@ -137,9 +144,15 @@ namespace PackageExplorer {
         private bool AskToSaveCurrentFile() {
             
             if (HasUnsavedChanges) {
+
+                var question = String.Format(
+                    CultureInfo.CurrentCulture,
+                    StringResources.Dialog_SaveQuestion,
+                    System.IO.Path.GetFileName(PackageSourceItem.Content.ToString()));
+
                 // if there is unsaved changes, ask user for confirmation
                 var result = MessageBox.Show(
-                    StringResources.Dialog_SaveQuestion,
+                    question,
                     PackageExplorer.Resources.Resources.Dialog_Title,
                     MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question);
@@ -174,6 +187,78 @@ namespace PackageExplorer {
             JumpList.AddToRecentCategory(jumpPath);
 
             _jumpList.Apply();
+        }
+
+        private void OnFontSizeItem_Click(object sender, RoutedEventArgs e) {
+            var item = (MenuItem)sender;
+            int size = Convert.ToInt32(item.Tag);
+            SetFontSize(size);
+        }
+
+        private void SetFontSize(int size) {
+            if (size <= 8 || size >= 50) {
+                size = 12;
+            }
+            this.FontSize = size;
+
+            // check the corresponding font size menu item 
+            foreach (MenuItem child in FontSizeMenuItem.Items) {
+                int value = Convert.ToInt32(child.Tag);
+                child.IsChecked = value == size;
+            }
+        }
+
+        private void Window_Closed(object sender, EventArgs e) {
+            try {
+                SaveSettings();
+            }
+            catch (Exception) { }
+        }
+
+        private void SaveSettings() {
+            Settings settings = Properties.Settings.Default;
+
+            settings.FontSize = (int)Math.Round(this.FontSize);
+            //settings.Left = this.Left;
+            //settings.Top = this.Top;
+            //settings.Width = this.Width;
+            //settings.Height = this.Height;
+            settings.WindowState = this.WindowState.ToString();
+        }
+
+        private void LoadSettings() {
+            Settings settings = Properties.Settings.Default;
+            
+            SetFontSize(settings.FontSize);
+
+            //double left = settings.Left;
+            //double top = settings.Top;
+
+            //if (left > 0 && top > 0) {
+            //    this.Left = left;
+            //    this.Top = top;
+            //}
+
+            //double width = settings.Width;
+            //double height = settings.Height;
+
+            //if (width > 0 && height > 0) {
+            //    this.Width = width;
+            //    this.Height = Height;
+            //}
+
+            string windowState = settings.WindowState;
+            if (!String.IsNullOrEmpty(windowState)) {
+                WindowState state;
+                if (Enum.TryParse<WindowState>(windowState, out state) && state == WindowState.Maximized) {
+                    this.WindowState = state;
+                }
+            }
+        }
+
+        private void ViewFileFormatItem_Click(object sender, RoutedEventArgs e) {
+            Uri uri = new Uri("http://nuget.codeplex.com/documentation?title=Creating%20a%20Package");
+            UriHelper.OpenExternalLink(uri);
         }
     }
 }

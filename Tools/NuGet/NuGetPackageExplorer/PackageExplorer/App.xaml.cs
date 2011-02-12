@@ -40,5 +40,9 @@ namespace PackageExplorer {
                 return false;
             }
         }
+
+        private void Application_Exit(object sender, ExitEventArgs e) {
+            PackageExplorer.Properties.Settings.Default.Save();
+        }
     }
 }

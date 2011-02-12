@@ -10,11 +10,12 @@
         MinWidth="400" 
         MinHeight="300" 
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
-        FontSize="13"
+        FontSize="12"
         AllowDrop="True"
         DragOver="Window_DragOver" 
         Drop="Window_Drop"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        Closed="Window_Closed">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -23,6 +24,12 @@
             </ResourceDictionary.MergedDictionaries>
             
             <viewmodel:DisabledCommand x:Key="DisabledCommand" />
+            
+            <Style TargetType="{x:Type Image}">
+                <Setter Property="Width" Value="16" />
+                <Setter Property="Height" Value="16" />
+                <Setter Property="Stretch" Value="Uniform" />
+            </Style>
 
             <ContextMenu x:Key="SharedContextMenu">
                 <MenuItem Header="_View Content" Command="{Binding ViewCommand}" />
@@ -157,24 +164,37 @@
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INIT.PS1">
                         <Setter TargetName="Header" Property="Foreground" Value="Blue" />
                     </DataTrigger>
-                    
                 </DataTemplate.Triggers>
             </DataTemplate>
 
             <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
-                <TextBlock x:Name="Header" Text="{Binding Name}" FontWeight="SemiBold" />
+                <HierarchicalDataTemplate.Resources>
+                    <Style TargetType="{x:Type Image}">
+                        <Setter Property="Width" Value="16" />
+                        <Setter Property="Height" Value="16" />
+                        <Setter Property="Stretch" Value="Uniform" />
+                    </Style>
+                </HierarchicalDataTemplate.Resources>
+                
+                <StackPanel Orientation="Horizontal">
+                    <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
+                    <TextBlock x:Name="Header" Text="{Binding Name}" FontWeight="SemiBold" />
+                </StackPanel>
 
                 <HierarchicalDataTemplate.Triggers>
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="LIB">
-                        <Setter TargetName="Header" Property="Foreground" Value="DarkRed" />
+                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Lib.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="CONTENT">
-                        <Setter TargetName="Header" Property="Foreground" Value="DarkRed" />
+                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/NoteHS.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS">
-                        <Setter TargetName="Header" Property="Foreground" Value="DarkRed" />
+                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Tools.png" />
                     </DataTrigger>
                 </HierarchicalDataTemplate.Triggers>
             </HierarchicalDataTemplate>
@@ -202,12 +222,12 @@
             <MenuItem Header="_File">
                 <MenuItem Command="Open">
                     <MenuItem.Icon>
-                        <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/openHS.png" />
+                        <Image Source="/NuGetPackageExplorer;component/Images/openHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">
                     <MenuItem.Icon>
-                        <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/saveHS.png" />
+                        <Image Source="/NuGetPackageExplorer;component/Images/saveHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
@@ -220,23 +240,36 @@
                 <Separator />
                 <MenuItem Command="Cut">
                     <MenuItem.Icon>
-                        <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/CutHS.png" />
+                        <Image Source="/NuGetPackageExplorer;component/Images/CutHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Command="Copy">
                     <MenuItem.Icon>
-                        <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/CopyHS.png" />
+                        <Image Source="/NuGetPackageExplorer;component/Images/CopyHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Command="Paste">
                     <MenuItem.Icon>
-                        <Image Width="16" Height="16" Stretch="Fill" Source="/NuGetPackageExplorer;component/Images/PasteHS.png" />
+                        <Image Source="/NuGetPackageExplorer;component/Images/PasteHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
             
+            <MenuItem Header="_View">
+                <MenuItem Header="Font _Size" x:Name="FontSizeMenuItem">
+                    <MenuItem Header="_Normal" Tag="12" Click="OnFontSizeItem_Click" IsCheckable="True" />
+                    <MenuItem Header="_Larger" Tag="14" Click="OnFontSizeItem_Click" IsCheckable="True" />
+                    <MenuItem Header="L_argest" Tag="16" Click="OnFontSizeItem_Click" IsCheckable="True" />
+                </MenuItem>
+            </MenuItem>
+            
             <MenuItem Header="_Help">
-                <MenuItem Header="About..." Click="AboutMenuItem_Click" />
+                <MenuItem Header="How to Create Package" Click="ViewFileFormatItem_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/NuGetPackageExplorer;component/Images/Web.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
             </MenuItem>
         </Menu>
 
@@ -268,7 +301,7 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents" FontSize="13">
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents">
                 <TreeView ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
                 </TreeView>
             </GroupBox>
@@ -297,7 +330,7 @@
         
         <!-- Status bar -->
         <StatusBar Grid.Row="2">
-            <StatusBarItem Content="{Binding PackageSource}" />
+            <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource}" />
             <StatusBarItem x:Name="BuildStatusItem" HorizontalAlignment="Right" />
         </StatusBar>
     </Grid>

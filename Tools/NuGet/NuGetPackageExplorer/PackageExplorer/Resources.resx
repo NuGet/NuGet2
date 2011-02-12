@@ -124,7 +124,7 @@
     <value>Dependencies:</value>
   </data>
   <data name="Dialog_HelpAbout" xml:space="preserve">
-    <value>For more information, visit http://nuget.codeplex.com.</value>
+    <value>Author: Luan Nguyen. For more information, visit http://nuget.codeplex.com.</value>
   </data>
   <data name="Dialog_IdLabel" xml:space="preserve">
     <value>Id:</value>
@@ -151,7 +151,7 @@
     <value>Require License Acceptance:</value>
   </data>
   <data name="Dialog_SaveQuestion" xml:space="preserve">
-    <value>You have unsaved changes. Do you want to save your changes?</value>
+    <value>Do you want to save your changes to {0}?</value>
   </data>
   <data name="Dialog_TagLabel" xml:space="preserve">
     <value>Tags:</value>

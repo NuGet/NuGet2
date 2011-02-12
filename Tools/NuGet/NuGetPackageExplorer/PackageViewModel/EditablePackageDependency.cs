@@ -25,12 +25,6 @@ namespace PackageExplorerViewModel {
                 return _id;
             }
             set {
-                if (String.IsNullOrEmpty(value)) {
-                    throw new ArgumentException("Id is required.");
-                }
-
-                PackageIdValidator.ValidatePackageId(value);
-
                 if (_id != value) {
                     _id = value;
                     RaisePropertyChange("Id");
@@ -43,10 +37,6 @@ namespace PackageExplorerViewModel {
         public IVersionSpec VersionSpec {
             get { return _versionSpec; }
             set {
-                if (value == null) {
-                    throw new ArgumentException("Dependency version is required.");
-                }
-
                 if (_versionSpec != value) {
                     _versionSpec = value;
                     RaisePropertyChange("VersionSpec");
