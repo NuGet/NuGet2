@@ -140,12 +140,26 @@ namespace NuGetConsole.Implementation {
         /// </summary>
         int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
 
-            if (!IsToolbarEnabled) {
-                // disbale all buttons on the toolbar
-                if (pguidCmdGroup == GuidList.guidNuGetCmdSet) {
-                    prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_SUPPORTED;
-                    return VSConstants.S_OK;
+            // examine buttons within our toolbar
+            if (pguidCmdGroup == GuidList.guidNuGetCmdSet) {
+                bool isEnabled = IsToolbarEnabled;
+
+                if (isEnabled) {
+                    bool isStopButton = (prgCmds[0].cmdID == 0x0600);   // 0x0600 is the Command ID of the Stop button, defined in .vsct
+                    
+                    // when command is executing: enable stop button and disable the rest
+                    // when command is not executing: disable the stop button and enable the rest
+                    isEnabled = !isStopButton ^ WpfConsole.Dispatcher.IsExecutingCommand;
                 }
+
+                if (isEnabled) {
+                    prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED);
+                }
+                else {
+                    prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED);
+                }
+
+                return VSConstants.S_OK;
             }
 
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;

@@ -49,6 +49,12 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
+        public IVsUIShell VsUIShell {
+            get {
+                return ServiceProvider.GetService<IVsUIShell>(typeof(SVsUIShell));
+            }
+        }
+
         private IVsStatusbar VsStatusBar {
             get {
                 if (_vsStatusBar == null) {
@@ -465,6 +471,8 @@ namespace NuGetConsole.Implementation.Console {
         public void SetExecutionMode(bool isExecuting) {
             if (!isExecuting) {
                 HideProgress();
+
+                VsUIShell.UpdateCommandUI(0 /* false = update UI asynchronously */);
             }
         }
 
