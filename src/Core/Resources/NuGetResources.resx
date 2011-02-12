@@ -279,4 +279,10 @@
   <data name="IncompatibleSchema" xml:space="preserve">
     <value>The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version.</value>
   </data>
+  <data name="InvalidFrameworkNameFormat" xml:space="preserve">
+    <value>Invalid framework name format. Expected {framework}{version}-{profile}.</value>
+  </data>
+  <data name="MissingFrameworkName" xml:space="preserve">
+    <value>Framework name is missing.</value>
+  </data>
 </root>

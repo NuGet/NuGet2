@@ -24,11 +24,11 @@ namespace NuGet.Test {
         [TestMethod]
         public void ParseFrameworkNameNormalizesSupportedSilverlightNames() {
             // Arrange
-            var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight" };
+            var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight", "Silverlight " };
             Version version40 = new Version("4.0.0.0");
 
             // Act
-            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
@@ -38,7 +38,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void ParseFrameworkNameUsesFrameworkNameIfUnrecognized() {
+        public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized() {
             // Arrange
             Version version20 = new Version("2.0");
 
@@ -46,8 +46,7 @@ namespace NuGet.Test {
             var frameworkName = VersionUtility.ParseFrameworkName("NETCF20");
 
             // Assert
-            Assert.AreEqual("NETCF", frameworkName.Identifier);
-            Assert.AreEqual(version20, frameworkName.Version);
+            Assert.AreEqual("Unsupported", frameworkName.Identifier);
         }
 
         [TestMethod]
@@ -70,7 +69,7 @@ namespace NuGet.Test {
             Version version40 = new Version("4.0");
 
             // Act
-            var frameworkNames = versionFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+            var frameworkNames = versionFormats.Select(VersionUtility.ParseFrameworkName);
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
@@ -97,6 +96,93 @@ namespace NuGet.Test {
             // Assert
             Assert.AreEqual(".NETFramework", frameworkName.Identifier);
             Assert.AreEqual(VersionUtility.DefaultTargetFrameworkVersion, frameworkName.Version);
+        }
+
+        [TestMethod]
+        public void ParseFrameworkNameWithProfile() {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("net40-client");
+
+            // Assert
+            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
+            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
+            Assert.AreEqual("Client", frameworkName.Profile);
+        }
+
+        [TestMethod]
+        public void ParseFrameworkNameWithUnknownProfileUsesProfileAsIs() {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("net40-other");
+
+            // Assert
+            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
+            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
+            Assert.AreEqual("other", frameworkName.Profile);
+        }
+
+        [TestMethod]
+        public void ParseFrameworkNameWithFullProfileNoamlizesToEmptyProfile() {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("net40-full");
+
+            // Assert
+            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
+            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
+            Assert.AreEqual(String.Empty, frameworkName.Profile);
+        }
+
+        [TestMethod]
+        public void ParseFrameworkNameWithWPProfileGetNormalizedToWindowsPhone() {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("sl4-wp");
+
+            // Assert
+            Assert.AreEqual("Silverlight", frameworkName.Identifier);
+            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
+            Assert.AreEqual("WindowsPhone", frameworkName.Profile);
+        }
+
+        [TestMethod]
+        public void ParseFrameworkNameWithEmptyProfile() {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("sl4-");
+
+            // Assert
+            Assert.AreEqual("Silverlight", frameworkName.Identifier);
+            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
+            Assert.AreEqual(String.Empty, frameworkName.Profile);
+        }
+
+        [TestMethod]
+        public void ParseFrameworkNameWithInvalidFrameworkNameThrows() {
+            // Act
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-"), "frameworkName", "Framework name is missing.");
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-client"), "frameworkName", "Framework name is missing.");
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName(""), "frameworkName", "Framework name is missing.");
+            ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("---"), "frameworkName", "Invalid framework name format. Expected {framework}{version}-{profile}.");
+        }
+
+        [TestMethod]
+        public void ParseFrameworkFolderName() {
+            // foo.dll
+            // sub\foo.dll -> Unsupported since we can't tell if this was meant to be a framework name or not
+            // {FrameworkName}{Version}\foo.dll
+            // {FrameworkName}{Version}\sub1\foo.dll
+            // {FrameworkName}{Version}\sub1\sub2\foo.dll
+            var f1 = VersionUtility.ParseFrameworkFolderName(@"foo.dll");
+            var f2 = VersionUtility.ParseFrameworkFolderName(@"sub\foo.dll");
+            var f3 = VersionUtility.ParseFrameworkFolderName(@"SL4\foo.dll");
+            var f4 = VersionUtility.ParseFrameworkFolderName(@"SL3\sub1\foo.dll");
+            var f5 = VersionUtility.ParseFrameworkFolderName(@"SL20\sub1\sub2\foo.dll");
+
+            Assert.IsNull(f1);
+            Assert.AreEqual("Unsupported", f2.Identifier);
+            Assert.AreEqual("Silverlight", f3.Identifier);
+            Assert.AreEqual(new Version("4.0"), f3.Version);
+            Assert.AreEqual("Silverlight", f4.Identifier);
+            Assert.AreEqual(new Version("3.0"), f4.Version);
+            Assert.AreEqual("Silverlight", f5.Identifier);
+            Assert.AreEqual(new Version("2.0"), f5.Version);
         }
 
         [TestMethod]

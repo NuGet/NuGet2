@@ -1034,6 +1034,40 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void GetCompatibleReferencesPrefersMatchingProfile() {
+            // Arrange                                                                                                                       
+            var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "client"));
+            var assemblyReference40client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0"), "client"));
+            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
+            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
+            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference30client, assemblyReference40client, assemblyReference30, assemblyReference40 };
+
+            // Act
+            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences)
+                                                         .ToList();
+
+            // Assert
+            Assert.AreEqual(1, targetAssemblyReferences.Count);
+            Assert.AreSame(assemblyReference40, targetAssemblyReferences[0]);
+        }
+
+        [TestMethod]
+        public void GetCompatibleReferencesPrefersMatchingProfileIfSpecified() {
+            // Arrange                                                                                                                       
+            var assemblyReferenceSL40phone = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0"), "WindowsPhone"));
+            var assemblyReferenceSL40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0")));
+            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReferenceSL40phone, assemblyReferenceSL40 };
+
+            // Act
+            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName("Silverlight", new Version("4.0"), "WindowsPhone"), assemblyReferences)
+                                                         .ToList();
+
+            // Assert
+            Assert.AreEqual(1, targetAssemblyReferences.Count);
+            Assert.AreSame(assemblyReferenceSL40phone, targetAssemblyReferences[0]);
+        }
+
+        [TestMethod]
         public void GetCompatibleReferencesPicksHigestVersionLessThanTargetVersion() {
             // Arrange                                                                                                                       
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));

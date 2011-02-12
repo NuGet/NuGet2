@@ -181,18 +181,21 @@ function Test-InstallPackageWithWebConfigDebugChanges {
 }
 
 function Test-FSharpSimpleInstallWithContentFiles {
+    param(
+        $context
+    )
+
     # Arrange
     $p = New-FSharpLibrary
     
     # Act
-    Install-Package jquery -Project $p.Name
+    Install-Package jquery -Project $p.Name -Source $context.RepositoryRoot
     
     # Assert
     Assert-Package $p jquery
     Assert-SolutionPackage jquery
     Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5.js)
     Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5.min.js)
-    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5-vsdoc.js)
 }
 
 function Test-FSharpSimpleWithAssemblyReference {
@@ -298,4 +301,38 @@ function Test-InstallPackageWithNestedAspxContentFiles {
 
     Assert-Package $p PackageWithNestedAspxFiles 1.0
     Assert-SolutionPackage PackageWithNestedAspxFiles 1.0
+}
+
+function Test-InstallPackageWithNestedReferences {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+    
+    # Act
+    $p | Install-Package PackageWithNestedReferenceFolders -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Reference $p Ninject
+    Assert-Reference $p CommonServiceLocator.NinjectAdapter
+}
+
+function Test-InstallPackageWithUnsupportedReference {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    Assert-Throws { $p | Install-Package PackageWithUnsupportedReferences -Source $context.RepositoryRoot } "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v4.0'."
+    $package = Get-Package PackageWithUnsupportedReferences
+    $reference = @($package.AssemblyReferences)[0]
+
+    # Assert    
+    Assert-AreEqual "Unsupported" $reference.TargetFramework.Identifier
+    Assert-Null (Get-AssemblyReference $p CommonServiceLocator.NinjectAdapter)
 }

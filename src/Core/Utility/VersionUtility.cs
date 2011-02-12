@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -9,6 +10,7 @@ using NuGet.Resources;
 namespace NuGet {
     public static class VersionUtility {
         private const string NetFrameworkIdentifier = ".NETFramework";
+        private static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "NET", NetFrameworkIdentifier },
@@ -16,7 +18,13 @@ namespace NuGet {
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
             { "SL", "Silverlight" },
-            { "Silverlight", "Silverlight" },
+            { "Silverlight", "Silverlight" }
+        };
+
+        private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "Client", "Client" },
+            { "WP", "WindowsPhone" },
+            { "Full", String.Empty }
         };
 
         public static Version DefaultTargetFrameworkVersion {
@@ -50,22 +58,48 @@ namespace NuGet {
                 throw new ArgumentNullException("frameworkName");
             }
 
-            // {FrameworkName}{Version}
-            var match = Regex.Match(frameworkName, @"\d+.*");
-            int length = match.Success ? match.Index : frameworkName.Length;
-            // Split the framework name into 2 parts, identifier and version
-            string identifierPart = frameworkName.Substring(0, length);
-            string versionPart = frameworkName.Substring(length);
+            // {Identifier}{Version}-{Profile}
 
-            if (String.IsNullOrEmpty(identifierPart)) {
-                // Use the default identifier (.NETFramework) if none specified
-                identifierPart = NetFrameworkIdentifier;
+            // Split the framework name into 3 parts, identifier, version and profile.
+            string identifierPart = null;
+            string versionPart = null;
+
+            string[] parts = frameworkName.Split('-');
+
+            if (parts.Length > 2) {
+                throw new ArgumentException(NuGetResources.InvalidFrameworkNameFormat, "frameworkName");
+            }
+
+            string frameworkNameAndVersion = parts.Length > 0 ? parts[0].Trim() : null;
+            string profilePart = parts.Length > 1 ? parts[1].Trim() : null;
+
+            if (String.IsNullOrEmpty(frameworkNameAndVersion)) {
+                throw new ArgumentException(NuGetResources.MissingFrameworkName, "frameworkName");
+            }
+ 
+            // If we find a version then we try to split the framework name into 2 parts
+            var match = Regex.Match(frameworkNameAndVersion, @"\d+");
+
+            if (match.Success) {
+                identifierPart = frameworkNameAndVersion.Substring(0, match.Index).Trim();
+                versionPart = frameworkNameAndVersion.Substring(match.Index).Trim();
             }
             else {
+                // Otherwise we take the whole name as an identifier
+                identifierPart = frameworkNameAndVersion.Trim();
+            }
+
+            if (!String.IsNullOrEmpty(identifierPart)) {
                 // Try to nomalize the identifier to a known identifier
-                string knownIdentifier;
-                if (_knownIdentifiers.TryGetValue(identifierPart, out knownIdentifier)) {
-                    identifierPart = knownIdentifier;
+                if (!_knownIdentifiers.TryGetValue(identifierPart, out identifierPart)) {
+                    return UnsupportedFrameworkName;
+                }
+            }
+
+            if (!String.IsNullOrEmpty(profilePart)) {
+                string knownProfile;
+                if (_knownProfiles.TryGetValue(profilePart, out knownProfile)) {
+                    profilePart = knownProfile;
                 }
             }
 
@@ -85,10 +119,18 @@ namespace NuGet {
 
             // If we can't parse the version then use the default
             if (!Version.TryParse(versionPart, out version)) {
+                if (String.IsNullOrEmpty(identifierPart)) {
+                    return UnsupportedFrameworkName;
+                }
+
                 version = DefaultTargetFrameworkVersion;
             }
 
-            return new FrameworkName(identifierPart, version);
+            if (String.IsNullOrEmpty(identifierPart)) {
+                identifierPart = NetFrameworkIdentifier;
+            }
+
+            return new FrameworkName(identifierPart, version, profilePart);
         }
 
 
@@ -199,6 +241,24 @@ namespace NuGet {
             // Successful parse!
             result = versionSpec;
             return true;
+        }
+
+        internal static FrameworkName ParseFrameworkFolderName(string path) {
+            // The path for a reference might look like this for assembly foo.dll:            
+            // foo.dll
+            // sub\foo.dll
+            // {FrameworkName}{Version}\foo.dll
+            // {FrameworkName}{Version}\sub1\foo.dll
+            // {FrameworkName}{Version}\sub1\sub2\foo.dll
+
+            // Get the target framework string if specified
+            string targetFrameworkString = Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar).FirstOrDefault();
+
+            if (!String.IsNullOrEmpty(targetFrameworkString)) {
+                return VersionUtility.ParseFrameworkName(targetFrameworkString);
+            }
+
+            return null;
         }
     }
 }

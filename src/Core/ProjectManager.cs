@@ -389,17 +389,62 @@ namespace NuGet {
 
             // Default framework for assembly references with an unspecified framework name
             // always match the project framework's identifier by is the lowest possible version
-            var defaultFramework = new FrameworkName(projectFramework.Identifier, new Version());
+            var defaultFramework = new FrameworkName(projectFramework.Identifier, new Version(), projectFramework.Profile);
 
             // Group references by target framework (if there is no target framework we assume it is the default)
             var frameworkGroups = allAssemblyReferences.GroupBy(g => g.TargetFramework ?? defaultFramework);
 
             // Try to find the best match
             return (from g in frameworkGroups
-                    where g.Key.Identifier.Equals(projectFramework.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                          g.Key.Version <= projectFramework.Version
-                    orderby g.Key.Version descending
+                    where IsCompatible(g.Key, projectFramework)
+                    orderby GetProfileCompatibility(g.Key, projectFramework) descending, 
+                            g.Key.Version descending
                     select g).FirstOrDefault();
+        }
+
+        private static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
+            if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase)) {
+                return false;
+            }
+
+            if (frameworkName.Version > targetFrameworkName.Version) {
+                return false;
+            }
+
+            // If there is no target framework then do nothing
+            if (String.IsNullOrEmpty(targetFrameworkName.Profile)) {
+                return true;
+            }
+
+            string targetProfile = frameworkName.Profile;
+
+            if (String.IsNullOrEmpty(targetProfile)) {
+                // We consider net40 to mean net40-full which is a superset of any specific profile.
+                // This means that a dll that is net40 will work for a project targeting net40-client.
+                targetProfile = targetFrameworkName.Profile;
+            }
+
+            return targetFrameworkName.Profile.Equals(targetProfile, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName) {            
+            string targetProfile = frameworkName.Profile;
+
+            if (String.IsNullOrEmpty(targetProfile)) {
+                // We consider net40 to mean net40-full which is a superset of any specific profile.
+                // This means that a dll that is net40 will work for a project targeting net40-client.
+                targetProfile = targetFrameworkName.Profile;
+            }
+
+            // Things with matching profiles are more compatible than things without.
+            // This means that if we have net40 and net40-client assemblies and the target framework is
+            // net40, both sets of assemblies are compatible but we prefer net40 since it matches
+            // the profile exactly.
+            if (targetFrameworkName.Profile.Equals(targetProfile, StringComparison.OrdinalIgnoreCase)) {
+                return 1;
+            }
+
+            return 0;
         }
 
         private static IDictionary<XName, Action<XElement, XElement>> GetConfigMappings() {
