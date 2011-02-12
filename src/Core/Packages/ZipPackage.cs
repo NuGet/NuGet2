@@ -9,7 +9,8 @@ using NuGet.Resources;
 namespace NuGet {
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
-        private const string AssemblyReferencesExtension = ".dll";
+        private const string ResourceAssemblyExtension = ".resources.dll";
+        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
 
         // paths to exclude
         private static readonly string[] _excludePaths = new[] { "_rels", "package" };
@@ -197,10 +198,12 @@ namespace NuGet {
         }
 
         private static bool IsAssemblyReference(PackagePart part) {
-            // Assembly references are in lib/ and have a .dll extension
+            // Assembly references are in lib/ and have a .dll/.exe extension
             var path = UriUtility.GetPath(part.Uri);
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
-                   Path.GetExtension(path).Equals(AssemblyReferencesExtension, StringComparison.OrdinalIgnoreCase);
+                   // Exclude resource assemblies
+                   !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
+                   AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
         }
 
         private static bool IsPackageFile(PackagePart part) {

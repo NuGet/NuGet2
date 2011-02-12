@@ -336,3 +336,34 @@ function Test-InstallPackageWithUnsupportedReference {
     Assert-AreEqual "Unsupported" $reference.TargetFramework.Identifier
     Assert-Null (Get-AssemblyReference $p CommonServiceLocator.NinjectAdapter)
 }
+
+function Test-InstallPackageWithExeReference {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package PackageWithExeReference -Source $context.RepositoryRoot
+    
+    # Assert    
+    Assert-Reference $p NuGet
+}
+
+function Test-InstallPackageWithResourceAssemblies {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package FluentValidation -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Reference $p FluentValidation
+    Assert-Null (Get-AssemblyReference $p FluentValidation.resources)
+}
