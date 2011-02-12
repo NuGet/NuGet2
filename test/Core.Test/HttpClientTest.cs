@@ -20,18 +20,6 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void CreateRequestSetsCachePolicy() {
-            // Arrange
-            var httpClient = new HttpClient();
-
-            // Act
-            WebRequest request = httpClient.CreateRequest(new Uri("http://example.com/"));
-
-            // Assert
-            Assert.IsInstanceOfType(request.CachePolicy, typeof(HttpRequestCachePolicy));
-        }
-
-        [TestMethod]
         public void InitializeRequestSetsProxyIfNull() {
             // Arrange
             var proxy = new Mock<IWebProxy>();

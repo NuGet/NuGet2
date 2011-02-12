@@ -22,7 +22,7 @@ namespace NuGet {
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
             }
-            request.CachePolicy = new HttpRequestCachePolicy();
+            
             request.UseDefaultCredentials = true;
             if (request.Proxy != null) {
                 // If we are going through a proxy then just set the default credentials

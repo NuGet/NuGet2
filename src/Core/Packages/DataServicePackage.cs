@@ -14,10 +14,17 @@ namespace NuGet {
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
         private readonly PackageDownloader _packageDownloader = new PackageDownloader();
-        private Lazy<IPackage> _package;
+        private readonly LazyWithRecreate<IPackage> _package;
 
         public DataServicePackage() {
-            _package = new Lazy<IPackage>(DownloadAndVerifyPackage, isThreadSafe: false);
+            _package = new LazyWithRecreate<IPackage>(DownloadAndVerifyPackage, () => {
+                // If the hash changed then update the hash and redownload the package.
+                if (OldHash != PackageHash) {
+                    OldHash = PackageHash;
+                    return true;
+                }
+                return false;
+            });
         }
 
         public string Id {
@@ -131,6 +138,11 @@ namespace NuGet {
             set;
         }
 
+        private string OldHash {
+            get;
+            set;
+        }
+
         internal IDataServiceContext Context {
             get;
             set;
@@ -227,6 +239,32 @@ namespace NuGet {
             }
 
             return new PackageDependency(id, versionSpec);
+        }
+
+        /// <summary>
+        /// We can't use the built in Lazy for 2 reasons:
+        /// 1. It caches the exception if any is thrown from the creator func (this means it won't retry calling the function).
+        /// 2. There's no way to force a retry or expiration of the cache.
+        /// </summary>
+        private class LazyWithRecreate<T> {
+            private readonly Func<T> _creator;
+            private readonly Func<bool> _shouldRecreate;
+            private T _value;
+            
+            public LazyWithRecreate(Func<T> creator, Func<bool> shouldRecreate) {
+                _creator = creator;
+                _shouldRecreate = shouldRecreate;
+            }
+
+            public T Value {
+                get {                    
+                    if (_shouldRecreate()) {
+                        _value = _creator();
+                    }
+
+                    return _value;
+                }
+            }
         }
     }
 }

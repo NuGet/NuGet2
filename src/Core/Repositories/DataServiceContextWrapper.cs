@@ -14,6 +14,7 @@ namespace NuGet {
                 throw new ArgumentNullException("serviceRoot");
             }
             _context = new DataServiceContext(serviceRoot);
+            _context.MergeOption = MergeOption.OverwriteChanges;
         }
 
         public Uri BaseUri {
