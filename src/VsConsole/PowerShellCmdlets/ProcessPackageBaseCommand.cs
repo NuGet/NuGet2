@@ -17,6 +17,7 @@ namespace NuGet.PowerShell.Commands {
         // If this command is executed by getting the project from the pipeline, then we need we keep track of all of the
         // project managers since the same cmdlet instance can be used across invocations.
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
+        private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
 
         protected ProcessPackageBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
@@ -31,16 +32,18 @@ namespace NuGet.PowerShell.Commands {
 
         protected IProjectManager ProjectManager {
             get {
-                // We take a snapshot of the default project, the first time it is accessed so if it changs during
+                // We take a snapshot of the default project, the first time it is accessed so if it changes during
                 // the executing of this cmdlet we won't take it into consideration. (which is really an edge case anyway)
                 string name = ProjectName ?? String.Empty;
 
                 IProjectManager projectManager;
                 if (!_projectManagers.TryGetValue(name, out projectManager)) {
-                    projectManager = GetProjectManager();
+                    Tuple<IProjectManager, Project> tuple = GetProjectManager();
+                    projectManager = tuple.Item1;
 
                     if (projectManager != null) {
                         _projectManagers.Add(name, projectManager);
+                        _projectManagerToProject[projectManager] = tuple.Item2;
                     }
                 }
 
@@ -73,7 +76,7 @@ namespace NuGet.PowerShell.Commands {
             WriteLine();
         }
 
-        private IProjectManager GetProjectManager() {
+        private Tuple<IProjectManager, Project> GetProjectManager() {
             if (PackageManager == null) {
                 return null;
             }
@@ -105,7 +108,7 @@ namespace NuGet.PowerShell.Commands {
             projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
             projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
 
-            return projectManager;
+            return Tuple.Create(projectManager, project);
         }
 
         private void OnPackageInstalling(object sender, PackageOperationEventArgs e) {
@@ -133,7 +136,9 @@ namespace NuGet.PowerShell.Commands {
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
-            EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
+
+            EnvDTE.Project project = _projectManagerToProject[projectManager];
+            Debug.Assert(project != null);
 
             ExecuteScript(e.InstallPath, "install.ps1", e.Package, project);
         }
