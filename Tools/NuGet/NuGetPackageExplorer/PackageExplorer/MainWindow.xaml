@@ -5,13 +5,14 @@
         xmlns:viewmodel="clr-namespace:PackageExplorerViewModel;assembly=PackageViewModel"
         xmlns:resources="clr-namespace:PackageExplorer.Resources"
         Title="{Binding WindowTitle, FallbackValue={x:Static resources:Resources.Dialog_Title}}" 
-        Height="450" 
-        Width="650" 
+        Height="650" 
+        Width="750" 
         MinWidth="400" 
         MinHeight="300" 
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
         FontSize="12"
         AllowDrop="True"
+        TextOptions.TextRenderingMode="ClearType"
         DragOver="Window_DragOver" 
         Drop="Window_Drop"
         Closing="Window_Closing"
@@ -44,6 +45,7 @@
             <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
             <self:HalfLengthConverter x:Key="lengthConverter" />
             <self:UpperCaseConverter x:Key="upperCaseConverter" />
+            <self:FrameworkNameConverter x:Key="frameworkConverter" />
 
             <!-- data template for the package details pane -->
             <DataTemplate x:Key="PackageDetailTemplate">
@@ -149,20 +151,26 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type viewmodel:PackageFile}">
-                <TextBlock x:Name="Header" Text="{Binding Name}" ContextMenu="{StaticResource SharedContextMenu}">
-                </TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
+                    <TextBlock x:Name="Header" Text="{Binding Name}" ContextMenu="{StaticResource SharedContextMenu}">
+                    </TextBlock>
+                </StackPanel>
 
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INSTALL.PS1">
-                        <Setter TargetName="Header" Property="Foreground" Value="Blue" />
+                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Script.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\UNINSTALL.PS1">
-                        <Setter TargetName="Header" Property="Foreground" Value="Blue" />
+                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Script.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INIT.PS1">
-                        <Setter TargetName="Header" Property="Foreground" Value="Blue" />
+                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Script.png" />
                     </DataTrigger>
                 </DataTemplate.Triggers>
             </DataTemplate>
@@ -178,7 +186,7 @@
                 
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
-                    <TextBlock x:Name="Header" Text="{Binding Name}" FontWeight="SemiBold" />
+                    <TextBlock x:Name="Header" Text="{Binding Converter={StaticResource frameworkConverter}}" FontWeight="SemiBold" />
                 </StackPanel>
 
                 <HierarchicalDataTemplate.Triggers>

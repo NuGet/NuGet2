@@ -6,6 +6,8 @@ using NuGet;
 namespace PackageExplorerViewModel {
     internal static class PathToTreeConverter {
 
+        private static readonly PackagePartComparer _packagePartComparer = new PackagePartComparer();
+
         public static PackageFolder Convert(List<IPackageFile> paths) {
             if (paths == null) {
                 throw new ArgumentNullException("paths");
@@ -51,6 +53,9 @@ namespace PackageExplorerViewModel {
                     i = j;
                 }
             }
+
+            // sort the children parts, putting folders before files
+            root.Children.Sort(_packagePartComparer);
         }
     }
 }

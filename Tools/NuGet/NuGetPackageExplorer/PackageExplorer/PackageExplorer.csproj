@@ -110,6 +110,7 @@
     </ApplicationDefinition>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\CountToVisibilityConverter.cs" />
+    <Compile Include="Converters\FrameworkNameConverter.cs" />
     <Compile Include="Converters\HalfLengthConverter.cs" />
     <Compile Include="Converters\UpperCaseConverter.cs" />
     <Compile Include="Converters\UriConverter.cs" />
@@ -176,6 +177,7 @@
     <Resource Include="Images\Delete.png" />
     <Resource Include="Images\Web.png" />
     <Resource Include="Images\Lib.png" />
+    <Resource Include="Images\Script.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -62,6 +62,7 @@
     <Compile Include="PackagePart\PackageFile.cs" />
     <Compile Include="PackagePart\PackageFolder.cs" />
     <Compile Include="PackagePart\PackagePart.cs" />
+    <Compile Include="PackagePart\PackagePartComparer.cs" />
     <Compile Include="PackagePart\PathToTreeConverter.cs" />
     <Compile Include="PackagePart\SaveContentCommand.cs" />
     <Compile Include="PackageViewModel.cs" />
