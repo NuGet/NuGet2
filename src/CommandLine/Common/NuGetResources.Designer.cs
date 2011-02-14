@@ -466,7 +466,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the Id and Version of the package that will be publised to the lve feed..
+        ///   Looks up a localized string similar to Specify the Id and Version of the package that will be publised to the live feed..
         /// </summary>
         internal static string PublishCommandUsageDescription {
             get {
@@ -484,6 +484,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifies if the package should be created and uploaded to the server but not published to the live feed. False by default..
+        /// </summary>
+        internal static string PushCommandCreateOnlyDescription {
+            get {
+                return ResourceManager.GetString("PushCommandCreateOnlyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creating an entry for your package [ID:{0} Ver:{1}]....
         /// </summary>
         internal static string PushCommandCreatingPackage {
@@ -493,7 +502,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pushes a package to the server and optionaly publish it to the feed..
+        ///   Looks up a localized string similar to Pushes a package to the server and optionally publish it to the feed..
         /// </summary>
         internal static string PushCommandDescription {
             get {
@@ -525,15 +534,6 @@ namespace NuGet.Common {
         internal static string PushCommandPackageCreated {
             get {
                 return ResourceManager.GetString("PushCommandPackageCreated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies if the package should be published to the live feed. True by default..
-        /// </summary>
-        internal static string PushCommandPublishDescription {
-            get {
-                return ResourceManager.GetString("PushCommandPublishDescription", resourceCulture);
             }
         }
         

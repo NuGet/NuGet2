@@ -13,7 +13,7 @@ namespace NuGet.Commands {
         private string _apiKey;
         private string _packagePath;
 
-        [Option(typeof(NuGetResources), "PushCommandPublishDescription", AltName = "co")]
+        [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
         public bool CreateOnly { get; set; }
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]

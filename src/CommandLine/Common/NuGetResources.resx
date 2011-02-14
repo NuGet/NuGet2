@@ -220,7 +220,7 @@
     <value>Specifies the base GalleryServer Url.</value>
   </data>
   <data name="PublishCommandUsageDescription" xml:space="preserve">
-    <value>Specify the Id and Version of the package that will be publised to the lve feed.</value>
+    <value>Specify the Id and Version of the package that will be publised to the live feed.</value>
   </data>
   <data name="PublishCommandUsageSummary" xml:space="preserve">
     <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
@@ -229,7 +229,7 @@
     <value>Creating an entry for your package [ID:{0} Ver:{1}]...</value>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
-    <value>Pushes a package to the server and optionaly publish it to the feed.</value>
+    <value>Pushes a package to the server and optionally publish it to the feed.</value>
   </data>
   <data name="PushCommandInvalidResponse" xml:space="preserve">
     <value>{0}: {1}</value>
@@ -240,8 +240,8 @@
   <data name="PushCommandPackageCreated" xml:space="preserve">
     <value>Your package was uploaded to the server but not published.</value>
   </data>
-  <data name="PushCommandPublishDescription" xml:space="preserve">
-    <value>Specifies if the package should be published to the live feed. True by default.</value>
+  <data name="PushCommandCreateOnlyDescription" xml:space="preserve">
+    <value>Specifies if the package should be created and uploaded to the server but not published to the live feed. False by default.</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
     <value>Specifies the base GalleryServer Url.</value>
