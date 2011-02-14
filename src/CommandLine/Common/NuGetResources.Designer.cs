@@ -207,9 +207,9 @@ namespace NuGet.Common {
         /// <summary>
         ///   Looks up a localized string similar to If set, the destination folder will contain only the package name, not the version number.
         /// </summary>
-        internal static string InstallCommandNoSideBySideDescription {
+        internal static string InstallCommandExcludeVersionDescription {
             get {
-                return ResourceManager.GetString("InstallCommandNoSideBySideDescription", resourceCulture);
+                return ResourceManager.GetString("InstallCommandExcludeVersionDescription", resourceCulture);
             }
         }
         

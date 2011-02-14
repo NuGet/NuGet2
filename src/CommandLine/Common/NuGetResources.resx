@@ -339,7 +339,7 @@
   <data name="DeleteCommandNoPromptDescription" xml:space="preserve">
     <value>Do not prompt when deleting.</value>
   </data>
-  <data name="InstallCommandNoSideBySideDescription" xml:space="preserve">
+  <data name="InstallCommandExcludeVersionDescription" xml:space="preserve">
     <value>If set, the destination folder will contain only the package name, not the version number</value>
   </data>
 </root>

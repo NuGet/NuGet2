@@ -16,8 +16,8 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "InstallCommandVersionDescription", AltName = "v")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandNoSideBySideDescription", AltName = "n")]
-        public bool NoSxS { get; set; }
+        [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription", AltName = "x")]
+        public bool ExcludeVersion { get; set; }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
@@ -38,8 +38,8 @@ namespace NuGet.Commands {
 
             IPackageRepository packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl));
             string path = Directory.GetCurrentDirectory();
-            var packageManager = new PackageManager(packageRepository, 
-                                                    new DefaultPackagePathResolver(path, useSideBySidePaths: !NoSxS), 
+            var packageManager = new PackageManager(packageRepository,
+                                                    new DefaultPackagePathResolver(path, useSideBySidePaths: !ExcludeVersion), 
                                                     new PhysicalFileSystem(path));
 
             packageManager.Logger = new Logger { Console = Console };
