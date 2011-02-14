@@ -135,7 +135,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         public void ShowProgress(string operation, int percentComplete) {
-            if (_uiDispatcher.CheckAccess()) {
+            if (!_uiDispatcher.CheckAccess()) {
                 _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), operation, percentComplete);
                 return;
             }
@@ -144,8 +144,11 @@ namespace NuGet.Dialog.PackageManagerUI {
                 throw new ArgumentNullException("operation");
             }
 
-            if (percentComplete < 0 || percentComplete > 100) {
-                throw new ArgumentOutOfRangeException("percentComplete");
+            if (percentComplete < 0) {
+                percentComplete = 0;
+            }
+            else if (percentComplete > 100) {
+                percentComplete = 100;
             }
 
             if (IsOpen) {
