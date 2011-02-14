@@ -16,7 +16,6 @@ namespace PackageExplorer {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private readonly JumpList _jumpList = new JumpList() { ShowRecentCategory = true };
 
         public MainWindow() {
             InitializeComponent();
@@ -44,8 +43,13 @@ namespace PackageExplorer {
             }
 
             if (package != null) {
+                LoadPackage(package, packagePath);
+            }
+        }
+
+        internal void LoadPackage(IPackage package, string packagePath) {
+            if (package != null) {
                 DataContext = new PackageViewModel(package, packagePath);
-                AddToRecentJumpList(packagePath);
             }
         }
 
@@ -67,6 +71,16 @@ namespace PackageExplorer {
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
                 LoadPackage(dialog.FileName);
+            }
+        }
+
+        private void OpenFileFromNuGetFeed(object sender, RoutedEventArgs e) {
+            var dialog = new PackageChooserDialog() { Owner = this };
+            bool? result = dialog.ShowDialog();
+            if (result ?? false) {
+                if (dialog.SelectedPackage != null) {
+                    LoadPackage(dialog.SelectedPackage, dialog.SelectedPackage.DownloadUrl.ToString());
+                }
             }
         }
 
@@ -178,15 +192,6 @@ namespace PackageExplorer {
                 var viewModel = (PackageViewModel) DataContext;
                 return (viewModel != null && viewModel.HasEdit);
             }
-        }
-
-        private void AddToRecentJumpList(string path) {
-            JumpList.SetJumpList(Application.Current, _jumpList);
-
-            var jumpPath = new JumpPath { Path = path };
-            JumpList.AddToRecentCategory(jumpPath);
-
-            _jumpList.Apply();
         }
 
         private void OnFontSizeItem_Click(object sender, RoutedEventArgs e) {

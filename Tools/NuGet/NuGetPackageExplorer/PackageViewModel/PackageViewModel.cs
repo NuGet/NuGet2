@@ -8,7 +8,7 @@ using NuGet;
 
 namespace PackageExplorerViewModel {
 
-    public class PackageViewModel : INotifyPropertyChanged, IPackageViewModel {
+    public class PackageViewModel : ViewModelBase, IPackageViewModel {
 
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
@@ -18,8 +18,6 @@ namespace PackageExplorerViewModel {
         private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand;
         private bool _isInEditMode;
         private string _packageSource;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public PackageViewModel(IPackage package, string source) {
             if (package == null) {
@@ -109,12 +107,6 @@ namespace PackageExplorerViewModel {
                         AssignViewModelToFiles(folder);
                     }
                 }
-            }
-        }
-
-        private void RaisePropertyChangeEvent(string propertyName) {
-            if (PropertyChanged != null) {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 

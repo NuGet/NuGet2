@@ -162,4 +162,10 @@
   <data name="IncompatibleSchema" xml:space="preserve">
     <value>The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version.</value>
   </data>
+  <data name="PackageContentsVerifyError" xml:space="preserve">
+    <value>Failed to download package correctly. The contents of the package could not be verified.</value>
+  </data>
+  <data name="InvalidFeed" xml:space="preserve">
+    <value>There was an error while processing the request. Please verify that '{0}' is a valid feed.</value>
+  </data>
 </root>

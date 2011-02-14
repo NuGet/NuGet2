@@ -124,6 +124,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error while processing the request. Please verify that &apos;{0}&apos; is a valid feed..
+        /// </summary>
+        internal static string InvalidFeed {
+            get {
+                return ResourceManager.GetString("InvalidFeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package id &apos;{0}&apos; is invalid..
         /// </summary>
         internal static string InvalidPackageId {
@@ -183,6 +192,15 @@ namespace NuGet.Resources {
         internal static string PackageAuthoring_FileNotFound {
             get {
                 return ResourceManager.GetString("PackageAuthoring_FileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to download package correctly. The contents of the package could not be verified..
+        /// </summary>
+        internal static string PackageContentsVerifyError {
+            get {
+                return ResourceManager.GetString("PackageContentsVerifyError", resourceCulture);
             }
         }
         

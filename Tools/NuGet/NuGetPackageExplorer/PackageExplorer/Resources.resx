@@ -165,4 +165,7 @@
   <data name="Dialog_ViewLicense" xml:space="preserve">
     <value>View License Terms</value>
   </data>
+  <data name="PackageContentsVerifyError" xml:space="preserve">
+    <value>Failed to download package correctly. The contents of the package could not be verified.</value>
+  </data>
 </root>

@@ -25,12 +25,6 @@
             </ResourceDictionary.MergedDictionaries>
             
             <viewmodel:DisabledCommand x:Key="DisabledCommand" />
-            
-            <Style TargetType="{x:Type Image}">
-                <Setter Property="Width" Value="16" />
-                <Setter Property="Height" Value="16" />
-                <Setter Property="Stretch" Value="Uniform" />
-            </Style>
 
             <ContextMenu x:Key="SharedContextMenu">
                 <MenuItem Header="_View Content" Command="{Binding ViewCommand}" />
@@ -175,15 +169,7 @@
                 </DataTemplate.Triggers>
             </DataTemplate>
 
-            <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
-                <HierarchicalDataTemplate.Resources>
-                    <Style TargetType="{x:Type Image}">
-                        <Setter Property="Width" Value="16" />
-                        <Setter Property="Height" Value="16" />
-                        <Setter Property="Stretch" Value="Uniform" />
-                    </Style>
-                </HierarchicalDataTemplate.Resources>
-                
+            <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">                
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
                     <TextBlock x:Name="Header" Text="{Binding Converter={StaticResource frameworkConverter}}" FontWeight="SemiBold" />
@@ -233,6 +219,9 @@
                         <Image Source="/NuGetPackageExplorer;component/Images/openHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Open from _NuGet Feed..." Click="OpenFileFromNuGetFeed">
+                </MenuItem>
+                <Separator />
                 <MenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">
                     <MenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/saveHS.png" />

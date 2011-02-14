@@ -203,5 +203,14 @@ namespace PackageExplorer.Resources {
                 return ResourceManager.GetString("Dialog_ViewLicense", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to download package correctly. The contents of the package could not be verified..
+        /// </summary>
+        public static string PackageContentsVerifyError {
+            get {
+                return ResourceManager.GetString("PackageContentsVerifyError", resourceCulture);
+            }
+        }
     }
 }

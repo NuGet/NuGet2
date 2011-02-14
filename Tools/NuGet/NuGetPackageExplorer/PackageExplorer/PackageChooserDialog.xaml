@@ -1,0 +1,87 @@
+﻿<self:DialogWindow x:Class="PackageExplorer.PackageChooserDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:self="clr-namespace:PackageExplorer"
+        Title="Select package" 
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        IsSystemMenuVisible="False"
+        IsHelpButtonVisible="True"
+        MinHeight="300"
+        MinWidth="450"
+        Height="400" 
+        Width="550">
+    
+    <self:DialogWindow.Resources>
+        <self:NullToBoolConverter x:Key="NullToBoolConverter" />
+        <Style TargetType="{x:Type Button}" x:Key="NavigationButtonStyle">
+            <Setter Property="Margin" Value="0,0,5,0" />
+        </Style>
+
+        <Style TargetType="{x:Type DataGridColumnHeader}" x:Key="DataGridHeaderStyle">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </self:DialogWindow.Resources>
+    
+    <Grid Margin="10">
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Horizontal">
+            <Button Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="First">
+                <Image Source="/NuGetPackageExplorer;component/Images/MoveFirstHS.png" />
+            </Button>
+
+            <Button Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Previous">
+                <Image Source="/NuGetPackageExplorer;component/Images/MovePreviousHS.png" />
+            </Button>
+            
+            <TextBlock Margin="0,0,7,0" VerticalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Mode="OneWay" StringFormat="{}{0} to {1} of {2}">
+                        <Binding Path="BeginPackage" />
+                        <Binding Path="EndPackage" />
+                        <Binding Path="TotalPackageCount" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <Button Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Next">
+                <Image Source="/NuGetPackageExplorer;component/Images/MoveNextHS.png" />
+            </Button>
+
+            <Button Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
+                <Image Source="/NuGetPackageExplorer;component/Images/MoveLastHS.png" />
+            </Button>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+            <Label Target="{Binding ElementName=SearchBox}" Content="_Search" />
+            <TextBox x:Name="SearchBox" Width="150" />
+        </StackPanel>
+
+        <DataGrid x:Name="PackageGrid" ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}" Grid.Row="1" Grid.ColumnSpan="2" AutoGenerateColumns="False" ItemsSource="{Binding Packages}" CanUserReorderColumns="False" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" CanUserResizeRows="False" SelectionMode="Single" Margin="0,5" IsReadOnly="True" AlternationCount="1" AlternatingRowBackground="#FFFCF7F7">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Id}" CanUserReorder="False" Header="Id" IsReadOnly="True" />
+                <DataGridTextColumn Binding="{Binding Version}" CanUserReorder="False" CanUserSort="False" Header="Version" IsReadOnly="True" />
+                <DataGridTextColumn Binding="{Binding Authors}" CanUserReorder="False" Header="Authors" IsReadOnly="True" Width="*" />
+                <DataGridTextColumn Binding="{Binding DownloadCount}" CanUserReorder="False" Header="Downloads" IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1">
+            <Button IsDefault="True" IsEnabled="{Binding SelectedItem, ElementName=PackageGrid, Converter={StaticResource NullToBoolConverter}}" Content="_OK" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OkButton_Click" />
+            <Button x:Name="CancelButton" IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</self:DialogWindow>  
