@@ -171,4 +171,7 @@
   <data name="Cmdlet_GetPackageProgress" xml:space="preserve">
     <value>Retrieving packages...</value>
   </data>
+  <data name="Cmdlet_InvalidProjectManagerInstance" xml:space="preserve">
+    <value>The specified IProjectManager instance is not recognized.</value>
+  </data>
 </root>

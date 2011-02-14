@@ -39,11 +39,12 @@ namespace NuGet.PowerShell.Commands {
                 IProjectManager projectManager;
                 if (!_projectManagers.TryGetValue(name, out projectManager)) {
                     Tuple<IProjectManager, Project> tuple = GetProjectManager();
-                    projectManager = tuple.Item1;
-
-                    if (projectManager != null) {
-                        _projectManagers.Add(name, projectManager);
-                        _projectManagerToProject[projectManager] = tuple.Item2;
+                    if (tuple != null) {
+                        projectManager = tuple.Item1;
+                        if (projectManager != null) {
+                            _projectManagers.Add(name, projectManager);
+                            _projectManagerToProject[projectManager] = tuple.Item2;
+                        }
                     }
                 }
 
@@ -137,8 +138,10 @@ namespace NuGet.PowerShell.Commands {
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
 
-            EnvDTE.Project project = _projectManagerToProject[projectManager];
-            Debug.Assert(project != null);
+            EnvDTE.Project project;
+            if (!_projectManagerToProject.TryGetValue(projectManager, out project)) {
+                throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
+            }
 
             ExecuteScript(e.InstallPath, "install.ps1", e.Package, project);
         }

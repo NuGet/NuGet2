@@ -106,6 +106,15 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified IProjectManager instance is not recognized..
+        /// </summary>
+        internal static string Cmdlet_InvalidProjectManagerInstance {
+            get {
+                return ResourceManager.GetString("Cmdlet_InvalidProjectManagerInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only paths residing on a FileSystemProvider are supported..
         /// </summary>
         internal static string Cmdlet_InvalidProvider {
