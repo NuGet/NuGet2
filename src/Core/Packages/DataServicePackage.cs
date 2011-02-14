@@ -250,6 +250,7 @@ namespace NuGet {
             private readonly Func<T> _creator;
             private readonly Func<bool> _shouldRecreate;
             private T _value;
+            private bool _isValueCreated;
             
             public LazyWithRecreate(Func<T> creator, Func<bool> shouldRecreate) {
                 _creator = creator;
@@ -257,9 +258,10 @@ namespace NuGet {
             }
 
             public T Value {
-                get {                    
-                    if (_shouldRecreate()) {
+                get {
+                    if (_shouldRecreate() || !_isValueCreated) {
                         _value = _creator();
+                        _isValueCreated = true;
                     }
 
                     return _value;
