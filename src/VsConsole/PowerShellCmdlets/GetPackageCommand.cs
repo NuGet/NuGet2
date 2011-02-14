@@ -214,7 +214,8 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        private bool ShouldShowProgress(IQueryable<IPackage> packages, out int total) {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
+        protected virtual bool ShouldShowProgress(IQueryable<IPackage> packages, out int total) {
             const int ThresholdToShowProgress = 20;
 
             bool showProgress = UseRemoteSource;

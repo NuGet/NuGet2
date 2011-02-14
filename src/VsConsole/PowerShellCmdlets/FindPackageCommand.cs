@@ -63,5 +63,10 @@ namespace NuGet.PowerShell.Commands {
         protected override void Log(MessageLevel level, string formattedMessage) {
             // We don't want this cmdlet to print anything
         }
+
+        protected override bool ShouldShowProgress(IQueryable<IPackage> packages, out int total) {
+            total = 0;
+            return false;
+        }
     }
 }
