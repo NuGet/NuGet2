@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Windows.Threading;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace NuGet.Dialog.PackageManagerUI {
 
@@ -131,6 +131,25 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
             else {
                 throw new InvalidOperationException();
+            }
+        }
+
+        public void ShowProgress(string operation, int percentComplete) {
+            if (_uiDispatcher.CheckAccess()) {
+                _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), operation, percentComplete);
+                return;
+            }
+
+            if (operation == null) {
+                throw new ArgumentNullException("operation");
+            }
+
+            if (percentComplete < 0 || percentComplete > 100) {
+                throw new ArgumentOutOfRangeException("percentComplete");
+            }
+
+            if (IsOpen) {
+                _currentWindow.ShowProgress(operation, percentComplete);
             }
         }
     }

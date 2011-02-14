@@ -15,8 +15,8 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
-        <TextBlock Grid.Row="0" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" FontWeight="Bold" Margin="10" x:Name="StatusText" />
+
+        <TextBlock Grid.Row="0" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" />
         <ProgressBar Grid.Row="1" IsIndeterminate="True" Margin="20,0,20,5" Height="26" Width="Auto" x:Name="ProgressBar" />
         <RichTextBox Grid.Row="2" Margin="20, 5, 20, 5" AcceptsReturn="True" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" x:Name="MessagePane">
         </RichTextBox>

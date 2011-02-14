@@ -69,5 +69,11 @@ namespace NuGet.Dialog.PackageManagerUI {
             // scroll to the end to show the latest message
             MessagePane.ScrollToEnd();
         }
+
+        public void ShowProgress(string operation, int percentComplete) {
+            ProgressBar.IsIndeterminate = false;
+            ProgressBar.Value = percentComplete;
+            StatusText.Text = operation;
+        }
     }
 }

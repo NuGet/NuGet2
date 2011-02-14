@@ -343,6 +343,12 @@ namespace NuGet.Dialog.Providers {
             _outputConsole.Value.WriteLine(message);
         }
 
+        protected void ShowProgress(string operation, int percentComplete) {
+            if (_progressWindowOpener.IsOpen) {
+                _progressWindowOpener.ShowProgress(operation, percentComplete);
+            }
+        }
+
         protected void RegisterPackageOperationEvents(IPackageManager packageManager) {
             packageManager.PackageInstalled += OnPackageInstalled;
             ProjectManager.PackageReferenceAdded += OnPackageReferenceAdded;
