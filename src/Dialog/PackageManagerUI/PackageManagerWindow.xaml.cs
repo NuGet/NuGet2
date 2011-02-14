@@ -11,7 +11,6 @@ using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
-using DTEPackage = Microsoft.VisualStudio.Shell.Package;
 
 namespace NuGet.Dialog.PackageManagerUI {
 
@@ -22,6 +21,8 @@ namespace NuGet.Dialog.PackageManagerUI {
         private const string F1Keyword = "vs.ExtensionManager";
 
         private readonly IServiceProvider _serviceProvider;
+
+        private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
 
         [ImportingConstructor]
         public PackageManagerWindow([Import("PackageServiceProvider")]
@@ -44,11 +45,12 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             // replace the ConsoleOutputProvider with SmartOutputConsoleProvider so that we can clear 
             // the console the first time an entry is written to it
+            _smartOutputConsoleProvider = new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider);
             providerServices = new ProviderServices(
                 providerServices.LicenseWindow,
                 providerServices.ProgressWindow,
                 providerServices.ScriptExecutor,
-                new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider));
+                _smartOutputConsoleProvider);
 
             SetupProviders(
                 dte, 
@@ -210,6 +212,9 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void OnDialogWindowClosed(object sender, EventArgs e) {
             explorer.Providers.Clear();
+
+            // flush output messages to the Output console at once when the dialog is closed.
+            _smartOutputConsoleProvider.Flush();
         }
 
         /// <summary>
