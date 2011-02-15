@@ -62,6 +62,7 @@
     <Compile Include="PackageChooser\NavigateCommand.cs" />
     <Compile Include="PackageChooser\PackageChooserViewModel.cs" />
     <Compile Include="PackageChooser\SearchCommand.cs" />
+    <Compile Include="PackageChooser\SortCommand.cs" />
     <Compile Include="PackagePart\PackageFile.cs" />
     <Compile Include="PackagePart\PackageFolder.cs" />
     <Compile Include="PackagePart\PackagePart.cs" />

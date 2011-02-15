@@ -117,8 +117,6 @@
     <Compile Include="Converters\UriConverter.cs" />
     <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="Converters\VersionSpecConverter.cs" />
-    <Compile Include="DialogWindow.cs" />
-    <Compile Include="NativeMethods.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">
       <DependentUpon>PackageChooserDialog.xaml</DependentUpon>
     </Compile>
@@ -192,6 +190,7 @@
     <Resource Include="Images\MoveLastHS.png" />
     <Resource Include="Images\MoveNextHS.png" />
     <Resource Include="Images\MovePreviousHS.png" />
+    <Resource Include="Images\search.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

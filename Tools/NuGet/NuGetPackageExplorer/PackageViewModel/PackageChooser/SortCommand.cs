@@ -2,22 +2,23 @@
 using System.Windows.Input;
 
 namespace PackageExplorerViewModel {
-    public class SearchCommand : ICommand {
+    public class SortCommand : ICommand {
 
-         private PackageChooserViewModel _viewModel;
+        private PackageChooserViewModel _viewModel;
 
-        public SearchCommand(PackageChooserViewModel viewModel) {
+        public SortCommand(PackageChooserViewModel viewModel) {
             _viewModel = viewModel;
         }
 
         public bool CanExecute(object parameter) {
-            return true;
+            throw new NotImplementedException();
         }
 
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            _viewModel.Search((string) parameter);
+            string column = (string) parameter;
+            _viewModel.Sort(column);
         }
     }
 }

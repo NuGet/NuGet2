@@ -1,19 +1,28 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
 using NuGet;
+using System.Threading.Tasks;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
         private const string NuGetFeed = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const int PageSize = 15;
         private IPackageRepository _packageRepository;
+        private IQueryable<IPackage> _currentQuery;
+        private string _currentSearch;
+        private string _currentSortColumn;
+        private bool _sortByDescending;
 
         public PackageChooserViewModel() {
-            // we assume the number of packages won't change during the dialog session
-            TotalPackageCount = PackageRepository.GetPackages().Count();
-            LoadPage(0);
+            Packages = new ObservableCollection<IPackage>();
+            NavigationCommand = new NavigateCommand(this);
+            SortCommand = new SortCommand(this);
+            SearchCommand = new SearchCommand(this);
+
+            LoadPackages();
         }
 
         private IPackageRepository PackageRepository {
@@ -80,39 +89,82 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private ObservableCollection<IPackage> _packages;
-        public ObservableCollection<IPackage> Packages {
-            get {
-                if (_packages == null) {
-                    _packages = new ObservableCollection<IPackage>();
-                }
-                return _packages;
-            }
-        }
+        public ObservableCollection<IPackage> Packages { get; private set; }
 
-        private NavigateCommand _navigationCommand;
+        public NavigateCommand NavigationCommand { get; private set; }
 
-        public NavigateCommand NavigationCommand {
-            get {
-                if (_navigationCommand == null) {
-                    _navigationCommand = new NavigateCommand(this);
-                }
+        public SortCommand SortCommand { get; private set; }
 
-                return _navigationCommand;
-            }
-        }
+        public SearchCommand SearchCommand { get; private set; }
 
-        public void LoadPage(int page) {
+        public void   LoadPage(int page) {
+            Debug.Assert(_currentQuery != null);
+
             page = Math.Max(page, 0);
             page = Math.Min(page, TotalPage - 1);
 
             // load package
-            var packages = PackageRepository.GetPackages().Skip(page*PageSize).Take(PageSize);
+            var subQuery = _currentQuery.Skip(page * PageSize).Take(PageSize);
 
-            SetPackages(packages);
-            CurrentPage = page;
-            BeginPackage = page * PageSize + 1;
-            EndPackage = (page + 1)*PageSize;
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            Task.Factory.StartNew<Tuple<IList<IPackage>, int>>(QueryPackages, subQuery).ContinueWith(
+                result => {
+                    if (result.IsCompleted) {
+                        TotalPackageCount = result.Result.Item2;
+                        SetPackages(result.Result.Item1);
+
+                        CurrentPage = page;
+                        BeginPackage = Math.Min(page*PageSize + 1, TotalPackageCount);
+                        EndPackage = Math.Min((page + 1)*PageSize, TotalPackageCount);
+
+                        NavigationCommand.RaiseCanExecuteChangedEvent();
+                    }
+                },
+                uiScheduler);
+        }
+
+        private Tuple<IList<IPackage>, int> QueryPackages(object state) {
+            var subQuery = (IQueryable<IPackage>)state;
+            IList<IPackage> result = subQuery.ToList();
+
+            int totalPackageCount = _currentQuery.Count();
+
+            return Tuple.Create(result, totalPackageCount);
+        }
+
+        private void LoadPackages() {
+            var query = PackageRepository.GetPackages();
+            if (!String.IsNullOrEmpty(_currentSearch)) {
+                query = query.Find(_currentSearch.Split(' '));
+            }
+
+            switch (_currentSortColumn) {
+                case "Id":
+                    query = _sortByDescending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
+                    break;
+
+                //case "Version":
+                //    query = _sortByDescending ? query.OrderByDescending(p => p.Version) : query.OrderBy(p => p.Version);
+                //    break;
+
+                case "Authors":
+                    query = _sortByDescending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
+                    break;
+
+                case "DownloadCount":
+                    query = _sortByDescending ? query.OrderByDescending(p => p.DownloadCount) : query.OrderBy(p => p.DownloadCount);
+                    break;
+
+                default:
+                    query = query.OrderBy(p => p.Id).ThenBy(p => p.Version);
+                    break;
+            }
+
+            _currentQuery = query;
+
+            // every time the search query changes, we reset to page 0
+            LoadPage(0);
         }
 
         private void SetPackages(IEnumerable<IPackage> packages) {
@@ -120,5 +172,23 @@ namespace PackageExplorerViewModel {
             Packages.AddRange(packages);
         }
 
+        public void Search(string searchTerm) {
+            if (_currentSearch != searchTerm) {
+                _currentSearch = searchTerm;
+                LoadPackages();
+            }
+        }
+
+        public void Sort(string column) {
+            if (_currentSortColumn == column) {
+                _sortByDescending = !_sortByDescending;
+            }
+            else {
+                _currentSortColumn = column;
+                _sortByDescending = false;
+            }
+
+            LoadPackages();
+        }
     }
 }

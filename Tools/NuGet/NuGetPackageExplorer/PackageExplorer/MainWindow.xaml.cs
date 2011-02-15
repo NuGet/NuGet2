@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Shell;
 using Microsoft.Win32;
 using NuGet;
 using PackageExplorer.Properties;
@@ -75,7 +74,10 @@ namespace PackageExplorer {
         }
 
         private void OpenFileFromNuGetFeed(object sender, RoutedEventArgs e) {
-            var dialog = new PackageChooserDialog() { Owner = this };
+            var dialog = new PackageChooserDialog() {
+                Owner = this,
+                FontSize = this.FontSize
+            };
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
                 if (dialog.SelectedPackage != null) {
@@ -224,8 +226,8 @@ namespace PackageExplorer {
             Settings settings = Properties.Settings.Default;
 
             settings.FontSize = (int)Math.Round(this.FontSize);
-            //settings.Left = this.Left;
-            //settings.Top = this.Top;
+            settings.Left = this.Left;
+            settings.Top = this.Top;
             //settings.Width = this.Width;
             //settings.Height = this.Height;
             settings.WindowState = this.WindowState.ToString();
@@ -236,13 +238,13 @@ namespace PackageExplorer {
             
             SetFontSize(settings.FontSize);
 
-            //double left = settings.Left;
-            //double top = settings.Top;
+            double left = settings.Left;
+            double top = settings.Top;
 
-            //if (left > 0 && top > 0) {
-            //    this.Left = left;
-            //    this.Top = top;
-            //}
+            if (left > 0 && top > 0) {
+                this.Left = left;
+                this.Top = top;
+            }
 
             //double width = settings.Width;
             //double height = settings.Height;

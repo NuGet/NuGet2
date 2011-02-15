@@ -53,7 +53,9 @@ namespace PackageExplorerViewModel {
                     MoveLast();
                     break;
             }
+        }
 
+        public void RaiseCanExecuteChangedEvent() {
             if (CanExecuteChanged != null) {
                 CanExecuteChanged(this, EventArgs.Empty);
             }
