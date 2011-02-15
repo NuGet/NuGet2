@@ -11,4 +11,5 @@ glob:*.orig
 glob:*.suo
 glob:*.vs10x
 glob:TestResults
+glob:[Tt]humbs.db
 glob:src/Server/Packages/*.nupkg
