@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using NuGet.VisualStudio;
@@ -290,6 +291,23 @@ namespace NuGet.Options {
         private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset) {
             return new Rectangle(sourceBounds.Left + xOffset, sourceBounds.Top + yOffset,
                 sourceBounds.Width - xOffset, sourceBounds.Height - yOffset);
+        }
+
+        private void OnBrowseButtonClicked(object sender, EventArgs e) {
+            using (var dialog = new FolderBrowserDialog()) {
+                dialog.Description = Resources.BrowseFolderDialogDescription;
+                
+                var result = dialog.ShowDialog();
+                if (result == DialogResult.OK) {
+                    var path = dialog.SelectedPath;
+                    NewPackageSource.Text = path;
+
+                    // if the package name text box is empty, we fill it with the selected folder's name
+                    if (String.IsNullOrEmpty(NewPackageName.Text)) {
+                        NewPackageName.Text = Path.GetFileName(path);
+                    }
+                }
+            }
         }
     }
 
