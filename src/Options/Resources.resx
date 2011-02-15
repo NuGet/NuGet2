@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BrowseFolderDialogDescription" xml:space="preserve">
-    <value>Select a package source folder:</value>
+    <value>Select a Package Source Folder</value>
+  </data>
+  <data name="BrowseFolderDialogSelectButton" xml:space="preserve">
+    <value>Select</value>
   </data>
   <data name="ShowInfo_ClearRecentPackages" xml:space="preserve">
     <value>All items have been cleared from the recent packages list.</value>

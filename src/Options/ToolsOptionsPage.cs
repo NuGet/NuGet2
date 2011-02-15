@@ -51,7 +51,7 @@ namespace NuGet.Options {
         private ToolsOptionsControl OptionsControl {
             get {
                 if (_optionsWindow == null) {
-                    _optionsWindow = new ToolsOptionsControl();
+                    _optionsWindow = new ToolsOptionsControl(this);
                     _optionsWindow.Location = new Point(0, 0);
                 }
 

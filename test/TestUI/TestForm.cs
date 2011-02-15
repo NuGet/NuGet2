@@ -26,7 +26,7 @@ namespace NuGet.TestUI {
                                                };
             _packageSourceProvider.SetPackageSources(list);
             _packageSourceProvider.ActivePackageSource = list[1];
-            _optionsControl = new ToolsOptionsControl(_packageSourceProvider);
+            _optionsControl = new ToolsOptionsControl(_packageSourceProvider, null);
             _optionsControl.Dock = DockStyle.Fill;
 
             panel1.Controls.Add(_optionsControl);

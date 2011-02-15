@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using NuGet.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio;
+using System.Runtime.InteropServices;
 
 namespace NuGet.Options {
     /// <summary>
@@ -20,16 +23,19 @@ namespace NuGet.Options {
         private PackageSource _aggregateSource;
         private PackageSource _activeSource;
         private BindingSource _allPackageSources;
+        private readonly IServiceProvider _serviceProvider;
         private bool _initialized;
 
-        public ToolsOptionsControl(IPackageSourceProvider packageSourceProvider) {
-            _packageSourceProvider = packageSourceProvider;
-            InitializeComponent();
-            SetupEventHandlers();
+        public ToolsOptionsControl(IServiceProvider serviceProvider)
+            : this(ServiceLocator.GetInstance<IPackageSourceProvider>(), serviceProvider) {
         }
 
-        public ToolsOptionsControl()
-            : this(ServiceLocator.GetInstance<IPackageSourceProvider>()) {
+        public ToolsOptionsControl(IPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider) {
+            InitializeComponent();
+
+            _serviceProvider = serviceProvider;
+            _packageSourceProvider = packageSourceProvider;
+            SetupEventHandlers();
         }
 
         private void SetupEventHandlers() {
@@ -294,18 +300,39 @@ namespace NuGet.Options {
         }
 
         private void OnBrowseButtonClicked(object sender, EventArgs e) {
-            using (var dialog = new FolderBrowserDialog()) {
-                dialog.Description = Resources.BrowseFolderDialogDescription;
-                
-                var result = dialog.ShowDialog();
-                if (result == DialogResult.OK) {
-                    var path = dialog.SelectedPath;
-                    NewPackageSource.Text = path;
 
-                    // if the package name text box is empty, we fill it with the selected folder's name
-                    if (String.IsNullOrEmpty(NewPackageName.Text)) {
-                        NewPackageName.Text = Path.GetFileName(path);
-                    }
+            const int MaxDirectoryLength = 1000;
+
+            var uiShell = (IVsUIShell2)_serviceProvider.GetService(typeof(SVsUIShell));
+
+            char[] rgch = new char[MaxDirectoryLength + 1];
+
+             // allocate a buffer in unmanaged memory for file name (string)
+            IntPtr bufferPtr = Marshal.AllocCoTaskMem((rgch.Length + 1) * 2);
+            // copy initial path to bufferPtr
+            Marshal.Copy(rgch, 0, bufferPtr, rgch.Length);
+
+            VSBROWSEINFOW[] pBrowse = new VSBROWSEINFOW[1];
+            pBrowse[0] = new VSBROWSEINFOW() {
+                lStructSize = (uint)Marshal.SizeOf(pBrowse[0]),
+                dwFlags = 0x00000080,
+                pwzDlgTitle = Resources.BrowseFolderDialogDescription,
+                nMaxDirName = (uint)MaxDirectoryLength,
+                hwndOwner = this.Handle,
+                pwzDirName = bufferPtr
+            };
+
+            var browseInfo = new VSNSEBROWSEINFOW[1] { new VSNSEBROWSEINFOW() };
+
+            int ret = uiShell.GetDirectoryViaBrowseDlgEx(pBrowse, "", Resources.BrowseFolderDialogSelectButton, "", browseInfo);
+            if (ret == VSConstants.S_OK) {
+                var pathPtr = pBrowse[0].pwzDirName;
+                var path = Marshal.PtrToStringAuto(pathPtr);
+                NewPackageSource.Text = path;
+
+                // if the package name text box is empty, we fill it with the selected folder's name
+                if (String.IsNullOrEmpty(NewPackageName.Text)) {
+                    NewPackageName.Text = Path.GetFileName(path);
                 }
             }
         }
