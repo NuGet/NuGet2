@@ -58,5 +58,11 @@ namespace PackageExplorer {
                 e.Handled = true;
             }
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ICommand loadedCommand = (ICommand)Tag;
+            loadedCommand.Execute(null);
+        }
     }
 }

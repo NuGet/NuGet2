@@ -5,6 +5,8 @@
         Title="Select package" 
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
+        Tag="{Binding LoadedCommand}"
+        Loaded="Window_Loaded"
         MinHeight="300"
         MinWidth="450"
         Height="400" 
@@ -101,6 +103,8 @@
                 <DataGridTextColumn Binding="{Binding DownloadCount}" CanUserReorder="False" Header="Downloads" IsReadOnly="True" Width="80" />
             </DataGrid.Columns>
         </DataGrid>
+        
+        <TextBlock Grid.Row="2" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1">
             <Button IsDefault="True" IsEnabled="{Binding SelectedItem, ElementName=PackageGrid, Converter={StaticResource NullToBoolConverter}}" Content="_OK" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OkButton_Click" />

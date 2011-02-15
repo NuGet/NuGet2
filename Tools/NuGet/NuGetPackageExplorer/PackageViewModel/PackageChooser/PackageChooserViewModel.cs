@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using NuGet;
 using System.Threading.Tasks;
+using NuGet;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
@@ -21,8 +21,7 @@ namespace PackageExplorerViewModel {
             NavigationCommand = new NavigateCommand(this);
             SortCommand = new SortCommand(this);
             SearchCommand = new SearchCommand(this);
-
-            LoadPackages();
+            LoadedCommand = new LoadedCommand(this);
         }
 
         private IPackageRepository PackageRepository {
@@ -71,6 +70,21 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private string _statusContent;
+
+        public string StatusContent
+        {
+            get { return _statusContent; }
+            set {
+                if (_statusContent != value)
+                {
+                    _statusContent = value;
+                    RaisePropertyChangeEvent("StatusContent");
+                }
+            }
+        }
+
+
         public int TotalPage {
             get {
                 return Math.Max(1, (TotalPackageCount + PageSize - 1) / PageSize);
@@ -97,7 +111,9 @@ namespace PackageExplorerViewModel {
 
         public SearchCommand SearchCommand { get; private set; }
 
-        public void   LoadPage(int page) {
+        public LoadedCommand LoadedCommand { get; set; }
+
+        public void LoadPage(int page) {
             Debug.Assert(_currentQuery != null);
 
             page = Math.Max(page, 0);
@@ -107,6 +123,8 @@ namespace PackageExplorerViewModel {
             var subQuery = _currentQuery.Skip(page * PageSize).Take(PageSize);
 
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            StatusContent = "Loading...";
 
             Task.Factory.StartNew<Tuple<IList<IPackage>, int>>(QueryPackages, subQuery).ContinueWith(
                 result => {
@@ -120,6 +138,8 @@ namespace PackageExplorerViewModel {
 
                         NavigationCommand.RaiseCanExecuteChangedEvent();
                     }
+
+                    StatusContent = String.Empty;
                 },
                 uiScheduler);
         }
@@ -133,7 +153,7 @@ namespace PackageExplorerViewModel {
             return Tuple.Create(result, totalPackageCount);
         }
 
-        private void LoadPackages() {
+        public void LoadPackages() {
             var query = PackageRepository.GetPackages();
             if (!String.IsNullOrEmpty(_currentSearch)) {
                 query = query.Find(_currentSearch.Split(' '));
