@@ -11,7 +11,7 @@
         MinWidth="450"
         Height="400" 
         Width="550">
-    
+
     <Window.Resources>
         <self:NullToBoolConverter x:Key="NullToBoolConverter" />
         <Style TargetType="{x:Type Button}" x:Key="NavigationButtonStyle">
@@ -22,16 +22,28 @@
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
+
+        <LinearGradientBrush x:Key="TextBoxBorder" StartPoint="0,0" EndPoint="0,20" MappingMode="Absolute">
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#ABADB3" Offset="0.05"/>
+                <GradientStop Color="#E2E3EA" Offset="0.07"/>
+                <GradientStop Color="#E3E9EF" Offset="1"/>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
     </Window.Resources>
-    
+
     <Grid Margin="10">
-        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
@@ -45,7 +57,7 @@
             <Button Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Previous">
                 <Image Source="/NuGetPackageExplorer;component/Images/MovePreviousHS.png" />
             </Button>
-            
+
             <TextBlock Margin="0,0,7,0" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding Mode="OneWay" StringFormat="{}{0} to {1} of {2}">
@@ -65,15 +77,11 @@
             </Button>
         </StackPanel>
 
-        <Border Grid.Column="1" HorizontalAlignment="Right" UseLayoutRounding="True" BorderThickness="0.5" BorderBrush="DarkGray" Padding="2,2,3,2">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <Border Grid.Column="1" HorizontalAlignment="Right" UseLayoutRounding="True" BorderThickness="0.5" BorderBrush="{StaticResource TextBoxBorder}" Padding="2,2,3,2">
+            <StackPanel Orientation="Horizontal">
                 <TextBox x:Name="SearchBox" BorderThickness="0" Width="150" KeyDown="SearchBox_KeyDown" Tag="{Binding SearchCommand}" VerticalAlignment="Center" />
                 <Image Grid.Column="1" Source="/NuGetPackageExplorer;component/Images/Search.png" />
-            </Grid>
+            </StackPanel>
         </Border>
 
         <DataGrid 
@@ -95,7 +103,7 @@
             AlternatingRowBackground="#FFFCF7F7" 
             Sorting="PackageGrid_Sorting"
             Tag="{Binding SortCommand}">
-            
+
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Id}" CanUserReorder="False" Header="Id" IsReadOnly="True" Width="150" />
                 <DataGridTextColumn Binding="{Binding Version}" CanUserReorder="False" CanUserSort="False" Header="Version" IsReadOnly="True" Width="80" />
@@ -103,9 +111,9 @@
                 <DataGridTextColumn Binding="{Binding DownloadCount}" CanUserReorder="False" Header="Downloads" IsReadOnly="True" Width="80" />
             </DataGrid.Columns>
         </DataGrid>
-        
+
         <TextBlock Grid.Row="2" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
-        
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1">
             <Button IsDefault="True" IsEnabled="{Binding SelectedItem, ElementName=PackageGrid, Converter={StaticResource NullToBoolConverter}}" Content="_OK" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OkButton_Click" />
             <Button x:Name="CancelButton" IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
