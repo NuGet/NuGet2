@@ -25,7 +25,7 @@ namespace PackageExplorerViewModel {
 
         private void SaveFile(PackageFile file) {
             string selectedFileName;
-            if (_packageViewModel.OpenSaveFileDialog(file.Name, out selectedFileName))
+            if (_packageViewModel.OpenSaveFileDialog(file.Name, false, out selectedFileName))
             {
                 using (FileStream fileStream = File.OpenWrite(selectedFileName))
                 {

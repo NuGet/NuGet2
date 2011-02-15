@@ -278,7 +278,7 @@ namespace PackageExplorerViewModel {
         }
 
         public override string ToString() {
-            return Id + " " + Version.ToString();
+            return Id + "-" + Version.ToString();
         }
 
         public string Error {

@@ -178,11 +178,17 @@ namespace PackageExplorerViewModel {
             CurrentFileContent = content;
         }
 
-        bool IPackageViewModel.OpenSaveFileDialog(string defaultName, out string selectedFileName) {
+        bool IPackageViewModel.OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName) {
+
+            var filter = "All files (*.*)|*.*";
+            if (addPackageExtension)
+            {
+                filter = "NuGet package file (*.nupkg)|*.nupkg|" + filter;
+            }
             var dialog = new SaveFileDialog() {
                 OverwritePrompt = true,
                 Title = "Save " + defaultName,
-                Filter = "All files (*.*)|*.*",
+                Filter = filter,
                 FileName = defaultName
             };
 

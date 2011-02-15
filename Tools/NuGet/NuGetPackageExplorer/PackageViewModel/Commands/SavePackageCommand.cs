@@ -26,7 +26,19 @@ namespace PackageExplorerViewModel {
         }
 
         public bool CanExecute(object parameter) {
-            return !ViewModel.IsInEditMode;
+            string action = parameter as string;
+            if (action == SaveAction)
+            {
+                return !ViewModel.IsInEditMode && Path.IsPathRooted(ViewModel.PackageSource);
+            }
+            else if (action == SaveAsAction)
+            {
+                return !ViewModel.IsInEditMode;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public event EventHandler CanExecuteChanged;
@@ -35,15 +47,24 @@ namespace PackageExplorerViewModel {
             string action = parameter as string;
             if (action == SaveAction) {
                 SavePackage(ViewModel.PackageSource);
+                RaiseCanExecuteChangedEvent();
             }
             else if (action == SaveAsAction) {
-                string packageName = Path.GetFileName(ViewModel.PackageSource);
-
+                string packageName = ViewModel.PackageMetadata.ToString() + Constants.PackageExtension;
                 string selectedPackageName;
-                if (ViewModel.OpenSaveFileDialog(packageName, out selectedPackageName)) {
+                if (ViewModel.OpenSaveFileDialog(packageName, true, out selectedPackageName)) {
                     SavePackage(selectedPackageName);
                     ViewModel.PackageSource = selectedPackageName;
                 }
+                RaiseCanExecuteChangedEvent();
+            }
+        }
+
+        private void RaiseCanExecuteChangedEvent()
+        {
+            if (CanExecuteChanged != null)
+            {
+                CanExecuteChanged(this, EventArgs.Empty);
             }
         }
 

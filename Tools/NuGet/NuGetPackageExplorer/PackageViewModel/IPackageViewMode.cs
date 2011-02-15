@@ -10,7 +10,7 @@ namespace PackageExplorerViewModel {
 
         void ShowFile(string name, string content);
 
-        bool OpenSaveFileDialog(string defaultName, out string selectedFileName);
+        bool OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName);
 
         IEnumerable<IPackageFile> GetFiles();
 
