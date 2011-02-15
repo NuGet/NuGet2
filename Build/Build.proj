@@ -16,7 +16,7 @@
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <ServerBuildDirectory>$(NuGetSrcRoot)\Server</ServerBuildDirectory>
         <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
-        <ZipExe>$(NuGetRoot)\Tools\7zip4.65\7z.exe</ZipExe>
+        <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
         <ILMergeFileFinalName>NuGet.exe</ILMergeFileFinalName>
