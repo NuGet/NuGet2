@@ -34,8 +34,13 @@ namespace NuGet {
             // Validate before saving
             Validate(this);
 
-            var serializer = new XmlSerializer(typeof(Manifest));
-            serializer.Serialize(stream, this);
+            // Define the namespaces to use when serializing
+            var ns = new XmlSerializerNamespaces();
+            ns.Add("", Constants.ManifestSchemaNamespace);
+
+            // Need to force the namespace here again as the default in order to get the XML output clean
+            var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
+            serializer.Serialize(stream, this, ns);
         }
 
         public static Manifest ReadFrom(Stream stream) {

@@ -27,8 +27,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>
@@ -96,8 +96,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>
@@ -141,8 +141,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(@"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>
@@ -434,8 +434,8 @@ Description is required.");
         public void ReadingManifestWithSerializationNamespaceBuilderFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-    <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+    <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <title>Some awesome package</title>
@@ -634,8 +634,8 @@ Enabling license acceptance requires a license url.");
         public void SchemaVersionAttributeWithNamespaceThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <metadata schemaVersion=""1.0"" xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata schemaVersion=""1.0"">
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>

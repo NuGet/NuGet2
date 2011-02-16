@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
-    [XmlType("metadata", Namespace = Constants.ManifestSchemaNamespace)]
+    [XmlType("metadata")]
     public class ManifestMetadata : IPackageMetadata, IValidatableObject {
         private string _owners;
 
