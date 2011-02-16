@@ -12,7 +12,11 @@ namespace NuGet.VisualStudio {
         private readonly DTE _dte;
         private readonly IComponentModel _componentModel;
 
-        [ImportingConstructor]
+        public VsFileSystemProvider()
+            : this(ServiceLocator.GetInstance<DTE>(), 
+                   ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>()) {
+        }
+
         public VsFileSystemProvider(DTE dte, IComponentModel componentModel) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");

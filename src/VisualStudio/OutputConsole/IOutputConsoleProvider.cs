@@ -1,6 +1,6 @@
 ﻿using NuGetConsole;
 
-namespace NuGet.OutputWindowConsole {
+namespace NuGet.VisualStudio {
     public interface IOutputConsoleProvider {
         IConsole CreateOutputConsole(bool requirePowerShellHost);
     }

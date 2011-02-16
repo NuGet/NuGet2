@@ -25,5 +25,7 @@
         <MefComponent>|PowerShellHostProvider|</MefComponent>
         <MefComponent>|Console|</MefComponent>
         <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
+        <MefComponent>|VisualStudio|</MefComponent>
+        <MefComponent>|Dialog|</MefComponent>
     </Content>
 </Vsix>

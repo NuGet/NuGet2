@@ -19,7 +19,10 @@ namespace NuGet.VisualStudio {
         private EventHandler _solutionClosing;
 
 
-        [ImportingConstructor]
+        public SolutionManager()
+            : this(ServiceLocator.GetInstance<DTE>()) {
+        }
+
         private SolutionManager(DTE dte) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");

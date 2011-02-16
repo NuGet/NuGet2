@@ -7,8 +7,7 @@ using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
-using NuGetConsole;
-using NuGet.OutputWindowConsole;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Test {
 

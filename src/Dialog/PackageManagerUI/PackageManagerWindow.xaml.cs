@@ -13,20 +13,23 @@ using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI {
-
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    [Export]
     public partial class PackageManagerWindow : DialogWindow {
-
         private const string F1Keyword = "vs.ExtensionManager";
 
         private readonly IServiceProvider _serviceProvider;
-
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
 
-        [ImportingConstructor]
-        public PackageManagerWindow([Import("PackageServiceProvider")]
-                                    IServiceProvider serviceProvider,
+        public PackageManagerWindow(IServiceProvider serviceProvider) :
+            this(serviceProvider,
+                ServiceLocator.GetInstance<DTE>(),
+                ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                ServiceLocator.GetInstance<IPackageSourceProvider>(),
+                ServiceLocator.GetInstance<ProviderServices>(),
+                ServiceLocator.GetInstance<IRecentPackageRepository>()) {
+        }
+
+        public PackageManagerWindow(IServiceProvider serviceProvider,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -53,9 +56,9 @@ namespace NuGet.Dialog.PackageManagerUI {
                 _smartOutputConsoleProvider);
 
             SetupProviders(
-                dte, 
-                packageManagerFactory, 
-                repositoryFactory, 
+                dte,
+                packageManagerFactory,
+                repositoryFactory,
                 packageSourceProvider,
                 providerServices,
                 recentPackagesRepository);
@@ -101,12 +104,12 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices);
 
             var installedProvider = new InstalledProvider(
-                packageManager, 
+                packageManager,
                 activeProject,
-                projectManager, 
+                projectManager,
                 Resources,
                 providerServices);
-            
+
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);
             explorer.Providers.Add(installedProvider);

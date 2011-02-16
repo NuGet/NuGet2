@@ -8,8 +8,12 @@ namespace NuGet.VisualStudio {
         private const string PackageSourcesSettingProperty = "PackageSources";
         private const string ActivePackageSourceSettingProperty = "ActivePackageSource";
 
-        [ImportingConstructor]
-        public VsPackageSourceSettingsManager(IServiceProvider serviceProvider) : base(serviceProvider) {
+        public VsPackageSourceSettingsManager()
+            : this(ServiceLocator.GetInstance<IServiceProvider>()) {
+        }
+
+        public VsPackageSourceSettingsManager(IServiceProvider serviceProvider)
+            : base(serviceProvider) {
         }
 
         /// <summary>

@@ -128,6 +128,8 @@
     <ProjectReference Include="..\Dialog\Dialog.csproj">
       <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
       <Name>Dialog</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\TeamFoundationServer\TeamFoundationServer.csproj">
       <Project>{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}</Project>
@@ -138,6 +140,8 @@
     <ProjectReference Include="..\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
       <Name>VisualStudio</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

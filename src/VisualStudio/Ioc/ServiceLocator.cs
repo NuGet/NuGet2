@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -14,54 +9,40 @@ using Microsoft.VisualStudio.Shell.Interop;
 using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace NuGet.VisualStudio {
-    public static class ServiceLocator {
-        private static CompositionContainer _container;
-        private static IEnumerable<Func<Type, object>> _fallBackServiceLocators;
-
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static void Initialize(Package package, params Assembly[] assemblies) {
-            if (_container != null) {
-                return;
+    /// <summary>
+    /// This class unifies all the different ways of getting services within visual studio.
+    /// </summary>
+    // REVIEW: Make this internal 
+    public static class ServiceLocator {       
+        public static TService GetInstance<TService>() where TService : class {
+            // Special case IServiceProvider
+            if (typeof(TService) == typeof(IServiceProvider)) {
+                return (TService)GetServiceProvider();
             }
 
-            var assemblyCatalogs = assemblies.Select(a => new AssemblyCatalog(a));
-            var catalog = new AggregateCatalog(assemblyCatalogs);
-            _container = new CompositionContainer(catalog);
-
-            var serviceProvider = (IServiceProvider)package;
-            var dte = (DTE)serviceProvider.GetService(typeof(SDTE));
-            IServiceProvider dteServiceProvider = GetServiceProvider(dte);
-
-            // Add DTE
-            _container.ComposeExportedValue(dte);
-            // Add DTE's IServiceProvider
-            _container.ComposeExportedValue(dteServiceProvider);
-            // Add Package's IServiceProvider
-            _container.ComposeExportedValue("PackageServiceProvider", serviceProvider);
-
-            // MEF within VS
-            var componentModel = (IComponentModel)dteServiceProvider.GetService(typeof(SComponentModel));
-            _container.ComposeExportedValue(componentModel);
-            
-            // Setup fallback service locators when the default container fails
-            _fallBackServiceLocators = new Func<Type, object>[] { 
-                                       type => dteServiceProvider.GetService(type),
-                                       type => serviceProvider.GetService(type), 
-                                       type => QueryService(dte, type)
-                                     };
+            // First try to find the service as a global service, then try dte then try component model
+            return GetGlobalService<TService, TService>() ??
+                   GetDTEService<TService>() ??
+                   GetComponentModelService<TService>();
         }
 
-        public static T GetInstance<T>() where T : class {
-            return _container.GetExportedValueOrDefault<T>() ??
-                   (T)_fallBackServiceLocators.Select(locator => locator(typeof(T)))
-                                      .FirstOrDefault();
-
+        internal static TInterface GetGlobalService<TService, TInterface>() {
+            return (TInterface)Package.GetGlobalService(typeof(TService));
         }
 
-        public static T GetInstance<T>(string contractName) where T : class {
-            return _container.GetExportedValueOrDefault<T>(contractName) ??
-                   (T)_fallBackServiceLocators.Select(locator => locator(typeof(T)))
-                                      .FirstOrDefault();
+        private static TService GetDTEService<TService>() where TService : class {
+            var dte = GetGlobalService<SDTE, DTE>();
+            return (TService)QueryService(dte, typeof(TService));
+        }
+
+        private static TService GetComponentModelService<TService>() where TService : class {
+            IComponentModel componentModel = GetGlobalService<SComponentModel, IComponentModel>();
+            return componentModel.GetService<TService>();
+        }
+
+        private static IServiceProvider GetServiceProvider() {
+            var dte = GetGlobalService<SDTE, DTE>();
+            return GetServiceProvider(dte);
         }
 
         private static object QueryService(_DTE dte, Type serviceType) {
@@ -73,7 +54,8 @@ namespace NuGet.VisualStudio {
             int hr = serviceProvider.QueryService(ref guidService, ref riid, out servicePtr);
 
             if (hr != VsConstants.S_OK) {
-                Marshal.ThrowExceptionForHR(hr);
+                // We didn't find the service so return null
+                return null;
             }
 
             object service = null;
@@ -93,6 +75,5 @@ namespace NuGet.VisualStudio {
             Debug.Assert(serviceProvider != null, "Service provider is null");
             return serviceProvider;
         }
-
     }
 }

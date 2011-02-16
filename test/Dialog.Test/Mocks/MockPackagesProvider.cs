@@ -6,7 +6,6 @@ using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
 using NuGetConsole;
-using NuGet.OutputWindowConsole;
 
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {

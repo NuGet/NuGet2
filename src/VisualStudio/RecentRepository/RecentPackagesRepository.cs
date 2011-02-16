@@ -22,6 +22,11 @@ namespace NuGet.VisualStudio {
         private bool _hasLoadedSettingsStore;
 
         [ImportingConstructor]
+        public RecentPackagesRepository(IPackageRepositoryFactory repositoryFactory,
+                                        IPersistencePackageSettingsManager settingsManager)
+            : this(ServiceLocator.GetInstance<DTE>(), repositoryFactory, settingsManager) {
+        }
+
         public RecentPackagesRepository(
             DTE dte,
             IPackageRepositoryFactory repositoryFactory,

@@ -2,16 +2,14 @@
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
-using NuGet.OutputWindowConsole;
+using EnvDTE;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 using NuGetConsole.Host.PowerShell;
 
-namespace NuGet.Dialog.PackageManagerUI {
-
+namespace NuGet.VisualStudio {
     [Export(typeof(IScriptExecutor))]
     public class PSScriptExecutor : IScriptExecutor {
-
         private readonly Lazy<IPowerShellHost> _psHost;
 
         public PSScriptExecutor() {
@@ -30,7 +28,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             set;
         }
 
-        public bool Execute(string installPath, string scriptFileName, IPackage package, EnvDTE.Project project, ILogger logger) {
+        public bool Execute(string installPath, string scriptFileName, IPackage package, Project project, ILogger logger) {
             string toolsPath = Path.Combine(installPath, "tools");
             string fullPath = Path.Combine(toolsPath, scriptFileName);
             if (File.Exists(fullPath)) {

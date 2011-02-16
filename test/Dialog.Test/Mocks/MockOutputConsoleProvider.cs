@@ -1,5 +1,5 @@
 ﻿using Moq;
-using NuGet.OutputWindowConsole;
+using NuGet.VisualStudio;
 using NuGetConsole;
 
 namespace NuGet.Dialog.Test {

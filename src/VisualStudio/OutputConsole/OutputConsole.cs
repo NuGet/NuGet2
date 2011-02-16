@@ -3,7 +3,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGetConsole;
 
-namespace NuGet.OutputWindowConsole {
+namespace NuGet.VisualStudio {
 
     /// <summary>
     /// This class implements the IConsole interface in order to integrate with the PowerShellHost.

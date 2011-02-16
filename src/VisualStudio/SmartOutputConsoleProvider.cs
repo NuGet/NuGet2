@@ -1,10 +1,8 @@
 ﻿using System.Text;
-using NuGet.OutputWindowConsole;
 using NuGetConsole;
 
-namespace NuGet.Dialog.PackageManagerUI {
-    internal class SmartOutputConsoleProvider : IOutputConsoleProvider {
-
+namespace NuGet.VisualStudio {
+    public class SmartOutputConsoleProvider : IOutputConsoleProvider {
         private readonly IOutputConsoleProvider _baseProvider;
         private BufferedOutputConsole _bufferedConsole;
 

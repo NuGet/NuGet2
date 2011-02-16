@@ -15,8 +15,12 @@ namespace NuGet.VisualStudio {
         private const string SettingsRootTemplate = MruSettingsRoot + "\\Package";
         private static readonly string[] SettingsProperties = new string[] { "Id", "Version", "Source" };
 
-        [ImportingConstructor]
-        public VsPersistencePackageSettingsManager(IServiceProvider serviceProvider) : base(serviceProvider) {
+        public VsPersistencePackageSettingsManager()
+            : this(ServiceLocator.GetInstance<IServiceProvider>()) {
+        }
+
+        public VsPersistencePackageSettingsManager(IServiceProvider serviceProvider)
+            : base(serviceProvider) {
         }
 
         public IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {

@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel.Composition;
 using NuGet.Dialog.PackageManagerUI;
-using NuGet.OutputWindowConsole;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
-
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export]
     public sealed class ProviderServices {
-
         public ILicenseWindowOpener LicenseWindow { get; private set; }
         public IProgressWindowOpener ProgressWindow { get; private set; }
         public IScriptExecutor ScriptExecutor { get; private set; }

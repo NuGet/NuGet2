@@ -7,6 +7,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
+using NuGet.VisualStudio;
 using NuGetConsole;
 
 namespace NuGet.Dialog.Providers {

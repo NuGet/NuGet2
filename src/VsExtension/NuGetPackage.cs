@@ -57,7 +57,7 @@ namespace NuGet.Tools {
         /// </summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
             if (HasActiveLoadedSupportedProject) {
-                var window = ServiceLocator.GetInstance<PackageManagerWindow>();
+                var window = new PackageManagerWindow(this);
                 try {
                     window.ShowModal();
                 }
@@ -94,11 +94,7 @@ namespace NuGet.Tools {
         /// where you can put all the initilaization code that rely on services provided by VisualStudio.
         /// </summary>
         protected override void Initialize() {
-            base.Initialize();            
-
-            // Initialize the service locator with the assemblies we need to get exports from
-            ServiceLocator.Initialize(this, typeof(PackageManagerWindow).Assembly, 
-                                            typeof(ServiceLocator).Assembly);
+            base.Initialize();
 
             _dte = ServiceLocator.GetInstance<DTE>();
 
