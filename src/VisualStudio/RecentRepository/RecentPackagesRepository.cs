@@ -108,13 +108,16 @@ namespace NuGet.VisualStudio {
         }
 
         private void LoadPackagesFromSettingsStore() {
-            var packagesMetadata = LoadPackageMetadataFromSettingsStore();
 
-            // for packages not in the cache, group them by sources, and get all packages with the matching Ids from each source
-            var newPackages = packagesMetadata.
-                                Where(m => !_packagesCache.ContainsKey(m)).
-                                GroupBy(p => p.Source).
-                                SelectMany(g => FindPackagesFromSource(g.Key, g).Select(p => new RecentPackage(p, g.Key)));
+            // find recent packages from the Aggregate repository
+            PackageSource source = VsPackageSourceProvider.AggregateSource;
+            var aggregateRepository = _repositoryFactory.CreateRepository(source);
+
+            // for packages not in the cache, find them from the Aggregate repository based on Id only
+            var packagesMetadata = LoadPackageMetadataFromSettingsStore();
+            var newPackages = aggregateRepository.
+                                FindPackages(packagesMetadata.Select(p => p.Id)).
+                                Select(p => new RecentPackage(p, ""));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             var filterPackages = FilterPackages(packagesMetadata, newPackages);
@@ -122,29 +125,6 @@ namespace NuGet.VisualStudio {
             foreach (var p in filterPackages) {
                 AddPackage(p.Item1, p.Item2, addToFront: false);
             }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private IEnumerable<IPackage> FindPackagesFromSource(string source, IEnumerable<IPersistencePackageMetadata> metadata) {
-            var packageSource = new PackageSource(source);
-
-            // HACK: be careful with the aggreate source. in which case, the source is a pseudo-source, e.g. '(Aggregate Source)'
-            if (source.Equals(VsPackageSourceProvider.AggregateSource.Source, StringComparison.OrdinalIgnoreCase)) {
-                packageSource.IsAggregate = true;
-            }
-
-            IPackageRepository repository = null;
-            try {
-                repository = _repositoryFactory.CreateRepository(packageSource);
-            }
-            catch (Exception) {
-                // we don't care if the source value is invalid or corrupted, which 
-                // will cause CreateRepository to throw.
-            }
-
-            return repository == null ?
-                Enumerable.Empty<IPackage>() :
-                repository.FindPackages(metadata.Select(m => m.Id).Distinct());
         }
 
         /// <summary>

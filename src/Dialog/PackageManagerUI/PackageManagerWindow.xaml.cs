@@ -76,6 +76,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 activeProject,
                 projectManager,
                 Resources,
+                packageRepositoryFactory,
                 packageManagerFactory,
                 recentPackagesRepository,
                 providerServices);

@@ -82,7 +82,7 @@ namespace NuGet.Dialog.Providers {
             return new SimpleTreeNode(this, source.Name, RootNode, repository);
         }
 
-        protected internal IVsPackageManager GetActivePackageManager() {
+        protected internal virtual IVsPackageManager GetActivePackageManager() {
             if (SelectedNode == null) {
                 return null;
             }

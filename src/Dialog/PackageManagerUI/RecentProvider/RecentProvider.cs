@@ -11,17 +11,23 @@ namespace NuGet.Dialog.Providers {
     internal class RecentProvider : OnlineProvider {
 
         private readonly IPackageRepository _recentPackagesRepository;
+        private readonly IVsPackageManagerFactory _packageManagerFactory;
+        private readonly IPackageRepositoryFactory _packageRepositoryFactory;
+        private IVsPackageManager _recentPackageManager;
 
         public RecentProvider(
             Project project,
             IProjectManager projectManager,
             ResourceDictionary resources,
+            IPackageRepositoryFactory packageRepositoryFactory,
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepository recentPackagesRepository,
             ProviderServices providerServices)
-            : base(project, projectManager, resources, null, null, packageManagerFactory, providerServices) {
+            : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices) {
 
             _recentPackagesRepository = recentPackagesRepository;
+            _packageManagerFactory = packageManagerFactory;
+            _packageRepositoryFactory = packageRepositoryFactory;
         }
 
         public override string Name {
@@ -40,6 +46,17 @@ namespace NuGet.Dialog.Providers {
             get {
                 return true;
             }
+        }
+
+        protected internal override IVsPackageManager GetActivePackageManager() {
+            if (_recentPackageManager == null) {
+                var packageSource = new PackageSource("All") { IsAggregate = true };
+                var repository = _packageRepositoryFactory.CreateRepository(packageSource);
+
+                _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository);
+            }
+
+            return _recentPackageManager;
         }
 
         protected override IList<IVsSortDescriptor> CreateSortDescriptors() {
