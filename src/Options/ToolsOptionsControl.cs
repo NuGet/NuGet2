@@ -246,14 +246,13 @@ namespace NuGet.Options {
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
             // Draw the background of the ListBox control for each item.
             if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
-                using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F))
-                {
+                using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F)) {
                     e.Graphics.FillRectangle(gradientBrush, e.Bounds);
                 }
                 using (var borderPen = new Pen(SelectionFocusBorderColor)) {
                     e.Graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
                 }
-            
+
             }
             else {
                 // alternate background color for even/odd rows
@@ -273,8 +272,7 @@ namespace NuGet.Options {
 
             using (StringFormat drawFormat = new StringFormat())
             using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
-            using (Font italicFont = new Font(e.Font, FontStyle.Italic))
-            {
+            using (Font italicFont = new Font(e.Font, FontStyle.Italic)) {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
@@ -300,8 +298,10 @@ namespace NuGet.Options {
         }
 
         private void OnBrowseButtonClicked(object sender, EventArgs e) {
-
             const int MaxDirectoryLength = 1000;
+
+            //const int BIF_RETURNONLYFSDIRS = 0x00000001;   // For finding a folder to start document searching.
+            const int BIF_BROWSEINCLUDEURLS = 0x00000080;   // Allow URLs to be displayed or entered.
 
             var uiShell = (IVsUIShell2)_serviceProvider.GetService(typeof(SVsUIShell));
 
@@ -315,11 +315,12 @@ namespace NuGet.Options {
             VSBROWSEINFOW[] pBrowse = new VSBROWSEINFOW[1];
             pBrowse[0] = new VSBROWSEINFOW() {
                 lStructSize = (uint)Marshal.SizeOf(pBrowse[0]),
-                dwFlags = 0x00000080,
+                dwFlags = (uint)(BIF_BROWSEINCLUDEURLS),
                 pwzDlgTitle = Resources.BrowseFolderDialogDescription,
                 nMaxDirName = (uint)MaxDirectoryLength,
                 hwndOwner = this.Handle,
-                pwzDirName = bufferPtr
+                pwzDirName = bufferPtr,
+                pwzInitialDir = DetermineInitialDirectory()
             };
 
             var browseInfo = new VSNSEBROWSEINFOW[1] { new VSNSEBROWSEINFOW() };
@@ -335,6 +336,25 @@ namespace NuGet.Options {
                     NewPackageName.Text = Path.GetFileName(path);
                 }
             }
+        }
+
+        private string DetermineInitialDirectory() {
+            // determine the inital directory to show in the folder dialog
+            string initialDir = NewPackageSource.Text;
+            if (Path.IsPathRooted(initialDir) && Directory.Exists(initialDir)) {
+                return initialDir;
+            }
+
+            var selectedItem = (PackageSource)PackageSourcesListBox.SelectedItem;
+            if (selectedItem != null) {
+                initialDir = selectedItem.Source;
+                if (Path.IsPathRooted(initialDir)) {
+                    return initialDir;
+                }
+            }
+
+            // fallback to MyDocuments folder
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
     }
 

@@ -86,6 +86,7 @@ namespace NuGet.Options {
             // NewPackageName
             // 
             resources.ApplyResources(this.NewPackageName, "NewPackageName");
+            this.tableLayoutPanel1.SetColumnSpan(this.NewPackageName, 2);
             this.NewPackageName.Name = "NewPackageName";
             // 
             // NewPackageNameLabel
@@ -114,7 +115,7 @@ namespace NuGet.Options {
             // 
             resources.ApplyResources(this.PackageSourcesListBox, "PackageSourcesListBox");
             this.PackageSourcesListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tableLayoutPanel1.SetColumnSpan(this.PackageSourcesListBox, 2);
+            this.tableLayoutPanel1.SetColumnSpan(this.PackageSourcesListBox, 3);
             this.PackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
             this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.PackageSourcesListBox.FormattingEnabled = true;
@@ -127,13 +128,13 @@ namespace NuGet.Options {
             // 
             resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
             this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.button1, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.addButton, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.button1, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // tableLayoutPanel2
