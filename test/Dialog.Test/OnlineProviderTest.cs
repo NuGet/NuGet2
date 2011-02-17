@@ -14,7 +14,6 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Test {
     [TestClass]
     public class OnlineProviderTest {
-
         [TestMethod]
         public void NamePropertyIsCorrect() {
             // Arrange
@@ -170,7 +169,7 @@ namespace NuGet.Dialog.Test {
 
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
-            var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world"}, tools: new string[] { "install.ps1", "uninstall.ps1" } );
+            var packageB = PackageUtility.CreatePackage("B", "2.0", content: new string[] { "hello world" }, tools: new string[] { "install.ps1", "uninstall.ps1" });
             var packageC = PackageUtility.CreatePackage("C", "3.0");
 
             var solutionRepository = new MockPackageRepository();
@@ -215,7 +214,7 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 try {
                     // Assert
-                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "install.ps1", packageB, project.Object, It.IsAny<ILogger>()), Times.Once());
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Install, packageB, project.Object, It.IsAny<ILogger>()), Times.Once());
                 }
                 finally {
                     manualEvent.Set();
@@ -281,7 +280,7 @@ namespace NuGet.Dialog.Test {
                     // Assert
 
                     // init.ps1 shouldn't be executed
-                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "init.ps1", packageB, project.Object, It.IsAny<ILogger>()), Times.Never());
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Init, packageB, project.Object, It.IsAny<ILogger>()), Times.Never());
 
                     // InstallPackage() should not get called
                     packageManager.Verify(p => p.InstallPackage(

@@ -66,13 +66,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\ScriptExecutorExtensions.cs" />
     <Compile Include="IRepositorySettings.cs" />
     <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="IScriptExecutor.cs" />
-    <Compile Include="MSBuildProjectExtensions.cs" />
+    <Compile Include="Extensions\MSBuildProjectExtensions.cs" />
+    <Compile Include="IVsPackageInstaller.cs" />
     <Compile Include="OutputConsole\IOutputConsoleProvider.cs" />
     <Compile Include="OutputConsole\OutputConsole.cs" />
     <Compile Include="OutputConsole\OutputConsoleProvider.cs" />
+    <Compile Include="Extensions\PackageExtensions.cs" />
+    <Compile Include="PowerShellScripts.cs" />
     <Compile Include="ProjectSystems\FSharpProjectSystem.cs" />
     <Compile Include="PSScriptExecutor.cs" />
     <Compile Include="RecentRepository\IPersistencePackageSettingsManager.cs" />
@@ -85,8 +89,9 @@
     <Compile Include="SettingsManagerBase.cs" />
     <Compile Include="SmartOutputConsoleProvider.cs" />
     <Compile Include="VsFileSystemProvider.cs" />
+    <Compile Include="VsPackageInstaller.cs" />
     <Compile Include="VsPackageManagerFactory.cs" />
-    <Compile Include="DTEExtensions.cs" />
+    <Compile Include="Extensions\DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Ioc\ServiceLocator.cs" />
     <Compile Include="ISolutionManager.cs" />

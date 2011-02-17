@@ -11,23 +11,12 @@ namespace NuGet.VisualStudio {
         private readonly IDictionary<string, IProjectManager> _projects;
         private readonly IPackageRepository _recentPackagesRepository;
 
-        public VsPackageManager(ISolutionManager solutionManager,
-                                IPackageRepository sourceRepository,
-                                IFileSystem fileSystem,
-                                ISharedPackageRepository sharedRepository,
-                                IPackageRepository recentPackagesRepository) :
+        public VsPackageManager(ISolutionManager solutionManager, IPackageRepository sourceRepository, IFileSystem fileSystem, ISharedPackageRepository sharedRepository, IPackageRepository recentPackagesRepository) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
             _sharedRepository = sharedRepository;
             _projects = solutionManager.GetProjects().ToDictionary(p => p.UniqueName, CreateProjectManager);
             _recentPackagesRepository = recentPackagesRepository;
-        }
-
-        public VsPackageManager(ISolutionManager solutionManager,
-                                IPackageRepository sourceRepository,
-                                IFileSystem fileSystem,
-                                ISharedPackageRepository sharedRepository) :
-            this(solutionManager, sourceRepository, fileSystem, sharedRepository, null) {
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
@@ -248,7 +237,7 @@ namespace NuGet.VisualStudio {
         /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
         /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
         /// </summary>
-        private bool IsProjectLevel(IPackage package) {            
+        private bool IsProjectLevel(IPackage package) {
             return package.HasProjectContent() || _sharedRepository.IsReferenced(package.Id, package.Version);
         }
 

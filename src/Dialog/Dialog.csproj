@@ -111,7 +111,6 @@
     <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="Extensions\PackageExtensions.cs" />
     <Compile Include="Extensions\QueryExtensions.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />

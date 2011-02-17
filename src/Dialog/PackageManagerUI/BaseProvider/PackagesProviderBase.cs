@@ -30,7 +30,7 @@ namespace NuGet.Dialog.Providers {
 
         protected PackagesProviderBase(
             Project project,
-            IProjectManager projectManager, 
+            IProjectManager projectManager,
             ResourceDictionary resources,
             ProviderServices providerServices) {
 
@@ -219,10 +219,10 @@ namespace NuGet.Dialog.Providers {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Globalization", 
-            "CA1303:Do not pass literals as localized parameters", 
+            "Microsoft.Globalization",
+            "CA1303:Do not pass literals as localized parameters",
             MessageId = "NuGet.Dialog.Providers.PackagesProviderBase.WriteLineToOutputWindow(System.String)",
-            Justification = "No need to localize the --- strings"), 
+            Justification = "No need to localize the --- strings"),
         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public virtual void Execute(PackageItem item) {
             if (OperationCoordinator.IsBusy) {
@@ -315,7 +315,7 @@ namespace NuGet.Dialog.Providers {
         public virtual string NoItemsMessage {
             get {
                 return String.Empty;
-            } 
+            }
         }
 
         public virtual string ProgressWindowTitle {
@@ -363,21 +363,15 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {
-            if (e.Package.HasPowerShellScript(new string[] { "init.ps1" })) {
-                _scriptExecutor.Execute(e.InstallPath, "init.ps1", e.Package, null, this);
-            }
+            _scriptExecutor.ExecuteInitScript(e.InstallPath, e.Package, this);
         }
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
-            if (e.Package.HasPowerShellScript(new string[] { "install.ps1" })) {
-                _scriptExecutor.Execute(e.InstallPath, "install.ps1", e.Package, _project, this);
-            }
+            _scriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, _project, this);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
-            if (e.Package.HasPowerShellScript(new string[] { "uninstall.ps1" })) {
-                _scriptExecutor.Execute(e.InstallPath, "uninstall.ps1", e.Package, _project, this);
-            }
+            _scriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, _project, this);
         }
     }
 }

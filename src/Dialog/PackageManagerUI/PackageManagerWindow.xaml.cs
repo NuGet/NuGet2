@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.Composition;
 using System.ComponentModel.Design;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,20 +15,20 @@ namespace NuGet.Dialog.PackageManagerUI {
     public partial class PackageManagerWindow : DialogWindow {
         private const string F1Keyword = "vs.ExtensionManager";
 
-        private readonly IServiceProvider _serviceProvider;
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
+        private readonly MenuCommandService _menuCommandService;
 
-        public PackageManagerWindow(IServiceProvider serviceProvider) :
-            this(serviceProvider,
-                ServiceLocator.GetInstance<DTE>(),
-                ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
-                ServiceLocator.GetInstance<IPackageSourceProvider>(),
-                ServiceLocator.GetInstance<ProviderServices>(),
-                ServiceLocator.GetInstance<IRecentPackageRepository>()) {
+        public PackageManagerWindow(MenuCommandService menuService) :
+            this(menuService,
+                 ServiceLocator.GetInstance<DTE>(),
+                 ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                 ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                 ServiceLocator.GetInstance<IPackageSourceProvider>(),
+                 ServiceLocator.GetInstance<ProviderServices>(),
+                 ServiceLocator.GetInstance<IRecentPackageRepository>()) {
         }
 
-        public PackageManagerWindow(IServiceProvider serviceProvider,
+        public PackageManagerWindow(MenuCommandService menuCommandService,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -38,13 +37,12 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IRecentPackageRepository recentPackagesRepository)
             : base(F1Keyword) {
 
+            _menuCommandService = menuCommandService;
+
             InitializeComponent();
 
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
-
-            // this is the service provider from VsPackage, not from DTE
-            _serviceProvider = serviceProvider;
 
             // replace the ConsoleOutputProvider with SmartOutputConsoleProvider so that we can clear 
             // the console the first time an entry is written to it
@@ -189,8 +187,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             var command = new CommandID(
                 VSConstants.GUID_VSStandardCommandSet97,
                 VSConstants.cmdidToolsOptions);
-            var mcs = (MenuCommandService)_serviceProvider.GetService(typeof(IMenuCommandService));
-            mcs.GlobalInvoke(command, targetGUID);
+            _menuCommandService.GlobalInvoke(command, targetGUID);
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {

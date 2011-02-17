@@ -119,7 +119,7 @@ namespace NuGet.PowerShell.Commands {
 
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {
             AddToolsFolderToEnvironmentPath(e.InstallPath);
-            ExecuteScript(e.InstallPath, "init.ps1", e.Package, null);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, null);
         }
 
         protected virtual void AddToolsFolderToEnvironmentPath(string installPath) {
@@ -143,14 +143,14 @@ namespace NuGet.PowerShell.Commands {
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }
 
-            ExecuteScript(e.InstallPath, "install.ps1", e.Package, project);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
             EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
 
-            ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, project);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project);
         }
 
         protected virtual void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project) {

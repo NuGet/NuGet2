@@ -37,6 +37,7 @@
     <Compile Include="RecentPackageRepositoryTest.cs" />
     <Compile Include="RecentPackageTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
+    <Compile Include="VsInstallerTest.cs" />
     <Compile Include="VsPackageManagerTest.cs" />
     <Compile Include="VsPackageSourceProviderTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />

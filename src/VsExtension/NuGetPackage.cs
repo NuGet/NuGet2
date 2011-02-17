@@ -29,8 +29,8 @@ namespace NuGet.Tools {
     [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent Packages", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [FontAndColorsRegistration(
-        "Package Manager Console", 
-        NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString, 
+        "Package Manager Console",
+        NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
         "{" + GuidList.guidNuGetPkgString + "}")]
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
@@ -57,7 +57,8 @@ namespace NuGet.Tools {
         /// </summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
             if (HasActiveLoadedSupportedProject) {
-                var window = new PackageManagerWindow(this);
+                var menuCommandService = (MenuCommandService)GetService(typeof(IMenuCommandService));
+                var window = new PackageManagerWindow(menuCommandService);
                 try {
                     window.ShowModal();
                 }
