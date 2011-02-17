@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using NuGet;
 using PackageExplorerViewModel;
+using System.Collections.ObjectModel;
 
 namespace PackageExplorer {
     /// <summary>
@@ -15,9 +16,32 @@ namespace PackageExplorer {
     /// </summary>
     public partial class PackageMetadataEditor : UserControl {
 
+        private ObservableCollection<PackageDependency> _packageDependencies;
+
         public PackageMetadataEditor() {
             InitializeComponent();
             PopulateLanguagesForLanguageBox();
+        }
+
+        private void PackageMetadataEditor_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (this.Visibility == System.Windows.Visibility.Visible)
+            {
+                ClearDependencyTextBox();
+                PrepareBindingForDependencyList();
+            }
+        }
+
+        private void PrepareBindingForDependencyList()
+        {
+            var viewModel = (PackageViewModel)DataContext;
+            _packageDependencies = new ObservableCollection<PackageDependency>(viewModel.PackageMetadata.Dependencies);
+            DependencyList.ItemsSource = _packageDependencies;
+        }
+
+        private void ClearDependencyTextBox()
+        {
+            NewDependencyId.Text = NewDependencyVersion.Text = String.Empty;
         }
 
         private void PopulateLanguagesForLanguageBox() {
@@ -32,10 +56,7 @@ namespace PackageExplorer {
             var button = (Button)sender;
             var item = (PackageDependency)button.DataContext;
 
-            var collection = DependencyList.ItemsSource as IList<PackageDependency>;
-            if (collection != null) {
-                collection.Remove(item);
-            }
+            _packageDependencies.Remove(item);
         }
 
         private void AddDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
@@ -48,11 +69,11 @@ namespace PackageExplorer {
             IVersionSpec versionSpec;
             VersionUtility.TryParseVersionSpec(NewDependencyVersion.Text, out versionSpec);
 
-            var collection = DependencyList.ItemsSource as IList<PackageDependency>;
-            if (collection != null) {
-                collection.Add(new PackageDependency(NewDependencyId.Text, versionSpec));
-                NewDependencyId.Text = NewDependencyVersion.Text = String.Empty;
-            }
+            _packageDependencies.Add(new PackageDependency(NewDependencyId.Text, versionSpec));
+
+            // after dependency is added, clear the textbox
+            ClearDependencyTextBox();
+            
         }
 
         private bool Validate(TextBox input, Func<string, string> validator) {
@@ -110,11 +131,18 @@ namespace PackageExplorer {
         }
 
         private void OkButtonClicked(object sender, RoutedEventArgs e) {
-            
+            bool commited = PackageMetadataGroup.CommitEdit();
+            if (commited)
+            {
+                var viewModel = (PackageViewModel)DataContext;
+                _packageDependencies.CopyTo(viewModel.PackageMetadata.Dependencies);
+            }
         }
 
         private void CancelButtonClicked(object sender, RoutedEventArgs e) {
-
+            var viewModel = (PackageViewModel)DataContext;
+            _packageDependencies = new ObservableCollection<PackageDependency>(viewModel.PackageMetadata.Dependencies);
+            DependencyList.ItemsSource = _packageDependencies;
         }
     }
 }

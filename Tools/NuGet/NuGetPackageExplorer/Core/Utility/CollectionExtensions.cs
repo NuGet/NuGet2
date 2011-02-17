@@ -12,6 +12,12 @@ namespace NuGet {
             }
         }
 
+        public static void CopyTo<T>(this ICollection<T> sourceCollection, ICollection<T> targetCollection)
+        {
+            targetCollection.Clear();
+            targetCollection.AddRange(sourceCollection);
+        }
+
         public static int RemoveAll<T>(this ICollection<T> collection, Func<T, bool> match) {
             IList<T> toRemove = collection.Where(match).ToList();
             foreach (var item in toRemove) {

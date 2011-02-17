@@ -6,6 +6,7 @@
              xmlns:self="clr-namespace:PackageExplorer"
              xmlns:core="clr-namespace:NuGet;assembly=Core"
              xmlns:viewmodel="clr-namespace:PackageExplorerViewModel;assembly=PackageViewModel"
+             IsVisibleChanged="PackageMetadataEditor_IsVisibleChanged"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
@@ -138,7 +139,7 @@
                 <Label Grid.Row="6" Grid.Column="0" Target="ProjectUrlBox" Style="{StaticResource LabelStyle}" Content="_Project Url" />
                 <TextBox Grid.Row="6" Grid.Column="1" x:Name="ProjectUrlBox" Style="{StaticResource TextBoxStyle}" Text="{Binding PackageMetadata.ProjectUrl, Converter={StaticResource UriConverter}}" />
 
-                <!-- Require License Acceptan -->
+                <!-- Require License Acceptane -->
                 <CheckBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="{Binding PackageMetadata.RequireLicenseAcceptance}" Content="_Require License Acceptance" Style="{StaticResource CheckBoxStyle}" />
                 
                 <!-- LicenseUrl -->
@@ -184,7 +185,6 @@
                             Grid.Row="1" 
                             Grid.Column="1" 
                             Grid.ColumnSpan="3" 
-                            ItemsSource="{Binding PackageMetadata.Dependencies}" 
                             ItemTemplate="{StaticResource PackageDependencyTemplate}">
                         </ItemsControl>
 
@@ -205,8 +205,8 @@
 
         <!-- Button -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 8, 0, 0">
-            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="7,0,7,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="OkButtonClicked" />
-            <Button x:Name="CancelButton" Padding="7,0,7,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="CancelButtonClicked" />
+            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="10,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="OkButtonClicked" />
+            <Button x:Name="CancelButton" Padding="10,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="CancelButtonClicked" />
         </StackPanel>
     </Grid>
 </UserControl>
