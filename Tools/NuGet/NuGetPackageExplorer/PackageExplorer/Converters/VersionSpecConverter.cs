@@ -7,23 +7,11 @@ namespace PackageExplorer {
     public class VersionSpecConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             IVersionSpec versionSpec = (IVersionSpec)value;
-            return versionSpec == null ? String.Empty : versionSpec.ToString();
+            return versionSpec == null ? null : versionSpec.ToString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            string stringValue = (string)value;
-            if (String.IsNullOrEmpty(stringValue)) {
-                return null;
-            }
-            else {
-                IVersionSpec versionSpec;
-                if (VersionUtility.TryParseVersionSpec(stringValue, out versionSpec)) {
-                    return versionSpec;
-                }
-                else {
-                    return DependencyProperty.UnsetValue;
-                }
-            }
+            throw new NotImplementedException();
         }
     }
 }

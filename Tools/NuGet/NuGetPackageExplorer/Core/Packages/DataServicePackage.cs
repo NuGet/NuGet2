@@ -18,6 +18,7 @@ namespace NuGet {
         private readonly LazyWithRecreate<IPackage> _package;
 
         public DataServicePackage() {
+            VersionDownloadCount = -1;
             _package = new LazyWithRecreate<IPackage>(DownloadAndVerifyPackage, () => {
                 // If the hash changed then update the hash and redownload the package.
                 if (OldHash != PackageHash) {
@@ -89,7 +90,15 @@ namespace NuGet {
             set;
         }
 
+        private int _downloadCount;
         public int DownloadCount {
+            get { return VersionDownloadCount > -1 ? VersionDownloadCount : _downloadCount; }
+            set {
+                _downloadCount = value;
+            }
+        }
+
+        public int VersionDownloadCount {
             get;
             set;
         }

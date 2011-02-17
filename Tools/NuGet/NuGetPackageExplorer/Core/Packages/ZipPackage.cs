@@ -86,6 +86,12 @@ namespace NuGet {
             }
         }
 
+        public int VersionDownloadCount {
+            get {
+                return -1;
+            }
+        }
+
         public double Rating {
             get {
                 return -1;

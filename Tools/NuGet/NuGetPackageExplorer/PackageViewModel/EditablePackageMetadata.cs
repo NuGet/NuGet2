@@ -32,7 +32,7 @@ namespace PackageExplorerViewModel {
             this.Summary = source.Summary;
             this.Language = source.Language;
             this.Tags = source.Tags;
-            this.Dependencies = new ObservableCollection<EditablePackageDependency>(source.Dependencies.Select(ConvertToEditablePackageDependency));
+            this.Dependencies = new ObservableCollection<PackageDependency>(source.Dependencies);
             this.Dependencies.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Dependencies_CollectionChanged);
         }
 
@@ -249,7 +249,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public ObservableCollection<EditablePackageDependency> Dependencies { get; private set; }
+        public ObservableCollection<PackageDependency> Dependencies { get; private set; }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
@@ -273,12 +273,12 @@ namespace PackageExplorerViewModel {
 
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
-                return this.Dependencies.Select(ConvertToPackageDependency);
+                return this.Dependencies;
             }
         }
 
         public override string ToString() {
-            return Id + "-" + Version.ToString();
+            return Id + "." + Version.ToString();
         }
 
         public string Error {
@@ -314,13 +314,13 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private EditablePackageDependency ConvertToEditablePackageDependency(PackageDependency pd) {
-            return new EditablePackageDependency(pd.Id, pd.VersionSpec);
-        }
+        //private EditablePackageDependency ConvertToEditablePackageDependency(PackageDependency pd) {
+        //    return new EditablePackageDependency(pd.Id, pd.VersionSpec);
+        //}
 
-        private PackageDependency ConvertToPackageDependency(EditablePackageDependency pd) {
-            return new PackageDependency(pd.Id, pd.VersionSpec);
-        }
+        //private PackageDependency ConvertToPackageDependency(EditablePackageDependency pd) {
+        //    return new PackageDependency(pd.Id, pd.VersionSpec);
+        //}
 
         public void ResetErrors() {
             _propertyErrors.Clear();

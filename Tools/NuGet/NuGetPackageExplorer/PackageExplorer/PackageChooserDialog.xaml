@@ -108,7 +108,7 @@
                 <DataGridTextColumn Binding="{Binding Id}" CanUserReorder="False" Header="Id" IsReadOnly="True" Width="150" />
                 <DataGridTextColumn Binding="{Binding Version}" CanUserReorder="False" CanUserSort="False" Header="Version" IsReadOnly="True" Width="80" />
                 <DataGridTextColumn Binding="{Binding Authors}" CanUserReorder="False" Header="Authors" IsReadOnly="True" Width="*" />
-                <DataGridTextColumn Binding="{Binding DownloadCount}" CanUserReorder="False" Header="Downloads" IsReadOnly="True" Width="80" />
+                <DataGridTextColumn Binding="{Binding VersionDownloadCount}" CanUserReorder="False" Header="Downloads" IsReadOnly="True" Width="80" />
             </DataGrid.Columns>
         </DataGrid>
 

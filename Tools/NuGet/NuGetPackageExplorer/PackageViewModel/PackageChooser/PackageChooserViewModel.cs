@@ -164,20 +164,16 @@ namespace PackageExplorerViewModel {
                     query = _sortByDescending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
                     break;
 
-                //case "Version":
-                //    query = _sortByDescending ? query.OrderByDescending(p => p.Version) : query.OrderBy(p => p.Version);
-                //    break;
-
                 case "Authors":
                     query = _sortByDescending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
                     break;
 
-                case "DownloadCount":
-                    query = _sortByDescending ? query.OrderByDescending(p => p.DownloadCount) : query.OrderBy(p => p.DownloadCount);
+                case "VersionDownloadCount":
+                    query = _sortByDescending ? query.OrderByDescending(p => p.VersionDownloadCount) :  query.OrderBy(p => p.VersionDownloadCount);
                     break;
 
                 default:
-                    query = query.OrderBy(p => p.Id).ThenBy(p => p.Version);
+                    query = query.OrderByDescending(p => p.VersionDownloadCount);
                     break;
             }
 

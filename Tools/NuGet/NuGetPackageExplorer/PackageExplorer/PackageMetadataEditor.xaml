@@ -53,15 +53,15 @@
         </Style>
         
         <DataTemplate DataType="{x:Type core:PackageDependency}" x:Key="PackageDependencyTemplate">
-            <Grid>
+            <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBox Margin="0,4,5,0" Style="{StaticResource TextBoxStyle}" Grid.Column="0" Text="{Binding Id, BindingGroupName=PackageMetadataGroup, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}" />
-                <TextBox Style="{StaticResource TextBoxStyle}" Grid.Column="1" Text="{Binding VersionSpec, BindingGroupName=PackageMetadataGroup, Converter={StaticResource VersionSpecConverter}, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}" />
+                <TextBlock Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id, Mode=OneWay}" />
+                <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, TargetNullValue='(not set)', Mode=OneWay}" />
                 <Button Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveDependencyButtonClicked">
                     <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
                 </Button>
@@ -163,31 +163,50 @@
 
                 <!-- Dependencies -->
                 <GroupBox Grid.Row="14" Grid.ColumnSpan="2" Header="Dependen_cies" Margin="0,4,0,0">
-                    <StackPanel Orientation="Vertical">
-                        <Grid Margin="3,4,3,0" Grid.Row="15" Grid.ColumnSpan="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="3*" />
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                    <Grid Margin="3,4,3,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="Id" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="1" Text="Version" HorizontalAlignment="Center" />
-                            <Button Grid.Column="2" HorizontalAlignment="Center" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
-                                <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
-                            </Button>
-                        </Grid>
-                        <ItemsControl x:Name="DependencyList" Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,4,3,0" ItemsSource="{Binding PackageMetadata.Dependencies}" ItemTemplate="{StaticResource PackageDependencyTemplate}">
+                        <TextBlock Grid.Column="1" Text="Id" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="Version" FontWeight="SemiBold" HorizontalAlignment="Center" />
+
+                        <ItemsControl 
+                            x:Name="DependencyList" 
+                            Grid.Row="1" 
+                            Grid.Column="1" 
+                            Grid.ColumnSpan="3" 
+                            ItemsSource="{Binding PackageMetadata.Dependencies}" 
+                            ItemTemplate="{StaticResource PackageDependencyTemplate}">
                         </ItemsControl>
-                    </StackPanel>
+
+                        <Button Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" ToolTipService.ToolTip="Select dependency from NuGet feed" Click="SelectDependencyButtonClicked">
+                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
+                        </Button>
+
+                        <TextBox x:Name="NewDependencyId" Margin="2" Grid.Column="1" Grid.Row="2" />
+                        <TextBox x:Name="NewDependencyVersion" Margin="2" Grid.Column="2" Grid.Row="2" />
+                        
+                        <Button Margin="0,2,0,2" Grid.Column="3" Grid.Row="2" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
+                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
+                        </Button>
+                    </Grid>
                 </GroupBox>
             </Grid>
         </ScrollViewer>
 
         <!-- Button -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 8, 0, 0">
-            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="7,0,7,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
-            <Button  x:Name="CancelButton" Padding="7,0,7,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
+            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="7,0,7,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="OkButtonClicked" />
+            <Button x:Name="CancelButton" Padding="7,0,7,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="CancelButtonClicked" />
         </StackPanel>
     </Grid>
 </UserControl>
