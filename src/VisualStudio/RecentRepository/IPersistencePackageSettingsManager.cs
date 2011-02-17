@@ -10,12 +10,12 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Loads all package metadata from the settings store.
         /// </summary>
-        IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount);
+        IEnumerable<PersistencePackageMetadata> LoadPackageMetadata(int maximumCount);
 
         /// <summary>
         /// Saves the specified package metadata to the settings store.
         /// </summary>
-        void SavePackageMetadata(IEnumerable<IPersistencePackageMetadata> packageMetadata);
+        void SavePackageMetadata(IEnumerable<PersistencePackageMetadata> packageMetadata);
 
         /// <summary>
         /// Clear all package metadata from the settings store.

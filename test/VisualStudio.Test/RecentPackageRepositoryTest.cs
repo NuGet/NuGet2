@@ -62,7 +62,7 @@ namespace NuGet.VisualStudio.Test {
             // Arrange
             var repository = CreateRecentPackageRepository();
             var packageC = PackageUtility.CreatePackage("C", "2.0");
-            var recentPackageC = new RecentPackage(packageC, "foo.com");
+            var recentPackageC = packageC;
 
             repository.AddPackage(recentPackageC);
 
@@ -106,37 +106,24 @@ namespace NuGet.VisualStudio.Test {
             var mockSettingsManager = new MockSettingsManager();
 
             if (!empty) {
-                var A = new PersistencePackageMetadata("A", "1.0", "bing.com");
-                var B = new PersistencePackageMetadata("B", "2.0", "live.com");
+                var A = new PersistencePackageMetadata("A", "1.0");
+                var B = new PersistencePackageMetadata("B", "2.0");
 
-                mockSettingsManager.SavePackageMetadata(new IPersistencePackageMetadata[] { A, B });
+                mockSettingsManager.SavePackageMetadata(new PersistencePackageMetadata[] { A, B });
             }
 
             return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockSettingsManager);
         }
 
-        private class PersistencePackageMetadata : IPersistencePackageMetadata {
-
-            public PersistencePackageMetadata(string id, string version, string source) {
-                Id = id;
-                Version = new Version(version);
-                Source = source;
-            }
-
-            public string Id { get; private set; }
-            public Version Version { get; private set; }
-            public string Source { get; private set; }
-        }
-
         private class MockSettingsManager : IPersistencePackageSettingsManager {
 
-            List<IPersistencePackageMetadata> _items = new List<IPersistencePackageMetadata>();
+            List<PersistencePackageMetadata> _items = new List<PersistencePackageMetadata>();
 
-            public System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
+            public System.Collections.Generic.IEnumerable<PersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
                 return _items.Take(maximumCount);
             }
 
-            public void SavePackageMetadata(System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> packageMetadata) {
+            public void SavePackageMetadata(System.Collections.Generic.IEnumerable<PersistencePackageMetadata> packageMetadata) {
                 _items.Clear();
                 _items.AddRange(packageMetadata);
             }

@@ -329,7 +329,7 @@ namespace NuGet.VisualStudio {
         private void AddPackageToRecentRepository(IPackage package) {
             // add the installed package to the recent repository
             if (_recentPackagesRepository != null) {
-                _recentPackagesRepository.AddPackage(new RecentPackage(package, SourceRepository.Source));
+                _recentPackagesRepository.AddPackage(package);
             }
         }
     }

@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio {
         private const string MruSettingsRoot = "NuGet\\Mru";
         // template = NuGet\Mru\Package
         private const string SettingsRootTemplate = MruSettingsRoot + "\\Package";
-        private static readonly string[] SettingsProperties = new string[] { "Id", "Version", "Source" };
+        private static readonly string[] SettingsProperties = new string[] { "Id", "Version" };
 
         public VsPersistencePackageSettingsManager()
             : this(ServiceLocator.GetInstance<IServiceProvider>()) {
@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio {
             : base(serviceProvider) {
         }
 
-        public IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
+        public IEnumerable<PersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
             for (int i = 0; i < maximumCount; i++) {
                 string settingsRoot = SettingsRootTemplate + i.ToString(CultureInfo.InvariantCulture);
                 string[] values = ReadStrings(settingsRoot, SettingsProperties);
@@ -34,11 +34,11 @@ namespace NuGet.VisualStudio {
                 }
 
                 // avoid corrupted data
-                if (values.Length != 3 || values.Any(p => String.IsNullOrEmpty(p))) {
+                if (values.Length != 2 || values.Any(p => String.IsNullOrEmpty(p))) {
                     continue;
                 }
 
-                yield return new PersistencePackageMetadata(values[0], values[1], values[2]);
+                yield return new PersistencePackageMetadata(values[0], values[1]);
             }
         }
 
@@ -52,10 +52,10 @@ namespace NuGet.VisualStudio {
         ///   Mru
         ///     Package0  ------->   | Id: Moq
         ///     Package1             | Version: 1.0.0.0 
-        ///     Package2             | Source: http://....
+        ///     Package2             
         ///     Package3
         /// </remarks>
-        public void SavePackageMetadata(IEnumerable<IPersistencePackageMetadata> packageMetadata) {
+        public void SavePackageMetadata(IEnumerable<PersistencePackageMetadata> packageMetadata) {
             if (packageMetadata == null) {
                 throw new ArgumentNullException("packageMetadata");
             }
@@ -63,7 +63,7 @@ namespace NuGet.VisualStudio {
             int count = 0;
             foreach (var metadata in packageMetadata) {
                 string settingsRoot = SettingsRootTemplate + count.ToString(CultureInfo.InvariantCulture);
-                string[] values = new string[] { metadata.Id, metadata.Version.ToString(), metadata.Source };
+                string[] values = new string[] { metadata.Id, metadata.Version.ToString()};
                 WriteStrings(settingsRoot, SettingsProperties, values);
                 count++;
             }
@@ -72,19 +72,6 @@ namespace NuGet.VisualStudio {
         public void ClearPackageMetadata() {
             // delete everything under NuGet\Mru
             ClearAllSettings(MruSettingsRoot);
-        }
-
-        private class PersistencePackageMetadata : IPersistencePackageMetadata {
-
-            public PersistencePackageMetadata(string id, string version, string source) {
-                Id = id;
-                Version = new Version(version);
-                Source = source;
-            }
-
-            public string Id { get; private set; }
-            public Version Version { get; private set; }
-            public string Source { get; private set; }
         }
     }
 }

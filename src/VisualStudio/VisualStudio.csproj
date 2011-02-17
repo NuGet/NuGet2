@@ -80,9 +80,8 @@
     <Compile Include="ProjectSystems\FSharpProjectSystem.cs" />
     <Compile Include="PSScriptExecutor.cs" />
     <Compile Include="RecentRepository\IPersistencePackageSettingsManager.cs" />
-    <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\IRecentPackageRepository.cs" />
-    <Compile Include="RecentRepository\RecentPackage.cs" />
+    <Compile Include="RecentRepository\PersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackagesRepository.cs" />
     <Compile Include="RecentRepository\VsPersistencePackageSettingsManager.cs" />
     <Compile Include="RepositorySettings.cs" />
