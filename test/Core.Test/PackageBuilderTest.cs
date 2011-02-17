@@ -468,6 +468,44 @@ Description is required.");
         }
 
         [TestMethod]
+        public void ReadingManifestWithOldStyleXmlnsDeclaratoinsFromStreamCopiesMetadata()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0""?>
+<package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+    <metadata xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <title>Some awesome package</title>
+    <authors>Velio Ivanov</authors>
+    <owners>John Doe</owners>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+    <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+  </metadata>
+</package>";
+
+            // Act
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+            var authors = builder.Authors.ToList();
+            var owners = builder.Owners.ToList();
+
+            // Assert
+            Assert.AreEqual("Artem.XmlProviders", builder.Id);
+            Assert.AreEqual(new Version(2, 5), builder.Version);
+            Assert.AreEqual("Some awesome package", builder.Title);
+            Assert.AreEqual(1, builder.Authors.Count);
+            Assert.AreEqual("Velio Ivanov", authors[0]);
+            Assert.AreEqual(1, builder.Owners.Count);
+            Assert.AreEqual("John Doe", owners[0]);
+            Assert.AreEqual("en-US", builder.Language);
+            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
+            Assert.IsTrue(builder.RequireLicenseAcceptance);
+        }
+
+        [TestMethod]
         public void ReadingPackageManifestFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
