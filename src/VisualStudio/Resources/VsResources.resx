@@ -171,9 +171,6 @@
   <data name="Console_HelpText" xml:space="preserve">
     <value>Type 'get-help NuGet' to see all available NuGet commands.</value>
   </data>
-  <data name="PackageCanNotBePersisted" xml:space="preserve">
-    <value>The package which implements IPersistencePackageMetadata can be added.</value>
-  </data>
   <data name="UnableToFindPackageFromSource" xml:space="preserve">
     <value>Unable to find package '{0}' version '{1}' from the source '{2}'.</value>
   </data>

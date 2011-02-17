@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using EnvDTE;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
 
@@ -15,7 +14,7 @@ namespace NuGet.VisualStudio {
         private const int MaximumPackageCount = 20;
 
         private readonly List<IPackage> _packages;
-        private readonly Dictionary<IPersistencePackageMetadata, IPackage> _packagesCache;
+        private readonly Dictionary<PersistencePackageMetadata, IPackage> _packagesCache;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private readonly DTEEvents _dteEvents;
@@ -32,7 +31,7 @@ namespace NuGet.VisualStudio {
             _settingsManager = settingsManager;
 
             // Used to cache the created packages so that we don't have to make requests every time the MRU list is accessed
-            _packagesCache = new Dictionary<IPersistencePackageMetadata, IPackage>(PackageMetadataEqualityComparer.Instance);
+            _packagesCache = new Dictionary<PersistencePackageMetadata, IPackage>();
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
@@ -52,11 +51,7 @@ namespace NuGet.VisualStudio {
         }
 
         public void AddPackage(IPackage package) {
-            var packageMetadata = package as IPersistencePackageMetadata;
-            if (packageMetadata == null) {
-                throw new ArgumentException(VsResources.PackageCanNotBePersisted, "package");
-            }
-
+            var packageMetadata = new PersistencePackageMetadata(package);
             AddPackage(packageMetadata, package, addToFront: true);
         }
 
@@ -64,8 +59,8 @@ namespace NuGet.VisualStudio {
         /// Add the specified package to the list.
         /// </summary>
         /// <param name="addToFront">if set to true, it will add package to the front</param>
-        private void AddPackage(IPersistencePackageMetadata metadata, IPackage package, bool addToFront) {
-            var index = _packages.FindIndex(p => PackageMetadataEqualityComparer.Instance.Equals(metadata, (IPersistencePackageMetadata)p));
+        private void AddPackage(PersistencePackageMetadata metadata, IPackage package, bool addToFront) {
+            var index = _packages.FindIndex(p => metadata.Equals(p));
             if (index >= 0) {
                 if (addToFront) {
                     package = _packages[index];
@@ -96,10 +91,10 @@ namespace NuGet.VisualStudio {
             _settingsManager.ClearPackageMetadata();
         }
 
-        private IEnumerable<IPersistencePackageMetadata> LoadPackageMetadataFromSettingsStore() {
+        private IEnumerable<PersistencePackageMetadata> LoadPackageMetadataFromSettingsStore() {
             // don't bother to load the settings store if we have loaded before or we already have enough packages in-memory
             if (_packages.Count >= MaximumPackageCount || _hasLoadedSettingsStore) {
-                return Enumerable.Empty<IPersistencePackageMetadata>();
+                return Enumerable.Empty<PersistencePackageMetadata>();
             }
 
             _hasLoadedSettingsStore = true;
@@ -110,19 +105,21 @@ namespace NuGet.VisualStudio {
         private void LoadPackagesFromSettingsStore() {
 
             // find recent packages from the Aggregate repository
-            PackageSource source = VsPackageSourceProvider.AggregateSource;
-            var aggregateRepository = _repositoryFactory.CreateRepository(source);
+            var aggregateRepository = _repositoryFactory.CreateRepository(VsPackageSourceProvider.AggregateSource);
 
             // for packages not in the cache, find them from the Aggregate repository based on Id only
             var packagesMetadata = LoadPackageMetadataFromSettingsStore();
             var newPackages = aggregateRepository.
-                                FindPackages(packagesMetadata.Select(p => p.Id)).
-                                Select(p => new RecentPackage(p, ""));
+                                FindPackages(packagesMetadata.Where(m => !_packagesCache.ContainsKey(m)).Select(p => p.Id));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             var filterPackages = FilterPackages(packagesMetadata, newPackages);
 
-            foreach (var p in filterPackages) {
+            var cachedPackages = packagesMetadata.Where(m => _packagesCache.ContainsKey(m)).Select(m => Tuple.Create(m, _packagesCache[m]));
+
+            var allPackages = filterPackages.Concat(cachedPackages);
+
+            foreach (var p in allPackages) {
                 AddPackage(p.Item1, p.Item2, addToFront: false);
             }
         }
@@ -131,8 +128,8 @@ namespace NuGet.VisualStudio {
         /// Select packages from 'allPackages' which match the Ids and Versions from packagesMetadata.
         /// Returns the result as a list of Tuple of (metadata, package)
         /// </summary>
-        private static IEnumerable<Tuple<IPersistencePackageMetadata, IPackage>> FilterPackages(
-            IEnumerable<IPersistencePackageMetadata> packagesMetadata,
+        private static IEnumerable<Tuple<PersistencePackageMetadata, IPackage>> FilterPackages(
+            IEnumerable<PersistencePackageMetadata> packagesMetadata,
             IEnumerable<IPackage> allPackages) {
 
             var lookup = packagesMetadata.ToLookup(p => p.Id, StringComparer.OrdinalIgnoreCase);
@@ -154,7 +151,7 @@ namespace NuGet.VisualStudio {
                 _settingsManager.SavePackageMetadata(
                     _packages.
                         Take(MaximumPackageCount).
-                        Cast<IPersistencePackageMetadata>().
+                        Cast<PersistencePackageMetadata>().
                         Concat(loadedPacakgesMetadata));
             }
         }
@@ -169,22 +166,6 @@ namespace NuGet.VisualStudio {
             }
             catch (Exception) {
                 // we don't care if the saving fails.
-            }
-        }
-
-        /// <summary>
-        /// Comparer which compares two IPersistencePackageMetadata on Id and Version. Source is NOT considered.
-        /// </summary>
-        private class PackageMetadataEqualityComparer : IEqualityComparer<IPersistencePackageMetadata> {
-
-            public static readonly PackageMetadataEqualityComparer Instance = new PackageMetadataEqualityComparer();
-
-            public bool Equals(IPersistencePackageMetadata x, IPersistencePackageMetadata y) {
-                return x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase) && x.Version == y.Version;
-            }
-
-            public int GetHashCode(IPersistencePackageMetadata obj) {
-                return obj.Id.GetHashCode() * 3137 + obj.Version.GetHashCode();
             }
         }
     }

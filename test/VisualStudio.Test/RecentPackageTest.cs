@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio.Test {
                 rating: 1.0);
 
             // Act
-            var package = new RecentPackage(basePackage, "http://bing.com");
+            var package = basePackage;
             var contents = package.GetContentFiles().ToList();
             var content1 = ReadStream(contents[0].GetStream());
             var content2 = ReadStream(contents[1].GetStream());
@@ -33,7 +33,6 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(1.0, package.Rating);
             Assert.AreEqual("content\\one", content1);
             Assert.AreEqual("content\\two", content2);
-            Assert.AreEqual("http://bing.com", package.Source);
         }
 
         private string ReadStream(Stream stream) {
