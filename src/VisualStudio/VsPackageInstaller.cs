@@ -10,6 +10,7 @@ namespace NuGet.VisualStudio {
         private readonly IScriptExecutor _scriptExecutor;
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
+        [ImportingConstructor]
         public VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory, 
                                   IScriptExecutor scriptExecutor,
                                   IPackageRepositoryFactory repositoryFactory) {
