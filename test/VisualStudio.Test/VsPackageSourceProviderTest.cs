@@ -80,7 +80,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.AggregateSource, sources[0]);
+            Assert.AreEqual(provider.AggregateSource, sources[0]);
         }
 
         [TestMethod]
@@ -96,7 +96,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.AggregateSource, sources[0]);
+            Assert.AreEqual(provider.AggregateSource, sources[0]);
             Assert.AreEqual(new PackageSource("a", "a"), sources[1]);
         }
 
@@ -113,7 +113,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.AggregateSource, sources[0]);
+            Assert.AreEqual(provider.AggregateSource, sources[0]);
         }
 
         [TestMethod]
@@ -130,7 +130,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.AggregateSource, sources[0]);
+            Assert.AreEqual(provider.AggregateSource, sources[0]);
         }
 
         [TestMethod]
@@ -273,7 +273,7 @@ namespace NuGet.VisualStudio.Test {
             settingsManager.PackageSourcesString = "";
             var provider = new VsPackageSourceProvider(settingsManager);
             var packageSources = new List<PackageSource> {
-                                                             VsPackageSourceProvider.AggregateSource,
+                                                             provider.AggregateSource,
                                                              new PackageSource("a", "a")
                                                          };
 

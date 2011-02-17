@@ -10,7 +10,7 @@ namespace NuGet.VisualStudio {
     public class VsPackageSourceProvider : IPackageSourceProvider {
         internal const string DefaultPackageSource = "https://go.microsoft.com/fwlink/?LinkID=206669";
         internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
-        internal static readonly PackageSource AggregateSource = new PackageSource("(Aggregate source)", Resources.VsResources.AggregateSourceName) { IsAggregate = true };
+        private static readonly PackageSource AggregateSourceInstance = new PackageSource("(Aggregate source)", Resources.VsResources.AggregateSourceName) { IsAggregate = true };
 
         private readonly IPackageSourceSettingsManager _settingsManager;
 
@@ -24,6 +24,12 @@ namespace NuGet.VisualStudio {
             DeserializePackageSources();
             DeserializeActivePackageSource();
             AddOfficialPackageSourceIfNeeded();
+        }
+
+        public PackageSource AggregateSource {
+            get {
+                return AggregateSourceInstance;
+            }
         }
 
         public PackageSource ActivePackageSource {
@@ -92,8 +98,8 @@ namespace NuGet.VisualStudio {
                     _packageSources.Add(s);
                 }
             }
-            if (!_packageSources.Contains(AggregateSource)) {
-                _packageSources.Insert(0, AggregateSource);
+            if (!_packageSources.Contains(AggregateSourceInstance)) {
+                _packageSources.Insert(0, AggregateSourceInstance);
             }
 
             PersistPackageSources();
@@ -112,16 +118,16 @@ namespace NuGet.VisualStudio {
 
             if (_packageSources == null) {
                 _packageSources = new List<PackageSource>();
-                _packageSources.Add(AggregateSource);
+                _packageSources.Add(AggregateSourceInstance);
             }
-            else if (!_packageSources.Contains(AggregateSource)) {
-                _packageSources.Insert(0, AggregateSource);
+            else if (!_packageSources.Contains(AggregateSourceInstance)) {
+                _packageSources.Insert(0, AggregateSourceInstance);
             }
             else {
                 // When deserialize old data from previous version of NuGet,
                 // the IsAggregate property is missing and hence set to false. 
                 // Set it to 'true'.
-                PackageSource aggregateSourceInCollection = _packageSources.Single(p => p.Equals(AggregateSource));
+                PackageSource aggregateSourceInCollection = _packageSources.Single(p => p.Equals(AggregateSourceInstance));
                 aggregateSourceInCollection.IsAggregate = true;
             }
         }

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio {
     public interface IPackageSourceProvider {
+        PackageSource AggregateSource { get; }
         PackageSource ActivePackageSource { get; set; }
         [SuppressMessage(
             "Microsoft.Design",

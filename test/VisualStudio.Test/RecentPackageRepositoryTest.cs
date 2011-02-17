@@ -112,7 +112,10 @@ namespace NuGet.VisualStudio.Test {
                 mockSettingsManager.SavePackageMetadata(new PersistencePackageMetadata[] { A, B });
             }
 
-            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockSettingsManager);
+            var mockPackageSourceProvider = new Mock<IPackageSourceProvider>();
+            mockPackageSourceProvider.Setup(p => p.AggregateSource).Returns(new PackageSource("All") { IsAggregate = true });
+
+            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider.Object, mockSettingsManager);
         }
 
         private class MockSettingsManager : IPersistencePackageSettingsManager {
