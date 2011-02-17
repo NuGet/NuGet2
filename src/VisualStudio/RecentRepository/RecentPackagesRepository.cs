@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using EnvDTE;
 
@@ -151,13 +152,13 @@ namespace NuGet.VisualStudio {
             if (_packages.Count > 0) {
 
                 // IMPORTANT: call ToList() here. Otherwise, we may read and write to the settings store at the same time
-                var loadedPacakgesMetadata = LoadPackageMetadataFromSettingsStore().ToList();
+                var loadedPackagesMetadata = LoadPackageMetadataFromSettingsStore().ToList();
 
                 _settingsManager.SavePackageMetadata(
                     _packages.
                         Take(MaximumPackageCount).
-                        Cast<PersistencePackageMetadata>().
-                        Concat(loadedPacakgesMetadata));
+                        Select(p => new PersistencePackageMetadata(p)).
+                        Concat(loadedPackagesMetadata));
             }
         }
 
@@ -170,6 +171,7 @@ namespace NuGet.VisualStudio {
                 SavePackagesToSettingsStore();
             }
             catch (Exception) {
+                Debug.Fail("Failed to save package metadatas.");
                 // we don't care if the saving fails.
             }
         }
