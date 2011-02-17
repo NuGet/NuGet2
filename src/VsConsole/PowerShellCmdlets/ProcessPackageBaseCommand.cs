@@ -148,7 +148,11 @@ namespace NuGet.PowerShell.Commands {
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
-            EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
+
+            EnvDTE.Project project;
+            if (!_projectManagerToProject.TryGetValue(projectManager, out project)) {
+                throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
+            }
 
             ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project);
         }
