@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.Data.Services.Common;
 using System.IO;
 using System.Linq;
 using NuGet.Resources;
-using System.Data.Services.Client;
 
 namespace NuGet {
     [DataServiceKey("Id", "Version")]
@@ -12,10 +12,9 @@ namespace NuGet {
     [EntityPropertyMapping("Id", SyndicationItemProperty.Title, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
-    [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
-        private readonly PackageDownloader _packageDownloader = new PackageDownloader();
         private readonly LazyWithRecreate<IPackage> _package;
+        private byte[] _bytes;
 
         public DataServicePackage() {
             VersionDownloadCount = -1;
@@ -90,12 +89,9 @@ namespace NuGet {
             set;
         }
 
-        private int _downloadCount;
         public int DownloadCount {
-            get { return VersionDownloadCount > -1 ? VersionDownloadCount : _downloadCount; }
-            set {
-                _downloadCount = value;
-            }
+            get;
+            set;
         }
 
         public int VersionDownloadCount {
@@ -215,13 +211,17 @@ namespace NuGet {
             return this.GetFullName();
         }
 
+        public void SetData(byte[] bytes) {
+            _bytes = bytes;
+        }
+
         internal IPackage DownloadAndVerifyPackage() {
             if (String.IsNullOrEmpty(PackageHash)) {
                 throw new InvalidOperationException(NuGetResources.PackageContentsVerifyError);
             }
 
-            byte[] hashBytes = Convert.FromBase64String(PackageHash);
-            return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, useCache: true);
+            var factory = new ZipPackageFactory();
+            return factory.CreatePackage(() => new MemoryStream(_bytes));
         }
 
         /// <summary>

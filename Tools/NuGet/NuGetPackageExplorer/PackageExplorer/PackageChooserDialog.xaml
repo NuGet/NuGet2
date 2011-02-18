@@ -7,6 +7,7 @@
         WindowStartupLocation="CenterOwner"
         Tag="{Binding LoadedCommand}"
         Loaded="Window_Loaded"
+        WindowStyle="ToolWindow"
         MinHeight="300"
         MinWidth="450"
         Height="400" 

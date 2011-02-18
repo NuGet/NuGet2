@@ -33,7 +33,7 @@ namespace PackageExplorer {
 
         private static bool LoadFile(MainWindow window, string file) {
             if (File.Exists(file) && file.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase)) {
-                window.LoadPackage(file);
+                window.OpenLocalPackage(file);
                 return true;
             }
             else {

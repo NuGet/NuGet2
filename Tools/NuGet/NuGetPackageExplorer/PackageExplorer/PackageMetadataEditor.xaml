@@ -61,7 +61,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id, Mode=OneWay}" />
+                <TextBlock Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, TargetNullValue='(not set)', Mode=OneWay}" />
                 <Button Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveDependencyButtonClicked">
                     <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
@@ -189,7 +189,7 @@
                         </ItemsControl>
 
                         <Button Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" ToolTipService.ToolTip="Select dependency from NuGet feed" Click="SelectDependencyButtonClicked">
-                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
+                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/properties.png" />
                         </Button>
 
                         <TextBox x:Name="NewDependencyId" Margin="2" Grid.Column="1" Grid.Row="2" />

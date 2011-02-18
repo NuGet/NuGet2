@@ -219,7 +219,7 @@
                         <Image Source="/NuGetPackageExplorer;component/Images/openHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Open from _NuGet Feed..." Click="OpenFileFromNuGetFeed">
+                <MenuItem Header="Open from _NuGet Feed..." Click="OpenPackageFromNuGetFeed">
                 </MenuItem>
                 <Separator />
                 <MenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">

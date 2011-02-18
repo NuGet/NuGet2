@@ -90,7 +90,6 @@
     </Compile>
     <Compile Include="Utility\ObjectExtensions.cs" />
     <Compile Include="Packages\PackageDependency.cs" />
-    <Compile Include="Utility\PackageDownloader.cs" />
     <Compile Include="Utility\PackageExtensions.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PackageUtility.cs" />

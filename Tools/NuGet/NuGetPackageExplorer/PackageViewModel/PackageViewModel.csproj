@@ -56,8 +56,8 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
+    <Compile Include="EditablePackageMetadata.cs" />
     <Compile Include="IPackageViewMode.cs" />
-    <Compile Include="Commands\EditablePackageMetadata.cs" />
     <Compile Include="PackageChooser\LoadedCommand.cs" />
     <Compile Include="PackageChooser\NavigateCommand.cs" />
     <Compile Include="PackageChooser\PackageChooserViewModel.cs" />

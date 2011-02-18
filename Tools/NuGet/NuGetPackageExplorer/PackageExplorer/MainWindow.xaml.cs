@@ -27,7 +27,7 @@ namespace PackageExplorer {
             BuildStatusItem.Content = "Build " + typeof(MainWindow).Assembly.GetName().Version.ToString();
         }
 
-        internal void LoadPackage(string packagePath) {
+        internal void OpenLocalPackage(string packagePath) {
             ZipPackage package = null;
             try {
                 package = new ZipPackage(packagePath);
@@ -46,7 +46,7 @@ namespace PackageExplorer {
             }
         }
 
-        internal void LoadPackage(IPackage package, string packagePath) {
+        private void LoadPackage(IPackage package, string packagePath) {
             if (package != null) {
                 DataContext = new PackageViewModel(package, packagePath);
             }
@@ -69,11 +69,11 @@ namespace PackageExplorer {
 
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
-                LoadPackage(dialog.FileName);
+                OpenLocalPackage(dialog.FileName);
             }
         }
 
-        private void OpenFileFromNuGetFeed(object sender, RoutedEventArgs e) {
+        private void OpenPackageFromNuGetFeed(object sender, RoutedEventArgs e) {
             var dialog = new PackageChooserDialog() {
                 Owner = this,
                 FontSize = this.FontSize
@@ -81,7 +81,15 @@ namespace PackageExplorer {
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
                 if (dialog.SelectedPackage != null) {
-                    LoadPackage(dialog.SelectedPackage, dialog.SelectedPackage.DownloadUrl.ToString());
+
+                    var progressWindow = new DownloadProgressWindow(dialog.SelectedPackage) {
+                        Owner = this
+                    };
+
+                    result = progressWindow.ShowDialog();
+                    if (result ?? false) {
+                        LoadPackage(dialog.SelectedPackage, dialog.SelectedPackage.DownloadUrl.ToString());
+                    }
                 }
             }
         }
@@ -122,7 +130,7 @@ namespace PackageExplorer {
 
                         bool canceled = AskToSaveCurrentFile();
                         if (!canceled) {
-                            LoadPackage(firstFile);
+                            OpenLocalPackage(firstFile);
                         }
                     }
                 }
