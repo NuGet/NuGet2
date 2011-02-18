@@ -40,7 +40,7 @@ namespace NuGet.Options {
             this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.BrowseButton = new System.Windows.Forms.Button();
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -133,7 +133,7 @@ namespace NuGet.Options {
             this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.button1, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 2);
             this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
@@ -145,12 +145,12 @@ namespace NuGet.Options {
             this.tableLayoutPanel2.Controls.Add(this.removeButton, 0, 2);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             // 
-            // button1
+            // BrowseButton
             // 
-            resources.ApplyResources(this.button1, "button1");
-            this.button1.Name = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.OnBrowseButtonClicked);
+            resources.ApplyResources(this.BrowseButton, "BrowseButton");
+            this.BrowseButton.Name = "BrowseButton";
+            this.BrowseButton.UseVisualStyleBackColor = true;
+            this.BrowseButton.Click += new System.EventHandler(this.OnBrowseButtonClicked);
             // 
             // ToolsOptionsControl
             // 
@@ -185,6 +185,6 @@ namespace NuGet.Options {
         private ListBox PackageSourcesListBox;
         private TableLayoutPanel tableLayoutPanel1;
         private TableLayoutPanel tableLayoutPanel2;
-        private Button button1;
+        private Button BrowseButton;
     }
 }
