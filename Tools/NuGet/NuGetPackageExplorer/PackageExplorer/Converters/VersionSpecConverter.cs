@@ -11,7 +11,19 @@ namespace PackageExplorer {
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            throw new NotImplementedException();
+            string stringValue = (string)value;
+            if (String.IsNullOrEmpty(stringValue)) {
+                return null;
+            }
+            else {
+                IVersionSpec versionSpec;
+                if (VersionUtility.TryParseVersionSpec(stringValue, out versionSpec)) {
+                    return versionSpec;
+                }
+                else {
+                    return DependencyProperty.UnsetValue;
+                }
+            }
         }
     }
 }

@@ -33,11 +33,6 @@ namespace PackageExplorerViewModel {
             this.Language = source.Language;
             this.Tags = source.Tags;
             this.Dependencies = new ObservableCollection<PackageDependency>(source.Dependencies);
-            this.Dependencies.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Dependencies_CollectionChanged);
-        }
-
-        void Dependencies_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            RaisePropertyChange("Dependencies");
         }
 
         private string _id;
@@ -313,14 +308,6 @@ namespace PackageExplorerViewModel {
                 _propertyErrors[property] = error;
             }
         }
-
-        //private EditablePackageDependency ConvertToEditablePackageDependency(PackageDependency pd) {
-        //    return new EditablePackageDependency(pd.Id, pd.VersionSpec);
-        //}
-
-        //private PackageDependency ConvertToPackageDependency(EditablePackageDependency pd) {
-        //    return new PackageDependency(pd.Id, pd.VersionSpec);
-        //}
 
         public void ResetErrors() {
             _propertyErrors.Clear();

@@ -16,6 +16,7 @@ namespace PackageExplorer {
     public partial class PackageMetadataEditor : UserControl {
 
         private ObservableCollection<PackageDependency> _packageDependencies;
+        private EditablePackageDependency _newPackageDependency;
 
         public PackageMetadataEditor() {
             InitializeComponent();
@@ -36,7 +37,8 @@ namespace PackageExplorer {
         }
 
         private void ClearDependencyTextBox() {
-            NewDependencyId.Text = NewDependencyVersion.Text = String.Empty;
+            _newPackageDependency = new EditablePackageDependency();
+            NewDependencyId.DataContext = NewDependencyVersion.DataContext = _newPackageDependency;
         }
 
         private void PopulateLanguagesForLanguageBox() {
@@ -56,60 +58,20 @@ namespace PackageExplorer {
 
         private void AddDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
 
-            if (!Validate(NewDependencyId, ValidateId) ||
-                !Validate(NewDependencyVersion, ValidateVersion)) {
+            var bindingExpression = NewDependencyId.GetBindingExpression(TextBox.TextProperty);
+            if (bindingExpression.HasError) {
                 return;
             }
 
-            IVersionSpec versionSpec;
-            VersionUtility.TryParseVersionSpec(NewDependencyVersion.Text, out versionSpec);
+            var bindingExpression2 = NewDependencyVersion.GetBindingExpression(TextBox.TextProperty);
+            if (bindingExpression2.HasError) {
+                return;
+            }
 
-            _packageDependencies.Add(new PackageDependency(NewDependencyId.Text, versionSpec));
+            _packageDependencies.Add(_newPackageDependency.AsReadOnly());
 
             // after dependency is added, clear the textbox
             ClearDependencyTextBox();
-        }
-
-        private bool Validate(TextBox input, Func<string, string> validator) {
-            string value = input.Text;
-            string error = validator(value);
-            if (error == null) {
-                input.ClearValue(Control.BorderBrushProperty);
-                input.ClearValue(ToolTipService.ToolTipProperty);
-                return true;
-            }
-            else {
-                input.BorderBrush = Brushes.Red;
-                ToolTipService.SetToolTip(input, error);
-                return false;
-            }
-        }
-
-        private string ValidateVersion(string version) {
-            string errorMessage = null;
-
-            if (!String.IsNullOrEmpty(version)) {
-                IVersionSpec versionSpec;
-                if (!VersionUtility.TryParseVersionSpec(version, out versionSpec)) {
-                    errorMessage = String.Format("Value '{0}' is an invalid version spec.", version);
-                }
-            }
-
-            return errorMessage;
-        }
-
-        private string ValidateId(string id) {
-            string errorMessage = null;
-
-            if (String.IsNullOrEmpty(id)) {
-                errorMessage = "Id is required.";
-            }
-
-            if (!PackageIdValidator.IsValidPackageId(id)) {
-                errorMessage = "Value '" + id + "' is an invalid id.";
-            }
-
-            return errorMessage;
         }
 
         private void SelectDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
@@ -118,8 +80,9 @@ namespace PackageExplorer {
             if (result ?? false) {
                 var selectedPackage = dialog.SelectedPackage;
                 if (selectedPackage != null) {
-                    NewDependencyId.Text = selectedPackage.Id;
-                    NewDependencyVersion.Text = selectedPackage.Version.ToString();
+
+                    _newPackageDependency.Id = selectedPackage.Id;
+                    _newPackageDependency.VersionSpec = VersionUtility.ParseVersionSpec(selectedPackage.Version.ToString());
                 }
             }
         }
@@ -130,12 +93,6 @@ namespace PackageExplorer {
                 var viewModel = (PackageViewModel)DataContext;
                 _packageDependencies.CopyTo(viewModel.PackageMetadata.Dependencies);
             }
-        }
-
-        private void CancelButtonClicked(object sender, RoutedEventArgs e) {
-            var viewModel = (PackageViewModel)DataContext;
-            _packageDependencies = new ObservableCollection<PackageDependency>(viewModel.PackageMetadata.Dependencies);
-            DependencyList.ItemsSource = _packageDependencies;
         }
     }
 }
