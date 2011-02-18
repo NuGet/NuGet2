@@ -75,7 +75,8 @@ function New-Project {
     
     # Close all active documents
     $dte.Documents | %{ try { $_.Close() } catch { } }
-    
+    $dte.Solution.SolutionBuild.SolutionConfigurations | % { if ($_.PlatformName -eq 'x86') { $_.Activate() } } | Out-Null
+
     # Set the focus back on the shell
     $window.SetFocus()
     
@@ -86,7 +87,7 @@ function New-Project {
         $project = Get-Project "$destPath\"
     }
     
-    $project
+    $project    
 }
 
 function New-ClassLibrary { 

@@ -45,22 +45,22 @@ function Test-UninstallingPackageWithConfigTransformWhenConfigReadOnly {
     Assert-Null (Get-SolutionPackage elmah)
 }
 
-function Test-UninstallPackageInvokeUninstallScript {
+function Test-VariablesPassedToUninstallScriptsAreValidWithWebSite {
     param(
         $context
     )
     
     # Arrange
-    $p = New-ConsoleApplication
+    $p = New-WebSite
 
-    # Act
-    Install-Package Moq -Project $p.Name -Source $context.RepositoryRoot
-    Uninstall-Package Moq -Project $p.Name
+    Install-Package PackageWithScripts -Project $p.Name -Source $context.RepositoryRoot
 
-    # Assert
+    # This asserts install.ps1 gets called with the correct project reference and package
+    Assert-Reference $p System.Windows.Forms
 
-    # This asserts uninstall.ps1 gets called
-    Assert-NotNull (Get-ChildItem function:\TestFunction)
+     # Act
+    Uninstall-Package PackageWithScripts -Project $p.Name
+    Assert-Null (Get-AssemblyReference $p System.Windows.Forms)
 }
 
 function Test-UninstallPackageWithNestedContentFiles {

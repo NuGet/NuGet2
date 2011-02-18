@@ -130,14 +130,28 @@ function Test-InstallPackageInvokeInstallScriptAndInitScript {
     $p = New-ConsoleApplication
 
     # Act
-    Install-Package Moq -Project $p.Name -Source $context.RepositoryRoot
+    Install-Package PackageWithScripts -Source $context.RepositoryRoot
 
     # Assert
 
     # This asserts init.ps1 gets called
     Assert-NotNull (Get-ChildItem function:\Get-World)
+}
 
-    # This asserts install.ps1 gets called
+function Test-VariablesPassedToInstallScriptsAreValidWithWebSite {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-WebSite
+
+    # Act
+    Install-Package PackageWithScripts -Project $p.Name -Source $context.RepositoryRoot
+
+    # Assert
+
+    # This asserts install.ps1 gets called with the correct project reference and package
     Assert-Reference $p System.Windows.Forms
 }
 
