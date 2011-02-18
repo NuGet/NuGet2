@@ -76,7 +76,7 @@ namespace NuGet {
             if (String.IsNullOrEmpty(frameworkNameAndVersion)) {
                 throw new ArgumentException(NuGetResources.MissingFrameworkName, "frameworkName");
             }
- 
+
             // If we find a version then we try to split the framework name into 2 parts
             var match = Regex.Match(frameworkNameAndVersion, @"\d+");
 
@@ -241,6 +241,14 @@ namespace NuGet {
             // Successful parse!
             result = versionSpec;
             return true;
+        }
+
+        public static string GetFrameworkString(FrameworkName frameworkName) {
+            string name = frameworkName.Identifier + frameworkName.Version;
+            if (String.IsNullOrEmpty(frameworkName.Profile)) {
+                return name;
+            }
+            return name + "-" + frameworkName.Profile;
         }
 
         internal static FrameworkName ParseFrameworkFolderName(string path) {

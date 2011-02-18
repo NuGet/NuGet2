@@ -70,6 +70,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to assembly references.
+        /// </summary>
+        internal static string AssemblyReferences {
+            get {
+                return ResourceManager.GetString("AssemblyReferences", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot create a package that has no dependencies nor content..
         /// </summary>
         internal static string CannotCreateEmptyPackage {
@@ -232,6 +241,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to framework assemblies.
+        /// </summary>
+        internal static string FrameworkAssemblies {
+            get {
+                return ResourceManager.GetString("FrameworkAssemblies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version..
         /// </summary>
         internal static string IncompatibleSchema {
@@ -367,6 +385,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assembly name is required..
+        /// </summary>
+        internal static string Manifest_AssemblyNameRequired {
+            get {
+                return ResourceManager.GetString("Manifest_AssemblyNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dependency Id is required..
         /// </summary>
         internal static string Manifest_DependencyIdRequired {
@@ -484,11 +511,11 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to find assembly references that are compatible with the target framework &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Unable to find {0} that are compatible with the target framework &apos;{1}&apos;..
         /// </summary>
-        internal static string UnableToFindCompatibleReference {
+        internal static string UnableToFindCompatibleItems {
             get {
-                return ResourceManager.GetString("UnableToFindCompatibleReference", resourceCulture);
+                return ResourceManager.GetString("UnableToFindCompatibleItems", resourceCulture);
             }
         }
         

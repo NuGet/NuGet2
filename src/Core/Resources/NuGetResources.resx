@@ -213,8 +213,8 @@
   <data name="TokenHasNoValue" xml:space="preserve">
     <value>The replacement token '{0}' has no value.</value>
   </data>
-  <data name="UnableToFindCompatibleReference" xml:space="preserve">
-    <value>Unable to find assembly references that are compatible with the target framework '{0}'.</value>
+  <data name="UnableToFindCompatibleItems" xml:space="preserve">
+    <value>Unable to find {0} that are compatible with the target framework '{1}'.</value>
   </data>
   <data name="UnableToLocateDependency" xml:space="preserve">
     <value>Unable to locate dependency '{0}'. It may have been uninstalled.</value>
@@ -284,5 +284,14 @@
   </data>
   <data name="MissingFrameworkName" xml:space="preserve">
     <value>Framework name is missing.</value>
+  </data>
+  <data name="Manifest_AssemblyNameRequired" xml:space="preserve">
+    <value>Assembly name is required.</value>
+  </data>
+  <data name="AssemblyReferences" xml:space="preserve">
+    <value>assembly references</value>
+  </data>
+  <data name="FrameworkAssemblies" xml:space="preserve">
+    <value>framework assemblies</value>
   </data>
 </root>

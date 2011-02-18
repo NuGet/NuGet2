@@ -34,9 +34,13 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        protected override void AddGacReference(string name) {
+            Project.Object.References.AddFromGAC(name);
+        }
+
         public override dynamic GetPropertyValue(string propertyName) {
             if (propertyName.Equals(RootNamespace, StringComparison.OrdinalIgnoreCase)) {
-                return DefaultNamespace;                
+                return DefaultNamespace;
             }
             return base.GetPropertyValue(propertyName);
         }

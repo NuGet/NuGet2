@@ -22,5 +22,10 @@ namespace NuGet.VisualStudio {
                 // But it still ends up working so we swallow the exception. We should follow up with F# people to find out what's going on.
             }
         }
+
+        protected override void AddGacReference(string name) {
+            // The F# project system expects assemblies that start with * to be framework assemblies.
+            base.AddGacReference("*" + name);
+        }
     }
 }

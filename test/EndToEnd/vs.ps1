@@ -121,6 +121,14 @@ function New-WPFApplication {
     New-Project WPFApplication
 }
 
+function New-SilverlightClassLibrary {
+    New-Project SilverlightClassLibrary
+}
+
+function New-WindowsPhoneClassLibrary {
+    New-Project WindowsPhoneClassLibrary
+}
+
 function Build-Project {
     param(
         [parameter(Mandatory = $true)]

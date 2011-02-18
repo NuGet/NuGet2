@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Runtime.Versioning;
 
 namespace NuGet.Test {
     [TestClass]
@@ -74,12 +75,12 @@ namespace NuGet.Test {
             // Assert
             foreach (var frameworkName in frameworkNames) {
                 Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-                Assert.AreEqual(version40, frameworkName.Version); 
+                Assert.AreEqual(version40, frameworkName.Version);
             }
         }
 
         [TestMethod]
-        public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess() {            
+        public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("NET41235");
 
@@ -183,6 +184,30 @@ namespace NuGet.Test {
             Assert.AreEqual(new Version("3.0"), f4.Version);
             Assert.AreEqual("Silverlight", f5.Identifier);
             Assert.AreEqual(new Version("2.0"), f5.Version);
+        }
+
+        [TestMethod]
+        public void GetFrameworkStringFromFrameworkName() {
+            // Arrange
+            var net40 = new FrameworkName(".NETFramework", new Version(4, 0));
+            var net40Client = new FrameworkName(".NETFramework", new Version(4, 0), "Client");
+            var sl3 = new FrameworkName("Silverlight", new Version(3, 0));
+            var sl4 = new FrameworkName("Silverlight", new Version(4, 0));
+            var wp7 = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone");
+
+            // Act
+            string net40Value = VersionUtility.GetFrameworkString(net40);
+            string net40ClientValue = VersionUtility.GetFrameworkString(net40Client);
+            string sl3Value = VersionUtility.GetFrameworkString(sl3);
+            string sl4Value = VersionUtility.GetFrameworkString(sl4);
+            string wp7Value = VersionUtility.GetFrameworkString(wp7);
+
+            // Assert
+            Assert.AreEqual(".NETFramework4.0", net40Value);
+            Assert.AreEqual(".NETFramework4.0-Client", net40ClientValue);
+            Assert.AreEqual("Silverlight3.0", sl3Value);
+            Assert.AreEqual("Silverlight4.0", sl4Value);
+            Assert.AreEqual("Silverlight4.0-WindowsPhone", wp7Value);
         }
 
         [TestMethod]

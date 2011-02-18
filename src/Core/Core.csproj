@@ -34,6 +34,7 @@
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="Authoring\IPackageBuilder.cs" />
+    <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
@@ -41,8 +42,11 @@
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
+    <Compile Include="Packages\FrameworkAssemblyReference.cs" />
+    <Compile Include="Packages\IFrameworkTargetable.cs" />
     <Compile Include="Packages\IPackageMetadata.cs" />
     <Compile Include="Packages\IServerPackageMetadata.cs" />
     <Compile Include="PackageWalker\ConflictResult.cs" />

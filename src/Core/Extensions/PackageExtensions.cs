@@ -31,7 +31,9 @@ namespace NuGet {
         /// Returns true if a package has no content that applies to a project.
         /// </summary>
         public static bool HasProjectContent(this IPackage package) {
-            return package.AssemblyReferences.Any() || package.GetContentFiles().Any();
+            return package.FrameworkAssemblies.Any() ||
+                   package.AssemblyReferences.Any() || 
+                   package.GetContentFiles().Any();
         }
 
         /// <summary>
@@ -135,10 +137,10 @@ namespace NuGet {
             var propertyExpression = Expression.Property(packageParameterExpression, propertyName);
             // .ToLower()
             var toLowerExpression = Expression.Call(propertyExpression, stringToLower);
-            
+
             // Handle potentially null properties
             // package.{propertyName} != null && package.{propertyName}.ToLower().Contains(term.ToLower())
-            return Expression.AndAlso(Expression.NotEqual(propertyExpression, 
+            return Expression.AndAlso(Expression.NotEqual(propertyExpression,
                                                       Expression.Constant(null)),
                                       Expression.Call(toLowerExpression, stringContains, Expression.Constant(term.ToLower())));
         }

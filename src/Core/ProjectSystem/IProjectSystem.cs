@@ -13,6 +13,11 @@ namespace NuGet {
         /// <param name="referencePath">Physical path to the assembly file relative to the project root.</param>
         /// <param name="stream">Contents of the assembly file.</param>
         void AddReference(string referencePath, Stream stream);
+        /// <summary>
+        /// Adds an assembly reference to a framework assembly (one in the GAC).
+        /// </summary>
+        /// <param name="name">name of the assembly</param>
+        void AddFrameworkReference(string name);
         bool ReferenceExists(string name);
         void RemoveReference(string name);
         bool IsSupportedFile(string path);

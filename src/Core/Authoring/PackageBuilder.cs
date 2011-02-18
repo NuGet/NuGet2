@@ -34,6 +34,7 @@ namespace NuGet {
         public PackageBuilder() {
             Files = new Collection<IPackageFile>();
             Dependencies = new Collection<PackageDependency>();
+            FrameworkReferences = new Collection<FrameworkAssemblyReference>();
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
             Tags = new HashSet<string>();
@@ -114,6 +115,11 @@ namespace NuGet {
             private set;
         }
 
+        public Collection<FrameworkAssemblyReference> FrameworkReferences {
+            get;
+            private set;
+        }
+
         IEnumerable<string> IPackageMetadata.Authors {
             get {
                 return Authors;
@@ -132,10 +138,15 @@ namespace NuGet {
             }
         }
 
-
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
                 return Dependencies;
+            }
+        }
+
+        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
+            get {
+                return FrameworkReferences;
             }
         }
 
@@ -144,9 +155,9 @@ namespace NuGet {
             PackageIdValidator.ValidatePackageId(Id);
 
             // Throw if the package doesn't contain any dependencies nor content
-            if (!Files.Any() && !Dependencies.Any()) {
+            if (!Files.Any() && !Dependencies.Any() && !FrameworkReferences.Any()) {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
-            }            
+            }
 
             // Verify that all dependencies specify a versionSpec
             List<PackageDependency> brokenDependencies = Dependencies.Where(d => d.VersionSpec == null)
@@ -207,6 +218,7 @@ namespace NuGet {
             }
 
             Dependencies.AddRange(metadata.Dependencies);
+            FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
 
             // If there's no base path then ignore the files node
             if (basePath != null) {

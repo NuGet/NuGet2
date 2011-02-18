@@ -46,5 +46,9 @@ namespace NuGet.Test.Mocks {
         public virtual bool IsSupportedFile(string path) {
             return true;
         }
+
+        public void AddFrameworkReference(string name) {
+            References[name] = name;
+        }
     }
 }

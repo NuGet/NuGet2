@@ -78,10 +78,10 @@ namespace NuGet.Test {
             mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockAssemblyReference.Setup(m => m.Path).Returns(path);
             mockAssemblyReference.Setup(m => m.Name).Returns(path);
-            mockAssemblyReference.Setup(m => m.TargetFramework).Returns(targetFramework);
+            mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new[] { targetFramework });
             return mockAssemblyReference.Object;
         }
-
+        
         public static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "") {
             var files = new List<IPackageFile>();
             foreach (var fileName in fileNames) {

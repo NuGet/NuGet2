@@ -15,6 +15,7 @@ using Project = EnvDTE.Project;
 namespace NuGet.VisualStudio {
     public class VsProjectSystem : PhysicalFileSystem, IProjectSystem {
         private const string BinDir = "bin";
+        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
 
         private FrameworkName _targetFramework;
 
@@ -75,6 +76,22 @@ namespace NuGet.VisualStudio {
                     Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
+        }
+
+        public void AddFrameworkReference(string name) {
+            try {
+                // Add a reference to the project
+                AddGacReference(name);
+
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
+            }
+            catch(Exception e) {
+                Logger.Log(MessageLevel.Warning, e.Message);
+            }
+        }
+
+        protected virtual void AddGacReference(string name) {
+            Project.Object.References.Add(name);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
@@ -182,8 +199,12 @@ namespace NuGet.VisualStudio {
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail when checking for existance")]
         public virtual bool ReferenceExists(string name) {
             try {
-                // Get the reference name without extension
-                string referenceName = Path.GetFileNameWithoutExtension(name);
+                string referenceName = name;
+
+                if (AssemblyReferencesExtensions.Contains(Path.GetExtension(name), StringComparer.OrdinalIgnoreCase)) {
+                    // Get the reference name without extension
+                    referenceName = Path.GetFileNameWithoutExtension(name);
+                }
 
                 return Project.Object.References.Item(referenceName) != null;
             }

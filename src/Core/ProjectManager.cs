@@ -184,7 +184,8 @@ namespace NuGet {
         protected virtual void ExtractPackageFilesToProject(IPackage package) {
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
             // Resolve assembly references first so that if this fails we never do anything to the project
-            IEnumerable<IPackageAssemblyReference> assemblyReferences = ResolveAssemblyReferences(package);
+            IEnumerable<IPackageAssemblyReference> assemblyReferences = Project.GetCompatibleItems(package.AssemblyReferences, NuGetResources.AssemblyReferences);
+            IEnumerable<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItems(package.FrameworkAssemblies, NuGetResources.FrameworkAssemblies);
 
             try {
                 // Add content files
@@ -202,6 +203,13 @@ namespace NuGet {
 
                     using (Stream stream = assemblyReference.GetStream()) {
                         Project.AddReference(relativeReferencePath, stream);
+                    }
+                }
+
+                // Add GAC/Framework references
+                foreach (FrameworkAssemblyReference frameworkReference in frameworkReferences) {
+                    if (!Project.ReferenceExists(frameworkReference.AssemblyName)) {
+                        Project.AddFrameworkReference(frameworkReference.AssemblyName);
                     }
                 }
             }
@@ -266,7 +274,7 @@ namespace NuGet {
 
             // Get other references
             var otherAssemblyReferences = from p in otherPackages
-                                          let assemblyReferences = GetCompatibleAssemblyReferences(Project.TargetFramework, p.AssemblyReferences)
+                                          let assemblyReferences = Project.GetCompatibleItemsCore(p.AssemblyReferences)
                                           from assemblyReference in assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>() // This can happen if package installed left the project in a bad state
                                           select assemblyReference;
 
@@ -365,86 +373,6 @@ namespace NuGet {
 
         private PackageOperationEventArgs CreateOperation(IPackage package) {
             return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
-        }
-
-        private IEnumerable<IPackageAssemblyReference> ResolveAssemblyReferences(IPackage package) {
-            // A package might have references that target a specific version of the framework (.net/silverlight etc)
-            // so we try to get the highest version that satifies the target framework i.e.
-            // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.
-            var compatibleAssemblyReferences = GetCompatibleAssemblyReferences(Project.TargetFramework, package.AssemblyReferences);
-
-            if (compatibleAssemblyReferences == null) {
-                throw new InvalidOperationException(
-                           String.Format(CultureInfo.CurrentCulture,
-                           NuGetResources.UnableToFindCompatibleReference, Project.TargetFramework));
-            }
-
-            return compatibleAssemblyReferences;
-        }
-
-        internal static IEnumerable<IPackageAssemblyReference> GetCompatibleAssemblyReferences(FrameworkName projectFramework, IEnumerable<IPackageAssemblyReference> allAssemblyReferences) {
-            if (!allAssemblyReferences.Any()) {
-                return Enumerable.Empty<IPackageAssemblyReference>();
-            }
-
-            // Default framework for assembly references with an unspecified framework name
-            // always match the project framework's identifier by is the lowest possible version
-            var defaultFramework = new FrameworkName(projectFramework.Identifier, new Version(), projectFramework.Profile);
-
-            // Group references by target framework (if there is no target framework we assume it is the default)
-            var frameworkGroups = allAssemblyReferences.GroupBy(g => g.TargetFramework ?? defaultFramework);
-
-            // Try to find the best match
-            return (from g in frameworkGroups
-                    where IsCompatible(g.Key, projectFramework)
-                    orderby GetProfileCompatibility(g.Key, projectFramework) descending, 
-                            g.Key.Version descending
-                    select g).FirstOrDefault();
-        }
-
-        private static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
-            if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase)) {
-                return false;
-            }
-
-            if (frameworkName.Version > targetFrameworkName.Version) {
-                return false;
-            }
-
-            // If there is no target framework then do nothing
-            if (String.IsNullOrEmpty(targetFrameworkName.Profile)) {
-                return true;
-            }
-
-            string targetProfile = frameworkName.Profile;
-
-            if (String.IsNullOrEmpty(targetProfile)) {
-                // We consider net40 to mean net40-full which is a superset of any specific profile.
-                // This means that a dll that is net40 will work for a project targeting net40-client.
-                targetProfile = targetFrameworkName.Profile;
-            }
-
-            return targetFrameworkName.Profile.Equals(targetProfile, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName) {            
-            string targetProfile = frameworkName.Profile;
-
-            if (String.IsNullOrEmpty(targetProfile)) {
-                // We consider net40 to mean net40-full which is a superset of any specific profile.
-                // This means that a dll that is net40 will work for a project targeting net40-client.
-                targetProfile = targetFrameworkName.Profile;
-            }
-
-            // Things with matching profiles are more compatible than things without.
-            // This means that if we have net40 and net40-client assemblies and the target framework is
-            // net40, both sets of assemblies are compatible but we prefer net40 since it matches
-            // the profile exactly.
-            if (targetFrameworkName.Profile.Equals(targetProfile, StringComparison.OrdinalIgnoreCase)) {
-                return 1;
-            }
-
-            return 0;
         }
 
         private static IDictionary<XName, Action<XElement, XElement>> GetConfigMappings() {

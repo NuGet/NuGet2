@@ -140,6 +140,11 @@ namespace NuGet {
             }
         }
 
+        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
+            get;
+            set;
+        }
+
         public IEnumerable<IPackageFile> GetFiles() {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);
@@ -188,6 +193,7 @@ namespace NuGet {
                     Language = metadata.Language;
                     Tags = metadata.Tags;
                     Dependencies = metadata.Dependencies;
+                    FrameworkAssemblies = metadata.FrameworkAssemblies;
 
                     // Ensure tags start and end with an empty " " so we can do contains filtering reliably
                     if (!String.IsNullOrEmpty(Tags)) {

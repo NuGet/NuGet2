@@ -16,7 +16,7 @@ namespace NuGet {
     [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
     public class Manifest {
         private const string SchemaResourceName = "NuGet.Authoring.nuspec.xsd";
-        
+
         public Manifest() {
             Metadata = new ManifestMetadata();
         }
@@ -101,7 +101,14 @@ namespace NuGet {
                                     select new ManifestDependency {
                                         Id = d.Id.SafeTrim(),
                                         Version = d.VersionSpec.ToStringSafe()
-                                    }).ToList()
+                                    }).ToList(),
+                    FrameworkAssemblies = metadata.FrameworkAssemblies == null ||
+                                          !metadata.FrameworkAssemblies.Any() ? null :
+                                          (from reference in metadata.FrameworkAssemblies
+                                           select new ManifestFrameworkAssembly {
+                                               AssemblyName = reference.AssemblyName,
+                                               TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
+                                           }).ToList()
                 }
             };
         }
@@ -136,7 +143,7 @@ namespace NuGet {
             XElement metadata = document.Root.Element(XName.Get("metadata", Constants.ManifestSchemaNamespace));
             if (metadata != null) {
                 string schemaVersionString = metadata.GetOptionalAttributeValue("schemaVersion");
-                                
+
                 // If there is any schemaVersion attribute then fail
                 if (!String.IsNullOrEmpty(schemaVersionString)) {
                     // Get the package id for error reporting.

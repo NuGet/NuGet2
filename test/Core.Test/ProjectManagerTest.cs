@@ -1034,139 +1034,23 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void GetCompatibleReferencesPrefersMatchingProfile() {
-            // Arrange                                                                                                                       
-            var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "client"));
-            var assemblyReference40client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0"), "client"));
-            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
-            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference30client, assemblyReference40client, assemblyReference30, assemblyReference40 };
-
-            // Act
-            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences)
-                                                         .ToList();
-
-            // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference40, targetAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesPrefersMatchingProfileIfSpecified() {
-            // Arrange                                                                                                                       
-            var assemblyReferenceSL40phone = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0"), "WindowsPhone"));
-            var assemblyReferenceSL40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0")));
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReferenceSL40phone, assemblyReferenceSL40 };
-
-            // Act
-            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName("Silverlight", new Version("4.0"), "WindowsPhone"), assemblyReferences)
-                                                         .ToList();
-
-            // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReferenceSL40phone, targetAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesPicksHigestVersionLessThanTargetVersion() {
-            // Arrange                                                                                                                       
-            var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
-            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
-            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
-            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference10, assemblyReference20, assemblyReference30, assemblyReference40 };
-
-            // Act
-            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences)
-                                                         .ToList();
-
-            // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference30, targetAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkName() {
+        public void AddPackageReferenceWithAnyNonCompatibleFrameworkReferenceThrowsAndPackageIsNotReferenced() {
             // Arrange
-            var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
-            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
-            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
-            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
-            var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo.dll", null);
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference10, assemblyReference20, assemblyReference30, assemblyReference40, assemblyReferenceNoVersion };
+            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, localRepository);
+            mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
+            var mockPackage = new Mock<IPackage>();
+            mockPackage.Setup(m => m.Id).Returns("A");
+            mockPackage.Setup(m => m.Version).Returns(new Version("1.0"));
+            var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { new FrameworkName(".NETFramework", new Version("5.0")) });
+            mockPackage.Setup(m => m.FrameworkAssemblies).Returns(new[] { frameworkReference });
+            sourceRepository.AddPackage(mockPackage.Object);
 
-            // Act
-            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences).ToList();
-
-            // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference30, targetAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkNameWinsIfNoMatchingSpecificFrameworkNames() {
-            // Arrange
-            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
-            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
-            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
-            var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo.dll", null);
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference20, assemblyReference30, assemblyReference40, assemblyReferenceNoVersion };
-
-            // Act
-            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("1.1")), assemblyReferences).ToList();
-
-            // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReferenceNoVersion, targetAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesReferenceMostSpecificVersionWins() {
-            // Arrange
-            var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
-            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
-            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
-            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
-            var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo.dll", null);
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference10, assemblyReference20, assemblyReference30, assemblyReference40, assemblyReferenceNoVersion };
-
-            // Act
-            var targetAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences).ToList();
-
-            // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference40, targetAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesHighestSpecifiedAssemblyLessThanProjectTargetFrameworkWins() {
-            // Arrange
-            var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo1.dll", new FrameworkName(".NETFramework", new Version("1.0")));
-            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo1.dll", new FrameworkName(".NETFramework", new Version("2.0")));
-            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo2.dll", new FrameworkName(".NETFramework", new Version("3.0")));
-            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo2.dll", new FrameworkName(".NETFramework", new Version("4.0")));
-            var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo3.dll", null);
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference10, assemblyReference20, assemblyReference30, assemblyReference40, assemblyReferenceNoVersion };
-
-            // Act
-            var compatibleAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences).ToList();
-
-            // Assert
-            Assert.AreEqual(1, compatibleAssemblyReferences.Count);
-            Assert.AreEqual(assemblyReference30, compatibleAssemblyReferences[0]);
-        }
-
-        [TestMethod]
-        public void GetCompatibleReferencesReturnsNullIfNoBestMatchFound() {
-            // Arrange
-            var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference };
-
-            // Act
-            var compatibleAssemblyReferences = ProjectManager.GetCompatibleAssemblyReferences(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences);
-
-            // Assert
-            Assert.IsNull(compatibleAssemblyReferences);
+            // Act & Assert            
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to find framework assemblies that are compatible with the target framework '.NETFramework,Version=v2.0'.");
+            Assert.IsFalse(localRepository.Exists(mockPackage.Object));
         }
 
         private ProjectManager CreateProjectManager() {

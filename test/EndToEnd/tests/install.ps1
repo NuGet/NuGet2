@@ -367,3 +367,69 @@ function Test-InstallPackageWithResourceAssemblies {
     Assert-Reference $p FluentValidation
     Assert-Null (Get-AssemblyReference $p FluentValidation.resources)
 }
+
+function Test-InstallPackageWithGacReferencesIntoMultipleProjectTypes {
+    param(
+        $context
+    )
+
+    # Arrange
+    $projects = @((New-ClassLibrary), (New-WebSite), (New-FSharpLibrary))
+    
+    # Act
+    $projects | Install-Package PackageWithGacReferences -Source $context.RepositoryRoot
+    
+    # Assert
+    $projects | %{ Assert-Reference $_ System.Net }
+    Assert-Reference $projects[1] System.Web
+}
+
+function Test-InstallPackageWithGacReferenceIntoWindowsPhoneProject {   
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WindowsPhoneClassLibrary
+    
+    # Act
+    $p | Install-Package PackageWithGacReferences -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Reference $p Microsoft.Devices.Sensors
+}
+
+function Test-PackageWithClientProfileAndFullFrameworkPicksClient {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Arrange
+    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Reference $p MyAwesomeLibrary
+    $reference = Get-AssemblyReference $p MyAwesomeLibrary
+    Assert-True ($reference.Path.Contains("net40-client"))
+}
+
+function Test-InstallPackageThatTargetsWindowsPhone {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WindowsPhoneClassLibrary
+
+    # Arrange
+    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p MyAwesomeLibrary
+    Assert-SolutionPackage MyAwesomeLibrary
+    $reference = Get-AssemblyReference $p MyAwesomeLibrary
+    Assert-True ($reference.Path.Contains("sl4-wp"))
+}

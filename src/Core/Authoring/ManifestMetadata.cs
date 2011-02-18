@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Xml.Serialization;
 using NuGet.Resources;
 
@@ -72,6 +73,12 @@ namespace NuGet {
         [XmlArrayItem("dependency")]
         public List<ManifestDependency> Dependencies { get; set; }
 
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlArray("frameworkAssemblies")]
+        [XmlArrayItem("frameworkAssembly")]
+        public List<ManifestFrameworkAssembly> FrameworkAssemblies { get; set; }
+
         Version IPackageMetadata.Version {
             get {
                 if (Version == null) {
@@ -136,6 +143,17 @@ namespace NuGet {
             }
         }
 
+        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
+            get {
+                if (FrameworkAssemblies == null) {
+                    return Enumerable.Empty<FrameworkAssemblyReference>();
+                }
+
+                return from frameworkReference in FrameworkAssemblies
+                       select new FrameworkAssemblyReference(frameworkReference.AssemblyName, ParseFrameworkNames(frameworkReference.TargetFramework));
+            }
+        }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
             if (LicenseUrl == String.Empty) {
                 yield return new ValidationResult(
@@ -156,5 +174,15 @@ namespace NuGet {
                 yield return new ValidationResult(NuGetResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl);
             }
         }
+
+        private static IEnumerable<FrameworkName> ParseFrameworkNames(string frameworkNames) {
+            if (String.IsNullOrEmpty(frameworkNames.SafeTrim())) {
+                return Enumerable.Empty<FrameworkName>();
+            }
+
+            return frameworkNames.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(VersionUtility.ParseFrameworkName);
+        }
+
     }
 }
