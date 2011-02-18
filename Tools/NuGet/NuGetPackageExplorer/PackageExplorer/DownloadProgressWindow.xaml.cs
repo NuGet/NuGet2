@@ -38,7 +38,7 @@ namespace PackageExplorer {
             };
 
             _client.DownloadProgressChanged += (sender, e) => {
-                Dispatcher.BeginInvoke(new Action<int, long, long>(OnProgress), e.ProgressPercentage, e.BytesReceived, e.TotalBytesToReceive);
+                OnProgress(e.ProgressPercentage, e.BytesReceived, e.TotalBytesToReceive);
             };
 
             _client.DownloadDataAsync(uri);
