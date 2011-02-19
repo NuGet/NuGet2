@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -140,8 +141,14 @@ namespace NuGet {
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {
-            foreach (PackageOperation operation in resolver.ResolveOperations(package)) {
-                Execute(operation);
+            var operations = resolver.ResolveOperations(package);
+            if (operations.Any()) {
+                foreach (PackageOperation operation in operations) {
+                    Execute(operation);
+                }
+            }
+            else if (LocalRepository.Exists(package)) {
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, package.GetFullName());
             }
         }
 
@@ -307,7 +314,7 @@ namespace NuGet {
             IPackage newPackage = SourceRepository.FindPackage(packageId, version: version);
 
             if (newPackage != null && oldPackage.Version != newPackage.Version) {
-                UpdatePackage(oldPackage, newPackage, updateDependencies);                
+                UpdatePackage(oldPackage, newPackage, updateDependencies);
             }
             else {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);

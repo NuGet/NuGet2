@@ -143,8 +143,14 @@ namespace NuGet {
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {
-            foreach (PackageOperation operation in resolver.ResolveOperations(package)) {
-                Execute(operation);
+            IEnumerable<PackageOperation> operations = resolver.ResolveOperations(package);
+            if (operations.Any()) {
+                foreach (PackageOperation operation in operations) {
+                    Execute(operation);
+                }
+            }
+            else if (LocalRepository.Exists(package)) {
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package.GetFullName());
             }
         }
 

@@ -282,8 +282,13 @@ namespace NuGet.VisualStudio {
         private void ExecuteOperatonsWithPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, Action action, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
-            foreach (var operation in operations) {
-                Execute(operation);
+            if (operations.Any()) {
+                foreach (var operation in operations) {
+                    Execute(operation);
+                }
+            }
+            else if(LocalRepository.Exists(package)) {
+                Logger.Log(MessageLevel.Info, VsResources.Log_PackageAlreadyInstalled, package.GetFullName());
             }
 
             action();

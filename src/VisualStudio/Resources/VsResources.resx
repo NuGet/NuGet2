@@ -207,4 +207,7 @@
   <data name="FailedToAddReference" xml:space="preserve">
     <value>Failed to add reference to '{0}'.</value>
   </data>
+  <data name="Log_PackageAlreadyInstalled" xml:space="preserve">
+    <value>'{0}' already installed.</value>
+  </data>
 </root>
