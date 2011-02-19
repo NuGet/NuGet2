@@ -12,3 +12,4 @@ glob:*.suo
 glob:*.vs10x
 glob:TestResults
 glob:src/Server/Packages/*.nupkg
+DebugConstants.cs

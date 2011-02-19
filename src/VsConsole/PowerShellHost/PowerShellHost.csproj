@@ -40,7 +40,9 @@
     </Compile>
     <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
-    <Compile Include="DebugConstants.cs" />
+      <Compile Include="DebugConstants.cs">
+          <InProject>false</InProject>
+      </Compile>
     <Compile Include="PowerShellHostExtensions.cs" />
     <Compile Include="PSTypeWrapper.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
