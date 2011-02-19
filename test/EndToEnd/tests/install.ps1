@@ -447,3 +447,15 @@ function Test-InstallPackageThatTargetsWindowsPhone {
     $reference = Get-AssemblyReference $p MyAwesomeLibrary
     Assert-True ($reference.Path.Contains("sl4-wp"))
 }
+
+function Test-InstallPackageWithNonExistentFrameworkReferences {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Arrange
+    Assert-Throws { $p | Install-Package PackageWithNonExistentGacReferences -Source $context.RepositoryRoot } "Failed to add reference to 'System.Awesome'. Please make sure that it is in the Global Assembly Cache."
+}

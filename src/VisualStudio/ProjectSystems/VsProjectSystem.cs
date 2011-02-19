@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -86,7 +87,7 @@ namespace NuGet.VisualStudio {
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
             catch(Exception e) {
-                Logger.Log(MessageLevel.Warning, e.Message);
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddGacReference, name), e);
             }
         }
 
@@ -96,9 +97,9 @@ namespace NuGet.VisualStudio {
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all exceptions")]
         public virtual void AddReference(string referencePath, Stream stream) {
-            try {
-                string name = Path.GetFileNameWithoutExtension(referencePath);
+            string name = Path.GetFileNameWithoutExtension(referencePath);
 
+            try {
                 // Get the full path to the reference
                 string fullPath = PathUtility.GetAbsolutePath(Root, referencePath);
 
@@ -136,7 +137,7 @@ namespace NuGet.VisualStudio {
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
             catch (Exception e) {
-                Logger.Log(MessageLevel.Warning, e.Message);
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddReference, name), e);
             }
         }
 
