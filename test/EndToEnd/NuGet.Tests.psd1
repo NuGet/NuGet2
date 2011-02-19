@@ -1,13 +1,13 @@
-﻿@{
+@{
 
 # Script module or binary module file associated with this manifest
-ModuleToProcess = 'Scripts\nuget.psm1'
+ModuleToProcess = 'NuGet.Test.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.2.0.0'
 
 # ID used to uniquely identify this module
-GUID = '76e6f9c4-7045-44c0-a557-17fab0835c12'
+GUID = '9DC288DB-ABBE-4C46-B319-C6A8562A1171'
 
 # Author of this module
 Author = 'NuGet Team'
@@ -19,7 +19,7 @@ CompanyName = 'Outercurve Foundation'
 Copyright = '(c) 2010 Outercurve Foundation. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'NuGet PowerShell module used for the Package Manager Console'
+Description = 'NuGet Functional Test Framework'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '2.0'
@@ -46,22 +46,22 @@ RequiredModules = @()
 RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module
-ScriptsToProcess = @('Scripts\profile.ps1')
+ScriptsToProcess = @()
 
 # Type files (.ps1xml) to be loaded when importing this module
-TypesToProcess = @('Scripts\NuGet.Types.ps1xml')
+TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('Scripts\NuGet.Format.ps1xml')
+FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
-NestedModules = @('NuGet.Cmdlets.dll')
+NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = @('NugetTabExpansion', 'Register-TabExpansion')
+FunctionsToExport = @()
 
 # Cmdlets to export from this module
-CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
+CmdletsToExport = @()
 
 # Variables to export from this module
 VariablesToExport = ''

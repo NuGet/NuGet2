@@ -64,6 +64,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{
 	ProjectSection(SolutionItems) = preProject
 		test\EndToEnd\assert.ps1 = test\EndToEnd\assert.ps1
 		test\EndToEnd\nuget.assert.ps1 = test\EndToEnd\nuget.assert.ps1
+		test\EndToEnd\NuGet.Tests.psd1 = test\EndToEnd\NuGet.Tests.psd1
 		test\EndToEnd\NuGet.Tests.psm1 = test\EndToEnd\NuGet.Tests.psm1
 		test\EndToEnd\utility.ps1 = test\EndToEnd\utility.ps1
 		test\EndToEnd\vs.ps1 = test\EndToEnd\vs.ps1
