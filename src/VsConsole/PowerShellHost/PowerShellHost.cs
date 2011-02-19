@@ -138,7 +138,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             this.ImportModule(nugetPath);
 
 #if DEBUG
-            this.ImportModule(DebugConstants.TestModulePath);
+            if (File.Exists(DebugConstants.TestModulePath)) {
+                this.ImportModule(DebugConstants.TestModulePath);
+            }
 #endif
 
             return true;
