@@ -60,6 +60,7 @@ namespace NuGet.VisualStudio.Test {
             solutionManager.Setup(c => c.GetProject(It.IsAny<string>()))
                 .Returns((string name) => projects.FirstOrDefault(p => p.Name == name));
             solutionManager.SetupGet(c => c.IsSolutionOpen).Returns(isSolutionOpen);
+            solutionManager.Setup(c => c.GetProjectSafeNames()).Returns(projects == null ? Enumerable.Empty<string>() : projects.Select(p => p.Name));
             return solutionManager.Object;
         }
 

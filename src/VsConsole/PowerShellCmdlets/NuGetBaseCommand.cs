@@ -144,14 +144,13 @@ namespace NuGet.PowerShell.Commands {
         }
 
         /// <summary>
-        /// Return all projects in the solution matching the provided names. Wildcards are supported.
+        /// Return all project safe names in the solution matching the provided names. Wildcards are supported.
         /// This method will automatically generate error records for non-wildcarded project names that
         /// are not found.
         /// </summary>
         /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
-        /// <returns>Projects matching the project name(s) provided.</returns>
-        protected IEnumerable<Project> GetProjectsByName(string[] projectNames) {
-
+        /// <returns>Project safe names matching the project name(s) provided.</returns>
+        protected IEnumerable<string> GetProjectSafeNamesByName(string[] projectNames) {
             foreach (string projectName in projectNames) {
                 // if ctrl+c hit, leave immediately
                 if (Stopping) {
@@ -161,23 +160,32 @@ namespace NuGet.PowerShell.Commands {
                 // Treat every name as a wildcard; results in simpler code
                 var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
 
-                var matches =
-                    (from project in _solutionManager.GetProjects()
-                     where pattern.IsMatch(project.Name)
-                     select project).ToList();
+                var matches = _solutionManager.GetProjectSafeNames().Where(s => pattern.IsMatch(s));
+
+                int count = 0;
+                foreach (string name in matches) {
+                    count++;
+                    yield return name;
+                }
 
                 // We only emit non-terminating error record if a non-wildcarded name was not found.
                 // This is consistent with built-in cmdlets that support wildcarded search.
                 // A search with a wildcard that returns nothing should not be considered an error.
-                if ((matches.Count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName)) {
+                if ((count == 0) && !WildcardPattern.ContainsWildcardCharacters(projectName)) {
                     ErrorHandler.WriteProjectNotFoundError(projectName, terminating: false);
                 }
-                else {
-                    foreach (Project project in matches) {
-                        yield return project;
-                    }
-                }
             }
+        }
+
+        /// <summary>
+        /// Return all projects in the solution matching the provided names. Wildcards are supported.
+        /// This method will automatically generate error records for non-wildcarded project names that
+        /// are not found.
+        /// </summary>
+        /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
+        /// <returns>Projects matching the project name(s) provided.</returns>
+        protected IEnumerable<Project> GetProjectsByName(string[] projectNames) {
+            return GetProjectSafeNamesByName(projectNames).Select(s => _solutionManager.GetProject(s));
         }
 
         /// <summary>

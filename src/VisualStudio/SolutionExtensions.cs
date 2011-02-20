@@ -1,9 +1,11 @@
+using System.Collections.Generic;
+using System.Linq;
+using EnvDTE;
+
 namespace NuGet.VisualStudio {
-    using System.Collections.Generic;
-    using System.Linq;
-    using EnvDTE;
 
     internal static class SolutionExtensions {
+
         /// <summary>
         /// Get the list of all supported projects in the current solution. This method
         /// recursively iterates through all projects.

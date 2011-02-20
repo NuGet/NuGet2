@@ -223,5 +223,32 @@ namespace NuGet.VisualStudio {
         public static MsBuildProject AsMSBuildProject(this Project project) {
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).FirstOrDefault();
         }
+
+        /// <summary>
+        /// Returns the unique name of the specified project including all solution folder names containing it.
+        /// </summary>
+        /// <remarks>
+        /// This is different from the DTE Project.UniqueName property, which is the absolute path to the project file.
+        /// </remarks>
+        public static string GetCustomUniqueName(this Project project) {
+            if (project.IsWebSite()) {
+                // website projects always have unique name
+                return project.Name;
+            }
+            else {
+                Stack<string> nameParts = new Stack<string>();
+                
+                Project cursor = project;
+                nameParts.Push(cursor.Name);
+
+                // walk up till the solution root
+                while (cursor.ParentProjectItem != null && cursor.ParentProjectItem.ContainingProject != null) {
+                    cursor = cursor.ParentProjectItem.ContainingProject;
+                    nameParts.Push(cursor.Name);
+                }
+
+                return String.Join("\\", nameParts);
+            }
+        }
     }
 }

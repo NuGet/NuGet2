@@ -312,8 +312,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public string[] GetAvailableProjects() {
             Debug.Assert(_solutionManager != null);
 
-            return (from p in _solutionManager.GetProjects()
-                    select p.Name).ToArray();
+            return _solutionManager.GetProjectSafeNames().ToArray();
         }
 
         #region IPowerShellHost

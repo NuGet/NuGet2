@@ -25,7 +25,6 @@ namespace NuGet.PowerShell.Commands {
             _solutionManager = solutionManager;
         }
 
-
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ByName")]
         [ValidateNotNullOrEmpty]
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
@@ -34,24 +33,43 @@ namespace NuGet.PowerShell.Commands {
         [Parameter(Mandatory = true, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
+        [Parameter(ParameterSetName = ParameterAttribute.AllParameterSets)]
+        public SwitchParameter SafeName { get; set; }
+
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             if (All.IsPresent) {
-                WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
+                if (SafeName.IsPresent) {
+                    WriteObject(_solutionManager.GetProjectSafeNames(), enumerateCollection: true);
+                }
+                else {
+                    WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
+                }
             }
             else {
                 // No name specified; return default project (if not null)
                 if (Name == null) {
-                    if (_solutionManager.DefaultProject != null) {
-                        WriteObject(_solutionManager.DefaultProject);
+                    if (_solutionManager.DefaultProjectName != null) {
+                        if (SafeName.IsPresent) {
+                            WriteObject(_solutionManager.DefaultProjectName);
+                        }
+                        else {
+                            WriteObject(_solutionManager.DefaultProject);
+                        }
                     }
                 }
                 else {
-                    // get all projects matching name(s) - handles wildcards
-                    WriteObject(GetProjectsByName(Name), enumerateCollection: true);
+                    if (SafeName.IsPresent) {
+                        // get all projects safe names matching name(s) - handles wildcards
+                        WriteObject(GetProjectSafeNamesByName(Name), enumerateCollection: true);
+                    }
+                    else {
+                        // get all projects matching name(s) - handles wildcards
+                        WriteObject(GetProjectsByName(Name), enumerateCollection: true);
+                    }
                 }
             }
         }
