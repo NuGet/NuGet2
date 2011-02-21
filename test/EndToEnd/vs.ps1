@@ -89,6 +89,8 @@ function New-Project {
     
     # Close all active documents
     $dte.Documents | %{ try { $_.Close() } catch { } }
+
+    # Change the configuration of the project to x86
     $dte.Solution.SolutionBuild.SolutionConfigurations | % { if ($_.PlatformName -eq 'x86') { $_.Activate() } } | Out-Null
 
     # Set the focus back on the shell
@@ -215,7 +217,14 @@ function New-WindowsPhoneClassLibrary {
         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
 
-    $SolutionFolder | New-Project WindowsPhoneClassLibrary $ProjectName
+    try {
+        $SolutionFolder | New-Project WindowsPhoneClassLibrary $ProjectName
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
 }
 
 function Build-Project {

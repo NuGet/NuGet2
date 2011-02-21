@@ -131,13 +131,24 @@ function global:Run-Test {
                     Error = $null
                 }
             }
-            catch {
-                $results += New-Object PSObject -Property @{ 
-                    Test = $name
-                    Error = $_
+            catch {                     
+                if($_.Exception.Message.StartsWith("SKIP")) {
+                    $message = $_.Exception.Message.Substring(5).Trim()
+                    $results += New-Object PSObject -Property @{ 
+                        Test = $name
+                        Error = $message
+                        Skipped = $true
+                    }
+
+                    Write-Warning "$name was Skipped: $message"
                 }
-                
-                Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
+                else {
+                    $results += New-Object PSObject -Property @{ 
+                        Test = $name
+                        Error = $_
+                    }
+                    Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
+                }
             }
             finally {            
                 # Cleanup the output from running the generate packages tool
@@ -221,6 +232,12 @@ function Write-TestResults {
             text-align:left;
             border:1px solid #CCC;
         }}
+        .Skipped 
+        {{
+            color:black;
+            background-color:Yellow;
+            font-weight:bold;
+        }}
         .Passed 
         {{
         }}
@@ -234,7 +251,7 @@ function Write-TestResults {
     </head>
     <body>
         <h2>Test Run {0} ({1})</h2>
-        <h3>Ran {2} Tests, {3} Passed, {4} Failed</h3>
+        <h3>Ran {2} Tests, {3} Passed, {4} Failed, {5} Skipped</h3>
         <table>
             <tr>
                 <th>
@@ -247,7 +264,7 @@ function Write-TestResults {
                     Error Message
                 </th>
             </tr>
-            {5}
+            {6}
             </table>
     </body>
 </html>";
@@ -260,10 +277,15 @@ function Write-TestResults {
     
     $pass = 0
     $fail = 0
-    
+    $skipped = 0
+
     $rows = $Results | %{   
         $status = 'Passed'
-        if($_.Error) {
+        if($_.Skipped) {
+            $status = 'Skipped'
+            $skipped++
+        }
+        elseif($_.Error) {
             $status = 'Failed'
             $fail++
         }
@@ -276,6 +298,6 @@ function Write-TestResults {
                          [System.Net.WebUtility]::HtmlEncode($_.Error))
     }
 
-    [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, [String]::Join("", $rows)) | Out-File $Path | Out-Null
-    Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed. See $Path for more details"
+    [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null
+    Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See $Path for more details"
 }
