@@ -8,7 +8,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for DownloadProgressWindow.xaml
     /// </summary>
-    public partial class DownloadProgressWindow : Window {
+    public partial class DownloadProgressWindow : DialogWithNoMinimizeAndMaximize {
 
         private readonly DataServicePackage _package;
         private WebClient _client;

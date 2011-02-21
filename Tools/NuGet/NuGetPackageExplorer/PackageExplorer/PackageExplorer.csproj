@@ -118,6 +118,7 @@
     <Compile Include="Converters\UriConverter.cs" />
     <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="Converters\VersionSpecConverter.cs" />
+    <Compile Include="DialogWithNoMinimizeAndMaximize.cs" />
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
     </Compile>

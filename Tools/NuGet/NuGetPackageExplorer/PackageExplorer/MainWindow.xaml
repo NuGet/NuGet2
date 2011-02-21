@@ -312,7 +312,7 @@
                 </TreeView>
             </GroupBox>
             
-            <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="LightGray" VerticalAlignment="Bottom" />
+            <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="Transparent" VerticalAlignment="Bottom" />
 
             <GroupBox
                 Header="{Binding CurrentFileName, TargetNullValue='Content Viewer'}"

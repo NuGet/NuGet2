@@ -8,7 +8,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for PackageChooserDialog.xaml
     /// </summary>
-    public partial class PackageChooserDialog : Window {
+    public partial class PackageChooserDialog : DialogWithNoMinimizeAndMaximize {
         //private string _currentSort;
         //private bool _ascending;
 

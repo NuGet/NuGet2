@@ -1,4 +1,4 @@
-﻿<Window x:Class="PackageExplorer.PackageChooserDialog"
+﻿<self:DialogWithNoMinimizeAndMaximize x:Class="PackageExplorer.PackageChooserDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:self="clr-namespace:PackageExplorer"
@@ -7,7 +7,6 @@
         WindowStartupLocation="CenterOwner"
         Tag="{Binding LoadedCommand}"
         Loaded="Window_Loaded"
-        WindowStyle="ToolWindow"
         MinHeight="300"
         MinWidth="450"
         Height="400" 
@@ -120,4 +119,4 @@
             <Button x:Name="CancelButton" IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
         </StackPanel>
     </Grid>
-</Window>  
+</self:DialogWithNoMinimizeAndMaximize>  
