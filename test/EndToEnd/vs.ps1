@@ -48,11 +48,15 @@ function New-Solution {
 function New-Project {
     param(
          [parameter(Mandatory = $true)]
-         [string]$TemplateName
+         [string]$TemplateName,
+         [string]$ProjectName,
+         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
-    
+
     $id = New-Guid
-    $projectName = $TemplateName + "_$id"
+    if(!$ProjectName) {
+        $projectName = $TemplateName + "_$id"
+    } 
     
     # Make sure there is a solution
     Ensure-Solution
@@ -61,17 +65,27 @@ function New-Project {
     $projectTemplatePath = Join-Path $TemplatePath "$TemplateName.zip"
     
     # Find the vs template file
-    $projectTemplateFilePath = @(Get-ChildItem $projectTemplatePath -Filter *.vstemplate)[0].FullName
-    
+    $projectTemplateFilePath = @(Get-ChildItem $projectTemplatePath -Filter *.vstemplate)[0].FullName    
+
     # Get the output path of the project
-    $destPath = Join-Path (Get-SolutionDir) $projectName
+    if($SolutionFolder) {
+        $destPath = Join-Path (Get-SolutionDir) (Join-Path $SolutionFolder.Name $projectName)
+    }
+    else {
+        $destPath = Join-Path (Get-SolutionDir) $projectName
+    }
     
     # Store the active window so that we can set focus to it after the command completes
     # When we add a project to VS it usually tries to set focus to some page
     $window = $dte.ActiveWindow
     
-    # Add the project to the solution from th template file specified
-    $dte.Solution.AddFromTemplate($projectTemplateFilePath, $destPath, $projectName, $false) | Out-Null
+    if($SolutionFolder) {
+        $SolutionFolder.Object.AddFromTemplate($projectTemplateFilePath, $destPath, $projectName) | Out-Null
+    }
+    else {
+        # Add the project to the solution from th template file specified
+        $dte.Solution.AddFromTemplate($projectTemplateFilePath, $destPath, $projectName, $false) | Out-Null
+    }
     
     # Close all active documents
     $dte.Documents | %{ try { $_.Close() } catch { } }
@@ -90,44 +104,118 @@ function New-Project {
     $project    
 }
 
-function New-ClassLibrary { 
-    New-Project ClassLibrary
+function New-SolutionFolder {
+    param(
+        [string]$Name,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+    
+    $id = New-Guid
+    if(!$Name) {
+        $Name = "SolutionFolder_$id"
+    }
+    
+    if(!$SolutionFolder) {
+        # Make sure there is a solution
+        Ensure-Solution
+
+        $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+    }
+    elseif($SolutionFolder.Object.AddSolutionFolder) {
+        $solution = $SolutionFolder.Object
+    }
+
+    $solution.AddSolutionFolder($Name)
+}
+
+function New-ClassLibrary {
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project ClassLibrary $ProjectName
 }
 
 function New-ConsoleApplication {
-    New-Project ConsoleApplication
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project ConsoleApplication $ProjectName
 }
 
 function New-WebApplication {
-    New-Project EmptyWebApplicationProject40
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project EmptyWebApplicationProject40 $ProjectName
 }
 
 function New-MvcApplication { 
-    New-Project EmptyMvcWebApplicationProjectTemplatev2.0.cs
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project EmptyMvcWebApplicationProjectTemplatev2.0.cs $ProjectName
 }
 
 function New-WebSite {
-    New-Project EmptyWeb
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project EmptyWeb $ProjectName
 }
 
 function New-FSharpLibrary {
-    New-Project FSharpLibrary
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project FSharpLibrary $ProjectName
 }
 
 function New-FSharpConsoleApplication {
-    New-Project FSharpConsoleApplication
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project FSharpConsoleApplication $ProjectName
 }
 
 function New-WPFApplication {
-    New-Project WPFApplication
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project WPFApplication $ProjectName
 }
 
 function New-SilverlightClassLibrary {
-    New-Project SilverlightClassLibrary
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project SilverlightClassLibrary $ProjectName
 }
 
 function New-WindowsPhoneClassLibrary {
-    New-Project WindowsPhoneClassLibrary
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project WindowsPhoneClassLibrary $ProjectName
 }
 
 function Build-Project {
