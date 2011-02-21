@@ -33,43 +33,24 @@ namespace NuGet.PowerShell.Commands {
         [Parameter(Mandatory = true, ParameterSetName = "All")]
         public SwitchParameter All { get; set; }
 
-        [Parameter(ParameterSetName = ParameterAttribute.AllParameterSets)]
-        public SwitchParameter SafeName { get; set; }
-
         protected override void ProcessRecordCore() {
             if (!SolutionManager.IsSolutionOpen) {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             if (All.IsPresent) {
-                if (SafeName.IsPresent) {
-                    WriteObject(_solutionManager.GetProjectSafeNames(), enumerateCollection: true);
-                }
-                else {
-                    WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
-                }
+                WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
             }
             else {
                 // No name specified; return default project (if not null)
                 if (Name == null) {
-                    if (_solutionManager.DefaultProjectName != null) {
-                        if (SafeName.IsPresent) {
-                            WriteObject(_solutionManager.DefaultProjectName);
-                        }
-                        else {
-                            WriteObject(_solutionManager.DefaultProject);
-                        }
+                    if (_solutionManager.DefaultProject != null) {
+                        WriteObject(_solutionManager.DefaultProject);
                     }
                 }
                 else {
-                    if (SafeName.IsPresent) {
-                        // get all projects safe names matching name(s) - handles wildcards
-                        WriteObject(GetProjectSafeNamesByName(Name), enumerateCollection: true);
-                    }
-                    else {
-                        // get all projects matching name(s) - handles wildcards
-                        WriteObject(GetProjectsByName(Name), enumerateCollection: true);
-                    }
+                    // get all projects matching name(s) - handles wildcards
+                    WriteObject(GetProjectsByName(Name), enumerateCollection: true);
                 }
             }
         }

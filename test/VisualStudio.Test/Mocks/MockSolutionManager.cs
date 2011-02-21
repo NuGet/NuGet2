@@ -27,7 +27,7 @@ namespace NuGet.VisualStudio.Test.Mocks {
 
         public abstract IEnumerable<Project> GetProjects();
 
-        public abstract IEnumerable<string> GetProjectSafeNames();
+        public abstract string GetProjectSafeName(Project project);
 
         public void CloseSolution() {
             if (SolutionClosing != null) {

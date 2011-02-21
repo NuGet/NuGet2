@@ -139,14 +139,14 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public string GetSafeName(Project project) {
+        public string GetProjectSafeName(Project project) {
             // try searching for simple names first
-            var name = _projectCacheByName.Where(p => p.Value == project).Select(p => p.Key).FirstOrDefault();
-            if (name != null) {
+            string name = project.Name;
+            if (_projectCacheByName.ContainsKey(name)) {
                 return name;
             }
 
-            // now search for for unique names
+            // now search for unique name
             return _projectCacheByUniqueName.Where(p => p.Value == project).Select(p => p.Key).FirstOrDefault();
         }
 

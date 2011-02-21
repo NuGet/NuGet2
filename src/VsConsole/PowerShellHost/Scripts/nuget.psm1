@@ -97,7 +97,7 @@ function GetPackages($context) {
 }
 
 function GetProjectNames {
-    Get-Project -All -SafeName | Sort-Object
+    Get-Project -All | Select-Object -ExpandProperty Name | Sort-Object
 }
 
 function GetPackageIds($packages) {

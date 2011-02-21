@@ -144,13 +144,15 @@ namespace NuGet.PowerShell.Commands {
         }
 
         /// <summary>
-        /// Return all project safe names in the solution matching the provided names. Wildcards are supported.
+        /// Return all projects in the solution matching the provided names. Wildcards are supported.
         /// This method will automatically generate error records for non-wildcarded project names that
         /// are not found.
         /// </summary>
         /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
-        /// <returns>Project safe names matching the project name(s) provided.</returns>
-        protected IEnumerable<string> GetProjectSafeNamesByName(string[] projectNames) {
+        /// <returns>Projects matching the project name(s) provided.</returns>
+        protected IEnumerable<Project> GetProjectsByName(string[] projectNames) {
+            var allValidProjectNames = GetAllValidProjectNames().ToList();
+
             foreach (string projectName in projectNames) {
                 // if ctrl+c hit, leave immediately
                 if (Stopping) {
@@ -159,13 +161,15 @@ namespace NuGet.PowerShell.Commands {
 
                 // Treat every name as a wildcard; results in simpler code
                 var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
-
-                var matches = _solutionManager.GetProjectSafeNames().Where(s => pattern.IsMatch(s));
+                
+                var matches = from s in allValidProjectNames
+                              where pattern.IsMatch(s)
+                              select _solutionManager.GetProject(s);
 
                 int count = 0;
-                foreach (string name in matches) {
+                foreach (var project in matches) {
                     count++;
-                    yield return name;
+                    yield return project;
                 }
 
                 // We only emit non-terminating error record if a non-wildcarded name was not found.
@@ -178,14 +182,13 @@ namespace NuGet.PowerShell.Commands {
         }
 
         /// <summary>
-        /// Return all projects in the solution matching the provided names. Wildcards are supported.
-        /// This method will automatically generate error records for non-wildcarded project names that
-        /// are not found.
+        /// Return all possibly valid project names in the current solution. This includes all 
+        /// unique names and unconflicting simple names.
         /// </summary>
-        /// <param name="projectNames">An array of project names that may or may not include wildcards.</param>
-        /// <returns>Projects matching the project name(s) provided.</returns>
-        protected IEnumerable<Project> GetProjectsByName(string[] projectNames) {
-            return GetProjectSafeNamesByName(projectNames).Select(s => _solutionManager.GetProject(s));
+        /// <returns></returns>
+        private IEnumerable<string> GetAllValidProjectNames() {
+            var uniqueNames = _solutionManager.GetProjects().Select(p => _solutionManager.GetProjectSafeName(p));
+            return uniqueNames;
         }
 
         /// <summary>

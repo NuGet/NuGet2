@@ -15,13 +15,16 @@ namespace NuGet.VisualStudio {
 
         Project GetProject(string projectName);
 
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is an expensive operation")]
+        //[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is an expensive operation")]
         IEnumerable<Project> GetProjects();
 
         /// <summary>
-        /// Gets the project names which guarantees not to have conflicting names.
+        /// Get the safe name of the specified project which guarantees not to conflict with other projects.
         /// </summary>
-        IEnumerable<string> GetProjectSafeNames();
+        /// <remarks>
+        /// It tries to return simple name if possible. Otherwise it returns the unique name.
+        /// </remarks>
+        string GetProjectSafeName(Project project);
 
         bool IsSolutionOpen { get; }
     }

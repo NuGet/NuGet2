@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using Project = EnvDTE.Project;
 using ProjectItem = EnvDTE.ProjectItem;
+using System.Management.Automation;
 
 namespace NuGet.VisualStudio {
     public static class ProjectExtensions {
@@ -249,6 +250,13 @@ namespace NuGet.VisualStudio {
 
                 return String.Join("\\", nameParts);
             }
+        }
+
+        /// <summary>
+        /// This method is used for the ProjectName CodeProperty in Types.ps1xml
+        /// </summary>
+        public static string GetCustomUniqueNameForPS(PSObject psObject) {
+            return GetCustomUniqueName((Project) psObject.BaseObject);
         }
     }
 }
