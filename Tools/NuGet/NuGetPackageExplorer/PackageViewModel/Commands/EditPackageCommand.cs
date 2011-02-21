@@ -5,7 +5,7 @@ using System.Windows.Input;
 namespace PackageExplorerViewModel {
     internal class EditPackageCommand : CommandBase, ICommand {
 
-        public EditPackageCommand(IPackageViewModel viewModel) : base(viewModel) {
+        public EditPackageCommand(PackageViewModel viewModel) : base(viewModel) {
             viewModel.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnPropertyChanged);
         }
 

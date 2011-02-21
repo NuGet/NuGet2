@@ -94,5 +94,17 @@ namespace PackageExplorer.Properties {
                 this["WindowState"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("400")]
+        public double ContentViewerPanelHeight {
+            get {
+                return ((double)(this["ContentViewerPanelHeight"]));
+            }
+            set {
+                this["ContentViewerPanelHeight"] = value;
+            }
+        }
     }
 }

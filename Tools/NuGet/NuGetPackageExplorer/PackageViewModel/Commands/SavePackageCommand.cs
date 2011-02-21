@@ -13,7 +13,7 @@ namespace PackageExplorerViewModel {
         private const string SaveAction = "Save";
         private const string SaveAsAction = "SaveAs";
 
-        public SavePackageCommand(IPackageViewModel model) : base(model) {
+        public SavePackageCommand(PackageViewModel model) : base(model) {
             model.PropertyChanged += OnPropertyChanged;
         }
 

@@ -20,5 +20,8 @@
     <Setting Name="WindowState" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="ContentViewerPanelHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">400</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

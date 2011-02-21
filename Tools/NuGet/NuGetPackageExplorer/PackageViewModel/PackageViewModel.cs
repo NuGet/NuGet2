@@ -7,14 +7,14 @@ using NuGet;
 
 namespace PackageExplorerViewModel {
 
-    public class PackageViewModel : ViewModelBase, IPackageViewModel {
+    public class PackageViewModel : ViewModelBase {
 
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
         private IList<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
-        private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand;
+        private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand, _showContentViewerCommand, _viewContentCommand, _saveContentCommand;
         private bool _isInEditMode;
         private string _packageSource;
 
@@ -53,6 +53,17 @@ namespace PackageExplorerViewModel {
                 if (_packageMetadata != value) {
                     _packageMetadata = value;
                     RaisePropertyChangeEvent("PackageMetadata");
+                }
+            }
+        }
+
+        private bool _showContentViewer;
+        public bool ShowContentViewer {
+            get { return _showContentViewer; }
+            set {
+                if (_showContentViewer != value) {
+                    _showContentViewer = value;
+                    RaisePropertyChangeEvent("ShowContentViewer");
                 }
             }
         }
@@ -149,9 +160,36 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public ICommand ShowContentViewerCommand {
+            get {
+                if (_showContentViewerCommand == null) {
+                    _showContentViewerCommand = new ShowContentViewerCommand(this);
+                }
+                return _showContentViewerCommand;
+            }
+        }
+
+        public ICommand ViewContentCommand {
+            get {
+                if (_viewContentCommand == null) {
+                    _viewContentCommand = new ViewContentCommand(this);
+                }
+                return _viewContentCommand;
+            }
+        }
+
+        public ICommand SaveContentCommand {
+            get {
+                if (_saveContentCommand == null) {
+                    _saveContentCommand = new SaveContentCommand(this);
+                }
+                return _saveContentCommand;
+            }
+        }
+
         #endregion
 
-        #region IPackageViewModel interface implementations
+        #region PackageViewModel interface implementations
 
         public string PackageSource {
             get { return _packageSource; }
@@ -168,16 +206,13 @@ namespace PackageExplorerViewModel {
             private set;
         }
 
-        IPackageMetadata IPackageViewModel.PackageMetadata {
-            get { return this.PackageMetadata; }
-        }
-
-        void IPackageViewModel.ShowFile(string name, string content) {
+        public void ShowFile(string name, string content) {
             CurrentFileName = name;
             CurrentFileContent = content;
+            ShowContentViewer = true;
         }
 
-        bool IPackageViewModel.OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName) {
+        public bool OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName) {
 
             var filter = "All files (*.*)|*.*";
             if (addPackageExtension)
@@ -202,30 +237,30 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        IEnumerable<IPackageFile> IPackageViewModel.GetFiles() {
+        public IEnumerable<IPackageFile> GetFiles() {
             return _package.GetFiles();
         }
 
-        void IPackageViewModel.BegingEdit() {
+        public void BegingEdit() {
             // raise the property change event here to force the edit form to rebind 
             // all controls, which will erase all error states, if any, left over from the previous edit
             RaisePropertyChangeEvent("PackageMetadata");
             IsInEditMode = true;
         }
 
-        void IPackageViewModel.CancelEdit() {
+        public void CancelEdit() {
             PackageMetadata.ResetErrors();
             IsInEditMode = false;
         }
 
-        void IPackageViewModel.CommitEdit() {
+        public void CommitEdit() {
             HasEdit = true;
             PackageMetadata.ResetErrors();
             IsInEditMode = false;
             RaisePropertyChangeEvent("WindowTitle");
         }
 
-        void IPackageViewModel.OnSaved() {
+        public void OnSaved() {
             HasEdit = false;
         }
 

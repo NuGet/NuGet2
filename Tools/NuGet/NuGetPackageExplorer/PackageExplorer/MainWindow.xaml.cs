@@ -275,5 +275,29 @@ namespace PackageExplorer {
             Uri uri = new Uri("http://nuget.codeplex.com/documentation?title=Creating%20a%20Package");
             UriHelper.OpenExternalLink(uri);
         }
+
+        private void OnTreeViewItemDoubleClick(object sender, RoutedEventArgs args) {
+            var item = (TreeViewItem)sender;
+            PackageFile file = item.DataContext as PackageFile;
+            if (file != null) {
+                var command = ((PackageViewModel)DataContext).ViewContentCommand;
+                command.Execute(file);
+
+                args.Handled = true;
+            }
+        }
+
+        private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+
+            var settings = Properties.Settings.Default;
+
+            if ((bool)e.NewValue) {
+                ContentGrid.RowDefinitions[2].Height = new GridLength(settings.ContentViewerPanelHeight, GridUnitType.Pixel);
+            }
+            else {
+                settings.ContentViewerPanelHeight = ContentGrid.RowDefinitions[2].Height.Value;
+                ContentGrid.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Auto);
+            }
+        }
     }
 }

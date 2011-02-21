@@ -10,7 +10,7 @@ namespace PackageExplorerViewModel {
         private ICommand _viewCommand;
         private ICommand _saveCommand;
 
-        public IPackageViewModel PackageViewModel { get; set; }
+        public PackageViewModel PackageViewModel { get; set; }
 
         public PackageFile(IPackageFile file, string name) : base(name, file.Path) {
             if (file == null) {
@@ -26,23 +26,11 @@ namespace PackageExplorerViewModel {
         }
 
         public ICommand ViewCommand {
-            get {
-                if (_viewCommand == null) {
-                    _viewCommand = new ViewContentCommand(PackageViewModel, this);
-                }
-
-                return _viewCommand;
-            }
+            get { return PackageViewModel.ViewContentCommand; }
         }
 
         public ICommand SaveCommand {
-            get {
-                if (_saveCommand == null) {
-                    _saveCommand = new SaveContentCommand(PackageViewModel, this);
-                }
-
-                return _saveCommand;
-            }
+            get { return PackageViewModel.SaveContentCommand; }
         }
     }
 }

@@ -56,9 +56,9 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
+    <Compile Include="Commands\ShowContentViewerCommand.cs" />
     <Compile Include="EditablePackageDependency.cs" />
     <Compile Include="EditablePackageMetadata.cs" />
-    <Compile Include="IPackageViewMode.cs" />
     <Compile Include="PackageChooser\LoadedCommand.cs" />
     <Compile Include="PackageChooser\NavigateCommand.cs" />
     <Compile Include="PackageChooser\PackageChooserViewModel.cs" />
@@ -69,7 +69,7 @@
     <Compile Include="PackagePart\PackagePart.cs" />
     <Compile Include="PackagePart\PackagePartComparer.cs" />
     <Compile Include="PackagePart\PathToTreeConverter.cs" />
-    <Compile Include="PackagePart\SaveContentCommand.cs" />
+    <Compile Include="Commands\SaveContentCommand.cs" />
     <Compile Include="PackageViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -77,7 +77,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PackagePart\ViewContentCommand.cs" />
+    <Compile Include="Commands\ViewContentCommand.cs" />
     <Compile Include="Commands\SavePackageCommand.cs" />
     <Compile Include="ViewModelBase.cs" />
   </ItemGroup>

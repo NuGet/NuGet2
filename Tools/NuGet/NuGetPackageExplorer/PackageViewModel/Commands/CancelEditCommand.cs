@@ -5,7 +5,7 @@ using System.Windows.Input;
 namespace PackageExplorerViewModel {
     internal class CancelEditCommand : CommandBase, ICommand {
 
-        public CancelEditCommand(IPackageViewModel packageViewModel)
+        public CancelEditCommand(PackageViewModel packageViewModel)
             : base(packageViewModel) {
         }
 

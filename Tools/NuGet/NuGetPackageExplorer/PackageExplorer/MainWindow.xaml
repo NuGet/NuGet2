@@ -27,8 +27,8 @@
             <viewmodel:DisabledCommand x:Key="DisabledCommand" />
 
             <ContextMenu x:Key="SharedContextMenu">
-                <MenuItem Header="_View Content" Command="{Binding ViewCommand}" />
-                <MenuItem Header="_Save As..." Command="{Binding SaveCommand}" />
+                <MenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" />
+                <MenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 
             <self:BooleanToVisibilityConverter x:Key="invertedBoolToVis" Inverted="True" />
@@ -253,6 +253,9 @@
             </MenuItem>
             
             <MenuItem Header="_View">
+                <MenuItem Header="Show _Content Viewer" IsChecked="{Binding ShowContentViewer}" Command="{Binding ShowContentViewerCommand, FallbackValue={StaticResource DisabledCommand}}">
+                </MenuItem>
+                <Separator />
                 <MenuItem Header="Font _Size" x:Name="FontSizeMenuItem">
                     <MenuItem Header="_Normal" Tag="12" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <MenuItem Header="_Larger" Tag="14" Click="OnFontSizeItem_Click" IsCheckable="True" />
@@ -276,6 +279,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             
             <Grid.ColumnDefinitions>
@@ -283,7 +287,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <GroupBox Grid.RowSpan="2" BorderThickness="1" BorderBrush="DarkGray" Margin="3" Header="Package metadata" FlowDirection="LeftToRight">
+            <GroupBox Grid.RowSpan="3" BorderThickness="1" BorderBrush="DarkGray" Margin="3" Header="Package metadata" FlowDirection="LeftToRight">
                 <Grid>
                     <ContentControl 
                         Content="{Binding PackageMetadata}" 
@@ -298,21 +302,27 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents">
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3,3,3,0" Header="Package contents">
                 <TreeView ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
                 </TreeView>
             </GroupBox>
             
+            <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="LightGray" VerticalAlignment="Bottom" />
+
             <GroupBox
-                Header="{Binding CurrentFileName}"
-                Visibility="{Binding CurrentFileName, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}"
-                Height="{Binding ActualHeight, ElementName=ContentGrid, Converter={StaticResource lengthConverter}}"
-                Grid.Row="1"
+                Header="{Binding CurrentFileName, TargetNullValue='Content Viewer'}"
+                Grid.Row="2"
                 Grid.Column="1" 
+                Visibility="{Binding ShowContentViewer, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}"
                 Margin="3,0,3,3" 
                 Padding="0,4,0,0"
                 BorderBrush="DarkGray" 
-                BorderThickness="1">
+                BorderThickness="1" IsVisibleChanged="GroupBox_IsVisibleChanged">
                 <TextBox 
                     x:Name="FileContent"
                     BorderThickness="0"

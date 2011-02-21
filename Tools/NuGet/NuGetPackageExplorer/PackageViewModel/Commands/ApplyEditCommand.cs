@@ -5,7 +5,7 @@ using System.Windows.Input;
 namespace PackageExplorerViewModel {
     internal class ApplyEditCommand : CommandBase, ICommand {
 
-        public ApplyEditCommand(IPackageViewModel packageViewModel) : base(packageViewModel) {
+        public ApplyEditCommand(PackageViewModel packageViewModel) : base(packageViewModel) {
         }
 
         public bool CanExecute(object parameter) {

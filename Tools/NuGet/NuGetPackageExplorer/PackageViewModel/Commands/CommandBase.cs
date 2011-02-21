@@ -2,10 +2,10 @@
 namespace PackageExplorerViewModel {
     internal class CommandBase {
 
-        protected CommandBase(IPackageViewModel viewModel) {
+        protected CommandBase(PackageViewModel viewModel) {
             this.ViewModel = viewModel;
         }
 
-        protected IPackageViewModel ViewModel { get; private set; }
+        protected PackageViewModel ViewModel { get; private set; }
     }
 }
