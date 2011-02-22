@@ -21,6 +21,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             foreach (var tuple in extraData) {
                 _privateData.Properties.Add(new PSNoteProperty(tuple.Item1, tuple.Item2));
             }
+
+            // add the flag to indicate whether our host is operating in sync mode
+            _privateData.Properties.Add(new PSNoteProperty("IsSyncMode", !host.IsAsync));
         }
 
         CultureInfo _culture = Thread.CurrentThread.CurrentCulture;

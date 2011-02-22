@@ -16,7 +16,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var cmdlet = new NewPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false, defaultProjectName: null), packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false, defaultProjectName: null), packageManagerFactory.Object, null);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "The current environment doesn't have a solution open.");
@@ -29,7 +29,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "test", projects: new[] { TestUtils.GetProject("test") });
-            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object, null);
             cmdlet.ProjectName = project;
 
             // Act and Assert            
@@ -45,7 +45,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "test.cs", "assembly.info", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
-            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object, null);
             cmdlet.ProjectName = projectName;
 
             // Act and Assert
@@ -61,7 +61,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var project = TestUtils.GetProject(projectName, projectFiles: new[] { "foo.nuspec", "bar.nuspec", "foo.dll" });
             var solutionManager = TestUtils.GetSolutionManager(projects: new[] { project });
-            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object);
+            var cmdlet = new NewPackageCommand(solutionManager, packageManagerFactory.Object, null);
             cmdlet.ProjectName = projectName;
 
             // Act and Assert

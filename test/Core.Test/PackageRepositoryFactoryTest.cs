@@ -37,7 +37,7 @@ namespace NuGet.Test {
             var httpClient = new Mock<IHttpClient>();
             httpClient.SetupAllProperties();
             httpClient.Setup(c => c.GetRedirectedUri(It.IsAny<Uri>())).Returns(new Uri("http://example.com"));
-            var factory = new PackageRepositoryFactory(httpClient.Object);
+            var factory = new PackageRepositoryFactory(httpClient.Object, null);
 
             // Act
             IPackageRepository repository = factory.CreateRepository(new PackageSource("http://example.com/", "Test Source"));

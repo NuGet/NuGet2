@@ -84,7 +84,9 @@
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
+    <Compile Include="Utility\IProgressReporter.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
+    <Compile Include="Utility\NullProgressReporter.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\VersionSpec.cs" />

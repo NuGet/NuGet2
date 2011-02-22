@@ -7,14 +7,16 @@ namespace NuGet {
         private readonly IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly string _source;
+        private readonly IProgressReporter _progressReporter;
 
         public DataServicePackageRepository(Uri serviceRoot)
-            : this(serviceRoot, new HttpClient()) {
+            : this(serviceRoot, new HttpClient(), NullProgressReporter.Instance) {
         }
 
-        public DataServicePackageRepository(Uri serviceRoot, IHttpClient client)
+        public DataServicePackageRepository(Uri serviceRoot, IHttpClient client, IProgressReporter progressReporter)
             : this(new DataServiceContextWrapper(serviceRoot), client) {
             _source = serviceRoot.OriginalString;
+            _progressReporter = progressReporter;
         }
 
         private DataServicePackageRepository(IDataServiceContext context, IHttpClient httpClient) {
@@ -46,6 +48,7 @@ namespace NuGet {
             // REVIEW: This is the only way (I know) to download the package on demand
             // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
             package.Context = _context;
+            package.ProgressReporter = _progressReporter;
         }
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {

@@ -1,4 +1,5 @@
-﻿using System.Windows.Documents;
+﻿using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using Microsoft.VisualStudio.PlatformUI;
 
@@ -71,9 +72,16 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         public void ShowProgress(string operation, int percentComplete) {
-            ProgressBar.IsIndeterminate = false;
-            ProgressBar.Value = percentComplete;
-            StatusText.Text = operation;
+            if (percentComplete == ProgressBar.Maximum) {
+                // the progress complete, reverts back to indeterminate state
+                ProgressBar.IsIndeterminate = true;
+                StatusText.Text = Title;
+            }
+            else {
+                ProgressBar.IsIndeterminate = false;
+                ProgressBar.Value = percentComplete;
+                StatusText.Text = operation;
+            }
         }
     }
 }

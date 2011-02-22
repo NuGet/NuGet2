@@ -96,7 +96,7 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97) {
-                Debug.Print("Exec: GUID_VSStandardCommandSet97: {0}", (VSConstants.VSStd97CmdID)nCmdID);
+                //Debug.Print("Exec: GUID_VSStandardCommandSet97: {0}", (VSConstants.VSStd97CmdID)nCmdID);
 
                 switch ((VSConstants.VSStd97CmdID)nCmdID) {
                     case VSConstants.VSStd97CmdID.Paste:
@@ -110,7 +110,7 @@ namespace NuGetConsole.Implementation.Console {
                 }
             }
             else if (pguidCmdGroup == VSConstants.VSStd2K) {
-                Debug.Print("Exec: VSStd2K: {0}", (VSConstants.VSStd2KCmdID)nCmdID);
+                //Debug.Print("Exec: VSStd2K: {0}", (VSConstants.VSStd2KCmdID)nCmdID);
 
                 switch ((VSConstants.VSStd2KCmdID)nCmdID) {
                     case VSConstants.VSStd2KCmdID.TYPECHAR:

@@ -24,8 +24,9 @@ namespace NuGet.Dialog.Providers {
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepository recentPackagesRepository,
             IPackageSourceProvider packageSourceProvider,
-            ProviderServices providerServices)
-            : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices) {
+            ProviderServices providerServices,
+            IVsProgressEvents progressEvents)
+            : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices, progressEvents) {
 
             _aggregateSource = packageSourceProvider.AggregateSource;
             _recentPackagesRepository = recentPackagesRepository;

@@ -148,6 +148,8 @@ namespace NuGet {
             set;
         }
 
+        internal IProgressReporter ProgressReporter { get; set; }
+
         IEnumerable<string> IPackageMetadata.Authors {
             get {
                 if (String.IsNullOrEmpty(Authors)) {
@@ -217,7 +219,7 @@ namespace NuGet {
             }
 
             byte[] hashBytes = Convert.FromBase64String(PackageHash);
-            return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, useCache: true);
+            return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, this, ProgressReporter);
         }
 
         /// <summary>

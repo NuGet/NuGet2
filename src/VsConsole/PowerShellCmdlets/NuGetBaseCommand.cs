@@ -18,10 +18,12 @@ namespace NuGet.PowerShell.Commands {
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
+        private IVsProgressEvents _progressEvents;
 
-        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory) {
+        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IVsProgressEvents progressEvents) {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
+            _progressEvents = progressEvents;
         }
 
         private ProgressRecordCollection ProgressRecordCache {
@@ -49,6 +51,18 @@ namespace NuGet.PowerShell.Commands {
         protected IVsPackageManagerFactory PackageManagerFactory {
             get {
                 return _vsPackageManagerFactory;
+            }
+        }
+
+        protected bool IsSyncMode {
+            get {
+                if (Host == null || Host.PrivateData == null) {
+                    return false;
+                }
+
+                PSObject privateData = Host.PrivateData;
+                var syncModeProp = privateData.Properties["IsSyncMode"];
+                return syncModeProp != null && (bool)syncModeProp.Value;
             }
         }
 
@@ -91,6 +105,23 @@ namespace NuGet.PowerShell.Commands {
             BeginProcessing();
             ProcessRecord();
             EndProcessing();
+        }
+
+        protected override void BeginProcessing() {
+            base.BeginProcessing();
+
+            if (!IsSyncMode && _progressEvents != null) {
+                // subscribe to the event so that VsProgressReporter doesn't automatically write progress to the status bar
+                _progressEvents.ProgressAvailable += OnProgressAvailable;
+            }
+        }
+
+        protected override void EndProcessing() {
+            base.EndProcessing();
+
+            if (_progressEvents != null) {
+                _progressEvents.ProgressAvailable -= OnProgressAvailable;
+            }
         }
 
         protected virtual void Log(MessageLevel level, string formattedMessage) {
@@ -250,6 +281,11 @@ namespace NuGet.PowerShell.Commands {
         }
 
         protected void WriteProgress(int activityId, string operation, int percentComplete) {
+            if (IsSyncMode) {
+                // don't bother to show progress if we are in synchronous mode
+                return;
+            }
+
             ProgressRecord progressRecord;
 
             // retrieve the ProgressRecord object for this particular activity id from the cache.
@@ -265,6 +301,10 @@ namespace NuGet.PowerShell.Commands {
             progressRecord.PercentComplete = percentComplete;
 
             WriteProgress(progressRecord);
+        }
+
+        private void OnProgressAvailable(object sender, ReportProgressEventArgs e) {
+            WriteProgress(1, e.Operation, e.PercentComplete);
         }
 
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord> {

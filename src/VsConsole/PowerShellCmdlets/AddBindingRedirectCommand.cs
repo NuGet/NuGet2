@@ -14,11 +14,11 @@ namespace NuGet.PowerShell.Commands {
         private readonly ISolutionManager _solutionManager;
 
         public AddBindingRedirectCommand()
-            : this(ServiceLocator.GetInstance<ISolutionManager>()) {
+            : this(ServiceLocator.GetInstance<ISolutionManager>(), ServiceLocator.GetInstance<IVsProgressEvents>()) {
         }
 
-        public AddBindingRedirectCommand(ISolutionManager solutionManager)
-            : base(solutionManager, null) {
+        public AddBindingRedirectCommand(ISolutionManager solutionManager, IVsProgressEvents progressEvents)
+            : base(solutionManager, null, progressEvents) {
             _solutionManager = solutionManager;
         }
 

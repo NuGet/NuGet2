@@ -16,8 +16,9 @@ namespace NuGet.Dialog.Providers {
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
-            ProviderServices providerServices)
-            : base(project, projectManager, resources, packageRepositoryFactory, packageSourceProvider, packageManagerFactory, providerServices) {
+            ProviderServices providerServices,
+            IVsProgressEvents progressEvents)
+            : base(project, projectManager, resources, packageRepositoryFactory, packageSourceProvider, packageManagerFactory, providerServices, progressEvents) {
         }
 
         public override string Name {

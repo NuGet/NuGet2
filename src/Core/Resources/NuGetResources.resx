@@ -294,4 +294,7 @@
   <data name="FrameworkAssemblies" xml:space="preserve">
     <value>framework assemblies</value>
   </data>
+  <data name="DownloadProgressStatus" xml:space="preserve">
+    <value>Downloading {0} {1}...</value>
+  </data>
 </root>

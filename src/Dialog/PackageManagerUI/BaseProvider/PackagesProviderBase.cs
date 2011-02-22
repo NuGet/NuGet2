@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 using NuGetConsole;
+using System.Diagnostics;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -27,12 +28,14 @@ namespace NuGet.Dialog.Providers {
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
         private Project _project;
+        private readonly IVsProgressEvents _progressEvents;
 
         protected PackagesProviderBase(
             Project project,
             IProjectManager projectManager,
             ResourceDictionary resources,
-            ProviderServices providerServices) {
+            ProviderServices providerServices,
+            IVsProgressEvents progressEvents) {
 
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
@@ -50,6 +53,7 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("providerServices");
             }
 
+            _progressEvents = progressEvents;
             _resources = resources;
             _scriptExecutor = providerServices.ScriptExecutor;
             _progressWindowOpener = providerServices.ProgressWindow;
@@ -232,6 +236,8 @@ namespace NuGet.Dialog.Providers {
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
+            _progressEvents.ProgressAvailable += OnProgressAvailable;
+
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
@@ -244,6 +250,10 @@ namespace NuGet.Dialog.Providers {
             ShowProgressWindow();
         }
 
+        private void OnProgressAvailable(object sender, ReportProgressEventArgs e) {
+            _progressWindowOpener.ShowProgress(e.Operation, e.PercentComplete);
+        }
+
         private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e) {
             var item = (PackageItem)e.Argument;
             bool succeeded = ExecuteCore(item);
@@ -253,6 +263,8 @@ namespace NuGet.Dialog.Providers {
 
         private void OnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             OperationCoordinator.IsBusy = false;
+
+            _progressEvents.ProgressAvailable -= OnProgressAvailable;
 
             if (e.Error == null) {
                 if (e.Cancelled) {
@@ -346,6 +358,7 @@ namespace NuGet.Dialog.Providers {
 
         protected void ShowProgress(string operation, int percentComplete) {
             if (_progressWindowOpener.IsOpen) {
+                Debug.WriteLine(percentComplete);
                 _progressWindowOpener.ShowProgress(operation, percentComplete);
             }
         }

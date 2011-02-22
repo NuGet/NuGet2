@@ -6,11 +6,13 @@ namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
         private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
         private IHttpClient _httpClient;
+        private readonly IProgressReporter _progressReporter;
 
-        public PackageRepositoryFactory() : this(new HttpClient()) { }
+        public PackageRepositoryFactory() : this(new HttpClient(), NullProgressReporter.Instance) { }
 
-        public PackageRepositoryFactory(IHttpClient httpClient) {
+        public PackageRepositoryFactory(IHttpClient httpClient, IProgressReporter progressReporter) {
             _httpClient = httpClient;
+            _progressReporter = progressReporter;
         }
 
         public static PackageRepositoryFactory Default {
@@ -44,7 +46,7 @@ namespace NuGet {
             }
 
             // Make sure we get resolve any fwlinks before creating the repository
-            return new DataServicePackageRepository(uri, _httpClient);
+            return new DataServicePackageRepository(uri, _httpClient, _progressReporter);
         }
     }
 }

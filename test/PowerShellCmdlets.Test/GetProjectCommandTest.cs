@@ -69,7 +69,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 TestUtils.GetProject("ConsoleApplication1"), TestUtils.GetProject("WebSite1"), TestUtils.GetProject("TestProject1") 
             };
             var solutionManager = TestUtils.GetSolutionManager(defaultProjectName: "ConsoleApplication1", projects: projects);
-            return new GetProjectCommand(solutionManager);
+            return new GetProjectCommand(solutionManager, null);
         }
     }
 }

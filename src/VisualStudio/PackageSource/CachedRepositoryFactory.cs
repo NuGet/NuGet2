@@ -12,8 +12,8 @@ namespace NuGet.VisualStudio {
         private readonly IPackageSourceProvider _packageSourceProvider;
 
         [ImportingConstructor]
-        public CachedRepositoryFactory(IPackageSourceProvider packageSourceProvider)
-            : this(PackageRepositoryFactory.Default, packageSourceProvider) {
+        public CachedRepositoryFactory(IPackageSourceProvider packageSourceProvider, IProgressReporter progressReporter)
+            : this(new PackageRepositoryFactory(new HttpClient(), progressReporter), packageSourceProvider) {
         }
 
         internal CachedRepositoryFactory(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider packageSourceProvider) {

@@ -17,15 +17,17 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRecentPackageRepository>()) {
+                   ServiceLocator.GetInstance<IRecentPackageRepository>(),
+                   ServiceLocator.GetInstance<IVsProgressEvents>()) {
         }
 
         public FindPackageCommand(IPackageRepositoryFactory repositoryFactory,
                           IPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
                           IVsPackageManagerFactory packageManagerFactory,
-                          IPackageRepository recentPackagesRepository)
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository) {
+                          IPackageRepository recentPackagesRepository,
+                          IVsProgressEvents progressEvents) 
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, progressEvents) {
         }
 
         protected override void ProcessRecordCore() {

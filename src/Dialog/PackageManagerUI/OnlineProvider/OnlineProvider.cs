@@ -27,8 +27,9 @@ namespace NuGet.Dialog.Providers {
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
-            ProviderServices providerServices) :
-            base(project, projectManager, resources, providerServices) {
+            ProviderServices providerServices,
+            IVsProgressEvents progressEvents) :
+            base(project, projectManager, resources, providerServices, progressEvents) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
@@ -104,7 +105,7 @@ namespace NuGet.Dialog.Providers {
             var walker = new InstallWalker(
                 ProjectManager.LocalRepository,
                 activePackageManager.SourceRepository,
-                NullLogger.Instance,
+                this,
                 ignoreDependencies: false);
 
             IList<PackageOperation> operations = walker.ResolveOperations(item.PackageIdentity).ToList();

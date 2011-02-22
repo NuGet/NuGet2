@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -29,6 +30,7 @@ namespace NuGet.Test {
             request.Setup(r => r.GetResponse()).Returns(response.Object);
             var httpClient = new Mock<IHttpClient>();
             httpClient.Setup(c => c.CreateRequest(It.IsAny<Uri>())).Returns(request.Object);
+            //httpClient.Setup(c => c.DownloadDataAsync(It.IsAny<Uri>())).Raises(f => f.DownloadDataCompleted += null, CreateDownloadProgressChangedEventArgs());
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(h => h.VerifyHash(It.IsAny<byte[]>(), It.IsAny<byte[]>())).Returns(false);
             var packageFactory = new Mock<IPackageFactory>();
@@ -36,36 +38,23 @@ namespace NuGet.Test {
             var downloader = new PackageDownloader(httpClient.Object, packageFactory.Object, hashProvider.Object);
 
             // Act, Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[] { }, useCache: false));
+            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[0], null, null));
         }
 
-        [TestMethod]
-        public void DownloadPackageReturnsCachedBytes() {
-            // Arrange
-            var response = new Mock<WebResponse>();
-            response.Setup(r => r.GetResponseStream()).Returns(new MemoryStream(new byte[] { 78, 117, 71, 101, 116 }));
-            var request = new Mock<WebRequest>();
-            request.Setup(r => r.GetResponse()).Returns(response.Object);
-            var httpClient = new Mock<IHttpClient>();
-            int httpClientCallbackCount = 0;
-            httpClient.Setup(c => c.CreateRequest(It.IsAny<Uri>())).Returns(request.Object).Callback(() => httpClientCallbackCount++);
+        private DownloadDataCompletedEventArgs CreateDownloadProgressChangedEventArgs(byte[] result = null) {
+            if (result == null) {
+                result = new byte[0];
+            }
 
-            Func<Stream> streamFactory = null;
-            var packageFactory = new Mock<IPackageFactory>();
-            packageFactory.Setup(f => f.CreatePackage(It.IsAny<Func<Stream>>())).Returns(new Mock<IPackage>().Object).Callback<Func<Stream>>(sf => streamFactory = sf);
-            var downloader = new PackageDownloader(httpClient.Object, packageFactory.Object, new Mock<IHashProvider>().Object);
+            var type = typeof(DownloadDataCompletedEventArgs);
+            var constructor = type.GetConstructor(
+                BindingFlags.NonPublic | BindingFlags.Instance,
+                null,
+                new[] { typeof(byte[]), typeof(Exception), typeof(bool), typeof(object) },
+                new ParameterModifier[0]);
 
-            // Act
-            downloader.DownloadPackage(new Uri("http://example.com"), null, useCache: true);
-
-            // Assert
-            var stream = streamFactory(); // HttpClient is invoked
-            var cachedStream = streamFactory(); // HttpClient should not be invoked.
-            Assert.AreEqual(1, httpClientCallbackCount);
-            Assert.AreNotSame(stream, cachedStream);
-            var streamContents = stream.ReadToEnd();
-            Assert.AreEqual(streamContents, cachedStream.ReadToEnd());
-            Assert.AreEqual("NuGet", streamContents);
+            var obj = constructor.Invoke(new object[] { result, null, false, null });
+            return (DownloadDataCompletedEventArgs)obj;
         }
     }
 

@@ -22,8 +22,9 @@ namespace NuGet.Dialog.Providers {
             Project project,
             IProjectManager projectManager, 
             ResourceDictionary resources,
-            ProviderServices providerServices)
-            : base(project, projectManager, resources, providerServices) {
+            ProviderServices providerServices,
+            IVsProgressEvents progressEvents)
+            : base(project, projectManager, resources, providerServices, progressEvents) {
 
             _packageManager = packageManager;
         }

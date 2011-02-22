@@ -105,7 +105,8 @@ namespace NuGet.PowerShell.Commands.Test {
                 GetSourceProvider(), 
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 
                 packageManagerFactory.Object,
-                new Mock<IPackageRepository>().Object);
+                new Mock<IPackageRepository>().Object,
+                null);
         }
 
         private static IPackageRepositoryFactory GetRepositoryFactory() {

@@ -25,15 +25,17 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRecentPackageRepository>()) {
+                   ServiceLocator.GetInstance<IRecentPackageRepository>(), 
+                   ServiceLocator.GetInstance<IVsProgressEvents>()) {
         }
 
         public GetPackageCommand(IPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,
-                                IPackageRepository recentPackagesRepository)
-            : base(solutionManager, packageManagerFactory) {
+                                IPackageRepository recentPackagesRepository,
+                                IVsProgressEvents progressEvents)
+            : base(solutionManager, packageManagerFactory, progressEvents) {
 
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
@@ -177,9 +179,10 @@ namespace NuGet.PowerShell.Commands {
 
         private void WritePackages(IQueryable<IPackage> packages) {
             
-            int total;
+            int total = 0;
             int packagesSoFar = 0;
-            bool showProgress = ShouldShowProgress(packages, out total);
+            // don't show progress if we are in sync mode
+            bool showProgress = !IsSyncMode && ShouldShowProgress(packages, out total);
 
             bool hasPackage = false;
             foreach (var package in packages) {

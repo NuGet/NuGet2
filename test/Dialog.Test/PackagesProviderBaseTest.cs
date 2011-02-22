@@ -150,7 +150,7 @@ namespace NuGet.Dialog.Test {
         public void DetailViewDataTemplate() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
-            
+
             // Act && Assert
             Assert.IsNotNull(provider.DetailViewDataTemplate);
         }
@@ -170,8 +170,9 @@ namespace NuGet.Dialog.Test {
             }
 
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
-                base(new Mock<Project>().Object, projectManager, resources, 
-                    new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider())) {
+                base(new Mock<Project>().Object, projectManager, resources,
+                    new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
+                    new Mock<IVsProgressEvents>().Object) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {
