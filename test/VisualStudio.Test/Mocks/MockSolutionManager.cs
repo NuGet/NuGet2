@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio.Test.Mocks {
             get;
         }
 
-        public abstract Project GetProject(string projectName);
+        public abstract Project GetProject(string projectSafeName);
 
         public abstract IEnumerable<Project> GetProjects();
 

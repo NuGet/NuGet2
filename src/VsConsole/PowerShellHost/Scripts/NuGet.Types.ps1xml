@@ -28,10 +28,13 @@
     <Type>
         <Name>Microsoft.VisualStudio.FSharp.ProjectSystem.Automation.OAProject</Name>
         <Members>
-            <AliasProperty>
+            <CodeProperty>
                 <Name>ProjectName</Name>
-                <ReferencedMemberName>Name</ReferencedMemberName>
-            </AliasProperty>
+                <GetCodeReference>
+                    <TypeName>NuGet.VisualStudio.ProjectExtensions</TypeName>
+                    <MethodName>GetCustomUniqueNameForPS</MethodName>
+                </GetCodeReference>
+            </CodeProperty>
             <ScriptProperty>
                 <Name>Type</Name>
                 <GetScriptBlock>

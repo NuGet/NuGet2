@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using EnvDTE;
@@ -11,7 +12,6 @@ using Microsoft.VisualStudio.Shell.Interop;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using Project = EnvDTE.Project;
 using ProjectItem = EnvDTE.ProjectItem;
-using System.Management.Automation;
 
 namespace NuGet.VisualStudio {
     public static class ProjectExtensions {

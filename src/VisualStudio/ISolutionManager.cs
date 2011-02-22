@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio {
         string DefaultProjectName { get; set; }
         Project DefaultProject { get; }
 
-        Project GetProject(string projectName);
+        Project GetProject(string projectSafeName);
 
         //[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is an expensive operation")]
         IEnumerable<Project> GetProjects();
