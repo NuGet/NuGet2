@@ -30,7 +30,6 @@ namespace NuGet.Test {
             request.Setup(r => r.GetResponse()).Returns(response.Object);
             var httpClient = new Mock<IHttpClient>();
             httpClient.Setup(c => c.CreateRequest(It.IsAny<Uri>())).Returns(request.Object);
-            //httpClient.Setup(c => c.DownloadDataAsync(It.IsAny<Uri>())).Raises(f => f.DownloadDataCompleted += null, CreateDownloadProgressChangedEventArgs());
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(h => h.VerifyHash(It.IsAny<byte[]>(), It.IsAny<byte[]>())).Returns(false);
             var packageFactory = new Mock<IPackageFactory>();

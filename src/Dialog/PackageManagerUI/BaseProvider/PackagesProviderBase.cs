@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using EnvDTE;
@@ -9,7 +10,6 @@ using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 using NuGetConsole;
-using System.Diagnostics;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -358,7 +358,6 @@ namespace NuGet.Dialog.Providers {
 
         protected void ShowProgress(string operation, int percentComplete) {
             if (_progressWindowOpener.IsOpen) {
-                Debug.WriteLine(percentComplete);
                 _progressWindowOpener.ShowProgress(operation, percentComplete);
             }
         }

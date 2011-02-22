@@ -111,7 +111,6 @@ namespace NuGet.PowerShell.Commands {
             base.BeginProcessing();
 
             if (!IsSyncMode && _progressEvents != null) {
-                // subscribe to the event so that VsProgressReporter doesn't automatically write progress to the status bar
                 _progressEvents.ProgressAvailable += OnProgressAvailable;
             }
         }
@@ -304,7 +303,7 @@ namespace NuGet.PowerShell.Commands {
         }
 
         private void OnProgressAvailable(object sender, ReportProgressEventArgs e) {
-            WriteProgress(1, e.Operation, e.PercentComplete);
+            WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
         }
 
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord> {
