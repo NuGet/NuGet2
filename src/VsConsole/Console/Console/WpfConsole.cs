@@ -447,16 +447,25 @@ namespace NuGetConsole.Implementation.Console {
                 throw new ArgumentNullException("operation");
             }
 
-            if (percentComplete < 0 || percentComplete > 100) {
-                throw new ArgumentOutOfRangeException("percentComplete");
+            if (percentComplete < 0) {
+                percentComplete = 0;
             }
 
-            VsStatusBar.Progress(
-                ref _pdwCookieForStatusBar,
-                1 /* in progress */,
-                operation,
-                (uint)percentComplete,
-                (uint)100);
+            if (percentComplete > 100) {
+                percentComplete = 100;
+            }
+
+            if (percentComplete == 100) {
+                HideProgress();
+            }
+            else {
+                VsStatusBar.Progress(
+                    ref _pdwCookieForStatusBar,
+                    1 /* in progress */,
+                    operation,
+                    (uint)percentComplete,
+                    (uint)100);
+            }
         }
 
         private void HideProgress() {

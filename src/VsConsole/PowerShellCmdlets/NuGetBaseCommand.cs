@@ -18,7 +18,7 @@ namespace NuGet.PowerShell.Commands {
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
-        private IVsProgressEvents _progressEvents;
+        private readonly IVsProgressEvents _progressEvents;
 
         protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IVsProgressEvents progressEvents) {
             _solutionManager = solutionManager;
@@ -54,7 +54,7 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        protected bool IsSyncMode {
+        internal bool IsSyncMode {
             get {
                 if (Host == null || Host.PrivateData == null) {
                     return false;

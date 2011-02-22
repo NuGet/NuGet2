@@ -13,7 +13,7 @@ namespace NuGet {
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
-        private readonly PackageDownloader _packageDownloader = new PackageDownloader();
+        private readonly Lazy<PackageDownloader> _packageDownloader = new Lazy<PackageDownloader>(() => new PackageDownloader());
         private readonly LazyWithRecreate<IPackage> _package;
 
         public DataServicePackage() {
@@ -219,7 +219,7 @@ namespace NuGet {
             }
 
             byte[] hashBytes = Convert.FromBase64String(PackageHash);
-            return _packageDownloader.DownloadPackage(DownloadUrl, hashBytes, this, ProgressReporter);
+            return _packageDownloader.Value.DownloadPackage(DownloadUrl, hashBytes, this, ProgressReporter);
         }
 
         /// <summary>

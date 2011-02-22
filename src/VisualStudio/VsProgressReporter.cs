@@ -2,7 +2,6 @@
 using System.ComponentModel.Composition;
 
 namespace NuGet.VisualStudio {
-
     [Export(typeof(IProgressReporter))]
     [Export(typeof(IVsProgressEvents))]
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -16,6 +15,9 @@ namespace NuGet.VisualStudio {
         }
 
         public VsProgressReporter(IServiceProvider serviceProvider) {
+            if (serviceProvider == null) {
+                throw new ArgumentNullException("serviceProvider");
+            }
             _serviceProvider = serviceProvider;
         }
 

@@ -13,8 +13,7 @@ namespace NuGet {
         private IPackageFactory _packageFactory = null;
         private IHashProvider _hashProvider = null;
         private IProgressReporter _progressReporter;
-        private IPackage _package;
-        private IDisposable _subscribeDisposable;
+        private string _currentOperation;
 
         public PackageDownloader()
             : this(null) {
@@ -28,36 +27,25 @@ namespace NuGet {
             _httpClient = httpClient ?? new HttpClient();
             _packageFactory = packageFactory ?? new ZipPackageFactory();
             _hashProvider = hashProvider ?? new CryptoHashProvider();
-            _subscribeDisposable = _httpClient.Subscribe(this);
+            _httpClient.Subscribe(this);
             var version = typeof(PackageDownloader).Assembly.GetNameSafe().Version;
             string userAgent = String.Format(CultureInfo.InvariantCulture, UserAgent, version, Environment.OSVersion);
             _httpClient.UserAgent = userAgent;
         }
 
-        public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackage package, IProgressReporter progressReporter) {
-
-            // make sure no previous download is pending
-            Debug.Assert(_progressReporter == null);
-
+        public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package, IProgressReporter progressReporter) {
+            if (package == null) {
+                throw new ArgumentNullException("package");
+            }
             _progressReporter = progressReporter ?? NullProgressReporter.Instance;
-            _package = package;
+            _currentOperation = String.Format(CultureInfo.CurrentCulture, NuGetResources.DownloadProgressStatus, package.Id, package.Version);
 
             byte[] buffer = _httpClient.DownloadData(uri);
-
             if (!_hashProvider.VerifyHash(buffer, packageHash)) {
                 throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
             }
 
-            try {
-                return _packageFactory.CreatePackage(() => new MemoryStream(buffer));
-            }
-            catch (AggregateException ex) {
-                if (ex.InnerException != null) {
-                    throw ex.InnerException;
-                }
-
-                throw;
-            }
+            return _packageFactory.CreatePackage(() => new MemoryStream(buffer));
         }
 
         public void InitializeRequest(WebRequest request) {
@@ -66,17 +54,13 @@ namespace NuGet {
 
         public void OnCompleted() {
             _progressReporter = null;
-            _subscribeDisposable.Dispose();
         }
 
         public void OnError(Exception error) {
-            throw error;
         }
 
         public void OnNext(int value) {
-            _progressReporter.ReportProgress(
-                String.Format(CultureInfo.CurrentCulture, NuGetResources.DownloadProgressStatus, _package.Id, _package.Version),
-                value);
+            _progressReporter.ReportProgress(_currentOperation, value);
         }
     }
 }

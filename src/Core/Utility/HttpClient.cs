@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Net;
 
 namespace NuGet {
-    public class HttpClient : IHttpClient, IObservable<int> {
+    public class HttpClient : IHttpClient {
         private const int RequestTimeOut = 5000;
-        private readonly HashSet<IObserver<int>> _observers = new HashSet<IObserver<int>>();
+        private IObserver<int> _observer;
 
         public string UserAgent {
             get;
@@ -50,40 +48,48 @@ namespace NuGet {
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public byte[] DownloadData(Uri uri) {
-
             const int ChunkSize = 1024 * 4; // 4KB
 
-            WebRequest request = HttpWebRequest.Create(uri);
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            int length = (int)response.ContentLength;
+            byte[] buffer = null;
+            try {
+                WebRequest request = CreateRequest(uri);
+                using (var response = request.GetResponse()) {
 
-            byte[] buffer = new byte[(int)length];
-            int totalReadSoFar = 0;
+                    // total response length
+                    int length = (int)response.ContentLength;
+                    buffer = new byte[length];
 
-            using (Stream stream = response.GetResponseStream()) {
-                try {
-                    while (totalReadSoFar < length) {
-                        int bytesRead = stream.Read(buffer, totalReadSoFar, Math.Min(length - totalReadSoFar, ChunkSize));
-                        if (bytesRead == 0) {
-                            break;
-                        }
-                        else {
-                            totalReadSoFar += bytesRead;
-                            IterateObservers(o => o.OnNext((totalReadSoFar * 100) / length));
+                    // We read the response stream chunk by chunk (each chunk is 4KB). 
+                    // After reading each chunk, we report the progress based on the total number bytes read so far.
+                    int totalReadSoFar = 0;
+                    using (Stream stream = response.GetResponseStream()) {
+                        while (totalReadSoFar < length) {
+                            int bytesRead = stream.Read(buffer, totalReadSoFar, Math.Min(length - totalReadSoFar, ChunkSize));
+                            if (bytesRead == 0) {
+                                break;
+                            }
+                            else {
+                                totalReadSoFar += bytesRead;
+                                NotifyObserver(o => o.OnNext((totalReadSoFar * 100) / length));
+                            }
                         }
                     }
-
-                }
-                catch (Exception ex) {
-                    IterateObservers(o => o.OnError(ex));
                 }
             }
+            catch (Exception ex) {
+                NotifyObserver(o => o.OnError(ex));
+                throw;
+            }
 
-            response.Close();
-
-            IterateObservers(o => o.OnCompleted());
+            NotifyObserver(o => o.OnCompleted());
 
             return buffer;
+        }
+
+        private void NotifyObserver(Action<IObserver<int>> action) {
+            if (_observer != null) {
+                action(_observer);
+            }
         }
 
         public IDisposable Subscribe(IObserver<int> observer) {
@@ -91,31 +97,8 @@ namespace NuGet {
                 throw new ArgumentNullException("observer");
             }
 
-            _observers.Add(observer);
-            
-            Action dispose = () => _observers.Remove(observer);
-            return new SubscriberDisposable(dispose);
-        }
-
-        private void IterateObservers(Action<IObserver<int>> action) {
-            // We can't enumerate directly on _observers because the invoked action 
-            // can potentially remove the subscribe, which modifies _observers.
-            var temp = _observers.ToList();
-            foreach (var observer in temp) {
-                action(observer);
-            }
-        }
-
-        private class SubscriberDisposable : IDisposable {
-            private Action _disposeAction;
-
-            public SubscriberDisposable(Action disposeAction) {
-                _disposeAction = disposeAction;
-            }
-
-            public void Dispose() {
-                _disposeAction.Invoke();
-            }
+            _observer = observer;
+            return null;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -36,25 +35,10 @@ namespace NuGet.Test {
             packageFactory.Setup(f => f.CreatePackage(It.IsAny<Func<Stream>>())).Returns(new Mock<IPackage>().Object).Callback<Func<Stream>>(streamFactory => streamFactory());
             var downloader = new PackageDownloader(httpClient.Object, packageFactory.Object, hashProvider.Object);
 
+            var package = PackageUtility.CreatePackage("A", "1.0");
+
             // Act, Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[0], null, null));
-        }
-
-        private DownloadDataCompletedEventArgs CreateDownloadProgressChangedEventArgs(byte[] result = null) {
-            if (result == null) {
-                result = new byte[0];
-            }
-
-            var type = typeof(DownloadDataCompletedEventArgs);
-            var constructor = type.GetConstructor(
-                BindingFlags.NonPublic | BindingFlags.Instance,
-                null,
-                new[] { typeof(byte[]), typeof(Exception), typeof(bool), typeof(object) },
-                new ParameterModifier[0]);
-
-            var obj = constructor.Invoke(new object[] { result, null, false, null });
-            return (DownloadDataCompletedEventArgs)obj;
+            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[0], package, null));
         }
     }
-
 }
