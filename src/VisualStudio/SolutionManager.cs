@@ -88,11 +88,20 @@ namespace NuGet.VisualStudio {
 
         public string SolutionDirectory {
             get {
-                if (!IsSolutionOpen || String.IsNullOrEmpty(_dte.Solution.FullName)) {
+                if (!IsSolutionOpen ) {
                     return null;
                 }
-
-                return Path.GetDirectoryName(_dte.Solution.FullName);
+                // Use .Properties.Item("Path") instead of .FullName because .FullName might not be
+                // available if the solution is just being created
+                Property property = _dte.Solution.Properties.Item("Path");
+                if(property == null) {
+                    return null;
+                }
+                string solutionFilePath = property.Value;
+                if (String.IsNullOrEmpty(solutionFilePath)) {
+                    return null;
+                }
+                return Path.GetDirectoryName(solutionFilePath);
             }
         }
 
