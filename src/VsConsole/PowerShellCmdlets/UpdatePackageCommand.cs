@@ -50,7 +50,7 @@ namespace NuGet.PowerShell.Commands {
                 PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
             }
             finally {
-                UnsubscribeToProgressEvents();
+                UnsubscribeFromProgressEvents();
             }
         }
     }

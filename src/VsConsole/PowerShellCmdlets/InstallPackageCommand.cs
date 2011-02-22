@@ -54,7 +54,7 @@ namespace NuGet.PowerShell.Commands {
                 PackageManager.InstallPackage(projectManager, Id, Version, IgnoreDependencies.IsPresent, this);
             }
             finally {
-                UnsubscribeToProgressEvents();
+                UnsubscribeFromProgressEvents();
             }
         }
     }

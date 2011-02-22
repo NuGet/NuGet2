@@ -113,7 +113,7 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        protected void UnsubscribeToProgressEvents() {
+        protected void UnsubscribeFromProgressEvents() {
             if (_progressEvents != null) {
                 _progressEvents.ProgressAvailable -= OnProgressAvailable;
             }
