@@ -107,17 +107,13 @@ namespace NuGet.PowerShell.Commands {
             EndProcessing();
         }
 
-        protected override void BeginProcessing() {
-            base.BeginProcessing();
-
+        protected void SubscribeToProgressEvents() {
             if (!IsSyncMode && _progressEvents != null) {
                 _progressEvents.ProgressAvailable += OnProgressAvailable;
             }
         }
 
-        protected override void EndProcessing() {
-            base.EndProcessing();
-
+        protected void UnsubscribeToProgressEvents() {
             if (_progressEvents != null) {
                 _progressEvents.ProgressAvailable -= OnProgressAvailable;
             }

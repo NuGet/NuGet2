@@ -44,8 +44,14 @@ namespace NuGet.PowerShell.Commands {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            IProjectManager projectManager = ProjectManager;
-            PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+            try {
+                SubscribeToProgressEvents();
+                IProjectManager projectManager = ProjectManager;
+                PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+            }
+            finally {
+                UnsubscribeToProgressEvents();
+            }
         }
     }
 }
