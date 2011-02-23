@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.Shell.Interop;
+using VSLangProj;
+using VsWebSite;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using Project = EnvDTE.Project;
 using ProjectItem = EnvDTE.ProjectItem;
@@ -82,6 +84,17 @@ namespace NuGet.VisualStudio {
             }
 
             return projectItem != null;
+        }
+
+        public static bool IsClassLibrary(this Project project) {
+            if (project.IsWebSite()) {
+                return false;
+            }
+
+            // Consider class libraries projects that have one project type guid and an output type of project library.
+            var outputType = project.GetPropertyValue<prjOutputType>("OutputType");
+            return project.GetProjectTypeGuids().Count() == 1 &&
+                   outputType == prjOutputType.prjOutputTypeLibrary;
         }
 
         // TODO: Return null for library projects
@@ -218,6 +231,61 @@ namespace NuGet.VisualStudio {
             }
 
             return projectTypeGuids.Split(';');
+        }
+
+        internal static IEnumerable<string> GetAssemblyClosure(this Project project) {
+            return GetAssemblyClosure(project, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        }
+
+        internal static IEnumerable<string> GetAssemblyClosure(this Project project, HashSet<string> projects) {
+            if (projects.Contains(project.UniqueName)) {
+                yield break;
+            }
+
+            foreach (var reference in project.Object.References) {
+                string path = null;
+                // Get the referenced project from the reference if any
+                var referencedProject = GetReferencedProject(project, reference);
+                if (referencedProject == null &&
+                    TryGetReferencePath(project, reference, out path) &&
+                    File.Exists(path)) {
+                    yield return path;
+                }
+
+                if (referencedProject != null) {
+                    // Recursively get all assemblies from referened projects
+                    foreach (var nestedReference in GetAssemblyClosure(referencedProject, projects)) {
+                        yield return nestedReference;
+                    }
+                }
+            }
+
+            projects.Add(project.UniqueName);
+        }
+
+        private static bool TryGetReferencePath(Project project, dynamic reference, out string path) {
+            path = null;
+            if (project.IsWebSite()) {
+                // For websites only include bin assemblies
+                if (reference.ReferenceKind == (int)AssemblyReferenceType.AssemblyReferenceBin) {
+                    path = reference.FullPath;
+                    return true;
+                }
+            }
+            else if (reference.CopyLocal) {
+                // Otherwise only copy local assemblies matter for other projects
+                path = reference.Path;
+                return true;
+            }
+
+            return false;
+        }
+
+        internal static Project GetReferencedProject(Project project, dynamic reference) {
+            if (project.IsWebSite()) {
+                return reference.ReferencedProject;
+            }
+            return reference.SourceProject;
         }
 
         public static MsBuildProject AsMSBuildProject(this Project project) {

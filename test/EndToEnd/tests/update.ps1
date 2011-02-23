@@ -216,7 +216,7 @@ function Test-AddingBindingRedirectAfterUpdate {
     )
     
     # Arrange
-    $p = New-ClassLibrary
+    $p = New-WebApplication
     
     # Act
     $p | Install-Package A -Source $context.RepositoryPath

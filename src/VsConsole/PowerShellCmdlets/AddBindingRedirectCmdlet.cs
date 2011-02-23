@@ -55,20 +55,7 @@ namespace NuGet.Cmdlets {
 
             try {
                 foreach (Project project in projects) {
-                    // Get the project's output path
-                    string outputPath = project.GetOutputPath();
-
-                    // Get the binding redirects from the output path
-                    IEnumerable<AssemblyBinding> redirects = BindingRedirectResolver.GetBindingRedirects(outputPath,
-                                                                                                         domain);
-                    // Create a project system
-                    IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
-
-                    // Create a binding redirect manager over the configuration
-                    var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
-
-                    // Add the redirects
-                    manager.AddBindingRedirects(redirects);
+                    var redirects = RuntimeHelpers.AddBindingRedirects(project, domain);
 
                     // Print out what we did
                     WriteObject(redirects, enumerateCollection: true);

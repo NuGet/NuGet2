@@ -192,7 +192,6 @@ function Test-FSharpSimpleInstallWithContentFiles {
     Assert-SolutionPackage jquery
     Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5.js)
     Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5.min.js)
-    Assert-NotNull (Get-ProjectItem $p Scripts\jquery-1.5-vsdoc.js)
 }
 
 function Test-FSharpSimpleWithAssemblyReference {
@@ -298,4 +297,182 @@ function Test-InstallPackageWithNestedAspxContentFiles {
 
     Assert-Package $p PackageWithNestedAspxFiles 1.0
     Assert-SolutionPackage PackageWithNestedAspxFiles 1.0
+}
+
+function Test-SimpleBindingRedirects {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-WebSite
+    $c = New-FSharpConsoleApplication
+
+    $projects = @($a, $b, $c)
+
+    # Act
+    $projects | Install-Package B -Version 2.0 -Source $context.RepositoryPath
+    $projects | Install-Package A -Version 1.0 -Source $context.RepositoryPath
+    $projects | Install-Package D -Version 2.0 -Source $context.RepositoryPath
+    $projects | Install-Package C -Version 1.0 -Source $context.RepositoryPath
+
+    # Assert
+    $projects | %{ Assert-Reference $_ A 1.0.0.0; 
+                   Assert-Reference $_ B 2.0.0.0; 
+                   Assert-Reference $_ C 1.0.0.0;
+                   Assert-Reference $_ D 2.0.0.0; }
+
+    Assert-BindingRedirect $a web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
+    Assert-BindingRedirect $a web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
+    Assert-BindingRedirect $b web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
+    Assert-BindingRedirect $b web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
+    Assert-BindingRedirect $c app.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
+    Assert-BindingRedirect $c app.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
+}
+
+function Test-SimpleBindingRedirectsClassLibraryReference {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-WebSite
+    $d = New-ClassLibrary
+    $e = New-ClassLibrary
+    
+    Add-ProjectReference $a $d
+    Add-ProjectReference $b $e
+
+    # Act
+    $d | Install-Package E -Source $context.RepositoryPath
+    $e | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $d E
+    Assert-Package $e E
+    Assert-Reference $d E 1.0.0.0
+    Assert-Reference $e E 1.0.0.0
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-Null (Get-ProjectItem $d app.config)
+    Assert-Null (Get-ProjectItem $d web.config)
+    Assert-Null (Get-ProjectItem $e app.config)
+    Assert-Null (Get-ProjectItem $e web.config)
+}
+
+function Test-SimpleBindingRedirectsIndirectReference {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-ClassLibrary
+    $c = New-ClassLibrary
+
+    Add-ProjectReference $a $b
+    Add-ProjectReference $b $c
+
+    # Act
+    $c | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Null (Get-ProjectItem $b app.config)
+    Assert-Null (Get-ProjectItem $b web.config)
+    Assert-Null (Get-ProjectItem $c app.config)
+    Assert-Null (Get-ProjectItem $c web.config)
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
+function Test-SimpleBindingRedirectsNonWeb {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-ConsoleApplication
+    $b = New-WPFApplication
+    $projects = @($a, $b)
+
+    # Act
+    $projects | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    $projects | %{ Assert-Package $_ E; 
+                   Assert-BindingRedirect $_ app.config F '0.0.0.0-1.0.5.0' '1.0.5.0' }
+}
+
+function Test-BindingRedirectComplex {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-ConsoleApplication
+    $c = New-ClassLibrary
+
+    Add-ProjectReference $a $b
+    Add-ProjectReference $b $c
+
+    $projects = @($a, $b)
+
+    # Act
+    $c | Install-Package E -Source $context.RepositoryPath
+
+    Assert-Package $c E; 
+
+    # Assert
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
+function Test-SimpleBindingRedirectsWebsite {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebSite
+
+    # Act
+    $a | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $a E; 
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
+function Test-AddingBindingRedirectsNoOpOnClassLibrary {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-ClassLibrary
+
+    # Act
+    $a | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $a E;
+    Assert-Null (Get-ProjectItem $a app.config)
+    Assert-Null (Get-ProjectItem $a web.config)
+
+    $a | Add-BindingRedirect
+    Assert-Null (Get-ProjectItem $a app.config)
+    Assert-Null (Get-ProjectItem $a web.config)
+}
+
+function Test-BindingRedirectInstallLargeProject {
+    param(
+        $context
+    )
+    $numProjects = 25
+    $projects = 0..$numProjects | %{ New-ClassLibrary $_ }
+    $p = New-WebApplication
+
+    for($i = 0; $i -lt $numProjects; $i++) {
+        Add-ProjectReference $projects[$i] $projects[$i+1]
+    }
+
+    Add-ProjectReference $p $projects[0]
+
+    $projects[$projects.Length - 1] | Install-Package E -Source $context.RepositoryPath
+    Assert-BindingRedirect $p web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }

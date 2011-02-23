@@ -18,6 +18,8 @@ namespace NuGet.VisualStudio {
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is an expensive operation")]
         IEnumerable<Project> GetProjects();
 
+        IEnumerable<Project> GetDependentProjects(Project project);
+
         bool IsSolutionOpen { get; }
     }
 }
