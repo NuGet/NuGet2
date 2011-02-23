@@ -65,7 +65,7 @@ function Test-GetProjectCommandWithWildCardsWorksWithProjectHavingTheSameName {
     Assert-Null $s1
 
     $s2 = (Get-Project 'Folder2' -ea SilentlyContinue)
-    Assert-Null $s1
+    Assert-Null $s2
 
     $fs = @( Get-Project 'Folder1*' )
     Assert-AreEqual 2 $fs.Count
@@ -80,15 +80,15 @@ function Test-GetProjectCommandWithWildCardsWorksWithProjectHavingTheSameName {
 }
 
 function Test-SimpleNameDoNotWorkWhenAllProjectsAreNested {
-	# Arrange
+    # Arrange
     $f = New-SolutionFolder 'Folder1'
     $p1 = $f | New-ClassLibrary 'ProjectA'
 
     $g = New-SolutionFolder 'Folder2'
     $p2 = $g | New-ClassLibrary 'ProjectA'
 
-	# Assert
-	Assert-Throws { (Get-Project -Name 'ProjectA') } "Project 'ProjectA' is not found."
+    # Assert
+    Assert-Throws { (Get-Project -Name 'ProjectA') } "Project 'ProjectA' is not found."
 }
 
 function Assert-DefaultProject($p) {
