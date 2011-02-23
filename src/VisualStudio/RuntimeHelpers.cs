@@ -14,6 +14,7 @@ namespace NuGet.VisualStudio {
                 // Create a project system
                 IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
+                // Run this on the UI thread since it enumerates all references
                 IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure());
 
                 redirects = BindingRedirectResolver.GetBindingRedirects(assemblies, domain);
@@ -41,7 +42,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain) {
+        private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain) {
             var projects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             AddBindingRedirects(solutionManager, project, domain, projects);
         }
@@ -53,7 +54,7 @@ namespace NuGet.VisualStudio {
 
             AddBindingRedirects(project, domain);
 
-            // Add binding redirects too all projects that are referencing this one
+            // Add binding redirects to all projects that are referencing this one
             foreach (Project dependentProject in solutionManager.GetDependentProjects(project)) {
                 AddBindingRedirects(solutionManager, dependentProject, domain, projects);
             }

@@ -222,18 +222,15 @@ namespace NuGet.VisualStudio {
             }
 
             var dependentProjects = new Dictionary<string, List<Project>>();
-            
+
             // Get all of the projects in the solution and build the reverse graph. i.e.
             // if A has a project reference to B (A -> B) the this will return B -> A
             // We need to run this on the ui thread so that it doesn't freeze for websites. Since there might be a 
-            // large number of references.
+            // large number of references.           
             ThreadHelper.Generic.Invoke(() => {
                 foreach (var proj in GetProjects()) {
-                    foreach (var reference in proj.Object.References) {
-                        var referencedProject = ProjectExtensions.GetReferencedProject(proj, reference);
-                        if (referencedProject != null) {
-                            AddDependentProject(dependentProjects, referencedProject, proj);
-                        }
+                    foreach (var referencedProject in proj.GetReferencedProjects()) {
+                        AddDependentProject(dependentProjects, referencedProject, proj);
                     }
                 }
             });
@@ -246,8 +243,8 @@ namespace NuGet.VisualStudio {
             return Enumerable.Empty<Project>();
         }
 
-        private static void AddDependentProject(IDictionary<string, List<Project>> dependentProjects, 
-                                         Project project, 
+        private static void AddDependentProject(IDictionary<string, List<Project>> dependentProjects,
+                                         Project project,
                                          Project dependent) {
             List<Project> dependents;
             if (!dependentProjects.TryGetValue(project.UniqueName, out dependents)) {
