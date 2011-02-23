@@ -241,11 +241,26 @@ function Test-TabExpansionForProjectsReturnsBothUniqueNamesAndSafeNames {
     $p2 = New-ConsoleApplication 'ProjectA'
 
     # Act
-    $suggestions = TabExpansion 'Get-Project'
+    $suggestions = TabExpansion 'Get-Project -name '
 
     # Assert
-    #Assert-True ($suggestions -contains 'ProjectA')
-    #Assert-True ($suggestions -contains 'Folder1\ProjectA')
-    #Assert-True ($suggestions -contains 'ProjectB')
-    #Assert-True ($suggestions -contains 'Folder1\ProjectB')
+	Assert-AreEqual 4 $suggestions.Count
+
+	Assert-AreEqual 'Folder1\ProjectA' $suggestions[0] 
+	Assert-AreEqual 'Folder1\ProjectB'$suggestions[1]
+    Assert-AreEqual 'ProjectA' $suggestions[2] 
+    Assert-AreEqual 'ProjectB' $suggestions[3] 
+    
+}
+
+function Test-TabExpansionWorksWithOneProject { 
+    # Arrange
+    $f = New-FSharpLibrary 'ProjectA'
+
+    # Act
+    $suggestion = @(TabExpansion 'Get-Project -Name ')
+
+	# Assert
+	Assert-AreEqual 1 $suggestion.Count
+	Assert-AreEqual 'ProjectA' $suggestion[0]
 }

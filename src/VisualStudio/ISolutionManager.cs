@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using EnvDTE;
 
 namespace NuGet.VisualStudio {
@@ -15,7 +14,6 @@ namespace NuGet.VisualStudio {
 
         Project GetProject(string projectSafeName);
 
-        //[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is an expensive operation")]
         IEnumerable<Project> GetProjects();
 
         /// <summary>

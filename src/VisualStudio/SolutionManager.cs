@@ -135,7 +135,7 @@ namespace NuGet.VisualStudio {
                 HashSet<Project> allProjects;
                 if (_projectCacheByName.TryGetValue(projectSafeName, out allProjects)) {
                     if (allProjects.Count == 1) {
-                        return allProjects.First();
+                        return allProjects.Single();
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace NuGet.VisualStudio {
             // we are having a name collision here.
             if (allProjects.Count == 1 && 
                 name.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
-                Project defaultProject = allProjects.First();
+                Project defaultProject = allProjects.Single();
                 DefaultProjectName = defaultProject.GetCustomUniqueName();
             }
 
@@ -262,7 +262,7 @@ namespace NuGet.VisualStudio {
                 else if (allProjects.Count == 1) {
                     // the DefaultProjectName is currently set to this project's unique name, change it to simple name
                     // because there is no more collision after the removal.
-                    if (allProjects.First().GetCustomUniqueName().Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
+                    if (allProjects.Single().GetCustomUniqueName().Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
                         DefaultProjectName = name;
                     }
                 }
