@@ -26,20 +26,27 @@ namespace NuGetConsole.Implementation.Console {
         public string HostName { get; private set; }
         private IVsStatusbar _vsStatusBar;
         private uint _pdwCookieForStatusBar;
+        private IPrivateConsoleStatus _consoleStatus;
 
         public event EventHandler<EventArgs<Tuple<SnapshotSpan, Color?, Color?>>> NewColorSpan;
         public event EventHandler ConsoleCleared;
 
-        public WpfConsole(WpfConsoleService factory, IServiceProvider sp, string contentTypeName, string hostName)
+        public WpfConsole(
+            WpfConsoleService factory, 
+            IServiceProvider sp, 
+            IPrivateConsoleStatus consoleStatus, 
+            string contentTypeName, 
+            string hostName)
             : base(factory) {
             UtilityMethods.ThrowIfArgumentNull(sp);
 
-            this.ServiceProvider = sp;
-            this.ContentTypeName = contentTypeName;
-            this.HostName = hostName;
+            _consoleStatus = consoleStatus;
+            ServiceProvider = sp;
+            ContentTypeName = contentTypeName;
+            HostName = hostName;
         }
 
-        IPrivateConsoleDispatcher _dispatcher;
+        private IPrivateConsoleDispatcher _dispatcher;
         public IPrivateConsoleDispatcher Dispatcher {
             get {
                 if (_dispatcher == null) {
@@ -478,6 +485,8 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void SetExecutionMode(bool isExecuting) {
+            _consoleStatus.SetBusy(isExecuting);
+
             if (!isExecuting) {
                 HideProgress();
 

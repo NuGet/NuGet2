@@ -45,9 +45,22 @@ namespace NuGetConsole.Implementation.Console {
         [Import]
         public IStandardClassificationService StandardClassificationService { get; set; }
 
+        private IPrivateConsoleStatus _privateConsoleStatus;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification="MEF export")]
+        [Export(typeof(IConsoleStatus))]
+        public IConsoleStatus ConsoleStatus { 
+            get { return _privateConsoleStatus; } 
+        }
+
+        public WpfConsoleService() {
+            _privateConsoleStatus = new PrivateConsoleStatus();
+        }
+
         #region IWpfConsoleService
         public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName) {
-            return new WpfConsole(this, sp, contentTypeName, hostName).MarshalledConsole;
+            return new WpfConsole(this, sp, _privateConsoleStatus, contentTypeName, hostName).MarshalledConsole;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -123,6 +136,21 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             return _tokenClassifications[i];
+        }
+
+        private sealed class PrivateConsoleStatus : IPrivateConsoleStatus {
+
+            public PrivateConsoleStatus() {
+            }
+
+            public void SetBusy(bool isBusy) {
+                IsBusy = isBusy;
+            }
+
+            public bool IsBusy {
+                get;
+                private set;
+            }
         }
     }
 

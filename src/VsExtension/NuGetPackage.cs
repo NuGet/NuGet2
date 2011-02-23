@@ -12,6 +12,7 @@ using NuGet.Dialog.PackageManagerUI;
 using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
+using NuGetConsole;
 using NuGetConsole.Implementation;
 
 namespace NuGet.Tools {
@@ -35,6 +36,8 @@ namespace NuGet.Tools {
     [Guid(GuidList.guidNuGetPkgString)]
     public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
         private DTE _dte;
+        private IConsoleStatus _consoleStatus;
+
         public NuGetPackage() {
         }
 
@@ -84,6 +87,8 @@ namespace NuGet.Tools {
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = HasActiveLoadedSupportedProject;
+            // disable the dialog menu if the console is busy executing a command;
+            command.Enabled = !_consoleStatus.IsBusy;
         }
 
         private void ShowSettingsWindow(object sender, EventArgs args) {
@@ -98,6 +103,7 @@ namespace NuGet.Tools {
             base.Initialize();
 
             _dte = ServiceLocator.GetInstance<DTE>();
+            _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
