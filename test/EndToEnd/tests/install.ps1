@@ -476,3 +476,51 @@ function Test-BindingRedirectInstallLargeProject {
     $projects[$projects.Length - 1] | Install-Package E -Source $context.RepositoryPath
     Assert-BindingRedirect $p web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
+
+function Test-BindingRedirectDuplicateReferences {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-ConsoleApplication
+    $c = New-ClassLibrary
+
+    ($a, $b) | Install-Package A -Source $context.RepositoryPath -IgnoreDependencies
+
+    Add-ProjectReference $a $b
+    Add-ProjectReference $b $c
+
+    # Act
+    $c | Install-Package E -Source $context.RepositoryPath
+
+    Assert-Package $c E 
+
+    # Assert
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
+function Test-BindingRedirectClassLibraryWithDifferentDependents {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-ConsoleApplication
+    $c = New-ClassLibrary
+
+    ($a, $b) | Install-Package A -Source $context.RepositoryPath -IgnoreDependencies
+
+    Add-ProjectReference $a $c
+    Add-ProjectReference $b $c
+
+    # Act
+    $c | Install-Package E -Source $context.RepositoryPath
+
+    Assert-Package $c E
+
+    # Assert
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}

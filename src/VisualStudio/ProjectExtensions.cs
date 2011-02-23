@@ -234,10 +234,12 @@ namespace NuGet.VisualStudio {
         }
 
         internal static IEnumerable<string> GetAssemblyClosure(this Project project) {
-            return GetAssemblyClosure(project, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            var projects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var assemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            return GetAssemblyClosure(project, projects, assemblies);
         }
 
-        internal static IEnumerable<string> GetAssemblyClosure(this Project project, HashSet<string> projects) {
+        internal static IEnumerable<string> GetAssemblyClosure(this Project project, HashSet<string> projects, HashSet<string> assemblies) {
             if (projects.Contains(project.UniqueName)) {
                 yield break;
             }
@@ -248,13 +250,14 @@ namespace NuGet.VisualStudio {
                 var referencedProject = GetReferencedProject(project, reference);
                 if (referencedProject == null &&
                     TryGetReferencePath(project, reference, out path) &&
-                    File.Exists(path)) {
+                    File.Exists(path) &&
+                    assemblies.Add(Path.GetFileName(path))) {
                     yield return path;
                 }
 
                 if (referencedProject != null) {
                     // Recursively get all assemblies from referened projects
-                    foreach (var nestedReference in GetAssemblyClosure(referencedProject, projects)) {
+                    foreach (var nestedReference in GetAssemblyClosure(referencedProject, projects, assemblies)) {
                         yield return nestedReference;
                     }
                 }
