@@ -15,17 +15,16 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             cm.RegisterCommand(mockCommand);
             // Assert
-            Assert.AreEqual(1, cm.GetCommands().Count);
+            Assert.AreEqual(1, cm.GetCommands().Count());
         }
 
         [TestMethod]
-        public void GetCommand_ReturnsNullIfNoCommandFound() {
+        public void GetCommand_ThrowsIfNoCommandFound() {
             // Arrange
             CommandManager cm = new CommandManager();
-            // Act
-            ICommand cmd = cm.GetCommand("NoCommandByThisName");
-            // Assert
-            Assert.IsNull(cmd);
+            
+            // Act and Assert
+            ExceptionAssert.Throws<CommandLineException>(() => cm.GetCommand("NoCommandByThisName"), "Unknown command: 'NoCommandByThisName'");
         }
 
         [TestMethod]
@@ -38,29 +37,6 @@ namespace NuGet.Test.NuGetCommandLine {
             ICommand actualCommand = cm.GetCommand("MockCommand");
             // Assert
             Assert.AreEqual(expectedCommand, actualCommand);
-        }
-
-        [TestMethod]
-        public void GetCommandAttribute_ReturnsNullIfNoCommandFound() {
-            // Arrange
-            CommandManager cm = new CommandManager();
-            // Act
-            CommandAttribute commandAttribute = cm.GetCommandAttribute(new MockCommand());
-            // Assert
-            Assert.IsNull(commandAttribute);
-        }
-
-        [TestMethod]
-        public void GetCommandAttribute_ReturnsCorrectCommandAttribute() {
-            // Arrange
-            CommandManager cm = new CommandManager();
-            ICommand cmd = new MockCommand();
-            CommandAttribute expectedCommandAttribute = ((CommandAttribute)cmd.GetType().GetCustomAttributes(typeof(CommandAttribute), true)[0]);
-            cm.RegisterCommand(cmd);
-            // Act 
-            CommandAttribute actualCommandAttribute = cm.GetCommandAttribute(cmd);
-            // Assert
-            Assert.AreEqual(expectedCommandAttribute, actualCommandAttribute);
         }
 
         [TestMethod]
@@ -98,22 +74,113 @@ namespace NuGet.Test.NuGetCommandLine {
 
         }
 
-        [Command("MockCommand", "This is a Mock Command")]
+        [TestMethod]
+        public void RegisterCommand_DoesNotRegisterCommandIfNoCommandAttributesArePresent() {
+            // Arrange 
+            CommandManager cm = new CommandManager();
+            ICommand cmd = new MockCommandEmptyAttributes();
+            cm.RegisterCommand(cmd);
+            
+            // Act
+            var registeredCommands = cm.GetCommands();
+            
+            // Assert
+            Assert.IsFalse(registeredCommands.Any());
+        }
+
+        [TestMethod]
+        public void RegisterCommand_ReturnsExactMatchesEvenIfAmbigious() {
+            // Arrange 
+            CommandManager cm = new CommandManager();
+            
+            cm.RegisterCommand(new MockCommand(new CommandAttribute("Foo", "desc")));
+            cm.RegisterCommand(new MockCommand(new CommandAttribute("FooBar", "desc")));
+
+            // Act
+            var result = cm.GetCommand("Foo");
+
+            // Assert
+            // If we get this far, we've found 'foo'
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.CommandAttribute.CommandName, "Foo");
+        }
+
+        [TestMethod]
+        public void RegisterCommand_ThrowsIfCommandNamesAreAmbigious() {
+            // Arrange 
+            CommandManager cm = new CommandManager();
+
+            cm.RegisterCommand(new MockCommand(new CommandAttribute("Foo", "desc")));
+            cm.RegisterCommand(new MockCommand(new CommandAttribute("FooBar", "desc")));
+
+            // Act and Assert
+            ExceptionAssert.Throws<CommandLineException>(() => cm.GetCommand("f"), "Ambiguous command 'f'. Possible values: Foo FooBar.");
+        }
+
         private class MockCommand : ICommand {
+            private readonly CommandAttribute _attribute;
+
             public System.Collections.Generic.List<string> Arguments { get; set; }
             [Option("A Option")]
             public string Message { get; set; }
             [Option("A Option Two")]
             public string MessageTwo { get; set; }
             public void Execute() { }
+
+            public MockCommand()
+                : this(new CommandAttribute("MockCommand", "This is a Mock Command")) {
+
+            }
+
+            public MockCommand(CommandAttribute attribute) {
+                _attribute = attribute;
+            }
+
+            public CommandAttribute CommandAttribute {
+                get {
+                    return _attribute;
+                }
+            }
+
+            public IEnumerable<CommandAttribute> GetCommandAttribute() {
+                return new[] { CommandAttribute };
+            }
         }
 
-        [Command("MockCommandBabOption", "This is a Mock Command With A Option Without a Setter")]
         private class MockCommandBadOption : ICommand {
             public System.Collections.Generic.List<string> Arguments { get; set; }
             [Option("A Option")]
             public string Message { get { return "Bad"; } }
             public void Execute() { }
+
+
+            public CommandAttribute CommandAttribute {
+                get {
+                    return new CommandAttribute("MockCommandBadOption", "This is a Mock Command With A Option Without a Setter");
+                }
+            }
+
+            public IEnumerable<CommandAttribute> GetCommandAttribute() {
+                return new[] { CommandAttribute };
+            }
+        }
+
+        private class MockCommandEmptyAttributes : ICommand {
+            public System.Collections.Generic.List<string> Arguments { get; set; }
+            [Option("A Option")]
+            public string Message { get { return "Bad"; } }
+            public void Execute() { }
+
+
+            public CommandAttribute CommandAttribute {
+                get {
+                    return null;
+                }
+            }
+
+            public IEnumerable<CommandAttribute> GetCommandAttribute() {
+                return Enumerable.Empty<CommandAttribute>();
+            }
         }
     }
 }

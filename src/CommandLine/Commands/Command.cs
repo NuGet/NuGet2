@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
     public abstract class Command : ICommand {
+        private const string _commandSuffix = "Command";
+        private CommandAttribute _commandAttribute;
+
         public Command() {
             Arguments = new List<string>();
         }
@@ -22,9 +27,17 @@ namespace NuGet.Commands {
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
 
+        public CommandAttribute CommandAttribute {
+            get {
+                if (_commandAttribute == null) {
+                    _commandAttribute = GetCommandAttribute();
+                }
+                return _commandAttribute;
+            }
+        }
 
         public string GetCurrentCommandName() {
-            return Manager.GetCommandAttribute(this).CommandName;
+            return CommandAttribute.CommandName;
         }
 
         public void Execute() {
@@ -37,5 +50,23 @@ namespace NuGet.Commands {
         }
 
         public abstract void ExecuteCommand();
+
+        public virtual CommandAttribute GetCommandAttribute() {
+            var attributes = GetType().GetCustomAttributes(typeof(CommandAttribute), true);
+            if (attributes.Any()) {
+                return (CommandAttribute) attributes.FirstOrDefault();
+            }
+
+            // Use the command name minus the suffix if present and default description
+            string name = GetType().Name;
+            int idx = name.LastIndexOf(_commandSuffix, StringComparison.OrdinalIgnoreCase);
+            if(idx >= 0){
+                name = name.Substring(0, idx);
+            }
+            if (!String.IsNullOrEmpty(name)) {
+                return new CommandAttribute(name, NuGetResources.DefaultCommandDescription);
+            }
+            return null;
+        } 
     }
 }

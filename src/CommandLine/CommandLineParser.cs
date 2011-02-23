@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using NuGet.Common;
 
@@ -13,7 +15,6 @@ namespace NuGet {
 
         public ICommand ExtractOptions(ICommand command, IEnumerator<string> argsEnumerator) {
             List<string> arguments = new List<string>();
-            
             IDictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
 
             while (true) {
@@ -28,7 +29,7 @@ namespace NuGet {
                     continue;
                 }
 
-                PropertyInfo propInfo = null;
+
                 string optionText = option.Substring(1);
                 string value = null;
 
@@ -37,16 +38,26 @@ namespace NuGet {
                     value = "false";
                 }
 
-                foreach (KeyValuePair<OptionAttribute, PropertyInfo> pair in properties) {
-                    if (String.Equals(pair.Value.Name, optionText, StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(pair.Key.AltName, optionText, StringComparison.OrdinalIgnoreCase)) {
-                        propInfo = pair.Value;
-                        break;
-                    }
+                var results = from prop in properties
+                              where prop.Value.Name.StartsWith(optionText, StringComparison.OrdinalIgnoreCase) ||
+                              (prop.Key.AltName ?? String.Empty).StartsWith(optionText, StringComparison.OrdinalIgnoreCase)
+                              select prop;
+
+                if (!results.Any()) {
+                    throw new CommandLineException(NuGetResources.UnknownOptionError, option);
                 }
 
-                if (propInfo == null) {
-                    throw new CommandLineException(NuGetResources.UnknownOptionError, option);
+                PropertyInfo propInfo = results.First().Value;
+                if (results.Skip(1).Any()) {
+                    try {
+                        // When multiple results are found, if there's an exact match, return it.
+                        propInfo = results.First(c => c.Value.Name.Equals(optionText, StringComparison.OrdinalIgnoreCase)
+                                || optionText.Equals(c.Key.AltName, StringComparison.OrdinalIgnoreCase)).Value;
+                    }
+                    catch (InvalidOperationException) {
+                        throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousOption, optionText,
+                            String.Join(" ", from c in results select c.Value.Name)));
+                    }
                 }
 
                 if (propInfo.PropertyType == typeof(bool)) {
@@ -68,7 +79,7 @@ namespace NuGet {
                 }
             }
 
-            command.Arguments = arguments;            
+            command.Arguments = arguments;
 
             return command;
         }

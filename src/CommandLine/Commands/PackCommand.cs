@@ -6,19 +6,19 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", AltName = "p", MaxArgs = 1,
+    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
-        [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription", AltName = "o")]
+        [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandBasePathDescription", AltName = "b")]
+        [Option(typeof(NuGetResources), "PackageCommandBasePathDescription")]
         public string BasePath { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandVerboseDescription", AltName = "v")]
+        [Option(typeof(NuGetResources), "PackageCommandVerboseDescription")]
         public bool Verbose { get; set; }
        
         public override void ExecuteCommand() {

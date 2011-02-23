@@ -46,6 +46,7 @@
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
+    <Compile Include="NuGetCommandLine\CommandTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageIdValidatorTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />

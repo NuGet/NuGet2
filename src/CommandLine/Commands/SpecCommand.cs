@@ -8,13 +8,13 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 0)]
     public class SpecCommand : Command {
-        [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription", AltName = "a")]
+        [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
         public string AssemblyPath {
             get;
             set;
         }
 
-        [Option(typeof(NuGetResources), "SpecCommandForceDescription", AltName = "f")]
+        [Option(typeof(NuGetResources), "SpecCommandForceDescription")]
         public bool Force {
             get;
             set;

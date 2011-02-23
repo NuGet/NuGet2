@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription", AltName = "del",
+    [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription", 
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary")]
     public class DeleteCommand : Command {
@@ -12,10 +12,10 @@ namespace NuGet.Commands {
         private string _packageId;
         private string _packageVersion;
 
-        [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetResources), "DeleteCommandSourceDescription")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
+        [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription")]
         public bool NoPrompt { get; set; }
 
         public override void ExecuteCommand() {

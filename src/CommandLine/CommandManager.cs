@@ -2,40 +2,47 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
-using System.Reflection;
-using NuGet.Common;
 using System.Linq;
+using System.Reflection;
+using Microsoft.Internal.Web.Utils;
+using NuGet.Common;
 
 namespace NuGet {
     [Export(typeof(ICommandManager))]
     public class CommandManager : ICommandManager {
-        private readonly Dictionary<CommandAttribute, ICommand> _commands;
-        private readonly string _commandSuffix = "Command";
+        private readonly IList<ICommand> _commands = new List<ICommand>();
 
-        public CommandManager() {
-            _commands = new Dictionary<CommandAttribute, ICommand>();
-        }
-
-        public IDictionary<CommandAttribute, ICommand> GetCommands() {
+        public IEnumerable<ICommand> GetCommands() {
             return _commands;
         }
 
-        public CommandAttribute GetCommandAttribute(ICommand command) {
-            foreach (KeyValuePair<CommandAttribute, ICommand> pair in _commands)
-                if (pair.Value.GetType() == command.GetType()) {
-                    return pair.Key;
-                }
-            return null;
-        }
-
         public ICommand GetCommand(string commandName) {
-            foreach (KeyValuePair<CommandAttribute, ICommand> kvp in _commands) {
-                if (String.Equals(kvp.Key.CommandName, commandName, StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(kvp.Key.AltName, commandName, StringComparison.OrdinalIgnoreCase)) {
-                    return kvp.Value;
+            if (String.IsNullOrEmpty(commandName)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, commandName);
+            }
+
+            IEnumerable<ICommand> results = from command in _commands
+                                            where command.CommandAttribute.CommandName.StartsWith(commandName, StringComparison.OrdinalIgnoreCase) || 
+                                            (command.CommandAttribute.AltName ?? String.Empty).StartsWith(commandName, StringComparison.OrdinalIgnoreCase) 
+                                            select command;
+
+            if (!results.Any()) {
+                throw new CommandLineException(NuGetResources.UnknowCommandError, commandName);
+            }
+
+            var matchedCommand = results.First();
+            if (results.Skip(1).Any()) {
+                // Were there more than one results found?
+                matchedCommand = results.FirstOrDefault(c => c.CommandAttribute.CommandName.Equals(commandName, StringComparison.OrdinalIgnoreCase) 
+                    || commandName.Equals(c.CommandAttribute.AltName, StringComparison.OrdinalIgnoreCase));
+                
+                if (matchedCommand == null) {
+                    // No exact match was found and the result returned multiple prefixes.
+                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousCommand, commandName,
+                        String.Join(" ", from c in results select c.CommandAttribute.CommandName)));
                 }
             }
-            return null;
+            return matchedCommand;
         }
 
         public IDictionary<OptionAttribute, PropertyInfo> GetCommandOptions(ICommand command) {
@@ -55,21 +62,9 @@ namespace NuGet {
         }
 
         public void RegisterCommand(ICommand command) {
-            var attributes = command.GetType().GetCustomAttributes(typeof(CommandAttribute), true);
-            if (attributes.Any()) { // If metadata was provided use it 
-                foreach (CommandAttribute attrib in attributes) {
-                    _commands.Add(attrib, command);
-                }
-            }
-            else { // Use the command name minus the suffic if present and default description
-                string name = command.GetType().Name;
-                int idx = name.IndexOf(_commandSuffix, StringComparison.InvariantCultureIgnoreCase);
-                if(idx >= 0){
-                    name = name.Remove(idx,_commandSuffix.Length);
-                }
-                if (!String.IsNullOrEmpty(name)) {
-                    _commands.Add(new CommandAttribute(name, NuGetResources.DefaultCommandDescription), command);
-                }
+            var attrib = command.CommandAttribute;
+            if (attrib != null) {
+                _commands.Add(command);
             }
         }
     }

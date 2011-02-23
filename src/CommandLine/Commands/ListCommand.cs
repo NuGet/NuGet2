@@ -5,15 +5,15 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "list", "ListCommandDescription", AltName = "l",
+    [Command(typeof(NuGetResources), "list", "ListCommandDescription", 
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : Command {
         internal const string _defaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
 
-        [Option(typeof(NuGetResources), "ListCommandSourceDescription", AltName = "s")]
+        [Option(typeof(NuGetResources), "ListCommandSourceDescription")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "ListCommandVerboseListDescription", AltName = "v")]
+        [Option(typeof(NuGetResources), "ListCommandVerboseListDescription")]
         public bool Verbose { get; set; }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }

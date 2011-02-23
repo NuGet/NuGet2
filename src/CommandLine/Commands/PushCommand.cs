@@ -5,7 +5,7 @@ using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "push", "PushCommandDescription", AltName="pu",
+    [Command(typeof(NuGetResources), "push", "PushCommandDescription", 
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : Command {
@@ -13,10 +13,10 @@ namespace NuGet.Commands {
         private string _apiKey;
         private string _packagePath;
 
-        [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
+        [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription")]
         public bool CreateOnly { get; set; }
 
-        [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetResources), "PushCommandSourceDescription")]
         public string Source { get; set; }
         
         public override void ExecuteCommand() {

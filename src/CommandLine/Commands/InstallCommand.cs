@@ -4,19 +4,19 @@ using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "install", "InstallCommandDescription", AltName = "i",
+    [Command(typeof(NuGetResources), "install", "InstallCommandDescription", 
         MinArgs = 1, MaxArgs = 1,
         UsageSummaryResourceName = "InstallCommandUsageSummary", UsageDescriptionResourceName = "InstallCommandUsageDescription")]
     public class InstallCommand : Command {
         private const string _defaultFeedUrl = ListCommand._defaultFeedUrl;
 
-        [Option(typeof(NuGetResources), "InstallCommandSourceDescription", AltName = "s")]
+        [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandVersionDescription", AltName = "v")]
+        [Option(typeof(NuGetResources), "InstallCommandVersionDescription")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription", AltName = "x")]
+        [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription")]
         public bool ExcludeVersion { get; set; }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }

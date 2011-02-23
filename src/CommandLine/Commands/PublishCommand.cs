@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "publish", "PublishCommandDescription", AltName = "pub",
+    [Command(typeof(NuGetResources), "publish", "PublishCommandDescription", 
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",
         UsageSummaryResourceName = "PublishCommandUsageSummary")]
     public class PublishCommand : Command {
@@ -12,7 +12,7 @@ namespace NuGet.Commands {
         private string _packageId;
         private string _packageVersion;
 
-        [Option(typeof(NuGetResources), "PublishCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetResources), "PublishCommandSourceDescription")]
         public string Source { get; set; }
 
 

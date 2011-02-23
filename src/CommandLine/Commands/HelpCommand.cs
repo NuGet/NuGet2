@@ -55,8 +55,8 @@ namespace NuGet.Commands {
             Console.WriteLine();
 
             var commands = from c in _commandManager.GetCommands()
-                           orderby c.Key.CommandName
-                           select c.Key;
+                           orderby c.CommandAttribute.CommandName
+                           select c.CommandAttribute;
 
             // Padding for printing
             int maxWidth = commands.Max(c => c.CommandName.Length + GetAltText(c.AltName).Length);
@@ -85,12 +85,7 @@ namespace NuGet.Commands {
 
         public void ViewHelpForCommand(string commandName) {
             ICommand command = _commandManager.GetCommand(commandName);
-
-            if (command == null) {
-                throw new CommandLineException(NuGetResources.UnknowCommandError, commandName);
-            }
-
-            CommandAttribute attribute = _commandManager.GetCommandAttribute(command);
+            CommandAttribute attribute = command.CommandAttribute;
 
             Console.WriteLine("usage: {0} {1} {2}", _commandExe, attribute.CommandName, attribute.GetUsageSummary());
             Console.WriteLine();
@@ -109,7 +104,7 @@ namespace NuGet.Commands {
                 Console.WriteLine();
             }
 
-            IDictionary<OptionAttribute, PropertyInfo> options = _commandManager.GetCommandOptions(command);
+            var options = _commandManager.GetCommandOptions(command);
 
             if (options.Count > 0) {
                 Console.WriteLine("options:");

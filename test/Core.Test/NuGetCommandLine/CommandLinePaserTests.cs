@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -47,7 +48,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>().GetEnumerator();
@@ -67,7 +67,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>() { "optionOne", "optionTwo" }.GetEnumerator();
@@ -89,7 +88,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             string expectedErrorMessage = "Unknown option: '/NotAnOption'";
@@ -107,10 +105,27 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>() { "/Message", "foo bar" }.GetEnumerator();
+            // Act
+            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            // Assert
+            Assert.AreEqual("foo bar", ((MockCommand)actualCommand).Message);
+        }
+
+        [TestMethod]
+        public void ExtractOptions_UsesShortenedForm() {
+            // Arrange
+            var cmdMgr = new Mock<ICommandManager>();
+            var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
+            var mockOptionAttribute = new OptionAttribute("Mock Option");
+            var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
+            MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
+            cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
+            CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
+            var ExpectedCommand = new MockCommand();
+            var argsEnumerator = new List<string>() { "/Mess", "foo bar" }.GetEnumerator();
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
@@ -126,7 +141,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>() { "-Message", "foo bar" }.GetEnumerator();
@@ -145,7 +159,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("Message");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             string expectedErrorMessage = "Missing option value for: '/Message'";
@@ -164,7 +177,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("IsWorking");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>() { "-IsWorking" }.GetEnumerator();
@@ -183,7 +195,6 @@ namespace NuGet.Test.NuGetCommandLine {
             var mockPropertyInfo = typeof(MockCommand).GetProperty("IsWorking");
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>() { "-IsWorking-" }.GetEnumerator();
@@ -204,12 +215,75 @@ namespace NuGet.Test.NuGetCommandLine {
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
 
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
-            cmdMgr.Setup(cm => cm.GetCommandAttribute(It.IsAny<ICommand>())).Returns(new CommandAttribute("Mock", "Mock Command Attirbute"));
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             string expectedErrorMessage = "Invalid option value: '/Count null'";
             var argsEnumerator = new List<string>() { "/Count", "null" }.GetEnumerator();
             // Act & Assert
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+        }
+
+        [TestMethod]
+        public void ExtractOptions_ThrowsIfCommandHasNoProperties() {
+            // Arrange
+            var cmdMgr = new Mock<ICommandManager>();
+
+            var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
+            cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
+            CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
+            var ExpectedCommand = new MockCommand();
+            string expectedErrorMessage = "Unknown option: '/Count'";
+            var argsEnumerator = new List<string>() { "/Count", "null" }.GetEnumerator();
+            
+            // Act & Assert
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+        }
+
+        [TestMethod]
+        public void ExtractOptions_ThrowsIfCommandOptionIsAmbigious() {
+            // Arrange
+            var cmdMgr = new Mock<ICommandManager>();
+
+            var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
+            var mockOptionAttribute = new OptionAttribute("Mock Option 1");
+            var mockPropertyInfo = typeof(MockCommand).GetProperty("Count");
+            MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
+            mockOptionAttribute = new OptionAttribute("Mock Option 2");
+            mockPropertyInfo = typeof(MockCommand).GetProperty("Counter");
+            MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
+
+            cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
+            CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
+            var ExpectedCommand = new MockCommand();
+            string expectedErrorMessage = "Ambiguous option 'Co'. Possible values: Count Counter.";
+            var argsEnumerator = new List<string>() { "/Co", "null" }.GetEnumerator();
+
+            // Act & Assert
+
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+        }
+
+        [TestMethod]
+        public void ExtractOptions_ThrowsIfCommandOptionDoesNotExist() {
+            // Arrange
+            var cmdMgr = new Mock<ICommandManager>();
+
+            var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
+            var mockOptionAttribute = new OptionAttribute("Mock Option 1");
+            var mockPropertyInfo = typeof(MockCommand).GetProperty("Count");
+            MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
+            mockOptionAttribute = new OptionAttribute("Mock Option 2");
+            mockPropertyInfo = typeof(MockCommand).GetProperty("Counter");
+            MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
+
+            cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
+            CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
+            var ExpectedCommand = new MockCommand();
+            string expectedErrorMessage = "Unknown option: '/37264752DOESNOTEXIST!!'";
+            var argsEnumerator = new List<string>() { "/37264752DOESNOTEXIST!!", "false" }.GetEnumerator();
+
+            // Act & Assert
+
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
@@ -223,8 +297,18 @@ namespace NuGet.Test.NuGetCommandLine {
 
             public int Count { get; set; }
 
+            public int Counter { get; set; }
+
             public void Execute() {
                 throw new NotImplementedException();
+            }
+
+            public CommandAttribute CommandAttribute {
+                get { return new CommandAttribute("Mock", "Mock Command Desc"); }
+            }
+
+            public IEnumerable<CommandAttribute> GetCommandAttribute() {
+                return new[] { CommandAttribute };
             }
         }
     }
