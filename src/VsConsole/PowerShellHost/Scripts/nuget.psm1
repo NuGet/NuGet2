@@ -97,7 +97,12 @@ function GetPackages($context) {
 }
 
 function GetProjectNames {
-    Get-Project -All | Select-Object -ExpandProperty Name | Sort-Object
+    $uniqueNames = Get-Project -All | Select-Object -ExpandProperty ProjectName
+    
+    $simpleNames = Get-Project -All | Select-Object -ExpandProperty Name
+    $safeNames = $simpleNames | Group-Object | Where-Object { $_.Count -eq 1 } | Select-Object -ExpandProperty Name
+
+    ($uniqueNames + $safeNames) | Select-Object -Unique | Sort-Object
 }
 
 function GetPackageIds($packages) {

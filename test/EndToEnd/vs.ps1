@@ -54,9 +54,9 @@ function New-Project {
     )
 
     $id = New-Guid
-    if(!$ProjectName) {
-        $projectName = $TemplateName + "_$id"
-    } 
+    if (!$ProjectName) {
+        $ProjectName = $TemplateName + "_$id"
+    }
     
     # Make sure there is a solution
     Ensure-Solution
@@ -97,13 +97,18 @@ function New-Project {
     $window.SetFocus()
     
     # Return the project
-    $project = Get-Project $projectName -ErrorAction SilentlyContinue
+    if ($SolutionFolder) {
+        $project = Get-Project "$($SolutionFolder.Name)\$projectName" -ErrorAction SilentlyContinue
+    }
+    else {
+        $project = Get-Project $projectName -ErrorAction SilentlyContinue
+    }
     
     if(!$project) {
         $project = Get-Project "$destPath\"
     }
     
-    $project    
+    $project
 }
 
 function New-SolutionFolder {

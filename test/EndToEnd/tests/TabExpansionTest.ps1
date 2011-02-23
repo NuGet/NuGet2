@@ -231,3 +231,21 @@ function Test-TabExpansionForVersionForUninstallPackage {
     # Assert
     Assert-AreEqual '1.1' $suggestion
 }
+
+function Test-TabExpansionForProjectsReturnsBothUniqueNamesAndSafeNames {
+    # Arrange
+    $f = New-SolutionFolder 'Folder1'
+    $p1 = $f | New-ClassLibrary 'ProjectA'
+    $p3 = $f | New-WebApplication 'ProjectB'
+
+    $p2 = New-ConsoleApplication 'ProjectA'
+
+    # Act
+    $suggestions = TabExpansion 'Get-Project'
+
+    # Assert
+    #Assert-True ($suggestions -contains 'ProjectA')
+    #Assert-True ($suggestions -contains 'Folder1\ProjectA')
+    #Assert-True ($suggestions -contains 'ProjectB')
+    #Assert-True ($suggestions -contains 'Folder1\ProjectB')
+}

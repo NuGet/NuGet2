@@ -18,8 +18,6 @@ namespace NuGet.VisualStudio {
         private Dictionary<string, HashSet<Project>> _projectCacheByName;
         // this dictionary stores projects by unique name
         private Dictionary<string, Project> _projectCacheByUniqueName;
-        private EventHandler _solutionOpened;
-        private EventHandler _solutionClosing;
 
         public SolutionManager()
             : this(ServiceLocator.GetInstance<DTE>()) {
@@ -61,23 +59,9 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public event EventHandler SolutionOpened {
-            add {
-                _solutionOpened += value;
-            }
-            remove {
-                _solutionOpened -= value;
-            }
-        }
+        public event EventHandler SolutionOpened;
 
-        public event EventHandler SolutionClosing {
-            add {
-                _solutionClosing += value;
-            }
-            remove {
-                _solutionClosing -= value;
-            }
-        }
+        public event EventHandler SolutionClosing;
 
         /// <summary>
         /// Gets a value indicating whether there is a solution open in the IDE.
@@ -162,8 +146,8 @@ namespace NuGet.VisualStudio {
             DefaultProjectName = null;
             _projectCacheByName = null;
             _projectCacheByUniqueName = null;
-            if (_solutionClosing != null) {
-                _solutionClosing(this, EventArgs.Empty);
+            if (SolutionClosing != null) {
+                SolutionClosing(this, EventArgs.Empty);
             }
         }
 
@@ -197,8 +181,8 @@ namespace NuGet.VisualStudio {
         private void OnSolutionOpened() {
             EnsureProjectCache();
             SetDefaultProject();
-            if (_solutionOpened != null) {
-                _solutionOpened(this, EventArgs.Empty);
+            if (SolutionOpened != null) {
+                SolutionOpened(this, EventArgs.Empty);
             }
         }
 
@@ -227,7 +211,7 @@ namespace NuGet.VisualStudio {
                 _projectCacheByName.Add(name, allProjects);
             }
 
-            // If there is currently only one project with the simple name, and it's the 
+            // If there is currently only one project with this simple name, and it's the 
             // default project, we have to set default project name to the unique name because
             // we are having a name collision here.
             if (allProjects.Count == 1 && 

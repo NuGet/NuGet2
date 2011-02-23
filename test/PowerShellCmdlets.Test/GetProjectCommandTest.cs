@@ -23,35 +23,6 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
-        public void GetProjectCmdletReturnsProjectWhenProjectNameIsSpecified() {
-            // Arrange
-            var cmdlet = BuildCmdlet();
-            cmdlet.Name = new [] { "WebSite1" };
-
-            // Act
-            var result = cmdlet.GetResults<Project>();
-            var project = result.SingleOrDefault();
-
-            // Assert
-            Assert.IsNotNull(project);
-            Assert.AreEqual(project.Name, "WebSite1");
-        }
-
-        [TestMethod]
-        public void GetProjectCmdletDoesNotThrowWhenProjectNameDoesNotExist() {
-            // Arrange
-            var cmdlet = BuildCmdlet();
-            cmdlet.Name = new [] { "WebSite2" };
-
-            // Act
-            var result = cmdlet.GetResults<Project>();
-            var project = result.SingleOrDefault();
-
-            // Assert
-            Assert.IsNull(project);
-        }
-
-        [TestMethod]
         public void GetProjectCmdletReturnsAllProjectsWhenAllIsSet() {
             // Arrange
             var cmdlet = BuildCmdlet();

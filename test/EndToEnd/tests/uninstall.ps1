@@ -229,3 +229,36 @@ function Test-UninstallSolutionOnlyPackageWhenAmbiguous {
 
     Assert-Throws { Uninstall-Package SolutionOnlyPackage } "Found multiple versions of 'SolutionOnlyPackage' installed. Please specify a version."
 }
+
+function Test-UninstallPackageWorksWithPackagesHavingSameNames {
+    #
+    #  Folder1
+    #     + ProjectA
+    #     + ProjectB
+    #  Folder2
+    #     + ProjectA
+    #     + ProjectC
+    #  ProjectA
+    #
+
+    # Arrange
+    $f = New-SolutionFolder 'Folder1'
+    $p1 = $f | New-ClassLibrary 'ProjectA'
+    $p2 = $f | New-ClassLibrary 'ProjectB'
+
+    $g = New-SolutionFolder 'Folder2'
+    $p3 = $g | New-ClassLibrary 'ProjectA'
+    $p4 = $g | New-ConsoleApplication 'ProjectC'
+
+    $p5 = New-ConsoleApplication 'ProjectA'
+
+    # Act
+    Get-Project -All | Install-Package elmah
+    $all = @( $p1, $p2, $p3, $p4, $p5 )
+    $all | % { Assert-Package $_ elmah }
+
+    Get-Project -All | Uninstall-Package elmah
+
+    # Assert
+    $all | % { Assert-Null (Get-ProjectPackage $_ elmah) }
+}

@@ -459,3 +459,34 @@ function Test-InstallPackageWithNonExistentFrameworkReferences {
     # Arrange
     Assert-Throws { $p | Install-Package PackageWithNonExistentGacReferences -Source $context.RepositoryRoot } "Failed to add reference to 'System.Awesome'. Please make sure that it is in the Global Assembly Cache."
 }
+
+function Test-InstallPackageWorksWithPackagesHavingSameNames {
+
+    #
+    #  Folder1
+    #     + ProjectA
+    #     + ProjectB
+    #  Folder2
+    #     + ProjectA
+    #     + ProjectC
+    #  ProjectA
+    #
+
+    # Arrange
+    $f = New-SolutionFolder 'Folder1'
+    $p1 = $f | New-ClassLibrary 'ProjectA'
+    $p2 = $f | New-ClassLibrary 'ProjectB'
+
+    $g = New-SolutionFolder 'Folder2'
+    $p3 = $g | New-ClassLibrary 'ProjectA'
+    $p4 = $g | New-ConsoleApplication 'ProjectC'
+
+    $p5 = New-ConsoleApplication 'ProjectA'
+
+    # Act
+    Get-Project -All | Install-Package elmah
+
+    # Assert
+    $all = @( $p1, $p2, $p3, $p4, $p5 )
+    $all | % { Assert-Package $_ elmah }
+}

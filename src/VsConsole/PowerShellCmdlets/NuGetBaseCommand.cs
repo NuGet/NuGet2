@@ -183,12 +183,13 @@ namespace NuGet.PowerShell.Commands {
 
         /// <summary>
         /// Return all possibly valid project names in the current solution. This includes all 
-        /// unique names and unconflicting simple names.
+        /// unique names and safe names.
         /// </summary>
         /// <returns></returns>
         private IEnumerable<string> GetAllValidProjectNames() {
-            var uniqueNames = _solutionManager.GetProjects().Select(p => _solutionManager.GetProjectSafeName(p));
-            return uniqueNames;
+            var safeNames = _solutionManager.GetProjects().Select(p => _solutionManager.GetProjectSafeName(p));
+            var uniqueNames = _solutionManager.GetProjects().Select(p => p.GetCustomUniqueName());
+            return uniqueNames.Concat(safeNames).Distinct();
         }
 
         /// <summary>
