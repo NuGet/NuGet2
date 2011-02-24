@@ -8,6 +8,10 @@ using NuGet.Runtime;
 namespace NuGet.VisualStudio {
     public static class RuntimeHelpers {
         public static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain) {
+            return AddBindingRedirects(project, domain, new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain, IDictionary<string, HashSet<string>> projectAssembliesCache) {
             var redirects = Enumerable.Empty<AssemblyBinding>();
             // Only add binding redirects to projects that aren't class libraries
             if (project.SupportsConfig()) {
@@ -15,7 +19,7 @@ namespace NuGet.VisualStudio {
                 IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
                 // Run this on the UI thread since it enumerates all references
-                IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure());
+                IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure(projectAssembliesCache));
 
                 redirects = BindingRedirectResolver.GetBindingRedirects(assemblies, domain);
 
@@ -44,22 +48,23 @@ namespace NuGet.VisualStudio {
 
         private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain) {
             var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            AddBindingRedirects(solutionManager, project, domain, visitedProjects);
+            var projectAssembliesCache = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            AddBindingRedirects(solutionManager, project, domain, visitedProjects, projectAssembliesCache);
         }
 
-        private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain, HashSet<string> projects) {
+        private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain, HashSet<string> projects, IDictionary<string, HashSet<string>> projectAssembliesCache) {
             if (projects.Contains(project.UniqueName)) {
                 return;
             }
 
-            AddBindingRedirects(project, domain);
+            AddBindingRedirects(project, domain, projectAssembliesCache);
 
             // Add binding redirects to all projects that are referencing this one
             foreach (Project dependentProject in solutionManager.GetDependentProjects(project)) {
-                AddBindingRedirects(solutionManager, dependentProject, domain, projects);
+                AddBindingRedirects(solutionManager, dependentProject, domain, projects, projectAssembliesCache);
             }
 
             projects.Add(project.UniqueName);
-        }        
+        }
     }
 }

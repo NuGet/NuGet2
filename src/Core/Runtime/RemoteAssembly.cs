@@ -7,8 +7,7 @@ namespace NuGet.Runtime {
     /// <summary>
     /// IAssembly implementation that is used for marshalling information across app domains.
     /// </summary>
-    [Serializable]
-    internal class RemoteAssembly : IAssembly {
+    internal class RemoteAssembly : MarshalByRefObject, IAssembly {
         private static readonly Dictionary<Tuple<string, string>, Assembly> _assemblyCache = new Dictionary<Tuple<string, string>, Assembly>();
         private readonly List<IAssembly> _referencedAssemblies = new List<IAssembly>();
 

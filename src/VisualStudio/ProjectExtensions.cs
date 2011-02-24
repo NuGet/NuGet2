@@ -246,37 +246,34 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        internal static IEnumerable<string> GetAssemblyClosure(this Project project) {
-            var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var visitedAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            return GetAssemblyClosure(project, visitedProjects, visitedAssemblies).ToList();
-        }
-
-        internal static IEnumerable<string> GetAssemblyClosure(this Project project, HashSet<string> visitedProjects, HashSet<string> visitedAssemblies) {
-            if (visitedProjects.Contains(project.UniqueName)) {
-                yield break;
+        internal static HashSet<string> GetAssemblyClosure(this Project project, IDictionary<string, HashSet<string>> visitedProjects) {
+            HashSet<string> assemblies;
+            if (visitedProjects.TryGetValue(project.UniqueName, out assemblies)) {
+                return assemblies;
             }
 
+            assemblies = new HashSet<string>(PathComparer.Default);
+            assemblies.AddRange(GetLocalProjectAssemblies(project));
+            assemblies.AddRange(project.GetReferencedProjects().SelectMany(p => GetAssemblyClosure(p, visitedProjects)));
+
+            visitedProjects.Add(project.UniqueName, assemblies);
+
+            return assemblies;
+        }
+
+        private static HashSet<string> GetLocalProjectAssemblies(Project project) {
+            var assemblies = new HashSet<string>(PathComparer.Default);
             foreach (var reference in project.Object.References) {
                 string path = null;
                 // Get the referenced project from the reference if any
-                var referencedProject = GetReferencedProject(project, reference);
+                Project referencedProject = GetReferencedProject(project, reference);
                 if (referencedProject == null &&
                     TryGetReferencePath(project, reference, out path) &&
-                    File.Exists(path) &&
-                    visitedAssemblies.Add(Path.GetFileName(path))) {
-                    yield return path;
-                }
-
-                if (referencedProject != null) {
-                    // Recursively get all assemblies from referened projects
-                    foreach (var nestedReference in GetAssemblyClosure(referencedProject, visitedProjects, visitedAssemblies)) {
-                        yield return nestedReference;
-                    }
+                    File.Exists(path)) {
+                    assemblies.Add(path);
                 }
             }
-
-            visitedProjects.Add(project.UniqueName);
+            return assemblies;
         }
 
         private static bool TryGetReferencePath(Project project, dynamic reference, out string path) {
@@ -306,6 +303,17 @@ namespace NuGet.VisualStudio {
 
         public static MsBuildProject AsMSBuildProject(this Project project) {
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).FirstOrDefault();
+        }
+
+        private class PathComparer : IEqualityComparer<string> {
+            public static readonly PathComparer Default = new PathComparer();
+            public bool Equals(string x, string y) {
+                return Path.GetFileName(x).Equals(Path.GetFileName(y));
+            }
+
+            public int GetHashCode(string obj) {
+                return Path.GetFileName(obj).GetHashCode();
+            }
         }
     }
 }
