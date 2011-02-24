@@ -46,7 +46,7 @@ namespace NuGet {
         }
 
         public IDictionary<OptionAttribute, PropertyInfo> GetCommandOptions(ICommand command) {
-            Dictionary<OptionAttribute, PropertyInfo> result = new Dictionary<OptionAttribute, PropertyInfo>();
+            var result = new Dictionary<OptionAttribute, PropertyInfo>();
 
             foreach (PropertyInfo propInfo in command.GetType().GetProperties()) {
                 foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true)) {

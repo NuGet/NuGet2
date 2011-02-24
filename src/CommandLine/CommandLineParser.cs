@@ -7,7 +7,7 @@ using NuGet.Common;
 
 namespace NuGet {
     public class CommandLineParser {
-        private ICommandManager _commandManager;
+        private readonly ICommandManager _commandManager;
 
         public CommandLineParser(ICommandManager manager) {
             _commandManager = manager;

@@ -8,7 +8,7 @@ namespace NuGet.Commands {
         MinArgs = 1, MaxArgs = 1,
         UsageSummaryResourceName = "InstallCommandUsageSummary", UsageDescriptionResourceName = "InstallCommandUsageDescription")]
     public class InstallCommand : Command {
-        private const string _defaultFeedUrl = ListCommand._defaultFeedUrl;
+        private const string DefaultFeedUrl = ListCommand.DefaultFeedUrl;
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
         public string Source { get; set; }
@@ -31,7 +31,7 @@ namespace NuGet.Commands {
         }
 
         public override void ExecuteCommand() {
-            var feedUrl = _defaultFeedUrl;
+            var feedUrl = DefaultFeedUrl;
             if (!String.IsNullOrEmpty(Source)) {
                 feedUrl = Source;
             }

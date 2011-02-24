@@ -8,7 +8,7 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "list", "ListCommandDescription", 
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : Command {
-        internal const string _defaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
+        internal const string DefaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription")]
         public string Source { get; set; }
@@ -28,7 +28,7 @@ namespace NuGet.Commands {
         }
 
         public IQueryable<IPackage> GetPackages() {
-            var feedUrl = _defaultFeedUrl;
+            var feedUrl = DefaultFeedUrl;
             if (!String.IsNullOrEmpty(Source)) {
                 feedUrl = Source;
             }

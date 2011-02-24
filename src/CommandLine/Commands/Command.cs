@@ -6,7 +6,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     public abstract class Command : ICommand {
-        private const string _commandSuffix = "Command";
+        private const string CommandSuffix = "Command";
         private CommandAttribute _commandAttribute;
 
         public Command() {
@@ -59,7 +59,7 @@ namespace NuGet.Commands {
 
             // Use the command name minus the suffix if present and default description
             string name = GetType().Name;
-            int idx = name.LastIndexOf(_commandSuffix, StringComparison.OrdinalIgnoreCase);
+            int idx = name.LastIndexOf(CommandSuffix, StringComparison.OrdinalIgnoreCase);
             if(idx >= 0){
                 name = name.Substring(0, idx);
             }
