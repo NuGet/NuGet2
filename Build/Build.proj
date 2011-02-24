@@ -54,7 +54,7 @@
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\NuGetPackage.cs">
           <Find><![CDATA[ProductVersion = "\d+\.\d+\.\d+\.\d+"]]></Find>
-          <ReplaceWith><![CDATA[ProductVersion = '$(Version)']]></ReplaceWith>
+          <ReplaceWith><![CDATA[ProductVersion = "$(Version)"]]></ReplaceWith>
         </RegexTransform>
     </ItemGroup>
     
