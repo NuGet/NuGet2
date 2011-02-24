@@ -52,6 +52,10 @@
           <Find><![CDATA[ModuleVersion = '\d+\.\d+\.\d+\.\d+']]></Find>
           <ReplaceWith><![CDATA[ModuleVersion = '$(Version)']]></ReplaceWith>
         </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\NuGetPackage.cs">
+          <Find><![CDATA[ProductVersion = "\d+\.\d+\.\d+\.\d+"]]></Find>
+          <ReplaceWith><![CDATA[ProductVersion = '$(Version)']]></ReplaceWith>
+        </RegexTransform>
     </ItemGroup>
     
     <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">

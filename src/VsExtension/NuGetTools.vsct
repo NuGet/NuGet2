@@ -9,14 +9,12 @@
     <Menus>
       <!-- This is the toolbar in the console -->
       <Menu guid="guidPowerConsoleCmdSet" id="idToolbar" type="ToolWindowToolbar">
-        <CommandFlag>DefaultDocked</CommandFlag>
         <Strings>
           <ButtonText>Package Manager Console</ButtonText>
         </Strings>
       </Menu>
       <Menu guid="guidToolsGroup" id="idLibraryPackageManager" type="Menu" priority="0x500">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OTHER2" />
-        <CommandFlag>DefaultDocked</CommandFlag>
         <Strings>
           <ButtonText>Library Package Ma&amp;nager</ButtonText>
         </Strings>
