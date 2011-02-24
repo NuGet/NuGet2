@@ -238,12 +238,19 @@ namespace NuGet.VisualStudio {
         }
 
         internal static IEnumerable<Project> GetReferencedProjects(this Project project) {
-            foreach (var reference in project.Object.References) {
-                var referencedProject = GetReferencedProject(project, reference);
-                if (referencedProject != null) {
-                    yield return referencedProject;
+            if (project.IsWebSite()) {
+                return GetWebsiteReferencedProjects(project);
+            }
+
+            var projects = new List<Project>();
+            References references = project.Object.References;
+            foreach (Reference reference in references) {
+                // Get the referenced project from the reference if any
+                if (reference.SourceProject != null) {
+                    projects.Add(reference.SourceProject);     
                 }
             }
+            return projects;
         }
 
         internal static HashSet<string> GetAssemblyClosure(this Project project, IDictionary<string, HashSet<string>> visitedProjects) {
@@ -261,44 +268,47 @@ namespace NuGet.VisualStudio {
             return assemblies;
         }
 
+        private static IEnumerable<Project> GetWebsiteReferencedProjects(Project project) {
+            var projects = new List<Project>();
+            AssemblyReferences references = project.Object.References;
+            foreach (AssemblyReference reference in references) {
+                if (reference.ReferencedProject != null) {
+                    projects.Add(reference.ReferencedProject);
+                }
+            }
+            return projects;
+        }
+
         private static HashSet<string> GetLocalProjectAssemblies(Project project) {
+            if (project.IsWebSite()) {
+                return GetWebsiteLocalAssemblies(project);
+            }
+
             var assemblies = new HashSet<string>(PathComparer.Default);
-            foreach (var reference in project.Object.References) {
-                string path = null;
+            References references = project.Object.References;
+            foreach (Reference reference in references) {
                 // Get the referenced project from the reference if any
-                Project referencedProject = GetReferencedProject(project, reference);
-                if (referencedProject == null &&
-                    TryGetReferencePath(project, reference, out path) &&
-                    File.Exists(path)) {
-                    assemblies.Add(path);
+                if (reference.SourceProject == null &&
+                    reference.CopyLocal &&
+                    File.Exists(reference.Path)) {
+                    assemblies.Add(reference.Path);
                 }
             }
             return assemblies;
         }
 
-        private static bool TryGetReferencePath(Project project, dynamic reference, out string path) {
-            path = null;
-            if (project.IsWebSite()) {
+        private static HashSet<string> GetWebsiteLocalAssemblies(Project project) {
+            var assemblies = new HashSet<string>(PathComparer.Default);
+            AssemblyReferences references = project.Object.References;
+            foreach (AssemblyReference reference in references) {
                 // For websites only include bin assemblies
-                if (reference.ReferenceKind == (int)AssemblyReferenceType.AssemblyReferenceBin) {
-                    path = reference.FullPath;
-                    return true;
+                if (reference.ReferencedProject == null &&
+                    reference.ReferenceKind == AssemblyReferenceType.AssemblyReferenceBin &&
+                    File.Exists(reference.FullPath)) {
+                    assemblies.Add(reference.FullPath);
                 }
             }
-            else if (reference.CopyLocal) {
-                // Otherwise only copy local assemblies matter for other projects
-                path = reference.Path;
-                return true;
-            }
-
-            return false;
-        }
-
-        private static Project GetReferencedProject(Project project, dynamic reference) {
-            if (project.IsWebSite()) {
-                return reference.ReferencedProject;
-            }
-            return reference.SourceProject;
+            return assemblies;
         }
 
         public static MsBuildProject AsMSBuildProject(this Project project) {
