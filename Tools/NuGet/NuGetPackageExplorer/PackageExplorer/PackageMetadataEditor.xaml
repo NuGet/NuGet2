@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:self="clr-namespace:PackageExplorer"
+             xmlns:effect="clr-namespace:GrayscaleEffect;assembly=GrayscaleEffect"
              xmlns:core="clr-namespace:NuGet;assembly=Core"
              xmlns:viewmodel="clr-namespace:PackageExplorerViewModel;assembly=PackageViewModel"
              IsVisibleChanged="PackageMetadataEditor_IsVisibleChanged"
@@ -190,21 +191,26 @@
                         </ItemsControl>
 
                         <Button Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" ToolTipService.ToolTip="Select dependency from NuGet feed" Click="SelectDependencyButtonClicked">
-                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/properties.png" />
+                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/properties.png">
+                            </Image>
                         </Button>
 
                         <TextBox x:Name="NewDependencyId" Text="{Binding Id, ValidatesOnDataErrors=True, BindingGroupName=NewPackageDependency, NotifyOnValidationError=True}" Margin="2" Grid.Column="1" Grid.Row="2" />
                         <TextBox x:Name="NewDependencyVersion" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, NotifyOnValidationError=True, ValidatesOnDataErrors=True, BindingGroupName=NewPackageDependency}" Margin="2" Grid.Column="2" Grid.Row="2" />
                         
-                        <Button Margin="0,2,0,2" Grid.Column="3" Grid.Row="2" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
+                        <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="3" Grid.Row="2" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
                                     <Binding ElementName="NewDependencyId" Path="Text" />
                                     <Binding ElementName="NewDependencyVersion" Path="Text" />
                                 </MultiBinding>
                             </Button.IsEnabled>
-                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
-                        </Button>
+                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png">
+                                <Image.Effect>
+                                    <effect:GrayscaleEffect DesaturationFactor="0" />
+                                </Image.Effect>
+                            </Image>
+                        </self:GrayscaleButton>
                     </Grid>
                 </GroupBox>
             </Grid>

@@ -64,7 +64,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\NuGet key.pfx</AssemblyOriginatorKeyFile>
@@ -88,6 +88,9 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GrayscaleEffect">
+      <HintPath>..\GrayscaleEffect.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -122,6 +125,8 @@
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GrayscaleButton.cs" />
+    <Compile Include="GrayscaleMenuItem.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">
       <DependentUpon>PackageChooserDialog.xaml</DependentUpon>
     </Compile>
