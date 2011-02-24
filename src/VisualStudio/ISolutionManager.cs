@@ -24,6 +24,8 @@ namespace NuGet.VisualStudio {
         /// </remarks>
         string GetProjectSafeName(Project project);
 
+        IEnumerable<Project> GetDependentProjects(Project project);
+
         bool IsSolutionOpen { get; }
     }
 }

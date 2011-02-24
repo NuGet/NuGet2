@@ -3,20 +3,36 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using EnvDTE;
+using NuGet.Runtime;
 using NuGet.VisualStudio.Resources;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
         private readonly IDictionary<string, IProjectManager> _projects;
+        private readonly IDictionary<string, Project> _projectManagers;
+        private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepository _recentPackagesRepository;
 
         public VsPackageManager(ISolutionManager solutionManager, IPackageRepository sourceRepository, IFileSystem fileSystem, ISharedPackageRepository sharedRepository, IPackageRepository recentPackagesRepository) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
+            _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;
             _projects = solutionManager.GetProjects().ToDictionary(p => p.UniqueName, CreateProjectManager);
             _recentPackagesRepository = recentPackagesRepository;
+
+            _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
+            _projectManagers = new Dictionary<string, Project>();
+
+            // There's no good way to get the project from the project manager
+            foreach (var project in _solutionManager.GetProjects()) {
+                var projectManager = CreateProjectManager(project);
+
+                _projects[project.UniqueName] = projectManager;
+                _projectManagers[projectManager.Project.Root] = project;
+            }
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
@@ -297,6 +313,23 @@ namespace NuGet.VisualStudio {
             AddPackageToRecentRepository(package);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If we failed to add binding redirects we don't want it to stop the install/update.")]
+        private void AddBindingRedirects(IProjectManager projectManager) {
+            Project project;
+            if (projectManager == null ||
+                !_projectManagers.TryGetValue(projectManager.Project.Root, out project)) {
+                return;
+            }
+
+            try {
+                RuntimeHelpers.AddBindingRedirects(_solutionManager, project);
+            }
+            catch (Exception e) {
+                // If there was an error adding binding redirects then print a warning and continue
+                Logger.Log(MessageLevel.Warning, e.Message);
+            }
+        }
+
         private void RunProjectActionWithRemoveEvent(IProjectManager projectManager, Action action) {
             if (projectManager == null) {
                 return;
@@ -318,6 +351,8 @@ namespace NuGet.VisualStudio {
                 // Remove the handlers
                 projectManager.PackageReferenceRemoved -= removeHandler;
             }
+
+            AddBindingRedirects(projectManager);
         }
 
         private void InitializeLogger(ILogger logger, IProjectManager projectManager) {

@@ -64,6 +64,10 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="WindowsBase" />
+    <Reference Include="VsWebSite.Interop, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Common Files\Microsoft Shared\MSEnv\PublicAssemblies\VsWebSite.Interop.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EnumerableExtensions.cs" />
@@ -88,6 +92,7 @@
     <Compile Include="RecentRepository\VsPersistencePackageSettingsManager.cs" />
     <Compile Include="ReportProgressEventArgs.cs" />
     <Compile Include="RepositorySettings.cs" />
+    <Compile Include="RuntimeHelpers.cs" />
     <Compile Include="SettingsManagerBase.cs" />
     <Compile Include="SmartOutputConsoleProvider.cs" />
     <Compile Include="VsFileSystemProvider.cs" />

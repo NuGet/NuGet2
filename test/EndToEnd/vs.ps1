@@ -385,3 +385,19 @@ function Add-File {
     
     $Project.ProjectItems.AddFromFileCopy($FilePath) | out-null
 }
+
+function Add-ProjectReference {
+    param (
+        [parameter(Mandatory = $true)]
+        $ProjectFrom,
+        [parameter(Mandatory = $true)]
+        $ProjectTo
+    )
+
+    if($ProjectFrom.Object.References.AddProject) {
+        $ProjectFrom.Object.References.AddProject($ProjectTo) | Out-Null
+    }
+    elseif($ProjectFrom.Object.References.AddFromProject) {
+        $ProjectFrom.Object.References.AddFromProject($ProjectTo) | Out-Null
+    }
+}

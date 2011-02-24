@@ -40,5 +40,9 @@ namespace NuGet.VisualStudio.Test.Mocks {
                 SolutionOpened(this, EventArgs.Empty);
             }
         }
+
+        public IEnumerable<Project> GetDependentProjects(Project project) {
+            throw new NotImplementedException();
+        }
     }
 }
