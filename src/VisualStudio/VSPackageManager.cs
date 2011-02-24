@@ -5,6 +5,7 @@ using System.Linq;
 using EnvDTE;
 using NuGet.Runtime;
 using NuGet.VisualStudio.Resources;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
@@ -318,6 +319,7 @@ namespace NuGet.VisualStudio {
             AddPackageToRecentRepository(package);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If we failed to add binding redirects we don't want it to stop the install/update.")]
         private void AddBindingRedirects(IProjectManager projectManager) {
             Project project;
             if (projectManager == null ||
