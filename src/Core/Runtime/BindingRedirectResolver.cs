@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace NuGet.Runtime {
     public static class BindingRedirectResolver {
@@ -95,9 +96,12 @@ namespace NuGet.Runtime {
 
         private static IEnumerable<IAssembly> GetAssemblies(IEnumerable<string> paths, AppDomain domain) {
             foreach (var path in paths) {
-                yield return RemoteAssembly.LoadAssembly(path, domain);
+                var assemblyName = AssemblyName.GetAssemblyName(path);
+                // Only look at assemblies that have a strong name
+                if (assemblyName.GetPublicKey() != null) {
+                    yield return RemoteAssembly.LoadAssembly(path, domain);
+                }
             }
         }
-
     }
 }

@@ -86,7 +86,11 @@ namespace NuGet.VisualStudio {
             return projectItem != null;
         }
 
-        public static bool IsClassLibrary(this Project project) {
+        public static bool SupportsConfig(this Project project) {
+            return !IsClassLibrary(project);
+        }
+
+        private static bool IsClassLibrary(this Project project) {
             if (project.IsWebSite()) {
                 return false;
             }
@@ -245,7 +249,7 @@ namespace NuGet.VisualStudio {
         internal static IEnumerable<string> GetAssemblyClosure(this Project project) {
             var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var visitedAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            return GetAssemblyClosure(project, visitedProjects, visitedAssemblies);
+            return GetAssemblyClosure(project, visitedProjects, visitedAssemblies).ToList();
         }
 
         internal static IEnumerable<string> GetAssemblyClosure(this Project project, HashSet<string> visitedProjects, HashSet<string> visitedAssemblies) {

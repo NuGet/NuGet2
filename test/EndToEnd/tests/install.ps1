@@ -524,3 +524,58 @@ function Test-BindingRedirectClassLibraryWithDifferentDependents {
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
     Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
+
+function Test-BindingRedirectProjectsThatReferenceSameAssemblyFromDifferentLocations {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-WebApplication
+    $b = New-ConsoleApplication
+    $c = New-ClassLibrary
+
+    $a | Install-Package A -Source $context.RepositoryPath -IgnoreDependencies
+    $aPath = ls (Get-SolutionDir) -Recurse -Filter A.dll
+    cp $aPath.FullName (Get-SolutionDir)
+    $aNewLocation = Join-Path (Get-SolutionDir) A.dll
+
+    $b.Object.References.Add($aNewLocation)
+
+    Add-ProjectReference $a $b
+    Add-ProjectReference $b $c
+
+    # Act
+    $c | Install-Package E -Source $context.RepositoryPath
+
+    Assert-Package $c E
+
+    # Assert
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
+function Test-BindingRedirectProjectsThatReferenceDifferentVersionsOfSameAssembly {
+    param(
+        $context
+    )
+
+    # Arrange
+    $a = New-WebApplication
+    $b = New-ConsoleApplication
+    $c = New-ClassLibrary
+
+    $a | Install-Package A -Source $context.RepositoryPath -IgnoreDependencies
+    $b | Install-Package A -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+    
+    Add-ProjectReference $a $b
+    Add-ProjectReference $b $c
+
+    # Act
+    $c | Install-Package E -Source $context.RepositoryPath
+
+    Assert-Package $c E
+
+    # Assert
+    Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+    Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}

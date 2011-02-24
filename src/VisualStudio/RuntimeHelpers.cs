@@ -10,7 +10,7 @@ namespace NuGet.VisualStudio {
         public static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain) {
             var redirects = Enumerable.Empty<AssemblyBinding>();
             // Only add binding redirects to projects that aren't class libraries
-            if (!project.IsClassLibrary()) {
+            if (project.SupportsConfig()) {
                 // Create a project system
                 IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
@@ -43,8 +43,8 @@ namespace NuGet.VisualStudio {
         }
 
         private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain) {
-            var projects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            AddBindingRedirects(solutionManager, project, domain, projects);
+            var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            AddBindingRedirects(solutionManager, project, domain, visitedProjects);
         }
 
         private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, AppDomain domain, HashSet<string> projects) {

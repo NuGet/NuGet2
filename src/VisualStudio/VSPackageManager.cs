@@ -325,7 +325,13 @@ namespace NuGet.VisualStudio {
                 return;
             }
 
-            RuntimeHelpers.AddBindingRedirects(_solutionManager, project);
+            try {
+                RuntimeHelpers.AddBindingRedirects(_solutionManager, project);
+            }
+            catch (Exception e) {
+                // If there was an error adding binding redirects then print a warning and continue
+                Logger.Log(MessageLevel.Warning, e.Message);
+            }
         }
 
         private void RunProjectActionWithRemoveEvent(IProjectManager projectManager, Action action) {
