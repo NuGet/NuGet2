@@ -13,6 +13,7 @@ namespace NuGet.Dialog.Providers {
         private readonly IPackageRepository _recentPackagesRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
+        private readonly PackageSource _aggregateSource;
         private IVsPackageManager _recentPackageManager;
 
         public RecentProvider(
@@ -22,9 +23,11 @@ namespace NuGet.Dialog.Providers {
             IPackageRepositoryFactory packageRepositoryFactory,
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepository recentPackagesRepository,
+            IPackageSourceProvider packageSourceProvider,
             ProviderServices providerServices)
             : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices) {
 
+            _aggregateSource = packageSourceProvider.AggregateSource;
             _recentPackagesRepository = recentPackagesRepository;
             _packageManagerFactory = packageManagerFactory;
             _packageRepositoryFactory = packageRepositoryFactory;
@@ -50,9 +53,7 @@ namespace NuGet.Dialog.Providers {
 
         protected internal override IVsPackageManager GetActivePackageManager() {
             if (_recentPackageManager == null) {
-                var packageSource = new PackageSource("All") { IsAggregate = true };
-                var repository = _packageRepositoryFactory.CreateRepository(packageSource);
-
+                var repository = _packageRepositoryFactory.CreateRepository(_aggregateSource);
                 _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository);
             }
 

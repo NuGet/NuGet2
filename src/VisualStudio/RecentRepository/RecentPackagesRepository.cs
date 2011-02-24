@@ -19,17 +19,20 @@ namespace NuGet.VisualStudio {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private readonly DTEEvents _dteEvents;
+        private readonly PackageSource _aggregatePackageSource;
         private bool _hasLoadedSettingsStore;
 
         [ImportingConstructor]
         public RecentPackagesRepository(
             DTE dte,
             IPackageRepositoryFactory repositoryFactory,
+            IPackageSourceProvider packageSourceProvider,
             IPersistencePackageSettingsManager settingsManager) {
 
             _packages = new List<IPackage>();
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
+            _aggregatePackageSource = packageSourceProvider.AggregateSource;
 
             // Used to cache the created packages so that we don't have to make requests every time the MRU list is accessed
             _packagesCache = new Dictionary<PersistencePackageMetadata, IPackage>();
@@ -106,7 +109,7 @@ namespace NuGet.VisualStudio {
         private void LoadPackagesFromSettingsStore() {
 
             // find recent packages from the Aggregate repository
-            var aggregateRepository = _repositoryFactory.CreateRepository(VsPackageSourceProvider.AggregateSource);
+            var aggregateRepository = _repositoryFactory.CreateRepository(_aggregatePackageSource);
 
             // for packages not in the cache, find them from the Aggregate repository based on Id only
             var packagesMetadata = LoadPackageMetadataFromSettingsStore();
