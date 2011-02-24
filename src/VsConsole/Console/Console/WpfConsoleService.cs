@@ -143,7 +143,7 @@ namespace NuGetConsole.Implementation.Console {
             public PrivateConsoleStatus() {
             }
 
-            public void SetBusy(bool isBusy) {
+            public void SetBusyState(bool isBusy) {
                 IsBusy = isBusy;
             }
 

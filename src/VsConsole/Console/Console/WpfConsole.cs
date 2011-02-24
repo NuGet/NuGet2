@@ -485,7 +485,7 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void SetExecutionMode(bool isExecuting) {
-            _consoleStatus.SetBusy(isExecuting);
+            _consoleStatus.SetBusyState(isExecuting);
 
             if (!isExecuting) {
                 HideProgress();
