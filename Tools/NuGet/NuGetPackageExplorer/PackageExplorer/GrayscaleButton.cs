@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 
 namespace PackageExplorer
 {
@@ -10,10 +6,10 @@ namespace PackageExplorer
     {
         public GrayscaleButton()
         {
-            IsEnabledChanged += new System.Windows.DependencyPropertyChangedEventHandler(OnIsEnabledChanged);
+            IsEnabledChanged += OnIsEnabledChanged;
         }
 
-        void OnIsEnabledChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        private void OnIsEnabledChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
             var icon = Content as Image;
             if (icon != null)

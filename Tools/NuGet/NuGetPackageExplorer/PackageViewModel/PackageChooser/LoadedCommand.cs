@@ -22,7 +22,7 @@ namespace PackageExplorerViewModel
 
         public void Execute(object parameter)
         {
-            _viewModel.LoadPackages();
+            _viewModel.Sort("VersionDownloadCount", System.ComponentModel.ListSortDirection.Descending);
         }
     }
 }

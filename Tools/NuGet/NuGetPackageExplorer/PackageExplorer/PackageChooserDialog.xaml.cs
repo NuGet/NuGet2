@@ -1,21 +1,38 @@
-﻿using System.ComponentModel;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel;
+using System.ComponentModel;
 
 namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for PackageChooserDialog.xaml
     /// </summary>
     public partial class PackageChooserDialog : DialogWithNoMinimizeAndMaximize {
-        //private string _currentSort;
-        //private bool _ascending;
 
         public PackageChooserDialog() {
             InitializeComponent();
 
-            DataContext = new PackageChooserViewModel();
+            var viewModel = new PackageChooserViewModel();
+            viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            DataContext = viewModel;
+        }
+
+        private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+            string name = e.PropertyName;
+            if (name.Equals("CurrentSortColumn") || name.Equals("SortDirection")) {
+                var viewModel = (PackageChooserViewModel)sender;
+                string columnName = viewModel.CurrentSortColumn;
+                ListSortDirection direction = (ListSortDirection)viewModel.SortDirection;
+
+                foreach (var column in PackageGrid.Columns) {
+                    if (column.SortMemberPath == columnName) {
+                        column.SortDirection = direction;
+                        break;
+                    }
+                }
+            }
         }
 
         public DataServicePackage SelectedPackage {
@@ -33,34 +50,30 @@ namespace PackageExplorer {
         }
 
         private void PackageGrid_Sorting(object sender, System.Windows.Controls.DataGridSortingEventArgs e) {
-            string sort = e.Column.SortMemberPath;
-            //if (sort == _currentSort) {
-            //    _ascending = !_ascending;
-            //}
-            //else {
-            //    _currentSort = sort;
-            //    _ascending = true;
-            //}
-
-            //e.Column.SortDirection = _ascending ? ListSortDirection.Ascending : ListSortDirection.Descending;
-
             ICommand sortCommand = (ICommand)PackageGrid.Tag;
-            sortCommand.Execute(sort);
+            sortCommand.Execute(e.Column.SortMemberPath);
             e.Handled = true;
         }
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
+            string searchTerm = null;
+
             if (e.Key == Key.Enter) {
-                string searchTerm = SearchBox.Text;
+                searchTerm = SearchBox.Text;
+            }
+            else if (e.Key == Key.Escape) {
+                searchTerm = String.Empty;
+                SearchBox.Text = String.Empty;
+            }
+
+            if (searchTerm != null) {
                 ICommand searchCommand = (ICommand)SearchBox.Tag;
                 searchCommand.Execute(searchTerm);
-                
                 e.Handled = true;
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
             ICommand loadedCommand = (ICommand)Tag;
             loadedCommand.Execute(null);
         }

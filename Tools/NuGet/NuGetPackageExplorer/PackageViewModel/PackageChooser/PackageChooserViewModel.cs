@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,8 +14,6 @@ namespace PackageExplorerViewModel {
         private IPackageRepository _packageRepository;
         private IQueryable<IPackage> _currentQuery;
         private string _currentSearch;
-        private string _currentSortColumn;
-        private bool _sortByDescending;
 
         public PackageChooserViewModel() {
             Packages = new ObservableCollection<IPackage>();
@@ -22,6 +21,16 @@ namespace PackageExplorerViewModel {
             SortCommand = new SortCommand(this);
             SearchCommand = new SearchCommand(this);
             LoadedCommand = new LoadedCommand(this);
+        }
+
+        public string CurrentSortColumn {
+            get;
+            set;
+        }
+
+        public ListSortDirection SortDirection {
+            get;
+            set;
         }
 
         private IPackageRepository PackageRepository {
@@ -159,17 +168,17 @@ namespace PackageExplorerViewModel {
                 query = query.Find(_currentSearch.Split(' '));
             }
 
-            switch (_currentSortColumn) {
+            switch (CurrentSortColumn) {
                 case "Id":
-                    query = _sortByDescending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
+                    query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
                     break;
 
                 case "Authors":
-                    query = _sortByDescending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
+                    query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
                     break;
 
                 case "VersionDownloadCount":
-                    query = _sortByDescending ? query.OrderByDescending(p => p.VersionDownloadCount) :  query.OrderBy(p => p.VersionDownloadCount);
+                    query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.VersionDownloadCount) : query.OrderBy(p => p.VersionDownloadCount);
                     break;
 
                 default:
@@ -195,15 +204,24 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public void Sort(string column) {
-            if (_currentSortColumn == column) {
-                _sortByDescending = !_sortByDescending;
+        public void Sort(string column, ListSortDirection? direction = null) {
+            if (CurrentSortColumn == column) {
+                if (direction.HasValue) {
+                    SortDirection = direction.Value;
+                }
+                else {
+                    SortDirection = SortDirection == ListSortDirection.Ascending
+                                        ? ListSortDirection.Descending
+                                        : ListSortDirection.Ascending;
+                }
+                RaisePropertyChangeEvent("SortDirection");
             }
             else {
-                _currentSortColumn = column;
-                _sortByDescending = false;
+                CurrentSortColumn = column;
+                SortDirection = direction ?? ListSortDirection.Ascending;
+                RaisePropertyChangeEvent("CurrentSortColumn");
             }
-
+            
             LoadPackages();
         }
     }
