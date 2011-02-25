@@ -489,6 +489,7 @@ function Test-InstallPackageWorksWithPackagesHavingSameNames {
     # Assert
     $all = @( $p1, $p2, $p3, $p4, $p5 )
     $all | % { Assert-Package $_ elmah }
+}
 
 function Test-SimpleBindingRedirects {
     param(
