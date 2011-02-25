@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace PackageExplorerViewModel {
 
-    public class EditableFrameworkAssemblyReference : INotifyPropertyChanged, IDataErrorInfo {
+    public class EditableFrameworkAssemblyReference : INotifyPropertyChanged {
 
         public EditableFrameworkAssemblyReference() {
         }
@@ -48,29 +48,6 @@ namespace PackageExplorerViewModel {
             if (PropertyChanged != null) {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
-        }
-
-        public string Error {
-            get { return null; }
-        }
-
-        public string this[string columnName] {
-            get { return IsValid(columnName); }
-        }
-
-        private string IsValid(string columnName) {
-            if (columnName == "Id") {
-
-                if (String.IsNullOrEmpty(AssemblyName)) {
-                    return null;
-                }
-
-                if (!PackageIdValidator.IsValidPackageId(AssemblyName)) {
-                    return "Value '" + AssemblyName + "' cannot be converted.";
-                }
-            }
-
-            return null;
         }
 
         public FrameworkAssemblyReference AsReadOnly() {

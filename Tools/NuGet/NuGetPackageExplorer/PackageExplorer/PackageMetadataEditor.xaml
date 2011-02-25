@@ -82,7 +82,7 @@
 
                 <TextBlock Grid.Column="0" Text="{Binding AssemblyName, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
                 <TextBlock Grid.Column="1" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
-                <Button Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveFrameworkAssemblyButtonClicked">
+                <Button Grid.Column="2" ToolTipService.ToolTip="Remove this framework assembly" Click="RemoveFrameworkAssemblyButtonClicked">
                     <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
                 </Button>
             </Grid>
@@ -257,8 +257,8 @@
                             ItemTemplate="{StaticResource FrameworkAssemblyTemplate}">
                         </ItemsControl>
 
-                        <TextBox x:Name="NewAssemblyName" Text="{Binding AssemblyName, ValidatesOnDataErrors=True, BindingGroupName=NewFrameworkAssembly, NotifyOnValidationError=True}" Margin="2" Grid.Column="0" Grid.Row="2" />
-                        <TextBox x:Name="NewSupportedFramework" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, NotifyOnValidationError=True, ValidatesOnDataErrors=True, BindingGroupName=NewFrameworkAssembly}" Margin="2" Grid.Column="1" Grid.Row="2" />
+                        <TextBox x:Name="NewAssemblyName" Text="{Binding AssemblyName, BindingGroupName=NewFrameworkAssembly, NotifyOnValidationError=True}" Margin="2" Grid.Column="0" Grid.Row="2" />
+                        <TextBox x:Name="NewSupportedFramework" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, NotifyOnValidationError=True, BindingGroupName=NewFrameworkAssembly}" Margin="2" Grid.Column="1" Grid.Row="2" />
 
                         <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="2" Grid.Row="2" ToolTipService.ToolTip="Add new framework assembly" Click="AddFrameworkAssemblyButtonClicked">
                             <Button.IsEnabled>
