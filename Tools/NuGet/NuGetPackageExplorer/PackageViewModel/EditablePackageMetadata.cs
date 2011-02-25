@@ -33,6 +33,7 @@ namespace PackageExplorerViewModel {
             this.Language = source.Language;
             this.Tags = source.Tags;
             this.Dependencies = new ObservableCollection<PackageDependency>(source.Dependencies);
+            this.FrameworkAssemblies = new ObservableCollection<FrameworkAssemblyReference>(source.FrameworkAssemblies);
         }
 
         private string _id;
@@ -246,6 +247,8 @@ namespace PackageExplorerViewModel {
 
         public ObservableCollection<PackageDependency> Dependencies { get; private set; }
 
+        public ObservableCollection<FrameworkAssemblyReference> FrameworkAssemblies { get; private set; }
+
         IEnumerable<string> IPackageMetadata.Authors {
             get {
                 return SplitString(this.Authors);
@@ -269,6 +272,12 @@ namespace PackageExplorerViewModel {
         IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
             get {
                 return this.Dependencies;
+            }
+        }
+
+        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
+            get {
+                return this.FrameworkAssemblies;
             }
         }
 

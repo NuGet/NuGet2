@@ -5,8 +5,6 @@ using NuGet;
 namespace PackageExplorerViewModel {
 
     public class EditablePackageDependency : INotifyPropertyChanged, IDataErrorInfo {
-        private const string LessThanOrEqualTo = "\u2264";
-        private const string GreaterThanOrEqualTo = "\u2265";
 
         public EditablePackageDependency() {
         }

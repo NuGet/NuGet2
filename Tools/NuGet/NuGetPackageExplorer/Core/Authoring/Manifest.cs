@@ -11,7 +11,6 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using NuGet.Resources;
-using NuGet;
 
 namespace NuGet {
     [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
@@ -35,8 +34,13 @@ namespace NuGet {
             // Validate before saving
             Validate(this);
 
-            var serializer = new XmlSerializer(typeof(Manifest));
-            serializer.Serialize(stream, this);
+            // Define the namespaces to use when serializing
+            var ns = new XmlSerializerNamespaces();
+            ns.Add("", Constants.ManifestSchemaNamespace);
+
+            // Need to force the namespace here again as the default in order to get the XML output clean
+            var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
+            serializer.Serialize(stream, this, ns);
         }
 
         public static Manifest ReadFrom(Stream stream) {
@@ -97,7 +101,14 @@ namespace NuGet {
                                     select new ManifestDependency {
                                         Id = d.Id.SafeTrim(),
                                         Version = d.VersionSpec.ToStringSafe()
-                                    }).ToList()
+                                    }).ToList(),
+                    FrameworkAssemblies = metadata.FrameworkAssemblies == null ||
+                                          !metadata.FrameworkAssemblies.Any() ? null :
+                                          (from reference in metadata.FrameworkAssemblies
+                                           select new ManifestFrameworkAssembly {
+                                               AssemblyName = reference.AssemblyName,
+                                               TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
+                                           }).ToList()
                 }
             };
         }
@@ -227,6 +238,6 @@ namespace NuGet {
             public object GetService(Type serviceType) {
                 return null;
             }
-        }        
+        }
     }
 }

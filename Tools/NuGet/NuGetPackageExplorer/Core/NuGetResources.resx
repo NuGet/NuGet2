@@ -168,4 +168,10 @@
   <data name="InvalidFeed" xml:space="preserve">
     <value>There was an error while processing the request. Please verify that '{0}' is a valid feed.</value>
   </data>
+  <data name="InvalidFrameworkNameFormat" xml:space="preserve">
+    <value>Invalid framework name format. Expected {framework}{version}-{profile}.</value>
+  </data>
+  <data name="MissingFrameworkName" xml:space="preserve">
+    <value>Framework name is missing.</value>
+  </data>
 </root>

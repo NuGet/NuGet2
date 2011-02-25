@@ -8,14 +8,37 @@ using System.Reflection;
 
 namespace NuGet {
     public static class PackageExtensions {
-
         private const string TagsProperty = "Tags";
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", TagsProperty };
+
+        public static IEnumerable<IPackageFile> GetFiles(this IPackage package, string directory) {
+            return package.GetFiles().Where(file => file.Path.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
+            return package.GetFiles(Constants.ContentDirectory);
+        }
+
+        /// <summary>
+        /// Returns true if a package has no content that applies to a project.
+        /// </summary>
+        public static bool HasProjectContent(this IPackage package) {
+            return package.FrameworkAssemblies.Any() ||
+                   package.AssemblyReferences.Any() || 
+                   package.GetContentFiles().Any();
+        }
+
+        /// <summary>
+        /// Returns true if a package has dependencies but no files.
+        /// </summary>
+        public static bool IsDependencyOnly(this IPackage package) {
+            return !package.GetFiles().Any() && package.Dependencies.Any();
+        }
 
         public static string GetFullName(this IPackageMetadata package) {
             return package.Id + " " + package.Version;
         }
-
+        
         public static IQueryable<IPackage> Find(this IQueryable<IPackage> packages, params string[] searchTerms) {
             if (searchTerms == null) {
                 return packages;

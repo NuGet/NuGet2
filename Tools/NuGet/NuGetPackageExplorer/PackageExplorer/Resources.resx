@@ -123,6 +123,9 @@
   <data name="Dialog_DependenciesLabel" xml:space="preserve">
     <value>Dependencies:</value>
   </data>
+  <data name="Dialog_FrameworkAssembliesLabel" xml:space="preserve">
+    <value>Framework Assembly References:</value>
+  </data>
   <data name="Dialog_HelpAbout" xml:space="preserve">
     <value>Author: Luan Nguyen. For more information, visit http://nuget.codeplex.com.</value>
   </data>

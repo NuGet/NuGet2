@@ -133,6 +133,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid framework name format. Expected {framework}{version}-{profile}..
+        /// </summary>
+        internal static string InvalidFrameworkNameFormat {
+            get {
+                return ResourceManager.GetString("InvalidFrameworkNameFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package id &apos;{0}&apos; is invalid..
         /// </summary>
         internal static string InvalidPackageId {
@@ -183,6 +192,15 @@ namespace NuGet.Resources {
         internal static string Manifest_UriCannotBeEmpty {
             get {
                 return ResourceManager.GetString("Manifest_UriCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Framework name is missing..
+        /// </summary>
+        internal static string MissingFrameworkName {
+            get {
+                return ResourceManager.GetString("MissingFrameworkName", resourceCulture);
             }
         }
         

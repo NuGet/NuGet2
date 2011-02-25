@@ -8,8 +8,8 @@ using NuGet.Resources;
 namespace NuGet {
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
-        private const string AssemblyReferencesExtension = ".dll";
-        private const string ManifestRelationType = "manifest";
+        private const string ResourceAssemblyExtension = ".resources.dll";
+        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
 
         // paths to exclude
         private static readonly string[] _excludePaths = new[] { "_rels", "package" };
@@ -20,7 +20,7 @@ namespace NuGet {
 
         public ZipPackage(string fileName) {
             if (String.IsNullOrEmpty(fileName)) {
-                throw new ArgumentException("fileName");
+                throw new ArgumentException("Argument cannot be null.", "fileName");
             }
             _streamFactory = () => File.OpenRead(fileName);
             EnsureManifest();
@@ -145,6 +145,11 @@ namespace NuGet {
             }
         }
 
+        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
+            get;
+            set;
+        }
+
         public IEnumerable<IPackageFile> GetFiles() {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);
@@ -163,7 +168,7 @@ namespace NuGet {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);
 
-                PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.SchemaNamespace + ManifestRelationType).SingleOrDefault();
+                PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.SchemaNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
 
                 if (relationshipType == null) {
                     throw new InvalidOperationException(NuGetResources.PackageDoesNotContainManifest);
@@ -193,6 +198,7 @@ namespace NuGet {
                     Language = metadata.Language;
                     Tags = metadata.Tags;
                     Dependencies = metadata.Dependencies;
+                    FrameworkAssemblies = metadata.FrameworkAssemblies;
 
                     // Ensure tags start and end with an empty " " so we can do contains filtering reliably
                     if (!String.IsNullOrEmpty(Tags)) {
@@ -203,10 +209,12 @@ namespace NuGet {
         }
 
         private static bool IsAssemblyReference(PackagePart part) {
-            // Assembly references are in lib/ and have a .dll extension
+            // Assembly references are in lib/ and have a .dll/.exe extension
             var path = UriUtility.GetPath(part.Uri);
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
-                   Path.GetExtension(path).Equals(AssemblyReferencesExtension, StringComparison.OrdinalIgnoreCase);
+                   // Exclude resource assemblies
+                   !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
+                   AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
         }
 
         private static bool IsPackageFile(PackagePart part) {
@@ -217,11 +225,7 @@ namespace NuGet {
         }
 
         public override string ToString() {
-            return GetFullName();
-        }
-
-        public string GetFullName() {
-            return Id + " " + Version;
+            return this.GetFullName();
         }
     }
 }

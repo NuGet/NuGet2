@@ -79,6 +79,15 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Framework Assembly References:.
+        /// </summary>
+        public static string Dialog_FrameworkAssembliesLabel {
+            get {
+                return ResourceManager.GetString("Dialog_FrameworkAssembliesLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Author: Luan Nguyen. For more information, visit http://nuget.codeplex.com..
         /// </summary>
         public static string Dialog_HelpAbout {

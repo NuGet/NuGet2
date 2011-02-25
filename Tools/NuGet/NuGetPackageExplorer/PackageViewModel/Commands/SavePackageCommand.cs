@@ -117,6 +117,7 @@ namespace PackageExplorerViewModel {
             builder.Language = source.Language;
             builder.Tags.AddRange(ParseTags(source.Tags));
             builder.Dependencies.AddRange(source.Dependencies);
+            builder.FrameworkReferences.AddRange(source.FrameworkAssemblies);
         }
 
         /// <summary>

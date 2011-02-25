@@ -2,7 +2,7 @@ namespace NuGet {
     using System;
     using System.Runtime.Versioning;
 
-    public interface IPackageAssemblyReference : IPackageFile {
+    public interface IPackageAssemblyReference : IPackageFile, IFrameworkTargetable {
         FrameworkName TargetFramework {
             get;
         }

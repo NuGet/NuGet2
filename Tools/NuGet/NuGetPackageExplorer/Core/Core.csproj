@@ -51,12 +51,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authoring\IPackageBuilder.cs" />
+    <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\PackageBuilder.cs" />
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\PathSearchFilter.cs" />
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
     <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\DataServicePackage.cs" />
+    <Compile Include="Packages\FrameworkAssemblyReference.cs" />
+    <Compile Include="Packages\IFrameworkTargetable.cs" />
     <Compile Include="Packages\IPackage.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\IPackageFile.cs" />
@@ -117,6 +120,9 @@
     <EmbeddedResource Include="Authoring\nuspec.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

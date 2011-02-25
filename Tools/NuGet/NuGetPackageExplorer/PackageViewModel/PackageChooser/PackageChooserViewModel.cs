@@ -93,7 +93,6 @@ namespace PackageExplorerViewModel {
             }
         }
 
-
         public int TotalPage {
             get {
                 return Math.Max(1, (TotalPackageCount + PageSize - 1) / PageSize);

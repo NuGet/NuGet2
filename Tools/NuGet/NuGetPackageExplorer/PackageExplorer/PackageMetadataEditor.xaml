@@ -16,6 +16,7 @@
         <self:VersionSpecConverter x:Key="VersionSpecConverter" />
         <self:UriConverter x:Key="UriConverter" />
         <self:MultiStringToBoolConverter x:Key="StringsConverter" />
+        <self:FrameworkAssemblyReferenceConverter x:Key="FrameworkNameConverter" />
 
         <Style x:Key="ImageStyle" TargetType="{x:Type Image}">
             <Setter Property="Width" Value="16" />
@@ -70,6 +71,22 @@
                 </Button>
             </Grid>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type core:FrameworkAssemblyReference}" x:Key="FrameworkAssemblyTemplate">
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding AssemblyName, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+                <TextBlock Grid.Column="1" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+                <Button Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveFrameworkAssemblyButtonClicked">
+                    <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
+                </Button>
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -86,6 +103,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -203,6 +221,50 @@
                                 <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
                                     <Binding ElementName="NewDependencyId" Path="Text" />
                                     <Binding ElementName="NewDependencyVersion" Path="Text" />
+                                </MultiBinding>
+                            </Button.IsEnabled>
+                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png">
+                                <Image.Effect>
+                                    <effect:GrayscaleEffect DesaturationFactor="0" />
+                                </Image.Effect>
+                            </Image>
+                        </self:GrayscaleButton>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Framework assemblies -->
+                <GroupBox Grid.Row="15" Grid.ColumnSpan="2" Header="Framework Assemblies" Margin="0,4,0,0">
+                    <Grid Margin="3,4,3,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Assembly name" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="Supported frameworks" FontWeight="SemiBold" HorizontalAlignment="Center" />
+
+                        <ItemsControl 
+                            x:Name="FrameworkAssembliesList" 
+                            Grid.Row="1" 
+                            Grid.Column="0" 
+                            Grid.ColumnSpan="3" 
+                            ItemTemplate="{StaticResource FrameworkAssemblyTemplate}">
+                        </ItemsControl>
+
+                        <TextBox x:Name="NewAssemblyName" Text="{Binding AssemblyName, ValidatesOnDataErrors=True, BindingGroupName=NewFrameworkAssembly, NotifyOnValidationError=True}" Margin="2" Grid.Column="0" Grid.Row="2" />
+                        <TextBox x:Name="NewSupportedFramework" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, NotifyOnValidationError=True, ValidatesOnDataErrors=True, BindingGroupName=NewFrameworkAssembly}" Margin="2" Grid.Column="1" Grid.Row="2" />
+
+                        <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="2" Grid.Row="2" ToolTipService.ToolTip="Add new framework assembly" Click="AddFrameworkAssemblyButtonClicked">
+                            <Button.IsEnabled>
+                                <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
+                                    <Binding ElementName="NewAssemblyName" Path="Text" />
+                                    <Binding ElementName="NewSupportedFramework" Path="Text" />
                                 </MultiBinding>
                             </Button.IsEnabled>
                             <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png">

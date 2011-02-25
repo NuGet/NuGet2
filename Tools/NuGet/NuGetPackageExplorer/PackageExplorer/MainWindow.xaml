@@ -134,13 +134,28 @@
                         </ItemsControl>
 
                         <TextBlock 
-                            x:Name="NoneLabel"
-                            Margin="25,5,0,0"
+                            Margin="25,5,0,5"
                             Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource invertedCountConverter}}"
                             Style="{StaticResource NoDependencyTextBoxStyle}" 
                             Text="{x:Static resources:Resources.Dialog_NoDependencyLabel}">
                         </TextBlock>
-
+                        
+                        <!-- Framework assembly references -->
+                        <TextBlock 
+                            Visibility="{Binding Items.Count, ElementName=FrameworkAssemblyItems, Converter={StaticResource countConverter}}"
+                            Text="{x:Static resources:Resources.Dialog_FrameworkAssembliesLabel}" 
+                            Style="{StaticResource DetailMetadataLabelStyle}" />
+                        
+                        <ItemsControl
+                            x:Name="FrameworkAssemblyItems"
+                            Margin="25,5,0,0"
+                            ItemsSource="{Binding FrameworkAssemblies}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </ScrollViewer>
             </DataTemplate>
