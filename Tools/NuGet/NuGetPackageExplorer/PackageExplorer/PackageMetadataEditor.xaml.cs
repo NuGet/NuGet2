@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using NuGet;
 using PackageExplorerViewModel;
+using System.Net.NetworkInformation;
 
 namespace PackageExplorer {
     /// <summary>
@@ -95,6 +96,12 @@ namespace PackageExplorer {
         }
 
         private void SelectDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var dialog = new PackageChooserDialog() { Owner = Window.GetWindow(this) };
             var result = dialog.ShowDialog();
             if (result ?? false) {

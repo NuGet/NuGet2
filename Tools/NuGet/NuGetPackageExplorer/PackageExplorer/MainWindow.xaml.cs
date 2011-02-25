@@ -9,6 +9,7 @@ using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using StringResources = PackageExplorer.Resources.Resources;
+using System.Net.NetworkInformation;
 
 namespace PackageExplorer {
     /// <summary>
@@ -74,6 +75,12 @@ namespace PackageExplorer {
         }
 
         private void OpenPackageFromNuGetFeed(object sender, RoutedEventArgs e) {
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var dialog = new PackageChooserDialog() {
                 Owner = this,
                 FontSize = this.FontSize
