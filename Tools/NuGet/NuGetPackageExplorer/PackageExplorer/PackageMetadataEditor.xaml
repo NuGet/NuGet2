@@ -246,8 +246,8 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="Assembly name" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text="Supported frameworks" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="0" Text="Assembly name" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,3" />
+                        <TextBlock Grid.Column="1" Text="Supported frameworks" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,3" />
 
                         <ItemsControl 
                             x:Name="FrameworkAssembliesList" 

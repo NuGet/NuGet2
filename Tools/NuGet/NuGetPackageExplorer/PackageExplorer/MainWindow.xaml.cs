@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -9,7 +10,6 @@ using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using StringResources = PackageExplorer.Resources.Resources;
-using System.Net.NetworkInformation;
 
 namespace PackageExplorer {
     /// <summary>
@@ -78,6 +78,11 @@ namespace PackageExplorer {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
                 MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            bool canceled = AskToSaveCurrentFile();
+            if (canceled) {
                 return;
             }
 
