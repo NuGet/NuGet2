@@ -71,17 +71,29 @@ namespace NuGet {
                     throw new CommandLineException(NuGetResources.MissingOptionValueError, option);
                 }
 
-                try {
-                    propInfo.SetValue(command, CommandLineUtility.ChangeType(value, propInfo.PropertyType), null);
-                }
-                catch {
-                    throw new CommandLineException(NuGetResources.InvalidOptionValueError, option, value);
-                }
+                AssignValue(propInfo, command, option, value);
             }
 
             command.Arguments = arguments;
 
             return command;
+        }
+
+        private static void AssignValue(PropertyInfo property, ICommand command, string option, object value) {
+            try {
+                var genericCollection = CommandLineUtility.GetGenericCollectionType(property.PropertyType);
+
+                if (genericCollection != null) {
+                    var method = genericCollection.GetMethod("Add");
+                    method.Invoke(property.GetValue(command, null), new[] { value });
+                }
+                else {
+                    property.SetValue(command, CommandLineUtility.ChangeType(value, property.PropertyType), null);
+                }
+            }
+            catch {
+                throw new CommandLineException(NuGetResources.InvalidOptionValueError, option, value);
+            }
         }
 
         public ICommand ParseCommandLine(IEnumerable<string> commandlineArgs) {

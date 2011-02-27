@@ -110,15 +110,16 @@ namespace NuGet.Commands {
                 Console.WriteLine("options:");
                 Console.WriteLine();
 
-                //Get the max option width
-                int maxOptionWidth = options.Max(o => o.Value.Name.Length);
-                //Get the max altname option width
+                // Get the max option width. +2 for showing + against multivalued properties
+                int maxOptionWidth = options.Max(o => o.Value.Name.Length) + 2;
+                // Get the max altname option width
                 int maxAltOptionWidth = options.Max(o => (o.Key.AltName ?? String.Empty).Length);
 
-
                 foreach (var o in options) {
-                    Console.Write(" {0, -" + (maxOptionWidth + 2) + "}", o.Value.Name);
+                    Console.Write(" {0, -" + (maxOptionWidth + 2) + "}", o.Value.Name +
+                        (CommandLineUtility.IsMultiValuedProperty(o.Value) ? " +" : String.Empty));
                     Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", GetAltText(o.Key.AltName));
+                    
                     Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
 
                 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NuGet.Commands;
 
 namespace NuGet.Test.NuGetCommandLine {
     [TestClass]
@@ -287,6 +288,26 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
+        [TestMethod]
+        public void ExtractOptionAddsValuesToListCommand() {
+            // Arrange
+            var cmdMgr = new CommandManager();
+            var command = new MockCommandWithMultiple();
+            var arguments = "/ListProperty Val1 /RegularProp RegularPropValue /ListProperty Val2  /ListProperty Val3";
+            var parser = new CommandLineParser(cmdMgr);
+
+            // Act
+            parser.ExtractOptions(command, arguments.Split().AsEnumerable().GetEnumerator());
+            
+            // Assert
+            Assert.AreEqual(command.RegularProp, "RegularPropValue");
+            Assert.AreEqual(command.ListProperty.Count, 3);
+            Assert.AreEqual(command.ListProperty[0], "Val1");
+            Assert.AreEqual(command.ListProperty[1], "Val2");
+            Assert.AreEqual(command.ListProperty[2], "Val3");
+        }
+        
+
         private class MockCommand : ICommand {
 
             public List<string> Arguments { get; set; }
@@ -309,6 +330,23 @@ namespace NuGet.Test.NuGetCommandLine {
 
             public IEnumerable<CommandAttribute> GetCommandAttribute() {
                 return new[] { CommandAttribute };
+            }
+        }
+
+
+        private class MockCommandWithMultiple : Command {
+            private readonly List<string> _listProperty = new List<string>();
+
+            [Option("Regular Option")]
+            public string RegularProp { get; set; }
+
+            [Option("List property")]
+            public List<string> ListProperty { 
+                get { return _listProperty; } 
+            }
+
+            public override void ExecuteCommand() {
+                throw new NotImplementedException();
             }
         }
     }

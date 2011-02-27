@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Common;
 using NuGet.Commands;
 
 namespace NuGet {
-    public static class CommandLineUtility {
+    internal static class CommandLineUtility {
+        private static Dictionary<string, string> _cachedResourceStrings;
+
         public readonly static string ApiKeysSectionName = "apikeys";
 
         public static Type RemoveNullableFromType(Type type) {
@@ -51,7 +54,19 @@ namespace NuGet {
             return Nullable.GetUnderlyingType(type) != null || !type.IsValueType;
         }
 
-        private static Dictionary<string, string> _cachedResourceStrings;
+        public static Type GetGenericCollectionType(Type type) {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>)) {
+                return type;
+            }
+            return (from t in type.GetInterfaces()
+                    where t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ICollection<>)
+                    select t).SingleOrDefault();
+        }
+
+        public static bool IsMultiValuedProperty(PropertyInfo property) {
+            return GetGenericCollectionType(property.PropertyType) != null;
+        }
+        
         public static string GetLocalizedString(Type resourceType, string resourceName) {
             if (String.IsNullOrEmpty(resourceName)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "resourceName");

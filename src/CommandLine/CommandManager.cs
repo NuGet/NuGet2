@@ -50,7 +50,7 @@ namespace NuGet {
 
             foreach (PropertyInfo propInfo in command.GetType().GetProperties()) {
                 foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true)) {
-                    if (!propInfo.CanWrite) {
+                    if (!propInfo.CanWrite && !CommandLineUtility.IsMultiValuedProperty(propInfo)) { 
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
                             NuGetResources.OptionInvalidWithoutSetter, command.GetType().FullName + "." + propInfo.Name));
                     }

@@ -2,15 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {
-        private static readonly HashSet<string> _excludeExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
-            Constants.PackageExtension, 
-            Constants.ManifestExtension 
+        private static readonly HashSet<string> _exclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+            Constants.PackageExtension, Constants.ManifestExtension, 
+            // Version control Files
+            @".hg*", @".git*", @".svn*"
         };
 
         private static readonly HashSet<string> _allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
@@ -36,6 +38,10 @@ namespace NuGet.Commands {
         public bool Debug { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandSourcesDescription")]
+        [Option(typeof(NuGetResources), "PackageCommandExcludeDescription")]
+        public ICollection<string> Exclude {
+            get { return _exclude; }
+        }
         public bool Sources { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
@@ -54,7 +60,8 @@ namespace NuGet.Commands {
                 builder.Version = new Version(Version);
             }
 
-            ExcludeFiles(builder);
+            // Remove the output file or the package spec might try to include it (which is default behavior)
+            ExcludeFiles(builder.Files, _exclude);
 
             // Get the output path
             string outputPath = GetOutputPath(builder);
@@ -74,6 +81,7 @@ namespace NuGet.Commands {
             if (Verbose) {
                 PrintVerbose(outputPath);
             }
+
 
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
         }
@@ -111,11 +119,10 @@ namespace NuGet.Commands {
             Console.WriteLine();
         }
 
-        private static void ExcludeFiles(PackageBuilder builder) {
-            // Remove the output file or the package spec might try to include it (which is default behavior)
-            builder.Files.RemoveAll(file => _excludeExtensions.Contains(Path.GetExtension(file.Path)));
+        internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, IEnumerable<string> excludeFilters) {
+            var filters = excludeFilters.Select(f => new Regex(Regex.Escape(f).Replace(@"\*", ".*").Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase));
+            packageFiles.RemoveAll(file => filters.Any(f => f.IsMatch(file.Path)));
         }
-
         private string GetOutputPath(PackageBuilder builder) {
             // Output file is {id}.{version}
             string outputFile = builder.Id + "." + builder.Version;

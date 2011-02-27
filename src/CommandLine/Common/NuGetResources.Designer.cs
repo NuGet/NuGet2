@@ -448,6 +448,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifies one or more wildcard patterns to exclude when creating a package..
+        /// </summary>
+        internal static string PackageCommandExcludeDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandExcludeDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {

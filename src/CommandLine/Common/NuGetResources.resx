@@ -351,6 +351,9 @@
   <data name="PackageCommandVersionDescription" xml:space="preserve">
     <value>Overrides the Version number from the nuspec file.</value>
   </data>
+  <data name="PackageCommandExcludeDescription" xml:space="preserve">
+    <value>Specifies one or more wildcard patterns to exclude when creating a package.</value>
+  </data>
   <data name="InstallCommandOutputDirDescription" xml:space="preserve">
     <value>Specifies the directory in which packages will be installed</value>
   </data>
