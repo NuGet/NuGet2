@@ -14,10 +14,9 @@
         FontSize="12"
         AllowDrop="True"
         TextOptions.TextRenderingMode="ClearType"
-        DragOver="Window_DragOver" 
+        DragOver="Window_DragOver"
         Drop="Window_Drop"
-        Closing="Window_Closing"
-        Closed="Window_Closed">
+        Closing="Window_Closing">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -47,14 +46,20 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="8">
 
-                        <Image 
-                            Visibility="{Binding IconUrl, Converter={StaticResource NullToVisibilityConverter}}"
-                            Source="{Binding IconUrl}" 
+                        <Border 
+                            BorderBrush="MediumAquamarine" 
+                            BorderThickness="0.5" 
                             HorizontalAlignment="Center" 
-                            Width="32" 
-                            Height="32" 
-                            Stretch="Fill" 
-                            StretchDirection="DownOnly" />
+                            Padding="2"
+                            ToolTipService.ToolTip="Package icon"
+                            Visibility="{Binding IconUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                            <Image         
+                                Source="{Binding IconUrl}" 
+                                Width="32" 
+                                Height="32" 
+                                Stretch="Fill" 
+                                StretchDirection="DownOnly" />
+                        </Border>
 
                         <!-- Id -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}">

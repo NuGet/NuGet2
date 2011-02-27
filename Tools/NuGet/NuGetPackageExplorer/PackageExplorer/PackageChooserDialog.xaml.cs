@@ -100,5 +100,12 @@ namespace PackageExplorer {
             var viewModel = (PackageChooserViewModel)DataContext;
             Properties.Settings.Default.PackageSource = viewModel.PackageSource;
         }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.Control) {
+                SearchBox.Focus();
+                e.Handled = true;
+            }
+        }
     }
 }

@@ -20,12 +20,16 @@ namespace PackageExplorer {
         public MainWindow() {
             InitializeComponent();
 
+            BuildStatusItem.Content = "Build " + typeof(MainWindow).Assembly.GetName().Version.ToString();
+        }
+
+        protected override void OnSourceInitialized(EventArgs e) {
+            base.OnSourceInitialized(e);
+
             try {
                 LoadSettings();
             }
             catch (Exception) { }
-
-            BuildStatusItem.Content = "Build " + typeof(MainWindow).Assembly.GetName().Version.ToString();
         }
 
         internal void OpenLocalPackage(string packagePath) {
@@ -171,6 +175,13 @@ namespace PackageExplorer {
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
             bool isCanceled = AskToSaveCurrentFile();
             e.Cancel = isCanceled;
+
+            if (!isCanceled) {
+                try {
+                    SaveSettings();
+                }
+                catch (Exception) { }
+            }
         }
 
         /// <summary>
@@ -235,52 +246,16 @@ namespace PackageExplorer {
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e) {
-            try {
-                SaveSettings();
-            }
-            catch (Exception) { }
+        private void LoadSettings() {
+            Settings settings = Properties.Settings.Default;
+            SetFontSize(settings.FontSize);
+            this.LoadWindowPlacementFromSettings(settings.WindowPlacement);
         }
 
         private void SaveSettings() {
             Settings settings = Properties.Settings.Default;
-
             settings.FontSize = (int)Math.Round(this.FontSize);
-            settings.Left = this.Left;
-            settings.Top = this.Top;
-            settings.Width = this.Width;
-            settings.Height = this.Height;
-            settings.WindowState = this.WindowState.ToString();
-        }
-
-        private void LoadSettings() {
-            Settings settings = Properties.Settings.Default;
-            
-            SetFontSize(settings.FontSize);
-
-            double left = settings.Left;
-            double top = settings.Top;
-
-            if (left > 0 && top > 0) {
-                this.Left = left;
-                this.Top = top;
-            }
-
-            double width = settings.Width;
-            double height = settings.Height;
-
-            if (width > 0 && height > 0) {
-                this.Width = width;
-                this.Height = Height;
-            }
-
-            string windowState = settings.WindowState;
-            if (!String.IsNullOrEmpty(windowState)) {
-                WindowState state;
-                if (Enum.TryParse<WindowState>(windowState, out state) && state == WindowState.Maximized) {
-                    this.WindowState = state;
-                }
-            }
+            settings.WindowPlacement = this.SaveWindowPlacementToSettings();
         }
 
         private void ViewFileFormatItem_Click(object sender, RoutedEventArgs e) {

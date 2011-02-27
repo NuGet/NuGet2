@@ -10,6 +10,8 @@
         Tag="{Binding LoadedCommand}"
         Loaded="Window_Loaded"
         Closed="Window_Closed"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        FocusManager.FocusedElement="{Binding ElementName=SearchBox}"
         MinHeight="300"
         MinWidth="450"
         Height="450" 

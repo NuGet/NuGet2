@@ -131,6 +131,7 @@
     <Compile Include="GrayscaleButton.cs" />
     <Compile Include="GrayscaleImage.cs" />
     <Compile Include="GrayscaleMenuItem.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">
       <DependentUpon>PackageChooserDialog.xaml</DependentUpon>
     </Compile>
@@ -149,6 +150,8 @@
     </Compile>
     <Compile Include="SortAdorner.cs" />
     <Compile Include="UriHelper.cs" />
+    <Compile Include="WindowPlacement.cs" />
+    <Compile Include="WindowPlacementHelper.cs" />
     <Page Include="DownloadProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
