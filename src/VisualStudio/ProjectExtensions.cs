@@ -108,11 +108,16 @@ namespace NuGet.VisualStudio {
         }
 
         private static ProjectItem GetProjectItem(ProjectItems projectItems, string name, string kind) {
-            return (from ProjectItem item in projectItems
-                    where item.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
-                          item.Kind != null &&
-                          item.Kind.Equals(kind, StringComparison.OrdinalIgnoreCase)
-                    select item).FirstOrDefault();
+            try {
+                ProjectItem projectItem = projectItems.Item(name);
+                if (kind.Equals(projectItem.Kind, StringComparison.OrdinalIgnoreCase)) {
+                    return projectItem;
+                }
+            }
+            catch {
+            }
+
+            return null;
         }
 
         public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, params string[] kinds) {
