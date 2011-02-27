@@ -223,11 +223,7 @@
                                     <Binding ElementName="NewDependencyVersion" Path="Text" />
                                 </MultiBinding>
                             </Button.IsEnabled>
-                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png">
-                                <Image.Effect>
-                                    <effect:GrayscaleEffect DesaturationFactor="0" />
-                                </Image.Effect>
-                            </Image>
+                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
                         </self:GrayscaleButton>
                     </Grid>
                 </GroupBox>
@@ -267,11 +263,7 @@
                                     <Binding ElementName="NewSupportedFramework" Path="Text" />
                                 </MultiBinding>
                             </Button.IsEnabled>
-                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png">
-                                <Image.Effect>
-                                    <effect:GrayscaleEffect DesaturationFactor="0" />
-                                </Image.Effect>
-                            </Image>
+                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
                         </self:GrayscaleButton>
                     </Grid>
                 </GroupBox>

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:self="clr-namespace:PackageExplorer"
         xmlns:effect="clr-namespace:GrayscaleEffect;assembly=GrayscaleEffect"
+        xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         Title="Select package" 
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
@@ -33,6 +34,49 @@
                 <GradientStop Color="#E3E9EF" Offset="1"/>
             </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
+
+        <Style x:Key="SearchBoxStyle" TargetType="{x:Type TextBoxBase}" BasedOn="{x:Null}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBoxBase}">
+                        <theme:ListBoxChrome x:Name="Bd"
+                                         BorderThickness="{TemplateBinding BorderThickness}"
+                                         BorderBrush="{TemplateBinding BorderBrush}"
+                                         Background="{TemplateBinding Background}"
+                                         RenderMouseOver="{TemplateBinding IsMouseOver}"
+                                         RenderFocused="{TemplateBinding IsKeyboardFocusWithin}"
+                                         SnapsToDevicePixels="true">
+                            
+                            <StackPanel Orientation="Horizontal">
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                      Width="150"
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                <Image Grid.Column="1" Source="/NuGetPackageExplorer;component/Images/Search.png" />
+                            </StackPanel>                            
+                        </theme:ListBoxChrome>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled"
+                                 Value="false">
+                                <Setter TargetName="Bd"
+                                    Property="Background"
+                                    Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                <Setter Property="Foreground"
+                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
@@ -49,7 +93,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        
+        <!-- change package source elements -->
         <Grid Grid.ColumnSpan="3" Margin="0,0,0,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -58,25 +102,18 @@
             </Grid.ColumnDefinitions>
             
             <Label Content="_Package source:" Target="{Binding ElementName=PackageSourceBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="PackageSourceBox" VerticalContentAlignment="Center" Grid.Column="1" Text="{Binding PackageSource, Mode=OneWay}" Margin="3,0" />
+            <TextBox x:Name="PackageSourceBox" VerticalContentAlignment="Center" Grid.Column="1" Text="{Binding PackageSource, Mode=OneWay}" Margin="4,0" />
             <Button Grid.Column="2" Content="_Apply" HorizontalAlignment="Center" Padding="10,0" IsEnabled="{Binding Text, ElementName=PackageSourceBox, Converter={StaticResource NullToBoolConverter}}" Command="{Binding ChangePackageSourceCommand}" CommandParameter="{Binding Text, ElementName=PackageSourceBox}" />
         </Grid>
 
+        <!-- navigation buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="First">
-                <Image Source="/NuGetPackageExplorer;component/Images/MoveFirstHS.png">
-                    <Image.Effect>
-                        <effect:GrayscaleEffect DesaturationFactor="0" />
-                    </Image.Effect>
-                </Image>
+                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MoveFirstHS.png" />
             </self:GrayscaleButton>
 
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Previous">
-                <Image Source="/NuGetPackageExplorer;component/Images/MovePreviousHS.png">
-                    <Image.Effect>
-                        <effect:GrayscaleEffect DesaturationFactor="0" />
-                    </Image.Effect>
-                </Image>
+                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MovePreviousHS.png" />
             </self:GrayscaleButton>
 
             <TextBlock Margin="0,0,7,0" VerticalAlignment="Center">
@@ -90,29 +127,19 @@
             </TextBlock>
 
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Next">
-                <Image Source="/NuGetPackageExplorer;component/Images/MoveNextHS.png">
-                    <Image.Effect>
-                        <effect:GrayscaleEffect DesaturationFactor="0" />
-                    </Image.Effect>
-                </Image>
+                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MoveNextHS.png" />
             </self:GrayscaleButton>
 
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
-                <Image Source="/NuGetPackageExplorer;component/Images/MoveLastHS.png">
-                    <Image.Effect>
-                        <effect:GrayscaleEffect DesaturationFactor="0" />
-                    </Image.Effect>
-                </Image>
+                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MoveLastHS.png" />
             </self:GrayscaleButton>
         </StackPanel>
 
-        <Border Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" UseLayoutRounding="True" BorderThickness="0.5" BorderBrush="{StaticResource TextBoxBorder}" Padding="2,2,3,2">
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="SearchBox" BorderThickness="0" Width="150" KeyDown="SearchBox_KeyDown" Tag="{Binding SearchCommand}" VerticalAlignment="Center" />
-                <Image Grid.Column="1" Source="/NuGetPackageExplorer;component/Images/Search.png" />
-            </StackPanel>
-        </Border>
+        <!-- search box -->
+        <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Padding="2,2,3,2" KeyDown="SearchBox_KeyDown" Tag="{Binding SearchCommand}" VerticalAlignment="Center">
+        </TextBox>
 
+        <!-- package list view -->
         <ListView x:Name="PackageGrid" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Packages}" SelectionMode="Single" IsTextSearchEnabled="False">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">

@@ -240,11 +240,7 @@
                 <Separator />
                 <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="Save" CommandParameter="Save">
                     <self:GrayscaleMenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/saveHS.png">
-                            <Image.Effect>
-                                <effect:GrayscaleEffect DesaturationFactor="0" />
-                            </Image.Effect>
-                        </Image>
+                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/saveHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
@@ -257,29 +253,17 @@
                 <Separator />
                 <self:GrayscaleMenuItem Command="Cut">
                     <self:GrayscaleMenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/CutHS.png">
-                            <Image.Effect>
-                                <effect:GrayscaleEffect DesaturationFactor="0" />
-                            </Image.Effect>
-                        </Image>
+                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/CutHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Command="Copy">
                     <self:GrayscaleMenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/CopyHS.png">
-                            <Image.Effect>
-                                <effect:GrayscaleEffect DesaturationFactor="0" />
-                            </Image.Effect>
-                        </Image>
+                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/CopyHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Command="Paste">
                     <self:GrayscaleMenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/PasteHS.png">
-                            <Image.Effect>
-                                <effect:GrayscaleEffect DesaturationFactor="0" />
-                            </Image.Effect>
-                        </Image>
+                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/PasteHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
             </self:GrayscaleMenuItem>

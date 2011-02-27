@@ -91,6 +91,7 @@
     <Reference Include="GrayscaleEffect">
       <HintPath>..\GrayscaleEffect.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -128,6 +129,7 @@
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GrayscaleButton.cs" />
+    <Compile Include="GrayscaleImage.cs" />
     <Compile Include="GrayscaleMenuItem.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">
       <DependentUpon>PackageChooserDialog.xaml</DependentUpon>
