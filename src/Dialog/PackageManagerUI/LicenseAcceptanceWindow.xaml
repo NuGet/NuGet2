@@ -49,7 +49,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" />
+        <TextBlock Grid.Row="0" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" />
         <ItemsControl
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             Grid.Row="1" 
