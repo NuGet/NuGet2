@@ -248,8 +248,8 @@ namespace PackageExplorer {
             settings.FontSize = (int)Math.Round(this.FontSize);
             settings.Left = this.Left;
             settings.Top = this.Top;
-            //settings.Width = this.Width;
-            //settings.Height = this.Height;
+            settings.Width = this.Width;
+            settings.Height = this.Height;
             settings.WindowState = this.WindowState.ToString();
         }
 
@@ -266,13 +266,13 @@ namespace PackageExplorer {
                 this.Top = top;
             }
 
-            //double width = settings.Width;
-            //double height = settings.Height;
+            double width = settings.Width;
+            double height = settings.Height;
 
-            //if (width > 0 && height > 0) {
-            //    this.Width = width;
-            //    this.Height = Height;
-            //}
+            if (width > 0 && height > 0) {
+                this.Width = width;
+                this.Height = Height;
+            }
 
             string windowState = settings.WindowState;
             if (!String.IsNullOrEmpty(windowState)) {

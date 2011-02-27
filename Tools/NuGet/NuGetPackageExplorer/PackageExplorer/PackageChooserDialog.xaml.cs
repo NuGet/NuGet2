@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel;
-using System.ComponentModel;
+using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace PackageExplorer {
     /// <summary>
@@ -11,12 +13,21 @@ namespace PackageExplorer {
     /// </summary>
     public partial class PackageChooserDialog : DialogWithNoMinimizeAndMaximize {
 
+        private const string NuGetFeed = "https://go.microsoft.com/fwlink/?LinkID=206669";
+
         public PackageChooserDialog() {
             InitializeComponent();
 
             var viewModel = new PackageChooserViewModel();
             viewModel.PropertyChanged += OnViewModelPropertyChanged;
             DataContext = viewModel;
+
+            // retrieve the package source from settings.
+            string source = Properties.Settings.Default.PackageSource;
+            if (String.IsNullOrEmpty(source)) {
+                source = NuGetFeed;
+            }
+            viewModel.PackageSource = source;
         }
 
         private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
@@ -26,10 +37,16 @@ namespace PackageExplorer {
                 string columnName = viewModel.CurrentSortColumn;
                 ListSortDirection direction = (ListSortDirection)viewModel.SortDirection;
 
-                foreach (var column in PackageGrid.Columns) {
-                    if (column.SortMemberPath == columnName) {
-                        column.SortDirection = direction;
-                        break;
+                foreach (var column in PackageGridView.Columns) {
+                    var header = (GridViewColumnHeader)column.Header;
+                    if (header.Tag != null) {
+                        AdornerLayer.GetAdornerLayer(header).Remove((Adorner) header.Tag);
+                    }
+
+                    if ((string)header.CommandParameter == columnName) {
+                        var newAdorner = new SortAdorner(header, direction);
+                        header.Tag = newAdorner;
+                        AdornerLayer.GetAdornerLayer(header).Add(newAdorner);
                     }
                 }
             }
@@ -76,6 +93,12 @@ namespace PackageExplorer {
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             ICommand loadedCommand = (ICommand)Tag;
             loadedCommand.Execute(null);
+        }
+
+        private void Window_Closed(object sender, EventArgs e) {
+            // persist the package source
+            var viewModel = (PackageChooserViewModel)DataContext;
+            Properties.Settings.Default.PackageSource = viewModel.PackageSource;
         }
     }
 }

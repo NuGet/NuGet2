@@ -183,7 +183,7 @@
                 <TextBox Grid.Row="13" Grid.Column="1" x:Name="TagsBox" Text="{Binding PackageMetadata.Tags}" />
 
                 <!-- Dependencies -->
-                <GroupBox Grid.Row="14" Grid.ColumnSpan="2" Header="Dependen_cies" Margin="0,4,0,0">
+                <GroupBox Grid.Row="14" Grid.ColumnSpan="2" Header="Dependen_cies" Margin="0,10,0,0">
                     <Grid Margin="3,4,3,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -233,7 +233,7 @@
                 </GroupBox>
 
                 <!-- Framework assemblies -->
-                <GroupBox Grid.Row="15" Grid.ColumnSpan="2" Header="Framework Assemblies" Margin="0,4,0,0">
+                <GroupBox Grid.Row="15" Grid.ColumnSpan="2" Header="Framework Assemblies" Margin="0,10,0,0">
                     <Grid Margin="3,4,3,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

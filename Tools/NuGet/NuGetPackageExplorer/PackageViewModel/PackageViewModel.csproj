@@ -60,6 +60,7 @@
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />
     <Compile Include="EditablePackageMetadata.cs" />
+    <Compile Include="PackageChooser\ChangePackageSourceCommand.cs" />
     <Compile Include="PackageChooser\LoadedCommand.cs" />
     <Compile Include="PackageChooser\NavigateCommand.cs" />
     <Compile Include="PackageChooser\PackageChooserViewModel.cs" />

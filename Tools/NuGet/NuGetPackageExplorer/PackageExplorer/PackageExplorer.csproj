@@ -144,6 +144,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SortAdorner.cs" />
     <Compile Include="UriHelper.cs" />
     <Page Include="DownloadProgressWindow.xaml">
       <SubType>Designer</SubType>

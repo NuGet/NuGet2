@@ -9,7 +9,6 @@ using NuGet;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
-        private const string NuGetFeed = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const int PageSize = 15;
         private IPackageRepository _packageRepository;
         private IQueryable<IPackage> _currentQuery;
@@ -21,6 +20,7 @@ namespace PackageExplorerViewModel {
             SortCommand = new SortCommand(this);
             SearchCommand = new SearchCommand(this);
             LoadedCommand = new LoadedCommand(this);
+            ChangePackageSourceCommand = new ChangePackageSourceCommand(this);
         }
 
         public string CurrentSortColumn {
@@ -35,11 +35,27 @@ namespace PackageExplorerViewModel {
 
         private IPackageRepository PackageRepository {
             get {
-                if (_packageRepository == null) {
-                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(NuGetFeed);
-                    
+                if (_packageRepository == null || _packageRepository.Source != PackageSource) {
+                    try {
+                        _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
+                    }
+                    catch (Exception) {
+                        _packageRepository = null;
+                    }
                 }
                 return _packageRepository;
+            }
+        }
+
+        private string _packageSource;
+
+        public string PackageSource {
+            get { return _packageSource; }
+            set {
+                if (_packageSource != value) {
+                    _packageSource = value;
+                    RaisePropertyChangeEvent("PackageSource");
+                }
             }
         }
 
@@ -51,6 +67,7 @@ namespace PackageExplorerViewModel {
                 if (_totalPackageCount != value) {
                     _totalPackageCount = value;
                     RaisePropertyChangeEvent("TotalPackageCount");
+                    SortCommand.RaiseCanExecuteEvent();
                 }
             }
         }
@@ -119,7 +136,9 @@ namespace PackageExplorerViewModel {
 
         public SearchCommand SearchCommand { get; private set; }
 
-        public LoadedCommand LoadedCommand { get; set; }
+        public LoadedCommand LoadedCommand { get; private set; }
+
+        public ChangePackageSourceCommand ChangePackageSourceCommand { get; private set; }
 
         public void LoadPage(int page) {
             Debug.Assert(_currentQuery != null);
@@ -136,18 +155,17 @@ namespace PackageExplorerViewModel {
 
             Task.Factory.StartNew<Tuple<IList<IPackage>, int>>(QueryPackages, subQuery).ContinueWith(
                 result => {
-                    if (result.IsCompleted) {
-                        TotalPackageCount = result.Result.Item2;
-                        SetPackages(result.Result.Item1);
+                    if (result.IsFaulted) {
+                        AggregateException exception = result.Exception;
+                        StatusContent = (exception.InnerException ?? exception).Message;
 
-                        CurrentPage = page;
-                        BeginPackage = Math.Min(page*PageSize + 1, TotalPackageCount);
-                        EndPackage = Math.Min((page + 1)*PageSize, TotalPackageCount);
-
-                        NavigationCommand.RaiseCanExecuteChangedEvent();
+                        ClearPackages();
                     }
-
-                    StatusContent = String.Empty;
+                    else if (!result.IsCanceled) {
+                        ShowPackages(result.Result.Item1, result.Result.Item2, page);
+                        StatusContent = String.Empty;
+                    }
+                    
                 },
                 uiScheduler);
         }
@@ -161,7 +179,11 @@ namespace PackageExplorerViewModel {
             return Tuple.Create(result, totalPackageCount);
         }
 
-        public void LoadPackages() {
+        private void LoadPackages() {
+            if (PackageRepository == null) {
+                return;
+            }
+
             var query = PackageRepository.GetPackages();
             if (!String.IsNullOrEmpty(_currentSearch)) {
                 query = query.Find(_currentSearch.Split(' '));
@@ -191,11 +213,6 @@ namespace PackageExplorerViewModel {
             LoadPage(0);
         }
 
-        private void SetPackages(IEnumerable<IPackage> packages) {
-            Packages.Clear();
-            Packages.AddRange(packages);
-        }
-
         public void Search(string searchTerm) {
             if (_currentSearch != searchTerm) {
                 _currentSearch = searchTerm;
@@ -222,6 +239,36 @@ namespace PackageExplorerViewModel {
             }
             
             LoadPackages();
+        }
+
+        public void ChangePackageSource(string source) {
+            if (PackageSource != source || _currentQuery == null) {
+                PackageSource = source;
+
+                if (PackageRepository != null) {
+                    LoadPackages();
+                }
+                else {
+                    ClearPackages();
+                }
+            }
+        }
+
+        private void ClearPackages() {
+            ShowPackages(Enumerable.Empty<IPackage>(), 0, 0);
+        }
+
+        private void ShowPackages(IEnumerable<IPackage> packages, int totalPackageCount, int page) {
+            TotalPackageCount = totalPackageCount;
+
+            CurrentPage = page;
+            BeginPackage = Math.Min(page * PageSize + 1, TotalPackageCount);
+            EndPackage = Math.Min((page + 1) * PageSize, TotalPackageCount);
+
+            Packages.Clear();
+            Packages.AddRange(packages);
+
+            NavigationCommand.RaiseCanExecuteChangedEvent();
         }
     }
 }

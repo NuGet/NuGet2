@@ -289,7 +289,7 @@
                 <self:GrayscaleMenuItem Header="Show _Content Viewer" IsChecked="{Binding ShowContentViewer}" Command="{Binding ShowContentViewerCommand, FallbackValue={StaticResource DisabledCommand}}">
                 </self:GrayscaleMenuItem>
                 <Separator />
-                <self:GrayscaleMenuItem Header="Font _Size" x:Name="FontSizeMenuItem">
+                <self:GrayscaleMenuItem Header="Text _Size" x:Name="FontSizeMenuItem">
                     <self:GrayscaleMenuItem Header="_Normal" Tag="12" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="_Larger" Tag="14" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="L_argest" Tag="16" Click="OnFontSizeItem_Click" IsCheckable="True" />

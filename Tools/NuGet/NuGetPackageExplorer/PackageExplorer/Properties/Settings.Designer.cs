@@ -106,5 +106,17 @@ namespace PackageExplorer.Properties {
                 this["ContentViewerPanelHeight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://go.microsoft.com/fwlink/?LinkID=206669")]
+        public string PackageSource {
+            get {
+                return ((string)(this["PackageSource"]));
+            }
+            set {
+                this["PackageSource"] = value;
+            }
+        }
     }
 }

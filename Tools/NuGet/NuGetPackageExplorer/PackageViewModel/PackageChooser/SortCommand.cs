@@ -11,14 +11,22 @@ namespace PackageExplorerViewModel {
         }
 
         public bool CanExecute(object parameter) {
-            throw new NotImplementedException();
+            return _viewModel.TotalPackageCount > 0;
         }
 
         public event EventHandler CanExecuteChanged;
 
+        internal void RaiseCanExecuteEvent() {
+            if (CanExecuteChanged != null) {
+                CanExecuteChanged(this, EventArgs.Empty);
+            }
+        }
+
         public void Execute(object parameter) {
             string column = (string) parameter;
-            _viewModel.Sort(column);
+            if (column != "Version") {
+                _viewModel.Sort(column);
+            }
         }
     }
 }
