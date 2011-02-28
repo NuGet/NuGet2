@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using EnvDTE;
-using NuGet.Runtime;
 using NuGet.VisualStudio.Resources;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio {
     public class VsPackageManager : PackageManager, IVsPackageManager {
         private readonly ISharedPackageRepository _sharedRepository;
         private readonly IDictionary<string, IProjectManager> _projects;
-        private readonly IDictionary<string, Project> _projectManagers;
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepository _recentPackagesRepository;
 
@@ -20,24 +19,24 @@ namespace NuGet.VisualStudio {
 
             _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;
-            _projects = solutionManager.GetProjects().ToDictionary(p => p.UniqueName, CreateProjectManager);
             _recentPackagesRepository = recentPackagesRepository;
 
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
-            _projectManagers = new Dictionary<string, Project>();
+        }
 
-            // There's no good way to get the project from the project manager
-            foreach (var project in _solutionManager.GetProjects()) {
-                var projectManager = CreateProjectManager(project);
-
-                _projects[project.UniqueName] = projectManager;
-                _projectManagers[projectManager.Project.Root] = project;
+        internal void EnsureCached(Project project) {
+            if (_projects.ContainsKey(project.UniqueName)) {
+                return;
             }
+
+            _projects[project.UniqueName] = CreateProjectManager(project);
         }
 
         public virtual IProjectManager GetProjectManager(Project project) {
+            EnsureCached(project);
             IProjectManager projectManager;
-            _projects.TryGetValue(project.UniqueName, out projectManager);
+            bool projectExists = _projects.TryGetValue(project.UniqueName, out projectManager);
+            Debug.Assert(projectExists, "Unknown project");
             return projectManager;
         }
 
@@ -303,7 +302,7 @@ namespace NuGet.VisualStudio {
                     Execute(operation);
                 }
             }
-            else if(LocalRepository.Exists(package)) {
+            else if (LocalRepository.Exists(package)) {
                 Logger.Log(MessageLevel.Info, VsResources.Log_PackageAlreadyInstalled, package.GetFullName());
             }
 
@@ -315,9 +314,17 @@ namespace NuGet.VisualStudio {
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If we failed to add binding redirects we don't want it to stop the install/update.")]
         private void AddBindingRedirects(IProjectManager projectManager) {
-            Project project;
-            if (projectManager == null ||
-                !_projectManagers.TryGetValue(projectManager.Project.Root, out project)) {
+            // We only support project systems that implement IVsProjectSystem
+            var vsProjectSystem = projectManager.Project as IVsProjectSystem;
+            if (vsProjectSystem == null) {
+                return;
+            }
+
+            // Find the project by it's unique name
+            Project project = _solutionManager.GetProject(vsProjectSystem.UniqueName);
+
+            // If we can't find the project then don't add any redirects
+            if (project == null) {
                 return;
             }
 

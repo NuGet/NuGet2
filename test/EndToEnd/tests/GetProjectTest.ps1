@@ -30,6 +30,32 @@ function Test-DefaultProjectIsCorrectWhenProjectsAreAdded {
     Assert-DefaultProject $p1
 }
 
+function Test-DefaultProjectIsCorrectWhenProjectsAreAddedInReverseOrder {
+    # Act
+    $p1 = New-ClassLibrary 'Projecta'    
+
+    # Assert
+    Assert-DefaultProject $p1
+
+    # Act
+    $f1 = New-SolutionFolder 'Folder1'
+    $p2 = $f1 | New-ClassLibrary 'ProjectA'
+    Assert-DefaultProject $p1
+}
+
+function Test-GetProjectThrowsIfProjectNameAmbiguous {
+    # Act
+    $f1 = New-SolutionFolder 'foo'
+    $f2 = New-SolutionFolder 'bar'
+    $p1 = $f1 | New-ClassLibrary 'A'
+    $p2 = $f2 | New-ClassLibrary 'A'
+
+    # Assert
+    Assert-Throws { Get-Project A } "Project 'A' is not found."
+    Assert-NotNull (Get-Project foo\A)
+    Assert-NotNull (Get-Project bar\A)
+}
+
 function Test-GetProjectCommandWithWildCardsWorksWithProjectHavingTheSameName {
     #
     #  Folder1

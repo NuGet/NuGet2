@@ -14,6 +14,7 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
     <Compile Include="VsProgressReporter.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>

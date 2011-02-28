@@ -244,10 +244,10 @@ function Test-TabExpansionForProjectsReturnsBothUniqueNamesAndSafeNames {
     $suggestions = TabExpansion 'Get-Project -name '
 
     # Assert
-	Assert-AreEqual 4 $suggestions.Count
+    Assert-AreEqual 4 $suggestions.Count
 
-	Assert-AreEqual 'Folder1\ProjectA' $suggestions[0] 
-	Assert-AreEqual 'Folder1\ProjectB'$suggestions[1]
+    Assert-AreEqual 'Folder1\ProjectA' $suggestions[0] 
+    Assert-AreEqual 'Folder1\ProjectB'$suggestions[1]
     Assert-AreEqual 'ProjectA' $suggestions[2] 
     Assert-AreEqual 'ProjectB' $suggestions[3] 
     
@@ -260,7 +260,7 @@ function Test-TabExpansionWorksWithOneProject {
     # Act
     $suggestion = @(TabExpansion 'Get-Project -Name ')
 
-	# Assert
-	Assert-AreEqual 1 $suggestion.Count
-	Assert-AreEqual 'ProjectA' $suggestion[0]
+    # Assert
+    Assert-AreEqual 1 $suggestion.Count
+    Assert-AreEqual 'ProjectA' $suggestion[0]
 }

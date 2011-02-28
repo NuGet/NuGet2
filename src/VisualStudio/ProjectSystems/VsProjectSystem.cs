@@ -14,7 +14,7 @@ using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
 using Project = EnvDTE.Project;
 
 namespace NuGet.VisualStudio {
-    public class VsProjectSystem : PhysicalFileSystem, IProjectSystem {
+    public class VsProjectSystem : PhysicalFileSystem, IProjectSystem, IVsProjectSystem {
         private const string BinDir = "bin";
         private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
 
@@ -33,6 +33,12 @@ namespace NuGet.VisualStudio {
         public virtual string ProjectName {
             get {
                 return Project.Name;
+            }
+        }
+
+        public string UniqueName {
+            get {
+                return Project.UniqueName;
             }
         }
 
@@ -86,7 +92,7 @@ namespace NuGet.VisualStudio {
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
             }
-            catch(Exception e) {
+            catch (Exception e) {
                 throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, VsResources.FailedToAddGacReference, name), e);
             }
         }
@@ -108,7 +114,7 @@ namespace NuGet.VisualStudio {
 
                 // Always set copy local to true for references that we add
                 reference.CopyLocal = true;
- 
+
                 // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
                 // Most commmonly, it happens if this assembly is in the GAC or in the output path.
                 if (!reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase)) {

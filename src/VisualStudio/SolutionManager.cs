@@ -15,10 +15,7 @@ namespace NuGet.VisualStudio {
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;
 
-        // this dictionary stores projects by simple name
-        private Dictionary<string, HashSet<Project>> _projectCacheByName;
-        // this dictionary stores projects by unique name
-        private Dictionary<string, Project> _projectCacheByUniqueName;
+        private ProjectCache _projectCache;
 
         public SolutionManager()
             : this(ServiceLocator.GetInstance<DTE>()) {
@@ -75,13 +72,13 @@ namespace NuGet.VisualStudio {
 
         public string SolutionDirectory {
             get {
-                if (!IsSolutionOpen ) {
+                if (!IsSolutionOpen) {
                     return null;
                 }
                 // Use .Properties.Item("Path") instead of .FullName because .FullName might not be
                 // available if the solution is just being created
                 Property property = _dte.Solution.Properties.Item("Path");
-                if(property == null) {
+                if (property == null) {
                     return null;
                 }
                 string solutionFilePath = property.Value;
@@ -103,7 +100,7 @@ namespace NuGet.VisualStudio {
         public IEnumerable<Project> GetProjects() {
             if (IsSolutionOpen) {
                 EnsureProjectCache();
-                return _projectCacheByUniqueName.Values;
+                return _projectCache.GetProjects();
             }
             else {
                 return Enumerable.Empty<Project>();
@@ -128,25 +125,18 @@ namespace NuGet.VisualStudio {
             if (IsSolutionOpen) {
                 EnsureProjectCache();
 
-                Project project = null;
-                if (_projectCacheByUniqueName.TryGetValue(projectSafeName, out project)) {
+                Project project;
+                if (_projectCache.TryGetProject(projectSafeName, out project)) {
                     return project;
                 }
-
-                HashSet<Project> allProjects;
-                if (_projectCacheByName.TryGetValue(projectSafeName, out allProjects)) {
-                    if (allProjects.Count == 1) {
-                        return allProjects.Single();
-                    }
-                }
             }
+
             return null;
         }
 
         private void OnBeforeClosing() {
             DefaultProjectName = null;
-            _projectCacheByName = null;
-            _projectCacheByUniqueName = null;
+            _projectCache = null;
             if (SolutionClosing != null) {
                 SolutionClosing(this, EventArgs.Empty);
             }
@@ -154,28 +144,23 @@ namespace NuGet.VisualStudio {
 
         private void OnProjectRenamed(Project project, string oldName) {
             if (!String.IsNullOrEmpty(oldName)) {
-                
                 if (project.IsSupported()) {
                     EnsureProjectCache();
 
-                    // oldName is the full path to the project file. Need to convert it to simple project name. 
-                    // No need to worry about Website project here, because there is no option to rename Website project.
-                    string simpleOldName = Path.GetFileNameWithoutExtension(oldName);
-
-                    RemoveProjectByKey(project, simpleOldName);
-                    AddProjectToCaches(project);
+                    RemoveProjectFromCache(oldName);
+                    AddProjectToCache(project);
                 }
             }
         }
 
         private void OnProjectRemoved(Project project) {
-            RemoveProjectFromCaches(project);
+            RemoveProjectFromCache(project.UniqueName);
         }
 
         private void OnProjectAdded(Project project) {
             if (project.IsSupported()) {
                 EnsureProjectCache();
-                AddProjectToCaches(project);
+                AddProjectToCache(project);
             }
         }
 
@@ -188,89 +173,37 @@ namespace NuGet.VisualStudio {
         }
 
         private void EnsureProjectCache() {
-            if (IsSolutionOpen && _projectCacheByName == null) {
-                _projectCacheByUniqueName = new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase);
-                _projectCacheByName = new Dictionary<string, HashSet<Project>>(StringComparer.OrdinalIgnoreCase);
+            if (IsSolutionOpen && _projectCache == null) {
+                _projectCache = new ProjectCache();
 
                 var allProjects = _dte.Solution.GetAllProjects();
                 foreach (Project project in allProjects) {
-                    AddProjectToCaches(project);
+                    AddProjectToCache(project);
                 }
             }
         }
 
-        private void AddProjectToCaches(Project project) {
-            // add to the unique name dictionary
-            string uniqueName = project.GetCustomUniqueName();
-            _projectCacheByUniqueName[uniqueName] = project;
+        private void AddProjectToCache(Project project) {
+            ProjectName collidingProjectName;
+            ProjectName projectName;
 
-            // add to simple name dictionary
-            string name = project.Name;
-            HashSet<Project> allProjects;
-            if (!_projectCacheByName.TryGetValue(name, out allProjects)) {
-                allProjects = new HashSet<Project>();
-                _projectCacheByName.Add(name, allProjects);
-            }
+            _projectCache.TryAddProject(project, out collidingProjectName, out projectName);
 
-            // If there is currently only one project with this simple name, and it's the 
-            // default project, we have to set default project name to the unique name because
-            // we are having a name collision here.
-            if (allProjects.Count == 1 && 
-                name.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
-                Project defaultProject = allProjects.Single();
-                DefaultProjectName = defaultProject.GetCustomUniqueName();
-            }
-
-            // now add our project to the simple dictionary
-            allProjects.Add(project);
-
-            // Set the DefaultProjectName if it's not set.
-            // Try to use simple name if there is no conflict (count = 1), otherwise use uniquename
-            if (String.IsNullOrEmpty(DefaultProjectName)) {
-                DefaultProjectName = allProjects.Count == 1 ? name : uniqueName;
+            // Set the DefaultProjectName if it's not set or 
+            // If the default project is the colliding one then make sure it's using the unique name
+            if (projectName.SimpleName.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase) ||
+                String.IsNullOrEmpty(DefaultProjectName)) {
+                DefaultProjectName = collidingProjectName != null ?
+                                     collidingProjectName.CustomUniqueName :
+                                     projectName.SimpleName;
             }
         }
 
-        private void RemoveProjectByKey(Project project, string oldName) {
-            // Get the old unique name of the project.
-            // Calling GetCustomUniqueName() here is wrong, because the project has been renamed, 
-            // and hence it has the new unique name now. We want to get the old unique name that
-            // is stored in the dictionary.
-            string uniqueName = _projectCacheByUniqueName.
-                Where(pair => pair.Value == project).
-                Select(pair => pair.Key).
-                FirstOrDefault();
+        private void RemoveProjectFromCache(string name) {
+            // Remove the entry from both dictionaries
+            _projectCache.RemoveProject(name);
 
-            RemoveProjectFromCaches(uniqueName ?? String.Empty, oldName, project);
-        }
-
-        private void RemoveProjectFromCaches(Project project) {
-            RemoveProjectFromCaches(project.GetCustomUniqueName(), project.Name, project);
-        }
-        
-        private void RemoveProjectFromCaches(string uniqueName, string name, Project project) {
-            // deal with unique name
-            _projectCacheByUniqueName.Remove(uniqueName);
-
-            // now with the simple name
-            HashSet<Project> allProjects;
-            if (_projectCacheByName.TryGetValue(name, out allProjects)) {
-                allProjects.Remove(project);
-
-                if (allProjects.Count == 0) {
-                    _projectCacheByName.Remove(name);
-                }
-                else if (allProjects.Count == 1) {
-                    // the DefaultProjectName is currently set to this project's unique name, change it to simple name
-                    // because there is no more collision after the removal.
-                    if (allProjects.Single().GetCustomUniqueName().Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase)) {
-                        DefaultProjectName = name;
-                    }
-                }
-            }
-
-            if (!_projectCacheByName.ContainsKey(DefaultProjectName) &&
-                !_projectCacheByUniqueName.ContainsKey(DefaultProjectName)) {
+            if (!_projectCache.Contains(DefaultProjectName)) {
                 DefaultProjectName = String.Empty;
             }
         }
@@ -293,9 +226,13 @@ namespace NuGet.VisualStudio {
         /// Search through the solution to look for a matching project with startupProject
         /// </summary>
         private string GetProjectName(string startupProjectName) {
-            return (from project in _projectCacheByUniqueName.Values
-                    where project.UniqueName.Equals(startupProjectName, StringComparison.OrdinalIgnoreCase)
-                    select GetProjectSafeName(project)).FirstOrDefault();
+            Project project = GetProject(startupProjectName);
+
+            if (project != null) {
+                return GetProjectSafeName(project);
+            }
+
+            return null;
         }
 
         // REVIEW: This might be inefficient, see what we can do with caching projects until references change
@@ -335,6 +272,121 @@ namespace NuGet.VisualStudio {
                 dependentProjects[project.UniqueName] = dependents;
             }
             dependents.Add(dependent);
+        }
+
+        /// <summary>
+        /// Cache that stores project based on multiple names. i.e. Project can be retrieved by name (if non conflicting), unique name or
+        /// full path.
+        /// </summary>
+        private class ProjectCache {
+            // Mapping from project name structure to project instance
+            private Dictionary<ProjectName, Project> _projectCache = new Dictionary<ProjectName, Project>();
+
+            // Mapping from all names to a project name structure
+            private Dictionary<string, ProjectName> _projectNamesCache = new Dictionary<string, ProjectName>(StringComparer.OrdinalIgnoreCase);
+
+            public bool TryGetProject(string name, out Project project) {
+                ProjectName projectName;
+                if (_projectNamesCache.TryGetValue(name, out projectName)) {
+                    if (_projectCache.TryGetValue(projectName, out project)) {
+                        return true;
+                    }
+                }
+                project = null;
+                return false;
+            }
+
+            public void RemoveProject(string name) {
+                ProjectName projectName;
+                if (_projectNamesCache.TryGetValue(name, out projectName)) {
+                    RemoveEntry(projectName);
+                }
+            }
+
+            private void RemoveEntry(ProjectName projectName) {
+                _projectNamesCache.Remove(projectName.CustomUniqueName);
+                _projectNamesCache.Remove(projectName.FullName);
+
+                // Only remove the simple name if the custom unique name matches. This is so we avoid
+                // the scenario where 2 projects have the same simple name and one of them is removed.
+                // We still need to be able to refer to it by simple name
+                if (projectName.CustomUniqueName == projectName.SimpleName) {
+                    _projectNamesCache.Remove(projectName.SimpleName);
+                }
+
+                _projectNamesCache.Remove(projectName.UniqueName);
+                _projectCache.Remove(projectName);
+            }
+
+            public bool Contains(string name) {
+                return _projectNamesCache.ContainsKey(name);
+            }
+
+            public IEnumerable<Project> GetProjects() {
+                return _projectCache.Values;
+            }
+
+            // Try to add a project to the cache returning any collisions in simple names
+            public bool TryAddProject(Project project,
+                                      out ProjectName collidingProjectName,
+                                      out ProjectName projectName) {
+                collidingProjectName = null;
+
+                // First create a project name from the project
+                projectName = new ProjectName(project);
+
+                if (_projectCache.ContainsKey(projectName)) {
+                    return false;
+                }
+
+                string name = project.Name;
+                string uniqueName = project.GetCustomUniqueName();
+
+                // If there is a name collision then remove the name from the dictionary
+                if (_projectNamesCache.TryGetValue(name, out collidingProjectName)) {
+                    if (collidingProjectName.CustomUniqueName != collidingProjectName.SimpleName) {
+                        _projectNamesCache.Remove(name);
+                    }
+                }
+                else {
+                    _projectNamesCache[name] = projectName;
+                }
+
+                _projectNamesCache[uniqueName] = projectName;
+                _projectNamesCache[project.UniqueName] = projectName;
+                _projectNamesCache[project.FullName] = projectName;
+
+                // Add the entry mapping project name to the actual project
+                _projectCache[projectName] = project;
+
+                return true;
+            }
+        }
+
+        private class ProjectName : IEquatable<ProjectName> {
+            public ProjectName(Project project) {
+                FullName = project.FullName;
+                UniqueName = project.UniqueName;
+                SimpleName = project.Name;
+                CustomUniqueName = project.GetCustomUniqueName();
+            }
+
+            public string FullName { get; set; }
+            public string UniqueName { get; set; }
+            public string SimpleName { get; set; }
+            public string CustomUniqueName { get; set; }
+
+            public bool Equals(ProjectName other) {
+                return other.UniqueName.Equals(other.UniqueName, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override int GetHashCode() {
+                return UniqueName.GetHashCode();
+            }
+
+            public override string ToString() {
+                return UniqueName;
+            }
         }
     }
 }
