@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace NuGet.TeamFoundationServer {
@@ -68,39 +65,9 @@ namespace NuGet.TeamFoundationServer {
             return Workspace.PendDelete(fullPath, recursionType);
         }
 
-        public override IEnumerable<string> GetFiles(string path, string filter) {
-            path = GetFullPath(path);
-            Regex matcher = GetFilterRegex(filter);
-            return Workspace.GetItems(path, ItemType.File)
-                            .Where(file => matcher.IsMatch(file))
-                            .Select(MakeRelativePath);
-        }
-
-        public override IEnumerable<string> GetDirectories(string path) {
-            path = GetFullPath(path);
-            return Workspace.GetItems(path, ItemType.Folder);
-        }
-
-        public override bool FileExists(string path) {
-            return ItemExists(path) && base.FileExists(path);
-        }
-
-        public override bool DirectoryExists(string path) {
-            return ItemExists(path) && base.DirectoryExists(path);
-        }
-
-        private bool ItemExists(string path) {
-            return Workspace.ItemExists(GetFullPath(path));
-        }
-
-        // TODO: Move this logic to the base in a static protected method
-        private static Regex GetFilterRegex(string wildcard) {
-            string pattern = String.Join("\\.", wildcard.Split('.').Select(GetPattern));
-            return new Regex(pattern, RegexOptions.IgnoreCase);
-        }
-
-        private static string GetPattern(string token) {
-            return token == "*" ? @"(.*)" : @"(" + token + ")";
+        protected override void EnsureDirectory(string path) {
+            base.EnsureDirectory(path);
+            Workspace.PendAdd(GetFullPath(path));
         }
     }
 }

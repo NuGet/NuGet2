@@ -172,7 +172,7 @@ namespace NuGet {
             return fullPath.Substring(Root.Length).TrimStart(Path.DirectorySeparatorChar);
         }
 
-        private void EnsureDirectory(string path) {
+        protected virtual void EnsureDirectory(string path) {
             path = GetFullPath(path);
             Directory.CreateDirectory(path);
         }
