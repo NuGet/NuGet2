@@ -211,13 +211,10 @@
         </ResourceDictionary>
     </Window.Resources>
     
-    <Window.InputBindings>
-        <KeyBinding Modifiers="Control" Key="O" Command="Open" />
-    </Window.InputBindings>
-    
     <Window.CommandBindings>
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
         <CommandBinding Command="Close" Executed="ExitMenuItem_Click" />
+        <CommandBinding Command="{x:Static self:Commands.OpenFromFeedCommand}" Executed="OpenPackageFromNuGetFeed" />
     </Window.CommandBindings>
     
     <Grid x:Name="LayoutRoot">
@@ -236,7 +233,7 @@
                         </Image>
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
-                <self:GrayscaleMenuItem Header="Open from _NuGet Feed..." Click="OpenPackageFromNuGetFeed">
+                <self:GrayscaleMenuItem Header="Open from _NuGet Feed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
                 </self:GrayscaleMenuItem>
                 <Separator />
                 <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">
