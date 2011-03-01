@@ -1,4 +1,3 @@
-
 function Test-ProjectNameReturnsUniqueName {
      # Arrange
      $f = New-SolutionFolder 'Folder1'
@@ -105,7 +104,7 @@ function Test-GetProjectCommandWithWildCardsWorksWithProjectHavingTheSameName {
     Assert-AreEqual $p5 $gs[2]
 }
 
-function Test-SimpleNameDoNotWorkWhenAllProjectsAreNested {
+function Test-SimpleNameDoesNotWorkWhenAllProjectsAreNested {
     # Arrange
     $f = New-SolutionFolder 'Folder1'
     $p1 = $f | New-ClassLibrary 'ProjectA'
@@ -115,6 +114,22 @@ function Test-SimpleNameDoNotWorkWhenAllProjectsAreNested {
 
     # Assert
     Assert-Throws { (Get-Project -Name 'ProjectA') } "Project 'ProjectA' is not found."
+}
+
+function Test-RemovingAmbiguousProjectAllowsSimpleNameToBeUsed {
+    # Act
+    $f1 = New-SolutionFolder 'foo'
+    $p1 = New-ClassLibrary 'A'
+    $p2 = $f1 | New-ClassLibrary 'A'
+    
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\A)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+
+    Remove-Project $p1
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\A)
+    Assert-AreEqual $p2 (Get-Project -Name A)
 }
 
 function Assert-DefaultProject($p) {

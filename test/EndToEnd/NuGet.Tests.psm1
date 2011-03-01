@@ -122,7 +122,7 @@ function global:Run-Test {
                 
                 Write-Host -ForegroundColor DarkGreen "Test $name Passed"
                 
-                if(!$Test) {
+                if($tests.Count -gt 1) {
                     $dte.Solution.Close()
                 }
                 

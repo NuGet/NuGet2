@@ -401,3 +401,12 @@ function Add-ProjectReference {
         $ProjectFrom.Object.References.AddFromProject($ProjectTo) | Out-Null
     }
 }
+
+function Remove-Project {
+    param (
+        [parameter(Mandatory = $true)]
+        $Project   
+    )
+
+    $dte.Solution.Remove($Project)
+}
