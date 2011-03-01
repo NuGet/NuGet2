@@ -300,7 +300,6 @@ namespace PackageExplorer {
         }
 
         private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-
             var settings = Properties.Settings.Default;
 
             if ((bool)e.NewValue) {
@@ -310,6 +309,36 @@ namespace PackageExplorer {
                 settings.ContentViewerPanelHeight = ContentGrid.RowDefinitions[2].Height.Value;
                 ContentGrid.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Auto);
             }
+        }
+
+        private void SaveMenuItem_Click(object sender, RoutedEventArgs args)
+        {
+            ExecuteSaveCommand("Save");
+            args.Handled = true;
+        }
+
+        private void SaveAsMenuItem_Click(object sender, RoutedEventArgs args)
+        {
+            ExecuteSaveCommand("SaveAs");
+            args.Handled = true;
+        }
+
+        private void ExecuteSaveCommand(object parameter)
+        {
+            var model = DataContext as PackageViewModel;
+            if (model != null)
+            {
+                model.SaveCommand.Execute(parameter);
+            }
+        }
+
+        private void CanExecuteSaveCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e)
+        {
+            var model = DataContext as PackageViewModel;
+            bool canExecute = model == null ? false : model.SaveCommand.CanExecute(e.Parameter);
+
+            e.CanExecute = canExecute;
+            e.Handled = true;
         }
     }
 }

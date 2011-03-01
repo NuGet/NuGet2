@@ -213,6 +213,8 @@
     
     <Window.CommandBindings>
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
+        <CommandBinding Command="Save" Executed="SaveMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
+        <CommandBinding Command="SaveAs" Executed="SaveAsMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
         <CommandBinding Command="Close" Executed="ExitMenuItem_Click" />
         <CommandBinding Command="{x:Static self:Commands.OpenFromFeedCommand}" Executed="OpenPackageFromNuGetFeed" />
     </Window.CommandBindings>
@@ -236,7 +238,7 @@
                 <self:GrayscaleMenuItem Header="Open from _NuGet Feed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
                 </self:GrayscaleMenuItem>
                 <Separator />
-                <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save">
+                <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="Save" CommandParameter="Save">
                     <self:GrayscaleMenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/saveHS.png">
                             <Image.Effect>
@@ -245,7 +247,7 @@
                         </Image>
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
-                <self:GrayscaleMenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
+                <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
                 <Separator />
                 <self:GrayscaleMenuItem Command="Close" Header="E_xit" />
             </self:GrayscaleMenuItem>
