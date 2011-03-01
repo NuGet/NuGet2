@@ -112,6 +112,7 @@
       <Link>RegistryHelper.cs</Link>
     </Compile>
     <Compile Include="Extensions\QueryExtensions.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\ProviderServices.cs" />

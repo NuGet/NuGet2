@@ -1,5 +1,6 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.VisualStudio.PlatformUI;
 
@@ -8,8 +9,19 @@ namespace NuGet.Dialog.PackageManagerUI {
     /// Interaction logic for ProgressDialog.xaml
     /// </summary>
     public partial class ProgressDialog : DialogWindow {
+
         public ProgressDialog() {
             InitializeComponent();
+        }
+
+        protected override void OnSourceInitialized(System.EventArgs e) {
+            base.OnSourceInitialized(e);
+
+            var hwnd = new WindowInteropHelper(this).Handle;
+            NativeMethods.SetWindowLong(
+                hwnd, 
+                NativeMethods.GWL_STYLE,
+                NativeMethods.GetWindowLong(hwnd, NativeMethods.GWL_STYLE) & ~NativeMethods.WS_SYSMENU);
         }
 
         internal void SetCompleted(bool successful) {
