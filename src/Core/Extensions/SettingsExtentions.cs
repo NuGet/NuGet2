@@ -1,0 +1,68 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using NuGet.Configuration;
+using System.Security.Cryptography;
+using Microsoft.Internal.Web.Utils;
+
+namespace NuGet {
+    internal static class SettingsExtentions {
+        private static string _entropy = "NuGet";
+
+        internal static string GetDecryptedValue(this ISettings settings, string section, string key){
+            if (String.IsNullOrEmpty(section)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+
+            if (String.IsNullOrEmpty(key)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
+            }
+
+            var encrpytedString = settings.GetValue(section, key);
+            if(encrpytedString == null){
+                return null;
+            }
+            if (String.IsNullOrEmpty(encrpytedString)) {
+                return String.Empty;
+            }
+            var encrpytedByteArray = Convert.FromBase64String(encrpytedString);
+            var decryptedByteArray = ProtectedData.Unprotect(encrpytedByteArray,StringToBytes(_entropy), DataProtectionScope.CurrentUser);
+            return BytesToString(decryptedByteArray);
+            
+        }
+
+        internal static void SetEncryptedValue(this ISettings settings, string section, string key, string value) {
+            if (String.IsNullOrEmpty(section)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+            if (String.IsNullOrEmpty(key)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
+            }
+            if (value == null) {
+                throw new ArgumentNullException("value");
+            }
+
+            if (value == String.Empty) {
+                settings.SetValue(section, key, String.Empty);
+            }
+            else {
+                var decryptedByteArray = StringToBytes(value);
+                var encryptedByteArray = ProtectedData.Protect(decryptedByteArray, StringToBytes(_entropy), DataProtectionScope.CurrentUser);
+                var encryptedString = Convert.ToBase64String(encryptedByteArray);
+                settings.SetValue(section, key, encryptedString);
+            }
+
+        }
+
+        private static byte[] StringToBytes(string str) {
+            UTF8Encoding encoding = new UTF8Encoding();
+            return encoding.GetBytes(str);
+        }
+
+        private static string BytesToString(byte[] bytes) {
+            UTF8Encoding encoding = new UTF8Encoding();
+            return encoding.GetString(bytes);
+        }
+    }
+}

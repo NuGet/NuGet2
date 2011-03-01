@@ -38,10 +38,13 @@
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
+    <Compile Include="Configuration\ISettings.cs" />
+    <Compile Include="Configuration\UserSettings.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObjectCacheExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\QueryableExtensions.cs" />
+    <Compile Include="Extensions\SettingsExtentions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPackageManager.cs" />
@@ -100,6 +103,7 @@
     <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />

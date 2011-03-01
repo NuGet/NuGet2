@@ -66,6 +66,10 @@ namespace NuGet.Test.Mocks {
             return GetFiles(path).Where(f => matcher.IsMatch(f));
         }
 
+        public virtual string GetEnvironmentFolderPath(Environment.SpecialFolder folderName) {
+            throw new NotImplementedException();
+        }
+
         private static Regex GetFilterRegex(string wildcard) {
             string pattern = String.Join(String.Empty, wildcard.Split('.').Select(GetPattern));
             return new Regex(pattern, RegexOptions.IgnoreCase);

@@ -153,6 +153,10 @@ namespace NuGet {
             return File.GetCreationTimeUtc(GetFullPath(path));
         }
 
+        public string GetEnvironmentFolderPath(Environment.SpecialFolder folderName) {
+            return Environment.GetFolderPath(folderName);
+        }
+
         public virtual bool FileExists(string path) {
             path = GetFullPath(path);
             return File.Exists(path);
