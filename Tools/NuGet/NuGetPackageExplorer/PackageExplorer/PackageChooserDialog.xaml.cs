@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel;
-using System.Windows.Controls;
-using System.Windows.Documents;
 
 namespace PackageExplorer {
     /// <summary>

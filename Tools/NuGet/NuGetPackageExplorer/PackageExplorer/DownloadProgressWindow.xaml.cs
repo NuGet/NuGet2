@@ -16,6 +16,7 @@ namespace PackageExplorer {
         public DownloadProgressWindow(DataServicePackage package) {
             InitializeComponent();
 
+            Title = "Downloading package " + package;
             _package = package;
         }
 
