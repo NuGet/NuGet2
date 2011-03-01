@@ -7,7 +7,7 @@ namespace NuGet.Dialog {
         public const int GWL_STYLE = -16;
         public const int WS_SYSMENU = 0x80000;
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll")]
         public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         [DllImport("user32.dll")]

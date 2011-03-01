@@ -39,8 +39,10 @@ namespace NuGet.Tools {
         // It is displayed in the Help - About box of Visual Studio
         public const string ProductVersion = "1.2.0.0";
 
+        private uint _debuggingContextCookie;
         private DTE _dte;
         private IConsoleStatus _consoleStatus;
+        private IVsMonitorSelection _vsMonitorSelection;
 
         public NuGetPackage() {
         }
@@ -63,7 +65,14 @@ namespace NuGet.Tools {
         /// the OleMenuCommandService service and the MenuCommand class.
         /// </summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
-            if (HasActiveLoadedSupportedProject) {
+            if (IsIDEInDebuggingContext()) {
+                MessageBox.Show(
+                    String.Format(CultureInfo.CurrentCulture, Resources.DebugContextNotSupported),
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            else if (HasActiveLoadedSupportedProject) {
                 var menuCommandService = (MenuCommandService)GetService(typeof(IMenuCommandService));
                 var window = new PackageManagerWindow(menuCommandService);
                 try {
@@ -90,9 +99,15 @@ namespace NuGet.Tools {
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = HasActiveLoadedSupportedProject;
+            command.Visible = !IsIDEInDebuggingContext() && HasActiveLoadedSupportedProject;
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
+        }
+
+        private bool IsIDEInDebuggingContext() {
+            int pfActive;
+            int result = _vsMonitorSelection.IsCmdUIContextActive(_debuggingContextCookie, out pfActive);
+            return (result == VSConstants.S_OK) ? (pfActive > 0) : false;
         }
 
         private void ShowSettingsWindow(object sender, EventArgs args) {
@@ -105,6 +120,11 @@ namespace NuGet.Tools {
         /// </summary>
         protected override void Initialize() {
             base.Initialize();
+
+            // get the UI context cookie for the debugging mode
+            _vsMonitorSelection = (IVsMonitorSelection)GetService(typeof(IVsMonitorSelection));
+            Guid debuggingContextGuid = VSConstants.UICONTEXT_Debugging;
+            _vsMonitorSelection.GetCmdUIContextCookie(ref debuggingContextGuid, out _debuggingContextCookie);
 
             _dte = ServiceLocator.GetInstance<DTE>();
             _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
