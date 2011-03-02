@@ -103,7 +103,7 @@
   </Commands>
 
   <VisibilityConstraints>
-    <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExists" />
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
   </VisibilityConstraints>
 
   <CommandPlacements>
@@ -178,6 +178,7 @@
     <GuidSymbol name="guidReferenceContext" value="{D309F791-903F-11D0-9EFC-00A0C911004F}">
       <IdSymbol name="cmdAddReferenceGroup" value="0x450" />
     </GuidSymbol>
+    <GuidSymbol name="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" value="{D0E4DEEC-1B53-4CDA-8559-D454583AD23B}" />
   </Symbols>
 
 </CommandTable>

@@ -120,7 +120,4 @@
   <data name="CanNotCreateWindow" xml:space="preserve">
     <value>Can not create tool window.</value>
   </data>
-  <data name="DebugContextNotSupported" xml:space="preserve">
-    <value>This operation is not supported in debug mode.</value>
-  </data>
 </root>

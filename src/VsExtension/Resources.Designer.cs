@@ -68,14 +68,5 @@ namespace NuGet.Tools {
                 return ResourceManager.GetString("CanNotCreateWindow", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This operation is not supported in debug mode..
-        /// </summary>
-        internal static string DebugContextNotSupported {
-            get {
-                return ResourceManager.GetString("DebugContextNotSupported", resourceCulture);
-            }
-        }
     }
 }
