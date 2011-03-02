@@ -3,13 +3,18 @@ using System.Collections.Generic;
 
 namespace NuGet{
     public class PackageSorter : PackageWalker {
-
         private IPackageRepository _repository;
         private IList<IPackage> _sortedPackages;
 
         protected override bool RaiseErrorOnCycle {
             get {
                 return false;
+            }
+        }
+
+        protected override bool IgnoreWalkInfo {
+            get {
+                return true;
             }
         }
 

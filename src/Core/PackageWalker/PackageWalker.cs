@@ -36,6 +36,12 @@ namespace NuGet {
             private set;
         }
 
+        protected virtual bool IgnoreWalkInfo {
+            get {
+                return false;
+            }
+        }
+
         public void Walk(IPackage package) {
             // Do nothing if we saw this package already
             if (Marker.IsVisited(package)) {
@@ -53,7 +59,7 @@ namespace NuGet {
                     IPackage resolvedDependency = Marker.FindDependency(dependency) ??
                                                   ResolveDependency(dependency);
 
-                    if (resolvedDependency == null) {                        
+                    if (resolvedDependency == null) {
                         OnDependencyResolveError(dependency);
                         // If we're skipping dependency resolve errros then move on to the next
                         // dependency
@@ -74,7 +80,7 @@ namespace NuGet {
                         continue;
                     }
 
-                    if (Marker.IsCycle(resolvedDependency) || 
+                    if (Marker.IsCycle(resolvedDependency) ||
                         Marker.IsVersionCycle(resolvedDependency.Id)) {
                         if (RaiseErrorOnCycle) {
                             List<IPackage> packages = Marker.Packages.ToList();
@@ -96,28 +102,30 @@ namespace NuGet {
             // Mark the package as visited
             Marker.MarkVisited(package);
 
-            PackageWalkInfo info = GetPackageInfo(package);
+            if (!IgnoreWalkInfo) {
+                PackageWalkInfo info = GetPackageInfo(package);
 
-            // If our parent is an unknown then we need to bubble up the type
-            if (info.Parent != null) {
-                PackageWalkInfo parentInfo = GetPackageInfo(info.Parent);
+                // If our parent is an unknown then we need to bubble up the type
+                if (info.Parent != null) {
+                    PackageWalkInfo parentInfo = GetPackageInfo(info.Parent);
 
-                Debug.Assert(parentInfo != null);
+                    Debug.Assert(parentInfo != null);
 
-                if (parentInfo.InitialTarget == PackageTargets.None) {
-                    // Update the parent target type
-                    parentInfo.Target |= info.Target;
+                    if (parentInfo.InitialTarget == PackageTargets.None) {
+                        // Update the parent target type
+                        parentInfo.Target |= info.Target;
 
-                    // If we ended up with both that means we found a dependency only packges
-                    // that has a mix of solution and project level packages
-                    if (parentInfo.Target == PackageTargets.Both) {
-                        throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);
+                        // If we ended up with both that means we found a dependency only packges
+                        // that has a mix of solution and project level packages
+                        if (parentInfo.Target == PackageTargets.Both) {
+                            throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);
+                        }
                     }
-                }
 
-                // Solution packages can't depend on project level packages
-                if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
-                    throw new InvalidOperationException(NuGetResources.ExternalPackagesCannotDependOnProjectLevelPackages);
+                    // Solution packages can't depend on project level packages
+                    if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
+                        throw new InvalidOperationException(NuGetResources.ExternalPackagesCannotDependOnProjectLevelPackages);
+                    }
                 }
             }
 
