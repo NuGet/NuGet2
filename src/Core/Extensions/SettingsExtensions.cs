@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
-    public static class SettingsExtentions {
+    public static class SettingsExtensions {
         private static string _entropy = "NuGet";
 
         public static string GetDecryptedValue(this ISettings settings, string section, string key){
@@ -42,7 +42,7 @@ namespace NuGet {
                 throw new ArgumentNullException("value");
             }
 
-            if (value == String.Empty) {
+            if (String.IsNullOrEmpty(value)) {
                 settings.SetValue(section, key, String.Empty);
             }
             else {

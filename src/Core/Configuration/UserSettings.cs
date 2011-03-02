@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
+using System.Globalization;
 
 namespace NuGet {
     public class UserSettings: ISettings {
@@ -84,7 +85,6 @@ namespace NuGet {
 
             foreach (var e in sectionElement.Elements("Add")) {
                 var tempKey = e.GetOptionalAttributeValue("key");
-                var tempValue = e.GetOptionalAttributeValue("value");
 
                 if (tempKey == key) {
                     e.SetAttributeValue("value", value);
@@ -111,7 +111,7 @@ namespace NuGet {
 
             var sectionElement = _config.Root.Element(section);
             if (sectionElement == null) {
-                throw new System.Xml.XmlException(String.Format(NuGetResources.UserSettings_SectionDoesNotExist, section));
+                throw new System.Xml.XmlException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
             }
 
             XElement elementToDelete = null;
@@ -122,7 +122,7 @@ namespace NuGet {
                 }
             }
             if (elementToDelete == null) {
-                throw new System.Xml.XmlException(String.Format(NuGetResources.UserSettings_SectionDoesNotExist, section));
+                throw new System.Xml.XmlException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
             }
             elementToDelete.Remove();
             Save(_config);

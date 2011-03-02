@@ -44,7 +44,7 @@
     <Compile Include="Extensions\ObjectCacheExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\QueryableExtensions.cs" />
-    <Compile Include="Extensions\SettingsExtentions.cs" />
+    <Compile Include="Extensions\SettingsExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPackageManager.cs" />
