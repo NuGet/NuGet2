@@ -42,6 +42,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,6 +57,7 @@
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\PathSearchFilter.cs" />
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
+    <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\DataServicePackage.cs" />
     <Compile Include="Packages\FrameworkAssemblyReference.cs" />
@@ -74,9 +76,10 @@
     <Compile Include="Repositories\IPackageRepository.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
-    <Compile Include="Utility\AssemblyExtensions.cs" />
-    <Compile Include="Utility\CollectionExtensions.cs" />
+    <Compile Include="Extensions\AssemblyExtensions.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Utility\CryptoHashProvider.cs" />
+    <Compile Include="Utility\GalleryServer.cs" />
     <Compile Include="Utility\HttpClient.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
@@ -91,21 +94,21 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Utility\ObjectExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Packages\PackageDependency.cs" />
-    <Compile Include="Utility\PackageExtensions.cs" />
+    <Compile Include="Extensions\PackageExtensions.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PackageUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\QueryableUtility.cs" />
-    <Compile Include="Utility\StringExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Utility\UriUtility.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\VersionUtility.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageFile.cs" />
-    <Compile Include="Utility\XElementExtensions.cs" />
+    <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Utility\ZipPackageFactory.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -121,9 +124,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

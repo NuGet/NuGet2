@@ -70,5 +70,17 @@ namespace PackageExplorer.Properties {
                 this["WindowPlacement"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PublishPrivateKey {
+            get {
+                return ((string)(this["PublishPrivateKey"]));
+            }
+            set {
+                this["PublishPrivateKey"] = value;
+            }
+        }
     }
 }

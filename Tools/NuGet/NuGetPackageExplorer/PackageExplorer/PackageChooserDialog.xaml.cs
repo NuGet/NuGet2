@@ -66,12 +66,6 @@ namespace PackageExplorer {
             DialogResult = true;
         }
 
-        private void PackageGrid_Sorting(object sender, System.Windows.Controls.DataGridSortingEventArgs e) {
-            ICommand sortCommand = (ICommand)PackageGrid.Tag;
-            sortCommand.Execute(e.Column.SortMemberPath);
-            e.Handled = true;
-        }
-
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
             string searchTerm = null;
 

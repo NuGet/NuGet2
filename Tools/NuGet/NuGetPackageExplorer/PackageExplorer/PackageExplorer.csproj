@@ -143,6 +143,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="PublishPackageWindow.xaml.cs">
+      <DependentUpon>PublishPackageWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -175,6 +178,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PackageMetadataEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PublishPackageWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -218,7 +225,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Properties\app.manifest" />
+    <None Include="Properties\app.manifest">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -217,13 +217,13 @@
                         <TextBox x:Name="NewDependencyVersion" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, NotifyOnValidationError=True, ValidatesOnDataErrors=True, BindingGroupName=NewPackageDependency}" Margin="2" Grid.Column="2" Grid.Row="2" />
                         
                         <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="3" Grid.Row="2" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
+                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
                                     <Binding ElementName="NewDependencyId" Path="Text" />
                                     <Binding ElementName="NewDependencyVersion" Path="Text" />
                                 </MultiBinding>
                             </Button.IsEnabled>
-                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
                         </self:GrayscaleButton>
                     </Grid>
                 </GroupBox>
@@ -257,13 +257,13 @@
                         <TextBox x:Name="NewSupportedFramework" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, NotifyOnValidationError=True, BindingGroupName=NewFrameworkAssembly}" Margin="2" Grid.Column="1" Grid.Row="2" />
 
                         <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="2" Grid.Row="2" ToolTipService.ToolTip="Add new framework assembly" Click="AddFrameworkAssemblyButtonClicked">
+                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
                                     <Binding ElementName="NewAssemblyName" Path="Text" />
                                     <Binding ElementName="NewSupportedFramework" Path="Text" />
                                 </MultiBinding>
                             </Button.IsEnabled>
-                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
                         </self:GrayscaleButton>
                     </Grid>
                 </GroupBox>

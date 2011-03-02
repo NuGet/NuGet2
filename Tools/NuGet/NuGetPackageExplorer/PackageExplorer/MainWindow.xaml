@@ -30,16 +30,6 @@
                 <self:GrayscaleMenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" />
                 <self:GrayscaleMenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
-            
-            <self:BooleanToVisibilityConverter x:Key="invertedBoolToVis" Inverted="True" />
-            <self:BooleanToVisibilityConverter x:Key="boolToVis" />
-            <self:CountToVisibilityConverter x:Key="countConverter" />
-            <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
-            <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-            <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
-            <self:HalfLengthConverter x:Key="lengthConverter" />
-            <self:UpperCaseConverter x:Key="upperCaseConverter" />
-            <self:FrameworkNameConverter x:Key="frameworkConverter" />
 
             <!-- data template for the package details pane -->
             <DataTemplate x:Key="PackageDetailTemplate">
@@ -249,6 +239,9 @@
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
+                <Separator />
+                <self:GrayscaleMenuItem Header="_Publish..." IsEnabled="{Binding Converter={StaticResource nullToBoolConverter}, FallbackValue=False}" Click="OnPublishButtonClick">
+                </self:GrayscaleMenuItem>
                 <Separator />
                 <self:GrayscaleMenuItem Command="Close" Header="E_xit" />
             </self:GrayscaleMenuItem>

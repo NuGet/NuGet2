@@ -45,6 +45,10 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public IPackage Package {
+            get { return _package; }
+        }
+
         public EditablePackageMetadata PackageMetadata {
             get {
                 return _packageMetadata;

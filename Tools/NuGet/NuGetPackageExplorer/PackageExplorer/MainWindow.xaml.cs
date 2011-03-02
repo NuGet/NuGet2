@@ -275,6 +275,7 @@ namespace PackageExplorer {
         }
 
         private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+
             var settings = Properties.Settings.Default;
 
             if ((bool)e.NewValue) {
@@ -286,34 +287,18 @@ namespace PackageExplorer {
             }
         }
 
-        private void SaveMenuItem_Click(object sender, RoutedEventArgs args)
-        {
-            ExecuteSaveCommand("Save");
-            args.Handled = true;
-        }
+        private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
+            var viewModel = (PackageViewModel)DataContext;
 
-        private void SaveAsMenuItem_Click(object sender, RoutedEventArgs args)
-        {
-            ExecuteSaveCommand("SaveAs");
-            args.Handled = true;
-        }
+            var publishPackageViewModel = new PublishPackageViewModel(viewModel.Package, viewModel.Package.GetStream()) {
+                PublishKey = Settings.Default.PublishPrivateKey
+            };
 
-        private void ExecuteSaveCommand(object parameter)
-        {
-            var model = DataContext as PackageViewModel;
-            if (model != null)
-            {
-                model.SaveCommand.Execute(parameter);
-            }
-        }
+            var dialog = new PublishPackageWindow { Owner = this };
+            dialog.DataContext = publishPackageViewModel;
+            dialog.ShowDialog();
 
-        private void CanExecuteSaveCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e)
-        {
-            var model = DataContext as PackageViewModel;
-            bool canExecute = model == null ? false : model.SaveCommand.CanExecute(e.Parameter);
-
-            e.CanExecute = canExecute;
-            e.Handled = true;
+            Settings.Default.PublishPrivateKey = publishPackageViewModel.PublishKey;
         }
     }
 }
