@@ -8,13 +8,13 @@ using NuGet.Dialog.Providers;
 
 namespace NuGet.Dialog.Extensions {
     internal static class QueryExtensions {
-        internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, PackageSortDescriptor descriptor) {
-            return source.SortBy<T>(descriptor.Name, descriptor.Direction);
+        internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, PackageSortDescriptor descriptor, params Type[] knownTypes) {
+            return source.SortBy<T>(descriptor.Name, descriptor.Direction, knownTypes);
         }
 
-        internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, string propertyName, ListSortDirection direction) {
+        internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, string propertyName, ListSortDirection direction, params Type[] knownTypes) {
             // Get the property being sorted on
-            PropertyInfo propertyInfo = GetProperty(source.ElementType, propertyName);
+            PropertyInfo propertyInfo = GetProperty(source.ElementType, propertyName, knownTypes);
 
             Debug.Assert(propertyInfo != null, "Unable to find property");
 
@@ -46,19 +46,37 @@ namespace NuGet.Dialog.Extensions {
             return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(methodCallExpression);
         }
 
-        private static PropertyInfo GetProperty(Type type, string propertyName) {
+        private static PropertyInfo GetProperty(Type type, string propertyName, params Type[] knownTypes) {
             // Try to get the property from the type
-            PropertyInfo property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-
+            PropertyInfo property = GetPublicProperty(type, propertyName);
             if (property != null) {
                 return property;
             }
 
             // Try the interfaces
-            return (from interfaceType in type.GetInterfaces()
-                    select GetProperty(interfaceType, propertyName) into prop
-                    where prop != null
-                    select prop).FirstOrDefault();
+            property = (from interfaceType in type.GetInterfaces()
+                        select GetProperty(interfaceType, propertyName) into prop
+                        where prop != null
+                        select prop).FirstOrDefault();
+            if (property != null) {
+                return property;
+            }
+
+            // now try the known types
+            foreach (var knownType in knownTypes) {
+                if (knownType != null) {
+                    property = GetPublicProperty(knownType, propertyName);
+                    if (property != null) {
+                        return property;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static PropertyInfo GetPublicProperty(Type type, string propertyName) {
+            return type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
         }
     }
 }

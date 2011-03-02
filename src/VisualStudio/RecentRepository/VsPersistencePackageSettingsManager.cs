@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio {
         private const string MruSettingsRoot = "NuGet\\Mru";
         // template = NuGet\Mru\Package
         private const string SettingsRootTemplate = MruSettingsRoot + "\\Package";
-        private static readonly string[] SettingsProperties = new string[] { "Id", "Version" };
+        private static readonly string[] SettingsProperties = new string[] { "Id", "Version", "LastUsed" };
 
         public VsPersistencePackageSettingsManager()
             : this(ServiceLocator.GetInstance<IServiceProvider>()) {
@@ -34,11 +34,19 @@ namespace NuGet.VisualStudio {
                 }
 
                 // avoid corrupted data
-                if (values.Length != 2 || values.Any(p => String.IsNullOrEmpty(p))) {
+                if (String.IsNullOrEmpty(values[0]) || String.IsNullOrEmpty(values[1])) {
                     continue;
                 }
 
-                yield return new PersistencePackageMetadata(values[0], values[1]);
+                DateTime lastUsedDate = DateTime.MinValue;
+                if (!String.IsNullOrEmpty(values[2])) {
+                    long binaryData;
+                    if (Int64.TryParse(values[2], out binaryData)) {
+                        lastUsedDate = DateTime.FromBinary(binaryData);
+                    }
+                }
+
+                yield return new PersistencePackageMetadata(values[0], values[1], lastUsedDate);
             }
         }
 
@@ -52,7 +60,7 @@ namespace NuGet.VisualStudio {
         ///   Mru
         ///     Package0  ------->   | Id: Moq
         ///     Package1             | Version: 1.0.0.0 
-        ///     Package2             
+        ///     Package2             | LastUsed: date time
         ///     Package3
         /// </remarks>
         public void SavePackageMetadata(IEnumerable<PersistencePackageMetadata> packageMetadata) {
@@ -63,7 +71,11 @@ namespace NuGet.VisualStudio {
             int count = 0;
             foreach (var metadata in packageMetadata) {
                 string settingsRoot = SettingsRootTemplate + count.ToString(CultureInfo.InvariantCulture);
-                string[] values = new string[] { metadata.Id, metadata.Version.ToString()};
+                string[] values = new string[] {
+                    metadata.Id, 
+                    metadata.Version.ToString(), 
+                    metadata.LastUsedDate.ToBinary().ToString(CultureInfo.InvariantCulture)
+                };
                 WriteStrings(settingsRoot, SettingsProperties, values);
                 count++;
             }

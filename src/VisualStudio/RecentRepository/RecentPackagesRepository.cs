@@ -14,8 +14,7 @@ namespace NuGet.VisualStudio {
         private const string SourceValue = "(MRU)";
         private const int MaximumPackageCount = 20;
 
-        private readonly List<IPackage> _packages;
-        private readonly Dictionary<PersistencePackageMetadata, IPackage> _packagesCache;
+        private readonly SortedDictionary<PersistencePackageMetadata, RecentPackage> _packagesCache;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private readonly DTEEvents _dteEvents;
@@ -34,13 +33,12 @@ namespace NuGet.VisualStudio {
             IPackageSourceProvider packageSourceProvider,
             IPersistencePackageSettingsManager settingsManager) {
 
-            _packages = new List<IPackage>();
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
             _aggregatePackageSource = packageSourceProvider.ActivePackageSource;
 
             // Used to cache the created packages so that we don't have to make requests every time the MRU list is accessed
-            _packagesCache = new Dictionary<PersistencePackageMetadata, IPackage>();
+            _packagesCache = new SortedDictionary<PersistencePackageMetadata, RecentPackage>();
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
@@ -56,11 +54,11 @@ namespace NuGet.VisualStudio {
 
         public IQueryable<IPackage> GetPackages() {
             LoadPackagesFromSettingsStore();
-            return _packages.Take(MaximumPackageCount).AsQueryable();
+            return _packagesCache.Take(MaximumPackageCount).Select(item => (IPackage)item.Value).AsQueryable();
         }
 
         public void AddPackage(IPackage package) {
-            var packageMetadata = new PersistencePackageMetadata(package);
+            var packageMetadata = new PersistencePackageMetadata(package, DateTime.Now);
             AddPackage(packageMetadata, package, addToFront: true);
         }
 
@@ -69,26 +67,29 @@ namespace NuGet.VisualStudio {
         /// </summary>
         /// <param name="addToFront">if set to true, it will add package to the front</param>
         private void AddPackage(PersistencePackageMetadata metadata, IPackage package, bool addToFront) {
-            var index = _packages.FindIndex(p => metadata.Equals(p));
-            if (index >= 0) {
+            if (_packagesCache.ContainsKey(metadata)) {
                 if (addToFront) {
-                    package = _packages[index];
-                    _packages.RemoveAt(index);
+                    _packagesCache.Remove(metadata);
                 }
                 else {
-                    return;
+                    return;                    
                 }
             }
 
-            if (addToFront) {
-                _packages.Insert(0, package);
+            _packagesCache[metadata] = ConvertToRecentPackage(package, metadata);
+        }
+
+        private RecentPackage ConvertToRecentPackage(IPackage package, PersistencePackageMetadata metadata) {
+            RecentPackage recentPackage = package as RecentPackage;
+            if (recentPackage != null) {
+                // if the package is already an instance of RecentPackage, reset the date and return it
+                recentPackage.LastUsedDate = metadata.LastUsedDate;
+                return recentPackage;
             }
             else {
-                _packages.Add(package);
+                // otherwise, wrap it inside a RecentPackage
+                return new RecentPackage(package, metadata.LastUsedDate);
             }
-
-            // also add it to the cache so that we don't have to retrieve the package again
-            _packagesCache[metadata] = package;
         }
 
         public void RemovePackage(IPackage package) {
@@ -96,19 +97,19 @@ namespace NuGet.VisualStudio {
         }
 
         public void Clear() {
-            _packages.Clear();
+            _packagesCache.Clear();
             _settingsManager.ClearPackageMetadata();
         }
 
         private IEnumerable<PersistencePackageMetadata> LoadPackageMetadataFromSettingsStore() {
             // don't bother to load the settings store if we have loaded before or we already have enough packages in-memory
-            if (_packages.Count >= MaximumPackageCount || _hasLoadedSettingsStore) {
+            if (_packagesCache.Count >= MaximumPackageCount || _hasLoadedSettingsStore) {
                 return Enumerable.Empty<PersistencePackageMetadata>();
             }
 
             _hasLoadedSettingsStore = true;
 
-            return _settingsManager.LoadPackageMetadata(MaximumPackageCount - _packages.Count);
+            return _settingsManager.LoadPackageMetadata(MaximumPackageCount - _packagesCache.Count);
         }
 
         private void LoadPackagesFromSettingsStore() {
@@ -124,7 +125,7 @@ namespace NuGet.VisualStudio {
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             var filterPackages = FilterPackages(packagesMetadata, newPackages);
 
-            var cachedPackages = packagesMetadata.Where(m => _packagesCache.ContainsKey(m)).Select(m => Tuple.Create(m, _packagesCache[m]));
+            var cachedPackages = packagesMetadata.Where(m => _packagesCache.ContainsKey(m)).Select(m => Tuple.Create(m, (IPackage)_packagesCache[m]));
 
             var allPackages = filterPackages.Concat(cachedPackages);
 
@@ -152,15 +153,15 @@ namespace NuGet.VisualStudio {
 
         private void SavePackagesToSettingsStore() {
             // only save if there are new package added
-            if (_packages.Count > 0) {
+            if (_packagesCache.Count > 0) {
 
                 // IMPORTANT: call ToList() here. Otherwise, we may read and write to the settings store at the same time
                 var loadedPackagesMetadata = LoadPackageMetadataFromSettingsStore().ToList();
 
                 _settingsManager.SavePackageMetadata(
-                    _packages.
+                    _packagesCache.
                         Take(MaximumPackageCount).
-                        Select(p => new PersistencePackageMetadata(p)).
+                        Select(p => p.Key).
                         Concat(loadedPackagesMetadata));
             }
         }

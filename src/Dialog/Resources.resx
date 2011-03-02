@@ -261,4 +261,7 @@
   <data name="License_DialogTitle" xml:space="preserve">
     <value>License Acceptance</value>
   </data>
+  <data name="Dialog_LastInstalled" xml:space="preserve">
+    <value>Last installed</value>
+  </data>
 </root>
