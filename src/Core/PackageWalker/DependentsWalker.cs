@@ -18,6 +18,12 @@ namespace NuGet {
             }
         }
 
+        protected override bool IgnoreWalkInfo {
+            get {
+                return true;
+            }
+        }
+
         protected IPackageRepository Repository {
             get;
             private set;

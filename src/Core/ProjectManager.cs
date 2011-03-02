@@ -131,6 +131,9 @@ namespace NuGet {
                     NuGetResources.UnknownPackage, packageId));
             }
 
+            // If we already have this package installed, use the local copy so we don't 
+            // end up using the one from the source repository.
+            package = LocalRepository.FindPackage(package.Id, package.Version) ?? package;
             AddPackageReference(package, ignoreDependencies);
         }
 

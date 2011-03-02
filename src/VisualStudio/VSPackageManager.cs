@@ -72,6 +72,8 @@ namespace NuGet.VisualStudio {
                     VsResources.UnknownPackage, packageId));
             }
 
+            package = LocalRepository.FindPackage(package.Id, package.Version) ?? package;
+
             // REVIEW: This isn't transactional, so if add package reference fails
             // the user has to manually clean it up by uninstalling it
             InstallPackage(package, ignoreDependencies);

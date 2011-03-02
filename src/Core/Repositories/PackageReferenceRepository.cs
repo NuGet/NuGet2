@@ -13,7 +13,7 @@ namespace NuGet {
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : PackageRepositoryBase {
+    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup {
         private const string PackageReferenceFile = "packages.config";
 
         public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
@@ -89,8 +89,8 @@ namespace NuGet {
                     Version version = VersionUtility.ParseOptionalVersion(versionString);
                     IPackage package = null;
 
-                    if (String.IsNullOrEmpty(id) || 
-                        version == null || 
+                    if (String.IsNullOrEmpty(id) ||
+                        version == null ||
                         !SourceRepository.TryFindPackage(id, version, out package)) {
 
                         // Skip bad entries
@@ -138,6 +138,19 @@ namespace NuGet {
             }
 
             DeleteEntry(document, package.Id, package.Version);
+        }
+
+        public IPackage FindPackage(string packageId, Version version) {
+            XDocument document = GetDocument();
+            if (document == null) {
+                return null;
+            }
+
+            if (FindEntry(document, packageId, version) == null) {
+                return null;
+            }
+
+            return SourceRepository.FindPackage(packageId, version);
         }
 
         public void RegisterIfNecessary() {

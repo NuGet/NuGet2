@@ -60,6 +60,7 @@
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
+    <Compile Include="Repositories\IPackageLookup.cs" />
     <Compile Include="Repositories\LazyQueue.cs" />
     <Compile Include="Repositories\SmartDataServiceQuery.cs" />
     <Compile Include="Repositories\BufferedEnumerable.cs" />

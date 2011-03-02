@@ -44,6 +44,14 @@ namespace NuGet {
                 throw new ArgumentNullException("packageId");
             }
 
+            // If the repository implements it's own lookup then use that instead.
+            // This is an optimization that we use so we don't have to enumerate packages for
+            // sources that don't need to.
+            var packageLookup = repository as IPackageLookup;
+            if (packageLookup != null && version != null) {
+                return packageLookup.FindPackage(packageId, version);
+            }
+
             IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
                                                        .ToList()
                                                        .OrderByDescending(p => p.Version);

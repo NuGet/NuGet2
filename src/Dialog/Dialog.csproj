@@ -116,7 +116,6 @@
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\ProviderServices.cs" />
-    <Compile Include="PackageManagerUI\CachedProjectManager.cs" />
     <Compile Include="PackageManagerUI\Controls\RatingControl.cs" />
     <Compile Include="PackageManagerUI\Controls\StarControl.cs" />
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">

@@ -74,6 +74,12 @@ namespace NuGet {
                 return;
             }
 
+            // If the conflicting package is the same as the package being installed
+            // then no-op
+            if (PackageEqualityComparer.IdAndVersion.Equals(package, conflictResult.Package)) {
+                return;
+            }
+
             // First we get a list of dependents for the installed package.
             // Then we find the dependency in the foreach dependent that this installed package used to satisfy.
             // We then check if the resolved package also meets that dependency and if it doesn't it's added to the list

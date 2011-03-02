@@ -129,6 +129,9 @@ namespace NuGet {
                     NuGetResources.UnknownPackage, packageId));
             }
             else {
+                // If we already have this package installed, use the local copy so we don't 
+                // end up using the one from the source repository
+                package = LocalRepository.FindPackage(package.Id, package.Version) ?? package;
                 InstallPackage(package, ignoreDependencies);
             }
         }

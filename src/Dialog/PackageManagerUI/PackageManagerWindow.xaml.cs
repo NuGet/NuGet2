@@ -77,7 +77,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             Project activeProject = dte.GetActiveProject();
 
             // Create a cached project manager so that checking for installed packages is fast
-            IProjectManager projectManager = new CachedProjectManager(packageManager.GetProjectManager(activeProject));
+            IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
 
             var recentProvider = new RecentProvider(
                 activeProject,
@@ -87,8 +87,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageManagerFactory,
                 recentPackagesRepository,
                 packageSourceProvider,
-                providerServices, 
-                progressEvents); 
+                providerServices,
+                progressEvents);
 
 
             var updatesProvider = new UpdatesProvider(
@@ -99,7 +99,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 packageManagerFactory,
                 providerServices,
-                progressEvents); 
+                progressEvents);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -109,7 +109,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 packageManagerFactory,
                 providerServices,
-                progressEvents); 
+                progressEvents);
 
             var installedProvider = new InstalledProvider(
                 packageManager,
@@ -117,7 +117,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 projectManager,
                 Resources,
                 providerServices,
-                progressEvents); 
+                progressEvents);
 
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);

@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 
 namespace NuGet {
-    public class LocalPackageRepository : PackageRepositoryBase {
+    public class LocalPackageRepository : PackageRepositoryBase, IPackageLookup {
         private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<PackageName, string> _packagePathLookup = new Dictionary<PackageName, string>();
 
         public LocalPackageRepository(string physicalPath)
             : this(new DefaultPackagePathResolver(physicalPath),
@@ -66,29 +67,61 @@ namespace NuGet {
             }
         }
 
+        public IPackage FindPackage(string packageId, Version version) {
+            var packageName = new PackageName(packageId, version);
+            string path;
+            if (!_packagePathLookup.TryGetValue(packageName, out path)) {
+                // Try to find the path based on id and version
+                path = GetPackageFilePath(packageName);
+
+                // If this path doesn't exist try the other one
+                if (!FileSystem.FileExists(path)) {
+                    path = PathResolver.GetPackageFileName(packageId, version);
+                }
+            }
+
+            if (!FileSystem.FileExists(path)) {
+                return null;
+            }
+
+            // Get the package at this path
+            return GetPackage(path);
+        }
+
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage) {
             foreach (var path in GetPackageFiles()) {
-                PackageCacheEntry cacheEntry;
-                DateTimeOffset lastModified = FileSystem.GetLastModified(path);
-                // If we never cached this file or we did and it's current last modified time is newer
-                // create a new entry
-                if (!_packageCache.TryGetValue(path, out cacheEntry) ||
-                    (cacheEntry != null && lastModified > cacheEntry.LastModifiedTime)) {
-                    // We need to do this so we capture the correct loop variable
-                    string packagePath = path;
+                IPackage package = GetPackage(openPackage, path);
 
-                    // Create the package
-                    IPackage package = openPackage(packagePath);
-
-                    // create a cache entry with the last modified time
-                    cacheEntry = new PackageCacheEntry(package, lastModified);
-
-                    // Store the entry
-                    _packageCache[packagePath] = cacheEntry;
-                }
-
-                yield return cacheEntry.Package;
+                yield return package;
             }
+        }
+
+        private IPackage GetPackage(string path) {
+            return GetPackage(OpenPackage, path);
+        }
+
+        private IPackage GetPackage(Func<string, IPackage> openPackage, string path) {
+            PackageCacheEntry cacheEntry;
+            DateTimeOffset lastModified = FileSystem.GetLastModified(path);
+            // If we never cached this file or we did and it's current last modified time is newer
+            // create a new entry
+            if (!_packageCache.TryGetValue(path, out cacheEntry) ||
+                (cacheEntry != null && lastModified > cacheEntry.LastModifiedTime)) {
+                // We need to do this so we capture the correct loop variable
+                string packagePath = path;
+
+                // Create the package
+                IPackage package = openPackage(packagePath);
+
+                // create a cache entry with the last modified time
+                cacheEntry = new PackageCacheEntry(package, lastModified);
+
+                // Store the entry
+                _packageCache[packagePath] = cacheEntry;
+                _packagePathLookup[new PackageName(package.Id, package.Version)] = path;
+            }
+
+            return cacheEntry.Package;
         }
 
         internal IEnumerable<string> GetPackageFiles() {
@@ -116,6 +149,11 @@ namespace NuGet {
                                 PathResolver.GetPackageFileName(package));
         }
 
+        private string GetPackageFilePath(PackageName packageName) {
+            return Path.Combine(PathResolver.GetPackageDirectory(packageName.PackageId, packageName.Version),
+                                PathResolver.GetPackageFileName(packageName.PackageId, packageName.Version));
+        }
+
         private class PackageCacheEntry {
             public PackageCacheEntry(IPackage package, DateTimeOffset lastModifiedTime) {
                 Package = package;
@@ -124,6 +162,33 @@ namespace NuGet {
 
             public IPackage Package { get; private set; }
             public DateTimeOffset LastModifiedTime { get; private set; }
+        }
+
+        private class PackageName : IEquatable<PackageName> {
+            public PackageName(string packageId, Version version) {
+                PackageId = packageId;
+                Version = version;
+            }
+
+            public string PackageId { get; private set; }
+            public Version Version { get; private set; }
+
+            public bool Equals(PackageName other) {
+                return PackageId.Equals(other.PackageId, StringComparison.OrdinalIgnoreCase) &&
+                       Version.Equals(other.Version);
+            }
+
+            public override int GetHashCode() {
+                var combiner = new HashCodeCombiner();
+                combiner.AddObject(PackageId);
+                combiner.AddObject(Version);
+
+                return combiner.CombinedHash;
+            }
+
+            public override string ToString() {
+                return PackageId + " " + Version;
+            }
         }
     }
 }

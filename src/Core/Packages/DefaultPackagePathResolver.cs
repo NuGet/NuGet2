@@ -1,11 +1,11 @@
-namespace NuGet {
-    using System;
-    using System.IO;
+using System;
+using System.IO;
 
+namespace NuGet {
     public class DefaultPackagePathResolver : IPackagePathResolver {
         private readonly IFileSystem _fileSystem;
         private readonly bool _useSideBySidePaths;
-        
+
         public DefaultPackagePathResolver(string path)
             : this(new PhysicalFileSystem(path)) {
         }
@@ -31,17 +31,25 @@ namespace NuGet {
         }
 
         public virtual string GetPackageDirectory(IPackage package) {
-            string directory = package.Id;
+            return GetPackageDirectory(package.Id, package.Version);
+        }
+
+        public virtual string GetPackageFileName(IPackage package) {
+            return GetPackageFileName(package.Id, package.Version);
+        }
+
+        public virtual string GetPackageDirectory(string packageId, Version version) {
+            string directory = packageId;
             if (_useSideBySidePaths) {
-                directory += "." + package.Version;
+                directory += "." + version;
             }
             return directory;
         }
 
-        public virtual string GetPackageFileName(IPackage package) {
-            string fileNameBase = package.Id;
+        public virtual string GetPackageFileName(string packageId, Version version) {
+            string fileNameBase = packageId;
             if (_useSideBySidePaths) {
-                fileNameBase += "." + package.Version;
+                fileNameBase += "." + version;
             }
             return fileNameBase + Constants.PackageExtension;
         }
