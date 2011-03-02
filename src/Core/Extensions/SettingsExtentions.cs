@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NuGet.Configuration;
 using System.Security.Cryptography;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
-    internal static class SettingsExtentions {
+    public static class SettingsExtentions {
         private static string _entropy = "NuGet";
 
-        internal static string GetDecryptedValue(this ISettings settings, string section, string key){
+        public static string GetDecryptedValue(this ISettings settings, string section, string key){
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
@@ -32,7 +31,7 @@ namespace NuGet {
             
         }
 
-        internal static void SetEncryptedValue(this ISettings settings, string section, string key, string value) {
+        public static void SetEncryptedValue(this ISettings settings, string section, string key, string value) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }

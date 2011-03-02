@@ -5,8 +5,9 @@ using System.Text;
 using System.IO;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
+using NuGet.Resources;
 
-namespace NuGet.Configuration {
+namespace NuGet {
     public class UserSettings: ISettings {
         private XDocument _config;
         private string _configLocation;
@@ -60,7 +61,7 @@ namespace NuGet.Configuration {
                 return kvps;
             }
             catch (Exception e) {
-                throw new Exception("There was an error with the file format.", e);
+                throw new System.Xml.XmlException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
             }
         }
 
@@ -96,6 +97,34 @@ namespace NuGet.Configuration {
             addElement.SetAttributeValue("key", key);
             addElement.SetAttributeValue("value", value);
             sectionElement.Add(addElement);
+            Save(_config);
+
+        }
+
+        public void DeleteValue(string section, string key) {
+            if (String.IsNullOrEmpty(section)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+            if (String.IsNullOrEmpty(key)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
+            }
+
+            var sectionElement = _config.Root.Element(section);
+            if (sectionElement == null) {
+                throw new System.Xml.XmlException(String.Format(NuGetResources.UserSettings_SectionDoesNotExist, section));
+            }
+
+            XElement elementToDelete = null;
+            foreach (var e in sectionElement.Elements("Add")) {
+                if (e.GetOptionalAttributeValue("key") == key) {
+                    elementToDelete = e;
+                    break;
+                }
+            }
+            if (elementToDelete == null) {
+                throw new System.Xml.XmlException(String.Format(NuGetResources.UserSettings_SectionDoesNotExist, section));
+            }
+            elementToDelete.Remove();
             Save(_config);
 
         }

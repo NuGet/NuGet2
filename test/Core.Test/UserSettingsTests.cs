@@ -3,7 +3,6 @@ using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Runtime;
-using NuGet.Configuration;
 
 namespace NuGet.Test {
     [TestClass]
@@ -432,6 +431,100 @@ namespace NuGet.Test {
             Assert.IsNull(result);
         }
 
+        [TestMethod]
+        public void UserSettings_CallingDeleteValueWithEmptyKeyThrowsException() {
+            // Arrange 
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(m => m.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData)).Returns(@"c:\users\bob\appdata\roaming");
+            var settings = new UserSettings(mockFileSystem.Object);
+            // Act & Assert
+            ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("SomeSection", ""));
+        }
+
+        [TestMethod]
+        public void UserSettings_CallingDeleteValueWithEmptySectionThrowsException() {
+            // Arrange 
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(m => m.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData)).Returns(@"c:\users\bob\appdata\roaming");
+            var settings = new UserSettings(mockFileSystem.Object);
+            // Act & Assert
+            ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("", "SomeKey"));
+        }
+
+        [TestMethod]
+        public void UserSettings_CallingDeleteWhenSectionNameDoesntExistThrowsException() {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(m => m.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData)).Returns(@"c:\users\bob\appdata\roaming");
+            mockFileSystem.Setup(m => m.FileExists(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(true);
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <Add key=""key"" value="""" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
+            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            // Act & Assert
+            ExceptionAssert.Throws<System.Xml.XmlException>(() => settings.DeleteValue("SectionDoesNotExists", "SomeKey"));
+        }
+
+        [TestMethod]
+        public void UserSettings_CallingDeleteWhenKeyDoesntExistThrowsException() {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(m => m.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData)).Returns(@"c:\users\bob\appdata\roaming");
+            mockFileSystem.Setup(m => m.FileExists(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(true);
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <Add key=""key"" value="""" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
+            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            // Act & Assert
+            ExceptionAssert.Throws<System.Xml.XmlException>(() => settings.DeleteValue("SectionName", "KeyDoesNotExist"));
+        }
+
+        [TestMethod]
+        public void UserSettings_CallingDeleteWithValidSectionAndKeyDeletesTheEntry() {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(m => m.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData)).Returns(@"c:\users\bob\appdata\roaming");
+            mockFileSystem.Setup(m => m.FileExists(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(true);
+            var ms = new MemoryStream();
+            mockFileSystem.Setup(m => m.AddFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+                stream.CopyTo(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+            });
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <Add key=""DeleteMe"" value=""value"" />
+    <Add key=""keyNotToDelete"" value=""value"" />
+  </SectionName>
+  <SectionName2>
+    <Add key=""key"" value=""value"" />
+  </SectionName2>
+</configuration>";
+            mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
+            UserSettings settings = new UserSettings(mockFileSystem.Object);
+
+            // Act
+            settings.DeleteValue("SectionName", "DeleteMe");
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <Add key=""keyNotToDelete"" value=""value"" />
+  </SectionName>
+  <SectionName2>
+    <Add key=""key"" value=""value"" />
+  </SectionName2>
+</configuration>", ms.ReadToEnd());      
+        }
 
     }
 }

@@ -18,6 +18,9 @@ namespace NuGet.Common {
         private string _baseGalleryServerUrl;
         private string _userAgent;
 
+
+        public string Source { get { return _baseGalleryServerUrl; } }
+
         public GalleryServer()
             : this(DefaultGalleryServerUrl) {
         }

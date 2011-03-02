@@ -4,27 +4,27 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription",
-        MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
+        MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary")]
     public class DeleteCommand : Command {
-        private string _apiKey;
-        private string _packageId;
-        private string _packageVersion;
-
+        
         [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
         [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
-        public override void ExecuteCommand() {
-            //First argument should be the package ID
-            _packageId = Arguments[0];
-            //Second argument should be the package Version
-            _packageVersion = Arguments[1];
-            //Third argument should be the API Key
-            _apiKey = Arguments[2];
+        [Option(typeof(NuGetResources), "ApiKeyDescription")]
+        public string ApiKey { get; set; }
 
+        public override void ExecuteCommand() {
+
+            //First argument should be the package ID
+            string packageId = Arguments[0];
+            //Second argument should be the package Version
+            string packageVersion = Arguments[1];
+
+            //If the user passed a source use it for the gallery location
             GalleryServer gallery;
             if (String.IsNullOrEmpty(Source)) {
                 gallery = new GalleryServer();
@@ -33,10 +33,26 @@ namespace NuGet.Commands {
                 gallery = new GalleryServer(Source);
             }
 
-            if (NoPrompt || Console.Confirm(String.Format(NuGetResources.DeleteCommandConfirm, _packageId, _packageVersion))) {
-                Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, _packageId, _packageVersion);
-                gallery.DeletePackage(_apiKey, _packageId, _packageVersion);
-                Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, _packageId, _packageVersion);
+            //If the user did not pass an API Key look in the config file
+            string apiKey;
+            ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
+            if (String.IsNullOrEmpty(ApiKey)) {
+                var value = settings.GetDecryptedValue("ApiKeys", gallery.Source);
+                if (string.IsNullOrEmpty(value)) {
+                    throw new CommandLineException(NuGetResources.NoApiKeyFound);
+                }
+                apiKey = value;
+
+            }
+            else {
+                apiKey = ApiKey;
+            }
+
+
+            if (NoPrompt || Console.Confirm(String.Format(NuGetResources.DeleteCommandConfirm, packageId, packageVersion))) {
+                Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion);
+                gallery.DeletePackage(apiKey, packageId, packageVersion);
+                Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, packageId, packageVersion);
             }
             else {
                 Console.WriteLine(NuGetResources.DeleteCommandCanceled);

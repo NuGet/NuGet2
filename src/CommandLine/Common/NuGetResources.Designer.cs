@@ -79,6 +79,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The API key to use for the source, by default saved for that source..
+        /// </summary>
+        internal static string ApiKeyDescription {
+            get {
+                return ResourceManager.GetString("ApiKeyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} (y/N) .
         /// </summary>
         internal static string ConsoleConfirmMessage {
@@ -367,6 +376,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No API Key was provided for this source and no saved API Key could be found..
+        /// </summary>
+        internal static string NoApiKeyFound {
+            get {
+                return ResourceManager.GetString("NoApiKeyFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [option] on &apos;{0}&apos; is invalid without a setter..
         /// </summary>
         internal static string OptionInvalidWithoutSetter {
@@ -565,6 +583,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do not save the API Key. Using this param with no API Key will clear the saved API Key for the given source..
+        /// </summary>
+        internal static string PushCommandNoPersistApiKeyDescription {
+            get {
+                return ResourceManager.GetString("PushCommandNoPersistApiKeyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is no default source, please specify a source..
         /// </summary>
         internal static string PushCommandNoSourceError {
@@ -583,11 +610,38 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The saved API Key was removed..
+        /// </summary>
+        internal static string PushCommandSavedApiKeyCleared {
+            get {
+                return ResourceManager.GetString("PushCommandSavedApiKeyCleared", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The API Key &apos;{0}&apos; will be saved for the Gallery Server located at {1}..
+        /// </summary>
+        internal static string PushCommandSavingApiKey {
+            get {
+                return ResourceManager.GetString("PushCommandSavingApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
         /// </summary>
         internal static string PushCommandSourceDescription {
             get {
                 return ResourceManager.GetString("PushCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to save API Key to NuGet.config..
+        /// </summary>
+        internal static string PushCommandUnableToSaveApiKey {
+            get {
+                return ResourceManager.GetString("PushCommandUnableToSaveApiKey", resourceCulture);
             }
         }
         

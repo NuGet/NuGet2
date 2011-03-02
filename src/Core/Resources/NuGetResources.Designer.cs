@@ -565,6 +565,33 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Key &apos;{0}&apos; does not exist..
+        /// </summary>
+        internal static string UserSettings_KeyDoesNotExist {
+            get {
+                return ResourceManager.GetString("UserSettings_KeyDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Section&apos;{0}&apos; does not exist..
+        /// </summary>
+        internal static string UserSettings_SectionDoesNotExist {
+            get {
+                return ResourceManager.GetString("UserSettings_SectionDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to parse config file..
+        /// </summary>
+        internal static string UserSettings_UnableToParseConfigFile {
+            get {
+                return ResourceManager.GetString("UserSettings_UnableToParseConfigFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already exists. Skipping....
         /// </summary>
         internal static string Warning_FileAlreadyExists {
