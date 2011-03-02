@@ -51,8 +51,8 @@ function Test-GetProjectThrowsIfProjectNameAmbiguous {
 
     # Assert
     Assert-Throws { Get-Project A } "Project 'A' is not found."
-    Assert-NotNull (Get-Project foo\A)
-    Assert-NotNull (Get-Project bar\A)
+    Assert-AreEqual $p1 (Get-Project foo\A)
+    Assert-AreEqual $p2 (Get-Project bar\A)
 }
 
 function Test-GetProjectCommandWithWildCardsWorksWithProjectHavingTheSameName {
@@ -132,6 +132,30 @@ function Test-RemovingAmbiguousProjectAllowsSimpleNameToBeUsed {
     Assert-AreEqual $p2 (Get-Project -Name A)
 }
 
+function Test-AmbiguousStartupProject {
+    # Arrange
+    $f = New-SolutionFolder foo
+    $p1 = $f | New-ClassLibrary A
+    $p2 = New-ClassLibrary A
+
+    # Make sure the default project is p1
+    Assert-DefaultProject $p1
+
+    $path = Get-SolutionPath
+    $p1.Save()
+    $p2.Save()
+    $dte.Solution.SaveAs($path)
+    $dte.Solution.Close()
+
+    # Re open the solution
+    $dte.Solution.Open($path)
+    $p1 = Get-Project foo\A
+    $p2 = Get-Project A
+
+    # Make sure the default project is p1
+    Assert-DefaultProject $p1
+}
+
 function Assert-DefaultProject($p) {
-    Assert-AreEqual $p (Get-Project)
+    Assert-AreEqual $p (Get-Project) "Default project is actually $($p.UniqueName)"
 }

@@ -410,3 +410,7 @@ function Remove-Project {
 
     $dte.Solution.Remove($Project)
 }
+
+function Get-SolutionPath {
+    $dte.Solution.Properties.Item("Path").Value
+}

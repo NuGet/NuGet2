@@ -228,7 +228,9 @@ namespace NuGet.VisualStudio {
                 if (!String.IsNullOrEmpty(startupProjectName)) {
                     ProjectName projectName;
                     if (_projectCache.TryGetProjectName(startupProjectName, out projectName)) {
-                        DefaultProjectName = projectName.ShortName;
+                        DefaultProjectName = _projectCache.IsAmbiguous(projectName.ShortName) ?
+                                             projectName.CustomUniqueName :
+                                             projectName.ShortName;
                     }
                 }
             }

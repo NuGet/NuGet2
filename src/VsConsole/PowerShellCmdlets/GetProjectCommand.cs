@@ -44,8 +44,9 @@ namespace NuGet.PowerShell.Commands {
             else {
                 // No name specified; return default project (if not null)
                 if (Name == null) {
-                    if (_solutionManager.DefaultProject != null) {
-                        WriteObject(_solutionManager.DefaultProject);
+                    Project defaultProject = _solutionManager.DefaultProject;
+                    if (defaultProject != null) {
+                        WriteObject(defaultProject);
                     }
                 }
                 else {
