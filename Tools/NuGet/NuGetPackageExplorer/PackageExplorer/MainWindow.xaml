@@ -212,6 +212,7 @@
         <CommandBinding Command="SaveAs" Executed="SaveAsMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
         <CommandBinding Command="Close" Executed="ExitMenuItem_Click" />
         <CommandBinding Command="{x:Static self:Commands.OpenFromFeedCommand}" Executed="OpenPackageFromNuGetFeed" />
+        <CommandBinding Command="{x:Static self:Commands.PublishToFeedCommand}" Executed="OnPublishButtonClick" CanExecute="CanPublishToFeedCommand" />
     </Window.CommandBindings>
     
     <Grid x:Name="LayoutRoot">
@@ -240,7 +241,10 @@
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
                 <Separator />
-                <self:GrayscaleMenuItem Header="_Publish..." IsEnabled="{Binding Converter={StaticResource nullToBoolConverter}, FallbackValue=False}" Click="OnPublishButtonClick">
+                <self:GrayscaleMenuItem Command="{x:Static self:Commands.PublishToFeedCommand}" Header="_Publish...">
+                    <self:GrayscaleMenuItem.Icon>
+                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/PublishToWebHS.png" />
+                    </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <Separator />
                 <self:GrayscaleMenuItem Command="Close" Header="E_xit" />

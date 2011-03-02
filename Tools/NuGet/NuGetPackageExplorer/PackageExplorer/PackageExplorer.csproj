@@ -221,6 +221,7 @@
     <Resource Include="Images\MovePreviousHS.png" />
     <Resource Include="Images\search.png" />
     <Resource Include="Images\Properties.png" />
+    <Resource Include="Images\PublishToWebHS.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

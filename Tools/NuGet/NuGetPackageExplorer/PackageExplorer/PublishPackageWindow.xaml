@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:self="clr-namespace:PackageExplorer"
         MinWidth="300"
-        MinHeight="200"
+        MinHeight="150"
         FocusManager.FocusedElement="{Binding ElementName=PublishKey}"
         Title="Publish package"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="NoResize"                              
         Width="400"
         WindowStartupLocation="CenterOwner"
         SizeToContent="Height">
@@ -46,10 +46,14 @@
         </TextBlock>
                 
         <!-- Private key -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,5">
-            <Label Target="{Binding PublishKey}" Content="Publish _key:" />
-            <TextBox x:Name="PublishKey" Width="270" Text="{Binding PublishKey}" VerticalContentAlignment="Center" />
-        </StackPanel>
+        <Grid Grid.Row="2" Margin="0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Target="{Binding ElementName=PublishKey}" Content="Publish _key:" />
+            <TextBox x:Name="PublishKey" Grid.Column="1" Text="{Binding PublishKey}" VerticalContentAlignment="Center" />
+        </Grid>
         
         <!-- Create only flag -->
         <CheckBox 

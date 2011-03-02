@@ -300,5 +300,38 @@ namespace PackageExplorer {
 
             Settings.Default.PublishPrivateKey = publishPackageViewModel.PublishKey;
         }
+
+        private void CanPublishToFeedCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {
+            var model = DataContext as PackageViewModel;
+            bool canExecute = model == null ? false : !model.IsInEditMode;
+
+            e.CanExecute = canExecute;
+            e.Handled = true;
+        }
+
+        private void SaveMenuItem_Click(object sender, RoutedEventArgs args) {
+            ExecuteSaveCommand("Save");
+            args.Handled = true;
+        }
+
+        private void SaveAsMenuItem_Click(object sender, RoutedEventArgs args) {
+            ExecuteSaveCommand("SaveAs");
+            args.Handled = true;
+        }
+
+        private void ExecuteSaveCommand(object parameter) {
+            var model = DataContext as PackageViewModel;
+            if (model != null) {
+                model.SaveCommand.Execute(parameter);
+            }
+        }
+
+        private void CanExecuteSaveCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {
+            var model = DataContext as PackageViewModel;
+            bool canExecute = model == null ? false : model.SaveCommand.CanExecute(e.Parameter);
+
+            e.CanExecute = canExecute;
+            e.Handled = true;
+        }
     }
 }
