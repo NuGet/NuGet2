@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio.Resources;
 using VSLangProj;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
@@ -166,8 +167,12 @@ namespace NuGet.VisualStudio {
         }
 
         public override bool FileExists(string path) {
-            // See if the file is in the project system
-            return Project.GetProjectItem(path) != null;
+            // Only check the project system if the file is on disk to begin with
+            if (base.FileExists(path)) {
+                // See if the file is in the project system
+                return Project.GetProjectItem(path) != null;
+            }
+            return false;
         }
 
         protected virtual bool ExcludeFile(string path) {
@@ -182,11 +187,13 @@ namespace NuGet.VisualStudio {
 
             // Get the project items for the folder path
             string folderPath = Path.GetDirectoryName(path);
-            ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
-
-            // Add the file to the project
             string fullPath = GetFullPath(path);
-            container.AddFromFileCopy(fullPath);
+
+            ThreadHelper.Generic.Invoke(() => {
+                ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
+                // Add the file to the project
+                container.AddFromFileCopy(fullPath);
+            });
 
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
         }

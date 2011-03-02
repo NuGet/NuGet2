@@ -10,6 +10,8 @@ glob:*.sln.cache
 glob:*.orig
 glob:*.suo
 glob:*.vs10x
+glob:*.vsp
+glob:*.psess
 glob:TestResults
 glob:src/Server/Packages/*.nupkg
 DebugConstants.cs

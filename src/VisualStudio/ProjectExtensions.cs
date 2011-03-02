@@ -21,6 +21,11 @@ namespace NuGet.VisualStudio {
         private const string AppConfig = "app.config";
         private const string BinFolder = "Bin";
 
+        private static readonly Dictionary<string, string> _knownNestedFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "web.debug.config", "web.config" },
+            { "web.release.config", "web.config" }
+        };
+
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
         private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectTypeGuid, 
@@ -73,15 +78,34 @@ namespace NuGet.VisualStudio {
             projectItem = GetProjectItem(projectItems, name, VsConstants.VsProjectItemKindPhysicalFile);
 
             if (projectItem == null) {
-                // If we didn't find the project item at the top level, then we look one more level down.
-                // In VS files can have other nested files like aspx and aspx.cs. These are actually top level files in the file system
-                // but are represented as nested project items in VS.
-                projectItem = (from ProjectItem item in projectItems
-                               where item.ProjectItems != null &&
-                                     item.ProjectItems.Count > 0
-                               select GetProjectItem(item.ProjectItems, name, VsConstants.VsProjectItemKindPhysicalFile) into item
-                               where item != null
-                               select item).FirstOrDefault();
+                // Try to get the nested project item
+                return TryGetFileNestedFile(projectItems, name, out projectItem);
+            }
+
+            return projectItem != null;
+        }
+
+        /// <summary>
+        /// // If we didn't find the project item at the top level, then we look one more level down.
+        /// In VS files can have other nested files like foo.aspx and foo.aspx.cs or web.config and web.debug.config. 
+        /// These are actually top level files in the file system but are represented as nested project items in VS.            
+        /// </summary>
+        private static bool TryGetFileNestedFile(ProjectItems projectItems, string name, out ProjectItem projectItem) {
+            string parentFileName;
+            if (!_knownNestedFiles.TryGetValue(name, out parentFileName)) {
+                parentFileName = Path.GetFileNameWithoutExtension(name);
+            }
+
+            // If it's not one of the known nested files then we're going to look up prefixes backwards
+            // i.e. if we're looking for foo.aspx.cs then we look for foo.aspx then foo.aspx.cs as a nested file
+            ProjectItem parentProjectItem = GetProjectItem(projectItems, parentFileName, VsConstants.VsProjectItemKindPhysicalFile);
+
+            if (parentProjectItem != null) {
+                // Now try to find the nested file
+                projectItem = GetProjectItem(parentProjectItem.ProjectItems, name, VsConstants.VsProjectItemKindPhysicalFile);
+            }
+            else {
+                projectItem = null;
             }
 
             return projectItem != null;
@@ -253,7 +277,7 @@ namespace NuGet.VisualStudio {
             foreach (Reference reference in references) {
                 // Get the referenced project from the reference if any
                 if (reference.SourceProject != null) {
-                    projects.Add(reference.SourceProject);     
+                    projects.Add(reference.SourceProject);
                 }
             }
             return projects;
@@ -334,7 +358,7 @@ namespace NuGet.VisualStudio {
             }
             else {
                 Stack<string> nameParts = new Stack<string>();
-                
+
                 Project cursor = project;
                 nameParts.Push(cursor.Name);
 
@@ -352,7 +376,7 @@ namespace NuGet.VisualStudio {
         /// This method is used for the ProjectName CodeProperty in Types.ps1xml
         /// </summary>
         public static string GetCustomUniqueNameForPS(PSObject psObject) {
-            return GetCustomUniqueName((Project) psObject.BaseObject);
+            return GetCustomUniqueName((Project)psObject.BaseObject);
         }
 
         private class PathComparer : IEqualityComparer<string> {
