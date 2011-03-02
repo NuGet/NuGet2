@@ -243,10 +243,10 @@ $solutionEvents.add_AfterClosing([EnvDTE._dispSolutionEvents_AfterClosingEventHa
 })
 
 function UpdateWorkingDirectory {
-    $SolutionDir = if($DTE -and $DTE.Solution -and $DTE.Solution.FullName) { Split-Path $DTE.Solution.FullName -Parent }
+    $SolutionDir = if(IsSolutionOpen) { Split-Path $DTE.Solution.Properties.Item("Path").Value -Parent }
     if ($SolutionDir) {
         Set-Location $SolutionDir
-    } 
+    }
     else {
         Set-Location $Env:USERPROFILE
     }
