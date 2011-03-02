@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Linq;
 using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
 
@@ -15,27 +15,24 @@ namespace NuGet.VisualStudio {
         private const int MaximumPackageCount = 20;
 
         private readonly List<IPackage> _packages;
-        private readonly Dictionary<PersistencePackageMetadata, IPackage> _packagesCache;
+        private readonly Dictionary<IPersistencePackageMetadata, IPackage> _packagesCache;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private readonly DTEEvents _dteEvents;
-        private readonly PackageSource _aggregatePackageSource;
         private bool _hasLoadedSettingsStore;
 
         [ImportingConstructor]
         public RecentPackagesRepository(
             DTE dte,
             IPackageRepositoryFactory repositoryFactory,
-            IPackageSourceProvider packageSourceProvider,
             IPersistencePackageSettingsManager settingsManager) {
 
             _packages = new List<IPackage>();
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
-            _aggregatePackageSource = packageSourceProvider.AggregateSource;
 
             // Used to cache the created packages so that we don't have to make requests every time the MRU list is accessed
-            _packagesCache = new Dictionary<PersistencePackageMetadata, IPackage>();
+            _packagesCache = new Dictionary<IPersistencePackageMetadata, IPackage>(PackageMetadataEqualityComparer.Instance);
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
@@ -55,7 +52,11 @@ namespace NuGet.VisualStudio {
         }
 
         public void AddPackage(IPackage package) {
-            var packageMetadata = new PersistencePackageMetadata(package);
+            var packageMetadata = package as IPersistencePackageMetadata;
+            if (packageMetadata == null) {
+                throw new ArgumentException(VsResources.PackageCanNotBePersisted, "package");
+            }
+
             AddPackage(packageMetadata, package, addToFront: true);
         }
 
@@ -63,8 +64,8 @@ namespace NuGet.VisualStudio {
         /// Add the specified package to the list.
         /// </summary>
         /// <param name="addToFront">if set to true, it will add package to the front</param>
-        private void AddPackage(PersistencePackageMetadata metadata, IPackage package, bool addToFront) {
-            var index = _packages.FindIndex(p => metadata.Equals(p));
+        private void AddPackage(IPersistencePackageMetadata metadata, IPackage package, bool addToFront) {
+            var index = _packages.FindIndex(p => PackageMetadataEqualityComparer.Instance.Equals(metadata, (IPersistencePackageMetadata)p));
             if (index >= 0) {
                 if (addToFront) {
                     package = _packages[index];
@@ -95,10 +96,10 @@ namespace NuGet.VisualStudio {
             _settingsManager.ClearPackageMetadata();
         }
 
-        private IEnumerable<PersistencePackageMetadata> LoadPackageMetadataFromSettingsStore() {
+        private IEnumerable<IPersistencePackageMetadata> LoadPackageMetadataFromSettingsStore() {
             // don't bother to load the settings store if we have loaded before or we already have enough packages in-memory
             if (_packages.Count >= MaximumPackageCount || _hasLoadedSettingsStore) {
-                return Enumerable.Empty<PersistencePackageMetadata>();
+                return Enumerable.Empty<IPersistencePackageMetadata>();
             }
 
             _hasLoadedSettingsStore = true;
@@ -107,33 +108,51 @@ namespace NuGet.VisualStudio {
         }
 
         private void LoadPackagesFromSettingsStore() {
-
-            // find recent packages from the Aggregate repository
-            var aggregateRepository = _repositoryFactory.CreateRepository(_aggregatePackageSource);
-
-            // for packages not in the cache, find them from the Aggregate repository based on Id only
             var packagesMetadata = LoadPackageMetadataFromSettingsStore();
-            var newPackages = aggregateRepository.
-                                FindPackages(packagesMetadata.Where(m => !_packagesCache.ContainsKey(m)).Select(p => p.Id));
+
+            // for packages not in the cache, group them by sources, and get all packages with the matching Ids from each source
+            var newPackages = packagesMetadata.
+                                Where(m => !_packagesCache.ContainsKey(m)).
+                                GroupBy(p => p.Source).
+                                SelectMany(g => FindPackagesFromSource(g.Key, g).Select(p => new RecentPackage(p, g.Key)));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             var filterPackages = FilterPackages(packagesMetadata, newPackages);
 
-            var cachedPackages = packagesMetadata.Where(m => _packagesCache.ContainsKey(m)).Select(m => Tuple.Create(m, _packagesCache[m]));
-
-            var allPackages = filterPackages.Concat(cachedPackages);
-
-            foreach (var p in allPackages) {
+            foreach (var p in filterPackages) {
                 AddPackage(p.Item1, p.Item2, addToFront: false);
             }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        private IEnumerable<IPackage> FindPackagesFromSource(string source, IEnumerable<IPersistencePackageMetadata> metadata) {
+            var packageSource = new PackageSource(source);
+
+            // HACK: be careful with the aggreate source. in which case, the source is a pseudo-source, e.g. '(Aggregate Source)'
+            if (source.Equals(VsPackageSourceProvider.AggregateSource.Source, StringComparison.OrdinalIgnoreCase)) {
+                packageSource.IsAggregate = true;
+            }
+
+            IPackageRepository repository = null;
+            try {
+                repository = _repositoryFactory.CreateRepository(packageSource);
+            }
+            catch (Exception) {
+                // we don't care if the source value is invalid or corrupted, which 
+                // will cause CreateRepository to throw.
+            }
+
+            return repository == null ?
+                Enumerable.Empty<IPackage>() :
+                repository.FindPackages(metadata.Select(m => m.Id).Distinct());
         }
 
         /// <summary>
         /// Select packages from 'allPackages' which match the Ids and Versions from packagesMetadata.
         /// Returns the result as a list of Tuple of (metadata, package)
         /// </summary>
-        private static IEnumerable<Tuple<PersistencePackageMetadata, IPackage>> FilterPackages(
-            IEnumerable<PersistencePackageMetadata> packagesMetadata,
+        private static IEnumerable<Tuple<IPersistencePackageMetadata, IPackage>> FilterPackages(
+            IEnumerable<IPersistencePackageMetadata> packagesMetadata,
             IEnumerable<IPackage> allPackages) {
 
             var lookup = packagesMetadata.ToLookup(p => p.Id, StringComparer.OrdinalIgnoreCase);
@@ -150,13 +169,13 @@ namespace NuGet.VisualStudio {
             if (_packages.Count > 0) {
 
                 // IMPORTANT: call ToList() here. Otherwise, we may read and write to the settings store at the same time
-                var loadedPackagesMetadata = LoadPackageMetadataFromSettingsStore().ToList();
+                var loadedPacakgesMetadata = LoadPackageMetadataFromSettingsStore().ToList();
 
                 _settingsManager.SavePackageMetadata(
                     _packages.
                         Take(MaximumPackageCount).
-                        Select(p => new PersistencePackageMetadata(p)).
-                        Concat(loadedPackagesMetadata));
+                        Cast<IPersistencePackageMetadata>().
+                        Concat(loadedPacakgesMetadata));
             }
         }
 
@@ -169,8 +188,23 @@ namespace NuGet.VisualStudio {
                 SavePackagesToSettingsStore();
             }
             catch (Exception) {
-                Debug.Fail("Failed to save package metadatas.");
                 // we don't care if the saving fails.
+            }
+        }
+
+        /// <summary>
+        /// Comparer which compares two IPersistencePackageMetadata on Id and Version. Source is NOT considered.
+        /// </summary>
+        private class PackageMetadataEqualityComparer : IEqualityComparer<IPersistencePackageMetadata> {
+
+            public static readonly PackageMetadataEqualityComparer Instance = new PackageMetadataEqualityComparer();
+
+            public bool Equals(IPersistencePackageMetadata x, IPersistencePackageMetadata y) {
+                return x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase) && x.Version == y.Version;
+            }
+
+            public int GetHashCode(IPersistencePackageMetadata obj) {
+                return obj.Id.GetHashCode() * 3137 + obj.Version.GetHashCode();
             }
         }
     }

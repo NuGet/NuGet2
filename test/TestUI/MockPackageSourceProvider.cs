@@ -5,17 +5,10 @@ using NuGet.VisualStudio;
 namespace NuGet.TestUI {
     class MockPackageSourceProvider : IPackageSourceProvider {
         private IList<PackageSource> _packageSources = new List<PackageSource>();
-        private static readonly PackageSource _aggregateSource = new PackageSource("All") { IsAggregate = true };
 
         public PackageSource ActivePackageSource {
             get;
             set;
-        }
-
-        public PackageSource AggregateSource {
-            get {
-                return _aggregateSource;
-            }
         }
 
         public IEnumerable<PackageSource> GetPackageSources() {

@@ -76,10 +76,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 activeProject,
                 projectManager,
                 Resources,
-                packageRepositoryFactory,
                 packageManagerFactory,
                 recentPackagesRepository,
-                packageSourceProvider,
                 providerServices);
 
             var updatesProvider = new UpdatesProvider(

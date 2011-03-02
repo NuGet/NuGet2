@@ -177,28 +177,3 @@ function Assert-Throws {
         Write-Error (Get-AssertError "Expected exception was not thrown")
     }
 }
-
-function Assert-BindingRedirect {
-    param(
-        [parameter(Mandatory = $true)]
-        $Project,
-        [parameter(Mandatory = $true)]
-        $ConfigPath,
-        [parameter(Mandatory = $true)]
-        $Name,
-        [parameter(Mandatory = $true)]
-        $OldVersion,
-        [parameter(Mandatory = $true)]
-        $NewVersion
-    )
-    
-    $config = [xml](Get-Content (Get-ProjectItemPath $Project $ConfigPath))
-    Assert-NotNull $config.configuration.runtime
-    Assert-NotNull $config.configuration.runtime.assemblyBinding
-    Assert-NotNull $config.configuration.runtime.assemblyBinding.dependentAssembly
-    $bindings = @($config.configuration.runtime.assemblyBinding.dependentAssembly | ?{ $_.assemblyIdentity.name -eq $Name -and 
-                                                                                    $_.bindingRedirect.oldVersion -eq $OldVersion -and
-                                                                                    $_.bindingRedirect.newVersion -eq $NewVersion })
-
-    Assert-True ($bindings.Count -eq 1) "Unable to find binding redirect matching $Name, $OldVersion, $NewVersion"
-}

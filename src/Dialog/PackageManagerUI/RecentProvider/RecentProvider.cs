@@ -11,26 +11,17 @@ namespace NuGet.Dialog.Providers {
     internal class RecentProvider : OnlineProvider {
 
         private readonly IPackageRepository _recentPackagesRepository;
-        private readonly IVsPackageManagerFactory _packageManagerFactory;
-        private readonly IPackageRepositoryFactory _packageRepositoryFactory;
-        private readonly PackageSource _aggregateSource;
-        private IVsPackageManager _recentPackageManager;
 
         public RecentProvider(
             Project project,
             IProjectManager projectManager,
             ResourceDictionary resources,
-            IPackageRepositoryFactory packageRepositoryFactory,
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepository recentPackagesRepository,
-            IPackageSourceProvider packageSourceProvider,
             ProviderServices providerServices)
-            : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices) {
+            : base(project, projectManager, resources, null, null, packageManagerFactory, providerServices) {
 
-            _aggregateSource = packageSourceProvider.AggregateSource;
             _recentPackagesRepository = recentPackagesRepository;
-            _packageManagerFactory = packageManagerFactory;
-            _packageRepositoryFactory = packageRepositoryFactory;
         }
 
         public override string Name {
@@ -49,15 +40,6 @@ namespace NuGet.Dialog.Providers {
             get {
                 return true;
             }
-        }
-
-        protected internal override IVsPackageManager GetActivePackageManager() {
-            if (_recentPackageManager == null) {
-                var repository = _packageRepositoryFactory.CreateRepository(_aggregateSource);
-                _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository);
-            }
-
-            return _recentPackageManager;
         }
 
         protected override IList<IVsSortDescriptor> CreateSortDescriptors() {

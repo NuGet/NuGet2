@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using EnvDTE;
 using EnvDTE80;
-using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -16,7 +15,6 @@ namespace NuGet.VisualStudio {
         private readonly SolutionEvents _solutionEvents;
 
         private Dictionary<string, Project> _projectCache;
-
         private EventHandler _solutionOpened;
         private EventHandler _solutionClosing;
 
@@ -213,45 +211,6 @@ namespace NuGet.VisualStudio {
             return (from project in _projectCache.Values
                     where project.UniqueName.Equals(startupProjectName, StringComparison.OrdinalIgnoreCase)
                     select project.Name).FirstOrDefault();
-        }
-
-        // REVIEW: This might be inefficient, see what we can do with caching projects until references change
-        public IEnumerable<Project> GetDependentProjects(Project project) {
-            if (project == null) {
-                throw new ArgumentNullException("project");
-            }
-
-            var dependentProjects = new Dictionary<string, List<Project>>();
-
-            // Get all of the projects in the solution and build the reverse graph. i.e.
-            // if A has a project reference to B (A -> B) the this will return B -> A
-            // We need to run this on the ui thread so that it doesn't freeze for websites. Since there might be a 
-            // large number of references.           
-            ThreadHelper.Generic.Invoke(() => {
-                foreach (var proj in GetProjects()) {
-                    foreach (var referencedProject in proj.GetReferencedProjects()) {
-                        AddDependentProject(dependentProjects, referencedProject, proj);
-                    }
-                }
-            });
-
-            List<Project> dependents;
-            if (dependentProjects.TryGetValue(project.UniqueName, out dependents)) {
-                return dependents;
-            }
-
-            return Enumerable.Empty<Project>();
-        }
-
-        private static void AddDependentProject(IDictionary<string, List<Project>> dependentProjects,
-                                         Project project,
-                                         Project dependent) {
-            List<Project> dependents;
-            if (!dependentProjects.TryGetValue(project.UniqueName, out dependents)) {
-                dependents = new List<Project>();
-                dependentProjects[project.UniqueName] = dependents;
-            }
-            dependents.Add(dependent);
         }
     }
 }

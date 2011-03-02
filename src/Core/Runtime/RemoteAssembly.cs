@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 
 namespace NuGet.Runtime {
@@ -8,7 +7,6 @@ namespace NuGet.Runtime {
     /// IAssembly implementation that is used for marshalling information across app domains.
     /// </summary>
     internal class RemoteAssembly : MarshalByRefObject, IAssembly {
-        private static readonly Dictionary<Tuple<string, string>, Assembly> _assemblyCache = new Dictionary<Tuple<string, string>, Assembly>();
         private readonly List<IAssembly> _referencedAssemblies = new List<IAssembly>();
 
         public string Name {
@@ -38,17 +36,8 @@ namespace NuGet.Runtime {
         }
 
         public void Load(string path) {
-            // The cache key is the file name plus the full name of the assembly.
-            // This is so we don't load the same assembly more than once from different paths
-            string fileName = Path.GetFileName(path).ToUpperInvariant();
-            var cacheKey = Tuple.Create(fileName, AssemblyName.GetAssemblyName(path).FullName);
-
-            Assembly assembly;
-            if (!_assemblyCache.TryGetValue(cacheKey, out assembly)) {
-                // Load the assembly in a reflection only context
-                assembly = Assembly.ReflectionOnlyLoadFrom(path);
-                _assemblyCache[cacheKey] = assembly;
-            }
+            // Load the assembly in a reflection only context
+            Assembly assembly = Assembly.ReflectionOnlyLoadFrom(path);
 
             // Get the assembly name and set the properties on this object
             CopyAssemblyProperties(assembly.GetName(), this);

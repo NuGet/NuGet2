@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace NuGet.Runtime {
     public static class BindingRedirectResolver {
@@ -31,19 +30,6 @@ namespace NuGet.Runtime {
             return GetBindingRedirects(GetAssemblies(path, domain));
         }
 
-
-        public static IEnumerable<AssemblyBinding> GetBindingRedirects(IEnumerable<string> assemblyPaths, AppDomain domain) {
-            if (assemblyPaths == null) {
-                throw new ArgumentNullException("assemblyPaths");
-            }
-
-            if (domain == null) {
-                throw new ArgumentNullException("domain");
-            }
-
-            return GetBindingRedirects(GetAssemblies(assemblyPaths, domain));
-        }
-
         /// <summary>
         /// Returns a list of assemblies that need binding redirects.
         /// </summary>
@@ -53,16 +39,13 @@ namespace NuGet.Runtime {
                 throw new ArgumentNullException("assemblies");
             }
 
-            // Evaluate the list eagerly
-            var assemblyList = assemblies.ToList();
-
-            var assemblyNameLookup = assemblyList.ToDictionary(GetUniqueKey);
+            var assemblyNameLookup = assemblies.ToDictionary(GetUniqueKey);
 
             // Output set of assemblies we need redirects for 
             var redirectAssemblies = new HashSet<IAssembly>();
 
             // For each available assembly
-            foreach (IAssembly assembly in assemblyList) {
+            foreach (IAssembly assembly in assemblies) {
                 foreach (IAssembly referenceAssembly in assembly.ReferencedAssemblies) {
                     Tuple<string, string> key = GetUniqueKey(referenceAssembly);
                     IAssembly targetAssembly;
@@ -87,21 +70,17 @@ namespace NuGet.Runtime {
         private static IEnumerable<IAssembly> GetAssemblies(string path, AppDomain domain) {
             // If the directory doesn't exist then bail out
             if (!Directory.Exists(path)) {
-                return Enumerable.Empty<IAssembly>();
+                yield break;
             }
 
-            return GetAssemblies(Directory.GetFiles(path, "*.dll"), domain).Concat(
-                   GetAssemblies(Directory.GetFiles(path, "*.exe"), domain));
-        }
+            foreach (var assemblyFile in Directory.GetFiles(path, "*.dll")) {
+                yield return RemoteAssembly.LoadAssembly(assemblyFile, domain);
+            }
 
-        private static IEnumerable<IAssembly> GetAssemblies(IEnumerable<string> paths, AppDomain domain) {
-            foreach (var path in paths) {
-                var assemblyName = AssemblyName.GetAssemblyName(path);
-                // Only look at assemblies that have a strong name
-                if (assemblyName.GetPublicKey() != null) {
-                    yield return RemoteAssembly.LoadAssembly(path, domain);
-                }
+            foreach (var assemblyFile in Directory.GetFiles(path, "*.exe")) {
+                yield return RemoteAssembly.LoadAssembly(assemblyFile, domain);
             }
         }
+
     }
 }

@@ -17,7 +17,6 @@ namespace NuGet.Cmdlets {
         // If this command is executed by getting the project from the pipeline, then we need we keep track of all of the
         // project managers since the same cmdlet instance can be used across invocations.
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
-        private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
 
         protected ProcessPackageBaseCmdlet(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory)
             : base(solutionManager, packageManagerFactory) {
@@ -38,13 +37,10 @@ namespace NuGet.Cmdlets {
 
                 IProjectManager projectManager;
                 if (!_projectManagers.TryGetValue(name, out projectManager)) {
-                    Tuple<IProjectManager, Project> tuple = GetProjectManager();
-                    if (tuple != null) {
-                        projectManager = tuple.Item1;
-                        if (projectManager != null) {
-                            _projectManagers.Add(name, projectManager);
-                            _projectManagerToProject[projectManager] = tuple.Item2;
-                        }
+                    projectManager = GetProjectManager();
+
+                    if (projectManager != null) {
+                        _projectManagers.Add(name, projectManager);
                     }
                 }
 
@@ -77,7 +73,7 @@ namespace NuGet.Cmdlets {
             WriteLine();
         }
 
-        private Tuple<IProjectManager, Project> GetProjectManager() {
+        private IProjectManager GetProjectManager() {
             if (PackageManager == null) {
                 return null;
             }
@@ -109,7 +105,7 @@ namespace NuGet.Cmdlets {
             projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
             projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
 
-            return Tuple.Create(projectManager, project);
+            return projectManager;
         }
 
         private void OnPackageInstalling(object sender, PackageOperationEventArgs e) {
@@ -137,18 +133,14 @@ namespace NuGet.Cmdlets {
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
-
-            EnvDTE.Project project;
-            _projectManagerToProject.TryGetValue(projectManager, out project);
+            EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
 
             ExecuteScript(e.InstallPath, "install.ps1", e.Package, project);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
-
-            EnvDTE.Project project;
-            _projectManagerToProject.TryGetValue(projectManager, out project);
+            EnvDTE.Project project = SolutionManager.GetProject(projectManager.Project.ProjectName);
 
             ExecuteScript(e.InstallPath, "uninstall.ps1", e.Package, project);
         }
