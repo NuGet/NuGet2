@@ -174,12 +174,7 @@ namespace NuGet.Runtime {
             return SafeEquals(Name, other.Name) &&
                    SafeEquals(PublicKeyToken, other.PublicKeyToken) &&
                    SafeEquals(Culture, other.Culture) &&
-                   SafeEquals(ProcessorArchitecture, other.ProcessorArchitecture) &&
-                   SafeEquals(OldVersion, other.OldVersion) &&
-                   SafeEquals(NewVersion, other.NewVersion) &&
-                   SafeEquals(CodeBaseVersion, other.CodeBaseVersion) &&
-                   SafeEquals(CodeBaseHref, other.CodeBaseHref) &&
-                   SafeEquals(PublisherPolicy, other.PublisherPolicy);
+                   SafeEquals(ProcessorArchitecture, other.ProcessorArchitecture);
         }
 
         private static bool SafeEquals(object a, object b) {
@@ -210,17 +205,6 @@ namespace NuGet.Runtime {
             combiner.AddObject(PublicKeyToken);
             combiner.AddObject(Culture);
             combiner.AddObject(ProcessorArchitecture);
-
-            // bindingRedirect
-            combiner.AddObject(OldVersion);
-            combiner.AddObject(NewVersion);
-
-            // codeBase
-            combiner.AddObject(CodeBaseHref);
-            combiner.AddObject(CodeBaseVersion);
-
-            // publisherPolicy
-            combiner.AddObject(PublisherPolicy);
 
             return combiner.CombinedHash;
         }

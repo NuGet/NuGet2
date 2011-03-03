@@ -49,19 +49,24 @@ namespace NuGet.Runtime {
             }
 
             // Get all of the current bindings in config
-            IDictionary<AssemblyBinding, XElement> currentBindings = GetAssemblyBindings(document);
+            ILookup<AssemblyBinding, XElement> currentBindings = GetAssemblyBindings(document);
 
             XElement assemblyBindingElement = null;
             foreach (var bindingRedirect in bindingRedirects) {
                 // Look to see if we already have this in the list of bindings already in config.
-                if (!currentBindings.ContainsKey(bindingRedirect)) {
-                    if (assemblyBindingElement == null) {
-                        // Get an assembly binding element to use
-                        assemblyBindingElement = GetAssemblyBindingElement(runtime);
+                if (currentBindings.Contains(bindingRedirect)) {                    
+                    // Remove the assembly binding elements
+                    foreach (var bindingElement in currentBindings[bindingRedirect]) {
+                        RemoveElement(bindingElement);
                     }
-                    // Add the binding to that element
-                    assemblyBindingElement.Add(bindingRedirect.ToXElement());
                 }
+
+                if (assemblyBindingElement == null) {
+                    // Get an assembly binding element to use
+                    assemblyBindingElement = GetAssemblyBindingElement(runtime);
+                }
+                // Add the binding to that element
+                assemblyBindingElement.Add(bindingRedirect.ToXElement());
             }
 
             // Save the file
@@ -82,29 +87,34 @@ namespace NuGet.Runtime {
             XDocument document = GetConfiguration();
 
             // Get all of the current bindings in config
-            IDictionary<AssemblyBinding, XElement> currentBindings = GetAssemblyBindings(document);
+            ILookup<AssemblyBinding, XElement> currentBindings = GetAssemblyBindings(document);
 
             if (!currentBindings.Any()) {
                 return;
             }
 
             foreach (var bindingRedirect in bindingRedirects) {
-                XElement element;
-                if (currentBindings.TryGetValue(bindingRedirect, out element)) {
-                    // Hold onto the parent element before removing the element
-                    XElement parentElement = element.Parent;
-                    
-                    // Remove the element from the document if we find a match
-                    element.Remove();
-
-                    if (!parentElement.HasElements) {
-                        parentElement.Remove();
+                if (currentBindings.Contains(bindingRedirect)) {
+                    foreach (var bindingElement in currentBindings[bindingRedirect]) {
+                        RemoveElement(bindingElement);
                     }
                 }
             }
 
             // Save the file
             Save(document);
+        }
+
+        private static void RemoveElement(XElement element) {
+            // Hold onto the parent element before removing the element
+            XElement parentElement = element.Parent;
+
+            // Remove the element from the document if we find a match
+            element.Remove();
+
+            if (!parentElement.HasElements) {
+                parentElement.Remove();
+            }
         }
 
         private static XElement GetAssemblyBindingElement(XElement runtime) {
@@ -124,22 +134,23 @@ namespace NuGet.Runtime {
             _fileSystem.AddFile(_configurationPath, document.Save);
         }
 
-        private static IDictionary<AssemblyBinding, XElement> GetAssemblyBindings(XDocument document) {
+        private static ILookup<AssemblyBinding, XElement> GetAssemblyBindings(XDocument document) {
             XElement runtime = document.Root.Element("runtime");
 
-            if (runtime == null) {
-                return new Dictionary<AssemblyBinding, XElement>();
+            IEnumerable<XElement> assemblyBindingElements = Enumerable.Empty<XElement>();
+            if (runtime != null) {
+                assemblyBindingElements = GetAssemblyBindingElements(runtime);
             }
 
             // We're going to need to know which element is associated with what binding for removal
-            var assemblyElementPairs = from dependentAssemblyElement in GetAssemblyBindingElements(runtime)
+            var assemblyElementPairs = from dependentAssemblyElement in assemblyBindingElements
                                        select new {
                                            Binding = AssemblyBinding.Parse(dependentAssemblyElement),
                                            Element = dependentAssemblyElement
                                        };
 
             // Return a mapping from binding to element
-            return assemblyElementPairs.ToDictionary(p => p.Binding, p => p.Element);
+            return assemblyElementPairs.ToLookup(p => p.Binding, p => p.Element);
         }
 
         private static IEnumerable<XElement> GetAssemblyBindingElements(XElement runtime) {
