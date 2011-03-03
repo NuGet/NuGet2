@@ -53,6 +53,32 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
+        public void TestGetPackagesReturnPackagesSortedByDateByDefault() {
+            // Scenario: The remote repository contains package A, B and C
+            // Recent settings store contains metadata for A and B
+            // Calling GetPackages() should return package A and B, sorted by date (B goes before A)
+
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "2.0");
+
+            var packagesList = new[] { packageA, packageB, packageC };
+            var repository = CreateRecentPackageRepository(packagesList: packagesList);
+
+            // Act
+            var packages = repository.GetPackages().ToList();
+
+            // Assert
+            Assert.AreEqual(2, packages.Count);
+            Assert.AreEqual("B", packages[0].Id);
+            Assert.AreEqual(new Version("2.0"), packages[0].Version);
+
+            Assert.AreEqual("A", packages[1].Id);
+            Assert.AreEqual(new Version("1.0"), packages[1].Version);
+        }
+
+        [TestMethod]
         public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackage() {
             // Scenario: The remote repository contains package A and C
             // Recent settings store contains metadata for A and B
@@ -91,11 +117,13 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(0, packages.Count);
         }
 
-        private RecentPackagesRepository CreateRecentPackageRepository(bool empty = false) {
-            var packageA = PackageUtility.CreatePackage("A", "1.0");
-            var packageB = PackageUtility.CreatePackage("C", "2.0");
+        private RecentPackagesRepository CreateRecentPackageRepository(bool empty = false, IPackage[] packagesList = null) {
+            if (packagesList == null) {
+                var packageA = PackageUtility.CreatePackage("A", "1.0");
+                var packageB = PackageUtility.CreatePackage("C", "2.0");
 
-            var packagesList = new IPackage[] { packageA, packageB };
+                packagesList = new[] { packageA, packageB };
+            }
 
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(p => p.GetPackages()).Returns(packagesList.AsQueryable());
@@ -106,8 +134,8 @@ namespace NuGet.VisualStudio.Test {
             var mockSettingsManager = new MockSettingsManager();
 
             if (!empty) {
-                var A = new PersistencePackageMetadata("A", "1.0");
-                var B = new PersistencePackageMetadata("B", "2.0");
+                var A = new PersistencePackageMetadata("A", "1.0", new DateTime(2010, 8, 12));
+                var B = new PersistencePackageMetadata("B", "2.0", new DateTime(2011, 3, 2));
 
                 mockSettingsManager.SavePackageMetadata(new PersistencePackageMetadata[] { A, B });
             }

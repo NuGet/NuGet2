@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
-using System.Linq;
 
 namespace NuGet.VisualStudio {
 
@@ -38,14 +37,7 @@ namespace NuGet.VisualStudio {
                     continue;
                 }
 
-                DateTime lastUsedDate = DateTime.MinValue;
-                if (!String.IsNullOrEmpty(values[2])) {
-                    long binaryData;
-                    if (Int64.TryParse(values[2], out binaryData)) {
-                        lastUsedDate = DateTime.FromBinary(binaryData);
-                    }
-                }
-
+                DateTime lastUsedDate = ConvertFromStringToDateTime(values[2]);
                 yield return new PersistencePackageMetadata(values[0], values[1], lastUsedDate);
             }
         }
@@ -74,11 +66,26 @@ namespace NuGet.VisualStudio {
                 string[] values = new string[] {
                     metadata.Id, 
                     metadata.Version.ToString(), 
-                    metadata.LastUsedDate.ToBinary().ToString(CultureInfo.InvariantCulture)
+                    ConvertFromDateTimeToString(metadata.LastUsedDate)
                 };
                 WriteStrings(settingsRoot, SettingsProperties, values);
                 count++;
             }
+        }
+
+        private static string ConvertFromDateTimeToString(DateTime dateTime) {
+            return dateTime.ToBinary().ToString(CultureInfo.InvariantCulture);
+        }
+
+        private static DateTime ConvertFromStringToDateTime(string value) {
+            if (!String.IsNullOrEmpty(value)) {
+                long binaryData;
+                if (Int64.TryParse(value, out binaryData)) {
+                    return DateTime.FromBinary(binaryData);
+                }
+            }
+
+            return DateTime.MinValue;
         }
 
         public void ClearPackageMetadata() {

@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio {
             this(id, new Version(version), lastUsedDate){
         }
 
-        public PersistencePackageMetadata(string id, string version) :
+        internal PersistencePackageMetadata(string id, string version) :
             this(id, new Version(version), DateTime.MinValue) {
         }
 
