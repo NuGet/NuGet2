@@ -20,6 +20,7 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        
     </Window.Resources>
     
     <Grid Margin="10">        
@@ -52,7 +53,15 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Label Target="{Binding ElementName=PublishKey}" Content="Publish _key:" />
-            <TextBox x:Name="PublishKey" Grid.Column="1" Text="{Binding PublishKey}" VerticalContentAlignment="Center" />
+            <TextBox x:Name="PublishKey" Grid.Column="1" VerticalContentAlignment="Center">
+                <TextBox.Text>
+                    <Binding Path="PublishKey" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <self:PublishApiKeyValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
         </Grid>
         
         <!-- Create only flag -->
@@ -70,7 +79,7 @@
         <TextBlock x:Name="StatusText" Style="{StaticResource StatusTextStyle}" Text="{Binding Status}" Margin="0,5" Visibility="{Binding ShowProgress, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}" Grid.Row="5" TextWrapping="Wrap" />
 
         <StackPanel Margin="0,5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="6">
-            <Button IsDefault="True" IsEnabled="{Binding Text, ElementName=PublishKey, Converter={StaticResource nullToBoolConverter}}" Content="_Publish" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Command="{Binding PublishCommand}" />
+            <Button IsDefault="True" IsEnabled="{Binding Text, ElementName=PublishKey, Converter={StaticResource nullToBoolConverter}}" Content="_Publish" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OnPublishButtonClick" />
             <Button x:Name="CancelButton" IsCancel="True" Content="_Close" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
         </StackPanel>
     </Grid>

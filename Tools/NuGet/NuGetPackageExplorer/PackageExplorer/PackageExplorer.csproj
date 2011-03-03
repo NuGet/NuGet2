@@ -143,6 +143,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="PublishApiKeyValidationRule.cs" />
     <Compile Include="PublishPackageWindow.xaml.cs">
       <DependentUpon>PublishPackageWindow.xaml</DependentUpon>
     </Compile>

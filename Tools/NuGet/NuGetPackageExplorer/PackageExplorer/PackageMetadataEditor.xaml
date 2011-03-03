@@ -32,22 +32,6 @@
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
-        <Style TargetType="{x:Type TextBox}">
-            <Setter Property="Margin" Value="0, 4, 3, 0" />
-
-            <Style.Triggers>
-                <Trigger Property="Validation.HasError" Value="True">
-                    <Setter Property="ToolTip">
-                        <Setter.Value>
-                            <Binding 
-                                Path="(Validation.Errors).CurrentItem.ErrorContent"
-                                RelativeSource="{x:Static RelativeSource.Self}" />
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
         <Style TargetType="{x:Type CheckBox}" x:Key="CheckBoxStyle">
             <Setter Property="Margin" Value="5, 4, 3, 2" />
         </Style>

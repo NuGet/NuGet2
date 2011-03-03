@@ -16,7 +16,7 @@ namespace PackageExplorer {
                 char c = key[i];
                 bool isValid = Char.IsDigit(c) || c == '-' || (c >= 'A' && c <= 'F');
                 if (!isValid) {
-                    return new ValidationResult(false, c + " is an invalid character.");
+                    return new ValidationResult(false, "'" + c + "' is an invalid character.");
                 }
             }
 

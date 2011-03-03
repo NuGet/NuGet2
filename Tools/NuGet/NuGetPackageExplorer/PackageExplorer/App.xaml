@@ -28,5 +28,23 @@
 
         <Style TargetType="{x:Type Image}" BasedOn="{StaticResource ImageStyleBase}">
         </Style>
+        
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Margin" Value="0, 4, 3, 0" />
+
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip">
+                        <Setter.Value>
+                            <Binding 
+                                Path="(Validation.Errors).CurrentItem.ErrorContent"
+                                RelativeSource="{x:Static RelativeSource.Self}" />
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
     </Application.Resources>
 </Application>
