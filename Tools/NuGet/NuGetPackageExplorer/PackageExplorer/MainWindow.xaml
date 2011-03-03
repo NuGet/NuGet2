@@ -282,12 +282,11 @@
             </self:GrayscaleMenuItem>
             
             <self:GrayscaleMenuItem Header="_Help">
-                <self:GrayscaleMenuItem Header="How to Create Package" Click="ViewFileFormatItem_Click">
-                    <self:GrayscaleMenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/Web.png" />
-                    </self:GrayscaleMenuItem.Icon>
-                </self:GrayscaleMenuItem>
-                <self:GrayscaleMenuItem Header="_About..." Click="AboutMenuItem_Click" />
+                <MenuItem Header="How to Create Package" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
+                <MenuItem Header="Learn to Set Version for Dependencies" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
+                <MenuItem Header="Learn to Set Framework Folder Name" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
+                <Separator />
+                <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
             </self:GrayscaleMenuItem>
         </Menu>
 

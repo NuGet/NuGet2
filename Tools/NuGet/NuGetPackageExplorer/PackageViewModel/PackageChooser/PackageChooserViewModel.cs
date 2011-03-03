@@ -164,6 +164,7 @@ namespace PackageExplorerViewModel {
                     else if (!result.IsCanceled) {
                         ShowPackages(result.Result.Item1, result.Result.Item2, page);
                         StatusContent = String.Empty;
+                        RaisePropertyChangeEvent("SortDirection");
                     }
                     
                 },
@@ -230,12 +231,10 @@ namespace PackageExplorerViewModel {
                                         ? ListSortDirection.Descending
                                         : ListSortDirection.Ascending;
                 }
-                RaisePropertyChangeEvent("SortDirection");
             }
             else {
                 CurrentSortColumn = column;
                 SortDirection = direction ?? ListSortDirection.Ascending;
-                RaisePropertyChangeEvent("CurrentSortColumn");
             }
             
             LoadPackages();

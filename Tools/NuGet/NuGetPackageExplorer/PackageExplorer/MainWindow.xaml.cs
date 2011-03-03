@@ -259,8 +259,9 @@ namespace PackageExplorer {
         }
 
         private void ViewFileFormatItem_Click(object sender, RoutedEventArgs e) {
-            Uri uri = new Uri("http://nuget.codeplex.com/documentation?title=Creating%20a%20Package");
-            UriHelper.OpenExternalLink(uri);
+            MenuItem item = (MenuItem)sender;
+            string url = (string)item.Tag;
+            UriHelper.OpenExternalLink(new Uri(url));
         }
 
         private void OnTreeViewItemDoubleClick(object sender, RoutedEventArgs args) {

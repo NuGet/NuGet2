@@ -36,7 +36,7 @@
         <TextBlock Grid.ColumnSpan="2" Text="Publish this package to NuGet gallery." TextWrapping="Wrap" />
 
         <!-- Id & Version -->
-        <TextBlock Grid.Row="1" Grid.Column="1" Margin="5,5,0,5">
+        <TextBlock Grid.Row="1" Grid.Column="1" Margin="5,10,0,5">
             <TextBlock.Inlines>
                 <Run Text="Id: " />
                 <Run FontWeight="Bold" Text="{Binding Id, Mode=OneTime}" />

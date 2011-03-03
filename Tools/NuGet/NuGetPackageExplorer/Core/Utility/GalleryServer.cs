@@ -74,10 +74,14 @@ namespace NuGet {
 
                 WebException webException = e.Error as WebException;
                 if (webException != null) {
-                    // real error message is contained inside the response body
-                    using (Stream stream = webException.Response.GetResponseStream()) {
-                        string errorMessage = stream.ReadToEnd();
-                        error = new WebException(errorMessage, webException, webException.Status, webException.Response);
+                    var response = (HttpWebResponse) webException.Response;
+                    if (response.StatusCode == HttpStatusCode.InternalServerError) {
+                        // real error message is contained inside the response body
+                        using (Stream stream = response.GetResponseStream()) {
+                            string errorMessage = stream.ReadToEnd();
+                            error = new WebException(errorMessage, webException, webException.Status,
+                                                     webException.Response);
+                        }
                     }
                 }
                 
