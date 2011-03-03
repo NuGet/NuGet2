@@ -8,6 +8,7 @@ namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IPackageSourceProvider {
+        private const string AggregateSourceValue = "(Aggregate source)";
         internal const string DefaultPackageSource = "https://go.microsoft.com/fwlink/?LinkID=206669";
         internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
         private static readonly PackageSource AggregateSourceInstance = new PackageSource("(Aggregate source)", Resources.VsResources.AggregateSourceName) { IsAggregate = true };
@@ -120,15 +121,37 @@ namespace NuGet.VisualStudio {
                 _packageSources = new List<PackageSource>();
                 _packageSources.Add(AggregateSourceInstance);
             }
-            else if (!_packageSources.Contains(AggregateSourceInstance)) {
-                _packageSources.Insert(0, AggregateSourceInstance);
+            else if (!_packageSources.Any(ps => ps.IsAggregate)) {
+                // look for a package source with the Source value as "(Aggregate source)"
+                var source = _packageSources.FirstOrDefault(ps => ps.Source.Equals(AggregateSourceValue));
+                if (source != null) {
+                    source.IsAggregate = true;
+                }
+                else {
+                    // only add the aggregate source if there is not already one
+                    _packageSources.Insert(0, AggregateSource);
+                }
             }
             else {
-                // When deserialize old data from previous version of NuGet,
-                // the IsAggregate property is missing and hence set to false. 
-                // Set it to 'true'.
-                PackageSource aggregateSourceInCollection = _packageSources.Single(p => p.Equals(AggregateSourceInstance));
-                aggregateSourceInCollection.IsAggregate = true;
+                // Try to detect if there are more than one aggreage sources.
+                // This should never happen, but just guard against it to avoid crashing VS.
+                bool seenAggregate = false;
+                for (int i = 0; i < _packageSources.Count; i++) {
+                    var source = _packageSources[i];
+                    if (source.IsAggregate) {
+                        if (seenAggregate) {
+                            source.IsAggregate = false;
+                        }
+                        else {
+                            seenAggregate = true;
+
+                            // in 1.0, we didn't localize the All word. Fix it here opportunistically.
+                            if (source.Name.Equals("All", StringComparison.CurrentCultureIgnoreCase)) {
+                                _packageSources[i] = new PackageSource(source.Source, AggregateSource.Name) { IsAggregate = true };
+                            }
+                        }
+                    }
+                }
             }
         }
 
