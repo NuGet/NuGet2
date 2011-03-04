@@ -77,6 +77,8 @@ namespace NuGet.Tools {
                         NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
+
+                    (exception.InnerException ?? exception).WriteToActivityLog();
                 }
             }
             else {
@@ -113,7 +115,12 @@ namespace NuGet.Tools {
         }
 
         private void ShowSettingsWindow(object sender, EventArgs args) {
-            ShowOptionPage(typeof(ToolsOptionsPage));
+            try {
+                ShowOptionPage(typeof(ToolsOptionsPage));
+            }
+            catch (Exception exception) {
+                exception.WriteToActivityLog();
+            }
         }
 
         /// <summary>

@@ -70,9 +70,10 @@ namespace NuGet.Dialog.Providers {
                     var repository = new LazyRepository(_packageRepositoryFactory, source);
                     node = CreateTreeNodeForPackageSource(source, repository);
                 }
-                catch (Exception) {
+                catch (Exception exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
                     node = new EmptyTreeNode(this, source.Name, RootNode);
+                    exception.WriteToActivityLog();
                 }
 
                 RootNode.Nodes.Add(node);

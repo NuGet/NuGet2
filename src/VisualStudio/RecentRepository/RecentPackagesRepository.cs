@@ -174,9 +174,9 @@ namespace NuGet.VisualStudio {
                 // save recent packages to settings store before IDE shuts down
                 SavePackagesToSettingsStore();
             }
-            catch (Exception) {
-                Debug.Fail("Failed to save package metadatas.");
-                // we don't care if the saving fails.
+            catch (Exception exception) {
+                // write to activity log for troubleshoting.
+                exception.WriteToActivityLog();
             }
         }
     }

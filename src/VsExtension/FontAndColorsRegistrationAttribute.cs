@@ -24,6 +24,7 @@ namespace NuGet.Tools {
             CategoryKey = "FontAndColors\\" + categoryKeyName;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public override void Register(RegistrationContext context) {
             using (var key = context.CreateKey(CategoryKey)) {
                 key.SetValue("Category", CategoryGuid);
@@ -31,7 +32,7 @@ namespace NuGet.Tools {
                 key.SetValue("NameID", CategoryNameResourceID);
                 key.SetValue("ToolWindowPackage", ToolWindowPackageGuid);
 
-            // IMPORTANT: without calling Close() the values won't be persisted to registry.
+                // IMPORTANT: without calling Close() the values won't be persisted to registry.
                 key.Close();
             }
         }

@@ -14,10 +14,14 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ActivityLogEntryType.cs" />
+    <Compile Include="Extensions\ExceptionExtensions.cs" />
+    <Compile Include="IVsActivityLogger.cs" />
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
     <Compile Include="RecentRepository\RecentPackage.cs" />
+    <Compile Include="VsActivityLogger.cs" />
     <Compile Include="VsProgressReporter.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>

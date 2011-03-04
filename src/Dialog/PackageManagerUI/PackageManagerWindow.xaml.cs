@@ -177,17 +177,18 @@ namespace NuGet.Dialog.PackageManagerUI {
                 }
                 catch (Exception exception) {
                     MessageHelper.ShowErrorMessage(exception);
+                    
+                    exception.WriteToActivityLog();
                 }
             }
         }
 
         private void ExecutedClose(object sender, ExecutedRoutedEventArgs e) {
-            this.Close();
+            Close();
         }
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
-            this.Close();
-
+            Close();
             ShowOptionsPage();
         }
 
