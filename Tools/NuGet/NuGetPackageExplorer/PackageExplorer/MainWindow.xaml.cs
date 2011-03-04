@@ -291,7 +291,7 @@ namespace PackageExplorer {
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
             var viewModel = (PackageViewModel)DataContext;
 
-            var publishPackageViewModel = new PublishPackageViewModel(viewModel.Package, viewModel.Package.GetStream()) {
+            var publishPackageViewModel = new PublishPackageViewModel(viewModel.PackageMetadata, viewModel.GetCurrentPackageStream) {
                 PublishKey = Settings.Default.PublishPrivateKey
             };
 

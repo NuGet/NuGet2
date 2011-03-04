@@ -6,6 +6,11 @@ namespace PackageExplorer {
     public class NullToVisibilityConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             if (targetType == typeof(Visibility)) {
+                if (value is string)
+                {
+                    return String.IsNullOrEmpty((string)value) ? Visibility.Collapsed : Visibility.Visible;
+                }
+
                 return value == null ? Visibility.Collapsed : Visibility.Visible;
             }
             return value;

@@ -21,6 +21,8 @@
             </Style.Triggers>
         </Style>
         
+        <self:AndLogicConverter x:Key="andConverter" />
+        
     </Window.Resources>
     
     <Grid Margin="10">        
@@ -53,7 +55,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Label Target="{Binding ElementName=PublishKey}" Content="Publish _key:" />
-            <TextBox x:Name="PublishKey" Grid.Column="1" VerticalContentAlignment="Center">
+            <TextBox x:Name="PublishKey" Grid.Column="1" VerticalContentAlignment="Center" IsEnabled="{Binding CanPublish}">
                 <TextBox.Text>
                     <Binding Path="PublishKey" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
@@ -70,17 +72,25 @@
             Margin="5,5,0,5" 
             IsChecked="{Binding PushOnly}"
             Grid.Row="3" 
+            IsEnabled="{Binding CanPublish}"
             Content="_Only push package to gallery but do not publish it." />
 
         <!-- Progress bar -->
         <ProgressBar x:Name="ProgressBar" Margin="0,5" Visibility="{Binding ShowProgress, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}" Grid.Row="4" Height="30" Maximum="100" Value="{Binding PercentComplete, Mode=OneWay}" />
         
         <!-- Status text -->
-        <TextBlock x:Name="StatusText" Style="{StaticResource StatusTextStyle}" Text="{Binding Status}" Margin="0,5" Visibility="{Binding ShowProgress, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}" Grid.Row="5" TextWrapping="Wrap" />
+        <TextBlock x:Name="StatusText" Style="{StaticResource StatusTextStyle}" Text="{Binding Status}" Margin="0,5" Visibility="{Binding Status, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}" Grid.Row="5" TextWrapping="Wrap" />
 
         <StackPanel Margin="0,5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="6">
-            <Button IsDefault="True" IsEnabled="{Binding Text, ElementName=PublishKey, Converter={StaticResource nullToBoolConverter}}" Content="_Publish" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OnPublishButtonClick" />
-            <Button x:Name="CancelButton" IsCancel="True" Content="_Close" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
+            <Button x:Name="PublishButton" IsDefault="True" Padding="14,0" Content="_Publish" Margin="5" Click="OnPublishButtonClick">
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource andConverter}">
+                        <Binding Path="Text" ElementName="PublishKey" Converter="{StaticResource nullToBoolConverter}" />
+                        <Binding Path="CanPublish" />
+                    </MultiBinding>
+                </Button.IsEnabled>
+            </Button>
+            <Button x:Name="CancelButton" IsCancel="True" Content="_Close" Margin="5,5,0,5" Click="CancelButton_Click" Width="{Binding ActualWidth, ElementName=PublishButton}" />
         </StackPanel>
     </Grid>
 </self:DialogWithNoMinimizeAndMaximize>

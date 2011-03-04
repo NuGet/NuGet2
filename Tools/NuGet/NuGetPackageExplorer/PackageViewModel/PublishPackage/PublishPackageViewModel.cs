@@ -7,22 +7,19 @@ namespace PackageExplorerViewModel {
 
     public class PublishPackageViewModel : ViewModelBase, IObserver<int> {
         private IPackageMetadata _package;
-        private Stream _packageStream;
+        private Lazy<Stream> _packageStream;
 
-        public PublishPackageViewModel(IPackageMetadata package, Stream packageStream) {
+        public PublishPackageViewModel(IPackageMetadata package, Func<Stream> getPackageStream) {
             if (package == null) {
                 throw new ArgumentNullException("package");
             }
 
-            if (packageStream == null) {
-                throw new ArgumentNullException("packageStream");
+            if (getPackageStream == null) {
+                throw new ArgumentNullException("getPackageStream");
             }
             _package = package;
-            _packageStream = packageStream;
-            PublishCommand = new PublishCommand(this);
+            _packageStream = new Lazy<Stream>(getPackageStream);
         }
-
-        public ICommand PublishCommand { get; private set; }
 
         private string _publishKey; 
 
@@ -94,9 +91,23 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private bool _canPublish = true;
+
+        public bool CanPublish
+        {
+            get { return _canPublish; }
+            set {
+                if (_canPublish != value)
+                {
+                    _canPublish = value;
+                    RaisePropertyChangeEvent("CanPublish");
+                }
+            }
+        }
+
         private GalleryServer _uploadHelper;
 
-        public GalleryServer UploadHelper {
+        public GalleryServer GalleryServer {
             get {
                 if (_uploadHelper == null) {
                     _uploadHelper = new GalleryServer();
@@ -117,24 +128,31 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        internal void PushPackage() {
+        public void PushPackage() {
             PercentComplete = 0;
             ShowProgress = true;
             Status = "Uploading package...";
             HasError = false;
+            CanPublish = false;
 
-            UploadHelper.CreatePackage(PublishKey, _packageStream, this, PushOnly == true? (IPackageMetadata)null : _package);
+            Stream fileStream = _packageStream.Value;
+            fileStream.Seek(0, SeekOrigin.Begin);
+
+            GalleryServer.CreatePackage(PublishKey, fileStream, this, PushOnly == true? (IPackageMetadata)null : _package);
         }
 
         public void OnCompleted() {
             PercentComplete = 100;
             HasError = false;
+            Status = "Package published successfully .";
         }
 
         public void OnError(Exception error) {
-            Status = error.Message;
             PercentComplete = 100;
+            ShowProgress = false;
             HasError = true;
+            Status = error.Message;
+            CanPublish = true;
         }
 
         public void OnNext(int value) {

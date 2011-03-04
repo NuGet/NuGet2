@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
+using System.IO;
 
 namespace PackageExplorerViewModel {
 
@@ -43,10 +44,6 @@ namespace PackageExplorerViewModel {
             get {
                 return Resources.Dialog_Title + " - " + _packageMetadata.ToString();
             }
-        }
-
-        public IPackage Package {
-            get { return _package; }
         }
 
         public EditablePackageMetadata PackageMetadata {
@@ -193,8 +190,6 @@ namespace PackageExplorerViewModel {
 
         #endregion
 
-        #region PackageViewModel interface implementations
-
         public string PackageSource {
             get { return _packageSource; }
             set {
@@ -245,6 +240,27 @@ namespace PackageExplorerViewModel {
             return _package.GetFiles();
         }
 
+        public Stream GetCurrentPackageStream()
+        {
+            try
+            {
+                string tempFile = Path.GetTempFileName();
+                PackageHelper.SavePackage(PackageMetadata, GetFiles(), tempFile, false);
+                if (File.Exists(tempFile))
+                {
+                    return File.OpenRead(tempFile);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public void BegingEdit() {
             // raise the property change event here to force the edit form to rebind 
             // all controls, which will erase all error states, if any, left over from the previous edit
@@ -268,6 +284,5 @@ namespace PackageExplorerViewModel {
             HasEdit = false;
         }
 
-        #endregion
     }
 }

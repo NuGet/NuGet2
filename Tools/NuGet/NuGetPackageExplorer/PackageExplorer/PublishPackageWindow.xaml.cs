@@ -23,8 +23,7 @@ namespace PackageExplorer {
             if (!bindingExpression.HasError)
             {
                 var viewModel = (PublishPackageViewModel)DataContext;
-                ICommand command = viewModel.PublishCommand;
-                command.Execute(PublishKey.Text);
+                viewModel.PushPackage();
             }
         }
     }
