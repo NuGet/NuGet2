@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Windows;
 using System.Windows.Media;
@@ -32,7 +33,8 @@ namespace PackageExplorer {
                         OnError(e.Error);
                     }
                     else {
-                        _package.SetData(e.Result);
+                        string storedFile = SaveResultToTempFile(e.Result);
+                        _package.SetData(storedFile);
                         OnCompleted();
                     }
                 }
@@ -43,6 +45,12 @@ namespace PackageExplorer {
             };
 
             _client.DownloadDataAsync(uri);
+        }
+
+        private string SaveResultToTempFile(byte[] bytes) {
+            string tempFile = Path.GetTempFileName();
+            File.WriteAllBytes(tempFile, bytes);
+            return tempFile;
         }
 
         private void CancelButtonClicked(object sender, RoutedEventArgs e) {

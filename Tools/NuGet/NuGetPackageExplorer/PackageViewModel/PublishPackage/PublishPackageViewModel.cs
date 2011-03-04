@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Windows.Input;
-using NuGet;
 using System.IO;
+using NuGet;
 
 namespace PackageExplorerViewModel {
 

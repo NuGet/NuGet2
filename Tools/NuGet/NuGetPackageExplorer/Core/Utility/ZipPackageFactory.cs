@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 
 namespace NuGet {
     public class ZipPackageFactory : IPackageFactory {

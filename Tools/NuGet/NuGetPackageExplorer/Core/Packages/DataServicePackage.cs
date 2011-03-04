@@ -14,7 +14,7 @@ namespace NuGet {
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     public class DataServicePackage : IPackage {
         private readonly LazyWithRecreate<IPackage> _package;
-        private byte[] _bytes;
+        private string _zipFileName;
 
         public DataServicePackage() {
             VersionDownloadCount = -1;
@@ -217,8 +217,8 @@ namespace NuGet {
             return this.GetFullName();
         }
 
-        public void SetData(byte[] bytes) {
-            _bytes = bytes;
+        public void SetData(string zipFileName) {
+            _zipFileName = zipFileName;
         }
 
         internal IPackage DownloadAndVerifyPackage() {
@@ -227,7 +227,7 @@ namespace NuGet {
             }
 
             var factory = new ZipPackageFactory();
-            return factory.CreatePackage(() => new MemoryStream(_bytes));
+            return factory.CreatePackage(() => File.OpenRead(_zipFileName));
         }
 
         /// <summary>
