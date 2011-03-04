@@ -210,6 +210,9 @@
   <data name="Log_PackageAlreadyInstalled" xml:space="preserve">
     <value>'{0}' already installed.</value>
   </data>
+  <data name="Warning_FailedToAddBindingRedirects" xml:space="preserve">
+    <value>Failed to generate binding redirects for '{0}'. {1}</value>
+  </data>
   <data name="Warning_FileAlreadyExists" xml:space="preserve">
     <value>'{0}' already exists. Skipping...</value>
   </data>

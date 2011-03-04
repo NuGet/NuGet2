@@ -340,6 +340,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to generate binding redirects for &apos;{0}&apos;. {1}.
+        /// </summary>
+        public static string Warning_FailedToAddBindingRedirects {
+            get {
+                return ResourceManager.GetString("Warning_FailedToAddBindingRedirects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already exists. Skipping....
         /// </summary>
         public static string Warning_FileAlreadyExists {

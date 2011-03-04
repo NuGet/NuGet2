@@ -335,7 +335,7 @@ namespace NuGet.VisualStudio {
             }
             catch (Exception e) {
                 // If there was an error adding binding redirects then print a warning and continue
-                Logger.Log(MessageLevel.Warning, e.Message);
+                Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, VsResources.Warning_FailedToAddBindingRedirects, vsProjectSystem.ProjectName, e.Message));
             }
         }
 
