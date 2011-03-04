@@ -7,7 +7,7 @@ namespace NuGet.VisualStudio {
     /// <summary>
     /// Represents a Recent package.
     /// </summary>
-    public class RecentPackage : IPackage {
+    public class RecentPackage : IPackage, IPersistencePackageMetadata, IComparable<RecentPackage> {
 
         private readonly IPackage _basePackage;
 
@@ -151,6 +151,10 @@ namespace NuGet.VisualStudio {
             get {
                 return _basePackage.FrameworkAssemblies;
             }
+        }
+
+        public int CompareTo(RecentPackage other) {
+            return other.LastUsedDate.CompareTo(LastUsedDate);
         }
     }
 }

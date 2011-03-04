@@ -165,7 +165,13 @@ namespace NuGet.PowerShell.Commands {
             if (!String.IsNullOrEmpty(Filter)) {
                 packages = packages.Find(Filter.Split());
             }
-            return packages.OrderBy(p => p.Id);
+
+            // for recent packages, we want to order by last installed first instead of Id
+            if (!Recent.IsPresent) {
+                packages = packages.OrderBy(p => p.Id);
+            }
+
+            return packages;
         }
 
         protected virtual IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {

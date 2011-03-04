@@ -53,3 +53,22 @@ function Test-GetPackageListsRecentPackages {
     Assert-True ($haveAntlr.Count -gt 0)
     Assert-True ($havejQuery.Count -gt 0)
 }
+
+
+function Test-GetPackageReturnPackagesInOrderOfLastInstalledFirst {
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    Install-Package Antlr -Project $p.Name
+    Install-Package jQuery -Project $p.Name
+    Install-Package elmah -Project $p.Name
+
+    $packages = Get-Package -Recent -First 3
+
+    # Assert
+    Assert-AreEqual 3 $packages.Count
+    Assert-AreEqual "elmah" $packages[0].Id
+    Assert-AreEqual "jQuery" $packages[1].Id
+    Assert-AreEqual "Antlr" $packages[2].Id
+}

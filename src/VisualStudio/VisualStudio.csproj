@@ -20,6 +20,7 @@
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
+    <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackage.cs" />
     <Compile Include="VsActivityLogger.cs" />
     <Compile Include="VsProgressReporter.cs" />

@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio {
             : base(serviceProvider) {
         }
 
-        public IEnumerable<PersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
+        public IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
             for (int i = 0; i < maximumCount; i++) {
                 string settingsRoot = SettingsRootTemplate + i.ToString(CultureInfo.InvariantCulture);
                 string[] values = ReadStrings(settingsRoot, SettingsProperties);
@@ -52,10 +52,10 @@ namespace NuGet.VisualStudio {
         ///   Mru
         ///     Package0  ------->   | Id: Moq
         ///     Package1             | Version: 1.0.0.0 
-        ///     Package2             | LastUsed: date time
+        ///     Package2             | LastUsed: (date time in a long number)
         ///     Package3
         /// </remarks>
-        public void SavePackageMetadata(IEnumerable<PersistencePackageMetadata> packageMetadata) {
+        public void SavePackageMetadata(IEnumerable<IPersistencePackageMetadata> packageMetadata) {
             if (packageMetadata == null) {
                 throw new ArgumentNullException("packageMetadata");
             }
@@ -74,6 +74,8 @@ namespace NuGet.VisualStudio {
         }
 
         private static string ConvertFromDateTimeToString(DateTime dateTime) {
+            // This is suggested by MSDN to serialize and deserialize date time
+            // http://msdn.microsoft.com/en-us/library/system.datetime.tobinary.aspx
             return dateTime.ToBinary().ToString(CultureInfo.InvariantCulture);
         }
 
