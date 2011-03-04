@@ -210,4 +210,7 @@
   <data name="Log_PackageAlreadyInstalled" xml:space="preserve">
     <value>'{0}' already installed.</value>
   </data>
+  <data name="Warning_FileAlreadyExists" xml:space="preserve">
+    <value>'{0}' already exists. Skipping...</value>
+  </data>
 </root>

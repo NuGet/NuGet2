@@ -771,3 +771,21 @@ function Test-BindingRedirectProjectsThatReferenceDifferentVersionsOfSameAssembl
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
     Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
+
+function Test-InstallingPackageDoesNotOverwriteFileIfExistsOnDiskButNotInProject {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+    $projectPath = $p.Properties.Item("FullPath").Value
+    $fooPath = Join-Path $projectPath foo
+    "file content" > $fooPath
+
+    # Act
+    $p | Install-Package PackageWithFooContentFile -Source $context.RepositoryRoot
+
+    Assert-Null (Get-ProjectItem $p foo) "foo exists in the project!"
+    Assert-AreEqual "file content" (Get-Content $fooPath)
+}

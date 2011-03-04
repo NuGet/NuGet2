@@ -62,10 +62,15 @@ namespace NuGet.VisualStudio {
         }
 
         public override void AddFile(string path, Stream stream) {
-            EnsureCheckedOutIfExists(path);
-
-            base.AddFile(path, stream);
-            AddFileToProject(path);
+            // If the file exists on disk but not in the project then skip it
+            if (base.FileExists(path) && !FileExistsInProject(path)) {
+                Logger.Log(MessageLevel.Warning, VsResources.Warning_FileAlreadyExists, path);
+            }
+            else {
+                EnsureCheckedOutIfExists(path);
+                base.AddFile(path, stream);
+                AddFileToProject(path);
+            }
         }
 
         public override void DeleteDirectory(string path, bool recursive = false) {
@@ -170,9 +175,13 @@ namespace NuGet.VisualStudio {
             // Only check the project system if the file is on disk to begin with
             if (base.FileExists(path)) {
                 // See if the file is in the project system
-                return Project.GetProjectItem(path) != null;
+                return FileExistsInProject(path);
             }
             return false;
+        }
+
+        private bool FileExistsInProject(string path) {
+            return Project.GetProjectItem(path) != null;
         }
 
         protected virtual bool ExcludeFile(string path) {
