@@ -2,15 +2,16 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:self="clr-namespace:PackageExplorer"
+        xmlns:settings="clr-namespace:PackageExplorer.Properties"
         MinWidth="300"
         MinHeight="150"
         FocusManager.FocusedElement="{Binding ElementName=PublishKey}"
         Title="Publish package"
         ShowInTaskbar="False"
         ResizeMode="NoResize"                              
-        Width="400"
+        FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
         WindowStartupLocation="CenterOwner"
-        SizeToContent="Height">
+        SizeToContent="WidthAndHeight">
     
     <Window.Resources>
         <Style TargetType="{x:Type TextBlock}" x:Key="StatusTextStyle">

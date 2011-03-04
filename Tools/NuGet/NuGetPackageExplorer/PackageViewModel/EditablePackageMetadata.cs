@@ -24,7 +24,7 @@ namespace PackageExplorerViewModel {
             this.Title = source.Title;
             this.Authors = ConvertToString(source.Authors);
             this.Owners = ConvertToString(source.Owners);
-            this.IconUrl = source.IconUrl;
+            this.IconUrl = FixIconUrl(source.IconUrl);
             this.LicenseUrl = source.LicenseUrl;
             this.ProjectUrl = source.ProjectUrl;
             this.RequireLicenseAcceptance = source.RequireLicenseAcceptance;
@@ -34,6 +34,28 @@ namespace PackageExplorerViewModel {
             this.Tags = source.Tags;
             this.Dependencies = new ObservableCollection<PackageDependency>(source.Dependencies);
             this.FrameworkAssemblies = new ObservableCollection<FrameworkAssemblyReference>(source.FrameworkAssemblies);
+        }
+
+        private Uri FixIconUrl(Uri uri)
+        {
+            if (uri == null || uri.IsAbsoluteUri)
+            {
+                return uri;
+            }
+
+            string path = uri.OriginalString;
+            if (path.StartsWith("//")) {
+                path = path.Substring(1);
+            }
+
+            UriBuilder builder = new UriBuilder()
+            {
+                Scheme = "http",
+                Host = "www.nuget.org",
+                Path = path
+            };
+
+            return builder.Uri;
         }
 
         private string _id;

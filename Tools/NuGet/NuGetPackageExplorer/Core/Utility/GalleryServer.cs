@@ -120,7 +120,8 @@ namespace NuGet {
 
         private void OnUploadProgressChanged(object sender, UploadProgressChangedEventArgs e) {
             var state = (PublishState)e.UserState;
-            state.ProgressObserver.OnNext(e.ProgressPercentage);
+            // Hack: the UploadDataAsync only reports up to 50 percent. multiply by 2 to simulate 100. LOL
+            state.ProgressObserver.OnNext(Math.Min(100, 2*e.ProgressPercentage));
         }
 
         private string GetSafeRedirectedUri(string uri) {

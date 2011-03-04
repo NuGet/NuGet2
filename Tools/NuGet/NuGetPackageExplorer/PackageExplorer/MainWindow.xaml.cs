@@ -90,14 +90,10 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog() {
-                Owner = this,
-                FontSize = this.FontSize
-            };
+            var dialog = new PackageChooserDialog() { Owner = this };
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
                 if (dialog.SelectedPackage != null) {
-
                     var progressWindow = new DownloadProgressWindow(dialog.SelectedPackage) {
                         Owner = this
                     };
@@ -237,7 +233,7 @@ namespace PackageExplorer {
             if (size <= 8 || size >= 50) {
                 size = 12;
             }
-            this.FontSize = size;
+            Properties.Settings.Default.FontSize = size;
 
             // check the corresponding font size menu item 
             foreach (MenuItem child in FontSizeMenuItem.Items) {
@@ -254,7 +250,6 @@ namespace PackageExplorer {
 
         private void SaveSettings() {
             Settings settings = Properties.Settings.Default;
-            settings.FontSize = (int)Math.Round(this.FontSize);
             settings.WindowPlacement = this.SaveWindowPlacementToSettings();
         }
 
@@ -289,6 +284,12 @@ namespace PackageExplorer {
         }
 
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var viewModel = (PackageViewModel)DataContext;
 
             var publishPackageViewModel = new PublishPackageViewModel(viewModel.PackageMetadata, viewModel.GetCurrentPackageStream) {
