@@ -348,4 +348,7 @@
   <data name="AmbiguousOption" xml:space="preserve">
     <value>Ambiguous option '{0}'. Possible values: {1}.</value>
   </data>
+  <data name="PackageCommandVersionDescription" xml:space="preserve">
+    <value>Overrides the Version number from the nuspec file.</value>
+  </data>
 </root>

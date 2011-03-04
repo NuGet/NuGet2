@@ -448,6 +448,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Overrides the Version number from the nuspec file..
+        /// </summary>
+        internal static string PackageCommandVersionDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandVersionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Publishes a package that was uploaded to the server but not added to the live feed..
         /// </summary>
         internal static string PublishCommandDescription {

@@ -20,7 +20,10 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PackageCommandVerboseDescription")]
         public bool Verbose { get; set; }
-       
+
+        [Option(typeof(NuGetResources), "PackageCommandVersionDescription")]
+        public string Version { get; set; }
+
         public override void ExecuteCommand() {
             string nuspecFile;
 
@@ -40,6 +43,10 @@ namespace NuGet.Commands {
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(nuspecFile));
             
             PackageBuilder builder = new PackageBuilder(nuspecFile, BasePath ?? Path.GetDirectoryName(nuspecFile));
+            
+            if (!String.IsNullOrEmpty(Version)) {
+                builder.Version = new Version(Version);
+            }
 
             var outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
 
