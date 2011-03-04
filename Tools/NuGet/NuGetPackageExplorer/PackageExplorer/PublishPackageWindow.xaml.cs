@@ -20,6 +20,7 @@ namespace PackageExplorer {
         private void OnPublishButtonClick(object sender, RoutedEventArgs e)
         {
             BindingExpression bindingExpression = PublishKey.GetBindingExpression(TextBox.TextProperty);
+            bindingExpression.UpdateSource();
             if (!bindingExpression.HasError)
             {
                 var viewModel = (PublishPackageViewModel)DataContext;

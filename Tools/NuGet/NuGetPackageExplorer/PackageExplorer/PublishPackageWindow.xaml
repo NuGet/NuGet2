@@ -9,9 +9,10 @@
         Title="Publish package"
         ShowInTaskbar="False"
         ResizeMode="NoResize"                              
+        Width="410"
         FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
         WindowStartupLocation="CenterOwner"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="Height">
     
     <Window.Resources>
         <Style TargetType="{x:Type TextBlock}" x:Key="StatusTextStyle">
@@ -74,7 +75,8 @@
             IsChecked="{Binding PushOnly}"
             Grid.Row="3" 
             IsEnabled="{Binding CanPublish}"
-            Content="_Only push package to gallery but do not publish it." />
+            Content="_Only push package to gallery but do not publish it.">
+        </CheckBox>
 
         <!-- Progress bar -->
         <ProgressBar x:Name="ProgressBar" Margin="0,5" Visibility="{Binding ShowProgress, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}" Grid.Row="4" Height="30" Maximum="100" Value="{Binding PercentComplete, Mode=OneWay}" />

@@ -73,8 +73,10 @@ namespace PackageExplorer {
                 searchTerm = SearchBox.Text;
             }
             else if (e.Key == Key.Escape) {
-                searchTerm = String.Empty;
-                SearchBox.Text = String.Empty;
+                if (!String.IsNullOrEmpty(SearchBox.Text)) {
+                    searchTerm = String.Empty;
+                    SearchBox.Text = String.Empty;
+                }
             }
 
             if (searchTerm != null) {
