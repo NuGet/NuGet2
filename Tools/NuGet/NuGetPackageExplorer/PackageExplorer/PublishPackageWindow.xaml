@@ -36,7 +36,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         
-        <TextBlock Grid.ColumnSpan="2" Text="Publish this package to NuGet gallery." TextWrapping="Wrap" />
+        <TextBlock Grid.ColumnSpan="2" Text="Publish this package to NuGet gallery (http://nuget.org)." TextWrapping="Wrap" />
 
         <!-- Id & Version -->
         <TextBlock Grid.Row="1" Grid.Column="1" Margin="5,10,0,5">

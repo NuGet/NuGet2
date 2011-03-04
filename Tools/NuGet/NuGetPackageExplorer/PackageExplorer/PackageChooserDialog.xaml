@@ -136,7 +136,7 @@
         </StackPanel>
 
         <!-- search box -->
-        <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Padding="2,2,3,2" KeyDown="SearchBox_KeyDown" Tag="{Binding SearchCommand}" VerticalAlignment="Center">
+        <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" ToolTipService.ToolTip="Search for package" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Padding="2,2,3,2" KeyDown="SearchBox_KeyDown" Tag="{Binding SearchCommand}" VerticalAlignment="Center">
         </TextBox>
 
         <!-- package list view -->
