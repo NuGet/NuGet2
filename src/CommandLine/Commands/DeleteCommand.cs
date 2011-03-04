@@ -3,11 +3,10 @@ using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription", 
+    [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary")]
     public class DeleteCommand : Command {
-        
         private string _apiKey;
         private string _packageId;
         private string _packageVersion;
@@ -30,8 +29,8 @@ namespace NuGet.Commands {
             if (String.IsNullOrEmpty(Source)) {
                 gallery = new GalleryServer();
             }
-            else { 
-                gallery = new GalleryServer(Source); 
+            else {
+                gallery = new GalleryServer(Source);
             }
 
             if (NoPrompt || Console.Confirm(String.Format(NuGetResources.DeleteCommandConfirm, _packageId, _packageVersion))) {
@@ -42,7 +41,7 @@ namespace NuGet.Commands {
             else {
                 Console.WriteLine(NuGetResources.DeleteCommandCanceled);
             }
-          
+
         }
     }
 }

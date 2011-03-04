@@ -5,11 +5,10 @@ using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "push", "PushCommandDescription", 
+    [Command(typeof(NuGetResources), "push", "PushCommandDescription",
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : Command {
-
         private string _apiKey;
         private string _packagePath;
 
@@ -18,7 +17,7 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription")]
         public string Source { get; set; }
-        
+
         public override void ExecuteCommand() {
             //Frist argument should be the package
             _packagePath = Arguments[0];
@@ -33,20 +32,23 @@ namespace NuGet.Commands {
                 gallery = new GalleryServer(Source);
             }
 
-            ZipPackage pkg = new ZipPackage(_packagePath);
+            ZipPackage package = new ZipPackage(_packagePath);
 
-            Console.WriteLine(NuGetResources.PushCommandCreatingPackage, pkg.Id, pkg.Version);
-            using (Stream pkgStream = pkg.GetStream()) {
+            Console.WriteLine(NuGetResources.PushCommandCreatingPackage, package.GetFullName());
+
+            using (Stream pkgStream = package.GetStream()) {
                 gallery.CreatePackage(_apiKey, pkgStream);
             }
-            Console.WriteLine(NuGetResources.PushCommandPackageCreated);
-            
+
             if (!CreateOnly) {
                 var cmd = new PublishCommand();
                 cmd.Console = Console;
                 cmd.Source = Source;
-                cmd.Arguments = new List<string> { pkg.Id, pkg.Version.ToString(), _apiKey };
+                cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), _apiKey };
                 cmd.Execute();
+            }
+            else {
+                Console.WriteLine(NuGetResources.PushCommandPackageCreated);
             }
         }
     }

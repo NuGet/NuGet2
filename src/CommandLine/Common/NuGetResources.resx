@@ -214,7 +214,7 @@
     <value>Your package was published to the feed.</value>
   </data>
   <data name="PublishCommandPublishingPackage" xml:space="preserve">
-    <value>Publishing your package [ID:{0} Ver:{1}] to the live feed...</value>
+    <value>Publishing {0} {1} to the live feed...</value>
   </data>
   <data name="PublishCommandSourceDescription" xml:space="preserve">
     <value>Specifies the base GalleryServer Url.</value>
@@ -226,7 +226,7 @@
     <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
   </data>
   <data name="PushCommandCreatingPackage" xml:space="preserve">
-    <value>Creating an entry for your package [ID:{0} Ver:{1}]...</value>
+    <value>Creating an entry for {0}...</value>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
     <value>Pushes a package to the server and optionally publish it to the feed.</value>
