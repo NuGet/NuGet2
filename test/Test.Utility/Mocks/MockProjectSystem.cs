@@ -4,8 +4,15 @@ using System.IO;
 using System.Runtime.Versioning;
 
 namespace NuGet.Test.Mocks {
-    public class MockProjectSystem : MockFileSystem, IProjectSystem {        
-        public MockProjectSystem() {
+    public class MockProjectSystem : MockFileSystem, IProjectSystem {
+        private readonly FrameworkName _frameworkName;
+
+        public MockProjectSystem()
+            : this(VersionUtility.DefaultTargetFramework) {
+        }
+
+        public MockProjectSystem(FrameworkName frameworkName) {
+            _frameworkName = frameworkName;
             References = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -30,9 +37,9 @@ namespace NuGet.Test.Mocks {
         public virtual bool ReferenceExists(string name) {
             return References.ContainsKey(name);
         }
- 
+
         public virtual FrameworkName TargetFramework {
-            get { return VersionUtility.DefaultTargetFramework; }
+            get { return _frameworkName; }
         }
 
         public virtual dynamic GetPropertyValue(string propertyName) {

@@ -977,6 +977,39 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void RemovePackageReferenceOnlyRemovedAssembliesFromTheTargetFramework() {
+            // Arrange
+            var net20 = new FrameworkName(".NETFramework", new Version("2.0"));
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(net20);
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackageAssemblyReference net20Reference = PackageUtility.CreateAssemblyReference("foo.dll", net20);
+            IPackageAssemblyReference net40Reference = PackageUtility.CreateAssemblyReference("bar.dll", new FrameworkName(".NETFramework", new Version("4.0")));
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                content: null,
+                assemblyReferences: new[] { net20Reference, net40Reference },
+                tools: null,
+                dependencies: null,
+                rating: null);
+
+            projectManager.LocalRepository.AddPackage(packageA);
+
+            sourceRepository.AddPackage(packageA);
+            projectManager.AddPackageReference("A");
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+
+            // Assert
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
+            Assert.AreEqual(1, projectSystem.Deleted.Count);
+            Assert.IsTrue(projectSystem.Deleted.Contains("foo.dll"));
+        }
+
+        [TestMethod]
         public void ReAddingAPackageReferenceAfterRemovingADependencyShouldReReferenceAllDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();

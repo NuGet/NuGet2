@@ -78,6 +78,7 @@ namespace NuGet.Test {
             mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockAssemblyReference.Setup(m => m.Path).Returns(path);
             mockAssemblyReference.Setup(m => m.Name).Returns(path);
+            mockAssemblyReference.Setup(m => m.TargetFramework).Returns(targetFramework);
             mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new[] { targetFramework });
             return mockAssemblyReference.Object;
         }

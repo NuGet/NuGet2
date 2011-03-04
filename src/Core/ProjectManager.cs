@@ -295,7 +295,7 @@ namespace NuGet {
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
-            var assemblyReferencesToDelete = package.AssemblyReferences.Except(otherAssemblyReferences, PackageFileComparer.Default);
+            var assemblyReferencesToDelete = Project.GetCompatibleItemsCore(package.AssemblyReferences).Except(otherAssemblyReferences, PackageFileComparer.Default);
             var contentFilesToDelete = package.GetContentFiles()
                                               .Except(otherContentFiles, PackageFileComparer.Default);
 
