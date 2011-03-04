@@ -84,8 +84,8 @@ namespace NuGet.Test {
             string config = @"
 <configuration>
     <SectionName>
-        <NotAdd key='key1' value='value1' />
-        <Add Key='key2' Value='value2' />
+        <Notadd key='key1' value='value1' />
+        <add Key='key2' Value='value2' />
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -108,8 +108,8 @@ namespace NuGet.Test {
             string config = @"
 <configuration>
     <SectionName>
-        <Add key='key1' value='value1' />
-        <Add key='key2' value='value2' />
+        <add key='key1' value='value1' />
+        <add key='key2' value='value2' />
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -131,8 +131,8 @@ namespace NuGet.Test {
             string config = @"
 <configuration>
     <SectionName>
-        <Add key='key1' value='value1' />
-        <Add key='key2' value='value2' />
+        <add key='key1' value='value1' />
+        <add key='key2' value='value2' />
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -154,8 +154,8 @@ namespace NuGet.Test {
             string config = @"
 <configuration>
     <SectionName>
-        <Add key='key1' value='value1' />
-        <Add key='key2' value='value2' />
+        <add key='key1' value='value1' />
+        <add key='key2' value='value2' />
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -177,8 +177,8 @@ namespace NuGet.Test {
             string config = @"
 <configuration>
     <SectionName>
-        <Add key='key1' value='value1' />
-        <Add key='key2' value='value2' />
+        <add key='key1' value='value1' />
+        <add key='key2' value='value2' />
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -201,10 +201,10 @@ namespace NuGet.Test {
             string config = @"
 <configuration>
     <SectionName>
-        <Add key='key1' value='value1' />
+        <add key='key1' value='value1' />
     </SectionName>
     <SectionNameTwo>
-        <Add key='key2' value='value2' />
+        <add key='key2' value='value2' />
     </SectionNameTwo>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -253,7 +253,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -266,10 +266,10 @@ namespace NuGet.Test {
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName>
   <NewSectionName>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </NewSectionName>
 </configuration>", ms.ReadToEnd());        
         }
@@ -288,7 +288,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -301,8 +301,8 @@ namespace NuGet.Test {
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""value"" />
-    <Add key=""keyTwo"" value=""valueTwo"" />
+    <add key=""key"" value=""value"" />
+    <add key=""keyTwo"" value=""valueTwo"" />
   </SectionName>
 </configuration>", ms.ReadToEnd());      
         }
@@ -321,7 +321,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -334,7 +334,7 @@ namespace NuGet.Test {
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""NewValue"" />
+    <add key=""key"" value=""NewValue"" />
   </SectionName>
 </configuration>", ms.ReadToEnd());
         }
@@ -353,7 +353,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -396,7 +396,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value="""" />
+    <add key=""key"" value="""" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -418,7 +418,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value="""" />
+    <add key=""key"" value="""" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -460,7 +460,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value="""" />
+    <add key=""key"" value="""" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -478,7 +478,7 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""key"" value="""" />
+    <add key=""key"" value="""" />
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -501,11 +501,11 @@ namespace NuGet.Test {
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""DeleteMe"" value=""value"" />
-    <Add key=""keyNotToDelete"" value=""value"" />
+    <add key=""DeleteMe"" value=""value"" />
+    <add key=""keyNotToDelete"" value=""value"" />
   </SectionName>
   <SectionName2>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName2>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(config.AsStream());
@@ -518,10 +518,10 @@ namespace NuGet.Test {
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
-    <Add key=""keyNotToDelete"" value=""value"" />
+    <add key=""keyNotToDelete"" value=""value"" />
   </SectionName>
   <SectionName2>
-    <Add key=""key"" value=""value"" />
+    <add key=""key"" value=""value"" />
   </SectionName2>
 </configuration>", ms.ReadToEnd());      
         }

@@ -4,7 +4,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription",
-        MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
+        MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary")]
     public class DeleteCommand : Command {
         
@@ -14,15 +14,17 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
-        [Option(typeof(NuGetResources), "ApiKeyDescription")]
-        public string ApiKey { get; set; }
-
         public override void ExecuteCommand() {
 
             //First argument should be the package ID
             string packageId = Arguments[0];
             //Second argument should be the package Version
             string packageVersion = Arguments[1];
+            //Third argument, if present, should be the API Key
+            string userSetApiKey = null;
+            if (Arguments.Count > 1) {
+                userSetApiKey = Arguments[1];
+            }
 
             //If the user passed a source use it for the gallery location
             GalleryServer gallery;
@@ -36,8 +38,8 @@ namespace NuGet.Commands {
             //If the user did not pass an API Key look in the config file
             string apiKey;
             ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
-            if (String.IsNullOrEmpty(ApiKey)) {
-                var value = settings.GetDecryptedValue("ApiKeys", gallery.Source);
+            if (String.IsNullOrEmpty(userSetApiKey)) {
+                var value = settings.GetDecryptedValue("apiKeys", gallery.Source);
                 if (string.IsNullOrEmpty(value)) {
                     throw new CommandLineException(NuGetResources.NoApiKeyFound);
                 }
@@ -45,7 +47,7 @@ namespace NuGet.Commands {
 
             }
             else {
-                apiKey = ApiKey;
+                apiKey = userSetApiKey;
             }
 
 

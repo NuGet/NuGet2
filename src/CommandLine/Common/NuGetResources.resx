@@ -353,9 +353,6 @@
   </data>
   <data name="InstallCommandOutputDirDescription" xml:space="preserve">
     <value>Specifies the directory in which packages will be installed</value>
-  <data name="ApiKeyDescription" xml:space="preserve">
-    <value>The API key to use for the source, by default saved for that source.</value>
-  </data>
   <data name="InstallCommandNothingToInstall" xml:space="preserve">
     <value>All packages listed in {0} are already installed.</value>
   <data name="NoApiKeyFound" xml:space="preserve">

@@ -6,7 +6,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "push", "PushCommandDescription",
-        MinArgs = 1, MaxArgs = 1, UsageDescriptionResourceName = "PushCommandUsageDescription",
+        MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : Command {
 
@@ -18,14 +18,17 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PushCommandNoPersistApiKeyDescription")]
         public bool NoPersist { get; set; }
-
-        [Option(typeof(NuGetResources), "ApiKeyDescription")]
-        public string ApiKey { get; set; }
         
         public override void ExecuteCommand() {
 
             //Frist argument should be the package
             string packagePath = Arguments[0];
+
+            //Second argument, if present, should be the API Key
+            string userSetApiKey = null;
+            if (Arguments.Count > 1) {
+                userSetApiKey = Arguments[1];
+            }
 
             //If the user passed a source use it for the gallery location
             GalleryServer gallery;
@@ -39,8 +42,8 @@ namespace NuGet.Commands {
             //If the user did not pass an API Key look in the config file
             string apiKey;
             ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
-            if(String.IsNullOrEmpty(ApiKey)){
-                var value = settings.GetDecryptedValue("ApiKeys", gallery.Source);
+            if (String.IsNullOrEmpty(userSetApiKey)) {
+                var value = settings.GetDecryptedValue("apiKeys", gallery.Source);
                 if (string.IsNullOrEmpty(value)) {
                     throw new CommandLineException(NuGetResources.NoApiKeyFound);
                 }
@@ -48,7 +51,7 @@ namespace NuGet.Commands {
 
             }
             else {
-                apiKey = ApiKey;
+                apiKey = userSetApiKey;
             }
             //Push the package to the server
             ZipPackage pkg = new ZipPackage(packagePath);
@@ -64,25 +67,31 @@ namespace NuGet.Commands {
                 cmd.Arguments = new List<string> { pkg.Id, pkg.Version.ToString(), apiKey };
                 cmd.Execute();
             }
+            else {
+                Console.WriteLine(NuGetResources.PushCommandPackageCreated);
+            }
 
-            //If we made it this far the push succeeded and we can try to save the API Key
-            if (!NoPersist) {
+            // If the user passed no API Key and said to persist the key
+            //  or if the use passed an API Key and said not to persist
+            //  the key (temperary key use) then do nothing.
+            
+            // Save the API Key if the User passed a key and said to persist (the default)
+            if (!String.IsNullOrEmpty(userSetApiKey) && !NoPersist) {
                 Console.WriteLine(NuGetResources.PushCommandSavingApiKey, apiKey, gallery.Source);
                 try {
-                    settings.SetEncryptedValue("ApiKeys", gallery.Source, apiKey);
+                    settings.SetEncryptedValue("apiKeys", gallery.Source, apiKey);
                 }
                 catch {
                     Console.WriteError(NuGetResources.PushCommandUnableToSaveApiKey);
                 }
             }
 
-            else {
-                var value = settings.GetDecryptedValue("ApiKeys", gallery.Source);
-                if (!String.IsNullOrEmpty(value)) {
-                    settings.DeleteValue("ApiKeys", gallery.Source);
-                    Console.WriteLine(NuGetResources.PushCommandSavedApiKeyCleared);
-                }
+            // Delete the API Key if user did not pass a key and said not to persist the key
+            if (String.IsNullOrEmpty(userSetApiKey) && NoPersist) {
+                settings.DeleteValue("apiKeys", gallery.Source);
+                Console.WriteLine(NuGetResources.PushCommandSavedApiKeyCleared);
             }
+
         }
     }
 }

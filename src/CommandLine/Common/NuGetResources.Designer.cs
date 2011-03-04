@@ -79,15 +79,6 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The API key to use for the source, by default saved for that source..
-        /// </summary>
-        internal static string ApiKeyDescription {
-            get {
-                return ResourceManager.GetString("ApiKeyDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} (y/N) .
         /// </summary>
         internal static string ConsoleConfirmMessage {

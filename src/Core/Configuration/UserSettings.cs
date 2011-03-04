@@ -51,7 +51,7 @@ namespace NuGet {
                 }
 
                 var kvps = new Dictionary<string, string>();
-                foreach (var e in sectionElement.Elements("Add")) {
+                foreach (var e in sectionElement.Elements("add")) {
                     var key = e.GetOptionalAttributeValue("key");
                     var value = e.GetOptionalAttributeValue("value");
                     if (!String.IsNullOrEmpty(key) && value != null) {
@@ -83,7 +83,7 @@ namespace NuGet {
                 _config.Root.Add(sectionElement);
             }
 
-            foreach (var e in sectionElement.Elements("Add")) {
+            foreach (var e in sectionElement.Elements("add")) {
                 var tempKey = e.GetOptionalAttributeValue("key");
 
                 if (tempKey == key) {
@@ -93,7 +93,7 @@ namespace NuGet {
                 }
             }
 
-            var addElement = new XElement("Add");
+            var addElement = new XElement("add");
             addElement.SetAttributeValue("key", key);
             addElement.SetAttributeValue("value", value);
             sectionElement.Add(addElement);
@@ -115,7 +115,7 @@ namespace NuGet {
             }
 
             XElement elementToDelete = null;
-            foreach (var e in sectionElement.Elements("Add")) {
+            foreach (var e in sectionElement.Elements("add")) {
                 if (e.GetOptionalAttributeValue("key") == key) {
                     elementToDelete = e;
                     break;
