@@ -176,7 +176,7 @@ namespace NuGet.VisualStudio {
             }
             catch (Exception exception) {
                 // write to activity log for troubleshoting.
-                exception.WriteToActivityLog();
+                ExceptionHelper.WriteToActivityLog(exception);
             }
         }
     }

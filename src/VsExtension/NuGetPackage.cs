@@ -78,7 +78,7 @@ namespace NuGet.Tools {
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
 
-                    (exception.InnerException ?? exception).WriteToActivityLog();
+                    ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
                 }
             }
             else {
@@ -119,7 +119,13 @@ namespace NuGet.Tools {
                 ShowOptionPage(typeof(ToolsOptionsPage));
             }
             catch (Exception exception) {
-                exception.WriteToActivityLog();
+                MessageBox.Show(
+                    exception.Message,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                ExceptionHelper.WriteToActivityLog(exception);
             }
         }
 

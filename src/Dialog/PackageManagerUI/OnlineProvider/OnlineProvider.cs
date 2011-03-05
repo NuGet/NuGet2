@@ -73,7 +73,7 @@ namespace NuGet.Dialog.Providers {
                 catch (Exception exception) {
                     // exception occurs if the Source value is invalid. In which case, adds an empty tree node in place.
                     node = new EmptyTreeNode(this, source.Name, RootNode);
-                    exception.WriteToActivityLog();
+                    ExceptionHelper.WriteToActivityLog(exception);
                 }
 
                 RootNode.Nodes.Add(node);

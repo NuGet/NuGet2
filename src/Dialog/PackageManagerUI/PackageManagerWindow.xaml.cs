@@ -177,8 +177,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 }
                 catch (Exception exception) {
                     MessageHelper.ShowErrorMessage(exception);
-                    
-                    exception.WriteToActivityLog();
+
+                    ExceptionHelper.WriteToActivityLog(exception);
                 }
             }
         }
