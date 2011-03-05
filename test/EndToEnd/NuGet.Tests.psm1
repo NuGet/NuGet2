@@ -152,7 +152,7 @@ function global:Run-Test {
             }
             finally {              
                 # Clear the cache after running each test
-                [System.Runtime.Caching.MemoryCache]::Default.Trim(100)
+                [System.Runtime.Caching.MemoryCache]::Default.Trim(100) | Out-Null
          
                 # Cleanup the output from running the generate packages tool
                 Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
