@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO.Packaging;
 using System.Runtime.Versioning;
 using System.Text;
 
@@ -9,8 +8,8 @@ namespace NuGet {
     internal class ZipPackageAssemblyReference : ZipPackageFile, IPackageAssemblyReference {
         private FrameworkName _targetFramework;
 
-        public ZipPackageAssemblyReference(PackagePart part)
-            : base(part) {
+        public ZipPackageAssemblyReference(IPackageFile file)
+            : base(file) {
             Debug.Assert(Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase), "path doesn't start with lib");
 
             // Get rid of the lib folder            

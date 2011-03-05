@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Runtime.Caching;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
@@ -10,7 +12,13 @@ namespace NuGet {
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
         private const string ResourceAssemblyExtension = ".resources.dll";
+        private const string CacheKeyFormat = "__ZIP_PACKAGE_{0}_{1}{2}";
+        private const string AssembliesCacheKey = "ASSEMBLIES";
+        private const string FilesCacheKey = "FILES";
+
         private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
+
+        private static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(15);
 
         // paths to exclude
         private static readonly string[] _excludePaths = new[] { "_rels", "package" };
@@ -131,12 +139,7 @@ namespace NuGet {
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                using (Stream stream = _streamFactory()) {
-                    Package package = Package.Open(stream);
-                    return (from part in package.GetParts()
-                            where IsAssemblyReference(part)
-                            select new ZipPackageAssemblyReference(part)).ToList();
-                }
+                return MemoryCache.Default.GetOrAdd(GetAssembliesCacheKey(), GetAssemblies, CacheTimeout);
             }
         }
 
@@ -146,17 +149,27 @@ namespace NuGet {
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
+            return MemoryCache.Default.GetOrAdd(GetFilesCacheKey(), GetFilesCore, CacheTimeout);
+        }
+
+        public Stream GetStream() {
+            return _streamFactory();
+        }
+
+        private List<IPackageAssemblyReference> GetAssemblies() {
+            return (from file in GetFiles()
+                    where IsAssemblyReference(file)
+                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)).ToList();
+        }
+
+        private List<IPackageFile> GetFilesCore() {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);
 
                 return (from part in package.GetParts()
                         where IsPackageFile(part)
-                        select new ZipPackageFile(part)).ToList();
+                        select (IPackageFile)new ZipPackageFile(part)).ToList();
             }
-        }
-
-        public Stream GetStream() {
-            return _streamFactory();
         }
 
         private void EnsureManifest() {
@@ -203,11 +216,11 @@ namespace NuGet {
             }
         }
 
-        private static bool IsAssemblyReference(PackagePart part) {
+        private static bool IsAssemblyReference(IPackageFile file) {
             // Assembly references are in lib/ and have a .dll/.exe extension
-            var path = UriUtility.GetPath(part.Uri);
+            var path = file.Path;
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
-                   // Exclude resource assemblies
+                // Exclude resource assemblies
                    !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
                    AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
         }
@@ -221,6 +234,14 @@ namespace NuGet {
 
         public override string ToString() {
             return this.GetFullName();
+        }
+
+        private string GetFilesCacheKey() {
+            return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, FilesCacheKey, Id, Version);
+        }
+
+        private string GetAssembliesCacheKey() {
+            return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, AssembliesCacheKey, Id, Version);
         }
     }
 }

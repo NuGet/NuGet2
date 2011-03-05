@@ -1,31 +1,31 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Packaging;
+
 namespace NuGet {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.IO.Packaging;
-    
     internal class ZipPackageFile : IPackageFile {
-        private readonly Func<MemoryStream> _streamFactory;
-        private readonly string _path;
+        private Func<MemoryStream> _streamFactory;
 
-        public ZipPackageFile(PackagePart part) {           
-            Debug.Assert(part != null, "part should not be null");
+        public ZipPackageFile(PackagePart part) {
+            Path = UriUtility.GetPath(part.Uri);
 
-            byte[] buffer;
-            using (Stream partStream = part.GetStream()) {
-                using (var stream = new MemoryStream()) {
-                    partStream.CopyTo(stream);
-                    buffer = stream.ToArray();
-                }
+            using (Stream stream = part.GetStream()) {
+                InitializeStream(stream);
             }
-            _path = UriUtility.GetPath(part.Uri);            
-            _streamFactory = () => new MemoryStream(buffer);
+        }
+
+        public ZipPackageFile(IPackageFile file) {
+            Path = file.Path;
+
+            using (Stream stream = file.GetStream()) {
+                InitializeStream(stream);
+            }
         }
 
         public string Path {
-            get {
-                return _path;
-            }
+            get;
+            private set;
         }
 
         public Stream GetStream() {
@@ -34,6 +34,17 @@ namespace NuGet {
 
         public override string ToString() {
             return Path;
+        }
+
+        private void InitializeStream(Stream fileStream) {
+            byte[] buffer;
+
+            using (var stream = new MemoryStream()) {
+                fileStream.CopyTo(stream);
+                buffer = stream.ToArray();
+            }
+
+            _streamFactory = () => new MemoryStream(buffer);
         }
     }
 }

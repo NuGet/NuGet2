@@ -70,9 +70,11 @@ namespace NuGet {
                         return;
                     }
 
-                    // Set the parent
-                    PackageWalkInfo dependencyInfo = GetPackageInfo(resolvedDependency);
-                    dependencyInfo.Parent = package;
+                    if (!IgnoreWalkInfo) {
+                        // Set the parent
+                        PackageWalkInfo dependencyInfo = GetPackageInfo(resolvedDependency);
+                        dependencyInfo.Parent = package;
+                    }
 
                     Marker.AddDependent(package, resolvedDependency);
 
