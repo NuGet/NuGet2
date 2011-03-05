@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 
@@ -8,6 +9,20 @@ namespace NuGet {
             byte[] buffer = new byte[length];
             stream.Read(buffer, 0, length);
             return buffer;
+        }
+
+        /// <summary>
+        /// Turns an existing stream into one that a stream factory that can be reopened.
+        /// </summary>        
+        public static Func<Stream> ToStreamFactory(this Stream stream) {
+            byte[] buffer;
+
+            using (var ms = new MemoryStream()) {
+                stream.CopyTo(ms);
+                buffer = ms.ToArray();
+            }
+
+            return () => new MemoryStream(buffer);
         }
 
         public static string ReadToEnd(this Stream stream) {

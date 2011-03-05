@@ -5,22 +5,16 @@ using System.IO.Packaging;
 
 namespace NuGet {
     internal class ZipPackageFile : IPackageFile {
-        private Func<MemoryStream> _streamFactory;
+        private Func<Stream> _streamFactory;
 
         public ZipPackageFile(PackagePart part) {
             Path = UriUtility.GetPath(part.Uri);
-
-            using (Stream stream = part.GetStream()) {
-                InitializeStream(stream);
-            }
+            _streamFactory = part.GetStream().ToStreamFactory();
         }
 
         public ZipPackageFile(IPackageFile file) {
             Path = file.Path;
-
-            using (Stream stream = file.GetStream()) {
-                InitializeStream(stream);
-            }
+            _streamFactory = file.GetStream().ToStreamFactory();
         }
 
         public string Path {
@@ -34,17 +28,6 @@ namespace NuGet {
 
         public override string ToString() {
             return Path;
-        }
-
-        private void InitializeStream(Stream fileStream) {
-            byte[] buffer;
-
-            using (var stream = new MemoryStream()) {
-                fileStream.CopyTo(stream);
-                buffer = stream.ToArray();
-            }
-
-            _streamFactory = () => new MemoryStream(buffer);
         }
     }
 }

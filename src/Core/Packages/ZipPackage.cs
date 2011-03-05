@@ -12,7 +12,7 @@ namespace NuGet {
     public class ZipPackage : IPackage {
         private const string AssemblyReferencesDir = "lib";
         private const string ResourceAssemblyExtension = ".resources.dll";
-        private const string CacheKeyFormat = "__ZIP_PACKAGE_{0}_{1}{2}";
+        private const string CacheKeyFormat = "NUGET_ZIP_PACKAGE_{0}_{1}{2}";
         private const string AssembliesCacheKey = "ASSEMBLIES";
         private const string FilesCacheKey = "FILES";
 
@@ -139,7 +139,7 @@ namespace NuGet {
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return MemoryCache.Default.GetOrAdd(GetAssembliesCacheKey(), GetAssemblies, CacheTimeout);
+                return MemoryCache.Default.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
             }
         }
 
@@ -149,20 +149,20 @@ namespace NuGet {
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
-            return MemoryCache.Default.GetOrAdd(GetFilesCacheKey(), GetFilesCore, CacheTimeout);
+            return MemoryCache.Default.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
         }
 
         public Stream GetStream() {
             return _streamFactory();
         }
 
-        private List<IPackageAssemblyReference> GetAssemblies() {
+        private List<IPackageAssemblyReference> GetAssembliesNoCache() {
             return (from file in GetFiles()
                     where IsAssemblyReference(file)
                     select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)).ToList();
         }
 
-        private List<IPackageFile> GetFilesCore() {
+        private List<IPackageFile> GetFilesNoCache() {
             using (Stream stream = _streamFactory()) {
                 Package package = Package.Open(stream);
 
