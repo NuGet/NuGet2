@@ -7,8 +7,6 @@ namespace PackageExplorerViewModel {
     public class PackageFile : PackagePart {
 
         private readonly IPackageFile _file;
-        private ICommand _viewCommand;
-        private ICommand _saveCommand;
 
         public PackageViewModel PackageViewModel { get; set; }
 
@@ -31,6 +29,10 @@ namespace PackageExplorerViewModel {
 
         public ICommand SaveCommand {
             get { return PackageViewModel.SaveContentCommand; }
+        }
+
+        public ICommand OpenCommand {
+            get { return PackageViewModel.OpenContentFileCommand; }
         }
     }
 }

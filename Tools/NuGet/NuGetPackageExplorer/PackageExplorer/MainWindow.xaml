@@ -26,9 +26,12 @@
             </ResourceDictionary.MergedDictionaries>
             
             <viewmodel:DisabledCommand x:Key="DisabledCommand" />
+            
+            <self:ViewContentConverter x:Key="ViewContentConverter" />
 
             <ContextMenu x:Key="SharedContextMenu">
                 <self:GrayscaleMenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" />
+                <self:GrayscaleMenuItem Header="_Open in Windows Shell..." Command="{Binding OpenCommand}" CommandParameter="{Binding}" />
                 <self:GrayscaleMenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 
@@ -272,21 +275,25 @@
                 </self:GrayscaleMenuItem>
             </self:GrayscaleMenuItem>
             
-            <self:GrayscaleMenuItem Header="_View">
-                <self:GrayscaleMenuItem Header="Show _Content Viewer" IsChecked="{Binding ShowContentViewer}" Command="{Binding ShowContentViewerCommand, FallbackValue={StaticResource DisabledCommand}}">
-                </self:GrayscaleMenuItem>
+            <MenuItem Header="_View">
+                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource ViewContentConverter}, FallbackValue=False}" Header="View File _Content" Command="{Binding ViewContentCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource ViewContentConverter}, FallbackValue=False}" Header="_Open File in Windows Shell..." Command="{Binding OpenContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
                 <Separator />
-                <self:GrayscaleMenuItem Header="Text _Size" x:Name="FontSizeMenuItem">
+                <MenuItem Header="Text _Size" x:Name="FontSizeMenuItem">
                     <self:GrayscaleMenuItem Header="_Normal" Tag="12" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="_Larger" Tag="14" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="L_argest" Tag="16" Click="OnFontSizeItem_Click" IsCheckable="True" />
-                </self:GrayscaleMenuItem>
-            </self:GrayscaleMenuItem>
+                    
+                    <MenuItem.Icon>
+                        <Image Source="/NuGetPackageExplorer;component/Images/FontDialogHS.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
             
             <self:GrayscaleMenuItem Header="_Help">
                 <self:GrayscaleMenuItem Header="_NuGet Documentation" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Web.png" />
+                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Book_angleHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <MenuItem Header="How to _Create Package" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
@@ -310,6 +317,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <!-- package metadata -->
             <GroupBox Grid.RowSpan="3" BorderThickness="1" BorderBrush="DarkGray" Margin="3" Header="Package metadata" FlowDirection="LeftToRight">
                 <Grid>
                     <ContentControl 
@@ -325,8 +333,9 @@
                 </Grid>
             </GroupBox>
 
+            <!-- package content tree view -->
             <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3,3,3,0" Header="Package contents">
-                <TreeView ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
+                <TreeView x:Name="PackagesTreeView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
@@ -337,6 +346,7 @@
             
             <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="Transparent" VerticalAlignment="Bottom" />
 
+            <!-- content viewer -->
             <GroupBox
                 Header="{Binding CurrentFileName, TargetNullValue='Content Viewer'}"
                 Grid.Row="2"
@@ -356,6 +366,21 @@
                     Background="#FFEAF7CE"
                     Text="{Binding CurrentFileContent, Mode=OneWay}" />
             </GroupBox>
+            
+            <Button 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top" 
+                Background="White"
+                Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                Command="{Binding ViewContentCommand}"
+                CommandParameter="Hide"
+                Margin="10,0"
+                Visibility="{Binding ShowContentViewer, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}"
+                Grid.Row="2" 
+                Grid.Column="1"
+                ToolTipService.ToolTip="Close viewer pane">
+                <Image Source="/NuGetPackageExplorer;component/Images/Delete.png" />
+            </Button>
         </Grid>
         
         <!-- Status bar -->

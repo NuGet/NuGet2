@@ -15,7 +15,7 @@ namespace PackageExplorerViewModel {
         private IList<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
-        private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand, _showContentViewerCommand, _viewContentCommand, _saveContentCommand;
+        private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand, _viewContentCommand, _saveContentCommand, _openContentFileCommand;
         private bool _isInEditMode;
         private string _packageSource;
 
@@ -161,15 +161,6 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public ICommand ShowContentViewerCommand {
-            get {
-                if (_showContentViewerCommand == null) {
-                    _showContentViewerCommand = new ShowContentViewerCommand(this);
-                }
-                return _showContentViewerCommand;
-            }
-        }
-
         public ICommand ViewContentCommand {
             get {
                 if (_viewContentCommand == null) {
@@ -185,6 +176,15 @@ namespace PackageExplorerViewModel {
                     _saveContentCommand = new SaveContentCommand(this);
                 }
                 return _saveContentCommand;
+            }
+        }
+
+        public ICommand OpenContentFileCommand {
+            get {
+                if (_openContentFileCommand == null) {
+                    _openContentFileCommand = new OpenContentFileCommand(this);
+                }
+                return _openContentFileCommand;
             }
         }
 

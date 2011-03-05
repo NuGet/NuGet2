@@ -56,8 +56,8 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
+    <Compile Include="Commands\OpenContentFileCommand.cs" />
     <Compile Include="PackageHelper.cs" />
-    <Compile Include="Commands\ShowContentViewerCommand.cs" />
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />
     <Compile Include="EditablePackageMetadata.cs" />

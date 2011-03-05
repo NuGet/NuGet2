@@ -10,34 +10,23 @@ namespace PackageExplorerViewModel {
         }
 
         public bool CanExecute(object parameter) {
-            //var file = parameter as PackageFile;
-            //return file == null ? false : !IsBinaryFile(file.Name);
             return true;
         }
 
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            var file = parameter as PackageFile;
-            if (IsBinaryFile(file.Name)) {
-                ShowBinaryFile(file);
+            if ("Hide".Equals(parameter)) {
+                ViewModel.ShowContentViewer = false;
             }
             else {
-                ViewModel.ShowFile(file.Name, ReadFileContent(file));
+                var file = parameter as PackageFile;
+                if (file != null) {
+                    const string UnsupportedMessage = "*** The format of this file is not supported. ***";
+                    string content = IsBinaryFile(file.Name) ? UnsupportedMessage : ReadFileContent(file);
+                    ViewModel.ShowFile(file.Name, content);
+                }
             }
-        }
-
-        private void ShowBinaryFile(PackageFile file) {
-            //// copy to temporary file
-            //// create package in the temprary file first in case the operation fails which would
-            //// override existing file with a 0-byte file.
-            //string tempFileName = Path.Combine(Path.GetTempPath(), file.Name);
-
-            //using (Stream tempFileStream = File.Create(tempFileName)) {
-            //    file.GetStream().CopyTo(tempFileStream);
-            //}
-
-            //Process.Start();
         }
 
         private string ReadFileContent(PackageFile file) {

@@ -125,6 +125,7 @@
     <Compile Include="Converters\UriConverter.cs" />
     <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="Converters\VersionSpecConverter.cs" />
+    <Compile Include="Converters\ViewContentConverter.cs" />
     <Compile Include="DialogWithNoMinimizeAndMaximize.cs" />
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
@@ -214,7 +215,6 @@
     <Resource Include="Images\Tools.png" />
     <Resource Include="Images\Add.png" />
     <Resource Include="Images\Delete.png" />
-    <Resource Include="Images\Web.png" />
     <Resource Include="Images\Lib.png" />
     <Resource Include="Images\Script.png" />
     <Resource Include="Images\MoveFirstHS.png" />
@@ -224,6 +224,9 @@
     <Resource Include="Images\search.png" />
     <Resource Include="Images\Properties.png" />
     <Resource Include="Images\PublishToWebHS.png" />
+    <Resource Include="Images\NewDocumentHS.png" />
+    <Resource Include="Images\FontDialogHS.png" />
+    <Resource Include="Images\Book_angleHS.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>
