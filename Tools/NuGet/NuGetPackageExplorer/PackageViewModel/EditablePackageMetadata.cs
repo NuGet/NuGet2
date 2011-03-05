@@ -33,7 +33,7 @@ namespace PackageExplorerViewModel {
             this.Language = source.Language;
             this.Tags = source.Tags;
             this.Dependencies = new ObservableCollection<PackageDependency>(source.Dependencies);
-            this.FrameworkAssemblies = new ObservableCollection<FrameworkAssemblyReference>(source.FrameworkAssemblies);
+            //this.FrameworkAssemblies = new ObservableCollection<FrameworkAssemblyReference>(source.FrameworkAssemblies);
         }
 
         private Uri FixIconUrl(Uri uri)
@@ -297,11 +297,11 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
-            get {
-                return this.FrameworkAssemblies;
-            }
-        }
+        //IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
+        //    get {
+        //        return this.FrameworkAssemblies;
+        //    }
+        //}
 
         public override string ToString() {
             return Id + "." + Version.ToString();

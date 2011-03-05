@@ -34,7 +34,7 @@ namespace NuGet {
         public PackageBuilder() {
             Files = new Collection<IPackageFile>();
             Dependencies = new Collection<PackageDependency>();
-            FrameworkReferences = new Collection<FrameworkAssemblyReference>();
+            //FrameworkReferences = new Collection<FrameworkAssemblyReference>();
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
             Tags = new HashSet<string>();
@@ -115,10 +115,10 @@ namespace NuGet {
             private set;
         }
 
-        public Collection<FrameworkAssemblyReference> FrameworkReferences {
-            get;
-            private set;
-        }
+        //public Collection<FrameworkAssemblyReference> FrameworkReferences {
+        //    get;
+        //    private set;
+        //}
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
@@ -144,18 +144,22 @@ namespace NuGet {
             }
         }
 
-        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
-            get {
-                return FrameworkReferences;
-            }
-        }
+        //IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
+        //    get {
+        //        return FrameworkReferences;
+        //    }
+        //}
 
         public void Save(Stream stream) {
             // Make sure we're saving a valid package id
             PackageIdValidator.ValidatePackageId(Id);
 
             // Throw if the package doesn't contain any dependencies nor content
-            if (!Files.Any() && !Dependencies.Any() && !FrameworkReferences.Any()) {
+            //if (!Files.Any() && !Dependencies.Any() && !FrameworkReferences.Any()) {
+            //    throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
+            //}
+
+            if (!Files.Any() && !Dependencies.Any()) {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
@@ -218,7 +222,7 @@ namespace NuGet {
             }
 
             Dependencies.AddRange(metadata.Dependencies);
-            FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
+            //FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
 
             // If there's no base path then ignore the files node
             if (basePath != null) {

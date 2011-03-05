@@ -143,16 +143,16 @@ namespace NuGet {
             }
         }
 
-        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
-            get {
-                if (FrameworkAssemblies == null) {
-                    return Enumerable.Empty<FrameworkAssemblyReference>();
-                }
+        //IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
+        //    get {
+        //        if (FrameworkAssemblies == null) {
+        //            return Enumerable.Empty<FrameworkAssemblyReference>();
+        //        }
 
-                return from frameworkReference in FrameworkAssemblies
-                       select new FrameworkAssemblyReference(frameworkReference.AssemblyName, ParseFrameworkNames(frameworkReference.TargetFramework));
-            }
-        }
+        //        return from frameworkReference in FrameworkAssemblies
+        //               select new FrameworkAssemblyReference(frameworkReference.AssemblyName, ParseFrameworkNames(frameworkReference.TargetFramework));
+        //    }
+        //}
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
             if (LicenseUrl == String.Empty) {

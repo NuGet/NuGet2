@@ -23,8 +23,10 @@ namespace NuGet {
         /// Returns true if a package has no content that applies to a project.
         /// </summary>
         public static bool HasProjectContent(this IPackage package) {
-            return package.FrameworkAssemblies.Any() ||
-                   package.AssemblyReferences.Any() || 
+            //return package.FrameworkAssemblies.Any() ||
+            //       package.AssemblyReferences.Any() || 
+            //       package.GetContentFiles().Any();
+            return package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any();
         }
 

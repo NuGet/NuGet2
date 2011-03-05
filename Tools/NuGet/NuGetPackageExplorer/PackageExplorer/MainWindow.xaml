@@ -138,7 +138,7 @@
                         </TextBlock>
                         
                         <!-- Framework assembly references -->
-                        <TextBlock 
+                        <!--<TextBlock 
                             Visibility="{Binding Items.Count, ElementName=FrameworkAssemblyItems, Converter={StaticResource countConverter}}"
                             Text="{x:Static resources:Resources.Dialog_FrameworkAssembliesLabel}" 
                             Style="{StaticResource DetailMetadataLabelStyle}" />
@@ -152,7 +152,7 @@
                                     <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        </ItemsControl>-->
                     </StackPanel>
                 </ScrollViewer>
             </DataTemplate>
