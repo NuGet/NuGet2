@@ -62,11 +62,18 @@ namespace NuGet.Commands {
                 Console.WriteLine(NuGetResources.SpecCommandFileExists, nuspecFile);
             }
             else {
-                using (Stream stream = File.Create(nuspecFile)) {
-                    Manifest.Create(builder).Save(stream);
-                }
+                try {
+                    using (Stream stream = File.Create(nuspecFile)) {
+                        Manifest.Create(builder).Save(stream);
+                    }
 
-                Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
+                    Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
+                }
+                catch {
+                    // Cleanup the file if it fails to save for some reason
+                    File.Delete(nuspecFile);
+                    throw;
+                }
             }
         }
 
@@ -74,7 +81,14 @@ namespace NuGet.Commands {
             // Get the attribute
             T attribute = assembly.GetCustomAttributes(typeof(T), inherit: false).Cast<T>().FirstOrDefault();
 
-            return attribute != null ? selector(attribute) : null;
+            if (attribute != null) {
+                string value = selector(attribute);
+                // Return the value only if it isn't null or empty so that we can use ?? to fall back
+                if (!String.IsNullOrEmpty(value)) {
+                    return value;
+                }
+            }
+            return null;
         }
     }
 }
