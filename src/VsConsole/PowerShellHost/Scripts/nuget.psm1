@@ -110,7 +110,14 @@ function GetPackageIds($packages) {
 }
 
 function GetPackageVersions($packages, $context) {
-    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version | Sort-Object -Descending
+    $packages | Where-Object { $_.Id -eq $context.Id } | Select -ExpandProperty Version | %{
+        # Convert to version if the we're looking at the version as a string
+        if($_ -is [string]) { 
+            [Version]::Parse($_) 
+        } else { 
+            $_ 
+        }  
+    } | Sort-Object -Descending
 }
 
 function NugetTabExpansion($line, $lastWord) {
