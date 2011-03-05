@@ -122,6 +122,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PackageManagerUI\Converters\CountToVisibilityConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\FixUrlConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LoadPageResult.cs" />

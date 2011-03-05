@@ -9,6 +9,7 @@
         <ResourceDictionary Source="TemplateStyles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <self:FixUrlConverter x:Key="urlConverter" />
     <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
     <self:CountToVisibilityConverter x:Key="countConverter" />
     <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
@@ -23,7 +24,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Image Style="{StaticResource TileImageStyle}" Source="{Binding PackageIdentity.IconUrl, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}" Width="32" Height="32" Stretch="Fill" StretchDirection="DownOnly">
+            <Image Style="{StaticResource TileImageStyle}" Source="{Binding PackageIdentity.IconUrl, Converter={StaticResource urlConverter}, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}" Width="32" Height="32" Stretch="Fill" StretchDirection="DownOnly">
             </Image>
 
             <StackPanel Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
