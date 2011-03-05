@@ -16,7 +16,7 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "InstallCommandVersionDescription")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription")]
+        [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription", AltName = "x")]
         public bool ExcludeVersion { get; set; }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }

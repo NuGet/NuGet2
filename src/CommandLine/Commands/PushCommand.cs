@@ -9,15 +9,16 @@ namespace NuGet.Commands {
         MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : Command {
+
         private string _apiKey;
         private string _packagePath;
 
-        [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription")]
+        [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
         public bool CreateOnly { get; set; }
 
-        [Option(typeof(NuGetResources), "PushCommandSourceDescription")]
+        [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-
+        
         public override void ExecuteCommand() {
             //Frist argument should be the package
             _packagePath = Arguments[0];

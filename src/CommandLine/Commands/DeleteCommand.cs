@@ -11,10 +11,10 @@ namespace NuGet.Commands {
         private string _packageId;
         private string _packageVersion;
 
-        [Option(typeof(NuGetResources), "DeleteCommandSourceDescription")]
+        [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription")]
+        [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
         public override void ExecuteCommand() {

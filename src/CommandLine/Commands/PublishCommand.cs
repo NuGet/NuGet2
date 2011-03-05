@@ -7,11 +7,12 @@ namespace NuGet.Commands {
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",
         UsageSummaryResourceName = "PublishCommandUsageSummary")]
     public class PublishCommand : Command {
+        
         private string _apiKey;
         private string _packageId;
         private string _packageVersion;
 
-        [Option(typeof(NuGetResources), "PublishCommandSourceDescription")]
+        [Option(typeof(NuGetResources), "PublishCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
 
