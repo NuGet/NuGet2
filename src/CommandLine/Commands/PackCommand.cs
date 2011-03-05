@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,11 +10,15 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {
-        private static readonly HashSet<string> _exclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-            Constants.PackageExtension, Constants.ManifestExtension, 
-            // Version control Files
-            @".hg*", @".git*", @".svn*"
+        private static readonly Regex[] _defaultExcludes = new [] {
+            // Exclude previous package files
+            new Regex(Regex.Escape(Constants.PackageExtension) + '$', RegexOptions.IgnoreCase), 
+            // Exclude the nuspec file
+            new Regex(Regex.Escape(Constants.ManifestExtension) + '$', RegexOptions.IgnoreCase), 
+            // Exclude all files and directories that begin with "."
+            new Regex(@"(^|[/\\])\..+$", RegexOptions.IgnoreCase)
         };
+        private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly HashSet<string> _allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
             Constants.ManifestExtension,
@@ -40,7 +45,7 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandSourcesDescription")]
         [Option(typeof(NuGetResources), "PackageCommandExcludeDescription")]
         public ICollection<string> Exclude {
-            get { return _exclude; }
+            get { return _excludes; }
         }
         public bool Sources { get; set; }
 
@@ -53,15 +58,16 @@ namespace NuGet.Commands {
 
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
-            // Get the package builder
-            PackageBuilder builder = GetPackageBuilder(path);
 
+            var basePath = BasePath ?? Path.GetDirectoryName(nuspecFile);
+            PackageBuilder builder = new PackageBuilder(nuspecFile, basePath);
+            
             if (!String.IsNullOrEmpty(Version)) {
                 builder.Version = new Version(Version);
             }
 
             // Remove the output file or the package spec might try to include it (which is default behavior)
-            ExcludeFiles(builder.Files, _exclude);
+            ExcludeFiles(builder.Files, basePath, _excludes);
 
             // Get the output path
             string outputPath = GetOutputPath(builder);
@@ -119,13 +125,31 @@ namespace NuGet.Commands {
             Console.WriteLine();
         }
 
-        internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, IEnumerable<string> excludeFilters) {
-            var filters = excludeFilters.Select(f => new Regex(Regex.Escape(f).Replace(@"\*", ".*").Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase));
-            packageFiles.RemoveAll(file => filters.Any(f => f.IsMatch(file.Path)));
+        internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, string basePath, IEnumerable<string> excludeFilters) {
+            var filters = excludeFilters.Select(WildCardToRegex).Concat(_defaultExcludes);
+            packageFiles.RemoveAll(item => {
+                // The Path property of IPackageFile returns the target path, the path inside the package.
+                // Since excludes would need to be performed against the physical path on disk, cast to it and use the SourcePath property
+                Debug.Assert(item is PhysicalPackageFile);
+                string path = (item as PhysicalPackageFile).SourcePath;
+
+                // Trim out the basePath portion of the path since wildcards would be relative to the basePath.
+                int index = path.IndexOf(basePath, StringComparison.OrdinalIgnoreCase);
+                if (index != -1) {
+                    path = path.Substring(index + basePath.Length);
+                }
+                return (filters.Any(f => f.IsMatch(path)));
+            });
         }
+
+        private static Regex WildCardToRegex(string wildCard) {
+            return new Regex('^' + Regex.Escape(wildCard).Replace(@"\*", ".*").Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase);
+        }
+
         private string GetOutputPath(PackageBuilder builder) {
             // Output file is {id}.{version}
             string outputFile = builder.Id + "." + builder.Version;
+
 
             // If this is a source package then add .Sources to the package file name
             if (Sources) {
