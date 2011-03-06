@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
-using System.IO;
 
 namespace PackageExplorerViewModel {
 
@@ -12,7 +12,7 @@ namespace PackageExplorerViewModel {
 
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
-        private IList<PackagePart> _packageParts;
+        private SortedSet<PackagePart> _packageParts;
         private string _currentFileContent;
         private string _currentFileName;
         private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand, _viewContentCommand, _saveContentCommand, _openContentFileCommand;
@@ -93,7 +93,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public IList<PackagePart> PackageParts {
+        public SortedSet<PackagePart> PackageParts {
             get {
                 if (_packageParts == null) {
                     PackageFolder root = PathToTreeConverter.Convert(_package.GetFiles().ToList());
@@ -283,6 +283,5 @@ namespace PackageExplorerViewModel {
         public void OnSaved() {
             HasEdit = false;
         }
-
     }
 }

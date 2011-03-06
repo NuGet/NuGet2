@@ -6,8 +6,6 @@ using NuGet;
 namespace PackageExplorerViewModel {
     internal static class PathToTreeConverter {
 
-        private static readonly PackagePartComparer _packagePartComparer = new PackagePartComparer();
-
         public static PackageFolder Convert(List<IPackageFile> paths) {
             if (paths == null) {
                 throw new ArgumentNullException("paths");
@@ -15,7 +13,7 @@ namespace PackageExplorerViewModel {
 
             paths.Sort((p1, p2) => String.Compare(p1.Path, p2.Path, StringComparison.OrdinalIgnoreCase));
 
-            PackageFolder root = new PackageFolder("Root", "");
+            PackageFolder root = new PackageFolder("Root", "", null);
 
             List<Tuple<IPackageFile, string[]>> parsedPaths = paths.Select(p => Tuple.Create(p, p.Path.Split('\\'))).ToList();
             Parse(root, parsedPaths, 0, 0, parsedPaths.Count);
@@ -30,7 +28,7 @@ namespace PackageExplorerViewModel {
 
                 if (parsedPaths[i].Item2.Length == level + 1) {
                     // it's a file
-                    root.Children.Add(new PackageFile(parsedPaths[i].Item1, s));
+                    root.Children.Add(new PackageFile(parsedPaths[i].Item1, s, root));
                     i++;
                 }
                 else {
@@ -46,16 +44,13 @@ namespace PackageExplorerViewModel {
                         path = root.Path + "\\" + s;
                     }
 
-                    PackageFolder folder = new PackageFolder(s, path);
+                    PackageFolder folder = new PackageFolder(s, path, root);
                     root.Children.Add(folder);
                     Parse(folder, parsedPaths, level + 1, i, j);
 
                     i = j;
                 }
             }
-
-            // sort the children parts, putting folders before files
-            root.Children.Sort(_packagePartComparer);
         }
     }
 }
