@@ -150,9 +150,14 @@ function global:Run-Test {
                     Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
                 }
             }
-            finally {              
-                # Clear the cache after running each test
-                [System.Runtime.Caching.MemoryCache]::Default.Trim(100) | Out-Null
+            finally {   
+                try {           
+                    # Clear the cache after running each test
+                    [System.Runtime.Caching.MemoryCache]::Default.Trim(100) | Out-Null
+                }
+                catch {
+                    # The type might not be loaded so don't fail if it isn't
+                }
          
                 # Cleanup the output from running the generate packages tool
                 Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
