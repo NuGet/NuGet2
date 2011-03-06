@@ -6,13 +6,13 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IVsActivityLogger))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class VsActivityLogger : IVsActivityLogger {
-
         // This is the package name. No need to localize it.
         public const string LogEntrySource = "NuGet Package Manager";
 
         private readonly Lazy<IVsActivityLog> _activityLog;
 
-        public VsActivityLogger() : this(ServiceLocator.GetInstance<IServiceProvider>()) {
+        public VsActivityLogger()
+            : this(ServiceLocator.GetInstance<IServiceProvider>()) {
         }
 
         public VsActivityLogger(IServiceProvider serviceProvider) {
