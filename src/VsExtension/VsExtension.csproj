@@ -14,6 +14,11 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <VsSdkTargets>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets</VsSdkTargets>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <StartAction>Program</StartAction>
+    <StartProgram>$(MSBuildProgramFiles32)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
+  </PropertyGroup>
   <Choose>
     <When Condition="Exists($(VsSdkTargets))">
       <PropertyGroup>
