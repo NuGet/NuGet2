@@ -1,4 +1,3 @@
-using System.Web.Security;
 using Ninject.Modules;
 
 namespace NuGet.Server.Infrastructure {
@@ -7,7 +6,6 @@ namespace NuGet.Server.Infrastructure {
             IServerPackageRepository packageRepository = new ServerPackageRepository(PackageUtility.PackagePhysicalPath);
             Bind<IHashProvider>().To<CryptoHashProvider>();
             Bind<IServerPackageRepository>().ToConstant(packageRepository);
-            Bind<MembershipProvider>().ToConstant(Membership.Provider);
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 using System.Web;
 using System.Web.Hosting;
 
-namespace NuGet.Server {
+namespace NuGet.Server.Infrastructure {
     public class PackageUtility {
         internal static string PackagePhysicalPath = HostingEnvironment.MapPath("~/Packages");
 

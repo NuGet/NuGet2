@@ -36,6 +36,8 @@ namespace NuGet.Server.DataServices {
             PackageSize = derivedData.PackageSize;
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
+            DownloadCount = -1;
+            Rating = -1;
         }
 
         public string Id {

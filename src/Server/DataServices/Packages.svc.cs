@@ -3,7 +3,6 @@ using System.Data.Services;
 using System.Data.Services.Common;
 using System.Data.Services.Providers;
 using System.IO;
-using System.Web;
 using Ninject;
 using NuGet.Server.Infrastructure;
 
