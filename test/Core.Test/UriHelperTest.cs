@@ -14,6 +14,15 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void CreatePartUriEncodesUri() {
+            // Act
+            Uri uri = UriUtility.CreatePartUri(@"My awesome projects\C#.NET\?123\foo.txt");
+
+            // Assert
+            Assert.AreEqual(@"/My%20awesome%20projects/C%23.NET/%3F123/foo.txt", uri.ToString());
+        }
+
+        [TestMethod]
         public void GetPathFromUri() {
             // Arrange
             Uri uri = new Uri("/a/b.txt", UriKind.Relative);
