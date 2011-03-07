@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Ninject;
 using NuGet.Server.DataServices;
@@ -31,7 +32,11 @@ namespace NuGet.Server.Infrastructure {
         }
 
         private DerivedPackageData CalculateDerivedData(string path) {
-            byte[] fileBytes = FileSystem.OpenFile(path).ReadAllBytes();
+            byte[] fileBytes;
+            using (Stream stream = FileSystem.OpenFile(path)) {
+                fileBytes = stream.ReadAllBytes();
+            }
+
             return new DerivedPackageData {
                 PackageSize = fileBytes.Length,
                 PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes)),
