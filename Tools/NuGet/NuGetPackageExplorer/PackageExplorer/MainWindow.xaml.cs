@@ -39,9 +39,9 @@ namespace PackageExplorer {
             }
             catch (Exception ex) {
                 MessageBox.Show(
-                    ex.Message, 
-                    StringResources.Dialog_Title, 
-                    MessageBoxButton.OK, 
+                    ex.Message,
+                    StringResources.Dialog_Title,
+                    MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
             }
@@ -88,8 +88,7 @@ namespace PackageExplorer {
         }
 
         private void OpenPackageFromNuGetFeed(object sender, RoutedEventArgs e) {
-            if (!NetworkInterface.GetIsNetworkAvailable())
-            {
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     PackageExplorer.Resources.Resources.Dialog_Title,
@@ -162,6 +161,56 @@ namespace PackageExplorer {
             }
         }
 
+        private void OnTreeViewItemDragOver(object sender, DragEventArgs e) {
+            PackageFolder folder;
+
+            TreeViewItem item = sender as TreeViewItem;
+            if (item != null) {
+                folder = item.DataContext as PackageFolder;
+            }
+            else {
+                folder = (DataContext as PackageViewModel).RootFolder;
+            }
+            if (folder != null) {
+                var data = e.Data;
+                if (data.GetDataPresent(DataFormats.FileDrop)) {
+                    e.Effects = DragDropEffects.Copy;
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            e.Effects = DragDropEffects.None;
+            e.Handled = true;
+        }
+
+        private void OnTreeViewItemDrop(object sender, DragEventArgs e) {
+            PackageFolder folder;
+
+            TreeViewItem item = sender as TreeViewItem;
+            if (item != null) {
+                folder = item.DataContext as PackageFolder;
+            }
+            else {
+                folder = (DataContext as PackageViewModel).RootFolder;
+            }
+
+            if (folder != null) {
+                var data = e.Data;
+                if (data.GetDataPresent(DataFormats.FileDrop)) {
+                    object value = data.GetData(DataFormats.FileDrop);
+                    string[] filenames = value as string[];
+                    if (filenames != null && filenames.Length > 0) {
+                        foreach (string file in filenames) {
+                            folder.AddFile(file);
+                        }
+
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         private void Hyperlink_Click(object sender, RoutedEventArgs e) {
@@ -176,8 +225,8 @@ namespace PackageExplorer {
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
                 StringResources.Dialog_HelpAbout,
-                StringResources.Dialog_Title, 
-                MessageBoxButton.OK, 
+                StringResources.Dialog_Title,
+                MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
 
@@ -225,7 +274,7 @@ namespace PackageExplorer {
 
         private bool HasUnsavedChanges {
             get {
-                var viewModel = (PackageViewModel) DataContext;
+                var viewModel = (PackageViewModel)DataContext;
                 return (viewModel != null && viewModel.HasEdit);
             }
         }
@@ -311,8 +360,7 @@ namespace PackageExplorer {
         }
 
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
-            if (!NetworkInterface.GetIsNetworkAvailable())
-            {
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     PackageExplorer.Resources.Resources.Dialog_Title,
@@ -326,8 +374,8 @@ namespace PackageExplorer {
             if (!viewModel.GetFiles().Any()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.PackageHasNoFile,
-                    PackageExplorer.Resources.Resources.Dialog_Title, 
-                    MessageBoxButton.OK, 
+                    PackageExplorer.Resources.Resources.Dialog_Title,
+                    MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
             }
@@ -388,7 +436,7 @@ namespace PackageExplorer {
             }
 
             if (part != null) {
-                var dialog = new RenameWindow { 
+                var dialog = new RenameWindow {
                     NewName = part.Name,
                     Owner = this
                 };
@@ -438,6 +486,30 @@ namespace PackageExplorer {
                     folder.AddFolder(newName);
                 }
             }
+        }
+
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e) {
+            if (DataContext == null) {
+                return;
+            }
+
+            var rootFolder = (DataContext as PackageViewModel).RootFolder;
+            string subFolder = (string)e.Parameter;
+            rootFolder.AddFolder(subFolder);
+            e.Handled = true;
+        }
+
+        private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e) {
+            if (DataContext == null) {
+                e.CanExecute = false;
+                e.Handled = true;
+                return;
+            }
+
+            var rootFolder = (DataContext as PackageViewModel).RootFolder;
+            string subFolder = (string)e.Parameter;
+            e.CanExecute = !rootFolder.ContainsFolder(subFolder);
+            e.Handled = true;
         }
     }
 }

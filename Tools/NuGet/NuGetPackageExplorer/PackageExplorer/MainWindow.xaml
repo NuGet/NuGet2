@@ -229,6 +229,7 @@
         <CommandBinding Command="Close" Executed="ExitMenuItem_Click" />
         <CommandBinding Command="{x:Static self:Commands.OpenFromFeedCommand}" Executed="OpenPackageFromNuGetFeed" />
         <CommandBinding Command="{x:Static self:Commands.PublishToFeedCommand}" Executed="OnPublishButtonClick" CanExecute="CanPublishToFeedCommand" />
+        <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
     </Window.CommandBindings>
     
     <Grid x:Name="LayoutRoot">
@@ -316,17 +317,17 @@
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                     <Separator />
-                    <self:GrayscaleMenuItem Header="_Content Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="content">
+                    <self:GrayscaleMenuItem Header="_Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
-                    <self:GrayscaleMenuItem Header="_Lib Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="lib">
+                    <self:GrayscaleMenuItem Header="_Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
-                    <self:GrayscaleMenuItem Header="_Tools Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="tools">
+                    <self:GrayscaleMenuItem Header="_Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
                         </self:GrayscaleMenuItem.Icon>
@@ -392,15 +393,22 @@
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
+                                <EventSetter Event="DragOver" Handler="OnTreeViewItemDragOver" />
+                                <EventSetter Event="Drop" Handler="OnTreeViewItemDrop" />
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
                                 <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                                <Setter Property="AllowDrop" Value="True" />
                             </Style>
                         </TreeView.ItemContainerStyle>
                     </TreeView>
-                    
-                    <Border Background="Transparent" Grid.Row="1">
+
+                    <Border Background="Transparent" Grid.Row="1" AllowDrop="true" DragOver="OnTreeViewItemDragOver" Drop="OnTreeViewItemDrop">
                         <Border.ContextMenu>
                             <ContextMenu>
+                                <ContextMenu.CommandBindings>
+                                    <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
+                                </ContextMenu.CommandBindings>
+                                
                                 <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
                                 <MenuItem Header="_New Folder" Click="OnAddNewFolder2Click">
                                     <MenuItem.Icon>
@@ -408,17 +416,17 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator />
-                                <self:GrayscaleMenuItem Header="Add _Content Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="content">
+                                <self:GrayscaleMenuItem Header="Add _Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
                                     <self:GrayscaleMenuItem.Icon>
                                         <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
                                     </self:GrayscaleMenuItem.Icon>
                                 </self:GrayscaleMenuItem>
-                                <self:GrayscaleMenuItem Header="Add _Lib Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="lib">
+                                <self:GrayscaleMenuItem Header="Add _Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
                                     <self:GrayscaleMenuItem.Icon>
                                         <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
                                     </self:GrayscaleMenuItem.Icon>
                                 </self:GrayscaleMenuItem>
-                                <self:GrayscaleMenuItem Header="Add _Tools Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="tools">
+                                <self:GrayscaleMenuItem Header="Add _Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
                                     <self:GrayscaleMenuItem.Icon>
                                         <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
                                     </self:GrayscaleMenuItem.Icon>

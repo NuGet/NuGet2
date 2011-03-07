@@ -76,8 +76,15 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private ICommand _deleteCommand;
+
         public ICommand DeleteCommand {
-            get { return PackageViewModel.DeleteContentCommand; }
+            get {
+                if (_deleteCommand == null) {
+                    _deleteCommand = new DeleteContentCommand2(PackageViewModel);
+                }
+                return _deleteCommand;
+            }
         }
 
         public void Rename(string newName) {

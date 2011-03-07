@@ -25,7 +25,7 @@ namespace PackageExplorerViewModel {
             }
 
             string folderName = (string)parameter;
-            return !ViewModel.RootFolder.HasFolder(folderName);
+            return !ViewModel.RootFolder.ContainsFolder(folderName);
         }
 
         public event EventHandler CanExecuteChanged;

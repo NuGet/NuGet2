@@ -58,6 +58,7 @@
     <Compile Include="Commands\CancelEditCommand.cs" />
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DeleteContentCommand.cs" />
+    <Compile Include="Commands\DeleteContentCommand2.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
     <Compile Include="Commands\OpenContentFileCommand.cs" />

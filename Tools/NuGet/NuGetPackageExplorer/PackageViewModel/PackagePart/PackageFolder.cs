@@ -71,7 +71,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public bool HasFolder(string folderName) {
+        public bool ContainsFolder(string folderName) {
             if (Children == null) {
                 return false;
             }
@@ -79,7 +79,7 @@ namespace PackageExplorerViewModel {
             return Children.Any(p => p is PackageFolder && p.Name.Equals(folderName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public bool HasFile(string fileName) {
+        public bool ContainsFile(string fileName) {
             if (Children == null) {
                 return false;
             }
@@ -88,7 +88,7 @@ namespace PackageExplorerViewModel {
         }
 
         public void AddFolder(string folderName) {
-            if (HasFolder(folderName)) {
+            if (ContainsFolder(folderName)) {
                 return;
             }
             var newFolder = new PackageFolder(folderName, this);
@@ -104,7 +104,7 @@ namespace PackageExplorerViewModel {
             }
 
             string name = System.IO.Path.GetFileName(filepath);
-            if (HasFile(name)) {
+            if (ContainsFile(name)) {
                 return;
             }
             

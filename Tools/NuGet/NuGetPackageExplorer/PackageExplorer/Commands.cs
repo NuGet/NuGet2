@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace PackageExplorer
 {
@@ -15,5 +11,8 @@ namespace PackageExplorer
         public static readonly RoutedUICommand PublishToFeedCommand =
             new RoutedUICommand("Publish...", "PublishToFeed", typeof(Commands),
                 new InputGestureCollection() { new KeyGesture(Key.P, ModifierKeys.Control) });
+
+        public static readonly RoutedUICommand AddRootFolderCommand =
+            new RoutedUICommand("Add Folder...", "AddRootFolder", typeof(Commands));
     }
 }
