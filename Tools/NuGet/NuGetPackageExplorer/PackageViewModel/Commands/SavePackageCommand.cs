@@ -13,7 +13,8 @@ namespace PackageExplorerViewModel {
         private const string SaveAction = "Save";
         private const string SaveAsAction = "SaveAs";
 
-        public SavePackageCommand(PackageViewModel model) : base(model) {
+        public SavePackageCommand(PackageViewModel model)
+            : base(model) {
             model.PropertyChanged += OnPropertyChanged;
         }
 
@@ -27,16 +28,13 @@ namespace PackageExplorerViewModel {
 
         public bool CanExecute(object parameter) {
             string action = parameter as string;
-            if (action == SaveAction)
-            {
+            if (action == SaveAction) {
                 return !ViewModel.IsInEditMode && Path.IsPathRooted(ViewModel.PackageSource);
             }
-            else if (action == SaveAsAction)
-            {
+            else if (action == SaveAsAction) {
                 return !ViewModel.IsInEditMode;
             }
-            else
-            {
+            else {
                 return false;
             }
         }
@@ -44,6 +42,11 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
+            if (!ViewModel.RootFolder.GetFiles().Any()) {
+                MessageBox.Show(Resources.PackageHasNoFile, Resources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             string action = parameter as string;
             if (action == SaveAction) {
                 SavePackage(ViewModel.PackageSource);
@@ -60,26 +63,20 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private void SavePackage(string fileName)
-        {
-            try
-            {
+        private void SavePackage(string fileName) {
+            try {
                 PackageHelper.SavePackage(ViewModel.PackageMetadata, ViewModel.GetFiles(), fileName, true);
                 ViewModel.OnSaved();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 MessageBox.Show(ex.Message, Resources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void RaiseCanExecuteChangedEvent()
-        {
-            if (CanExecuteChanged != null)
-            {
+        private void RaiseCanExecuteChangedEvent() {
+            if (CanExecuteChanged != null) {
                 CanExecuteChanged(this, EventArgs.Empty);
             }
         }
-
     }
 }

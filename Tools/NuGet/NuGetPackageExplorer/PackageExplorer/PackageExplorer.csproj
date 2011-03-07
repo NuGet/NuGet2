@@ -33,7 +33,7 @@
     <SuiteName>NuGet</SuiteName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>0.5.0.0</ApplicationVersion>
+    <ApplicationVersion>0.8.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -125,7 +125,7 @@
     <Compile Include="Converters\UriConverter.cs" />
     <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="Converters\VersionSpecConverter.cs" />
-    <Compile Include="Converters\ViewContentConverter.cs" />
+    <Compile Include="Converters\PackagePartToBoolConverter.cs" />
     <Compile Include="DialogWithNoMinimizeAndMaximize.cs" />
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
@@ -148,6 +148,9 @@
     <Compile Include="PublishApiKeyValidationRule.cs" />
     <Compile Include="PublishPackageWindow.xaml.cs">
       <DependentUpon>PublishPackageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RenameWindow.xaml.cs">
+      <DependentUpon>RenameWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -185,6 +188,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PublishPackageWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -227,6 +234,7 @@
     <Resource Include="Images\NewDocumentHS.png" />
     <Resource Include="Images\FontDialogHS.png" />
     <Resource Include="Images\Book_angleHS.png" />
+    <Resource Include="Images\NewFolderHS.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
 using PackageExplorer.Properties;
@@ -57,6 +57,15 @@ namespace PackageExplorer {
             }
         }
 
+        private void NewMenuItem_Click(object sender, RoutedEventArgs e) {
+            bool canceled = AskToSaveCurrentFile();
+            if (canceled) {
+                return;
+            }
+
+            DataContext = new PackageViewModel(new EmptyPackage(), String.Empty);
+        }
+
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e) {
             bool canceled = AskToSaveCurrentFile();
             if (canceled) {
@@ -81,7 +90,11 @@ namespace PackageExplorer {
         private void OpenPackageFromNuGetFeed(object sender, RoutedEventArgs e) {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    PackageExplorer.Resources.Resources.NoNetworkConnection,
+                    PackageExplorer.Resources.Resources.Dialog_Title,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
@@ -185,17 +198,11 @@ namespace PackageExplorer {
         /// </summary>
         /// <returns>true if user cancels the impending action</returns>
         private bool AskToSaveCurrentFile() {
-            
             if (HasUnsavedChanges) {
-
-                var question = String.Format(
-                    CultureInfo.CurrentCulture,
-                    StringResources.Dialog_SaveQuestion,
-                    System.IO.Path.GetFileName(PackageSourceItem.Content.ToString()));
 
                 // if there is unsaved changes, ask user for confirmation
                 var result = MessageBox.Show(
-                    question,
+                    StringResources.Dialog_SaveQuestion,
                     PackageExplorer.Resources.Resources.Dialog_Title,
                     MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question);
@@ -270,6 +277,26 @@ namespace PackageExplorer {
             }
         }
 
+        private void TreeView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            TreeView tv = (TreeView)sender;
+            IInputElement element = tv.InputHitTest(e.GetPosition(tv));
+            while (!((element is TreeView) || element == null)) {
+                if (element is TreeViewItem)
+                    break;
+
+                if (element is FrameworkElement) {
+                    FrameworkElement fe = (FrameworkElement)element;
+                    element = (IInputElement)(fe.Parent ?? fe.TemplatedParent);
+                }
+                else
+                    break;
+            }
+            if (element is TreeViewItem) {
+                element.Focus();
+                e.Handled = true;
+            }
+        }
+
         private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
 
             var settings = Properties.Settings.Default;
@@ -286,13 +313,26 @@ namespace PackageExplorer {
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    PackageExplorer.Resources.Resources.NoNetworkConnection,
+                    PackageExplorer.Resources.Resources.Dialog_Title,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
             var viewModel = (PackageViewModel)DataContext;
 
-            var publishPackageViewModel = new PublishPackageViewModel(viewModel.PackageMetadata, viewModel.GetCurrentPackageStream) {
+            if (!viewModel.GetFiles().Any()) {
+                MessageBox.Show(
+                    PackageExplorer.Resources.Resources.PackageHasNoFile,
+                    PackageExplorer.Resources.Resources.Dialog_Title, 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            var publishPackageViewModel = new PublishPackageViewModel(viewModel) {
                 PublishKey = Settings.Default.PublishPrivateKey
             };
 
@@ -334,6 +374,70 @@ namespace PackageExplorer {
 
             e.CanExecute = canExecute;
             e.Handled = true;
+        }
+
+        private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            (DataContext as PackageViewModel).SelectedItem = PackagesTreeView.SelectedItem;
+        }
+
+        private void OnRenameItemClick(object sender, RoutedEventArgs e) {
+            MenuItem menuItem = (MenuItem)sender;
+            PackagePart part = menuItem.DataContext as PackagePart;
+            if (part == null) {
+                part = PackagesTreeView.SelectedItem as PackagePart;
+            }
+
+            if (part != null) {
+                var dialog = new RenameWindow { 
+                    NewName = part.Name,
+                    Owner = this
+                };
+                bool? result = dialog.ShowDialog();
+                if (result ?? false) {
+                    part.Name = dialog.NewName;
+                }
+            }
+        }
+
+        private void OnAddNewFolderClick(object sender, RoutedEventArgs e) {
+            MenuItem menuItem = (MenuItem)sender;
+            PackageFolder folder = menuItem.DataContext as PackageFolder;
+
+            if (folder == null) {
+                folder = PackagesTreeView.SelectedItem as PackageFolder;
+            }
+
+            if (folder == null) {
+                folder = (DataContext as PackageViewModel).RootFolder;
+            }
+
+            if (folder != null) {
+                var dialog = new RenameWindow {
+                    NewName = "NewFolder",
+                    Owner = this
+                };
+                bool? result = dialog.ShowDialog();
+                if (result ?? false) {
+                    string newName = dialog.NewName;
+                    folder.AddFolder(newName);
+                }
+            }
+        }
+
+        private void OnAddNewFolder2Click(object sender, RoutedEventArgs e) {
+            var folder = (DataContext as PackageViewModel).RootFolder;
+
+            if (folder != null) {
+                var dialog = new RenameWindow {
+                    NewName = "NewFolder",
+                    Owner = this
+                };
+                bool? result = dialog.ShowDialog();
+                if (result ?? false) {
+                    string newName = dialog.NewName;
+                    folder.AddFolder(newName);
+                }
+            }
         }
     }
 }

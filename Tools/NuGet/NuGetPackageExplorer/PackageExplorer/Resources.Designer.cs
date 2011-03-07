@@ -169,7 +169,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you want to save your changes to {0}?.
+        ///   Looks up a localized string similar to Do you want to save your changes?.
         /// </summary>
         public static string Dialog_SaveQuestion {
             get {
@@ -214,11 +214,29 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Network connection is not detected..
+        /// </summary>
+        public static string NoNetworkConnection {
+            get {
+                return ResourceManager.GetString("NoNetworkConnection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to download package correctly. The contents of the package could not be verified..
         /// </summary>
         public static string PackageContentsVerifyError {
             get {
                 return ResourceManager.GetString("PackageContentsVerifyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no content file in the package..
+        /// </summary>
+        public static string PackageHasNoFile {
+            get {
+                return ResourceManager.GetString("PackageHasNoFile", resourceCulture);
             }
         }
     }

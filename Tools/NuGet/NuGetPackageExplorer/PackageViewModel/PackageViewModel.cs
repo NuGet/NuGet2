@@ -12,10 +12,11 @@ namespace PackageExplorerViewModel {
 
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
-        private SortedSet<PackagePart> _packageParts;
+        private PackageFolder _packageRoot;
         private string _currentFileContent;
         private string _currentFileName;
         private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand, _viewContentCommand, _saveContentCommand, _openContentFileCommand;
+        private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _deleteContentCommand;
         private bool _isInEditMode;
         private string _packageSource;
 
@@ -26,6 +27,8 @@ namespace PackageExplorerViewModel {
             _package = package;
             _packageMetadata = new EditablePackageMetadata(_package);
             PackageSource = source;
+
+            _packageRoot = PathToTreeConverter.Convert(_package.GetFiles().ToList(), this);
         }
 
         public bool IsInEditMode {
@@ -93,31 +96,9 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public SortedSet<PackagePart> PackageParts {
+        public ICollection<PackagePart> PackageParts {
             get {
-                if (_packageParts == null) {
-                    PackageFolder root = PathToTreeConverter.Convert(_package.GetFiles().ToList());
-                    _packageParts = root.Children;
-
-                    AssignViewModelToFiles(root);
-                }
-
-                return _packageParts;
-            }
-        }
-
-        private void AssignViewModelToFiles(PackageFolder root) {
-            foreach (var part in root.Children) {
-                var file = part as PackageFile;
-                if (file != null) {
-                    file.PackageViewModel = this;
-                }
-                else {
-                    var folder = part as PackageFolder;
-                    if (folder != null) {
-                        AssignViewModelToFiles(folder);
-                    }
-                }
+                return _packageRoot.Children;
             }
         }
 
@@ -161,6 +142,46 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public ICommand AddContentFolderCommand {
+            get {
+                if (_addContentFolderCommand == null) {
+                    _addContentFolderCommand = new AddContentFolderCommand(this);
+                }
+
+                return _addContentFolderCommand;
+            }
+        }
+
+        public ICommand AddContentFileCommand {
+            get {
+                if (_addContentFileCommand == null) {
+                    _addContentFileCommand = new AddContentFileCommand(this);
+                }
+
+                return _addContentFileCommand;
+            }
+        }
+
+        public ICommand AddNewFolderCommand {
+            get {
+                if (_addNewFolderCommand == null) {
+                    _addNewFolderCommand = new AddNewFolderCommand(this);
+                }
+
+                return _addNewFolderCommand;
+            }
+        }
+
+        public ICommand DeleteContentCommand {
+            get {
+                if (_deleteContentCommand == null) {
+                    _deleteContentCommand = new DeleteContentCommand(this);
+                }
+
+                return _deleteContentCommand;
+            }
+        }
+
         public ICommand ViewContentCommand {
             get {
                 if (_viewContentCommand == null) {
@@ -189,6 +210,20 @@ namespace PackageExplorerViewModel {
         }
 
         #endregion
+
+        private object _selectedItem;
+
+        public object SelectedItem {
+            get {
+                return _selectedItem;
+            }
+            set {
+                if (_selectedItem != value) {
+                    _selectedItem = value;
+                    RaisePropertyChangeEvent("SelectedItem");
+                }
+            }
+        }
 
         public string PackageSource {
             get { return _packageSource; }
@@ -237,7 +272,7 @@ namespace PackageExplorerViewModel {
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
-            return _package.GetFiles();
+            return _packageRoot.GetFiles();
         }
 
         public Stream GetCurrentPackageStream()
@@ -280,8 +315,18 @@ namespace PackageExplorerViewModel {
             RaisePropertyChangeEvent("WindowTitle");
         }
 
-        public void OnSaved() {
+        internal void OnSaved() {
             HasEdit = false;
+        }
+
+        internal void NotifyChanges() {
+            HasEdit = true;
+        }
+
+        public PackageFolder RootFolder {
+            get {
+                return _packageRoot;
+            }
         }
     }
 }

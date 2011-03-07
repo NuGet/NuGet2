@@ -26,13 +26,23 @@
             </ResourceDictionary.MergedDictionaries>
             
             <viewmodel:DisabledCommand x:Key="DisabledCommand" />
-            
-            <self:ViewContentConverter x:Key="ViewContentConverter" />
+
+            <self:PackagePartToBoolConverter x:Key="PackagePartConverter" />
 
             <ContextMenu x:Key="SharedContextMenu">
-                <self:GrayscaleMenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" />
-                <self:GrayscaleMenuItem Header="_Open in Windows Shell..." Command="{Binding OpenCommand}" CommandParameter="{Binding}" />
-                <self:GrayscaleMenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
+                <MenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" />
+                <MenuItem Header="_Open in Windows shell..." Command="{Binding OpenCommand}" CommandParameter="{Binding}" />
+                <MenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
+                <Separator />
+                <MenuItem Header="_Rename..." Click="OnRenameItemClick" />
+                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
+            </ContextMenu>
+
+            <ContextMenu x:Key="FolderSharedContextMenu">
+                <MenuItem Header="_Add Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding}" />
+                <MenuItem Header="Add Ne_w Folder..." Click="OnAddNewFolderClick" />
+                <MenuItem Header="_Rename..." Click="OnRenameItemClick" />
+                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 
             <!-- data template for the package details pane -->
@@ -79,7 +89,7 @@
                         </Grid>
 
                         <!-- Owners -->
-                        <Grid Margin="0,3,0,0">
+                        <Grid Margin="0,3,0,0" Visibility="{Binding Owners, Converter={StaticResource NullToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -161,9 +171,9 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type viewmodel:PackageFile}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Background="Transparent" Orientation="Horizontal" ContextMenu="{StaticResource SharedContextMenu}">
                     <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
-                    <TextBlock x:Name="Header" Text="{Binding Name}" ContextMenu="{StaticResource SharedContextMenu}">
+                    <TextBlock x:Name="Header" Text="{Binding Name}">
                     </TextBlock>
                 </StackPanel>
 
@@ -185,10 +195,10 @@
                 </DataTemplate.Triggers>
             </DataTemplate>
 
-            <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">                
-                <StackPanel Orientation="Horizontal">
+            <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
+                <StackPanel Background="Transparent" Orientation="Horizontal" ContextMenu="{StaticResource FolderSharedContextMenu}">
                     <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
-                    <TextBlock x:Name="Header" Text="{Binding Converter={StaticResource frameworkConverter}}" FontWeight="SemiBold" />
+                    <TextBlock x:Name="Header" Text="{Binding Path, Converter={StaticResource frameworkConverter}}" FontWeight="SemiBold" />
                 </StackPanel>
 
                 <HierarchicalDataTemplate.Triggers>
@@ -212,6 +222,7 @@
     </Window.Resources>
     
     <Window.CommandBindings>
+        <CommandBinding Command="New" Executed="NewMenuItem_Click" />
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
         <CommandBinding Command="Save" Executed="SaveMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
         <CommandBinding Command="SaveAs" Executed="SaveAsMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
@@ -230,6 +241,12 @@
         <!-- Menu bar -->
         <Menu>
             <self:GrayscaleMenuItem Header="_File">
+                <MenuItem Command="New">
+                    <MenuItem.Icon>
+                        <Image Source="/NuGetPackageExplorer;component/Images/NewDocumentHS.png">
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <self:GrayscaleMenuItem Command="Open">
                     <self:GrayscaleMenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/openHS.png">
@@ -276,9 +293,6 @@
             </self:GrayscaleMenuItem>
             
             <MenuItem Header="_View">
-                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource ViewContentConverter}, FallbackValue=False}" Header="View File _Content" Command="{Binding ViewContentCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
-                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource ViewContentConverter}, FallbackValue=False}" Header="_Open File in Windows Shell..." Command="{Binding OpenContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
-                <Separator />
                 <MenuItem Header="Text _Size" x:Name="FontSizeMenuItem">
                     <self:GrayscaleMenuItem Header="_Normal" Tag="12" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="_Larger" Tag="14" Click="OnFontSizeItem_Click" IsCheckable="True" />
@@ -289,7 +303,40 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            
+
+            <MenuItem Header="_Content" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
+                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=file, FallbackValue=False}" Header="View File _Content" Command="{Binding ViewContentCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=file, FallbackValue=False}" Header="Open File in Window_s shell..." Command="{Binding OpenContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                <Separator />
+                <MenuItem Header="_Add">
+                    <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                    <self:GrayscaleMenuItem Header="_New Folder" Click="OnAddNewFolderClick" IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=folder, FallbackValue=False, TargetNullValue=true}">
+                        <self:GrayscaleMenuItem.Icon>
+                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NewFolderHS.png" />
+                        </self:GrayscaleMenuItem.Icon>
+                    </self:GrayscaleMenuItem>
+                    <Separator />
+                    <self:GrayscaleMenuItem Header="_Content Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="content">
+                        <self:GrayscaleMenuItem.Icon>
+                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
+                        </self:GrayscaleMenuItem.Icon>
+                    </self:GrayscaleMenuItem>
+                    <self:GrayscaleMenuItem Header="_Lib Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="lib">
+                        <self:GrayscaleMenuItem.Icon>
+                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
+                        </self:GrayscaleMenuItem.Icon>
+                    </self:GrayscaleMenuItem>
+                    <self:GrayscaleMenuItem Header="_Tools Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="tools">
+                        <self:GrayscaleMenuItem.Icon>
+                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
+                        </self:GrayscaleMenuItem.Icon>
+                    </self:GrayscaleMenuItem>
+                </MenuItem>
+
+                <MenuItem Header="_Rename..." Click="OnRenameItemClick" IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, FallbackValue=False, TargetNullValue=False}" />
+                <MenuItem Header="_Delete..." Command="{Binding DeleteContentCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+            </MenuItem>
+
             <self:GrayscaleMenuItem Header="_Help">
                 <self:GrayscaleMenuItem Header="_NuGet Documentation" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation">
                     <self:GrayscaleMenuItem.Icon>
@@ -304,7 +351,7 @@
         </Menu>
 
         <!-- Main content -->
-        <Grid Grid.Row="1" x:Name="ContentGrid" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
+        <Grid Grid.Row="1" x:Name="ContentGrid" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
             
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -335,13 +382,51 @@
 
             <!-- package content tree view -->
             <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3,3,3,0" Header="Package contents">
-                <TreeView x:Name="PackagesTreeView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0">
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                </TreeView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TreeView x:Name="PackagesTreeView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0" SelectedItemChanged="OnTreeViewSelectedItemChanged" PreviewMouseRightButtonDown="TreeView_PreviewMouseRightButtonDown">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+                                <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                    </TreeView>
+                    
+                    <Border Background="Transparent" Grid.Row="1">
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
+                                <MenuItem Header="_New Folder" Click="OnAddNewFolder2Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/NuGetPackageExplorer;component/Images/NewFolderHS.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <self:GrayscaleMenuItem Header="Add _Content Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="content">
+                                    <self:GrayscaleMenuItem.Icon>
+                                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
+                                    </self:GrayscaleMenuItem.Icon>
+                                </self:GrayscaleMenuItem>
+                                <self:GrayscaleMenuItem Header="Add _Lib Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="lib">
+                                    <self:GrayscaleMenuItem.Icon>
+                                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
+                                    </self:GrayscaleMenuItem.Icon>
+                                </self:GrayscaleMenuItem>
+                                <self:GrayscaleMenuItem Header="Add _Tools Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="tools">
+                                    <self:GrayscaleMenuItem.Icon>
+                                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
+                                    </self:GrayscaleMenuItem.Icon>
+                                </self:GrayscaleMenuItem>
+                            </ContextMenu>
+                        </Border.ContextMenu>
+                    </Border>
+                </Grid>
             </GroupBox>
             
             <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="Transparent" VerticalAlignment="Bottom" />

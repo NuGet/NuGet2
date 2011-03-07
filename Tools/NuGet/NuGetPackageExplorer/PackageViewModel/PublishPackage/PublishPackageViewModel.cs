@@ -1,23 +1,22 @@
 ﻿using System;
 using System.IO;
 using NuGet;
+using System.Linq;
+using System.Windows;
 
 namespace PackageExplorerViewModel {
 
     public class PublishPackageViewModel : ViewModelBase, IObserver<int> {
-        private IPackageMetadata _package;
-        private Lazy<Stream> _packageStream;
+        private readonly IPackageMetadata _package;
+        private readonly Lazy<Stream> _packageStream;
 
-        public PublishPackageViewModel(IPackageMetadata package, Func<Stream> getPackageStream) {
-            if (package == null) {
-                throw new ArgumentNullException("package");
+        public PublishPackageViewModel(PackageViewModel viewModel) {
+            if (viewModel == null) {
+                throw new ArgumentNullException("viewModel");
             }
 
-            if (getPackageStream == null) {
-                throw new ArgumentNullException("getPackageStream");
-            }
-            _package = package;
-            _packageStream = new Lazy<Stream>(getPackageStream);
+            _package = viewModel.PackageMetadata;
+            _packageStream = new Lazy<Stream>(viewModel.GetCurrentPackageStream);
         }
 
         private string _publishKey; 

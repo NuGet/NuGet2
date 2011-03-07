@@ -1,24 +1,97 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Input;
+using NuGet;
 
 namespace PackageExplorerViewModel {
-    public abstract class PackagePart : IComparable<PackagePart> {
+    public abstract class PackagePart : IComparable<PackagePart>, INotifyPropertyChanged {
 
-        public string Name { get; private set; }
-        public string Path { get; private set; }
-        public PackageFolder Parent { get; private set; }
-
-        protected PackagePart(string name, string path, PackageFolder parent) {
+        protected PackagePart(string name, PackageFolder parent, PackageViewModel viewModel) {
             if (name == null) {
                 throw new ArgumentNullException("name");
             }
 
-            if (path == null) {
-                throw new ArgumentNullException("path");
+            if (viewModel == null) {
+                throw new ArgumentNullException("viewModel");
             }
 
+            _viewModel = viewModel;
+            _parent = parent;
             this.Name = name;
-            this.Path = path;
-            this.Parent = parent;
+        }
+
+        private readonly PackageFolder _parent;
+
+        public PackageFolder Parent {
+            get { return _parent; }
+        }
+
+        private readonly PackageViewModel _viewModel;
+
+        public PackageViewModel PackageViewModel {
+            get { return _viewModel; }
+        }
+
+        private string _name;
+
+        public string Name {
+            get {
+                return _name;
+            }
+            set {
+                if (_name != value) {
+                    _name = value;
+                    RaisePropertyChangeEvent("Name");
+                    UpdatePath();
+                }
+            }
+        }
+
+        private string _path;
+
+        public string Path {
+            get {
+                return _path;
+            }
+            set {
+                if (_path != value) {
+                    _path = value;
+                    RaisePropertyChangeEvent("Path");
+                }
+            }
+        }
+
+        private bool _isSelected;
+
+        public bool IsSelected {
+            get {
+                return _isSelected;
+            }
+            set {
+                if (_isSelected != value) {
+                    _isSelected = value;
+                    RaisePropertyChangeEvent("IsSelected");
+                }
+            }
+        }
+
+        public ICommand DeleteCommand {
+            get { return PackageViewModel.DeleteContentCommand; }
+        }
+
+        public void Rename(string newName) {
+            if (Name != newName) {
+                Name = newName;
+                PackageViewModel.NotifyChanges();
+            }
+        }
+
+        public void Delete() {
+            if (Parent != null) {
+                Parent.Children.Remove(this);
+                PackageViewModel.NotifyChanges();
+            }
         }
 
         public int CompareTo(PackagePart other) {
@@ -40,6 +113,24 @@ namespace PackageExplorerViewModel {
             }
 
             return String.Compare(this.Name, other.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public abstract IEnumerable<IPackageFile> GetFiles();
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void RaisePropertyChangeEvent(string propertyName) {
+            if (PropertyChanged != null) {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private void RecalculatePath() {
+            Path = (Parent == null || String.IsNullOrEmpty(Parent.Path)) ? Name : (Parent.Path + "\\" + Name);
+        }
+
+        internal virtual void UpdatePath() {
+            RecalculatePath();
         }
     }
 }

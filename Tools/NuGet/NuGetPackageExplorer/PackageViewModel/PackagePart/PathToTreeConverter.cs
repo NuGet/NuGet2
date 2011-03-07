@@ -6,14 +6,14 @@ using NuGet;
 namespace PackageExplorerViewModel {
     internal static class PathToTreeConverter {
 
-        public static PackageFolder Convert(List<IPackageFile> paths) {
+        public static PackageFolder Convert(List<IPackageFile> paths, PackageViewModel viewModel) {
             if (paths == null) {
                 throw new ArgumentNullException("paths");
             }
 
             paths.Sort((p1, p2) => String.Compare(p1.Path, p2.Path, StringComparison.OrdinalIgnoreCase));
 
-            PackageFolder root = new PackageFolder("Root", "", null);
+            PackageFolder root = new PackageFolder("", viewModel);
 
             List<Tuple<IPackageFile, string[]>> parsedPaths = paths.Select(p => Tuple.Create(p, p.Path.Split('\\'))).ToList();
             Parse(root, parsedPaths, 0, 0, parsedPaths.Count);
@@ -36,15 +36,7 @@ namespace PackageExplorerViewModel {
                     int j = i;
                     while (j < end && level < parsedPaths[j].Item2.Length && parsedPaths[j].Item2[level] == s) j++;
 
-                    string path;
-                    if (root.Path == String.Empty) {
-                        path = s;
-                    }
-                    else {
-                        path = root.Path + "\\" + s;
-                    }
-
-                    PackageFolder folder = new PackageFolder(s, path, root);
+                    PackageFolder folder = new PackageFolder(s, root);
                     root.Children.Add(folder);
                     Parse(folder, parsedPaths, level + 1, i, j);
 

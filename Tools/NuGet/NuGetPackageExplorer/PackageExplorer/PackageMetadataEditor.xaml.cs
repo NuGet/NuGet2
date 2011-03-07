@@ -98,7 +98,11 @@ namespace PackageExplorer {
         private void SelectDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                MessageBox.Show("Network connection is not detected.", "Network error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    PackageExplorer.Resources.Resources.NoNetworkConnection,
+                    PackageExplorer.Resources.Resources.Dialog_Title, 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Warning);
                 return;
             }
 

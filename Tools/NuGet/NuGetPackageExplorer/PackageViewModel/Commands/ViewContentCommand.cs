@@ -42,7 +42,7 @@ namespace PackageExplorerViewModel {
         private bool IsBinaryFile(string path) {
             // TODO: check for content type of the file here
             string extension = Path.GetExtension(path).ToUpper();
-            return BinaryFileExtensions.Any(p => p.Equals(extension));
+            return String.IsNullOrEmpty(extension) || BinaryFileExtensions.Any(p => p.Equals(extension));
         }
     }
 }

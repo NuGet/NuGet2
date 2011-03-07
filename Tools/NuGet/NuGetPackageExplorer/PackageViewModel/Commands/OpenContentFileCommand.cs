@@ -32,16 +32,7 @@ namespace PackageExplorerViewModel {
             }
 
             if (File.Exists(tempFileName)) {
-                Process process = Process.Start("explorer.exe", tempFileName);
-                process.Exited += (sender, args) => {
-                                      if (File.Exists(tempFileName)) {
-                                          try {
-                                              File.Delete(tempFileName);
-                                          }
-                                          catch {
-                                          }
-                                      }
-                                  };
+                Process.Start("explorer.exe", tempFileName);
             }
         }
     }

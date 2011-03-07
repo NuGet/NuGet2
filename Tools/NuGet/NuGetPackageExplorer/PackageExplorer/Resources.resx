@@ -154,7 +154,7 @@
     <value>Require License Acceptance:</value>
   </data>
   <data name="Dialog_SaveQuestion" xml:space="preserve">
-    <value>Do you want to save your changes to {0}?</value>
+    <value>Do you want to save your changes?</value>
   </data>
   <data name="Dialog_TagLabel" xml:space="preserve">
     <value>Tags:</value>
@@ -168,7 +168,13 @@
   <data name="Dialog_ViewLicense" xml:space="preserve">
     <value>View License Terms</value>
   </data>
+  <data name="NoNetworkConnection" xml:space="preserve">
+    <value>Network connection is not detected.</value>
+  </data>
   <data name="PackageContentsVerifyError" xml:space="preserve">
     <value>Failed to download package correctly. The contents of the package could not be verified.</value>
+  </data>
+  <data name="PackageHasNoFile" xml:space="preserve">
+    <value>There is no content file in the package.</value>
   </data>
 </root>
