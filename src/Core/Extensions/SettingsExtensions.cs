@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
     public static class SettingsExtensions {
         private static string _entropy = "NuGet";
 
-        public static string GetDecryptedValue(this ISettings settings, string section, string key){
+        public static string GetDecryptedValue(this ISettings settings, string section, string key) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
@@ -19,16 +17,16 @@ namespace NuGet {
             }
 
             var encrpytedString = settings.GetValue(section, key);
-            if(encrpytedString == null){
+            if (encrpytedString == null) {
                 return null;
             }
             if (String.IsNullOrEmpty(encrpytedString)) {
                 return String.Empty;
             }
             var encrpytedByteArray = Convert.FromBase64String(encrpytedString);
-            var decryptedByteArray = ProtectedData.Unprotect(encrpytedByteArray,StringToBytes(_entropy), DataProtectionScope.CurrentUser);
+            var decryptedByteArray = ProtectedData.Unprotect(encrpytedByteArray, StringToBytes(_entropy), DataProtectionScope.CurrentUser);
             return BytesToString(decryptedByteArray);
-            
+
         }
 
         public static void SetEncryptedValue(this ISettings settings, string section, string key, string value) {
@@ -55,13 +53,11 @@ namespace NuGet {
         }
 
         private static byte[] StringToBytes(string str) {
-            UTF8Encoding encoding = new UTF8Encoding();
-            return encoding.GetBytes(str);
+            return Encoding.UTF8.GetBytes(str);
         }
 
         private static string BytesToString(byte[] bytes) {
-            UTF8Encoding encoding = new UTF8Encoding();
-            return encoding.GetString(bytes);
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 }

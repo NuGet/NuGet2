@@ -9,6 +9,8 @@ using NuGet.Commands;
 
 namespace NuGet {
     public static class CommandLineUtility {
+        public readonly static string ApiKeysSectionName = "apikeys";
+
         public static Type RemoveNullableFromType(Type type) {
             return Nullable.GetUnderlyingType(type) ?? type;
         }
@@ -89,8 +91,8 @@ namespace NuGet {
         }
 
         public static string GetApiKey(ISettings settings, string source) {
-            var value = settings.GetDecryptedValue("apiKeys", source);
-            if (string.IsNullOrEmpty(value)) {
+            var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
+            if (String.IsNullOrEmpty(value)) {
                 throw new CommandLineException(NuGetResources.NoApiKeyFound);
             }
             return value;

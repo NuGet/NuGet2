@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.IO;
 using NuGet.Common;
 
@@ -15,7 +14,7 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-        
+
         public override void ExecuteCommand() {
 
             //Frist argument should be the package
@@ -36,11 +35,11 @@ namespace NuGet.Commands {
                 galleryServerUrl = Source;
             }
 
-            GalleryServer gallery = new GalleryServer(galleryServerUrl);
-            
+            var gallery = new GalleryServer(galleryServerUrl);
+
             //If the user did not pass an API Key look in the config file
             string apiKey;
-            ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
+            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             if (String.IsNullOrEmpty(userSetApiKey)) {
                 apiKey = CommandLineUtility.GetApiKey(settings, galleryServerUrl);
             }
@@ -49,8 +48,8 @@ namespace NuGet.Commands {
             }
 
             //Push the package to the server
-            ZipPackage pkg = new ZipPackage(packagePath);
-            using (Stream pkgStream = pkg.GetStream()) {
+            var package = new ZipPackage(packagePath);
+            using (Stream pkgStream = package.GetStream()) {
                 gallery.CreatePackage(apiKey, pkgStream);
             }
 
@@ -59,7 +58,7 @@ namespace NuGet.Commands {
                 var cmd = new PublishCommand();
                 cmd.Console = Console;
                 cmd.Source = Source;
-                cmd.Arguments = new List<string> { pkg.Id, pkg.Version.ToString(), apiKey };
+                cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), apiKey };
                 cmd.Execute();
             }
             else {

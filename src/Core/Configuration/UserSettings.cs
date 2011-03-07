@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
@@ -9,17 +7,17 @@ using NuGet.Resources;
 using System.Globalization;
 
 namespace NuGet {
-    public class UserSettings: ISettings {
+    public class UserSettings : ISettings {
         private XDocument _config;
         private string _configLocation;
-        private IFileSystem _fileSystem;
+        private readonly IFileSystem _fileSystem;
 
         public UserSettings(IFileSystem fileSystem) {
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }
             _fileSystem = fileSystem;
-            _configLocation = Path.Combine(_fileSystem.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "Nuget.Config");
+            _configLocation = Path.Combine(_fileSystem.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configLocation);
         }
 
@@ -33,17 +31,18 @@ namespace NuGet {
             }
 
             var kvps = GetValues(section);
-            if (kvps == null || !kvps.ContainsKey(key)) {
+            string value;
+            if (kvps == null || !kvps.TryGetValue(key, out value)) {
                 return null;
             }
-            return kvps[key];
+            return value;
         }
 
         public IDictionary<string, string> GetValues(string section) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
-            
+
             try {
                 var sectionElement = _config.Root.Element(section);
                 if (sectionElement == null) {
@@ -62,7 +61,7 @@ namespace NuGet {
                 return kvps;
             }
             catch (Exception e) {
-                throw new System.Xml.XmlException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
+                throw new InvalidOperationException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
             }
         }
 

@@ -361,4 +361,7 @@
   <data name="SetApiKeyCommandApiKeySaved" xml:space="preserve">
     <value>The API Key '{0}' was saved for the source '{1}'.</value>
   </data>
+  <data name="SetApiKeyCommandSourceDescription" xml:space="preserve">
+    <value>Base URL to the Gallery Server where the API Key is valid.</value>
+  </data>
 </root>

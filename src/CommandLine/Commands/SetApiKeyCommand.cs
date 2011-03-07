@@ -10,7 +10,7 @@ namespace NuGet.Commands {
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class SetApiKeyCommand : Command {
 
-        [Option("Source")]
+        [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
         
         public override void ExecuteCommand() {
@@ -26,8 +26,8 @@ namespace NuGet.Commands {
                 galleryServerUrl = Source;
             }
 
-            ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
-            settings.SetEncryptedValue("apiKeys", galleryServerUrl, apiKey);
+            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
+            settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, galleryServerUrl, apiKey);
 
             Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, galleryServerUrl);
         }

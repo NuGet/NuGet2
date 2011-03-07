@@ -1,5 +1,5 @@
 ﻿using System;
-using System.ComponentModel.Composition;
+using System.Globalization;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -7,7 +7,7 @@ namespace NuGet.Commands {
         MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary")]
     public class DeleteCommand : Command {
-        
+
         [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
@@ -35,11 +35,11 @@ namespace NuGet.Commands {
                 galleryServerUrl = Source;
             }
 
-            GalleryServer gallery = new GalleryServer(galleryServerUrl);
+            var gallery = new GalleryServer(galleryServerUrl);
 
             //If the user did not pass an API Key look in the config file
             string apiKey;
-            ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
+            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             if (String.IsNullOrEmpty(userSetApiKey)) {
                 apiKey = CommandLineUtility.GetApiKey(settings, galleryServerUrl);
             }
@@ -48,7 +48,7 @@ namespace NuGet.Commands {
             }
 
 
-            if (NoPrompt || Console.Confirm(String.Format(NuGetResources.DeleteCommandConfirm, packageId, packageVersion))) {
+            if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion))) {
                 Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion);
                 gallery.DeletePackage(apiKey, packageId, packageVersion);
                 Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, packageId, packageVersion);
