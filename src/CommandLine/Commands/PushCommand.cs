@@ -47,9 +47,10 @@ namespace NuGet.Commands {
             else {
                 apiKey = userSetApiKey;
             }
+
             //Push the package to the server
             ZipPackage pkg = new ZipPackage(packagePath);
-            using (Stream pkgStream = package.GetStream()) {
+            using (Stream pkgStream = pkg.GetStream()) {
                 gallery.CreatePackage(apiKey, pkgStream);
             }
 
