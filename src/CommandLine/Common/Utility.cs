@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Reflection;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Common;
+using NuGet.Commands;
 
 namespace NuGet {
     public static class CommandLineUtility {
@@ -85,6 +86,14 @@ namespace NuGet {
             }
 
             return _cachedResourceStrings[resourceName];
+        }
+
+        public static string GetApiKey(ISettings settings, string source) {
+            var value = settings.GetDecryptedValue("apiKeys", source);
+            if (string.IsNullOrEmpty(value)) {
+                throw new CommandLineException(NuGetResources.NoApiKeyFound);
+            }
+            return value;
         }
     }
 }

@@ -250,7 +250,7 @@
     <value>Specify the location of the package and your API key to push the package to the server.</value>
   </data>
   <data name="PushCommandUsageSummary" xml:space="preserve">
-    <value>&lt;package location&gt; &lt;API key&gt; [options]</value>
+    <value>&lt;package location&gt; [API key] [options]</value>
   </data>
   <data name="ResourcePropertyDoesNotHaveAccessibleGet" xml:space="preserve">
     <value>The resource type '{0}' does not have an accessible get for the '{1}' property.</value>
@@ -356,15 +356,9 @@
   <data name="InstallCommandNothingToInstall" xml:space="preserve">
     <value>All packages listed in {0} are already installed.</value>
   <data name="NoApiKeyFound" xml:space="preserve">
-    <value>No API Key was provided for this source and no saved API Key could be found.</value>
+    <value>No API Key was provided and no API Key could be found for this source. To save an API Key for a source use the 'SetApiKey' command.</value>
   </data>
-  <data name="PushCommandSavedApiKeyCleared" xml:space="preserve">
-    <value>The saved API Key was removed.</value>
-  </data>
-  <data name="PushCommandSavingApiKey" xml:space="preserve">
-    <value>The API Key '{0}' will be saved for the Gallery Server located at {1}.</value>
-  </data>
-  <data name="PushCommandUnableToSaveApiKey" xml:space="preserve">
-    <value>Unable to save API Key to NuGet.config.</value>
+  <data name="SetApiKeyCommandApiKeySaved" xml:space="preserve">
+    <value>The API Key '{0}' was saved for the source '{1}'.</value>
   </data>
 </root>

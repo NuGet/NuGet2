@@ -15,9 +15,6 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-
-        [Option(typeof(NuGetResources), "PushCommandNoPersistApiKeyDescription")]
-        public bool NoPersist { get; set; }
         
         public override void ExecuteCommand() {
 
@@ -31,24 +28,21 @@ namespace NuGet.Commands {
             }
 
             //If the user passed a source use it for the gallery location
-            GalleryServer gallery;
+            string galleryServerUrl;
             if (String.IsNullOrEmpty(Source)) {
-                gallery = new GalleryServer();
+                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
             }
             else {
-                gallery = new GalleryServer(Source);
+                galleryServerUrl = Source;
             }
+
+            GalleryServer gallery = new GalleryServer(galleryServerUrl);
             
             //If the user did not pass an API Key look in the config file
             string apiKey;
             ISettings settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             if (String.IsNullOrEmpty(userSetApiKey)) {
-                var value = settings.GetDecryptedValue("apiKeys", gallery.Source);
-                if (string.IsNullOrEmpty(value)) {
-                    throw new CommandLineException(NuGetResources.NoApiKeyFound);
-                }
-                apiKey = value;
-
+                apiKey = CommandLineUtility.GetApiKey(settings, galleryServerUrl);
             }
             else {
                 apiKey = userSetApiKey;
@@ -69,27 +63,6 @@ namespace NuGet.Commands {
             }
             else {
                 Console.WriteLine(NuGetResources.PushCommandPackageCreated);
-            }
-
-            // If the user passed no API Key and said to persist the key
-            //  or if the use passed an API Key and said not to persist
-            //  the key (temperary key use) then do nothing.
-            
-            // Save the API Key if the User passed a key and said to persist (the default)
-            if (!String.IsNullOrEmpty(userSetApiKey) && !NoPersist) {
-                Console.WriteLine(NuGetResources.PushCommandSavingApiKey, apiKey, gallery.Source);
-                try {
-                    settings.SetEncryptedValue("apiKeys", gallery.Source, apiKey);
-                }
-                catch {
-                    Console.WriteError(NuGetResources.PushCommandUnableToSaveApiKey);
-                }
-            }
-
-            // Delete the API Key if user did not pass a key and said not to persist the key
-            if (String.IsNullOrEmpty(userSetApiKey) && NoPersist) {
-                settings.DeleteValue("apiKeys", gallery.Source);
-                Console.WriteLine(NuGetResources.PushCommandSavedApiKeyCleared);
             }
 
         }
