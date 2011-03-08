@@ -30,7 +30,7 @@
                 <TextBlock TextWrapping="Wrap">
                     <Run Text="{Binding Id, Mode=OneTime}" FontWeight="Bold" />
                     <Run Text=" " />
-                    <Run Text="{Binding Authors, Mode=OneTime, StringFormat=(Author: {0}), Converter={StaticResource authorNamesConverter}}" />
+                    <Run Text="{Binding Authors, Mode=OneTime, StringFormat={x:Static resources:Resources.License_AuthorFormatString}, Converter={StaticResource authorNamesConverter}}" />
                 </TextBlock>
                 <TextBlock>
                     <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">

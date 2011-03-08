@@ -264,4 +264,7 @@
   <data name="Dialog_RecentPackagesDefaultSort" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="License_AuthorFormatString" xml:space="preserve">
+    <value>(Author: {0})</value>
+  </data>
 </root>
