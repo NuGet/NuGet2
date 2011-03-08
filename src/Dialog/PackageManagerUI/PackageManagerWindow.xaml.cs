@@ -39,9 +39,10 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IProgressProvider progressProvider)
             : base(F1Keyword) {
 
-            _menuCommandService = menuCommandService;
-
             InitializeComponent();
+
+            // make sure the Resources class return the UI thread's culture strings
+            _menuCommandService = menuCommandService;
 
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();

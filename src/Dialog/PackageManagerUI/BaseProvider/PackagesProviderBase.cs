@@ -29,6 +29,7 @@ namespace NuGet.Dialog.Providers {
         private IList<IVsSortDescriptor> _sortDescriptors;
         private Project _project;
         private readonly IProgressProvider _progressProvider;
+        private CultureInfo _uiCulture, _culture;
 
         protected PackagesProviderBase(
             Project project,
@@ -238,6 +239,9 @@ namespace NuGet.Dialog.Providers {
 
             _progressProvider.ProgressAvailable += OnProgressAvailable;
 
+            _uiCulture = System.Threading.Thread.CurrentThread.CurrentUICulture;
+            _culture = System.Threading.Thread.CurrentThread.CurrentCulture;
+
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
@@ -255,6 +259,10 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e) {
+            // make sure the new thread has the same cultures as the UI thread's cultures
+            System.Threading.Thread.CurrentThread.CurrentUICulture = _uiCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = _culture;
+
             var item = (PackageItem)e.Argument;
             bool succeeded = ExecuteCore(item);
             e.Cancel = !succeeded;
