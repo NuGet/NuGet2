@@ -87,7 +87,7 @@ namespace NuGet.VisualStudio {
         }
 
         private static RecentPackage ConvertToRecentPackage(IPackage package, DateTime lastUsedDate) {
-            RecentPackage recentPackage = package as RecentPackage;
+            var recentPackage = package as RecentPackage;
             if (recentPackage != null) {
                 // if the package is already an instance of RecentPackage, reset the date and return it
                 recentPackage.LastUsedDate = lastUsedDate;

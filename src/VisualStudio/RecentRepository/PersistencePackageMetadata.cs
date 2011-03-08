@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace NuGet.VisualStudio {
-    public sealed class PersistencePackageMetadata : IPersistencePackageMetadata {
+    internal sealed class PersistencePackageMetadata : IPersistencePackageMetadata {
 
         public PersistencePackageMetadata(string id, string version, DateTime lastUsedDate) : 
             this(id, new Version(version), lastUsedDate){
