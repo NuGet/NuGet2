@@ -7,7 +7,7 @@ namespace NuGet.VisualStudio {
     /// <summary>
     /// Represents a Recent package.
     /// </summary>
-    public class RecentPackage : IPackage, IPersistencePackageMetadata, IComparable<RecentPackage> {
+    public class RecentPackage : IPackage, IPersistencePackageMetadata, IEquatable<RecentPackage> {
 
         private readonly IPackage _basePackage;
 
@@ -153,8 +153,24 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public int CompareTo(RecentPackage other) {
-            return other.LastUsedDate.CompareTo(LastUsedDate);
+        public bool Equals(RecentPackage other) {
+            if (other == null) {
+                return false;
+            }
+
+            return Id.Equals(other.Id, StringComparison.OrdinalIgnoreCase) && Version == other.Version;
+        }
+
+        public override bool Equals(object obj) {
+            return Equals(obj as RecentPackage);
+        }
+
+        public override int GetHashCode() {
+            return Id.GetHashCode() * 3137 + Version.GetHashCode();
+        }
+
+        public override string ToString() {
+            return Id + " " + Version + " " + LastUsedDate;
         }
     }
 }
