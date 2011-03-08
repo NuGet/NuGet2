@@ -26,7 +26,7 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IRecentPackageRepository>(), 
-                   ServiceLocator.GetInstance<IVsProgressEvents>()) {
+                   ServiceLocator.GetInstance<IProgressProvider>()) {
         }
 
         public GetPackageCommand(IPackageRepositoryFactory repositoryFactory,
@@ -34,8 +34,8 @@ namespace NuGet.PowerShell.Commands {
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,
                                 IPackageRepository recentPackagesRepository,
-                                IVsProgressEvents progressEvents)
-            : base(solutionManager, packageManagerFactory, progressEvents) {
+                                IProgressProvider progressProvider)
+            : base(solutionManager, packageManagerFactory, progressProvider) {
 
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");

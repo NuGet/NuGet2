@@ -172,7 +172,7 @@ namespace NuGet.Dialog.Test {
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
                 base(new Mock<Project>().Object, projectManager, resources,
                     new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
-                    new Mock<IVsProgressEvents>().Object) {
+                    new Mock<IProgressProvider>().Object) {
             }
 
             public override IVsExtension CreateExtension(IPackage package) {

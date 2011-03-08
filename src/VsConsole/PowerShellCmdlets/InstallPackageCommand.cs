@@ -13,11 +13,11 @@ namespace NuGet.PowerShell.Commands {
         public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(), 
-                   ServiceLocator.GetInstance<IVsProgressEvents>()) {
+                   ServiceLocator.GetInstance<IProgressProvider>()) {
         }
 
-        public InstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IVsProgressEvents progressEvents)
-            : base(solutionManager, packageManagerFactory, progressEvents) {
+        public InstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IProgressProvider progressProvider)
+            : base(solutionManager, packageManagerFactory, progressProvider) {
         }
 
         [Parameter(Position = 2)]

@@ -26,7 +26,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
                  ServiceLocator.GetInstance<ProviderServices>(),
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
-                 ServiceLocator.GetInstance<IVsProgressEvents>()) {
+                 ServiceLocator.GetInstance<IProgressProvider>()) {
         }
 
         public PackageManagerWindow(MenuCommandService menuCommandService,
@@ -36,7 +36,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
                                     IRecentPackageRepository recentPackagesRepository,
-                                    IVsProgressEvents progressEvents)
+                                    IProgressProvider progressProvider)
             : base(F1Keyword) {
 
             _menuCommandService = menuCommandService;
@@ -62,7 +62,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 providerServices,
                 recentPackagesRepository,
-                progressEvents);
+                progressProvider);
         }
 
         private void SetupProviders(DTE dte,
@@ -71,7 +71,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository,
-                                    IVsProgressEvents progressEvents) {
+                                    IProgressProvider progressProvider) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -88,7 +88,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 recentPackagesRepository,
                 packageSourceProvider,
                 providerServices,
-                progressEvents);
+                progressProvider);
 
 
             var updatesProvider = new UpdatesProvider(
@@ -99,7 +99,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 packageManagerFactory,
                 providerServices,
-                progressEvents);
+                progressProvider);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -109,7 +109,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 packageManagerFactory,
                 providerServices,
-                progressEvents);
+                progressProvider);
 
             var installedProvider = new InstalledProvider(
                 packageManager,
@@ -117,7 +117,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 projectManager,
                 Resources,
                 providerServices,
-                progressEvents);
+                progressProvider);
 
             explorer.Providers.Add(recentProvider);
             explorer.Providers.Add(updatesProvider);

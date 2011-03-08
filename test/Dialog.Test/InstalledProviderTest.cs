@@ -219,7 +219,7 @@ namespace NuGet.Dialog.Test {
                 new MockOutputConsoleProvider()
             );
 
-            return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), services, new Mock<IVsProgressEvents>().Object);
+            return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), services, new Mock<IProgressProvider>().Object);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository) {

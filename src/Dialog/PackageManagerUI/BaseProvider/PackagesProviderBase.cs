@@ -28,14 +28,14 @@ namespace NuGet.Dialog.Providers {
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
         private Project _project;
-        private readonly IVsProgressEvents _progressEvents;
+        private readonly IProgressProvider _progressProvider;
 
         protected PackagesProviderBase(
             Project project,
             IProjectManager projectManager,
             ResourceDictionary resources,
             ProviderServices providerServices,
-            IVsProgressEvents progressEvents) {
+            IProgressProvider progressProvider) {
 
             if (projectManager == null) {
                 throw new ArgumentNullException("projectManager");
@@ -53,7 +53,7 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("providerServices");
             }
 
-            _progressEvents = progressEvents;
+            _progressProvider = progressProvider;
             _resources = resources;
             _scriptExecutor = providerServices.ScriptExecutor;
             _progressWindowOpener = providerServices.ProgressWindow;
@@ -236,7 +236,7 @@ namespace NuGet.Dialog.Providers {
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
-            _progressEvents.ProgressAvailable += OnProgressAvailable;
+            _progressProvider.ProgressAvailable += OnProgressAvailable;
 
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
@@ -250,7 +250,7 @@ namespace NuGet.Dialog.Providers {
             ShowProgressWindow();
         }
 
-        private void OnProgressAvailable(object sender, ReportProgressEventArgs e) {
+        private void OnProgressAvailable(object sender, ProgressEventArgs e) {
             _progressWindowOpener.ShowProgress(e.Operation, e.PercentComplete);
         }
 
@@ -264,7 +264,7 @@ namespace NuGet.Dialog.Providers {
         private void OnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             OperationCoordinator.IsBusy = false;
 
-            _progressEvents.ProgressAvailable -= OnProgressAvailable;
+            _progressProvider.ProgressAvailable -= OnProgressAvailable;
 
             if (e.Error == null) {
                 if (e.Cancelled) {

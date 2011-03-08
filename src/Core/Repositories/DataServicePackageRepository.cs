@@ -3,20 +3,29 @@ using System.Data.Services.Client;
 using System.Linq;
 
 namespace NuGet {
-    public class DataServicePackageRepository : PackageRepositoryBase {
+    public class DataServicePackageRepository : PackageRepositoryBase, IProgressProvider {
         private readonly IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly string _source;
-        private readonly IProgressReporter _progressReporter;
+        private readonly PackageDownloader _packageDownloader = new PackageDownloader();
 
-        public DataServicePackageRepository(Uri serviceRoot)
-            : this(serviceRoot, new HttpClient(), NullProgressReporter.Instance) {
+        // Just forward calls to the package downloader
+        public event EventHandler<ProgressEventArgs> ProgressAvailable {
+            add {
+                _packageDownloader.ProgressAvailable += value;
+            }
+            remove {
+                _packageDownloader.ProgressAvailable -= value;
+            }
         }
 
-        public DataServicePackageRepository(Uri serviceRoot, IHttpClient client, IProgressReporter progressReporter)
+        public DataServicePackageRepository(Uri serviceRoot)
+            : this(serviceRoot, new HttpClient()) {
+        }
+
+        public DataServicePackageRepository(Uri serviceRoot, IHttpClient client)
             : this(new DataServiceContextWrapper(serviceRoot), client) {
             _source = serviceRoot.OriginalString;
-            _progressReporter = progressReporter;
         }
 
         private DataServicePackageRepository(IDataServiceContext context, IHttpClient httpClient) {
@@ -48,7 +57,7 @@ namespace NuGet {
             // REVIEW: This is the only way (I know) to download the package on demand
             // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
             package.Context = _context;
-            package.ProgressReporter = _progressReporter;
+            package.Downloader = _packageDownloader;
         }
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {

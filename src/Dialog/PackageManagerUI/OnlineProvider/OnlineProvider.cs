@@ -28,8 +28,8 @@ namespace NuGet.Dialog.Providers {
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
-            IVsProgressEvents progressEvents) :
-            base(project, projectManager, resources, providerServices, progressEvents) {
+            IProgressProvider progressProvider) :
+            base(project, projectManager, resources, providerServices, progressProvider) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;

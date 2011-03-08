@@ -13,7 +13,6 @@ namespace NuGet {
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage {
-        private readonly Lazy<PackageDownloader> _packageDownloader = new Lazy<PackageDownloader>(() => new PackageDownloader());
         private readonly LazyWithRecreate<IPackage> _package;
 
         public DataServicePackage() {
@@ -148,7 +147,7 @@ namespace NuGet {
             set;
         }
 
-        internal IProgressReporter ProgressReporter { get; set; }
+        internal PackageDownloader Downloader { get; set; }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
@@ -219,7 +218,7 @@ namespace NuGet {
             }
 
             byte[] hashBytes = Convert.FromBase64String(PackageHash);
-            return _packageDownloader.Value.DownloadPackage(DownloadUrl, hashBytes, this, ProgressReporter);
+            return Downloader.DownloadPackage(DownloadUrl, hashBytes, this);
         }
 
         /// <summary>

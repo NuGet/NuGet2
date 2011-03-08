@@ -16,6 +16,7 @@
   <ItemGroup>
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="IProgressReporter.cs" />
     <Compile Include="IVsActivityLogger.cs" />
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectName.cs" />
@@ -86,7 +87,6 @@
     <Compile Include="IScriptExecutor.cs" />
     <Compile Include="Extensions\MSBuildProjectExtensions.cs" />
     <Compile Include="IVsPackageInstaller.cs" />
-    <Compile Include="IVsProgressEvents.cs" />
     <Compile Include="OutputConsole\IOutputConsoleProvider.cs" />
     <Compile Include="OutputConsole\OutputConsole.cs" />
     <Compile Include="OutputConsole\OutputConsoleProvider.cs" />
@@ -99,7 +99,6 @@
     <Compile Include="RecentRepository\PersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackagesRepository.cs" />
     <Compile Include="RecentRepository\VsPersistencePackageSettingsManager.cs" />
-    <Compile Include="ReportProgressEventArgs.cs" />
     <Compile Include="RepositorySettings.cs" />
     <Compile Include="RuntimeHelpers.cs" />
     <Compile Include="SettingsManagerBase.cs" />

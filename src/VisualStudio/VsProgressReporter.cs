@@ -3,12 +3,12 @@ using System.ComponentModel.Composition;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IProgressReporter))]
-    [Export(typeof(IVsProgressEvents))]
+    [Export(typeof(IProgressProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class VsProgressReporter : IProgressReporter, IVsProgressEvents {
-
-        public event EventHandler<ReportProgressEventArgs> ProgressAvailable;
+    public class VsProgressReporter : IProgressReporter, IProgressProvider {
         private readonly IServiceProvider _serviceProvider;
+
+        public event EventHandler<ProgressEventArgs> ProgressAvailable;
 
         public VsProgressReporter()
             : this(ServiceLocator.GetInstance<IServiceProvider>()) {
@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio {
             percentComplete = Math.Min(100, percentComplete);
 
             if (ProgressAvailable != null) {
-                ProgressAvailable(this, new ReportProgressEventArgs(operation, percentComplete));
+                ProgressAvailable(this, new ProgressEventArgs(operation, percentComplete));
             }
         }
     }

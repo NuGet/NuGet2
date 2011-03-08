@@ -18,12 +18,12 @@ namespace NuGet.PowerShell.Commands {
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
-        private readonly IVsProgressEvents _progressEvents;
+        private readonly IProgressProvider _progressProvider;
 
-        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IVsProgressEvents progressEvents) {
+        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IProgressProvider progressProvider) {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
-            _progressEvents = progressEvents;
+            _progressProvider = progressProvider;
         }
 
         private ProgressRecordCollection ProgressRecordCache {
@@ -108,14 +108,14 @@ namespace NuGet.PowerShell.Commands {
         }
 
         protected void SubscribeToProgressEvents() {
-            if (!IsSyncMode && _progressEvents != null) {
-                _progressEvents.ProgressAvailable += OnProgressAvailable;
+            if (!IsSyncMode && _progressProvider != null) {
+                _progressProvider.ProgressAvailable += OnProgressAvailable;
             }
         }
 
         protected void UnsubscribeFromProgressEvents() {
-            if (_progressEvents != null) {
-                _progressEvents.ProgressAvailable -= OnProgressAvailable;
+            if (_progressProvider != null) {
+                _progressProvider.ProgressAvailable -= OnProgressAvailable;
             }
         }
 
@@ -310,7 +310,7 @@ namespace NuGet.PowerShell.Commands {
             WriteProgress(progressRecord);
         }
 
-        private void OnProgressAvailable(object sender, ReportProgressEventArgs e) {
+        private void OnProgressAvailable(object sender, ProgressEventArgs e) {
             WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
         }
 

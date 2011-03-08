@@ -38,7 +38,7 @@ namespace NuGet.Test {
             var package = PackageUtility.CreatePackage("A", "1.0");
 
             // Act, Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[0], package, null));
+            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[0], package));
         }
     }
 }

@@ -17,11 +17,11 @@ namespace NuGet.PowerShell.Commands {
 
         public GetProjectCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
-                    ServiceLocator.GetInstance<IVsProgressEvents>()) {
+                    ServiceLocator.GetInstance<IProgressProvider>()) {
         }
 
-        public GetProjectCommand(ISolutionManager solutionManager, IVsProgressEvents progressEvents)
-            : base(solutionManager, null, progressEvents) {
+        public GetProjectCommand(ISolutionManager solutionManager, IProgressProvider progressProvider)
+            : base(solutionManager, null, progressProvider) {
             _solutionManager = solutionManager;
         }
 

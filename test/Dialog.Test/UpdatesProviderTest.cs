@@ -309,7 +309,7 @@ namespace NuGet.Dialog.Test {
                 packageSourceProvider,
                 factory.Object,
                 services,
-                new Mock<IVsProgressEvents>().Object);
+                new Mock<IProgressProvider>().Object);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {

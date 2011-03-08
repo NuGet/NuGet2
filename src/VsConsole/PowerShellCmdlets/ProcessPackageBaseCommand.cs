@@ -19,8 +19,8 @@ namespace NuGet.PowerShell.Commands {
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
 
-        protected ProcessPackageBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IVsProgressEvents progressEvents)
-            : base(solutionManager, packageManagerFactory, progressEvents) {
+        protected ProcessPackageBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IProgressProvider progressProvider)
+            : base(solutionManager, packageManagerFactory, progressProvider) {
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
