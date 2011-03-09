@@ -41,7 +41,6 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             InitializeComponent();
 
-            // make sure the Resources class return the UI thread's culture strings
             _menuCommandService = menuCommandService;
 
             InsertDisclaimerElement();
