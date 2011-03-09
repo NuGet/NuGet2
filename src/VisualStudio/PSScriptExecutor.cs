@@ -5,20 +5,19 @@ using System.IO;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
-using NuGetConsole.Host.PowerShell;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IScriptExecutor))]
     public class PSScriptExecutor : IScriptExecutor {
-        private readonly Lazy<IPowerShellHost> _psHost;
+        private readonly Lazy<IHost> _host;
 
         public PSScriptExecutor() {
-            _psHost = new Lazy<IPowerShellHost>(GetHost);
+            _host = new Lazy<IHost>(GetHost);
         }
 
-        private IPowerShellHost PSHost {
+        private IHost Host {
             get {
-                return _psHost.Value;
+                return _host.Value;
             }
         }
 
@@ -39,10 +38,11 @@ namespace NuGet.VisualStudio {
                 logger.Log(MessageLevel.Info, logMessage);
                 WriteHost(logMessage);
 
-                PSHost.Invoke(
+                IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
+                Host.Execute(console, 
                     "$__pc_args=@(); $input|%{$__pc_args+=$_}; & '" + fullPath + "' $__pc_args[0] $__pc_args[1] $__pc_args[2] $__pc_args[3]; Remove-Variable __pc_args -Scope 0",
-                    new object[] { installPath, toolsPath, package, project },
-                    outputResults: true);
+                    new object[] { installPath, toolsPath, package, project });
+
                 return true;
             }
             
@@ -50,10 +50,13 @@ namespace NuGet.VisualStudio {
         }
 
         private void WriteHost(string message) {
-            PSHost.Invoke("Write-Host '" + message.Replace("'", "''") + "'", null, true);
+            IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
+            Host.Execute(console, "Write-Host '" + message.Replace("'", "''") + "'", null);
+
+            //Host.Invoke("Write-Host '" + message.Replace("'", "''") + "'", null, true);
         }
 
-        private IPowerShellHost GetHost() {
+        private IHost GetHost() {
             // create the console and instantiate the PS host on demand
             IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
             IHost host = console.Host;
@@ -62,12 +65,12 @@ namespace NuGet.VisualStudio {
             console.Dispatcher.Start();
 
             // gives the host a chance to do initialization works before dispatching commands to it
-            host.Initialize();
+            host.Initialize(console);
 
             // after the host initializes, it may set IsCommandEnabled = false
             if (host.IsCommandEnabled) {
                 // the OutputConsoleProvider guarantees to return PowerShell host, hence this cast is safe
-                return (IPowerShellHost)host;
+                return (IHost)host;
             }
             else {
                 // the PowerShell host fails to initialize if group policy restricts loading of scripts

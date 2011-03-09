@@ -41,8 +41,6 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
     <Compile Include="IPowerShellHost.cs" />
-          <InProject>false</InProject>
-      </Compile>
     <Compile Include="PowerShellHostExtensions.cs" />
     <Compile Include="PSTypeWrapper.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />

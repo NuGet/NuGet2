@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio {
             // only instantiate the PS host if necessary (e.g. when package contains PS script files)
             if (requirePowerShellHost && _console.Host == null) {
                 var hostProvider = GetPowerShellHostProvider();
-                _console.Host = hostProvider.CreateHost(_console, @async: false);
+                _console.Host = hostProvider.CreateHost(@async: false);
             }
 
             return _console;

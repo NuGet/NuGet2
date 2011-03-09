@@ -148,11 +148,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             string nugetPath = Path.Combine(extensionLocation, @"NuGet.psd1");
             this.ImportModule(nugetPath);
 
-#if DEBUG
-            if (File.Exists(DebugConstants.TestModulePath)) {
-                this.ImportModule(DebugConstants.TestModulePath);
-            }
-#endif
+//#if DEBUG
+//            if (File.Exists(DebugConstants.TestModulePath)) {
+//                this.ImportModule(DebugConstants.TestModulePath);
+//            }
+//#endif
 
             return true;
         }

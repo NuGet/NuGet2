@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.Composition;
 using System.Runtime.CompilerServices;
 using NuGetConsole.Host.PowerShell.Implementation;
@@ -26,14 +27,19 @@ namespace NuGetConsole.Host.PowerShellProvider {
             if (_host == null) {
                 bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
                 if (isPowerShell2Installed) {
-                    _host = CreatePowerShellHost(@async);
+                    return CreatePowerShellHost(@async);
                 }
                 else {
-                    _host = new UnsupportedHost();
+                    return new UnsupportedHost();
                 }
             }
+            else {
+                return _host;
+            }
+        }
 
-            return _host;
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static IHost CreatePowerShellHost(bool @async) {
 
             // backdoor: allow turning off async mode by setting enviroment variable NuGetSyncMode=1
             string syncModeFlag = Environment.GetEnvironmentVariable("NuGetSyncMode", EnvironmentVariableTarget.User);
@@ -41,7 +47,6 @@ namespace NuGetConsole.Host.PowerShellProvider {
                 @async = false;
             }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
             return PowerShellHostService.CreateHost(PowerConsoleHostName, @async, new Commander(null));
         }
 
