@@ -119,21 +119,8 @@ namespace NuGet {
         }
 
         public virtual void AddPackageReference(string packageId, Version version, bool ignoreDependencies) {
-            if (String.IsNullOrEmpty(packageId)) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
+            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version);
 
-            IPackage package = SourceRepository.FindPackage(packageId, version: version);
-
-            if (package == null) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.UnknownPackage, packageId));
-            }
-
-            // If we already have this package installed, use the local copy so we don't 
-            // end up using the one from the source repository.
-            package = LocalRepository.FindPackage(package.Id, package.Version) ?? package;
             AddPackageReference(package, ignoreDependencies);
         }
 

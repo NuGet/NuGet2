@@ -64,15 +64,7 @@ namespace NuGet.VisualStudio {
         public virtual void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
-            IPackage package = SourceRepository.FindPackage(packageId, version: version);
-
-            if (package == null) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    VsResources.UnknownPackage, packageId));
-            }
-
-            package = LocalRepository.FindPackage(package.Id, package.Version) ?? package;
+            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version);
 
             // REVIEW: This isn't transactional, so if add package reference fails
             // the user has to manually clean it up by uninstalling it
