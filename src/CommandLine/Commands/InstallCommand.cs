@@ -7,13 +7,16 @@ using System.Xml.Linq;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "install", "InstallCommandDescription", 
-        MinArgs = 1, MaxArgs = 2,
+        MinArgs = 1, MaxArgs = 1,
         UsageSummaryResourceName = "InstallCommandUsageSummary", UsageDescriptionResourceName = "InstallCommandUsageDescription")]
     public class InstallCommand : Command {
         private const string DefaultFeedUrl = ListCommand.DefaultFeedUrl;
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
         public string Source { get; set; }
+
+        [Option(typeof(NuGetResources), "InstallCommandOutputDirDescription")]
+        public string OutputDirectory { get; set; }
 
         [Option(typeof(NuGetResources), "InstallCommandVersionDescription")]
         public string Version { get; set; }
@@ -41,13 +44,7 @@ namespace NuGet.Commands {
             IPackageRepository packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl));
 
             // Use the passed in install path if any, and default to the current dir
-            string installPath;
-            if (Arguments.Count > 1) {
-                installPath = Arguments[1];
-            }
-            else {
-                installPath = Directory.GetCurrentDirectory();
-            }
+            string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
 
             var packageManager = new PackageManager(packageRepository,
                 new DefaultPackagePathResolver(installPath, useSideBySidePaths: !ExcludeVersion), 
@@ -72,10 +69,17 @@ namespace NuGet.Commands {
             // REVIEW: would be nice to share some reading code with core
             var packages = from packageTag in XElement.Load(Arguments[0]).Elements("package")
                            select new { Id = packageTag.Attribute("id").Value, Version = new Version(packageTag.Attribute("version").Value) };
+            bool installedAny = false;
             foreach (var package in packages) {
                 if (!IsPackageInstalled(package.Id, package.Version, packageManager, path)) {
-                    packageManager.InstallPackage(package.Id, package.Version);
+                    // Note that we ignore dependencies here because packages.config already contains the full closure
+                    packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true);
+                    installedAny = true;
                 }
+            }
+
+            if (!installedAny) {
+                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, PackageReferenceRepository.PackageReferenceFile);
             }
         }
 

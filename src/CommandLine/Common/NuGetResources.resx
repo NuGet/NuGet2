@@ -178,7 +178,7 @@
     <value>Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed.</value>
   </data>
   <data name="InstallCommandUsageSummary" xml:space="preserve">
-    <value>packageId|pathToPackagesConfig [install path] [options]</value>
+    <value>packageId|pathToPackagesConfig [options]</value>
   </data>
   <data name="MissingOptionValueError" xml:space="preserve">
     <value>Missing option value for: '{0}'</value>
@@ -350,5 +350,11 @@
   </data>
   <data name="PackageCommandVersionDescription" xml:space="preserve">
     <value>Overrides the Version number from the nuspec file.</value>
+  </data>
+  <data name="InstallCommandOutputDirDescription" xml:space="preserve">
+    <value>Specifies the directory in which packages will be installed</value>
+  </data>
+  <data name="InstallCommandNothingToInstall" xml:space="preserve">
+    <value>All packages listed in {0} are already installed.</value>
   </data>
 </root>
