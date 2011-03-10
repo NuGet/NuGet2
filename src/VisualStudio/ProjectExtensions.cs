@@ -31,8 +31,9 @@ namespace NuGet.VisualStudio {
                                                                           VsConstants.WebSiteProjectTypeGuid, 
                                                                           VsConstants.CsharpProjectTypeGuid, 
                                                                           VsConstants.VbProjectTypeGuid,
-                                                                          VsConstants.FsharpProjectTypeGuid 
-        };
+                                                                          VsConstants.FsharpProjectTypeGuid,
+                                                                          VsConstants.WixProjectTypeGuid
+                                                                         };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
 
