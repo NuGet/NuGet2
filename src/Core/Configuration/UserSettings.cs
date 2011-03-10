@@ -17,7 +17,7 @@ namespace NuGet {
                 throw new ArgumentNullException("fileSystem");
             }
             _fileSystem = fileSystem;
-            _configLocation = Path.Combine(_fileSystem.GetEnvironmentFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            _configLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configLocation);
         }
 
@@ -110,7 +110,7 @@ namespace NuGet {
 
             var sectionElement = _config.Root.Element(section);
             if (sectionElement == null) {
-                throw new System.Xml.XmlException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
             }
 
             XElement elementToDelete = null;
@@ -121,7 +121,7 @@ namespace NuGet {
                 }
             }
             if (elementToDelete == null) {
-                throw new System.Xml.XmlException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
             }
             elementToDelete.Remove();
             Save(_config);
