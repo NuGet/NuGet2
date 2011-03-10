@@ -241,7 +241,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the id and optionally the version of the package to install..
+        ///   Looks up a localized string similar to Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed..
         /// </summary>
         internal static string InstallCommandUsageDescription {
             get {
@@ -250,7 +250,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [package id] [options].
+        ///   Looks up a localized string similar to packageId|pathToPackagesConfig [install path] [options].
         /// </summary>
         internal static string InstallCommandUsageSummary {
             get {

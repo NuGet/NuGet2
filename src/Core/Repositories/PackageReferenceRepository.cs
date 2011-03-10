@@ -14,7 +14,7 @@ namespace NuGet {
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup {
-        private const string PackageReferenceFile = "packages.config";
+        public const string PackageReferenceFile = "packages.config";
 
         public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
             if (fileSystem == null) {

@@ -175,10 +175,10 @@
     <value>The location to look for packages.</value>
   </data>
   <data name="InstallCommandUsageDescription" xml:space="preserve">
-    <value>Specify the id and optionally the version of the package to install.</value>
+    <value>Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed.</value>
   </data>
   <data name="InstallCommandUsageSummary" xml:space="preserve">
-    <value>[package id] [options]</value>
+    <value>packageId|pathToPackagesConfig [install path] [options]</value>
   </data>
   <data name="MissingOptionValueError" xml:space="preserve">
     <value>Missing option value for: '{0}'</value>
