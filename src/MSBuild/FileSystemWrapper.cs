@@ -57,10 +57,6 @@ namespace NuGet {
             throw new NotSupportedException();
         }
 
-        public string GetEnvironmentFolderPath(Environment.SpecialFolder folderName) {
-            throw new NotSupportedException();
-        }
-
         public Stream CreateFile(string path) {
             return File.Create(path);
         }
