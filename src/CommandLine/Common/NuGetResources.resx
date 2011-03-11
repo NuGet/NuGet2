@@ -353,8 +353,10 @@
   </data>
   <data name="InstallCommandOutputDirDescription" xml:space="preserve">
     <value>Specifies the directory in which packages will be installed</value>
+  </data>
   <data name="InstallCommandNothingToInstall" xml:space="preserve">
     <value>All packages listed in {0} are already installed.</value>
+  </data>
   <data name="NoApiKeyFound" xml:space="preserve">
     <value>No API Key was provided and no API Key could be found for this source. To save an API Key for a source use the 'SetApiKey' command.</value>
   </data>
