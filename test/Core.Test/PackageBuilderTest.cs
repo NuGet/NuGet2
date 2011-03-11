@@ -696,5 +696,43 @@ Enabling license acceptance requires a license url.");
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
+
+        [TestMethod]
+        public void PackageBuilderWorksWithFileNamesContainingSpecialCharacters() {
+            // Arrange
+            var fileNames = new[] {
+                @"lib\regular.file.dll",
+                @"lib\name with spaces.dll",
+                @"lib\C#\test.dll",
+                @"content\images\logo123?#78.png",
+                @"content\images\bread&butter.jpg",
+            };
+
+            // Act
+            var builder = new PackageBuilder { Id = "test", Version = new Version("1.0"), Description = "test" };
+            builder.Authors.Add("test");
+            foreach(var name in fileNames) {
+                builder.Files.Add(CreatePackageFile(name));
+            }
+
+            // Assert
+            using (MemoryStream stream = new MemoryStream()) {
+                builder.Save(stream);
+
+                var zipPackage = new ZipPackage(() => new MemoryStream(stream.ToArray()));
+                Assert.AreEqual(@"content\images\bread&butter.jpg", zipPackage.GetFiles().ElementAt(0).Path);
+                Assert.AreEqual(@"content\images\logo123?#78.png", zipPackage.GetFiles().ElementAt(1).Path);
+                Assert.AreEqual(@"lib\C#\test.dll", zipPackage.GetFiles().ElementAt(2).Path);
+                Assert.AreEqual(@"lib\name with spaces.dll", zipPackage.GetFiles().ElementAt(3).Path);
+                Assert.AreEqual(@"lib\regular.file.dll", zipPackage.GetFiles().ElementAt(4).Path);
+            }
+        }
+
+        private static IPackageFile CreatePackageFile(string name) {
+            var file = new Mock<IPackageFile>();
+            file.SetupGet(f => f.Path).Returns(name);
+            file.Setup(f => f.GetStream()).Returns(new MemoryStream());
+            return file.Object;
+        }
     }
 }

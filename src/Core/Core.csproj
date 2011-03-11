@@ -90,6 +90,7 @@
     <Compile Include="Utility\IHttpClient.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
+    <Compile Include="Utility\PackageHelper.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\ZipPackageFactory.cs" />
