@@ -13,5 +13,6 @@ glob:*.vs10x
 glob:*.vsp
 glob:*.psess
 glob:TestResults
+glob:[Tt]humbs.db
 glob:src/Server/Packages/*.nupkg
 DebugConstants.cs
