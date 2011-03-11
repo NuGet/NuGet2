@@ -39,7 +39,9 @@ namespace NuGet.VisualStudio {
 
             try {
                 // Keep track of visited projects
-                AddBindingRedirects(solutionManager, project, domain);
+                if (project.SupportsBindingRedirects()) {
+                    AddBindingRedirects(solutionManager, project, domain);
+                }
             }
             finally {
                 AppDomain.Unload(domain);

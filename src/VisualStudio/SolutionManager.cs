@@ -261,8 +261,10 @@ namespace NuGet.VisualStudio {
             // large number of references.           
             ThreadHelper.Generic.Invoke(() => {
                 foreach (var proj in GetProjects()) {
-                    foreach (var referencedProject in proj.GetReferencedProjects()) {
-                        AddDependentProject(dependentProjects, referencedProject, proj);
+                    if (project.SupportsReferences()) {
+                        foreach (var referencedProject in proj.GetReferencedProjects()) {
+                            AddDependentProject(dependentProjects, referencedProject, proj);
+                        }
                     }
                 }
             });

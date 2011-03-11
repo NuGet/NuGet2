@@ -35,6 +35,11 @@ namespace NuGet.VisualStudio {
                                                                           VsConstants.WixProjectTypeGuid
                                                                          };
 
+        // List of project types that cannot have references added to them
+        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid};
+        // List of project types that cannot have binding redirects added
+        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid };
+
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
 
         // Get the ProjectItems for a folder path
@@ -262,6 +267,16 @@ namespace NuGet.VisualStudio {
 
         public static bool IsSolutionFolder(this Project project) {
             return project.Kind != null && project.Kind.Equals(VsConstants.VsProjectItemKindSolutionFolder, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool SupportsReferences(this Project project) {
+            return project.Kind != null &&
+                !_unsupportedProjectTypesForAddingReferences.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static bool SupportsBindingRedirects(this Project project) {
+            return project.Kind != null & 
+                !_unsupportedProjectTypesForBindingRedirects.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsUnloaded(this Project project) {

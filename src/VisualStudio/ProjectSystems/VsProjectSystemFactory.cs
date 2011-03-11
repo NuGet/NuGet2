@@ -9,7 +9,8 @@ namespace NuGet.VisualStudio {
         private static Dictionary<string, Func<Project, IProjectSystem>> _factories = new Dictionary<string, Func<Project, IProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
             { VsConstants.WebApplicationProjectTypeGuid , project => new WebProjectSystem(project) },
             { VsConstants.WebSiteProjectTypeGuid , project => new WebSiteProjectSystem(project) },
-            { VsConstants.FsharpProjectTypeGuid , project => new FSharpProjectSystem(project) }
+            { VsConstants.FsharpProjectTypeGuid , project => new FSharpProjectSystem(project) },
+            { VsConstants.WixProjectTypeGuid , project => new WixProjectSystem(project) }
         };
 
 
