@@ -655,11 +655,38 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saves an API key for a given Gallery Server URL, when no URL is provide API key is saved for the default source..
+        /// </summary>
+        internal static string SetApiKeyCommandDescription {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Base URL to the Gallery Server where the API Key is valid..
         /// </summary>
         internal static string SetApiKeyCommandSourceDescription {
             get {
                 return ResourceManager.GetString("SetApiKeyCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the API key to save and an optional URL to the Gallery Server that provided the API key..
+        /// </summary>
+        internal static string SetApiKeyCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;API key&gt; [Source].
+        /// </summary>
+        internal static string SetApiKeyCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandUsageSummary", resourceCulture);
             }
         }
         

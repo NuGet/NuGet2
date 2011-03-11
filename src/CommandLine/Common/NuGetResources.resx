@@ -366,4 +366,13 @@
   <data name="SetApiKeyCommandSourceDescription" xml:space="preserve">
     <value>Base URL to the Gallery Server where the API Key is valid.</value>
   </data>
+  <data name="SetApiKeyCommandDescription" xml:space="preserve">
+    <value>Saves an API key for a given Gallery Server URL, when no URL is provide API key is saved for the default source.</value>
+  </data>
+  <data name="SetApiKeyCommandUsageDescription" xml:space="preserve">
+    <value>Specify the API key to save and an optional URL to the Gallery Server that provided the API key.</value>
+  </data>
+  <data name="SetApiKeyCommandUsageSummary" xml:space="preserve">
+    <value>&lt;API key&gt; [Source]</value>
+  </data>
 </root>

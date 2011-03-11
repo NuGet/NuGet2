@@ -5,9 +5,9 @@ using System.Text;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "setApiKey", "PushCommandDescription",
-        MinArgs = 1, MaxArgs = 1, UsageDescriptionResourceName = "PushCommandUsageDescription",
-        UsageSummaryResourceName = "PushCommandUsageSummary")]
+    [Command(typeof(NuGetResources), "setApiKey", "SetApiKeyCommandDescription",
+        MinArgs = 1, MaxArgs = 1, UsageDescriptionResourceName = "SetApiKeyCommandUsageDescription",
+        UsageSummaryResourceName = "SetApiKeyCommandUsageSummary")]
     public class SetApiKeyCommand : Command {
 
         [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
