@@ -457,6 +457,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disable auto-exclusion of special files. This includes files with extensions .nupkg and any file or folder name that starts with a dot (.hg, .git etc)..
+        /// </summary>
+        internal static string PackageCommandNoDefaultExcludes {
+            get {
+                return ResourceManager.GetString("PackageCommandNoDefaultExcludes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {

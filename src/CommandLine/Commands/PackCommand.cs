@@ -10,11 +10,9 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {
-        private static readonly Regex[] _defaultExcludes = new [] {
+        private static readonly Regex[] _defaultExcludes = new[] {
             // Exclude previous package files
-            new Regex(Regex.Escape(Constants.PackageExtension) + '$', RegexOptions.IgnoreCase), 
-            // Exclude the nuspec file
-            new Regex(Regex.Escape(Constants.ManifestExtension) + '$', RegexOptions.IgnoreCase), 
+            WildCardToRegex("*" + Constants.PackageExtension), 
             // Exclude all files and directories that begin with "."
             new Regex(@"(^|[/\\])\..+$", RegexOptions.IgnoreCase)
         };
@@ -52,6 +50,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
+        public bool NoDefaultExcludes { get; set; }
+
         public override void ExecuteCommand() {
             // Get the input file
             string path = GetInputFile();
@@ -61,13 +62,13 @@ namespace NuGet.Commands {
 
             var basePath = BasePath ?? Path.GetDirectoryName(nuspecFile);
             PackageBuilder builder = new PackageBuilder(nuspecFile, basePath);
-            
+
             if (!String.IsNullOrEmpty(Version)) {
                 builder.Version = new Version(Version);
             }
 
             // Remove the output file or the package spec might try to include it (which is default behavior)
-            ExcludeFiles(builder.Files, basePath, _excludes);
+            ExcludeFiles(builder.Files, basePath, _excludes, enableDefaultExcludes: !NoDefaultExcludes);
 
             // Get the output path
             string outputPath = GetOutputPath(builder);
@@ -125,8 +126,12 @@ namespace NuGet.Commands {
             Console.WriteLine();
         }
 
-        internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, string basePath, IEnumerable<string> excludeFilters) {
-            var filters = excludeFilters.Select(WildCardToRegex).Concat(_defaultExcludes);
+        internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, string basePath, IEnumerable<string> excludeFilters, bool enableDefaultExcludes) {
+            // Always exclude the nuspec file
+            IEnumerable<Regex> filters = excludeFilters.Concat(new[] { "*" + Constants.ManifestExtension } ).Select(WildCardToRegex);
+            if (enableDefaultExcludes) {
+                filters = filters.Concat(_defaultExcludes);
+            }
             packageFiles.RemoveAll(item => {
                 // The Path property of IPackageFile returns the target path, the path inside the package.
                 // Since excludes would need to be performed against the physical path on disk, cast to it and use the SourcePath property
