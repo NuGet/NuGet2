@@ -199,11 +199,11 @@ namespace NuGet {
             }
         }
 
-        //public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
-        //    get {
-        //        return _package.Value.FrameworkAssemblies;
-        //    }
-        //}
+        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
+            get {
+                return _package.Value.FrameworkAssemblies;
+            }
+        }
 
         public IEnumerable<IPackageFile> GetFiles() {
             return _package.Value.GetFiles();

@@ -17,9 +17,9 @@ namespace PackageExplorer {
     public partial class PackageMetadataEditor : UserControl {
 
         private ObservableCollection<PackageDependency> _packageDependencies;
-        //private ObservableCollection<FrameworkAssemblyReference> _frameworkAssemblies;
+        private ObservableCollection<FrameworkAssemblyReference> _frameworkAssemblies;
         private EditablePackageDependency _newPackageDependency;
-        //private EditableFrameworkAssemblyReference _newFrameworkAssembly;
+        private EditableFrameworkAssemblyReference _newFrameworkAssembly;
 
         public PackageMetadataEditor() {
             InitializeComponent();
@@ -29,7 +29,7 @@ namespace PackageExplorer {
         private void PackageMetadataEditor_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
             if (this.Visibility == System.Windows.Visibility.Visible) {
                 ClearDependencyTextBox();
-                //ClearFrameworkAssemblyTextBox();
+                ClearFrameworkAssemblyTextBox();
                 PrepareBindingForDependencyList();
             }
         }
@@ -40,9 +40,9 @@ namespace PackageExplorer {
             _packageDependencies = new ObservableCollection<PackageDependency>(viewModel.PackageMetadata.Dependencies);
             DependencyList.ItemsSource = _packageDependencies;
 
-            //_frameworkAssemblies =
-            //    new ObservableCollection<FrameworkAssemblyReference>(viewModel.PackageMetadata.FrameworkAssemblies);
-            //FrameworkAssembliesList.ItemsSource = _frameworkAssemblies;
+            _frameworkAssemblies =
+                new ObservableCollection<FrameworkAssemblyReference>(viewModel.PackageMetadata.FrameworkAssemblies);
+            FrameworkAssembliesList.ItemsSource = _frameworkAssemblies;
         }
 
         private void ClearDependencyTextBox() {
@@ -50,10 +50,10 @@ namespace PackageExplorer {
             NewDependencyId.DataContext = NewDependencyVersion.DataContext = _newPackageDependency;
         }
 
-        //private void ClearFrameworkAssemblyTextBox() {
-        //    _newFrameworkAssembly = new EditableFrameworkAssemblyReference();
-        //    NewAssemblyName.DataContext = NewSupportedFramework.DataContext = _newFrameworkAssembly;
-        //}
+        private void ClearFrameworkAssemblyTextBox() {
+            _newFrameworkAssembly = new EditableFrameworkAssemblyReference();
+            NewAssemblyName.DataContext = NewSupportedFramework.DataContext = _newFrameworkAssembly;
+        }
 
         private void PopulateLanguagesForLanguageBox() {
             LanguageBox.ItemsSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures).Select(c => c.Name).OrderBy(p => p, StringComparer.OrdinalIgnoreCase);
@@ -74,7 +74,7 @@ namespace PackageExplorer {
             var button = (Button)sender;
             var item = (FrameworkAssemblyReference)button.DataContext;
 
-            //_frameworkAssemblies.Remove(item);
+            _frameworkAssemblies.Remove(item);
         }
 
         private void AddDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
@@ -114,24 +114,24 @@ namespace PackageExplorer {
             }
         }
 
-        //private void AddFrameworkAssemblyButtonClicked(object sender, RoutedEventArgs args) {
-        //    var bindingExpression2 = NewSupportedFramework.GetBindingExpression(TextBox.TextProperty);
-        //    if (bindingExpression2.HasError) {
-        //        return;
-        //    }
+        private void AddFrameworkAssemblyButtonClicked(object sender, RoutedEventArgs args) {
+            var bindingExpression2 = NewSupportedFramework.GetBindingExpression(TextBox.TextProperty);
+            if (bindingExpression2.HasError) {
+                return;
+            }
 
-        //    _frameworkAssemblies.Add(_newFrameworkAssembly.AsReadOnly());
+            _frameworkAssemblies.Add(_newFrameworkAssembly.AsReadOnly());
 
-        //    // after framework assembly is added, clear the textbox
-        //    ClearFrameworkAssemblyTextBox();
-        //}
+            // after framework assembly is added, clear the textbox
+            ClearFrameworkAssemblyTextBox();
+        }
 
         private void OkButtonClicked(object sender, RoutedEventArgs e) {
             bool commited = PackageMetadataGroup.CommitEdit();
             if (commited) {
                 var viewModel = (PackageViewModel)DataContext;
                 _packageDependencies.CopyTo(viewModel.PackageMetadata.Dependencies);
-                //_frameworkAssemblies.CopyTo(viewModel.PackageMetadata.FrameworkAssemblies);
+                _frameworkAssemblies.CopyTo(viewModel.PackageMetadata.FrameworkAssemblies);
             }
         }
     }

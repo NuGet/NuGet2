@@ -198,7 +198,7 @@ namespace NuGet {
                     Language = metadata.Language;
                     Tags = metadata.Tags;
                     Dependencies = metadata.Dependencies;
-                    //FrameworkAssemblies = metadata.FrameworkAssemblies;
+                    FrameworkAssemblies = metadata.FrameworkAssemblies;
 
                     // Ensure tags start and end with an empty " " so we can do contains filtering reliably
                     if (!String.IsNullOrEmpty(Tags)) {
