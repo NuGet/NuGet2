@@ -19,8 +19,6 @@ namespace PackageExplorer {
 
         public MainWindow() {
             InitializeComponent();
-
-            BuildStatusItem.Content = "Build " + typeof(MainWindow).Assembly.GetName().Version.ToString();
         }
 
         protected override void OnSourceInitialized(EventArgs e) {

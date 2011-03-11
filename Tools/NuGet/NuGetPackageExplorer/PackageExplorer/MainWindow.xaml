@@ -488,7 +488,6 @@
         <!-- Status bar -->
         <StatusBar Grid.Row="2">
             <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource}" />
-            <StatusBarItem x:Name="BuildStatusItem" HorizontalAlignment="Right" />
         </StatusBar>
     </Grid>
 </Window>
