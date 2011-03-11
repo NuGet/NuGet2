@@ -102,13 +102,13 @@ namespace NuGet {
                                         Id = d.Id.SafeTrim(),
                                         Version = d.VersionSpec.ToStringSafe()
                                     }).ToList(),
-                    //FrameworkAssemblies = metadata.FrameworkAssemblies == null ||
-                    //                      !metadata.FrameworkAssemblies.Any() ? null :
-                    //                      (from reference in metadata.FrameworkAssemblies
-                    //                       select new ManifestFrameworkAssembly {
-                    //                           AssemblyName = reference.AssemblyName,
-                    //                           TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
-                    //                       }).ToList()
+                    FrameworkAssemblies = metadata.FrameworkAssemblies == null ||
+                                          !metadata.FrameworkAssemblies.Any() ? null :
+                                          (from reference in metadata.FrameworkAssemblies
+                                           select new ManifestFrameworkAssembly {
+                                               AssemblyName = reference.AssemblyName,
+                                               TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
+                                           }).ToList()
                 }
             };
         }
