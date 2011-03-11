@@ -655,7 +655,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Saves an API key for a given Gallery Server URL, when no URL is provide API key is saved for the default source..
+        ///   Looks up a localized string similar to Saves an API key for a given Gallery Server URL, when no URL is provided API key is saved for the default source..
         /// </summary>
         internal static string SetApiKeyCommandDescription {
             get {

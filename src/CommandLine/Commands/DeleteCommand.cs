@@ -22,8 +22,8 @@ namespace NuGet.Commands {
             string packageVersion = Arguments[1];
             //Third argument, if present, should be the API Key
             string userSetApiKey = null;
-            if (Arguments.Count > 1) {
-                userSetApiKey = Arguments[1];
+            if (Arguments.Count > 2) {
+                userSetApiKey = Arguments[2];
             }
 
             //If the user passed a source use it for the gallery location
