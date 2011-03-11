@@ -177,4 +177,7 @@
   <data name="PackageHasNoFile" xml:space="preserve">
     <value>There is no content file in the package.</value>
   </data>
+  <data name="ProductRelease" xml:space="preserve">
+    <value>Beta 2</value>
+  </data>
 </root>

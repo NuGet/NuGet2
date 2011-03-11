@@ -1,0 +1,34 @@
+﻿<self:DialogWithNoMinimizeAndMaximize x:Class="PackageExplorer.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:self="clr-namespace:PackageExplorer"
+        xmlns:settings="clr-namespace:PackageExplorer.Properties"
+        xmlns:resources="clr-namespace:PackageExplorer.Resources"
+        FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
+        Title="{x:Static resources:Resources.Dialog_Title}" 
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="WidthAndHeight"
+        ShowInTaskbar="False">
+    
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        
+        <Image Style="{x:Null}" Stretch="None" VerticalAlignment="Top" Source="/NuGetPackageExplorer;component/Images/packageicon.png" />
+        
+        <StackPanel Orientation="Vertical" Grid.Column="1" Margin="20,0,0,0">
+            <TextBlock x:Name="ProductTitle" Text="NuGet Package Explorer Beta 2" FontWeight="Bold" />
+            <TextBlock>
+                <Hyperlink NavigateUri="http://nuget.codeplex.com" Click="Hyperlink_Click">
+                    <Run Text="http://nuget.codeplex.com" />
+                </Hyperlink>
+            </TextBlock>
+
+            <TextBlock Text="Author: Luan Nguyen (@dotnetjunky)" Margin="0,10,0,0" />
+            <Button Content="_OK" Padding="20,0,20,0" HorizontalAlignment="Right" Margin="0,30,0,0" IsDefault="True" Click="Button_Click" />
+        </StackPanel>
+    </Grid>
+</self:DialogWithNoMinimizeAndMaximize>

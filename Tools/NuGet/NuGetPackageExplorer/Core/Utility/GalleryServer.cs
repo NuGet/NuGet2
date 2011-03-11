@@ -12,8 +12,7 @@ namespace NuGet {
         private const string PackageService = "Packages";
         private const string PublishPackageService = "PublishedPackages/Publish";
 
-        //REVIEW: What should be the User agent
-        private const string _UserAgentPattern = "NuGet/{0} ({1})";
+        private const string _UserAgentPattern = "NuGet Package Explorer/{0} ({1})";
         
         private string _baseGalleryServerUrl;
         private string _userAgent;

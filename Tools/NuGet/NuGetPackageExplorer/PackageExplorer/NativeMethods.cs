@@ -18,5 +18,8 @@ namespace PackageExplorer {
 
         [DllImport("user32.dll")]
         public extern static int GetWindowLong(IntPtr hwnd, int index);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetWindowPos(IntPtr hwnd, IntPtr hwndInsertAfter, int x, int y, int width, int height, uint flags);
     }
 }

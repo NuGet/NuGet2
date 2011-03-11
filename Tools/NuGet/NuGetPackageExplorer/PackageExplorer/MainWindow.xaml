@@ -11,6 +11,7 @@
         Width="750" 
         MinWidth="400" 
         MinHeight="300" 
+        Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}"
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
         FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
         AllowDrop="True"
@@ -226,7 +227,7 @@
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
         <CommandBinding Command="Save" Executed="SaveMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
         <CommandBinding Command="SaveAs" Executed="SaveAsMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
-        <CommandBinding Command="Close" Executed="ExitMenuItem_Click" />
+        <CommandBinding Command="Close" Executed="CloseMenuItem_Click" CanExecute="CanExecuteCloseCommand" />
         <CommandBinding Command="{x:Static self:Commands.OpenFromFeedCommand}" Executed="OpenPackageFromNuGetFeed" />
         <CommandBinding Command="{x:Static self:Commands.PublishToFeedCommand}" Executed="OnPublishButtonClick" CanExecute="CanPublishToFeedCommand" />
         <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
@@ -242,20 +243,22 @@
         <!-- Menu bar -->
         <Menu>
             <self:GrayscaleMenuItem Header="_File">
-                <MenuItem Command="New">
+                <MenuItem Command="New" Header="_New">
                     <MenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/NewDocumentHS.png">
                         </Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <self:GrayscaleMenuItem Command="Open">
+                <self:GrayscaleMenuItem Command="Open" Header="_Open">
                     <self:GrayscaleMenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/openHS.png">
                         </Image>
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
-                <self:GrayscaleMenuItem Header="Open from _NuGet Feed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
-                </self:GrayscaleMenuItem>
+                <MenuItem Header="Open from Nu_Get Feed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
+                </MenuItem>
+                <Separator />
+                <MenuItem Command="Close" Header="_Close" />
                 <Separator />
                 <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="Save" CommandParameter="Save">
                     <self:GrayscaleMenuItem.Icon>
@@ -270,7 +273,7 @@
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <Separator />
-                <self:GrayscaleMenuItem Command="Close" Header="E_xit" />
+                <MenuItem Header="E_xit" Click="ExitMenuItem_Click" />
             </self:GrayscaleMenuItem>
 
             <self:GrayscaleMenuItem Header="_Edit">
@@ -347,12 +350,17 @@
                 <MenuItem Header="How to _Create Package" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
                 <MenuItem Header="_Version Range Specification" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/wikipage?title=Version%20Range%20Specification" />
                 <Separator />
+                <MenuItem Header="_File Bug..." Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/WorkItem/Create" />
                 <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
             </self:GrayscaleMenuItem>
         </Menu>
 
         <!-- Main content -->
-        <Grid Grid.Row="1" x:Name="ContentGrid" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+        <Grid 
+            x:Name="ContentGrid" 
+            Grid.Row="1" 
+            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+            Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
             
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -389,13 +397,13 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TreeView x:Name="PackagesTreeView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0" SelectedItemChanged="OnTreeViewSelectedItemChanged" PreviewMouseRightButtonDown="TreeView_PreviewMouseRightButtonDown">
+                    <TreeView x:Name="PackagesTreeView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0" SelectedItemChanged="OnTreeViewSelectedItemChanged" PreviewMouseRightButtonDown="TreeView_PreviewMouseRightButtonDown" KeyDown="PackagesTreeView_KeyDown">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
                                 <EventSetter Event="DragOver" Handler="OnTreeViewItemDragOver" />
                                 <EventSetter Event="Drop" Handler="OnTreeViewItemDrop" />
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, FallbackValue=False}" />
                                 <Setter Property="IsSelected" Value="{Binding IsSelected}" />
                                 <Setter Property="AllowDrop" Value="True" />
                             </Style>
@@ -448,7 +456,8 @@
                 Margin="3,0,3,3" 
                 Padding="0,4,0,0"
                 BorderBrush="DarkGray" 
-                BorderThickness="1" IsVisibleChanged="GroupBox_IsVisibleChanged">
+                BorderThickness="1" 
+                IsVisibleChanged="GroupBox_IsVisibleChanged">
                 <TextBox 
                     x:Name="FileContent"
                     BorderThickness="0"

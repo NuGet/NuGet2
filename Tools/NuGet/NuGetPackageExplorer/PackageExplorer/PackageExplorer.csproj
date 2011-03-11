@@ -112,6 +112,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Commands.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
@@ -161,6 +164,10 @@
     <Compile Include="UriHelper.cs" />
     <Compile Include="WindowPlacement.cs" />
     <Compile Include="WindowPlacementHelper.cs" />
+    <Page Include="AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DownloadProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

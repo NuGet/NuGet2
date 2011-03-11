@@ -223,11 +223,8 @@ namespace PackageExplorer {
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e) {
-            MessageBox.Show(
-                StringResources.Dialog_HelpAbout,
-                StringResources.Dialog_Title,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            var dialog = new AboutWindow() { Owner = this };
+            dialog.ShowDialog();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
@@ -425,7 +422,10 @@ namespace PackageExplorer {
         }
 
         private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
-            (DataContext as PackageViewModel).SelectedItem = PackagesTreeView.SelectedItem;
+            var model = DataContext as PackageViewModel;
+            if (model != null) {
+                model.SelectedItem = PackagesTreeView.SelectedItem;
+            }
         }
 
         private void OnRenameItemClick(object sender, RoutedEventArgs e) {
@@ -509,6 +509,30 @@ namespace PackageExplorer {
             var rootFolder = (DataContext as PackageViewModel).RootFolder;
             string subFolder = (string)e.Parameter;
             e.CanExecute = !rootFolder.ContainsFolder(subFolder);
+            e.Handled = true;
+        }
+
+        private void PackagesTreeView_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Delete) {
+                var selectedPart = PackagesTreeView.SelectedItem as PackagePart;
+                if (selectedPart != null) {
+                    selectedPart.Delete();
+                }
+                e.Handled = true;
+            }
+        }
+
+        private void CloseMenuItem_Click(object sender, ExecutedRoutedEventArgs e) {
+            bool isCanceled = AskToSaveCurrentFile();
+            if (isCanceled) {
+                return;
+            }
+
+            DataContext = null;
+        }
+
+        private void CanExecuteCloseCommand(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = DataContext != null;
             e.Handled = true;
         }
     }
