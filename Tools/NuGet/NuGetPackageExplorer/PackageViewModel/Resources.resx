@@ -121,6 +121,6 @@
     <value>NuGet Package Explorer</value>
   </data>
   <data name="PackageHasNoFile" xml:space="preserve">
-    <value>There is no content file in the package.</value>
+    <value>There are no contents or dependencies in the package.</value>
   </data>
 </root>

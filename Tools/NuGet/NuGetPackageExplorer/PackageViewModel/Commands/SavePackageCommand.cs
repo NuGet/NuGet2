@@ -42,7 +42,7 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            if (!ViewModel.RootFolder.GetFiles().Any()) {
+            if (!ViewModel.IsValid) {
                 MessageBox.Show(Resources.PackageHasNoFile, Resources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }

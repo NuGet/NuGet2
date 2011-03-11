@@ -102,6 +102,12 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public bool IsValid {
+            get {
+                return GetFiles().Any() || PackageMetadata.Dependencies.Any() || PackageMetadata.FrameworkAssemblies.Any();
+            }
+        }
+
         #region Commands
 
         public ICommand SaveCommand {

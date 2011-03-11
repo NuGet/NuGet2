@@ -366,7 +366,7 @@ namespace PackageExplorer {
 
             var viewModel = (PackageViewModel)DataContext;
 
-            if (!viewModel.GetFiles().Any()) {
+            if (!viewModel.IsValid) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.PackageHasNoFile,
                     PackageExplorer.Resources.Resources.Dialog_Title,

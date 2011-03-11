@@ -232,7 +232,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There is no content file in the package..
+        ///   Looks up a localized string similar to There are no contents or dependencies in the package..
         /// </summary>
         public static string PackageHasNoFile {
             get {
