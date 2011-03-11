@@ -4,7 +4,7 @@
 ModuleToProcess = 'Scripts\nuget.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.0.0'
+ModuleVersion = '1.3.0.0'
 
 # ID used to uniquely identify this module
 GUID = '76e6f9c4-7045-44c0-a557-17fab0835c12'
