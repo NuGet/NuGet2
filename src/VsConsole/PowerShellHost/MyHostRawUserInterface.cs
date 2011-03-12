@@ -4,7 +4,7 @@ using System.Management.Automation.Host;
 namespace NuGetConsole.Host.PowerShell.Implementation {
     class MyHostRawUserInterface : PSHostRawUserInterface {
 
-        private PowerShellHost _host;
+        private MyHost _host;
 
         private IConsole Console {
             get {
@@ -12,7 +12,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public MyHostRawUserInterface(PowerShellHost host) {
+        public MyHostRawUserInterface(MyHost host) {
             _host = host;
         }
 

@@ -40,9 +40,14 @@
     </Compile>
     <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
-    <Compile Include="IPowerShellHost.cs" />
-    <Compile Include="PowerShellHostExtensions.cs" />
+    <Compile Include="DebugConstants.cs" />
+    <Compile Include="IRunspaceManager.cs" />
+    <Compile Include="ProjectExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PSTypeWrapper.cs" />
+    <Compile Include="RunspaceExtensions.cs" />
+    <Compile Include="RunspaceManager.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="CommandTokenizer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -101,21 +106,12 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-    <Target Name="BeforeBuild" Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage'">
-        <PropertyGroup>
-            <DebugConstants>$(MSBuildProjectDirectory)\DebugConstants.cs</DebugConstants>
-        </PropertyGroup>
-        <WriteLinesToFile File="$(DebugConstants)"
-                          Lines="#if DEBUG
-using System.IO%3B
-namespace NuGetConsole.Host.PowerShell {
-    public static class DebugConstants {
-        internal static string TestModulePath = Path.Combine(%40&quot;$(NuGetRoot)&quot;, %40&quot;test\EndToEnd\NuGet.Tests.psm1&quot;)%3B
-    }
-}
-#endif"
-                          Overwrite="true" />
-    </Target>
+  <Target Name="BeforeBuild" Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage'">
+    <PropertyGroup>
+      <DebugConstants>$(MSBuildProjectDirectory)\DebugConstants.cs</DebugConstants>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(DebugConstants)" Lines="#if DEBUG&#xD;&#xA;using System.IO%3B&#xD;&#xA;namespace NuGetConsole.Host.PowerShell {&#xD;&#xA;    public static class DebugConstants {&#xD;&#xA;        internal static string TestModulePath = Path.Combine(%40&quot;$(NuGetRoot)&quot;, %40&quot;test\EndToEnd\NuGet.Tests.psm1&quot;)%3B&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;#endif" Overwrite="true" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.  
   <Target Name="AfterBuild">

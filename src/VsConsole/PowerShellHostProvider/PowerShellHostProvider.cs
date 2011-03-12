@@ -21,20 +21,13 @@ namespace NuGetConsole.Host.PowerShellProvider {
         /// </summary>
         public const string PowerConsoleHostName = "Package Manager Host";
 
-        private IHost _host;
-
         public IHost CreateHost(bool @async) {
-            if (_host == null) {
-                bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
-                if (isPowerShell2Installed) {
-                    return CreatePowerShellHost(@async);
-                }
-                else {
-                    return new UnsupportedHost();
-                }
+            bool isPowerShell2Installed = RegistryHelper.CheckIfPowerShell2Installed();
+            if (isPowerShell2Installed) {
+                return CreatePowerShellHost(@async);
             }
             else {
-                return _host;
+                return new UnsupportedHost();
             }
         }
 
@@ -47,23 +40,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
                 @async = false;
             }
 
-            return PowerShellHostService.CreateHost(PowerConsoleHostName, @async, new Commander(null));
-        }
-
-        class Commander {
-            private readonly IConsole _console;
-
-            public Commander(IConsole console) {
-                _console = console;
-            }
-
-            [System.Diagnostics.CodeAnalysis.SuppressMessage(
-                "Microsoft.Performance",
-                "CA1811:AvoidUncalledPrivateCode",
-                Justification = "This method can be dynamically invoked from PS script.")]
-            public void ClearHost() {
-                _console.Clear();
-            }
+            return PowerShellHostService.CreateHost(PowerConsoleHostName, @async);
         }
     }
 }

@@ -231,7 +231,7 @@ namespace NuGet.Dialog.Test {
         }
 
         [TestMethod]
-        public void ExecuteMethodDoesNotInstallPackagesWithInitScript() {
+        public void ExecuteMethodInstallPackagesWithInitScript() {
             // source repo has A, B, C
             // solution repo has A
             // project repo has C
@@ -262,6 +262,8 @@ namespace NuGet.Dialog.Test {
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
             packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
+            packageManager.Setup(p => p.InstallPackage(projectManager, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>())).
+                Raises(p => p.PackageInstalled += null, packageManager, new PackageOperationEventArgs(packageB, ""));
 
             var provider = CreateOnlineProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -279,12 +281,12 @@ namespace NuGet.Dialog.Test {
                 try {
                     // Assert
 
-                    // init.ps1 shouldn't be executed
-                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Init, packageB, project.Object, It.IsAny<ILogger>()), Times.Never());
+                    // init.ps1 should be executed
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Init, packageB, null, It.IsAny<ILogger>()), Times.Once());
 
-                    // InstallPackage() should not get called
+                    // InstallPackage() should get called
                     packageManager.Verify(p => p.InstallPackage(
-                       projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>()), Times.Never());
+                       projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>()), Times.Once());
                 }
                 finally {
                     manualEvent.Set();

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using EnvDTE;
@@ -370,13 +369,6 @@ namespace NuGet.VisualStudio {
 
                 return String.Join("\\", nameParts);
             }
-        }
-
-        /// <summary>
-        /// This method is used for the ProjectName CodeProperty in Types.ps1xml
-        /// </summary>
-        public static string GetCustomUniqueNameForPS(PSObject psObject) {
-            return GetCustomUniqueName((Project)psObject.BaseObject);
         }
 
         private class PathComparer : IEqualityComparer<string> {

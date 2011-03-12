@@ -119,12 +119,6 @@ namespace NuGet.Dialog.Providers {
                 if (!RegistryHelper.CheckIfPowerShell2Installed()) {
                     throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
                 }
-                else {
-                    var hasInitScriptPackages = scriptPackages.Any(p => p.HasPowerShellScript(new[] { "init.ps1" }));
-                    if (hasInitScriptPackages) {
-                        throw new InvalidOperationException(Resources.Dialog_PackageHasInitScript);
-                    }
-                }
             }
 
             IEnumerable<IPackage> licensePackages = from o in operations

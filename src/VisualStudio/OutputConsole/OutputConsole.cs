@@ -96,5 +96,9 @@ namespace NuGet.VisualStudio {
         public void ClearConsole() {
             Clear();
         }
+
+        public bool ExecuteInitScriptOnStartup {
+            get { return false; }
+        }
     }
 }

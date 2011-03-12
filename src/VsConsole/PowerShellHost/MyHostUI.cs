@@ -10,7 +10,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class MyHostUI : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
         
-        private PowerShellHost _host;
+        private MyHost _host;
 
         private IConsole Console {
             get {
@@ -18,7 +18,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public MyHostUI(PowerShellHost host) {
+        public MyHostUI(MyHost host) {
             UtilityMethods.ThrowIfArgumentNull(host);
             _host = host;
         }

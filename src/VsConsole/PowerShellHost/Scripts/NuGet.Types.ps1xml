@@ -7,8 +7,8 @@
             <CodeProperty>
                 <Name>ProjectName</Name>
                 <GetCodeReference>
-                    <TypeName>NuGet.VisualStudio.ProjectExtensions</TypeName>
-                    <MethodName>GetCustomUniqueNameForPS</MethodName>
+                    <TypeName>NuGetConsole.Host.PowerShell.Implementation.ProjectExtensions</TypeName>
+                    <MethodName>GetCustomUniqueName</MethodName>
                 </GetCodeReference>
             </CodeProperty>
             <ScriptProperty>
@@ -31,8 +31,8 @@
             <CodeProperty>
                 <Name>ProjectName</Name>
                 <GetCodeReference>
-                    <TypeName>NuGet.VisualStudio.ProjectExtensions</TypeName>
-                    <MethodName>GetCustomUniqueNameForPS</MethodName>
+                    <TypeName>NuGetConsole.Host.PowerShell.Implementation.ProjectExtensions</TypeName>
+                    <MethodName>GetCustomUniqueName</MethodName>
                 </GetCodeReference>
             </CodeProperty>
             <ScriptProperty>

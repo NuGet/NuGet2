@@ -6,31 +6,27 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.PowerShell;
 using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
 
-    internal abstract class PowerShellHost : IPowerShellHost, IPathExpansion, IDisposable, IHost {
+    internal abstract class PowerShellHost : IHost, IPathExpansion, IDisposable {
 
-        public IConsole ActiveConsole { get; private set; }
-
-        private string _name;
-        private object _privateData;
-        private Runspace _myRunSpace;
-        private MyHost _myHost;
+        private readonly string _name;
+        private readonly IRunspaceManager _runspaceManager;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
-        private Pipeline _executingPipeline;
-        private bool? _initialized;
 
-        protected PowerShellHost(string name, bool isAsync, object privateData) {
-            IsAsync = isAsync;
+        private Runspace _runspace;
+        private MyHost _myHost;
+        private bool? _initialized;
+        private ComplexCommand _complexCommand;
+
+        public PowerShellHost(string name, IRunspaceManager runspaceManager) {
+            _runspaceManager = runspaceManager;
 
             // TODO: Take these as ctor arguments
             _packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
@@ -38,184 +34,37 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             _packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
 
             _name = name;
-            _privateData = privateData;
             IsCommandEnabled = true;
         }
 
-        public bool IsCommandEnabled {
-            get;
-            private set;
-        }
+        protected Pipeline ExecutingPipeline { get; set; }
 
         /// <summary>
-        /// Doing all necessary initialization works before the console accepts user inputs
+        /// The host is associated with a particular console on a per-command basis. 
+        /// This gets set every time a command is executed on this host.
         /// </summary>
-        public void Initialize(IConsole console) {
-            ActiveConsole = console;
-
-            if (_initialized.HasValue) {
-                if (_initialized.Value && console.ShowDisclaimerHeader) {
-                    DisplayDisclaimerAndHelpText();
-                }
-            }
-            else {
-
-                // we setup the runspace here, rather than loading it on-demand. This is so that we can
-                // load user profile scripts before the command prompt shows up. It also helps with 
-                // tab expansion right from the beginning
-                SetupRunspace();
-                bool successful = LoadStartupScripts();
-                if (successful) {
-                    if (console.ShowDisclaimerHeader) {
-                        DisplayDisclaimerAndHelpText();
-                    }
-
-                    LoadProfilesIntoRunspace(_myRunSpace);
-
-                    ExecuteInitScripts();
-                    _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
-                }
-                else {
-                    IsCommandEnabled = false;
-                    DisplayGroupPolicyError();
-                }
-
-                _initialized = successful;
+        protected void SetActiveConsole(IConsole console) {
+            if (_myHost != null) {
+                _myHost.ActiveConsole = console;
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want execution of init scripts to crash our console.")]
-        private void ExecuteInitScripts() {
-            if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
-                try {
-                    var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
-                    var localRepository = packageManager.LocalRepository;
+        public bool IsCommandEnabled {
+            get; private set;
+        }
 
-                    // invoke init.ps1 files in the order of package dependency.
-                    // if A -> B, we invoke B's init.ps1 before A's.
-
-                    var sorter = new PackageSorter();
-                    var sortedPackages = sorter.GetPackagesByDependencyOrder(localRepository);
-
-                    foreach (var package in sortedPackages) {
-                        string installPath = packageManager.PathResolver.GetInstallPath(package);
-
-                        this.AddPathToEnvironment(Path.Combine(installPath, "tools"));
-                        this.ExecuteScript(installPath, "tools\\init.ps1", package);
-                    }
+        public Runspace Runspace {
+            get {
+                // throw if the host is not initialized yet
+                if (_initialized == null) {
+                    throw new InvalidOperationException();
                 }
-                catch (Exception ex) {
-                    // if execution of Init scripts fails, do not let it crash our console
-                    ReportError(ex);
-                }
+
+                return _runspace;
             }
         }
 
-        private void DisplayDisclaimerAndHelpText() {
-            _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
-            _myHost.UI.WriteLine();
-            _myHost.UI.WriteLine(VsResources.Console_HelpText);
-            _myHost.UI.WriteLine();
-        }
-
-        private void DisplayGroupPolicyError() {
-            _myHost.UI.WriteErrorLine(VsResources.Console_GroupPolicyError);
-        }
-
-        private bool LoadStartupScripts() {
-            ExecutionPolicy policy = this.GetEffectiveExecutionPolicy();
-            if (policy != ExecutionPolicy.Unrestricted &&
-                policy != ExecutionPolicy.RemoteSigned &&
-                policy != ExecutionPolicy.Bypass) {
-
-                ExecutionPolicy machinePolicy = this.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
-                if (machinePolicy != ExecutionPolicy.Undefined) {
-                    return false;
-                }
-
-                ExecutionPolicy userPolicy = this.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
-                if (userPolicy != ExecutionPolicy.Undefined) {
-                    return false;
-                }
-
-                this.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
-            }
-
-            string extensionLocation = Path.GetDirectoryName(GetType().Assembly.Location);
-            string nugetPath = Path.Combine(extensionLocation, @"NuGet.psd1");
-            this.ImportModule(nugetPath);
-
-//#if DEBUG
-//            if (File.Exists(DebugConstants.TestModulePath)) {
-//                this.ImportModule(DebugConstants.TestModulePath);
-//            }
-//#endif
-
-            return true;
-        }
-
-        private void SetupRunspace() {
-            if (_myRunSpace != null) {
-                return;
-            }
-
-            DTE dte = ServiceLocator.GetInstance<DTE>();
-
-            InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
-            initialSessionState.Variables.Add(
-                new SessionStateVariableEntry("DTE", (DTE2)dte, "Visual Studio DTE automation object",
-                    ScopedItemOptions.AllScope | ScopedItemOptions.Constant));
-
-            // The constructor expects Tuple<string, object>. We can’t let Tuple.Create() infer the type here because it will 
-            // infer it as Tuple<string, PackageManagerFactory>, which can’t be converted to Tuple<string, object>.
-            // Thus we have to provide explicity generic type arguments for Tuple.Create().
-            _myHost = new MyHost(this, _name, _privateData, Tuple.Create<string, object>("packageManagerFactory", _packageManagerFactory));
-            _myRunSpace = RunspaceFactory.CreateRunspace(_myHost, initialSessionState);
-
-            // if is sync, set UseCurrentThread for Invoke
-            if (!IsAsync) {
-                _myRunSpace.ThreadOptions = PSThreadOptions.UseCurrentThread;
-            }
-
-            _myRunSpace.Open();
-
-            //
-            // Set this runspace as DefaultRunspace so I can script DTE events.
-            //
-            // WARNING: MSDN says this is unsafe. The runspace must not be shared across
-            // threads. I need this to be able to use ScriptBlock for DTE events. The
-            // ScriptBlock event handlers execute on DefaultRunspace.
-            //
-            Runspace.DefaultRunspace = _myRunSpace;
-        }
-
-        private void LoadProfilesIntoRunspace(Runspace runspace) {
-            using (var powerShell = System.Management.Automation.PowerShell.Create()) {
-                powerShell.Runspace = runspace;
-
-                PSCommand[] profileCommands = HostUtilities.GetProfileCommands("NuGet");
-                foreach (PSCommand command in profileCommands) {
-                    try {
-                        powerShell.Commands = command;
-                        powerShell.AddCommand("out-default");
-                        powerShell.Invoke();
-                    }
-                    catch (RuntimeException ex) {
-                        _myHost.UI.WriteLine(
-                            "An exception occured while loading one of the profile files. " +
-                            "This may happen if the profile calls scripts that require a different environment than the Package Manager Console.");
-
-                        _myHost.UI.WriteErrorLine(ex.Message);
-                    }
-                }
-            }
-        }
-
-        ComplexCommand _complexCommand;
-        ComplexCommand ComplexCommand {
+        private ComplexCommand ComplexCommand {
             get {
                 if (_complexCommand == null) {
                     _complexCommand = new ComplexCommand((allLines, lastLine) => {
@@ -243,52 +92,141 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
+        /// <summary>
+        /// Doing all necessary initialization works before the console accepts user inputs
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public void Initialize(IConsole console) {
+
+            if (_initialized.HasValue) {
+                SetActiveConsole(console);
+                if (_initialized.Value && console.ShowDisclaimerHeader) {
+                    DisplayDisclaimerAndHelpText();
+                }
+            }
+            else {
+                try {
+                    Tuple<Runspace, MyHost> tuple = _runspaceManager.GetRunspace(console, _name);
+                    _runspace = tuple.Item1;
+                    _myHost = tuple.Item2;
+
+                    SetActiveConsole(console);
+
+                    if (console.ShowDisclaimerHeader) {
+                        DisplayDisclaimerAndHelpText();
+                    }
+
+                    // when initializing host from the dialog, we don't want to execute exisint init scripts in the solution, if any
+                    if (console.ExecuteInitScriptOnStartup) {
+                        ExecuteInitScripts();
+                        _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
+                    }
+
+                    _initialized = true;
+                }
+                catch (Exception ex) {
+                    // catch all exception as we don't want it to crash VS
+                    _initialized = false;
+                    IsCommandEnabled = false;
+                    ReportError(ex);
+
+                    ExceptionHelper.WriteToActivityLog(ex);
+                }
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We don't want execution of init scripts to crash our console.")]
+        private void ExecuteInitScripts() {
+            if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
+                try {
+                    var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
+                    var localRepository = packageManager.LocalRepository;
+
+                    // invoke init.ps1 files in the order of package dependency.
+                    // if A -> B, we invoke B's init.ps1 before A's.
+
+                    var sorter = new PackageSorter();
+                    var sortedPackages = sorter.GetPackagesByDependencyOrder(localRepository);
+
+                    foreach (var package in sortedPackages) {
+                        string installPath = packageManager.PathResolver.GetInstallPath(package);
+
+                        AddPathToEnvironment(Path.Combine(installPath, "tools"));
+                        Runspace.ExecuteScript(installPath, "tools\\init.ps1", package);
+                    }
+                }
+                catch (Exception ex) {
+                    // if execution of Init scripts fails, do not let it crash our console
+                    ReportError(ex);
+                }
+            }
+        }
+
+        private static void AddPathToEnvironment(string path) {
+            if (Directory.Exists(path)) {
+                string environmentPath = Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.Process);
+                environmentPath = environmentPath + ";" + path;
+                Environment.SetEnvironmentVariable("path", environmentPath, EnvironmentVariableTarget.Process);
+            }
+        }
+
+        protected abstract bool ExecuteHost(string fullCommand, string command, params object[] inputs);
+
         public bool Execute(IConsole console, string command, params object[] inputs) {
             if (console == null) {
                 throw new ArgumentNullException("console");
             }
 
-            ActiveConsole = console;
+            if (command == null) {
+                throw new ArgumentNullException("command");
+            }
+
+            SetActiveConsole(console);
 
             string fullCommand;
-            if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {
+            if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {                
                 return ExecuteHost(fullCommand, command, inputs);
             }
             else {
                 // Add this one piece into history. ExecuteHost adds the last piece.
-                this.AddHistory(command, DateTime.Now);
+                Runspace.AddHistory(command, DateTime.Now);
             }
 
             return false; // constructing multi-line command
         }
 
         public void Abort() {
-            if (_executingPipeline != null) {
-                _executingPipeline.StopAsync();
+            if (ExecutingPipeline != null) {
+                ExecutingPipeline.StopAsync();
             }
             ComplexCommand.Clear();
         }
 
-        protected abstract bool ExecuteHost(string fullCommand, string command, params object[] inputs);
-
-        protected void ReportError(ErrorRecord record) {
-            Pipeline pipeline = CreatePipeline("$input", false);
-            pipeline.Commands.Add("out-string");
-
-            Collection<PSObject> result;
-            using (PSDataCollection<object> inputCollection = new PSDataCollection<object>()) {
-                inputCollection.Add(record);
-                inputCollection.Complete();
-                result = pipeline.Invoke(inputCollection);
-            }
-
-            if (result.Count > 0) {
-                string str = result[0].BaseObject as string;
-                if (!string.IsNullOrEmpty(str)) {
-                    // Remove \r\n, which is added by the Out-String cmdlet.
-                    _myHost.UI.WriteErrorLine(str.Substring(0, str.Length - 2));
+        protected void SetSyncModeOnHost(bool isSync) {
+            if (_myHost != null) {
+                PSPropertyInfo property = _myHost.PrivateData.Properties["IsSyncMode"];
+                if (property == null) {
+                    property = new PSNoteProperty("IsSyncMode", isSync);
+                    _myHost.PrivateData.Properties.Add(property);
+                }
+                else {
+                    property.Value = isSync;
                 }
             }
+        }
+
+        private void DisplayDisclaimerAndHelpText() {
+            _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
+            _myHost.UI.WriteLine();
+            _myHost.UI.WriteLine(VsResources.Console_HelpText);
+            _myHost.UI.WriteLine();
+        }
+
+        protected void ReportError(ErrorRecord record) {
+            _myHost.UI.WriteErrorLine(Runspace.ExtractErrorFromErrorRecord(record));
         }
 
         protected void ReportError(Exception exception) {
@@ -333,71 +271,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return projectSafeNames;
         }
 
-        #region IPowerShellHost
-        public bool IsAsync { get; private set; }
-
-        Pipeline CreatePipeline(string command, bool outputResults) {
-            SetupRunspace();
-            Pipeline pipeline = _myRunSpace.CreatePipeline();
-            pipeline.Commands.AddScript(command);
-
-            if (outputResults) {
-                pipeline.Commands.Add("out-default");
-                pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
-            }
-            return pipeline;
-        }
-
-        public Collection<PSObject> Invoke(string command, object[] inputs = null, bool outputResults = true) {
-            if (string.IsNullOrEmpty(command)) {
-                return null;
-            }
-
-            using (Pipeline pipeline = CreatePipeline(command, outputResults)) {
-                return inputs != null ? pipeline.Invoke(inputs) : pipeline.Invoke();
-            }
-        }
-
-        public bool InvokeAsync(string command, object[] inputs, bool outputResults, EventHandler<PipelineStateEventArgs> pipelineStateChanged) {
-            if (string.IsNullOrEmpty(command)) {
-                return false;
-            }
-
-            //Debug.Assert(_executingPipeline == null);
-
-            Pipeline pipeline = CreatePipeline(command, outputResults);
-
-            pipeline.StateChanged += (sender, e) => {
-                pipelineStateChanged.Raise(sender, e);
-
-                // Dispose Pipeline object upon completion
-                switch (e.PipelineStateInfo.State) {
-                    case PipelineState.Completed:
-                    case PipelineState.Failed:
-                    case PipelineState.Stopped:
-                        _executingPipeline = null;
-                        ActiveConsole = null;
-                        ((Pipeline)sender).Dispose();
-                        break;
-                }
-            };
-
-            _executingPipeline = pipeline;
-
-            if (inputs != null) {
-                foreach (var input in inputs) {
-                    pipeline.Input.Write(input);
-                }
-            }
-            
-            pipeline.InvokeAsync();
-            return true;
-        }
-        #endregion
-
         #region ITabExpansion
         public string[] GetExpansions(string line, string lastWord) {
-            var query = from s in Invoke(
+            var query = from s in Runspace.Invoke(
                             "$__pc_args=@(); $input|%{$__pc_args+=$_}; TabExpansion $__pc_args[0] $__pc_args[1]; Remove-Variable __pc_args -Scope 0",
                             new string[] { line, lastWord },
                             outputResults: false)
@@ -408,7 +284,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         #region IPathExpansion
         public SimpleExpansion GetPathExpansions(string line) {
-            PSObject expansion = Invoke(
+            PSObject expansion = Runspace.Invoke(
                 "$input|%{$__pc_args=$_}; _TabExpansionPath $__pc_args; Remove-Variable __pc_args -Scope 0",
                 new object[] {line},
                 outputResults: false).FirstOrDefault();
@@ -424,34 +300,35 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         #region IDisposable
         public void Dispose() {
-            if (_myRunSpace != null) {
-                _myRunSpace.Dispose();
+            if (_runspace != null) {
+                _runspace.Dispose();
             }
         }
         #endregion
     }
 
     class SyncPowerShellHost : PowerShellHost {
-        public SyncPowerShellHost(string name, object privateData)
-            : base(name, false, privateData) {
+        public SyncPowerShellHost(string name, IRunspaceManager runspaceManager)
+            : base(name, runspaceManager) {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
             DateTime startExecutionTime = DateTime.Now;
-
+            SetSyncModeOnHost(true);
             try {
-                Invoke(fullCommand, inputs);
+                Runspace.Invoke(fullCommand, inputs, true);
             }
             catch (RuntimeException e) {
                 ReportError(e.ErrorRecord);
+                ExceptionHelper.WriteToActivityLog(e);
             }
-            catch (Exception x) {
-                // If an exception pops up, console becomes unusable. Eat it.
-                Debug.Print(x.ToString());
+            catch (Exception e) {
+                ReportError(e);
+                ExceptionHelper.WriteToActivityLog(e);
             }
 
-            this.AddHistory(command, startExecutionTime);
+            Runspace.AddHistory(command, startExecutionTime);
             return true;
         }
     }
@@ -459,16 +336,17 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     class AsyncPowerShellHost : PowerShellHost, IAsyncHost {
         public event EventHandler ExecuteEnd;
 
-        public AsyncPowerShellHost(string name, object privateData)
-            : base(name, true, privateData) {
+        public AsyncPowerShellHost(string name, IRunspaceManager runspaceManager)
+            : base(name, runspaceManager) {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
             DateTime startExecutionTime = DateTime.Now;
+            SetSyncModeOnHost(false);
 
             try {
-                return InvokeAsync(fullCommand, inputs, true, (sender, e) => {
+                Pipeline pipeline = Runspace.InvokeAsync(fullCommand, inputs, true, (sender, e) => {
                     switch (e.PipelineStateInfo.State) {
                         case PipelineState.Completed:
                         case PipelineState.Failed:
@@ -477,18 +355,22 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                 ReportError(e.PipelineStateInfo.Reason);
                             }
 
-                            this.AddHistory(command, startExecutionTime);
+                            Runspace.AddHistory(command, startExecutionTime);
                             ExecuteEnd.Raise(this, EventArgs.Empty);
                             break;
                     }
                 });
+
+                ExecutingPipeline = pipeline;
+                return true;
             }
             catch (RuntimeException e) {
                 ReportError(e.ErrorRecord);
+                ExceptionHelper.WriteToActivityLog(e);
             }
-            catch (Exception x) {
-                // If an exception pops up, console becomes unusable. Eat it.
-                Debug.Print(x.ToString());
+            catch (Exception e) {
+                ReportError(e);
+                ExceptionHelper.WriteToActivityLog(e);
             }
 
             return false; // Error occured, command not executing

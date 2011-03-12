@@ -29,7 +29,7 @@ namespace NuGetConsole {
         /// <returns>true if the command is executed. In the case of async host, this indicates
         /// that the command is being executed and ExecuteEnd event would signal the end of
         /// execution.</returns>
-        bool Execute(IConsole console, string command, params object[] inputs);
+        bool Execute(IConsole console, string command, object[] inputs);
 
         /// <summary>
         /// Abort the current execution if this host is executing a command, or discard currently

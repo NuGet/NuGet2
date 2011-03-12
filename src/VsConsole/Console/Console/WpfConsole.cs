@@ -334,6 +334,12 @@ namespace NuGetConsole.Implementation.Console {
                     return true;
                 }
             }
+
+            public bool ExecuteInitScriptOnStartup {
+                get {
+                    return true;
+                }
+            }
         }
 
         IHost _host;

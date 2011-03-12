@@ -6,24 +6,19 @@ using System.Threading;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class MyHost : PSHost {
-        private PowerShellHost _host;
-        private string _name;
-        private PSObject _privateData;
+        private readonly string _name;
+        private readonly PSObject _privateData;
 
-        public MyHost(PowerShellHost host, string name, object privateData, params Tuple<string, object>[] extraData) {
-            UtilityMethods.ThrowIfArgumentNull(host);
+        public IConsole ActiveConsole { get; set; }
 
-            _host = host;
+        public MyHost(string name, params Tuple<string, object>[] extraData) {
             _name = name;
-            _privateData = (privateData != null ? new PSObject(privateData) : new PSObject());
+            _privateData = new PSObject(new Commander(this));
 
             // add extra data as note properties
             foreach (var tuple in extraData) {
                 _privateData.Properties.Add(new PSNoteProperty(tuple.Item1, tuple.Item2));
             }
-
-            // add the flag to indicate whether our host is operating in sync mode
-            _privateData.Properties.Add(new PSNoteProperty("IsSyncMode", !host.IsAsync));
         }
 
         CultureInfo _culture = Thread.CurrentThread.CurrentCulture;
@@ -73,7 +68,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public override PSHostUserInterface UI {
             get {
                 if (_ui == null) {
-                    _ui = new MyHostUI(_host);
+                    _ui = new MyHostUI(this);
                 }
                 return _ui;
             }
@@ -82,6 +77,24 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public override Version Version {
             get {
                 return this.GetType().Assembly.GetName().Version;
+            }
+        }
+
+        class Commander {
+            private MyHost _host;
+
+            public Commander(MyHost host) {
+                _host = host;
+            }
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage(
+                "Microsoft.Performance",
+                "CA1811:AvoidUncalledPrivateCode",
+                Justification = "This method can be dynamically invoked from PS script.")]
+            public void ClearHost() {
+                if (_host.ActiveConsole != null) {
+                    _host.ActiveConsole.Clear();
+                }
             }
         }
     }

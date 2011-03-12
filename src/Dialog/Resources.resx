@@ -255,9 +255,6 @@
   <data name="Dialog_RecentProviderNoItem" xml:space="preserve">
     <value>There are no recently installed packages.</value>
   </data>
-  <data name="Dialog_PackageHasInitScript" xml:space="preserve">
-    <value>This package (or one of its dependencies) contains an init.ps1 file and needs to be installed from the Package Manager Console.</value>
-  </data>
   <data name="License_DialogTitle" xml:space="preserve">
     <value>License Acceptance</value>
   </data>
