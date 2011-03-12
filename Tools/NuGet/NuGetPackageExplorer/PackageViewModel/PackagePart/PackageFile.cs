@@ -45,5 +45,14 @@ namespace PackageExplorerViewModel {
         public ICommand OpenCommand {
             get { return PackageViewModel.OpenContentFileCommand; }
         }
+
+        public override void Export(string rootPath) {
+            string fullPath = System.IO.Path.Combine(rootPath, Path);
+            if (!File.Exists(fullPath)) {
+                using (var stream = File.Create(fullPath)) {
+                    GetStream().CopyTo(stream);
+                }
+            }
+        }
     }
 }

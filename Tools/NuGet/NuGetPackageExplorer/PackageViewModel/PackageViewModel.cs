@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
+using System.Globalization;
 
 namespace PackageExplorerViewModel {
 
@@ -332,6 +333,31 @@ namespace PackageExplorerViewModel {
         public PackageFolder RootFolder {
             get {
                 return _packageRoot;
+            }
+        }
+
+        public void Export(string rootPath) {
+            if (rootPath == null) {
+                throw new ArgumentNullException("rootPath");
+            }
+
+            if (!Directory.Exists(rootPath)) {
+                throw new ArgumentException("Specified directory doesn't exist.");
+            }
+
+            // export files
+            RootFolder.Export(rootPath);
+
+            // export .nuspec file
+            ExportManifest(rootPath, PackageMetadata);
+        }
+
+        private void ExportManifest(string rootPath, EditablePackageMetadata metadata) {
+            string filename = metadata.Id + ".nuspec";
+            string fullpath = Path.Combine(rootPath, filename);
+            using (Stream fileStream = File.Create(fullpath)) {
+                Manifest manifest = Manifest.Create(metadata);
+                manifest.Save(fileStream);
             }
         }
     }

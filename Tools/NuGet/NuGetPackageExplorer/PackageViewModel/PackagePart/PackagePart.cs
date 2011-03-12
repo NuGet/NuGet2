@@ -87,6 +87,8 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public abstract void Export(string rootPath);
+
         public void Rename(string newName) {
             if (Name != newName) {
                 Name = newName;

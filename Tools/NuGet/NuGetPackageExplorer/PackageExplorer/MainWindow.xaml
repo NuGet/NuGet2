@@ -267,6 +267,7 @@
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
                 <Separator />
+                <MenuItem Header="E_xport..." IsEnabled="{Binding Converter={StaticResource nullToBoolConverter}}" Click="OnExportMenuItem_Click" />
                 <self:GrayscaleMenuItem Command="{x:Static self:Commands.PublishToFeedCommand}" Header="_Publish...">
                     <self:GrayscaleMenuItem.Icon>
                         <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/PublishToWebHS.png" />
@@ -350,7 +351,7 @@
                 <MenuItem Header="How to _Create Package" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
                 <MenuItem Header="_Version Range Specification" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/wikipage?title=Version%20Range%20Specification" />
                 <Separator />
-                <MenuItem Header="_File Bug..." Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/WorkItem/Create" />
+                <MenuItem Header="_Open Bug..." Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/WorkItem/Create" />
                 <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
             </self:GrayscaleMenuItem>
         </Menu>
@@ -390,59 +391,60 @@
             </GroupBox>
 
             <!-- package content tree view -->
-            <GroupBox BorderBrush="DarkGray" BorderThickness="1" Grid.Column="1" Margin="3,3,3,0" Header="Package contents">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+            <GroupBox BorderBrush="DarkGray" Background="Transparent" BorderThickness="1" Grid.Column="1" Margin="3,3,3,0" Header="Package contents">
+                <TreeView 
+                    x:Name="PackagesTreeView" 
+                    ItemsSource="{Binding PackageParts}" 
+                    BorderThickness="0" 
+                    Margin="0,4,0,0" 
+                    DragOver="OnTreeViewItemDragOver"
+                    Drop="OnTreeViewItemDrop"
+                    SelectedItemChanged="OnTreeViewSelectedItemChanged" 
+                    PreviewMouseRightButtonDown="TreeView_PreviewMouseRightButtonDown" 
+                    KeyDown="PackagesTreeView_KeyDown">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
+                            <EventSetter Event="DragOver" Handler="OnTreeViewItemDragOver" />
+                            <EventSetter Event="Drop" Handler="OnTreeViewItemDrop" />
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, FallbackValue=False}" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                            <Setter Property="AllowDrop" Value="True" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
 
-                    <TreeView x:Name="PackagesTreeView" ItemsSource="{Binding PackageParts}" BorderThickness="0" Margin="0,4,0,0" SelectedItemChanged="OnTreeViewSelectedItemChanged" PreviewMouseRightButtonDown="TreeView_PreviewMouseRightButtonDown" KeyDown="PackagesTreeView_KeyDown">
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
-                                <EventSetter Event="DragOver" Handler="OnTreeViewItemDragOver" />
-                                <EventSetter Event="Drop" Handler="OnTreeViewItemDrop" />
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, FallbackValue=False}" />
-                                <Setter Property="IsSelected" Value="{Binding IsSelected}" />
-                                <Setter Property="AllowDrop" Value="True" />
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                    </TreeView>
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <ContextMenu.CommandBindings>
+                                <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
+                            </ContextMenu.CommandBindings>
 
-                    <Border Background="Transparent" Grid.Row="1" AllowDrop="true" DragOver="OnTreeViewItemDragOver" Drop="OnTreeViewItemDrop">
-                        <Border.ContextMenu>
-                            <ContextMenu>
-                                <ContextMenu.CommandBindings>
-                                    <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
-                                </ContextMenu.CommandBindings>
-                                
-                                <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
-                                <MenuItem Header="_New Folder" Click="OnAddNewFolder2Click">
-                                    <MenuItem.Icon>
-                                        <Image Source="/NuGetPackageExplorer;component/Images/NewFolderHS.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator />
-                                <self:GrayscaleMenuItem Header="Add _Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
-                                    <self:GrayscaleMenuItem.Icon>
-                                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
-                                    </self:GrayscaleMenuItem.Icon>
-                                </self:GrayscaleMenuItem>
-                                <self:GrayscaleMenuItem Header="Add _Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
-                                    <self:GrayscaleMenuItem.Icon>
-                                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
-                                    </self:GrayscaleMenuItem.Icon>
-                                </self:GrayscaleMenuItem>
-                                <self:GrayscaleMenuItem Header="Add _Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
-                                    <self:GrayscaleMenuItem.Icon>
-                                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
-                                    </self:GrayscaleMenuItem.Icon>
-                                </self:GrayscaleMenuItem>
-                            </ContextMenu>
-                        </Border.ContextMenu>
-                    </Border>
-                </Grid>
+                            <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
+                            <MenuItem Header="_New Folder" Click="OnAddNewFolder2Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/NuGetPackageExplorer;component/Images/NewFolderHS.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator />
+                            <self:GrayscaleMenuItem Header="Add _Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
+                                <self:GrayscaleMenuItem.Icon>
+                                    <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
+                                </self:GrayscaleMenuItem.Icon>
+                            </self:GrayscaleMenuItem>
+                            <self:GrayscaleMenuItem Header="Add _Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
+                                <self:GrayscaleMenuItem.Icon>
+                                    <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
+                                </self:GrayscaleMenuItem.Icon>
+                            </self:GrayscaleMenuItem>
+                            <self:GrayscaleMenuItem Header="Add _Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
+                                <self:GrayscaleMenuItem.Icon>
+                                    <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
+                                </self:GrayscaleMenuItem.Icon>
+                            </self:GrayscaleMenuItem>
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+
+                </TreeView>
             </GroupBox>
             
             <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="Transparent" VerticalAlignment="Bottom" />
@@ -466,7 +468,8 @@
                     VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True" 
                     Background="#FFEAF7CE"
-                    Text="{Binding CurrentFileContent, Mode=OneWay}" />
+                    Text="{Binding CurrentFileContent, Mode=OneWay}"
+                    TextChanged="OnFileContentChanged" />
             </GroupBox>
             
             <Button 

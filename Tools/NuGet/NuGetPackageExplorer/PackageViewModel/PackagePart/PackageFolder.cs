@@ -115,5 +115,16 @@ namespace PackageExplorerViewModel {
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
         }
+
+        public override void Export(string rootPath) {
+            string fullPath = System.IO.Path.Combine(rootPath, Path);
+            if (!Directory.Exists(fullPath)) {
+                Directory.CreateDirectory(fullPath);
+            }
+             
+            foreach (var part in Children) {
+                part.Export(rootPath);
+            }
+        }
     }
 }

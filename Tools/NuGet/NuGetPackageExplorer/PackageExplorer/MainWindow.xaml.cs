@@ -10,6 +10,7 @@ using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using StringResources = PackageExplorer.Resources.Resources;
+using System.Diagnostics;
 
 namespace PackageExplorer {
     /// <summary>
@@ -342,11 +343,11 @@ namespace PackageExplorer {
         }
 
         private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-
             var settings = Properties.Settings.Default;
 
             if ((bool)e.NewValue) {
                 ContentGrid.RowDefinitions[2].Height = new GridLength(settings.ContentViewerPanelHeight, GridUnitType.Pixel);
+                FileContent.ScrollToLine(0);
             }
             else {
                 settings.ContentViewerPanelHeight = ContentGrid.RowDefinitions[2].Height.Value;
@@ -532,6 +533,33 @@ namespace PackageExplorer {
         private void CanExecuteCloseCommand(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = DataContext != null;
             e.Handled = true;
+        }
+
+        private void OnExportMenuItem_Click(object sender, RoutedEventArgs e) {
+
+            // TODO: Remove dependency on Windows forms
+            System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog() {
+                Description = "Choose a folder to export package to",
+                ShowNewFolderButton = true
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK) {
+                string rootPath = dialog.SelectedPath;
+                var model = (PackageViewModel)DataContext;
+                if (model != null) {
+                    model.Export(rootPath);
+
+                    // after export completes, open the folder in windows explorer
+                    Process.Start(rootPath);
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        private void OnFileContentChanged(object sender, TextChangedEventArgs e) {
+            FileContent.ScrollToLine(0);
         }
     }
 }
