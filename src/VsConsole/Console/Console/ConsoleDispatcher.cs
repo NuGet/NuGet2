@@ -4,7 +4,7 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.Text;
 
 namespace NuGetConsole.Implementation.Console {
-    interface IPrivateConsoleDispatcher : IConsoleDispatcher {
+    internal interface IPrivateConsoleDispatcher : IConsoleDispatcher {
         event EventHandler<EventArgs<Tuple<SnapshotSpan, bool>>> ExecuteInputLine;
         void PostInputLine(InputLine inputLine);
     }
@@ -12,17 +12,17 @@ namespace NuGetConsole.Implementation.Console {
     /// <summary>
     /// This class handles input line posting and command line dispatching/execution.
     /// </summary>
-    class ConsoleDispatcher : IPrivateConsoleDispatcher {
+    internal class ConsoleDispatcher : IPrivateConsoleDispatcher {
         /// <summary>
         /// The IPrivateWpfConsole instance this dispatcher works with.
         /// </summary>
-        IPrivateWpfConsole WpfConsole { get; set; }
+        private IPrivateWpfConsole WpfConsole { get; set; }
 
         /// <summary>
         /// Child dispatcher based on host type. Its creation is postponed to Start(), so that
         /// a WpfConsole's dispatcher can be accessed while inside a host construction.
         /// </summary>
-        Dispatcher _dispatcher;
+        private Dispatcher _dispatcher;
 
         public ConsoleDispatcher(IPrivateWpfConsole wpfConsole) {
             UtilityMethods.ThrowIfArgumentNull(wpfConsole);
@@ -85,7 +85,7 @@ namespace NuGetConsole.Implementation.Console {
         }
         #endregion
 
-        abstract class Dispatcher {
+        private abstract class Dispatcher {
             protected ConsoleDispatcher ParentDispatcher { get; private set; }
             protected IPrivateWpfConsole WpfConsole { get; private set; }
 
@@ -110,7 +110,6 @@ namespace NuGetConsole.Implementation.Console {
             /// Process a input line.
             /// </summary>
             /// <param name="inputLine"></param>
-            /// <returns></returns>
             protected Tuple<bool, bool> Process(InputLine inputLine) {
                 SnapshotSpan inputSpan = inputLine.SnapshotSpan;
 
@@ -160,7 +159,7 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// This class dispatches inputs for synchronous hosts.
         /// </summary>
-        class SyncHostConsoleDispatcher : Dispatcher {
+        private class SyncHostConsoleDispatcher : Dispatcher {
             public SyncHostConsoleDispatcher(ConsoleDispatcher parentDispatcher)
                 : base(parentDispatcher) {
             }
@@ -185,16 +184,16 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// This class dispatches inputs for asynchronous hosts.
         /// </summary>
-        class AsyncHostConsoleDispatcher : Dispatcher {
-            Queue<InputLine> _buffer;
-            _Marshaler _marshaler;
+        private class AsyncHostConsoleDispatcher : Dispatcher {
+            private Queue<InputLine> _buffer;
+            private Marshaler _marshaler;
 
             public AsyncHostConsoleDispatcher(ConsoleDispatcher parentDispatcher)
                 : base(parentDispatcher) {
-                _marshaler = new _Marshaler(this);
+                _marshaler = new Marshaler(this);
             }
 
-            bool IsStarted {
+            private bool IsStarted {
                 get {
                     return _buffer != null;
                 }
@@ -227,7 +226,7 @@ namespace NuGetConsole.Implementation.Console {
                 }
             }
 
-            void ProcessInputs() {
+            private void ProcessInputs() {
                 if (IsExecuting) {
                     return;
                 }
@@ -246,7 +245,7 @@ namespace NuGetConsole.Implementation.Console {
                 }
             }
 
-            void OnExecuteEnd() {
+            private void OnExecuteEnd() {
                 if (IsStarted) {
                     // Filter out noise. A host could execute private commands.
                     Debug.Assert(IsExecuting);
@@ -261,8 +260,8 @@ namespace NuGetConsole.Implementation.Console {
             /// This private Marshaler marshals async host event to main thread so that the dispatcher
             /// doesn't need to worry about threading.
             /// </summary>
-            class _Marshaler : Marshaler<AsyncHostConsoleDispatcher> {
-                public _Marshaler(AsyncHostConsoleDispatcher impl)
+            private class Marshaler : Marshaler<AsyncHostConsoleDispatcher> {
+                public Marshaler(AsyncHostConsoleDispatcher impl)
                     : base(impl) {
                 }
 
@@ -274,12 +273,12 @@ namespace NuGetConsole.Implementation.Console {
     }
 
     [Flags]
-    enum InputLineFlag {
+    internal enum InputLineFlag {
         Echo = 1,
         Execute = 2
     }
 
-    class InputLine {
+    internal class InputLine {
         public SnapshotSpan SnapshotSpan { get; private set; }
         public string Text { get; private set; }
         public InputLineFlag Flags { get; private set; }

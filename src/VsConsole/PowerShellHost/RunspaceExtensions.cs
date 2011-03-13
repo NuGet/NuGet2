@@ -8,11 +8,9 @@ using Microsoft.PowerShell;
 using NuGet;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-
     using PowerShell = System.Management.Automation.PowerShell;
 
     internal static class RunspaceExtensions {
-
         public static Collection<PSObject> Invoke(this Runspace runspace, string command, object[] inputs, bool outputResults) {
             if (string.IsNullOrEmpty(command)) {
                 throw new ArgumentNullException("command");

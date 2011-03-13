@@ -2,9 +2,8 @@ using System;
 using System.Management.Automation.Host;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-    class MyHostRawUserInterface : PSHostRawUserInterface {
-
-        private MyHost _host;
+    class NuGetRawUserInterface : PSHostRawUserInterface {
+        private NuGetPSHost _host;
 
         private IConsole Console {
             get {
@@ -12,14 +11,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public MyHostRawUserInterface(MyHost host) {
+        public NuGetRawUserInterface(NuGetPSHost host) {
             _host = host;
         }
 
         public override ConsoleColor BackgroundColor {
             get {
                 // default color controlled by Visual Studio
-                return MyHostUI.NoColor;
+                return NuGetHostUserInterface.NoColor;
             }
             set {
             }
@@ -59,7 +58,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public override ConsoleColor ForegroundColor {
             get {
                 // default color controlled by Visual Studio
-                return MyHostUI.NoColor;
+                return NuGetHostUserInterface.NoColor;
             }
             set {
             }

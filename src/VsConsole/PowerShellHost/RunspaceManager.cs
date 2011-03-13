@@ -13,20 +13,17 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class RunspaceManager : IRunspaceManager {
 
         // Cache Runspace by name. There should be only one Runspace instance created though.
-        private ConcurrentDictionary<string, Tuple<Runspace, MyHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, MyHost>>();
+        private ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
 
         public const string ProfilePrefix = "Nuget";
         public const string NuGetModuleFile = "nuget.psd1";
 
-        public RunspaceManager() {
-        }
-
-        public Tuple<Runspace, MyHost> GetRunspace(IConsole console, string hostName) {
+        public Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName) {
             return _runspaceCache.GetOrAdd(hostName, name => CreateAndSetupRunspace(console, name));
         }
 
-        private static Tuple<Runspace, MyHost> CreateAndSetupRunspace(IConsole console, string hostName) {
-            Tuple<Runspace, MyHost> runspace = CreateRunspace(console, hostName);
+        private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName) {
+            Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
             LoadStartupScripts(runspace.Item1);
             LoadProfilesIntoRunspace(runspace.Item1);
 
@@ -37,7 +34,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             "Microsoft.Reliability", 
             "CA2000:Dispose objects before losing scope",
             Justification="We can't dispose it if we want to return it.")]
-        private static Tuple<Runspace, MyHost> CreateRunspace(IConsole console, string hostName) {
+        private static Tuple<Runspace, NuGetPSHost> CreateRunspace(IConsole console, string hostName) {
             DTE dte = ServiceLocator.GetInstance<DTE>();
 
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
@@ -49,11 +46,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant)
             );
 
-
             // this is used by the functional tests
             var packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
             var privateData = Tuple.Create<string, object>("packageManagerFactory", packageManagerFactory);
-            var host = new MyHost(hostName, privateData) {
+            var host = new NuGetPSHost(hostName, privateData) {
                 ActiveConsole = console
             };
 

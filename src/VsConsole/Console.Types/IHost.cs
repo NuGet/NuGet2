@@ -13,9 +13,10 @@ namespace NuGetConsole {
         bool IsCommandEnabled { get; }
 
         /// <summary>
-        /// Do initialization work before the console accepts user inputs.
+        /// Do initialization work before the specified console accepts user inputs.
         /// </summary>
-        void Initialize(IConsole console); 
+        /// <param name="console">The console requesting the initialization.</param>
+        void Initialize(IConsole console);
 
         /// <summary>
         /// Get the current command prompt used by this host.
@@ -23,9 +24,11 @@ namespace NuGetConsole {
         string Prompt { get; }
 
         /// <summary>
-        /// Execute a command on this host.
+        /// Execute a command on this host from the specified console.
         /// </summary>
         /// <param name="command">The command.</param>
+        /// <param name="console">The console requesting the execution.</param>
+        /// <param name="inputs">Inputs for the command</param>
         /// <returns>true if the command is executed. In the case of async host, this indicates
         /// that the command is being executed and ExecuteEnd event would signal the end of
         /// execution.</returns>

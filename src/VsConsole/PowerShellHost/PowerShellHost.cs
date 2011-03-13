@@ -21,8 +21,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private readonly IVsPackageManagerFactory _packageManagerFactory;
 
         private Runspace _runspace;
-        private MyHost _myHost;
+        private NuGetPSHost _myHost;
+        // indicates whether this host has been initialized. 
+        // null = not initilized, true = initialized successfully, false = initialized unsuccessfully
         private bool? _initialized;
+
+        // store the current command typed so far
         private ComplexCommand _complexCommand;
 
         public PowerShellHost(string name, IRunspaceManager runspaceManager) {
@@ -55,11 +59,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         public Runspace Runspace {
             get {
-                // throw if the host is not initialized yet
-                if (_initialized == null) {
-                    throw new InvalidOperationException();
-                }
-
+                Debug.Assert(_initialized != null);
                 return _runspace;
             }
         }
@@ -97,7 +97,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Initialize(IConsole console) {
-
             if (_initialized.HasValue) {
                 SetActiveConsole(console);
                 if (_initialized.Value && console.ShowDisclaimerHeader) {
@@ -106,7 +105,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
             else {
                 try {
-                    Tuple<Runspace, MyHost> tuple = _runspaceManager.GetRunspace(console, _name);
+                    Tuple<Runspace, NuGetPSHost> tuple = _runspaceManager.GetRunspace(console, _name);
                     _runspace = tuple.Item1;
                     _myHost = tuple.Item2;
 
@@ -116,7 +115,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                         DisplayDisclaimerAndHelpText();
                     }
 
-                    // when initializing host from the dialog, we don't want to execute exisint init scripts in the solution, if any
+                    // when initializing host from the dialog, we don't want to execute existing init scripts in the solution, if any
                     if (console.ExecuteInitScriptOnStartup) {
                         ExecuteInitScripts();
                         _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
@@ -161,6 +160,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 catch (Exception ex) {
                     // if execution of Init scripts fails, do not let it crash our console
                     ReportError(ex);
+
+                    ExceptionHelper.WriteToActivityLog(ex);
                 }
             }
         }
@@ -305,75 +306,5 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
         #endregion
-    }
-
-    class SyncPowerShellHost : PowerShellHost {
-        public SyncPowerShellHost(string name, IRunspaceManager runspaceManager)
-            : base(name, runspaceManager) {
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
-            DateTime startExecutionTime = DateTime.Now;
-            SetSyncModeOnHost(true);
-            try {
-                Runspace.Invoke(fullCommand, inputs, true);
-            }
-            catch (RuntimeException e) {
-                ReportError(e.ErrorRecord);
-                ExceptionHelper.WriteToActivityLog(e);
-            }
-            catch (Exception e) {
-                ReportError(e);
-                ExceptionHelper.WriteToActivityLog(e);
-            }
-
-            Runspace.AddHistory(command, startExecutionTime);
-            return true;
-        }
-    }
-
-    class AsyncPowerShellHost : PowerShellHost, IAsyncHost {
-        public event EventHandler ExecuteEnd;
-
-        public AsyncPowerShellHost(string name, IRunspaceManager runspaceManager)
-            : base(name, runspaceManager) {
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
-            DateTime startExecutionTime = DateTime.Now;
-            SetSyncModeOnHost(false);
-
-            try {
-                Pipeline pipeline = Runspace.InvokeAsync(fullCommand, inputs, true, (sender, e) => {
-                    switch (e.PipelineStateInfo.State) {
-                        case PipelineState.Completed:
-                        case PipelineState.Failed:
-                        case PipelineState.Stopped:
-                            if (e.PipelineStateInfo.Reason != null) {
-                                ReportError(e.PipelineStateInfo.Reason);
-                            }
-
-                            Runspace.AddHistory(command, startExecutionTime);
-                            ExecuteEnd.Raise(this, EventArgs.Empty);
-                            break;
-                    }
-                });
-
-                ExecutingPipeline = pipeline;
-                return true;
-            }
-            catch (RuntimeException e) {
-                ReportError(e.ErrorRecord);
-                ExceptionHelper.WriteToActivityLog(e);
-            }
-            catch (Exception e) {
-                ReportError(e);
-                ExceptionHelper.WriteToActivityLog(e);
-            }
-
-            return false; // Error occured, command not executing
-        }
     }
 }

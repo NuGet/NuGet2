@@ -43,9 +43,7 @@ namespace NuGet.VisualStudio {
 
                 return true;
             }
-            else {
-                return false;
-            }
+            return false;
         }
 
         private IHost GetHost() {

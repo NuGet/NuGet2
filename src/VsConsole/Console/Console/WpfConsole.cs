@@ -13,15 +13,15 @@ using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using IServiceProvider = System.IServiceProvider;
 
 namespace NuGetConsole.Implementation.Console {
-    interface IPrivateWpfConsole : IWpfConsole {
+    internal interface IPrivateWpfConsole : IWpfConsole {
         SnapshotPoint? InputLineStart { get; }
         void BeginInputLine();
         SnapshotSpan? EndInputLine(bool isEcho);
         InputHistory InputHistory { get; }
     }
 
-    class WpfConsole : ObjectWithFactory<WpfConsoleService> {
-        IServiceProvider ServiceProvider { get; set; }
+    internal class WpfConsole : ObjectWithFactory<WpfConsoleService> {
+        private IServiceProvider ServiceProvider { get; set; }
         public string ContentTypeName { get; private set; }
         public string HostName { get; private set; }
         private IVsStatusbar _vsStatusBar;
@@ -342,7 +342,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IHost _host;
+        private IHost _host;
         public IHost Host {
             get {
                 return _host;
@@ -355,7 +355,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        int _consoleWidth = -1;
+        private int _consoleWidth = -1;
         public int ConsoleWidth {
             get {
                 if (_consoleWidth < 0) {
@@ -377,7 +377,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        void ResetConsoleWidth() {
+        private void ResetConsoleWidth() {
             _consoleWidth = -1;
         }
 

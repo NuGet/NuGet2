@@ -38,9 +38,11 @@
     <Compile Include="..\Console\Utils\UtilityMethods.cs">
       <Link>Utils\UtilityMethods.cs</Link>
     </Compile>
+    <Compile Include="AsyncPowerShellHost.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
-    <Compile Include="DebugConstants.cs" />
+    <Compile Include="DebugConstants.cs" Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' ">
+    </Compile>
     <Compile Include="IRunspaceManager.cs" />
     <Compile Include="ProjectExtensions.cs">
       <SubType>Code</SubType>
@@ -48,6 +50,7 @@
     <Compile Include="PSTypeWrapper.cs" />
     <Compile Include="RunspaceExtensions.cs" />
     <Compile Include="RunspaceManager.cs" />
+    <Compile Include="SyncPowerShellHost.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
     <Compile Include="CommandTokenizer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -55,9 +58,9 @@
     <Compile Include="Utils\MethodBinder.cs" />
     <Compile Include="Utils\TypeWrapper.cs" />
     <Compile Include="HostUtilities.cs" />
-    <Compile Include="MyHost.cs" />
-    <Compile Include="MyHostRawUserInterface.cs" />
-    <Compile Include="MyHostUI.cs" />
+    <Compile Include="NuGetPSHost.cs" />
+    <Compile Include="NuGetHostRawUserInterface.cs" />
+    <Compile Include="NuGetHostUserInterface.cs" />
     <Compile Include="PowerShellHost.cs" />
     <Compile Include="PowerShellHostService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

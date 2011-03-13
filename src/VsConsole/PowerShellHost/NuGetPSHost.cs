@@ -5,13 +5,13 @@ using System.Management.Automation.Host;
 using System.Threading;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-    internal class MyHost : PSHost {
+    internal class NuGetPSHost : PSHost {
         private readonly string _name;
         private readonly PSObject _privateData;
 
         public IConsole ActiveConsole { get; set; }
 
-        public MyHost(string name, params Tuple<string, object>[] extraData) {
+        public NuGetPSHost(string name, params Tuple<string, object>[] extraData) {
             _name = name;
             _privateData = new PSObject(new Commander(this));
 
@@ -64,11 +64,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             //TODO: Exit VS?
         }
 
-        PSHostUserInterface _ui;
+        private PSHostUserInterface _ui;
         public override PSHostUserInterface UI {
             get {
                 if (_ui == null) {
-                    _ui = new MyHostUI(this);
+                    _ui = new NuGetHostUserInterface(this);
                 }
                 return _ui;
             }
@@ -80,10 +80,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        class Commander {
-            private MyHost _host;
+        private class Commander {
+            private NuGetPSHost _host;
 
-            public Commander(MyHost host) {
+            public Commander(NuGetPSHost host) {
                 _host = host;
             }
 

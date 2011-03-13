@@ -7,10 +7,10 @@ using System.Security;
 using System.Windows.Media;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-    internal class MyHostUI : PSHostUserInterface {
+    internal class NuGetHostUserInterface : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
         
-        private MyHost _host;
+        private NuGetPSHost _host;
 
         private IConsole Console {
             get {
@@ -18,7 +18,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public MyHostUI(MyHost host) {
+        public NuGetHostUserInterface(NuGetPSHost host) {
             UtilityMethods.ThrowIfArgumentNull(host);
             _host = host;
         }
@@ -52,7 +52,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public override PSHostRawUserInterface RawUI {
             get {
                 if (_rawUI == null) {
-                    _rawUI = new MyHostRawUserInterface(_host);
+                    _rawUI = new NuGetRawUserInterface(_host);
                 }
                 return _rawUI;
             }
