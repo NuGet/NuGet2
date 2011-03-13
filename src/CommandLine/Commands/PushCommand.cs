@@ -1,56 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "push", "PushCommandDescription",
-        MinArgs = 2, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
+        MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : Command {
-
-        private string _apiKey;
-        private string _packagePath;
 
         [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
         public bool CreateOnly { get; set; }
 
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-        
-        public override void ExecuteCommand() {
-            //Frist argument should be the package
-            _packagePath = Arguments[0];
-            //Second argument should be the API Key
-            _apiKey = Arguments[1];
 
-            GalleryServer gallery;
+        public override void ExecuteCommand() {
+
+            //Frist argument should be the package
+            string packagePath = Arguments[0];
+
+            //Second argument, if present, should be the API Key
+            string userSetApiKey = null;
+            if (Arguments.Count > 1) {
+                userSetApiKey = Arguments[1];
+            }
+
+            //If the user passed a source use it for the gallery location
+            string galleryServerUrl;
             if (String.IsNullOrEmpty(Source)) {
-                gallery = new GalleryServer();
+                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
             }
             else {
-                gallery = new GalleryServer(Source);
+                galleryServerUrl = Source;
             }
 
-            ZipPackage package = new ZipPackage(_packagePath);
+            var gallery = new GalleryServer(galleryServerUrl);
 
-            Console.WriteLine(NuGetResources.PushCommandCreatingPackage, package.GetFullName());
+            //If the user did not pass an API Key look in the config file
+            string apiKey;
+            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
+            if (String.IsNullOrEmpty(userSetApiKey)) {
+                apiKey = CommandLineUtility.GetApiKey(settings, galleryServerUrl);
+            }
+            else {
+                apiKey = userSetApiKey;
+            }
 
+            //Push the package to the server
+            var package = new ZipPackage(packagePath);
             using (Stream pkgStream = package.GetStream()) {
-                gallery.CreatePackage(_apiKey, pkgStream);
+                gallery.CreatePackage(apiKey, pkgStream);
             }
 
+            //Publish the package on the server
             if (!CreateOnly) {
                 var cmd = new PublishCommand();
                 cmd.Console = Console;
                 cmd.Source = Source;
-                cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), _apiKey };
+                cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), apiKey };
                 cmd.Execute();
             }
             else {
                 Console.WriteLine(NuGetResources.PushCommandPackageCreated);
             }
+
         }
     }
 }

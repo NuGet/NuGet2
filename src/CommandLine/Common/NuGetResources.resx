@@ -250,7 +250,7 @@
     <value>Specify the location of the package and your API key to push the package to the server.</value>
   </data>
   <data name="PushCommandUsageSummary" xml:space="preserve">
-    <value>&lt;package location&gt; &lt;API key&gt; [options]</value>
+    <value>&lt;package location&gt; [API key] [options]</value>
   </data>
   <data name="ResourcePropertyDoesNotHaveAccessibleGet" xml:space="preserve">
     <value>The resource type '{0}' does not have an accessible get for the '{1}' property.</value>
@@ -356,5 +356,23 @@
   </data>
   <data name="InstallCommandNothingToInstall" xml:space="preserve">
     <value>All packages listed in {0} are already installed.</value>
+  </data>
+  <data name="NoApiKeyFound" xml:space="preserve">
+    <value>No API Key was provided and no API Key could be found for this source. To save an API Key for a source use the 'SetApiKey' command.</value>
+  </data>
+  <data name="SetApiKeyCommandApiKeySaved" xml:space="preserve">
+    <value>The API Key '{0}' was saved for the source '{1}'.</value>
+  </data>
+  <data name="SetApiKeyCommandSourceDescription" xml:space="preserve">
+    <value>Base URL to the Gallery Server where the API Key is valid.</value>
+  </data>
+  <data name="SetApiKeyCommandDescription" xml:space="preserve">
+    <value>Saves an API key for a given Gallery Server URL, when no URL is provided API key is saved for the default source.</value>
+  </data>
+  <data name="SetApiKeyCommandUsageDescription" xml:space="preserve">
+    <value>Specify the API key to save and an optional URL to the Gallery Server that provided the API key.</value>
+  </data>
+  <data name="SetApiKeyCommandUsageSummary" xml:space="preserve">
+    <value>&lt;API key&gt; [Source]</value>
   </data>
 </root>

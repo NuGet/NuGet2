@@ -367,6 +367,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No API Key was provided and no API Key could be found for this source. To save an API Key for a source use the &apos;SetApiKey&apos; command..
+        /// </summary>
+        internal static string NoApiKeyFound {
+            get {
+                return ResourceManager.GetString("NoApiKeyFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [option] on &apos;{0}&apos; is invalid without a setter..
         /// </summary>
         internal static string OptionInvalidWithoutSetter {
@@ -601,7 +610,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;package location&gt; &lt;API key&gt; [options].
+        ///   Looks up a localized string similar to &lt;package location&gt; [API key] [options].
         /// </summary>
         internal static string PushCommandUsageSummary {
             get {
@@ -633,6 +642,51 @@ namespace NuGet.Common {
         internal static string ResourceTypeDoesNotHaveProperty {
             get {
                 return ResourceManager.GetString("ResourceTypeDoesNotHaveProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for the source &apos;{1}&apos;..
+        /// </summary>
+        internal static string SetApiKeyCommandApiKeySaved {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandApiKeySaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saves an API key for a given Gallery Server URL, when no URL is provided API key is saved for the default source..
+        /// </summary>
+        internal static string SetApiKeyCommandDescription {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Base URL to the Gallery Server where the API Key is valid..
+        /// </summary>
+        internal static string SetApiKeyCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the API key to save and an optional URL to the Gallery Server that provided the API key..
+        /// </summary>
+        internal static string SetApiKeyCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;API key&gt; [Source].
+        /// </summary>
+        internal static string SetApiKeyCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandUsageSummary", resourceCulture);
             }
         }
         

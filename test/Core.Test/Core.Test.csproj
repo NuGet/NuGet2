@@ -84,6 +84,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server\Infrastructure\ServerPackageRepositoryTest.cs" />
     <Compile Include="UriHelperTest.cs" />
+    <Compile Include="UserSettingsTests.cs" />
     <Compile Include="VersionSpecTest.cs" />
     <Compile Include="VersionUtilityTest.cs" />
     <Compile Include="XmlExtensionsTest.cs" />

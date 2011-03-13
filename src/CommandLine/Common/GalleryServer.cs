@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Json;
 
 namespace NuGet.Common {   
     public class GalleryServer {
-        private const string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
+        public readonly static string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
         private const string PublichPackageService = "PublishedPackages/Publish";

@@ -5,9 +5,12 @@ using System.Globalization;
 using System.Reflection;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Common;
+using NuGet.Commands;
 
 namespace NuGet {
     public static class CommandLineUtility {
+        public readonly static string ApiKeysSectionName = "apikeys";
+
         public static Type RemoveNullableFromType(Type type) {
             return Nullable.GetUnderlyingType(type) ?? type;
         }
@@ -85,6 +88,14 @@ namespace NuGet {
             }
 
             return _cachedResourceStrings[resourceName];
+        }
+
+        public static string GetApiKey(ISettings settings, string source) {
+            var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
+            if (String.IsNullOrEmpty(value)) {
+                throw new CommandLineException(NuGetResources.NoApiKeyFound);
+            }
+            return value;
         }
     }
 }
