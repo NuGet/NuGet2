@@ -241,7 +241,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Beta 2.
+        ///   Looks up a localized string similar to RC.
         /// </summary>
         public static string ProductRelease {
             get {

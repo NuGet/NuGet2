@@ -11,13 +11,9 @@
         SizeToContent="WidthAndHeight"
         ShowInTaskbar="False">
     
-    <Grid Margin="20">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <DockPanel Margin="20" LastChildFill="true">
         
-        <Image Style="{x:Null}" Stretch="None" VerticalAlignment="Top" Source="/NuGetPackageExplorer;component/Images/packageicon.png" />
+        <Image Style="{x:Null}" DockPanel.Dock="Left" Stretch="None" VerticalAlignment="Top" Source="/NuGetPackageExplorer;component/Images/packageicon.png" />
         
         <StackPanel Orientation="Vertical" Grid.Column="1" Margin="20,0,0,0">
             <TextBlock x:Name="ProductTitle" Text="NuGet Package Explorer Beta 2" FontWeight="Bold" />
@@ -30,5 +26,5 @@
             <TextBlock Text="Author: Luan Nguyen (@dotnetjunky)" Margin="0,10,0,0" />
             <Button Content="_OK" Padding="20,0,20,0" HorizontalAlignment="Right" Margin="0,30,0,0" IsDefault="True" Click="Button_Click" />
         </StackPanel>
-    </Grid>
+    </DockPanel>
 </self:DialogWithNoMinimizeAndMaximize>

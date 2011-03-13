@@ -536,22 +536,26 @@ namespace PackageExplorer {
         }
 
         private void OnExportMenuItem_Click(object sender, RoutedEventArgs e) {
+            BrowseForFolder dialog = new BrowseForFolder();
+            string rootPath = dialog.SelectFolder(
+                "Choose a folder to export package to:",
+                "",
+                new System.Windows.Interop.WindowInteropHelper(this).Handle);
 
-            // TODO: Remove dependency on Windows forms
-            System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog() {
-                Description = "Choose a folder to export package to",
-                ShowNewFolderButton = true
-            };
-
-            var result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK) {
-                string rootPath = dialog.SelectedPath;
+            if (!String.IsNullOrEmpty(rootPath)) {
                 var model = (PackageViewModel)DataContext;
                 if (model != null) {
                     model.Export(rootPath);
 
-                    // after export completes, open the folder in windows explorer
-                    Process.Start(rootPath);
+                    // after export completes, ask if user wantns to open the folder in windows explorer
+                    var result = MessageBox.Show(
+                        "Package has been exported successfully. Do you want to open the folder?", 
+                        StringResources.Dialog_Title,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes) {
+                        Process.Start(rootPath);
+                    }
                 }
             }
 

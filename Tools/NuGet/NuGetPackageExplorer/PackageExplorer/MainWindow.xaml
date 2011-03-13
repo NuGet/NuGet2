@@ -233,15 +233,9 @@
         <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
     </Window.CommandBindings>
     
-    <Grid x:Name="LayoutRoot">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
+    <DockPanel LastChildFill="True">
         <!-- Menu bar -->
-        <Menu>
+        <Menu DockPanel.Dock="Top">
             <self:GrayscaleMenuItem Header="_File">
                 <MenuItem Command="New" Header="_New">
                     <MenuItem.Icon>
@@ -355,6 +349,11 @@
                 <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
             </self:GrayscaleMenuItem>
         </Menu>
+
+        <!-- Status bar -->
+        <StatusBar Grid.Row="2" DockPanel.Dock="Bottom">
+            <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource}" />
+        </StatusBar>
 
         <!-- Main content -->
         <Grid 
@@ -487,10 +486,6 @@
                 <Image Source="/NuGetPackageExplorer;component/Images/Delete.png" />
             </Button>
         </Grid>
-        
-        <!-- Status bar -->
-        <StatusBar Grid.Row="2">
-            <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource}" />
-        </StatusBar>
-    </Grid>
+              
+    </DockPanel>
 </Window>
