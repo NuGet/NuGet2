@@ -36,7 +36,7 @@ namespace PackageExplorerViewModel {
             this.FrameworkAssemblies = new ObservableCollection<FrameworkAssemblyReference>(source.FrameworkAssemblies);
         }
 
-        private Uri FixIconUrl(Uri uri)
+        private static Uri FixIconUrl(Uri uri)
         {
             if (uri == null || uri.IsAbsoluteUri)
             {
@@ -44,7 +44,7 @@ namespace PackageExplorerViewModel {
             }
 
             string path = uri.OriginalString;
-            if (path.StartsWith("//")) {
+            if (path.StartsWith("//", StringComparison.Ordinal)) {
                 path = path.Substring(1);
             }
 
@@ -283,11 +283,11 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private IEnumerable<string> SplitString(string text) {
+        private static IEnumerable<string> SplitString(string text) {
             return text == null ? Enumerable.Empty<string>() : text.Split(',').Select(a => a.Trim());
         }
 
-        private string ConvertToString(IEnumerable<string> items) {
+        private static string ConvertToString(IEnumerable<string> items) {
             return String.Join(", ", items);
         }
 

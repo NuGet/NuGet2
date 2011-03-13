@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using System.Globalization;
 
 namespace PackageExplorerViewModel {
     internal class ViewContentCommand : CommandBase, ICommand {
@@ -13,7 +14,10 @@ namespace PackageExplorerViewModel {
             return true;
         }
 
-        public event EventHandler CanExecuteChanged;
+        event EventHandler ICommand.CanExecuteChanged {
+            add { }
+            remove { }
+        }
 
         public void Execute(object parameter) {
             if ("Hide".Equals(parameter)) {
@@ -29,7 +33,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private string ReadFileContent(PackageFile file) {
+        private static string ReadFileContent(PackageFile file) {
             using (StreamReader reader = new StreamReader(file.GetStream())) {
                 return reader.ReadToEnd();
             }
@@ -39,9 +43,9 @@ namespace PackageExplorerViewModel {
             ".DLL", ".EXE", ".CHM", ".PDF", ".DOCX", ".DOC", ".JPG", ".PNG", ".GIF", ".RTF", ".PDB", ".ZIP", ".XAP", ".VSIX", ".NUPKG"
         };
 
-        private bool IsBinaryFile(string path) {
+        private static bool IsBinaryFile(string path) {
             // TODO: check for content type of the file here
-            string extension = Path.GetExtension(path).ToUpper();
+            string extension = Path.GetExtension(path).ToUpper(CultureInfo.InvariantCulture);
             return String.IsNullOrEmpty(extension) || BinaryFileExtensions.Any(p => p.Equals(extension));
         }
     }

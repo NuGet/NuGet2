@@ -39,7 +39,7 @@ namespace PackageExplorerViewModel {
             private set {
                 if (_isInEditMode != value) {
                     _isInEditMode = value;
-                    RaisePropertyChangeEvent("IsInEditMode");
+                    OnPropertyChanged("IsInEditMode");
                 }
             }
         }
@@ -54,12 +54,6 @@ namespace PackageExplorerViewModel {
             get {
                 return _packageMetadata;
             }
-            private set {
-                if (_packageMetadata != value) {
-                    _packageMetadata = value;
-                    RaisePropertyChangeEvent("PackageMetadata");
-                }
-            }
         }
 
         private bool _showContentViewer;
@@ -68,7 +62,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_showContentViewer != value) {
                     _showContentViewer = value;
-                    RaisePropertyChangeEvent("ShowContentViewer");
+                    OnPropertyChanged("ShowContentViewer");
                 }
             }
         }
@@ -80,7 +74,7 @@ namespace PackageExplorerViewModel {
             internal set {
                 if (_currentFileName != value) {
                     _currentFileName = value;
-                    RaisePropertyChangeEvent("CurrentfileName");
+                    OnPropertyChanged("CurrentfileName");
                 }
             }
         }
@@ -92,7 +86,7 @@ namespace PackageExplorerViewModel {
             internal set {
                 if (_currentFileContent != value) {
                     _currentFileContent = value;
-                    RaisePropertyChangeEvent("CurrentFileContent");
+                    OnPropertyChanged("CurrentFileContent");
                 }
             }
         }
@@ -227,7 +221,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_selectedItem != value) {
                     _selectedItem = value;
-                    RaisePropertyChangeEvent("SelectedItem");
+                    OnPropertyChanged("SelectedItem");
                 }
             }
         }
@@ -237,7 +231,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_packageSource != value) {
                     _packageSource = value;
-                    RaisePropertyChangeEvent("PackageSource");
+                    OnPropertyChanged("PackageSource");
                 }
             }
         }
@@ -253,6 +247,7 @@ namespace PackageExplorerViewModel {
             ShowContentViewer = true;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         public bool OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName) {
 
             var filter = "All files (*.*)|*.*";
@@ -278,35 +273,30 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public IEnumerable<IPackageFile> GetFiles() {
             return _packageRoot.GetFiles();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public Stream GetCurrentPackageStream()
         {
-            try
+            string tempFile = Path.GetTempFileName();
+            PackageHelper.SavePackage(PackageMetadata, GetFiles(), tempFile, false);
+            if (File.Exists(tempFile))
             {
-                string tempFile = Path.GetTempFileName();
-                PackageHelper.SavePackage(PackageMetadata, GetFiles(), tempFile, false);
-                if (File.Exists(tempFile))
-                {
-                    return File.OpenRead(tempFile);
-                }
-                else
-                {
-                    return null;
-                }
+                return File.OpenRead(tempFile);
             }
-            catch (Exception)
+            else
             {
                 return null;
             }
         }
 
-        public void BegingEdit() {
+        public void BeginEdit() {
             // raise the property change event here to force the edit form to rebind 
             // all controls, which will erase all error states, if any, left over from the previous edit
-            RaisePropertyChangeEvent("PackageMetadata");
+            OnPropertyChanged("PackageMetadata");
             IsInEditMode = true;
         }
 
@@ -319,7 +309,7 @@ namespace PackageExplorerViewModel {
             HasEdit = true;
             PackageMetadata.ResetErrors();
             IsInEditMode = false;
-            RaisePropertyChangeEvent("WindowTitle");
+            OnPropertyChanged("WindowTitle");
         }
 
         internal void OnSaved() {
@@ -352,7 +342,7 @@ namespace PackageExplorerViewModel {
             ExportManifest(rootPath, PackageMetadata);
         }
 
-        private void ExportManifest(string rootPath, EditablePackageMetadata metadata) {
+        private static void ExportManifest(string rootPath, EditablePackageMetadata metadata) {
             string filename = metadata.Id + ".nuspec";
             string fullpath = Path.Combine(rootPath, filename);
             using (Stream fileStream = File.Create(fullpath)) {

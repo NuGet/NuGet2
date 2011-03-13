@@ -2,7 +2,7 @@
 
 namespace PackageExplorer
 {
-    class GrayscaleButton : Button
+    internal class GrayscaleButton : Button
     {
         public GrayscaleButton()
         {

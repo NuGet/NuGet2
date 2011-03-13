@@ -55,7 +55,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public void RaiseCanExecuteChangedEvent() {
+        public void OnCanExecuteChanged() {
             if (CanExecuteChanged != null) {
                 CanExecuteChanged(this, EventArgs.Empty);
             }

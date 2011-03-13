@@ -26,7 +26,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_publishKey != value) {
                     _publishKey = value;
-                    RaisePropertyChangeEvent("PublishKey");
+                    OnPropertyChanged("PublishKey");
                 }
             }
         }
@@ -40,7 +40,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_pushOnly != value) {
                     _pushOnly = value;
-                    RaisePropertyChangeEvent("PushOnly");
+                    OnPropertyChanged("PushOnly");
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_hasError != value) {
                     _hasError = value;
-                    RaisePropertyChangeEvent("HasError");
+                    OnPropertyChanged("HasError");
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_showProgress != value) {
                     _showProgress = value;
-                    RaisePropertyChangeEvent("ShowProgress");
+                    OnPropertyChanged("ShowProgress");
                 }
             }
         }
@@ -84,7 +84,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_percentComplete != value) {
                     _percentComplete = value;
-                    RaisePropertyChangeEvent("PercentComplete");
+                    OnPropertyChanged("PercentComplete");
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace PackageExplorerViewModel {
                 if (_canPublish != value)
                 {
                     _canPublish = value;
-                    RaisePropertyChangeEvent("CanPublish");
+                    OnPropertyChanged("CanPublish");
                 }
             }
         }
@@ -121,7 +121,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_status != value) {
                     _status = value;
-                    RaisePropertyChangeEvent("Status");
+                    OnPropertyChanged("Status");
                 }
             }
         }

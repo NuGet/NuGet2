@@ -26,7 +26,7 @@ namespace PackageExplorer {
                                 return DependencyProperty.UnsetValue;
                             }
                         }
-                        catch (Exception) {
+                        catch (ArgumentException) {
                             return DependencyProperty.UnsetValue;
                         }
                     }

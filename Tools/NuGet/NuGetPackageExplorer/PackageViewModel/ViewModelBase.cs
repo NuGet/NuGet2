@@ -12,7 +12,7 @@ namespace PackageExplorerViewModel {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void RaisePropertyChangeEvent(string propertyName) {
+        protected void OnPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }

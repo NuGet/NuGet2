@@ -13,8 +13,7 @@
         <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
         <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
-        <self:HalfLengthConverter x:Key="lengthConverter" />
-        <self:UpperCaseConverter x:Key="upperCaseConverter" />
+        <self:UppercaseConverter x:Key="upperCaseConverter" />
         <self:FrameworkNameConverter x:Key="frameworkConverter" />
         <self:NullToBoolConverter x:Key="nullToBoolConverter" />
 

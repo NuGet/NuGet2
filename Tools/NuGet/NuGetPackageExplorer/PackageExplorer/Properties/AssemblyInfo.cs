@@ -1,12 +1,13 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Resources;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("NuGet Package Explorer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("This is a NuGet package explorer tool which lets you view the metadata of a .nupkg package. After installing it, you can double click on .nupkg packages to open them in Package Explorer.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NuGet Package Explorer")]
@@ -26,7 +27,7 @@ using System.Windows;
 //the NeutralResourceLanguage attribute below.  Update the "en-US" in
 //the line below to match the UICulture setting in the project file.
 
-//[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
+[assembly: NeutralResourcesLanguage("en-US")]
 
 
 [assembly: ThemeInfo(

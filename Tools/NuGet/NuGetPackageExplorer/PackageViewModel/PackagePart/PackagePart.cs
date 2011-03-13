@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows.Input;
 using NuGet;
 
 namespace PackageExplorerViewModel {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     public abstract class PackagePart : IComparable<PackagePart>, INotifyPropertyChanged {
 
         protected PackagePart(string name, PackageFolder parent, PackageViewModel viewModel) {
@@ -18,7 +20,8 @@ namespace PackageExplorerViewModel {
 
             _viewModel = viewModel;
             _parent = parent;
-            this.Name = name;
+            _name = name;
+            RecalculatePath();
         }
 
         private readonly PackageFolder _parent;
@@ -42,7 +45,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_name != value) {
                     _name = value;
-                    RaisePropertyChangeEvent("Name");
+                    OnPropertyChanged("Name");
                     UpdatePath();
                 }
             }
@@ -57,7 +60,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_path != value) {
                     _path = value;
-                    RaisePropertyChangeEvent("Path");
+                    OnPropertyChanged("Path");
                 }
             }
         }
@@ -71,7 +74,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_isSelected != value) {
                     _isSelected = value;
-                    RaisePropertyChangeEvent("IsSelected");
+                    OnPropertyChanged("IsSelected");
                 }
             }
         }
@@ -124,11 +127,15 @@ namespace PackageExplorerViewModel {
             return String.Compare(this.Name, other.Name, StringComparison.OrdinalIgnoreCase);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification="This method is potentially expensive.")]
         public abstract IEnumerable<IPackageFile> GetFiles();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void RaisePropertyChangeEvent(string propertyName) {
+        protected void OnPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
@@ -140,6 +147,19 @@ namespace PackageExplorerViewModel {
 
         internal virtual void UpdatePath() {
             RecalculatePath();
+        }
+
+        public override bool Equals(object obj) {
+            PackagePart other = obj as PackagePart;
+            if (other == null) {
+                return false;
+            }
+
+            return CompareTo(other) == 0;
+        }
+
+        public override int GetHashCode() {
+            return Name.ToUpper(CultureInfo.InvariantCulture).GetHashCode();
         }
     }
 }

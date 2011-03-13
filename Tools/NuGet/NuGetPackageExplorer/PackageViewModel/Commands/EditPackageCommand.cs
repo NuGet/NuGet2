@@ -29,7 +29,7 @@ namespace PackageExplorerViewModel {
                 bindingGroup.BeginEdit();
             }
 
-            ViewModel.BegingEdit();
+            ViewModel.BeginEdit();
         }
     }
 }

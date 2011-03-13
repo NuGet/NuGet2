@@ -66,7 +66,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_isExpanded != value) {
                     _isExpanded = value;
-                    RaisePropertyChangeEvent("IsExpanded");
+                    OnPropertyChanged("IsExpanded");
                 }
             }
         }
@@ -98,17 +98,17 @@ namespace PackageExplorerViewModel {
             PackageViewModel.NotifyChanges();
         }
 
-        public void AddFile(string filepath) {
-            if (!File.Exists(filepath)) {
-                throw new ArgumentException("File does not exist.", "filepath");
+        public void AddFile(string filePath) {
+            if (!File.Exists(filePath)) {
+                throw new ArgumentException("File does not exist.", "filePath");
             }
 
-            string name = System.IO.Path.GetFileName(filepath);
+            string name = System.IO.Path.GetFileName(filePath);
             if (ContainsFile(name)) {
                 return;
             }
             
-            var physicalFile = new PhysicalFile(filepath);
+            var physicalFile = new PhysicalFile(filePath);
             var newFile = new PackageFile(physicalFile, name, this);
             Children.Add(newFile);
             newFile.IsSelected = true;

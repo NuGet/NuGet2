@@ -78,7 +78,7 @@ namespace PackageExplorer {
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, int wParam, string lParam);
     }
 
-    public struct BROWSEINFO {
+    internal struct BROWSEINFO {
         public IntPtr hwndOwner;
         public IntPtr pidlRoot;
         public string pszDisplayName;
@@ -89,5 +89,5 @@ namespace PackageExplorer {
         public int iImage;
     }
 
-    public delegate int BrowseCallBackProc(IntPtr hwnd, int msg, IntPtr lp, IntPtr wp);
+    internal delegate int BrowseCallBackProc(IntPtr hwnd, int msg, IntPtr lp, IntPtr wp);
 }

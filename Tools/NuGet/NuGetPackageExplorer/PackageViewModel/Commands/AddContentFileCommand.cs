@@ -21,7 +21,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private void AddExistingFileToFolder(PackageFolder folder) {
+        private static void AddExistingFileToFolder(PackageFolder folder) {
             OpenFileDialog dialog = new OpenFileDialog() {
                 CheckFileExists = true,
                 CheckPathExists = true,

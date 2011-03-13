@@ -10,6 +10,7 @@ using NuGet.Resources;
 namespace NuGet {
     public static class VersionUtility {
         private const string NetFrameworkIdentifier = ".NETFramework";
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

@@ -14,14 +14,17 @@ namespace PackageExplorerViewModel {
             return true;
         }
 
-        public event EventHandler CanExecuteChanged;
+        event EventHandler ICommand.CanExecuteChanged {
+            add { }
+            remove { }
+        }
 
         public void Execute(object parameter) {
             var file = parameter as PackageFile;
             OpenFileInShell(file);
         }
 
-        private void OpenFileInShell(PackageFile file) {
+        private static void OpenFileInShell(PackageFile file) {
             // copy to temporary file
             // create package in the temprary file first in case the operation fails which would
             // override existing file with a 0-byte file.

@@ -4,8 +4,10 @@ using System.Windows.Data;
 namespace PackageExplorer {
     public class NullToBoolConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            if (value is string) {
-                return !String.IsNullOrEmpty((string)value);
+
+            string stringValue = value as string;
+            if (stringValue != null) {
+                return !String.IsNullOrEmpty(stringValue);
             }
 
             return value != null;

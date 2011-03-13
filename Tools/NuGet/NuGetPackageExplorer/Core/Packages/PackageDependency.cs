@@ -13,7 +13,7 @@ namespace NuGet {
 
         public PackageDependency(string id, IVersionSpec versionSpec) {
             if (String.IsNullOrEmpty(id)) {
-                throw new ArgumentException("id");
+                throw new ArgumentNullException("id");
             }
             Id = id;
             VersionSpec = versionSpec;
@@ -75,10 +75,6 @@ namespace NuGet {
             }
 
             return Id + " " + versionBuilder;
-        }
-
-        internal static PackageDependency CreateDependency(string id, string versionSpec) {
-            return new PackageDependency(id, VersionUtility.ParseVersionSpec(versionSpec));
         }
     }
 }

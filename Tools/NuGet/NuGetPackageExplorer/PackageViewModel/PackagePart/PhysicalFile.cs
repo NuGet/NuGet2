@@ -9,11 +9,11 @@ namespace PackageExplorerViewModel {
 
         public PhysicalFile(string physicalPath) {
             if (physicalPath == null) {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException("physicalPath");
             }
 
             if (!File.Exists(physicalPath)) {
-                throw new ArgumentException("File does not exist.", "path");
+                throw new ArgumentException("File does not exist.", "physicalPath");
             }
 
             _physicalPath = physicalPath;

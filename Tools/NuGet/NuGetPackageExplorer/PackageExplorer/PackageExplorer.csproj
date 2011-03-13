@@ -58,6 +58,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\..\..\..\NuGet.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>nupack.ico</ApplicationIcon>
@@ -122,7 +125,6 @@
     <Compile Include="Converters\CountToVisibilityConverter.cs" />
     <Compile Include="Converters\FrameworkAssemblyReferenceConverter.cs" />
     <Compile Include="Converters\FrameworkNameConverter.cs" />
-    <Compile Include="Converters\HalfLengthConverter.cs" />
     <Compile Include="Converters\MultiStringToBoolConverter.cs" />
     <Compile Include="Converters\NullToBoolConverter.cs" />
     <Compile Include="Converters\UpperCaseConverter.cs" />
@@ -243,6 +245,9 @@
     <Resource Include="Images\FontDialogHS.png" />
     <Resource Include="Images\Book_angleHS.png" />
     <Resource Include="Images\NewFolderHS.png" />
+    <CodeAnalysisDictionary Include="..\..\..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

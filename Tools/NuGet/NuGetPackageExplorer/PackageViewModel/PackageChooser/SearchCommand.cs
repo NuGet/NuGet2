@@ -2,10 +2,9 @@
 using System.Windows.Input;
 
 namespace PackageExplorerViewModel {
-    public class SearchCommand : ICommand {
-
-         private PackageChooserViewModel _viewModel;
-
+    public sealed class SearchCommand : ICommand {
+        
+        private PackageChooserViewModel _viewModel;
         public SearchCommand(PackageChooserViewModel viewModel) {
             _viewModel = viewModel;
         }
@@ -14,10 +13,13 @@ namespace PackageExplorerViewModel {
             return true;
         }
 
-        public event EventHandler CanExecuteChanged;
+        event EventHandler ICommand.CanExecuteChanged {
+            add { }
+            remove { }
+        }
 
         public void Execute(object parameter) {
-            _viewModel.Search((string) parameter);
+            _viewModel.Search((string)parameter);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace NuGet {
 
         public FrameworkAssemblyReference(string assemblyName, IEnumerable<FrameworkName> supportedFrameworks) {
             if (String.IsNullOrEmpty(assemblyName)) {
-                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Argument is null.", "assemblyName"));
+                throw new ArgumentException("Argument is null or empty.", "assemblyName");
             }
 
             if (supportedFrameworks == null) {

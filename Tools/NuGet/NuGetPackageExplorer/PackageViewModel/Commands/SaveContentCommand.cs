@@ -12,7 +12,10 @@ namespace PackageExplorerViewModel {
             return true;
         }
 
-        public event EventHandler CanExecuteChanged;
+        event EventHandler ICommand.CanExecuteChanged {
+            add { }
+            remove { }
+        }
 
         public void Execute(object parameter) {
             var file = parameter as PackageFile;

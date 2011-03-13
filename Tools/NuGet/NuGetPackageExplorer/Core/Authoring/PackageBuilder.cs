@@ -9,7 +9,7 @@ using System.Linq;
 using NuGet.Resources;
 
 namespace NuGet {
-    public class PackageBuilder : IPackageBuilder {
+    public sealed class PackageBuilder : IPackageBuilder {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
 

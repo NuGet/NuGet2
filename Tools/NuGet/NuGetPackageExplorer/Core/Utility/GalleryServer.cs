@@ -21,12 +21,16 @@ namespace NuGet {
             : this(DefaultGalleryServerUrl) {
         }
 
-        public GalleryServer(string galleryServerUrl) {
-            _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerUrl);
+        public GalleryServer(string galleryServerSource) {
+            _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerSource);
             var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
             _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability", 
+            "CA2000:Dispose objects before losing scope",
+            Justification="We dispose it in the Completed event handler.")]
         public void CreatePackage(string apiKey, Stream packageStream, IObserver<int> progressObserver, IPackageMetadata metadata = null) {
 
             var state = new PublishState {
@@ -35,17 +39,22 @@ namespace NuGet {
                 ProgressObserver = progressObserver
             };
 
-            var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
+            var url = new Uri(String.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
 
             WebClient client = new WebClient();
             client.Headers[HttpRequestHeader.ContentType] = "application/octet-stream";
+            client.Headers[HttpRequestHeader.UserAgent] = _userAgent;
             client.UploadProgressChanged += OnUploadProgressChanged;
             client.UploadDataCompleted += OnCreatePackageCompleted;
             client.UploadDataAsync(url, "POST", packageStream.ReadAllBytes(), state);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = "We dispose it in the Completed event handler.")]
         private void PublishPackage(PublishState state) {
-            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, PublishPackageService));
+            var url = new Uri(String.Format(CultureInfo.InvariantCulture, "{0}/{1}", _baseGalleryServerUrl, PublishPackageService));
 
             using (Stream requestStream = new MemoryStream()) {
                 var data = new PublishData {
@@ -60,6 +69,7 @@ namespace NuGet {
 
                 WebClient client = new WebClient();
                 client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                client.Headers[HttpRequestHeader.UserAgent] = _userAgent;
                 client.UploadProgressChanged += OnUploadProgressChanged;
                 client.UploadDataCompleted += OnPublishPackageCompleted;
                 client.UploadDataAsync(url, "POST", requestStream.ReadAllBytes(), state);
@@ -94,6 +104,9 @@ namespace NuGet {
                     state.ProgressObserver.OnCompleted();
                 }
             }
+
+            var client = (WebClient)sender;
+            client.Dispose();
         }
 
         private void OnPublishPackageCompleted(object sender, UploadDataCompletedEventArgs e) {
@@ -115,6 +128,9 @@ namespace NuGet {
             else if (!e.Cancelled) {
                 state.ProgressObserver.OnCompleted();
             }
+
+            var client = (WebClient)sender;
+            client.Dispose();
         }
 
         private void OnUploadProgressChanged(object sender, UploadProgressChangedEventArgs e) {
@@ -123,7 +139,7 @@ namespace NuGet {
             state.ProgressObserver.OnNext(Math.Min(100, 2*e.ProgressPercentage));
         }
 
-        private string GetSafeRedirectedUri(string uri) {
+        private static string GetSafeRedirectedUri(string uri) {
             WebRequest request = WebRequest.Create(uri);
             try {
                 WebResponse response = request.GetResponse();
@@ -142,17 +158,17 @@ namespace NuGet {
             public IObserver<int> ProgressObserver { get; set; }
             public IPackageMetadata PackageMetadata { get; set; }
         }
+    }
 
-        [DataContract]
-        public class PublishData {
-            [DataMember(Name = "key")]
-            public string Key { get; set; }
+    [DataContract]
+    public class PublishData {
+        [DataMember(Name = "key")]
+        public string Key { get; set; }
 
-            [DataMember(Name = "id")]
-            public string Id { get; set; }
+        [DataMember(Name = "id")]
+        public string Id { get; set; }
 
-            [DataMember(Name = "version")]
-            public string Version { get; set; }
-        }
+        [DataMember(Name = "version")]
+        public string Version { get; set; }
     }
 }

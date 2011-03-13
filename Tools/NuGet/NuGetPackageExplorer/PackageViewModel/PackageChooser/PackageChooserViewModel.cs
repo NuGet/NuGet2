@@ -33,6 +33,7 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private IPackageRepository PackageRepository {
             get {
                 if (_packageRepository == null || _packageRepository.Source != PackageSource) {
@@ -54,7 +55,7 @@ namespace PackageExplorerViewModel {
             set {
                 if (_packageSource != value) {
                     _packageSource = value;
-                    RaisePropertyChangeEvent("PackageSource");
+                    OnPropertyChanged("PackageSource");
                 }
             }
         }
@@ -66,7 +67,7 @@ namespace PackageExplorerViewModel {
             private set {
                 if (_totalPackageCount != value) {
                     _totalPackageCount = value;
-                    RaisePropertyChangeEvent("TotalPackageCount");
+                    OnPropertyChanged("TotalPackageCount");
                     SortCommand.RaiseCanExecuteEvent();
                 }
             }
@@ -79,7 +80,7 @@ namespace PackageExplorerViewModel {
             private set {
                 if (_beginPackage != value) {
                     _beginPackage = value;
-                    RaisePropertyChangeEvent("BeginPackage");
+                    OnPropertyChanged("BeginPackage");
                 }
             }
         }
@@ -91,7 +92,7 @@ namespace PackageExplorerViewModel {
             private set {
                 if (_endPackage != value) {
                     _endPackage = value;
-                    RaisePropertyChangeEvent("EndPackage");
+                    OnPropertyChanged("EndPackage");
                 }
             }
         }
@@ -105,7 +106,7 @@ namespace PackageExplorerViewModel {
                 if (_statusContent != value)
                 {
                     _statusContent = value;
-                    RaisePropertyChangeEvent("StatusContent");
+                    OnPropertyChanged("StatusContent");
                 }
             }
         }
@@ -123,7 +124,7 @@ namespace PackageExplorerViewModel {
             private set {
                 if (_currentPage != value) {
                     _currentPage = value;
-                    RaisePropertyChangeEvent("CurrentPage");
+                    OnPropertyChanged("CurrentPage");
                 }
             }
         }
@@ -164,7 +165,7 @@ namespace PackageExplorerViewModel {
                     else if (!result.IsCanceled) {
                         ShowPackages(result.Result.Item1, result.Result.Item2, page);
                         StatusContent = String.Empty;
-                        RaisePropertyChangeEvent("SortDirection");
+                        OnPropertyChanged("SortDirection");
                     }
                     
                 },
@@ -267,7 +268,7 @@ namespace PackageExplorerViewModel {
             Packages.Clear();
             Packages.AddRange(packages);
 
-            NavigationCommand.RaiseCanExecuteChangedEvent();
+            NavigationCommand.OnCanExecuteChanged();
         }
     }
 }
