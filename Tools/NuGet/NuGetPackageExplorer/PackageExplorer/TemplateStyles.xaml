@@ -20,7 +20,6 @@
 
     <Style  x:Key="DetailDescriptionTextBoxStyle" TargetType="{x:Type TextBlock}">
         <Setter  Property="Margin" Value="0,8,0,8" />
-        <Setter  Property="MaxHeight" Value="200" />
         <Setter  Property="TextWrapping" Value="Wrap" />
         <Setter  Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
