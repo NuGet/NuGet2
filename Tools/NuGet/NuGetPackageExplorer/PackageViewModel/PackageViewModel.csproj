@@ -65,6 +65,7 @@
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\EditPackageCommand.cs" />
     <Compile Include="Commands\OpenContentFileCommand.cs" />
+    <Compile Include="Commands\OpenWithContentFileCommand.cs" />
     <Compile Include="Commands\PackagePartCommandBase.cs" />
     <Compile Include="EmptyPackage.cs" />
     <Compile Include="GlobalSuppressions.cs" />

@@ -46,6 +46,10 @@ namespace PackageExplorerViewModel {
             get { return PackageViewModel.OpenContentFileCommand; }
         }
 
+        public ICommand OpenWithCommand {
+            get { return PackageViewModel.OpenWithContentFileCommand; }
+        }
+
         public override void Export(string rootPath) {
             string fullPath = System.IO.Path.Combine(rootPath, Path);
             if (!File.Exists(fullPath)) {

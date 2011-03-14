@@ -33,6 +33,7 @@
             <ContextMenu x:Key="SharedContextMenu">
                 <MenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" FontWeight="SemiBold" />
                 <MenuItem Header="_Open in Windows shell..." Command="{Binding OpenCommand}" CommandParameter="{Binding}" />
+                <MenuItem Header="Open with..." Command="{Binding OpenWithCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
                 <Separator />
                 <MenuItem Header="_Rename..." Click="OnRenameItemClick" />
@@ -54,9 +55,10 @@
                         <Border 
                             BorderBrush="MediumAquamarine" 
                             BorderThickness="0.5" 
-                            HorizontalAlignment="Center" 
+                            HorizontalAlignment="Left" 
                             Padding="2"
                             Background="Transparent"
+                            Margin="0,0,0,5"
                             ToolTipService.ToolTip="{Binding IconUrl, Mode=OneTime}"
                             Visibility="{Binding IconUrl, Converter={StaticResource NullToVisibilityConverter}}">
                             <Image         
@@ -352,7 +354,7 @@
 
         <!-- Status bar -->
         <StatusBar Grid.Row="2" DockPanel.Dock="Bottom">
-            <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource}" />
+            <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource, FallbackValue=Ready}" />
         </StatusBar>
 
         <!-- Main content -->
@@ -477,6 +479,7 @@
                     VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True" 
                     Background="#FFEAF7CE"
+                    TextWrapping="Wrap"
                     Text="{Binding CurrentFileContent, Mode=OneWay}"
                     TextChanged="OnFileContentChanged" />
             </GroupBox>

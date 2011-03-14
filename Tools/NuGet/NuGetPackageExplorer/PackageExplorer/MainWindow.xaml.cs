@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using StringResources = PackageExplorer.Resources.Resources;
-using System.Diagnostics;
 
 namespace PackageExplorer {
     /// <summary>
@@ -32,6 +33,11 @@ namespace PackageExplorer {
         }
 
         internal void OpenLocalPackage(string packagePath) {
+            PackageSourceItem.SetCurrentValue(ContentControl.ContentProperty, "Loading " + packagePath + "...");
+            Dispatcher.BeginInvoke(new Action<string>(OpenLocalPackageCore), DispatcherPriority.Loaded, packagePath);
+        }
+
+        internal void OpenLocalPackageCore(string packagePath) {
             ZipPackage package = null;
             try {
                 package = new ZipPackage(packagePath);
