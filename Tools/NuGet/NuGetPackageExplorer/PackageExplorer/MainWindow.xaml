@@ -9,7 +9,7 @@
         Title="{Binding WindowTitle, FallbackValue={x:Static resources:Resources.Dialog_Title}}" 
         Height="650" 
         Width="750" 
-        MinWidth="400" 
+        MinWidth="500" 
         MinHeight="300" 
         Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}"
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
@@ -53,7 +53,7 @@
                     <StackPanel Margin="8">
 
                         <Border 
-                            BorderBrush="MediumAquamarine" 
+                            BorderBrush="{StaticResource {x:Static SystemColors.ActiveBorderBrushKey}}" 
                             BorderThickness="0.5" 
                             HorizontalAlignment="Left" 
                             Padding="2"
@@ -479,9 +479,15 @@
                     VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True" 
                     Background="#FFEAF7CE"
-                    TextWrapping="Wrap"
                     Text="{Binding CurrentFileContent, Mode=OneWay}"
-                    TextChanged="OnFileContentChanged" />
+                    TextChanged="OnFileContentChanged">
+                    <TextBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="SelectAll" />
+                            <MenuItem Command="Copy" />
+                        </ContextMenu>
+                    </TextBox.ContextMenu>
+                </TextBox>
             </GroupBox>
             
             <Button 

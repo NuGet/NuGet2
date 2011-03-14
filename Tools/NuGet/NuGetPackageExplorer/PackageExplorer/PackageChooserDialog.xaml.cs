@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Threading;
 using NuGet;
 using PackageExplorerViewModel;
 
@@ -87,7 +88,11 @@ namespace PackageExplorer {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            ICommand loadedCommand = (ICommand)Tag;
+            Dispatcher.BeginInvoke(new Action(LoadPackages), DispatcherPriority.Background);
+        }
+
+        private void LoadPackages() {
+            var loadedCommand = (ICommand)Tag;
             loadedCommand.Execute(null);
         }
 
