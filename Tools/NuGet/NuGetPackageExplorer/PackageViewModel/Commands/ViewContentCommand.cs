@@ -28,7 +28,7 @@ namespace PackageExplorerViewModel {
                 if (file != null) {
                     const string UnsupportedMessage = "*** The format of this file is not supported. ***";
                     string content = IsBinaryFile(file.Name) ? UnsupportedMessage : ReadFileContent(file);
-                    ViewModel.ShowFile(file.Name, content);
+                    ViewModel.ShowFile(file.Path, content);
                 }
             }
         }

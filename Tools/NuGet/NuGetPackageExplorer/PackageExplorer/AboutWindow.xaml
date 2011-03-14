@@ -17,6 +17,9 @@
         
         <StackPanel Orientation="Vertical" Grid.Column="1" Margin="20,0,0,0">
             <TextBlock x:Name="ProductTitle" Text="NuGet Package Explorer Beta 2" FontWeight="Bold" />
+            
+            <TextBlock Text="Tested with NuGet 1.2 and below." Margin="0,4,0,4"/>
+            
             <TextBlock>
                 <Hyperlink NavigateUri="http://nuget.codeplex.com" Click="Hyperlink_Click">
                     <Run Text="http://nuget.codeplex.com" />

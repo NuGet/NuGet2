@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:self="clr-namespace:PackageExplorer"
-             xmlns:windows="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
              Startup="Application_Startup"
              Exit="Application_Exit">
     <Application.Resources>
@@ -45,7 +44,7 @@
             </Style.Triggers>
         </Style>
 
-        <!--<windows:BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
+        <self:BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
         <Style TargetType="{x:Type GroupBox}">
             <Setter Property="BorderBrush"
                 Value="#D5DFE5"/>
@@ -80,9 +79,14 @@
                                 Grid.RowSpan="2"
                                 Grid.Column="1"
                                 HorizontalAlignment="Center">
-                                <ContentPresenter ContentSource="Header" 
-                                              RecognizesAccessKey="True" 
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                
+                                <ContentControl
+                                    FontWeight="SemiBold"
+                                    Foreground="Navy"
+                                    Content="{TemplateBinding Header}"
+                                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
+                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                             </Border>
                             <ContentPresenter Grid.Row="2"
                                           Grid.Column="1"
@@ -119,6 +123,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>-->
+        </Style>
     </Application.Resources>
 </Application>

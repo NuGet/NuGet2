@@ -390,7 +390,7 @@
             </GroupBox>
 
             <!-- package content tree view -->
-            <GroupBox BorderBrush="DarkGray" Background="Transparent" BorderThickness="1" Grid.Column="1" Margin="3,3,3,0" Header="Package contents">
+            <GroupBox BorderBrush="DarkGray" Background="Transparent" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents">
                 <TreeView 
                     x:Name="PackagesTreeView" 
                     ItemsSource="{Binding PackageParts}" 
@@ -446,7 +446,17 @@
                 </TreeView>
             </GroupBox>
             
-            <GridSplitter Grid.Column="1" Grid.Row="1" ShowsPreview="True" ResizeBehavior="PreviousAndNext" Height="4" HorizontalAlignment="Stretch" Background="Transparent" VerticalAlignment="Bottom" />
+            <GridSplitter 
+                Grid.Column="1" 
+                Grid.Row="1" 
+                Visibility="{Binding ShowContentViewer, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}"
+                ShowsPreview="True" 
+                ResizeBehavior="PreviousAndNext" 
+                Height="4" 
+                Margin="0,-2,0,0"
+                HorizontalAlignment="Stretch" 
+                Background="Transparent" 
+                VerticalAlignment="Bottom" />
 
             <!-- content viewer -->
             <GroupBox
