@@ -60,7 +60,7 @@ namespace NuGetConsole.Implementation.Console {
 
         #region IWpfConsoleService
         public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName) {
-            return new WpfConsole(this, sp, _privateConsoleStatus, contentTypeName, hostName).MarshalledConsole;
+            return new WpfConsole(this, sp, _privateConsoleStatus, contentTypeName, hostName).MarshaledConsole;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

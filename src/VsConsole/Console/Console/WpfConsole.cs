@@ -249,22 +249,22 @@ namespace NuGetConsole.Implementation.Console {
             return null;
         }
 
-        _Marshaler _marshaler;
-        _Marshaler Marshaler {
+        private PrivateMarshaler _marshaler;
+        private PrivateMarshaler Marshaler {
             get {
                 if (_marshaler == null) {
-                    _marshaler = new _Marshaler(this);
+                    _marshaler = new PrivateMarshaler(this);
                 }
                 return _marshaler;
             }
         }
 
-        public IWpfConsole MarshalledConsole {
+        public IWpfConsole MarshaledConsole {
             get { return this.Marshaler; }
         }
 
-        class _Marshaler : Marshaler<WpfConsole>, IWpfConsole, IPrivateWpfConsole {
-            public _Marshaler(WpfConsole impl)
+        class PrivateMarshaler : Marshaler<WpfConsole>, IWpfConsole, IPrivateWpfConsole {
+            public PrivateMarshaler(WpfConsole impl)
                 : base(impl) {
             }
 
@@ -416,8 +416,8 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        InputHistory _inputHistory;
-        InputHistory InputHistory {
+        private InputHistory _inputHistory;
+        private InputHistory InputHistory {
             get {
                 if (_inputHistory == null) {
                     _inputHistory = new InputHistory();
@@ -426,10 +426,10 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IList<string> _historyInputs;
-        int _currentHistoryInputIndex;
-
-        void ResetNavigateHistory() {
+        private IList<string> _historyInputs;
+        private int _currentHistoryInputIndex;
+        
+        private void ResetNavigateHistory() {
             _historyInputs = null;
             _currentHistoryInputIndex = -1;
         }
@@ -519,7 +519,7 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        IVsTextView _view;
+        private IVsTextView _view;
         public IVsTextView VsTextView {
             get {
                 if (_view == null) {

@@ -12,33 +12,33 @@ namespace NuGetConsole.Implementation.Console {
 
     internal class WpfConsoleKeyProcessor : OleCommandFilter {
 
-        WpfConsole WpfConsole { get; set; }
-        IWpfTextView WpfTextView { get; set; }
+        private WpfConsole WpfConsole { get; set; }
+        private IWpfTextView WpfTextView { get; set; }
 
-        ICommandExpansion CommandExpansion { get; set; }
+        private ICommandExpansion CommandExpansion { get; set; }
 
         public WpfConsoleKeyProcessor(WpfConsole wpfConsole)
             : base(wpfConsole.VsTextView) {
-            this.WpfConsole = wpfConsole;
-            this.WpfTextView = wpfConsole.WpfTextView;
-            this.CommandExpansion = wpfConsole.Factory.GetCommandExpansion(wpfConsole);
+            WpfConsole = wpfConsole;
+            WpfTextView = wpfConsole.WpfTextView;
+            CommandExpansion = wpfConsole.Factory.GetCommandExpansion(wpfConsole);
         }
 
         /// <summary>
         /// Check if Caret is in read only region. This is true if the console is currently not
         /// in input mode, or the caret is before current prompt.
         /// </summary>
-        bool IsCaretInReadOnlyRegion {
+        private bool IsCaretInReadOnlyRegion {
             get {
-                return WpfConsole.InputLineStart == null // shortcut -- no inut allowed
-                    || WpfTextView.TextBuffer.IsReadOnly(WpfTextView.Caret.Position.BufferPosition.Position);
+                return WpfConsole.InputLineStart == null || // shortcut -- no inut allowed
+                       WpfTextView.TextBuffer.IsReadOnly(WpfTextView.Caret.Position.BufferPosition.Position);
             }
         }
 
         /// <summary>
         /// Check if Caret is on InputLine, including before or after Prompt.
         /// </summary>
-        bool IsCaretOnInputLine {
+        private bool IsCaretOnInputLine {
             get {
                 SnapshotPoint? inputStart = WpfConsole.InputLineStart;
                 if (inputStart != null) {
@@ -55,17 +55,17 @@ namespace NuGetConsole.Implementation.Console {
         /// Check if Caret is exactly on InputLineStart. Do nothing when HOME/Left keys are pressed here.
         /// When caret is right to this position, HOME/Left moves caret to this position.
         /// </summary>
-        bool IsCaretAtInputLineStart {
+        private bool IsCaretAtInputLineStart {
             get {
                 return WpfConsole.InputLineStart == WpfTextView.Caret.Position.BufferPosition;
             }
         }
 
-        SnapshotPoint CaretPosition {
+        private SnapshotPoint CaretPosition {
             get { return WpfTextView.Caret.Position.BufferPosition; }
         }
 
-        bool IsSelectionReadonly {
+        private bool IsSelectionReadonly {
             get {
                 if (!WpfTextView.Selection.IsEmpty) {
                     ITextBuffer buffer = WpfTextView.TextBuffer;
@@ -78,7 +78,7 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// Manually execute a command on the OldChain (so this filter won't participate in the command filtering).
         /// </summary>
-        void ExecuteCommand(VSConstants.VSStd2KCmdID idCommand, object args = null) {
+        private void ExecuteCommand(VSConstants.VSStd2KCmdID idCommand, object args = null) {
             OldChain.Execute(idCommand, args);
         }
 
@@ -87,6 +87,11 @@ namespace NuGetConsole.Implementation.Console {
             int hr = OLECMDERR_E_NOTSUPPORTED;
 
             if (!WpfConsole.Host.IsCommandEnabled) {
+                return hr;
+            }
+
+            // if the console has not been successfully started, do not accept any key inputs
+            if (!WpfConsole.Dispatcher.IsStartCompleted) {
                 return hr;
             }
 
@@ -247,9 +252,9 @@ namespace NuGetConsole.Implementation.Console {
             return hr;
         }
 
-        static readonly char[] NEWLINE_CHARS = new char[] { '\n', '\r' };
+        private static readonly char[] NEWLINE_CHARS = new char[] { '\n', '\r' };
 
-        void PasteText(ref int hr) {
+        private void PasteText(ref int hr) {
             string text = System.Windows.Clipboard.GetText();
             int iLineStart = 0;
             int iNewLine = -1;

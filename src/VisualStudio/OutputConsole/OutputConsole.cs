@@ -91,6 +91,18 @@ namespace NuGet.VisualStudio {
                     System.Diagnostics.Debug.Assert(_outputWindowPane != null);
                 }
             }
+
+            if (StartCompleted != null) {
+                StartCompleted(this, EventArgs.Empty);
+            }
+
+            IsStartCompleted = true;
+        }
+
+        public event EventHandler StartCompleted;
+
+        public bool IsStartCompleted { 
+            get; private set; 
         }
 
         public void ClearConsole() {

@@ -7,9 +7,20 @@ namespace NuGetConsole {
     public interface IConsoleDispatcher {
 
         /// <summary>
-        /// Start dispatching console command line inputs.
+        /// Start dispatching console command line inputs. This method can execute asynchronouly.
         /// </summary>
         void Start();
+
+        /// <summary>
+        /// Raised when the Start method completes asynchronously.
+        /// </summary>
+        event EventHandler StartCompleted;
+
+        /// <summary>
+        /// Indicates whether the StartCompleted event has raised.
+        /// </summary>
+        /// <returns></returns>
+        bool IsStartCompleted { get; }
 
         /// <summary>
         /// Indicates whether the console is busy executing an earlier command;

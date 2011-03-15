@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -49,7 +50,10 @@ namespace NuGetConsole.Implementation {
 
         private bool IsToolbarEnabled {
             get {
-                return (_wpfConsole != null && _wpfConsole.Host != null && _wpfConsole.Host.IsCommandEnabled);
+                return _wpfConsole != null &&
+                       _wpfConsole.Dispatcher.IsStartCompleted &&
+                       _wpfConsole.Host != null && 
+                       _wpfConsole.Host.IsCommandEnabled;
             }
         }
 
@@ -101,14 +105,12 @@ namespace NuGetConsole.Implementation {
             Guid cmdUi = VSConstants.GUID_TextEditorFactory;
             windowFrame.SetGuidProperty((int)__VSFPROPID.VSFPROPID_InheritKeyBindings, ref cmdUi);
 
-            PowerConsoleWindow.ActiveHostChanged += PowerConsoleWindow_ActiveHostChanged;
-
             // pause for a tiny moment to let the tool window open before initializing the host
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(0);
             timer.Tick += (o, e) => {
                 timer.Stop();
-                PowerConsoleWindow_ActiveHostChanged(PowerConsoleWindow, EventArgs.Empty);
+                LoadConsoleEditor();
             };
             timer.Start();
 
@@ -285,15 +287,10 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        private void PowerConsoleWindow_ActiveHostChanged(object sender, EventArgs e) {
-            // Reset local caching variables
-            _wpfConsole = null;
-            _vsTextView = null;
-
-            // Switch to new WpfConsole if available
+        private void LoadConsoleEditor() {
             if (WpfConsole != null) {
                 FrameworkElement consolePane = WpfConsole.Content as FrameworkElement;
-                ConsoleParentPane.Child = consolePane;
+                ConsoleParentPane.Children.Add(consolePane);
 
                 // WPF doesn't handle input focus automatically in this scenario. We
                 // have to set the focus manually, otherwise the editor is displayed but
@@ -340,21 +337,29 @@ namespace NuGetConsole.Implementation {
             MoveFocus(PendingFocusPane);
             PendingFocusPane = null;
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification = "We really don't want exceptions from the console to bring down VS")]
+        
         private void MoveFocus(FrameworkElement consolePane) {
             // TAB focus into editor (consolePane.Focus() does not work due to editor layouts)
             consolePane.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
 
             // Try start the console session now. This needs to be after the console
             // pane getting focus to avoid incorrect initial editor layout.
-            if (WpfConsole != null && WpfConsole.Content == consolePane) {
+            StartConsoleSession(consolePane);
+        }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "We really don't want exceptions from the console to bring down VS")]
+        private void StartConsoleSession(FrameworkElement consolePane) {
+            if (WpfConsole != null && WpfConsole.Content == consolePane) {
                 if (WpfConsole.Host.IsCommandEnabled) {
                     try {
+                        WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
+                            // after the console finishes initializing the host, 
+                            // we remove the "Initializing..." text block
+                            ConsoleParentPane.Children.RemoveAt(0);
+                        };
                         WpfConsole.Dispatcher.Start();
                     }
                     catch (Exception x) {
@@ -373,17 +378,14 @@ namespace NuGetConsole.Implementation {
         private IWpfConsole WpfConsole {
             get {
                 if (_wpfConsole == null) {
-                    if (ActiveHostInfo != null) {
-                        try {
-                            _wpfConsole = ActiveHostInfo.WpfConsole;
-                        }
-                        catch (Exception x) {
-                            _wpfConsole = ActiveHostInfo.WpfConsole;
-                            _wpfConsole.Write(x.ToString());
-                        }
+                    Debug.Assert(ActiveHostInfo != null);
+
+                    try {
+                        _wpfConsole = ActiveHostInfo.WpfConsole;
                     }
-                    else {
-                        // TODO: no host
+                    catch (Exception x) {
+                        _wpfConsole = ActiveHostInfo.WpfConsole;
+                        _wpfConsole.Write(x.ToString());
                     }
                 }
 
@@ -405,24 +407,27 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        private Border _consoleParentPane;
+        private Grid _consoleParentPane;
 
         /// <summary>
         /// Get the parent pane of console panes. This serves as the Content of this tool window.
         /// </summary>
-        private Border ConsoleParentPane {
+        private Grid ConsoleParentPane {
             get {
                 if (_consoleParentPane == null) {
                     // display the text "initializing..." while the host is initialized.
                     var textBlock = new TextBlock {
                         Text = Resources.ToolWindowInitializing,
                         HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Focusable = false
                     };
 
-                    _consoleParentPane = new Border() {
-                        Child = textBlock
-                    };
+                    // render the textblock above the editor
+                    Canvas.SetZIndex(textBlock, 1);
+
+                    _consoleParentPane = new Grid();
+                    _consoleParentPane.Children.Add(textBlock);
                 }
                 return _consoleParentPane;
             }

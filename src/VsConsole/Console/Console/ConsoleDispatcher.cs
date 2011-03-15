@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text;
 
 namespace NuGetConsole.Implementation.Console {
@@ -53,14 +55,31 @@ namespace NuGetConsole.Implementation.Console {
                     _dispatcher = new SyncHostConsoleDispatcher(this);
                 }
 
-                // gives the host a chance to do initialization works before the console starts accepting user inputs
-                host.Initialize(WpfConsole);
-
-                if (host.IsCommandEnabled) {
-                    _dispatcher.Start();
-                }
+                TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                
+                Task.Factory.StartNew(
+                    // gives the host a chance to do initialization works before the console starts accepting user inputs
+                    () => host.Initialize(WpfConsole)
+                ).ContinueWith(
+                    task => {
+                        if (host.IsCommandEnabled) {
+                            _dispatcher.Start();
+                        }
+                        if (StartCompleted != null) {
+                            StartCompleted(this, EventArgs.Empty);
+                        }
+                        IsStartCompleted = true;
+                    },
+                    CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnRanToCompletion,
+                    uiScheduler
+                );
             }
         }
+
+        public event EventHandler StartCompleted;
+
+        public bool IsStartCompleted { get; private set; }
 
         public void ClearConsole() {
             Debug.Assert(_dispatcher != null);

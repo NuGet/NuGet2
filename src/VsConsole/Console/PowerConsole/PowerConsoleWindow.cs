@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio;
 
 namespace NuGetConsole.Implementation.PowerConsole {
     [Export(typeof(IPowerConsoleWindow))]
@@ -22,8 +22,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [ImportMany]
         internal IEnumerable<Lazy<IHostProvider, IHostMetadata>> HostProviders { get; set; }
-
-        internal event EventHandler ActiveHostChanged;
 
         Dictionary<string, HostInfo> _hostInfos;
         Dictionary<string, HostInfo> HostInfos {
@@ -43,41 +41,12 @@ namespace NuGetConsole.Implementation.PowerConsole {
         internal HostInfo ActiveHostInfo {
             get {
                 if (_activeHostInfo == null) {
-                    if (!string.IsNullOrEmpty(ActiveHost)) {
-                        HostInfos.TryGetValue(ActiveHost, out _activeHostInfo);
-                    }
+                    _activeHostInfo = HostInfos.Values.FirstOrDefault();                    
                 }
                 return _activeHostInfo;
             }
         }
 
-        #region IPowerConsole
-        public IEnumerable<string> Hosts {
-            get { return HostProviders.Select(p => p.Metadata.HostName); }
-        }
-
-        string _activeHost;
-
-        public string ActiveHost {
-            get {
-                // If _activeHost is invalid (e.g., a previous provider is uninstalled),
-                // simply use a random available host
-                if (string.IsNullOrEmpty(_activeHost) || !HostInfos.ContainsKey(_activeHost)) {
-                    _activeHost = HostInfos.Keys.FirstOrDefault();
-                }
-
-                return _activeHost;
-            }
-            set {
-                if (!string.Equals(_activeHost, value) && HostInfos.ContainsKey(value)) {
-                    _activeHost = value;
-                    _activeHostInfo = null;
-                    ActiveHostChanged.Raise(this);
-                }
-            }
-        }
-
-        // represent the default feed
         public string ActivePackageSource {
             get {
                 HostInfo hi = ActiveHostInfo;
@@ -134,6 +103,5 @@ namespace NuGetConsole.Implementation.PowerConsole {
                 }
             }
         }
-        #endregion
     }
 }

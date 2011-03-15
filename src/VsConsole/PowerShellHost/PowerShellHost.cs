@@ -64,7 +64,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             get; private set;
         }
 
-        public Runspace Runspace {
+        protected Runspace Runspace {
             get {
                 Debug.Assert(_initialized != null);
                 return _runspace;
@@ -117,6 +117,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     _runspace = tuple.Item1;
                     _myHost = tuple.Item2;
 
+                    _initialized = true;
+
                     if (console.ShowDisclaimerHeader) {
                         DisplayDisclaimerAndHelpText();
                     }
@@ -126,8 +128,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                         ExecuteInitScripts();
                         _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
                     }
-
-                    _initialized = true;
                 }
                 catch (Exception ex) {
                     // catch all exception as we don't want it to crash VS
