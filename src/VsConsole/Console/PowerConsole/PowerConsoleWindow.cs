@@ -41,6 +41,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
         internal HostInfo ActiveHostInfo {
             get {
                 if (_activeHostInfo == null) {
+                    // we only have exactly one host, the PowerShellHost. So always choose the first and only one.
                     _activeHostInfo = HostInfos.Values.FirstOrDefault();                    
                 }
                 return _activeHostInfo;

@@ -358,7 +358,9 @@ namespace NuGetConsole.Implementation {
                         WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
                             // after the console finishes initializing the host, 
                             // we remove the "Initializing..." text block
-                            ConsoleParentPane.Children.RemoveAt(0);
+                            if (ConsoleParentPane.Children.Count > 0) {
+                                ConsoleParentPane.Children.RemoveAt(0);
+                            }
                         };
                         WpfConsole.Dispatcher.Start();
                     }

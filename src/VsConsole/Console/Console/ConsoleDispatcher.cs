@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 
 namespace NuGetConsole.Implementation.Console {
@@ -37,6 +38,10 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
+        public event EventHandler StartCompleted;
+
+        public bool IsStartCompleted { get; private set; }
+
         #region IConsoleDispatcher
 
         public void Start() {
@@ -59,27 +64,35 @@ namespace NuGetConsole.Implementation.Console {
                 
                 Task.Factory.StartNew(
                     // gives the host a chance to do initialization works before the console starts accepting user inputs
-                    () => host.Initialize(WpfConsole)
+                    () => host.Initialize(WpfConsole)  
                 ).ContinueWith(
                     task => {
+                        if (task.IsFaulted) {
+                            var exception = task.Exception;
+                            WriteError((exception.InnerException ?? exception).Message);
+                        }
+                        
                         if (host.IsCommandEnabled) {
                             _dispatcher.Start();
                         }
+
                         if (StartCompleted != null) {
                             StartCompleted(this, EventArgs.Empty);
                         }
                         IsStartCompleted = true;
                     },
                     CancellationToken.None,
-                    TaskContinuationOptions.OnlyOnRanToCompletion,
+                    TaskContinuationOptions.NotOnCanceled,
                     uiScheduler
                 );
             }
         }
 
-        public event EventHandler StartCompleted;
-
-        public bool IsStartCompleted { get; private set; }
+        private void WriteError(string message) {
+            if (WpfConsole != null) {
+                WpfConsole.Write(message + Environment.NewLine, Colors.Red, null);
+            }
+        }
 
         public void ClearConsole() {
             Debug.Assert(_dispatcher != null);

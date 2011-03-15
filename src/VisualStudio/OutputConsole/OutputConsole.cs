@@ -26,6 +26,13 @@ namespace NuGet.VisualStudio {
             _outputWindow = outputWindow;
         }
 
+        public event EventHandler StartCompleted;
+
+        public bool IsStartCompleted {
+            get;
+            private set;
+        }
+
         public IHost Host {
             get;
             set;
@@ -97,12 +104,6 @@ namespace NuGet.VisualStudio {
             }
 
             IsStartCompleted = true;
-        }
-
-        public event EventHandler StartCompleted;
-
-        public bool IsStartCompleted { 
-            get; private set; 
         }
 
         public void ClearConsole() {
