@@ -15,7 +15,13 @@ using NuGet.Resources;
 namespace NuGet {
     [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
     public class Manifest {
-        private const string SchemaResourceName = "NuGet.Authoring.nuspec.xsd";
+        private const string SchemaVersionAttributeName = "schemaVersion";
+        private const string CurrentSchemaVersion = "2";
+
+        // Mapping from schema to resource name
+        private static readonly Dictionary<string, string> Schemas = new Dictionary<string, string> {
+            { "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" , "NuGet.Authoring.nuspec.xsd" }
+        };
 
         public Manifest() {
             Metadata = new ManifestMetadata();
@@ -31,6 +37,10 @@ namespace NuGet {
         public List<ManifestFile> Files { get; set; }
 
         public void Save(Stream stream) {
+            Save(stream, stampVersion: false);
+        }
+
+        internal void Save(Stream stream, bool stampVersion) {
             // Validate before saving
             Validate(this);
 
@@ -40,7 +50,30 @@ namespace NuGet {
 
             // Need to force the namespace here again as the default in order to get the XML output clean
             var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
-            serializer.Serialize(stream, this, ns);
+
+            if (stampVersion) {
+                using (var ms = new MemoryStream()) {
+                    serializer.Serialize(ms, this, ns);
+
+                    // Reset the stream so we can read the document and add the attribute
+                    ms.Seek(0, SeekOrigin.Begin);
+                    XDocument document = XDocument.Load(ms);
+                    AddSchemaVersionAttribute(document, stream);
+                }
+            }
+            else {
+                serializer.Serialize(stream, this, ns);
+            }
+        }
+
+        private static void AddSchemaVersionAttribute(XDocument document, Stream stream) {
+            XElement metadata = GetMetadataElement(document);
+
+            if (metadata != null) {
+                metadata.SetAttributeValue(SchemaVersionAttributeName, CurrentSchemaVersion);
+            }
+
+            document.Save(stream);
         }
 
         public static Manifest ReadFrom(Stream stream) {
@@ -125,7 +158,7 @@ namespace NuGet {
 
             // Create the schema set
             var schemaSet = new XmlSchemaSet();
-            using (Stream schemaStream = GetSchemaStream()) {
+            using (Stream schemaStream = GetSchemaStream(document)) {
                 schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
             }
 
@@ -140,26 +173,55 @@ namespace NuGet {
 
         private static void CheckSchemaVersion(XDocument document) {
             // Get the metadata node and look for the schemaVersion attribute
-            XElement metadata = document.Root.Element(XName.Get("metadata", Constants.ManifestSchemaNamespace));
+            XElement metadata = GetMetadataElement(document);
+
             if (metadata != null) {
-                string schemaVersionString = metadata.GetOptionalAttributeValue("schemaVersion");
+                // Yank this attribute since we don't want to have to put it in our xsd
+                XAttribute schemaVersionAttribute = metadata.Attribute(SchemaVersionAttributeName);
 
-                // If there is any schemaVersion attribute then fail
-                if (!String.IsNullOrEmpty(schemaVersionString)) {
-                    // Get the package id for error reporting.
-                    string packageId = metadata.GetOptionalElementValue("id", Constants.ManifestSchemaNamespace);
+                if (schemaVersionAttribute != null) {
+                    schemaVersionAttribute.Remove();
+                }
 
+                // Get the package id from the metadata node
+                string packageId = GetPackageId(metadata);
+
+                // If the schema of the document doesn't match any of our known schemas
+                if (!Schemas.ContainsKey(document.Root.Name.Namespace.NamespaceName)) {
                     throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                                      NuGetResources.IncompatibleSchema,
-                                      packageId,
-                                      typeof(Manifest).Assembly.GetNameSafe().Version));
+                            String.Format(CultureInfo.CurrentCulture,
+                                          NuGetResources.IncompatibleSchema,
+                                          packageId,
+                                          typeof(Manifest).Assembly.GetNameSafe().Version));
                 }
             }
         }
 
-        private static Stream GetSchemaStream() {
-            return typeof(Manifest).Assembly.GetManifestResourceStream(SchemaResourceName);
+        private static string GetPackageId(XElement metadataElement) {
+            XName idName = XName.Get("id", metadataElement.Document.Root.Name.NamespaceName);
+            XElement element = metadataElement.Element(idName);
+
+            if (element != null) {
+                return element.Value;
+            }
+
+            return null;
+        }
+
+        private static XElement GetMetadataElement(XDocument document) {
+            // Get the metadata element this way so that we don't have to worry about the schema version
+            XName metadataName = XName.Get("metadata", document.Root.Name.Namespace.NamespaceName);
+
+            return document.Root.Element(metadataName);
+        }
+
+        private static Stream GetSchemaStream(XDocument document) {
+            string schemaResourceName;
+            if (Schemas.TryGetValue(document.Root.Name.NamespaceName, out schemaResourceName)) {
+                return typeof(Manifest).Assembly.GetManifestResourceStream(schemaResourceName);
+            }
+
+            return null;
         }
 
         private static void Validate(Manifest manifest) {

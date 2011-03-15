@@ -649,41 +649,88 @@ Enabling license acceptance requires a license url.");
         }
 
         [TestMethod]
-        public void SchemaVersionAttributeThrows() {
+        public void ReadingPackageWithUnknownSchemaThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<package>
-  <metadata schemaVersion=""1.0"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2011/03/nuspec.xsd"">
+  <metadata>
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
   </metadata>
 </package>";
 
-            // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of 'Artem.XmlProviders' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version.");
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of 'Artem.XmlProviders' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
         }
 
         [TestMethod]
-        public void SchemaVersionAttributeWithNamespaceThrows() {
+        public void ReadingPackageWithUnknownSchemaAndMissingIdThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata schemaVersion=""1.0"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2011/03/nuspec.xsd"">
+  <metadata>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+  </metadata>
+</package>";
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of '' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
+        }
+
+        [TestMethod]
+        public void ReadingPackageWithSchemaVersionAttribute() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata schemaVersion=""2.0"">
     <id>Artem.XmlProviders</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <language>en-US</language>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
   </metadata>
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of 'Artem.XmlProviders' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version.");
+            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
+
+            // Assert
+            Assert.AreEqual("Artem.XmlProviders", packageBuilder.Id);
+            Assert.AreEqual(new Version("2.5"), packageBuilder.Version);
+            Assert.AreEqual("Velio Ivanov", packageBuilder.Authors.Single());
+            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.AreEqual("en-US", packageBuilder.Language);
+        }
+
+        [TestMethod]
+        public void ReadingPackageWithSchemaVersionAttributeWithNamespace() {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata schemaVersion=""2.0"">
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <language>en-US</language>
+  </metadata>
+</package>";
+
+            // Act
+            var packageBuilder = new PackageBuilder(spec.AsStream(), null);
+
+            // Assert
+            Assert.AreEqual("Artem.XmlProviders", packageBuilder.Id);
+            Assert.AreEqual(new Version("2.5"), packageBuilder.Version);
+            Assert.AreEqual("Velio Ivanov", packageBuilder.Authors.Single());
+            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.AreEqual("en-US", packageBuilder.Language);
         }
 
         [TestMethod]
