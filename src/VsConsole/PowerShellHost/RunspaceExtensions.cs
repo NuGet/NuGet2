@@ -84,7 +84,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private static Pipeline CreatePipeline(Runspace runspace, string command, bool outputResults) {
-            Pipeline pipeline = runspace.CreatePipeline(command, true);
+            Pipeline pipeline = runspace.CreatePipeline(command, addToHistory: true);
             if (outputResults) {
                 pipeline.Commands.Add("out-default");
                 pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
