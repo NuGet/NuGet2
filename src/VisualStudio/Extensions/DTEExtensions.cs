@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using EnvDTE;
 
 namespace NuGet.VisualStudio {
@@ -10,12 +11,17 @@ namespace NuGet.VisualStudio {
 
             Project activeProject = null;
 
-            var activeProjects = (object[])dte.ActiveSolutionProjects;
-            if (activeProjects != null && activeProjects.Length > 0) {
-                Project project = activeProjects[0] as Project;
-                if (project != null) {
-                    return project;
+            try {
+                var activeProjects = (object[])dte.ActiveSolutionProjects;
+                if (activeProjects != null && activeProjects.Length > 0) {
+                    Project project = activeProjects[0] as Project;
+                    if (project != null) {
+                        return project;
+                    }
                 }
+            }
+            catch (COMException) {
+                // accessing ActiveSolutionProjects can result in a COMException if the solution explorer is hidden
             }
 
             return activeProject;

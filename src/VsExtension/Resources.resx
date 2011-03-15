@@ -120,4 +120,7 @@
   <data name="CanNotCreateWindow" xml:space="preserve">
     <value>Can not create tool window.</value>
   </data>
+  <data name="NoProjectSelected" xml:space="preserve">
+    <value>No project is selected for this operation.</value>
+  </data>
 </root>
