@@ -10,7 +10,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
-            DateTime startExecutionTime = DateTime.Now;
             SetSyncModeOnHost(true);
             try {
                 Runspace.Invoke(fullCommand, inputs, true);
@@ -24,7 +23,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 ExceptionHelper.WriteToActivityLog(e);
             }
 
-            Runspace.AddHistory(command, startExecutionTime);
             return true;
         }
     }

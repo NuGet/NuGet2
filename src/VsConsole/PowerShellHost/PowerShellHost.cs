@@ -197,11 +197,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {                
                 return ExecuteHost(fullCommand, command, inputs);
             }
-            else {
-                // Add this one piece into history. ExecuteHost adds the last piece.
-                Runspace.AddHistory(command, DateTime.Now);
-            }
-
             return false; // constructing multi-line command
         }
 

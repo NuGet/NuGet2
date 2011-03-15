@@ -84,9 +84,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private static Pipeline CreatePipeline(Runspace runspace, string command, bool outputResults) {
-            Pipeline pipeline = runspace.CreatePipeline();
-            pipeline.Commands.AddScript(command);
-
+            Pipeline pipeline = runspace.CreatePipeline(command, true);
             if (outputResults) {
                 pipeline.Commands.Add("out-default");
                 pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
@@ -119,19 +117,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         public static void ImportModule(this Runspace runspace, string modulePath) {
             runspace.Invoke("Import-Module '" + modulePath + "'", null, false);
-        }
-
-        public static void AddHistory(this Runspace runspace, string command, DateTime startExecutionTime) {
-            // PowerShell.exe doesn't add empty commands into execution history. Do the same.
-            if (!String.IsNullOrWhiteSpace(command)) {
-                DateTime endExecutionTime = DateTime.Now;
-                PSObject historyInfo = new PSObject();
-                historyInfo.Properties.Add(new PSNoteProperty("CommandLine", command), true);
-                historyInfo.Properties.Add(new PSNoteProperty("ExecutionStatus", PipelineState.Completed), true);
-                historyInfo.Properties.Add(new PSNoteProperty("StartExecutionTime", startExecutionTime), true);
-                historyInfo.Properties.Add(new PSNoteProperty("EndExecutionTime", endExecutionTime), true);
-                runspace.Invoke("$input | Add-History", new object[] { historyInfo }, outputResults: false);
-            }
         }
 
         public static void ExecuteScript(this Runspace runspace, string installPath, string scriptPath, IPackage package) {

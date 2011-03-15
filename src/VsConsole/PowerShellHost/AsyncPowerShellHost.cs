@@ -13,9 +13,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
-            DateTime startExecutionTime = DateTime.Now;
             SetSyncModeOnHost(false);
-
             try {
                 Pipeline pipeline = Runspace.InvokeAsync(fullCommand, inputs, true, (sender, e) => {
                     switch (e.PipelineStateInfo.State) {
@@ -26,7 +24,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                 ReportError(e.PipelineStateInfo.Reason);
                             }
 
-                            Runspace.AddHistory(command, startExecutionTime);
                             ExecuteEnd.Raise(this, EventArgs.Empty);
                             break;
                     }
