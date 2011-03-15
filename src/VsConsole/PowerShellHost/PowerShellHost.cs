@@ -20,6 +20,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
 
+        private IConsole _activeConsole;
         private Runspace _runspace;
         private NuGetPSHost _myHost;
         // indicates whether this host has been initialized. 
@@ -47,9 +48,15 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         /// The host is associated with a particular console on a per-command basis. 
         /// This gets set every time a command is executed on this host.
         /// </summary>
-        protected void SetActiveConsole(IConsole console) {
-            if (_myHost != null) {
-                _myHost.ActiveConsole = console;
+        protected IConsole ActiveConsole {
+            get {
+                return _activeConsole;
+            }
+            set {
+                _activeConsole = value;
+                if (_myHost != null) {
+                    _myHost.ActiveConsole = value;
+                }
             }
         }
 
@@ -97,8 +104,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Initialize(IConsole console) {
+            ActiveConsole = console;
+
             if (_initialized.HasValue) {
-                SetActiveConsole(console);
                 if (_initialized.Value && console.ShowDisclaimerHeader) {
                     DisplayDisclaimerAndHelpText();
                 }
@@ -108,8 +116,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     Tuple<Runspace, NuGetPSHost> tuple = _runspaceManager.GetRunspace(console, _name);
                     _runspace = tuple.Item1;
                     _myHost = tuple.Item2;
-
-                    SetActiveConsole(console);
 
                     if (console.ShowDisclaimerHeader) {
                         DisplayDisclaimerAndHelpText();
@@ -185,7 +191,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 throw new ArgumentNullException("command");
             }
 
-            SetActiveConsole(console);
+            ActiveConsole = console;
 
             string fullCommand;
             if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {                
@@ -220,18 +226,30 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private void DisplayDisclaimerAndHelpText() {
-            _myHost.UI.WriteLine(VsResources.Console_DisclaimerText);
-            _myHost.UI.WriteLine();
-            _myHost.UI.WriteLine(VsResources.Console_HelpText);
-            _myHost.UI.WriteLine();
+            WriteLine(VsResources.Console_DisclaimerText);
+            WriteLine();
+            WriteLine(VsResources.Console_HelpText);
+            WriteLine();
         }
 
         protected void ReportError(ErrorRecord record) {
-            _myHost.UI.WriteErrorLine(Runspace.ExtractErrorFromErrorRecord(record));
+            WriteErrorLine(Runspace.ExtractErrorFromErrorRecord(record));
         }
 
         protected void ReportError(Exception exception) {
-            _myHost.UI.WriteErrorLine((exception.InnerException ?? exception).Message);
+            WriteErrorLine((exception.InnerException ?? exception).Message);
+        }
+
+        private void WriteErrorLine(string message) {
+            if (ActiveConsole != null) {
+                ActiveConsole.Write(message + Environment.NewLine, System.Windows.Media.Colors.Red, null);
+            }
+        }
+
+        private void WriteLine(string message = "") {
+            if (ActiveConsole != null) {
+                ActiveConsole.WriteLine(message);
+            }
         }
 
         public string ActivePackageSource {
