@@ -806,3 +806,23 @@ function Test-InstallPackageWithUnboundedDependencyGetsLatest {
     Assert-SolutionPackage PackageWithUnboundedDependency 1.0
     Assert-SolutionPackage PackageWithTextFile 2.0
 }
+
+function Test-InstallPackageWithXmlTransformAndTokenReplacement {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    $p | Install-Package PackageWithXmlTransformAndTokenReplacement -Source $context.RepositoryRoot
+
+    # Assert
+    $ns = $p.Properties.Item("DefaultNamespace").Value
+    $assemblyName = $p.Properties.Item("AssemblyName").Value
+    $path = (Get-ProjectItemPath $p web.config)
+    $content = [System.IO.File]::ReadAllText($path)
+    $expectedContent = "type=`"$ns.MyModule, $assemblyName`""
+    Assert-True ($content.Contains($expectedContent))
+}
