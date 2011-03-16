@@ -48,6 +48,12 @@ namespace NuGetConsole.Implementation {
             }
         }
 
+        private IVsUIShell VsUIShell {
+            get {
+                return this.GetService<IVsUIShell>(typeof(SVsUIShell));
+            }
+        }
+
         private bool IsToolbarEnabled {
             get {
                 return _wpfConsole != null &&
@@ -361,6 +367,9 @@ namespace NuGetConsole.Implementation {
                             if (ConsoleParentPane.Children.Count > 0) {
                                 ConsoleParentPane.Children.RemoveAt(0);
                             }
+
+                            // force the UI to update the toolbar
+                            VsUIShell.UpdateCommandUI(0 /* false = update UI asynchronously */);
                         };
                         WpfConsole.Dispatcher.Start();
                     }
