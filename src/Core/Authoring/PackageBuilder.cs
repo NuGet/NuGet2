@@ -159,25 +159,6 @@ namespace NuGet {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
-            // Verify that all dependencies specify a versionSpec
-            List<PackageDependency> brokenDependencies = Dependencies.Where(d => d.VersionSpec == null)
-                                                                     .ToList();
-            if (brokenDependencies.Any()) {
-                if (brokenDependencies.Count == 1) {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                                      NuGetResources.DependencyMissingVersion,
-                                      brokenDependencies.Single().Id));
-
-                }
-                else {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                                      NuGetResources.DependenciesMissingVersion,
-                                      String.Join(", ", brokenDependencies.Select(d => d.Id))));
-                }
-            }
-
             using (Package package = Package.Open(stream, FileMode.Create)) {
                 // Validate and write the manifest
                 WriteManifest(package);
@@ -244,7 +225,7 @@ namespace NuGet {
 
             using (Stream stream = packagePart.GetStream()) {
                 Manifest manifest = Manifest.Create(this);
-                manifest.Save(stream);
+                manifest.Save(stream, stampVersion: true);
             }
         }
 

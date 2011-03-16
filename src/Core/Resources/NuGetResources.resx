@@ -261,12 +261,6 @@
   <data name="PackageAuthoring_FileNotFound" xml:space="preserve">
     <value>File not found: '{0}'.</value>
   </data>
-  <data name="DependenciesMissingVersion" xml:space="preserve">
-    <value>Dependencies '{0}' must specify a version.</value>
-  </data>
-  <data name="DependencyMissingVersion" xml:space="preserve">
-    <value>Dependency '{0}' must specify a version.</value>
-  </data>
   <data name="InvalidPackageId" xml:space="preserve">
     <value>Package id '{0}' is invalid.</value>
   </data>
@@ -277,7 +271,7 @@
     <value>The package source named '{0}' is either invalid or not available and thus is currently unreachable.</value>
   </data>
   <data name="IncompatibleSchema" xml:space="preserve">
-    <value>The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version.</value>
+    <value>The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.</value>
   </data>
   <data name="InvalidFrameworkNameFormat" xml:space="preserve">
     <value>Invalid framework name format. Expected {framework}{version}-{profile}.</value>

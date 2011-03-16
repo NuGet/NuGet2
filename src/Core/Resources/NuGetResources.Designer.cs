@@ -178,29 +178,11 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Dependencies &apos;{0}&apos; must specify a version..
-        /// </summary>
-        internal static string DependenciesMissingVersion {
-            get {
-                return ResourceManager.GetString("DependenciesMissingVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Dependency &apos;{0}&apos; has an invalid version..
         /// </summary>
         internal static string DependencyHasInvalidVersion {
             get {
                 return ResourceManager.GetString("DependencyHasInvalidVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Dependency &apos;{0}&apos; must specify a version..
-        /// </summary>
-        internal static string DependencyMissingVersion {
-            get {
-                return ResourceManager.GetString("DependencyMissingVersion", resourceCulture);
             }
         }
         
@@ -259,7 +241,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version..
+        ///   Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
         /// </summary>
         internal static string IncompatibleSchema {
             get {

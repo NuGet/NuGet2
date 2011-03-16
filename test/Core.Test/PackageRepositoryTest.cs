@@ -194,6 +194,27 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void FindDependencyPicksHighestVersionIfNotSpecified() {
+            // Arrange
+            var repository = new MockPackageRepository() {
+                PackageUtility.CreatePackage("B", "2.0"),
+                PackageUtility.CreatePackage("B", "1.0"),
+                PackageUtility.CreatePackage("B", "1.0.1"),
+                PackageUtility.CreatePackage("B", "1.0.9"),
+                PackageUtility.CreatePackage("B", "1.1")
+            };
+
+            var dependency = new PackageDependency("B");
+
+            // Act
+            IPackage package = repository.FindDependency(dependency);
+
+            // Assert
+            Assert.AreEqual("B", package.Id);
+            Assert.AreEqual(new Version("2.0"), package.Version);
+        }
+
+        [TestMethod]
         public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision() {
             // Arrange
             var repository = new MockPackageRepository() {

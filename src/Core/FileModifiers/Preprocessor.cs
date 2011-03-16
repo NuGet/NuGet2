@@ -25,7 +25,7 @@ namespace NuGet {
             FileSystemExtensions.DeleteFileSafe(projectSystem, targetPath, streamFactory);
         }
         
-        private static string Process(IPackageFile file, IProjectSystem projectSystem) {
+        internal static string Process(IPackageFile file, IProjectSystem projectSystem) {
             string text = file.GetStream().ReadToEnd();
             return _tokenRegex.Replace(text, match => ReplaceToken(match, projectSystem));
         }

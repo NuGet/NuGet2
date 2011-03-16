@@ -262,3 +262,26 @@ function Test-UninstallPackageWorksWithPackagesHavingSameNames {
     # Assert
     $all | % { Assert-Null (Get-ProjectPackage $_ elmah) }
 }
+
+function Test-UninstallPackageWithXmlTransformAndTokenReplacement {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+    $p | Install-Package PackageWithXmlTransformAndTokenReplacement -Source $context.RepositoryRoot
+
+    # Assert
+    $ns = $p.Properties.Item("DefaultNamespace").Value
+    $assemblyName = $p.Properties.Item("AssemblyName").Value
+    $path = (Get-ProjectItemPath $p web.config)
+    $content = [System.IO.File]::ReadAllText($path)
+    $expectedContent = "type=`"$ns.MyModule, $assemblyName`""
+    Assert-True ($content.Contains($expectedContent))
+
+    # Act
+    $p | Uninstall-Package PackageWithXmlTransformAndTokenReplacement
+    $content = [System.IO.File]::ReadAllText($path)
+    Assert-False ($content.Contains($expectedContent))
+}
