@@ -40,39 +40,6 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void BuildingPackageFailsIfMoreThanOneDependencyVersionIsNotSpecified() {
-            // Arrange
-            var builder = new PackageBuilder() {
-                Id = "A",
-                Version = new Version("1.0"),
-                Description = "Description",
-            };
-            builder.Authors.Add("David");
-            builder.Dependencies.Add(new PackageDependency("B"));
-            builder.Dependencies.Add(PackageDependency.CreateDependency("A", "1.0"));
-            builder.Dependencies.Add(new PackageDependency("C"));
-
-            // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "Dependencies 'B, C' must specify a version.");
-        }
-
-        [TestMethod]
-        public void BuildingPackageFailsIfSingleDependencyVersionIsNotSpecified() {
-            // Arrange
-            var builder = new PackageBuilder() {
-                Id = "A",
-                Version = new Version("1.0"),
-                Description = "Description",
-            };
-            builder.Authors.Add("David");
-            builder.Dependencies.Add(new PackageDependency("B"));
-            builder.Dependencies.Add(PackageDependency.CreateDependency("A", "1.0"));
-
-            // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "Dependency 'B' must specify a version.");
-        }
-
-        [TestMethod]
         public void CreatePackageTrimsExtraWhitespace() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {

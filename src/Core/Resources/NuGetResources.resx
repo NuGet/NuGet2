@@ -261,12 +261,6 @@
   <data name="PackageAuthoring_FileNotFound" xml:space="preserve">
     <value>File not found: '{0}'.</value>
   </data>
-  <data name="DependenciesMissingVersion" xml:space="preserve">
-    <value>Dependencies '{0}' must specify a version.</value>
-  </data>
-  <data name="DependencyMissingVersion" xml:space="preserve">
-    <value>Dependency '{0}' must specify a version.</value>
-  </data>
   <data name="InvalidPackageId" xml:space="preserve">
     <value>Package id '{0}' is invalid.</value>
   </data>

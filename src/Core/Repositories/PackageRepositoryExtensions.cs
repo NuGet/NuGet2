@@ -135,6 +135,11 @@ namespace NuGet {
             if (dependency.VersionSpec != null) {
                 packages = packages.FindByVersion(dependency.VersionSpec);
             }
+            else {
+                // BUG 840: If no version info was specified then pick the latest
+                return packages.OrderByDescending(p => p.Version)
+                               .FirstOrDefault();
+            }
 
             if (packages.Any()) {
                 // We want to take the biggest build and revision number for the smallest

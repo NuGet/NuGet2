@@ -789,3 +789,20 @@ function Test-InstallingPackageDoesNotOverwriteFileIfExistsOnDiskButNotInProject
     Assert-Null (Get-ProjectItem $p foo) "foo exists in the project!"
     Assert-AreEqual "file content" (Get-Content $fooPath)
 }
+
+function Test-InstallPackageWithUnboundedDependencyGetsLatest {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    $p | Install-Package PackageWithUnboundedDependency -Source $context.RepositoryRoot
+
+    Assert-Package $p PackageWithUnboundedDependency 1.0
+    Assert-Package $p PackageWithTextFile 2.0
+    Assert-SolutionPackage PackageWithUnboundedDependency 1.0
+    Assert-SolutionPackage PackageWithTextFile 2.0
+}
