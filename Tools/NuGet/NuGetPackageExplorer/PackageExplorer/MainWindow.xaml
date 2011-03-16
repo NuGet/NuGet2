@@ -29,6 +29,7 @@
             <viewmodel:DisabledCommand x:Key="DisabledCommand" />
 
             <self:PackagePartToBoolConverter x:Key="PackagePartConverter" />
+            <self:TruncateFilePathConverter x:Key="TruncatePathConverter" />
 
             <ContextMenu x:Key="SharedContextMenu">
                 <MenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" FontWeight="SemiBold" />
@@ -270,6 +271,24 @@
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <Separator />
+                <MenuItem Header="_Recent Files" x:Name="RecentFilesMenuItem" Visibility="{Binding Files.Count, Converter={StaticResource countConverter}}" ItemsSource="{Binding Files}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="{x:Type MenuItem}">
+                            <EventSetter Event="Click" Handler="RecentFileMenuItem_Click" />
+                            <Setter Property="Header" Value="{Binding Path,Converter={StaticResource TruncatePathConverter}, FallbackValue='Clear Recent Files List'}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                    <Setter Property="Icon">
+                                        <Setter.Value>
+                                            <Image Source="/NuGetPackageExplorer;component/Images/Delete.png" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
+                <Separator Visibility="{Binding Visibility, ElementName=RecentFilesMenuItem, Mode=OneWay}" />
                 <MenuItem Header="E_xit" Click="ExitMenuItem_Click" />
             </self:GrayscaleMenuItem>
 

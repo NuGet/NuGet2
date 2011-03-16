@@ -4,6 +4,7 @@ using System.Net;
 using System.Windows;
 using System.Windows.Media;
 using NuGet;
+using System.Windows.Threading;
 
 namespace PackageExplorer {
     /// <summary>
@@ -11,18 +12,29 @@ namespace PackageExplorer {
     /// </summary>
     public partial class DownloadProgressWindow : DialogWithNoMinimizeAndMaximize {
 
-        private readonly DataServicePackage _package;
+        private readonly Uri _downloadUri;
         private WebClient _client;
 
-        public DownloadProgressWindow(DataServicePackage package) {
+        public DownloadProgressWindow(Uri downloadUri, string packageName) {
+            if (downloadUri == null)
+            {
+                throw new ArgumentNullException("downloadUri");
+            }
+
             InitializeComponent();
 
-            Title = "Downloading package " + package;
-            _package = package;
+            Title = "Downloading package " + packageName;
+            _downloadUri = downloadUri;
+        }
+
+        public string DownloadedFilePath
+        {
+            get;
+            private set;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e) {
-            DownloadData(_package.DownloadUrl);
+            Dispatcher.BeginInvoke(new Action<Uri>(DownloadData), DispatcherPriority.Background, _downloadUri);
         }
 
         private void DownloadData(Uri uri) {
@@ -33,8 +45,7 @@ namespace PackageExplorer {
                         OnError(e.Error);
                     }
                     else {
-                        string storedFile = SaveResultToTempFile(e.Result);
-                        _package.SetData(storedFile);
+                        DownloadedFilePath = SaveResultToTempFile(e.Result);
                         OnCompleted();
                     }
                 }

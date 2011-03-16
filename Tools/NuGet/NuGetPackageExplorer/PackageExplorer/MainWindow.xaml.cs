@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows;
@@ -19,8 +20,12 @@ namespace PackageExplorer {
     /// </summary>
     public partial class MainWindow : Window {
 
+        private MruManager _mruManager;
+
         public MainWindow() {
             InitializeComponent();
+
+            RecentFilesMenuItem.DataContext = _mruManager = new MruManager(this);
         }
 
         protected override void OnSourceInitialized(EventArgs e) {
@@ -33,6 +38,11 @@ namespace PackageExplorer {
         }
 
         internal void OpenLocalPackage(string packagePath) {
+            if (!File.Exists(packagePath))
+            {
+                MessageBox.Show("File not found at " + packagePath, StringResources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             PackageSourceItem.SetCurrentValue(ContentControl.ContentProperty, "Loading " + packagePath + "...");
             Dispatcher.BeginInvoke(new Action<string>(OpenLocalPackageCore), DispatcherPriority.Loaded, packagePath);
         }
@@ -52,13 +62,14 @@ namespace PackageExplorer {
             }
 
             if (package != null) {
-                LoadPackage(package, packagePath);
+                LoadPackage(package, packagePath, PackageType.ZipPackge);
             }
         }
 
-        private void LoadPackage(IPackage package, string packagePath) {
+        private void LoadPackage(IPackage package, string packagePath, PackageType packageType) {
             if (package != null) {
                 DataContext = new PackageViewModel(package, packagePath);
+                _mruManager.NotifyFileAdded(packagePath, package.ToString(), packageType);
             }
         }
 
@@ -110,14 +121,16 @@ namespace PackageExplorer {
             var dialog = new PackageChooserDialog() { Owner = this };
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
-                if (dialog.SelectedPackage != null) {
-                    var progressWindow = new DownloadProgressWindow(dialog.SelectedPackage) {
+                var selectedPackage = dialog.SelectedPackage;
+                if (selectedPackage != null) {
+                    var progressWindow = new DownloadProgressWindow(selectedPackage.DownloadUrl, selectedPackage.ToString()) {
                         Owner = this
                     };
 
                     result = progressWindow.ShowDialog();
                     if (result ?? false) {
-                        LoadPackage(dialog.SelectedPackage, dialog.SelectedPackage.DownloadUrl.ToString());
+                        selectedPackage.SetData(progressWindow.DownloadedFilePath);
+                        LoadPackage(selectedPackage, selectedPackage.DownloadUrl.ToString(), PackageType.DataServicePackage);
                     }
                 }
             }
@@ -570,6 +583,48 @@ namespace PackageExplorer {
 
         private void OnFileContentChanged(object sender, TextChangedEventArgs e) {
             FileContent.ScrollToLine(0);
+        }
+
+        private void RecentFileMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            bool canceled = AskToSaveCurrentFile();
+            if (canceled)
+            {
+                return;
+            }
+
+            MenuItem menuItem = (MenuItem)sender;
+            var mruItem = (MruItem)menuItem.DataContext;
+            if (mruItem == null)
+            {
+                _mruManager.Clear();
+            }
+            else
+            {
+                if (mruItem.PackageType == PackageType.ZipPackge)
+                {
+                    OpenLocalPackage(mruItem.Path);
+                }
+                else
+                {
+                    DownloadAndOpenDataServicePackage(mruItem);
+                }
+            }
+        }
+
+        private void DownloadAndOpenDataServicePackage(MruItem item)
+        {
+            Uri downloadUrl;
+            if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl))
+            {
+                var progressWindow = new DownloadProgressWindow(downloadUrl, item.PackageName) { Owner = this };
+                var result = progressWindow.ShowDialog();
+                if (result ?? false)
+                {
+                    ZipPackage package = new ZipPackage(progressWindow.DownloadedFilePath);
+                    LoadPackage(package, item.Path, PackageType.DataServicePackage);
+                }
+            }
         }
     }
 }

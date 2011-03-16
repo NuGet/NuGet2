@@ -128,6 +128,7 @@
     <Compile Include="Converters\FrameworkNameConverter.cs" />
     <Compile Include="Converters\MultiStringToBoolConverter.cs" />
     <Compile Include="Converters\NullToBoolConverter.cs" />
+    <Compile Include="Converters\TruncateFilePathConverter.cs" />
     <Compile Include="Converters\UpperCaseConverter.cs" />
     <Compile Include="Converters\UriConverter.cs" />
     <Compile Include="Converters\VersionConverter.cs" />
@@ -140,6 +141,8 @@
     <Compile Include="GrayscaleButton.cs" />
     <Compile Include="GrayscaleImage.cs" />
     <Compile Include="GrayscaleMenuItem.cs" />
+    <Compile Include="MruItem.cs" />
+    <Compile Include="MruManager.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">
       <DependentUpon>PackageChooserDialog.xaml</DependentUpon>
