@@ -260,8 +260,7 @@ namespace PackageExplorerViewModel {
         public bool OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName) {
 
             var filter = "All files (*.*)|*.*";
-            if (addPackageExtension)
-            {
+            if (addPackageExtension) {
                 filter = "NuGet package file (*.nupkg)|*.nupkg|" + filter;
             }
             var dialog = new SaveFileDialog() {
@@ -288,16 +287,13 @@ namespace PackageExplorerViewModel {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public Stream GetCurrentPackageStream()
-        {
+        public Stream GetCurrentPackageStream() {
             string tempFile = Path.GetTempFileName();
             PackageHelper.SavePackage(PackageMetadata, GetFiles(), tempFile, false);
-            if (File.Exists(tempFile))
-            {
+            if (File.Exists(tempFile)) {
                 return File.OpenRead(tempFile);
             }
-            else
-            {
+            else {
                 return null;
             }
         }

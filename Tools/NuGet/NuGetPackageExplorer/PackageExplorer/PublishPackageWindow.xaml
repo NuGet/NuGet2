@@ -22,9 +22,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        
-        <self:AndLogicConverter x:Key="andConverter" />
-        
     </Window.Resources>
     
     <Grid Margin="10">        

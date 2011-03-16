@@ -15,6 +15,7 @@
         <self:UppercaseConverter x:Key="upperCaseConverter" />
         <self:FrameworkNameConverter x:Key="frameworkConverter" />
         <self:NullToBoolConverter x:Key="nullToBoolConverter" />
+        <self:AndLogicConverter x:Key="andConverter" />
 
         <Style TargetType="{x:Type Image}" x:Key="ImageStyleBase">
             <Setter Property="Width" Value="16" />

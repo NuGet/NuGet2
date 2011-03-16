@@ -33,6 +33,20 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        private bool _isEditable = true;
+
+        public bool IsEditable {
+            get {
+                return _isEditable;
+            }
+            set {
+                if (_isEditable != value) {
+                    _isEditable = value;
+                    OnPropertyChanged("IsEditable");
+                }
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private IPackageRepository PackageRepository {
             get {
@@ -153,6 +167,7 @@ namespace PackageExplorerViewModel {
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             StatusContent = "Loading...";
+            IsEditable = false;
 
             Task.Factory.StartNew<Tuple<IList<IPackage>, int>>(QueryPackages, subQuery).ContinueWith(
                 result => {
@@ -167,7 +182,8 @@ namespace PackageExplorerViewModel {
                         StatusContent = String.Empty;
                         OnPropertyChanged("SortDirection");
                     }
-                    
+
+                    IsEditable = true;
                 },
                 uiScheduler);
         }

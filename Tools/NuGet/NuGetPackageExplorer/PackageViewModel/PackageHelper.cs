@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NuGet;
 using System.IO;
+using System.Linq;
+using NuGet;
 
-namespace PackageExplorerViewModel
-{
-    internal static class PackageHelper
-    {
-        public static void SavePackage(IPackageMetadata packageMetadata, IEnumerable<IPackageFile> files, string targetFilePath, bool useTempFile)
-        {
+namespace PackageExplorerViewModel {
+    internal static class PackageHelper {
+        public static void SavePackage(IPackageMetadata packageMetadata, IEnumerable<IPackageFile> files, string targetFilePath, bool useTempFile) {
             var builder = new PackageBuilder();
             // set metadata
             CopyMetadata(packageMetadata, builder);
@@ -20,36 +16,28 @@ namespace PackageExplorerViewModel
             // create package in the temprary file first in case the operation fails which would
             // override existing file with a 0-byte file.
             string fileNameToUse = useTempFile ? Path.GetTempFileName() : targetFilePath;
-            try
-            {
-                using (Stream stream = File.Create(fileNameToUse))
-                {
+            try {
+                using (Stream stream = File.Create(fileNameToUse)) {
                     builder.Save(stream);
                 }
 
-                if (useTempFile)
-                {
+                if (useTempFile) {
                     File.Copy(fileNameToUse, targetFilePath, true);
                 }
             }
-            finally
-            {
-                try
-                {
-                    if (useTempFile && File.Exists(fileNameToUse))
-                    {
+            finally {
+                try {
+                    if (useTempFile && File.Exists(fileNameToUse)) {
                         File.Delete(fileNameToUse);
                     }
                 }
-                catch
-                {
+                catch {
                     // don't care if this fails
                 }
             }
         }
 
-        private static void CopyMetadata(IPackageMetadata source, PackageBuilder builder)
-        {
+        private static void CopyMetadata(IPackageMetadata source, PackageBuilder builder) {
             builder.Id = source.Id;
             builder.Version = source.Version;
             builder.Title = source.Title;
@@ -70,10 +58,8 @@ namespace PackageExplorerViewModel
         /// <summary>
         /// Tags come in this format. tag1 tag2 tag3 etc..
         /// </summary>
-        private static IEnumerable<string> ParseTags(string tags)
-        {
-            if (tags == null)
-            {
+        private static IEnumerable<string> ParseTags(string tags) {
+            if (tags == null) {
                 return Enumerable.Empty<string>();
             }
             return tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

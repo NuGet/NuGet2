@@ -61,18 +61,14 @@
                             <StackPanel Orientation="Horizontal">
                                 <ScrollViewer x:Name="PART_ContentHost"
                                       Width="150"
-                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                <Image Grid.Column="1" Source="/NuGetPackageExplorer;component/Images/Search.png" />
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                <Image IsEnabled="{TemplateBinding IsEnabled}" Grid.Column="1" Source="/NuGetPackageExplorer;component/Images/Search.png" />
                             </StackPanel>                            
                         </theme:ListBoxChrome>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled"
-                                 Value="false">
-                                <Setter TargetName="Bd"
-                                    Property="Background"
-                                    Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                                <Setter Property="Foreground"
-                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -82,7 +78,6 @@
     </Window.Resources>
 
     <Grid Margin="10">
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -104,8 +99,15 @@
             </Grid.ColumnDefinitions>
             
             <Label Content="_Package source:" Target="{Binding ElementName=PackageSourceBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="PackageSourceBox" VerticalContentAlignment="Center" Grid.Column="1" Text="{Binding PackageSource, Mode=OneWay}" Margin="4,0" />
-            <Button Grid.Column="2" Content="_Apply" HorizontalAlignment="Center" Padding="10,0" IsEnabled="{Binding Text, ElementName=PackageSourceBox, Converter={StaticResource nullToBoolConverter}}" Command="{Binding ChangePackageSourceCommand}" CommandParameter="{Binding Text, ElementName=PackageSourceBox}" />
+            <TextBox x:Name="PackageSourceBox" IsEnabled="{Binding IsEditable}" VerticalContentAlignment="Center" Grid.Column="1" Text="{Binding PackageSource, Mode=OneWay}" Margin="4,0" />
+            <Button Grid.Column="2" Content="_Apply" HorizontalAlignment="Center" Padding="10,0" Command="{Binding ChangePackageSourceCommand}" CommandParameter="{Binding Text, ElementName=PackageSourceBox}">
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource andConverter}">
+                        <Binding Path="Text" ElementName="PackageSourceBox" Converter="{StaticResource nullToBoolConverter}" />
+                        <Binding Path="IsEditable" />
+                    </MultiBinding>
+                </Button.IsEnabled>
+            </Button>
         </Grid>
 
         <!-- navigation buttons -->
@@ -138,7 +140,18 @@
         </StackPanel>
 
         <!-- search box -->
-        <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" ToolTipService.ToolTip="Search for package" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Padding="2,2,3,2" KeyDown="SearchBox_KeyDown" Tag="{Binding SearchCommand}" VerticalAlignment="Center">
+        <TextBox 
+            x:Name="SearchBox" 
+            Style="{StaticResource SearchBoxStyle}" 
+            ToolTipService.ToolTip="Search for package" 
+            Grid.Column="1" 
+            Grid.Row="1" 
+            HorizontalAlignment="Right" 
+            Padding="2,2,3,2" 
+            KeyDown="SearchBox_KeyDown" 
+            IsEnabled="{Binding IsEditable}"
+            Tag="{Binding SearchCommand}" 
+            VerticalAlignment="Center">
         </TextBox>
 
         <!-- package list view -->

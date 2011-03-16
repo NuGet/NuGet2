@@ -81,10 +81,14 @@ namespace PackageExplorer {
             }
 
             if (searchTerm != null) {
-                ICommand searchCommand = (ICommand)SearchBox.Tag;
-                searchCommand.Execute(searchTerm);
+                Search(searchTerm);
                 e.Handled = true;
             }
+        }
+
+        private void Search(string searchTerm) {
+            ICommand searchCommand = (ICommand)SearchBox.Tag;
+            searchCommand.Execute(searchTerm);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
