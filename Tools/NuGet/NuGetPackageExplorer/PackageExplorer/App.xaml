@@ -125,5 +125,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+        </Style>
     </Application.Resources>
 </Application>
