@@ -100,6 +100,10 @@ namespace PackageExplorerViewModel {
         }
 
         public void Delete() {
+            bool confirm = PackageViewModel.MessageBox.Confirm("Are you sure you want to delete it?");
+            if (!confirm) {
+                return;
+            }
 
             if (Parent != null) {
                 Parent.Children.Remove(this);
