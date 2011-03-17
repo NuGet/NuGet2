@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -82,10 +83,13 @@ namespace NuGet {
         private static void AssignValue(PropertyInfo property, ICommand command, string option, object value) {
             try {
                 var genericCollection = CommandLineUtility.GetGenericCollectionType(property.PropertyType);
-
-                if (genericCollection != null) {
+                if (genericCollection != null && (value as string) != null) {
+                    var stringValue = value as string;
+                    Debug.Assert(stringValue != null);
                     var method = genericCollection.GetMethod("Add");
-                    method.Invoke(property.GetValue(command, null), new[] { value });
+                    foreach (var item in stringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
+                        method.Invoke(property.GetValue(command, null), new object[] { item });
+                    }
                 }
                 else {
                     property.SetValue(command, CommandLineUtility.ChangeType(value, property.PropertyType), null);

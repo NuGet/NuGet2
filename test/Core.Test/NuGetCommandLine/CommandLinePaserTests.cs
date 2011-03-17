@@ -306,7 +306,28 @@ namespace NuGet.Test.NuGetCommandLine {
             Assert.AreEqual(command.ListProperty[1], "Val2");
             Assert.AreEqual(command.ListProperty[2], "Val3");
         }
-        
+
+        [TestMethod]
+        public void ExtractOptionsSplitsValueBySemiColorForCollectionOption() {
+            // Arrange
+            var cmdMgr = new CommandManager();
+            var command = new MockCommandWithMultiple();
+            var arguments = "/ListProperty Val1 /RegularProp RegularPropValue /ListProperty Val2;Val3;Val4  /ListProperty Val5";
+            var parser = new CommandLineParser(cmdMgr);
+
+            // Act
+            parser.ExtractOptions(command, arguments.Split().AsEnumerable().GetEnumerator());
+
+            // Assert
+            Assert.AreEqual(command.RegularProp, "RegularPropValue");
+            Assert.AreEqual(command.ListProperty.Count, 5);
+            Assert.AreEqual(command.ListProperty[0], "Val1");
+            Assert.AreEqual(command.ListProperty[1], "Val2");
+            Assert.AreEqual(command.ListProperty[2], "Val3");
+            Assert.AreEqual(command.ListProperty[3], "Val4");
+            Assert.AreEqual(command.ListProperty[4], "Val5");
+        }
+
 
         private class MockCommand : ICommand {
 
