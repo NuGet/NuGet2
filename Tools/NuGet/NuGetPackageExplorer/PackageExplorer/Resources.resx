@@ -142,7 +142,7 @@
     <value>No Dependencies</value>
   </data>
   <data name="Dialog_OpenFileFilter" xml:space="preserve">
-    <value>NuGet package file (*.nupkg)|*.nupkg</value>
+    <value>All supported files|*.nupkg;*.nuspec|NuGet package file (*.nupkg)|*.nupkg|NuSpec file (*.nuspec)|*.nuspec</value>
   </data>
   <data name="Dialog_OwnersLabel" xml:space="preserve">
     <value>Owners:</value>

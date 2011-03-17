@@ -25,7 +25,6 @@ namespace NuGet {
             }
         }
 
-
         public PackageBuilder(Stream stream, string basePath)
             : this() {
             ReadManifest(stream, basePath);
@@ -219,7 +218,7 @@ namespace NuGet {
 
             Dependencies.AddRange(metadata.Dependencies);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
-
+            
             // If there's no base path then ignore the files node
             if (basePath != null) {
                 if (manifest.Files == null || !manifest.Files.Any()) {
@@ -298,6 +297,11 @@ namespace NuGet {
             Debug.Assert(tags != null);
             return from tag in tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                    select tag.Trim();
+        }
+
+        public IPackage Build()
+        {
+            return new SimplePackage(this);
         }
     }
 }

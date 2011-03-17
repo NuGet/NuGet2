@@ -139,6 +139,7 @@
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FileUtility.cs" />
     <Compile Include="GrayscaleButton.cs" />
     <Compile Include="GrayscaleImage.cs" />
     <Compile Include="GrayscaleMenuItem.cs" />

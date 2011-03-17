@@ -133,7 +133,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuGet package file (*.nupkg)|*.nupkg.
+        ///   Looks up a localized string similar to All supported files|*.nupkg;*.nuspec|NuGet package file (*.nupkg)|*.nupkg|NuSpec file (*.nuspec)|*.nuspec.
         /// </summary>
         public static string Dialog_OpenFileFilter {
             get {

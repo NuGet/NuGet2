@@ -50,7 +50,7 @@ namespace PackageExplorer {
         }
 
         private static bool LoadFile(MainWindow window, string file) {
-            if (File.Exists(file) && file.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase)) {
+            if (FileUtility.IsSupportedFile(file) && File.Exists(file)) {
                 window.OpenLocalPackage(file);
                 return true;
             }

@@ -68,10 +68,20 @@ namespace PackageExplorer {
             Dispatcher.BeginInvoke(new Action<string>(OpenLocalPackageCore), DispatcherPriority.Loaded, packagePath);
         }
 
-        internal void OpenLocalPackageCore(string packagePath) {
-            ZipPackage package = null;
+        private void OpenLocalPackageCore(string packagePath) {
+            IPackage package = null;
+            
             try {
-                package = new ZipPackage(packagePath);
+                string extension = Path.GetExtension(packagePath);
+                if (extension.Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    package = new ZipPackage(packagePath);
+                }
+                else if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    PackageBuilder builder = new PackageBuilder(packagePath);
+                    package = builder.Build();
+                }
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message, MessageLevel.Error);
@@ -86,8 +96,10 @@ namespace PackageExplorer {
         private void LoadPackage(IPackage package, string packagePath, PackageType packageType) {
             if (package != null) {
                 DataContext = PackageViewModelFactory.CreateViewModel(package, packagePath);
-                _mruManager.NotifyFileAdded(packagePath, package.ToString(), packageType);
-
+                if (!String.IsNullOrEmpty(packagePath))
+                {
+                    _mruManager.NotifyFileAdded(packagePath, package.ToString(), packageType);
+                }
             }
         }
 
@@ -109,7 +121,7 @@ namespace PackageExplorer {
             OpenFileDialog dialog = new OpenFileDialog() {
                 CheckFileExists = true,
                 CheckPathExists = true,
-                DefaultExt = Constants.PackageExtension,
+                FilterIndex = 0,
                 Multiselect = false,
                 ValidateNames = true,
                 Filter = StringResources.Dialog_OpenFileFilter
@@ -161,7 +173,7 @@ namespace PackageExplorer {
                 string[] filenames = value as string[];
                 if (filenames != null && filenames.Length > 0) {
                     string firstFile = filenames[0];
-                    if (firstFile.EndsWith(Constants.PackageExtension)) {
+                    if (FileUtility.IsSupportedFile(firstFile)) {
                         e.Effects = DragDropEffects.Copy;
                         e.Handled = true;
                         return;
@@ -179,10 +191,7 @@ namespace PackageExplorer {
                 object value = data.GetData(DataFormats.FileDrop);
                 string[] filenames = value as string[];
                 if (filenames != null && filenames.Length > 0) {
-
-                    string firstFile = filenames.FirstOrDefault(
-                        f => f.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase));
-
+                    string firstFile = filenames.FirstOrDefault(f => FileUtility.IsSupportedFile(f));
                     if (firstFile != null) {
                         e.Handled = true;
 
@@ -570,7 +579,7 @@ namespace PackageExplorer {
             BrowseForFolder dialog = new BrowseForFolder();
             string rootPath = dialog.SelectFolder(
                 "Choose a folder to export package to:",
-                "",
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 new System.Windows.Interop.WindowInteropHelper(this).Handle);
 
             if (!String.IsNullOrEmpty(rootPath)) {
