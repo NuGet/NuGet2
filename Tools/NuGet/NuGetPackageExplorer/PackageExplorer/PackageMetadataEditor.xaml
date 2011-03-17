@@ -160,7 +160,7 @@
 
                 <!-- Language -->
                 <Label Grid.Row="12" Grid.Column="0" Target="LanguageBox" Style="{StaticResource LabelStyle}" Content="La_nguage" />
-                <ComboBox Grid.Row="12" Grid.Column="1" x:Name="LanguageBox" SelectedItem="{Binding PackageMetadata.Language, FallbackValue=en-US}" HorizontalAlignment="Left" Style="{StaticResource ComboBoxStyle}" />
+                <ComboBox Grid.Row="12" Grid.Column="1" x:Name="LanguageBox" Text="{Binding PackageMetadata.Language}" IsEditable="true" IsReadOnly="False" Width="120" HorizontalAlignment="Left" Style="{StaticResource ComboBoxStyle}" />
 
                 <!-- Tags -->
                 <Label Grid.Row="13" Grid.Column="0" Target="TagsBox" Style="{StaticResource LabelStyle}" Content="Ta_gs" />
