@@ -6,7 +6,7 @@ using System.Text;
 namespace PackageExplorerViewModel.Types
 {
     public enum PackageType {
-        ZipPackage,
+        LocalPackage,
         DataServicePackage
     }
 

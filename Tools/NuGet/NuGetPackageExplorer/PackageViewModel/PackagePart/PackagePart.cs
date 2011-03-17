@@ -100,7 +100,7 @@ namespace PackageExplorerViewModel {
         }
 
         public void Delete() {
-            bool confirm = PackageViewModel.MessageBox.Confirm("Are you sure you want to delete it?");
+            bool confirm = PackageViewModel.MessageBox.Confirm(Resources.ConfirmToDeleteContent, isWarning: true);
             if (!confirm) {
                 return;
             }

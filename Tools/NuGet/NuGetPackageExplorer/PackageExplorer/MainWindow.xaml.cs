@@ -89,7 +89,7 @@ namespace PackageExplorer {
             }
 
             if (package != null) {
-                LoadPackage(package, packagePath, PackageType.ZipPackage);
+                LoadPackage(package, packagePath, PackageType.LocalPackage);
             }
         }
 
@@ -277,7 +277,7 @@ namespace PackageExplorer {
             if (!isCanceled) {
                 try {
                     SaveSettings();
-                    _mruManager.OnParentWindowClosed();
+                    _mruManager.OnApplicationExit();
                 }
                 catch (Exception) { }
             }
@@ -609,7 +609,7 @@ namespace PackageExplorer {
                 _mruManager.Clear();
             }
             else {
-                if (mruItem.PackageType == PackageType.ZipPackage) {
+                if (mruItem.PackageType == PackageType.LocalPackage) {
                     OpenLocalPackage(mruItem.Path);
                 }
                 else {

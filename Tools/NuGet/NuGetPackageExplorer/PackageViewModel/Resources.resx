@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ConfirmToDeleteContent" xml:space="preserve">
+    <value>Are you sure you want to delete it?</value>
+  </data>
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
+  </data>
+  <data name="OpenExecutableScriptWarning" xml:space="preserve">
+    <value>Opening this file can potentially harm your computer. Do you want to continue?</value>
   </data>
   <data name="PackageHasNoFile" xml:space="preserve">
     <value>There are no contents or dependencies in the package.</value>

@@ -12,14 +12,17 @@ namespace PackageExplorer {
         }
 
         public bool Confirm(string message) {
-            MessageBoxResult result = MessageBox.Show(
-                message, 
-                Resources.Resources.Dialog_Title, 
-                MessageBoxButton.YesNo, 
-                MessageBoxImage.Question);
-            return result == MessageBoxResult.Yes;
+            return Confirm(message, false);
         }
 
+        public bool Confirm(string message, bool isWarning) {
+            MessageBoxResult result = MessageBox.Show(
+                message,
+                Resources.Resources.Dialog_Title,
+                MessageBoxButton.YesNo,
+                isWarning ? MessageBoxImage.Warning : MessageBoxImage.Question);
+            return result == MessageBoxResult.Yes;
+        }
 
         public bool? ConfirmWithCancel(string message) {
             MessageBoxResult result = MessageBox.Show(

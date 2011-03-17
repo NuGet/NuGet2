@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using PackageExplorerViewModel.Types;
-using System.Collections.Generic;
 
 namespace PackageExplorerViewModel {
 
@@ -34,7 +33,7 @@ namespace PackageExplorerViewModel {
             _settingsManager = settingsManager;
         }
 
-        public void OnParentWindowClosed() {
+        public void OnApplicationExit() {
             List<string> sc = new List<string>();
             foreach (var item in _files) {
                 if (item != null) {
