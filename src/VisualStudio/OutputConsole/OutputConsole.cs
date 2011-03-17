@@ -10,7 +10,6 @@ namespace NuGet.VisualStudio {
     /// It sends PowerShell host outputs to the VS Output tool window.
     /// </summary>
     internal class OutputConsole : IConsole, IConsoleDispatcher {
-
         // guid for our Output window pane
         private static Guid _outputWindowPaneGuid = new Guid("CEC55EC8-CC51-40E7-9243-57B87A6F6BEB");
         private const string _outputWindowPaneName = "Package Manager";
@@ -45,6 +44,10 @@ namespace NuGet.VisualStudio {
             get {
                 return 120;
             }
+        }
+
+        public bool ExecuteInitScriptOnStartup {
+            get { return false; }
         }
 
         public void Write(string text) {

@@ -9,15 +9,13 @@ using System.Management.Automation.Runspaces;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
+using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
-using NuGet;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-
     internal abstract class PowerShellHost : IPowerShellHost, IPathExpansion, IDisposable, IHost {
-        public IConsole Console { get; private set; }
-
+        private static readonly object _lockObject = new object();
         private string _name;
         private object _privateData;
         private Runspace _myRunSpace;
@@ -48,6 +46,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             private set;
         }
 
+        public IConsole Console { get; private set; }
+
         /// <summary>
         /// Doing all necessary initialization works before the console accepts user inputs
         /// </summary>
@@ -64,8 +64,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 LoadProfilesIntoRunspace(_myRunSpace);
 
-                ExecuteInitScripts();
-                _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
+                if (Console.ExecuteInitScriptOnStartup) {
+                    ExecuteInitScripts();
+                    _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
+                }
             }
             else {
                 IsCommandEnabled = false;
@@ -74,9 +76,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want execution of init scripts to crash our console.")]
+            Justification = "We don't want execution of init scripts to crash our console.")]
         private void ExecuteInitScripts() {
             if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
                 try {
@@ -171,14 +173,23 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
             _myRunSpace.Open();
 
-            //
-            // Set this runspace as DefaultRunspace so I can script DTE events.
-            //
-            // WARNING: MSDN says this is unsafe. The runspace must not be shared across
-            // threads. I need this to be able to use ScriptBlock for DTE events. The
-            // ScriptBlock event handlers execute on DefaultRunspace.
-            //
-            Runspace.DefaultRunspace = _myRunSpace;
+            SetDefaultRunspace();
+        }
+
+        public void SetDefaultRunspace() {
+            if (Runspace.DefaultRunspace == null) {
+                lock (_lockObject) {
+                    if (Runspace.DefaultRunspace == null) {
+                        // Set this runspace as DefaultRunspace so I can script DTE events.
+                        //
+                        // WARNING: MSDN says this is unsafe. The runspace must not be shared across
+                        // threads. I need this to be able to use ScriptBlock for DTE events. The
+                        // ScriptBlock event handlers execute on DefaultRunspace.
+
+                        Runspace.DefaultRunspace = _myRunSpace;
+                    }
+                }
+            }
         }
 
         private void LoadProfilesIntoRunspace(Runspace runspace) {

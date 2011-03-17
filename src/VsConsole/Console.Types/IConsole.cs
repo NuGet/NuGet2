@@ -16,6 +16,11 @@ namespace NuGetConsole {
         /// Indicates to the active Host whether this console wants to show a disclaimer header.
         /// </summary>
         bool ShowDisclaimerHeader { get; }
+        
+        /// <summary>
+        /// Indicates to the active host whether it should execute init scripts when this console attempts to initialize the host
+        /// </summary>
+        bool ExecuteInitScriptOnStartup { get; }
 
         /// <summary>
         /// Get the console dispatcher which dispatches user interaction.

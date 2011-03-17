@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio;
 
 namespace NuGetConsole.Implementation.PowerConsole {
     [Export(typeof(IPowerConsoleWindow))]
-    class PowerConsoleWindow : IPowerConsoleWindow {
+    [Export(typeof(IHostInitializer))]
+    internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer {
         public const string ContentType = "PackageConsole";
+
+        private string _activeHost;
+        private Dictionary<string, HostInfo> _hostInfos;
+        private HostInfo _activeHostInfo;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import(typeof(SVsServiceProvider))]
@@ -25,7 +30,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
 
         internal event EventHandler ActiveHostChanged;
 
-        Dictionary<string, HostInfo> _hostInfos;
         Dictionary<string, HostInfo> HostInfos {
             get {
                 if (_hostInfos == null) {
@@ -39,7 +43,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
             }
         }
 
-        HostInfo _activeHostInfo;
         internal HostInfo ActiveHostInfo {
             get {
                 if (_activeHostInfo == null) {
@@ -51,12 +54,9 @@ namespace NuGetConsole.Implementation.PowerConsole {
             }
         }
 
-        #region IPowerConsole
         public IEnumerable<string> Hosts {
             get { return HostProviders.Select(p => p.Metadata.HostName); }
         }
-
-        string _activeHost;
 
         public string ActiveHost {
             get {
@@ -134,6 +134,13 @@ namespace NuGetConsole.Implementation.PowerConsole {
                 }
             }
         }
-        #endregion
+
+        public void Start() {
+            ActiveHostInfo.WpfConsole.Dispatcher.Start();
+        }
+
+        public void SetDefaultRunspace() {
+            ActiveHostInfo.WpfConsole.Host.SetDefaultRunspace();
+        }
     }
 }

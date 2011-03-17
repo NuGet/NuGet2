@@ -32,10 +32,10 @@ namespace NuGetConsole.Implementation.Console {
         public event EventHandler ConsoleCleared;
 
         public WpfConsole(
-            WpfConsoleService factory, 
-            IServiceProvider sp, 
-            IPrivateConsoleStatus consoleStatus, 
-            string contentTypeName, 
+            WpfConsoleService factory,
+            IServiceProvider sp,
+            IPrivateConsoleStatus consoleStatus,
+            string contentTypeName,
             string hostName)
             : base(factory) {
             UtilityMethods.ThrowIfArgumentNull(sp);
@@ -281,6 +281,16 @@ namespace NuGetConsole.Implementation.Console {
                 get { return Invoke(() => _impl.ConsoleWidth); }
             }
 
+            public bool ShowDisclaimerHeader {
+                get {
+                    return true;
+                }
+            }
+
+            public bool ExecuteInitScriptOnStartup {
+                get { return true; }
+            }
+
             public void Write(string text) {
                 Invoke(() => _impl.Write(text));
             }
@@ -306,13 +316,13 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public void WriteProgress(string operation, int percentComplete) {
-                Invoke(()=>_impl.WriteProgress(operation, percentComplete));
+                Invoke(() => _impl.WriteProgress(operation, percentComplete));
             }
 
             public object VsTextView {
                 get { return Invoke(() => _impl.VsTextView); }
             }
-            
+
             public SnapshotPoint? InputLineStart {
                 get { return Invoke(() => _impl.InputLineStart); }
             }
@@ -327,12 +337,6 @@ namespace NuGetConsole.Implementation.Console {
 
             public InputHistory InputHistory {
                 get { return Invoke(() => _impl.InputHistory); }
-            }
-
-            public bool ShowDisclaimerHeader {
-                get {
-                    return true;
-                }
             }
         }
 
@@ -506,7 +510,7 @@ namespace NuGetConsole.Implementation.Console {
             // Raise event
             ConsoleCleared.Raise(this);
         }
-        
+
         public void ClearConsole() {
             if (_inputLineStart != null) {
                 Dispatcher.ClearConsole();

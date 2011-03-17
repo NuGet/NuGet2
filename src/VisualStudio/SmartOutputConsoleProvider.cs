@@ -55,6 +55,10 @@ namespace NuGet.VisualStudio {
                 get { return _baseConsole.ConsoleWidth; }
             }
 
+            public bool ExecuteInitScriptOnStartup {
+                get { return _baseConsole.ExecuteInitScriptOnStartup; }
+            }
+
             public void WriteProgress(string currentOperation, int percentComplete) {
                 // ignore this because the output window doesn't show progress anyway
             }
