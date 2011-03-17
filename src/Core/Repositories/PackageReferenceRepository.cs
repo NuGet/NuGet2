@@ -1,11 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
-using NuGet.Resources;
 
 namespace NuGet {
     /// <summary>
@@ -15,6 +10,8 @@ namespace NuGet {
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup {
         public static readonly string PackageReferenceFile = "packages.config";
+        private readonly PackageReferenceFile _packageReferenceFile;
+        private readonly string _fullPath;
 
         public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
             if (fileSystem == null) {
@@ -23,7 +20,8 @@ namespace NuGet {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
-            FileSystem = fileSystem;
+            _packageReferenceFile = new PackageReferenceFile(fileSystem, PackageReferenceFile);
+            _fullPath = fileSystem.GetFullPath(PackageReferenceFile);
             SourceRepository = sourceRepository;
         }
 
@@ -33,11 +31,6 @@ namespace NuGet {
             }
         }
 
-        private IFileSystem FileSystem {
-            get;
-            set;
-        }
-
         private ISharedPackageRepository SourceRepository {
             get;
             set;
@@ -45,30 +38,7 @@ namespace NuGet {
 
         private string PackageReferenceFileFullPath {
             get {
-                return FileSystem.GetFullPath(PackageReferenceFile);
-            }
-        }
-
-        private XDocument GetDocument(bool createIfNotExists = false) {
-            try {
-                // If the file exists then open and return it
-                if (FileSystem.FileExists(PackageReferenceFile)) {
-                    using (Stream stream = FileSystem.OpenFile(PackageReferenceFile)) {
-                        return XDocument.Load(stream);
-                    }
-                }
-
-                // If it doesn't exist and we're creating a new file then return a
-                // document with an empty packages node
-                if (createIfNotExists) {
-                    return new XDocument(new XElement("packages"));
-                }
-
-                return null;
-            }
-            catch (XmlException e) {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, PackageReferenceFileFullPath), e);
+                return _fullPath;
             }
         }
 
@@ -77,50 +47,23 @@ namespace NuGet {
         }
 
         private IEnumerable<IPackage> GetPackagesCore() {
-            XDocument document = GetDocument();
+            foreach (var reference in _packageReferenceFile.GetPackageReferences()) {                
+                IPackage package = null;
 
-            if (document == null) {
-                yield break;
-            }
-            else {
-                foreach (var e in document.Root.Elements("package")) {
-                    string id = e.GetOptionalAttributeValue("id");
-                    string versionString = e.GetOptionalAttributeValue("version");
-                    Version version = VersionUtility.ParseOptionalVersion(versionString);
-                    IPackage package = null;
-
-                    if (String.IsNullOrEmpty(id) ||
-                        version == null ||
-                        !SourceRepository.TryFindPackage(id, version, out package)) {
-
-                        // Skip bad entries
-                        continue;
-                    }
-                    else {
-                        yield return package;
-                    }
+                if (String.IsNullOrEmpty(reference.Id) ||
+                    reference.Version == null ||
+                    !SourceRepository.TryFindPackage(reference.Id, reference.Version, out package)) {
+                    // Skip bad entries
+                    continue;
+                }
+                else {
+                    yield return package;
                 }
             }
         }
 
-        public override void AddPackage(IPackage package) {
-            XDocument document = GetDocument(createIfNotExists: true);
-
-            AddEntry(document, package.Id, package.Version);
-        }
-
-        private void AddEntry(XDocument document, string id, Version version) {
-            XElement element = FindEntry(document, id, version);
-
-            if (element != null) {
-                element.Remove();
-            }
-
-            document.Root.Add(new XElement("package",
-                                  new XAttribute("id", id),
-                                  new XAttribute("version", version)));
-
-            SaveDocument(document);
+        public override void AddPackage(IPackage package) {            
+            _packageReferenceFile.AddEntry(package.Id, package.Version);
 
             // Notify the source repository every time we add a new package to the repository.
             // This doesn't really need to happen on every package add, but this is over agressive
@@ -128,25 +71,16 @@ namespace NuGet {
             // registered in the source then this will be ignored
             SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
         }
-
-        public override void RemovePackage(IPackage package) {
-            XDocument document = GetDocument();
-
-            // If there is no document then do nothing
-            if (document == null) {
-                return;
+ 
+        public override void RemovePackage(IPackage package) {            
+            if (_packageReferenceFile.DeleteEntry(package.Id, package.Version)) {
+                // Remove the repository from the source
+                SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
             }
-
-            DeleteEntry(document, package.Id, package.Version);
         }
 
         public IPackage FindPackage(string packageId, Version version) {
-            XDocument document = GetDocument();
-            if (document == null) {
-                return null;
-            }
-
-            if (FindEntry(document, packageId, version) == null) {
+            if (!_packageReferenceFile.EntryExists(packageId, version)) {
                 return null;
             }
 
@@ -157,41 +91,6 @@ namespace NuGet {
             if (GetPackages().Any()) {
                 SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
             }
-        }
-
-        private void DeleteEntry(XDocument document, string id, Version version) {
-            XElement element = FindEntry(document, id, version);
-
-            if (element != null) {
-                // Remove the element from the xml dom
-                element.Remove();
-
-                // Remove the file if there are no more elements
-                if (!document.Root.HasElements) {
-                    FileSystem.DeleteFile(PackageReferenceFile);
-
-                    // Remove the repository from the source
-                    SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
-                }
-                else {
-                    // Otherwise save the updated document
-                    SaveDocument(document);
-                }
-            }
-        }
-
-        private static XElement FindEntry(XDocument document, string id, Version version) {
-            return (from e in document.Root.Elements("package")
-                    let entryId = e.GetOptionalAttributeValue("id")
-                    let entryVersion = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
-                    where entryId != null && entryVersion != null
-                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) &&
-                          version.Equals(entryVersion)
-                    select e).FirstOrDefault();
-        }
-
-        private void SaveDocument(XDocument document) {
-            FileSystem.AddFile(PackageReferenceFile, document.Save);
         }
     }
 }

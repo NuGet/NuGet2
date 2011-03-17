@@ -114,6 +114,30 @@ namespace NuGet.Test {
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 
+        [TestMethod]
+        public void RemovePackageRemovesEntryFromPackagesConfigDeletesFileAndUnregistersRepositoryIfLastEntry() {
+            // Arrange
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            string path = null;
+            sharedRepository.Setup(m => m.UnregisterRepository(It.IsAny<string>()))
+                            .Callback<string>(p => path = p);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var package = PackageUtility.CreatePackage("A");
+
+            // Act
+            referenceRepository.RemovePackage(package);
+
+            // Assert
+            Assert.IsFalse(fileSystem.FileExists("packages.config"));
+            Assert.IsNotNull(path);
+            Assert.AreEqual(@"C:\MockFileSystem\packages.config", path);
+        }
+
         
         [TestMethod]
         public void GetPackagesReturnsPackagesFromSourceRepositoryListedInPackagesConfig() {

@@ -65,6 +65,8 @@
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
     <Compile Include="Repositories\IPackageLookup.cs" />
+    <Compile Include="Repositories\PackageReference.cs" />
+    <Compile Include="Repositories\PackageReferenceFile.cs" />
     <Compile Include="Utility\IProgressProvider.cs" />
     <Compile Include="Repositories\LazyQueue.cs" />
     <Compile Include="Repositories\ProgressEventArgs.cs" />
