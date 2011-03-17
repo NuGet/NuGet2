@@ -395,8 +395,13 @@ namespace PackageExplorer {
                 return;
             }
 
+            string key = Settings.Default.PublishPrivateKey;
+            if (String.IsNullOrEmpty(key))
+            {
+                key = SettingsKeyHelper.ReadApiKeyFromSettingFile();
+            }
             var publishPackageViewModel = new PublishPackageViewModel(viewModel) {
-                PublishKey = Settings.Default.PublishPrivateKey
+                PublishKey = key
             };
 
             var dialog = new PublishPackageWindow { Owner = this };
@@ -404,6 +409,7 @@ namespace PackageExplorer {
             dialog.ShowDialog();
 
             Settings.Default.PublishPrivateKey = publishPackageViewModel.PublishKey;
+            SettingsKeyHelper.WriteApiKeyToSettingFile(publishPackageViewModel.PublishKey);
         }
 
         private void CanPublishToFeedCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {

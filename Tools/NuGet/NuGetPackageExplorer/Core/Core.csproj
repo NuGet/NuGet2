@@ -48,6 +48,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +63,10 @@
     <Compile Include="Authoring\PathResolver.cs" />
     <Compile Include="Authoring\PathSearchFilter.cs" />
     <Compile Include="Authoring\PhysicalPackageFile.cs" />
+    <Compile Include="Configuration\ISettings.cs" />
+    <Compile Include="Configuration\UserSettings.cs" />
+    <Compile Include="Extensions\FileSystemExtensions.cs" />
+    <Compile Include="Extensions\SettingsExtensions.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\DataServicePackage.cs" />
@@ -73,6 +78,8 @@
     <Compile Include="Packages\IPackageMetadata.cs" />
     <Compile Include="Packages\IPackagePathResolver.cs" />
     <Compile Include="Packages\IServerPackageMetadata.cs" />
+    <Compile Include="ProjectSystem\IFileSystem.cs" />
+    <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
     <Compile Include="Repositories\DataServiceContextWrapper.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
     <Compile Include="Repositories\DataServiceQueryWrapper.cs" />
@@ -114,6 +121,7 @@
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageFile.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
+    <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="Utility\ZipPackageFactory.cs" />
   </ItemGroup>
   <ItemGroup>
