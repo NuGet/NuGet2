@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using NuGet;
+using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     internal class SavePackageCommand : CommandBase, ICommand {
@@ -43,7 +44,7 @@ namespace PackageExplorerViewModel {
 
         public void Execute(object parameter) {
             if (!ViewModel.IsValid) {
-                MessageBox.Show(Resources.PackageHasNoFile, Resources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                ViewModel.MessageBox.Show(Resources.PackageHasNoFile, MessageLevel.Warning);
                 return;
             }
 
@@ -70,7 +71,7 @@ namespace PackageExplorerViewModel {
                 ViewModel.OnSaved();
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.Message, Resources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                ViewModel.MessageBox.Show(ex.Message, MessageLevel.Error);
             }
         }
 

@@ -44,6 +44,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -69,6 +70,7 @@
     <Compile Include="Commands\PackagePartCommandBase.cs" />
     <Compile Include="EmptyPackage.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="MruManager.cs" />
     <Compile Include="PackageHelper.cs" />
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="PackagePart\PhysicalFile.cs" />
     <Compile Include="PackagePart\SortedCollection.cs" />
     <Compile Include="PackageViewModel.cs" />
+    <Compile Include="PackageViewModelFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishPackage\PublishPackageViewModel.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -96,6 +99,11 @@
     </Compile>
     <Compile Include="Commands\ViewContentCommand.cs" />
     <Compile Include="Commands\SavePackageCommand.cs" />
+    <Compile Include="Types\IMessageBox.cs" />
+    <Compile Include="Types\IMruManager.cs" />
+    <Compile Include="Types\IPackageViewModelFactory.cs" />
+    <Compile Include="Types\ISettingsManager.cs" />
+    <Compile Include="Types\MruItem.cs" />
     <Compile Include="ViewModelBase.cs" />
   </ItemGroup>
   <ItemGroup>

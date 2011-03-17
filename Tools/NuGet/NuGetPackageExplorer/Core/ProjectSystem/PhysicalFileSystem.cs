@@ -35,7 +35,7 @@ namespace NuGet {
             WriteAddedFileAndDirectory(path);
         }
 
-        private void WriteAddedFileAndDirectory(string path) {
+        private static void WriteAddedFileAndDirectory(string path) {
             string folderPath = Path.GetDirectoryName(path);
         }
 

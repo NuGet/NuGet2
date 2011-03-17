@@ -2,13 +2,13 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using NuGet;
 using PackageExplorerViewModel;
-using System.Net.NetworkInformation;
+using PackageExplorerViewModel.Types;
 
 namespace PackageExplorer {
     /// <summary>
@@ -20,6 +20,8 @@ namespace PackageExplorer {
         private ObservableCollection<FrameworkAssemblyReference> _frameworkAssemblies;
         private EditablePackageDependency _newPackageDependency;
         private EditableFrameworkAssemblyReference _newFrameworkAssembly;
+
+        public IMessageBox MessageBox { get; set; }
 
         public PackageMetadataEditor() {
             InitializeComponent();
@@ -100,9 +102,7 @@ namespace PackageExplorer {
             {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
-                    PackageExplorer.Resources.Resources.Dialog_Title, 
-                    MessageBoxButton.OK, 
-                    MessageBoxImage.Warning);
+                    MessageLevel.Warning);
                 return;
             }
 

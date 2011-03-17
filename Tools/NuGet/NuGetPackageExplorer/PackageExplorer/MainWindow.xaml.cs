@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -12,20 +12,42 @@ using Microsoft.Win32;
 using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
+using PackageExplorerViewModel.Types;
 using StringResources = PackageExplorer.Resources.Resources;
 
 namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    [Export]
     public partial class MainWindow : Window {
 
-        private MruManager _mruManager;
+        private readonly IMruManager _mruManager;
 
-        public MainWindow() {
+        [Import]
+        public IPackageViewModelFactory PackageViewModelFactory {
+            get;
+            set;
+        }
+
+        [Import]
+        public IMessageBox MessageBox {
+            get;
+            set;
+        }
+
+        [Import]
+        public ISettingsManager SettingsManager {
+            get;
+            set;
+        }
+
+        [ImportingConstructor]
+        public MainWindow(IMruManager mruManager) {
             InitializeComponent();
 
-            RecentFilesMenuItem.DataContext = _mruManager = new MruManager(this);
+            PackageMetadataEditor.MessageBox = MessageBox;
+            RecentFilesMenuItem.DataContext = _mruManager = mruManager;
         }
 
         protected override void OnSourceInitialized(EventArgs e) {
@@ -38,9 +60,8 @@ namespace PackageExplorer {
         }
 
         internal void OpenLocalPackage(string packagePath) {
-            if (!File.Exists(packagePath))
-            {
-                MessageBox.Show("File not found at " + packagePath, StringResources.Dialog_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            if (!File.Exists(packagePath)) {
+                MessageBox.Show("File not found at " + packagePath, MessageLevel.Error);
                 return;
             }
             PackageSourceItem.SetCurrentValue(ContentControl.ContentProperty, "Loading " + packagePath + "...");
@@ -53,23 +74,20 @@ namespace PackageExplorer {
                 package = new ZipPackage(packagePath);
             }
             catch (Exception ex) {
-                MessageBox.Show(
-                    ex.Message,
-                    StringResources.Dialog_Title,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, MessageLevel.Error);
                 return;
             }
 
             if (package != null) {
-                LoadPackage(package, packagePath, PackageType.ZipPackge);
+                LoadPackage(package, packagePath, PackageType.ZipPackage);
             }
         }
 
         private void LoadPackage(IPackage package, string packagePath, PackageType packageType) {
             if (package != null) {
-                DataContext = new PackageViewModel(package, packagePath);
+                DataContext = PackageViewModelFactory.CreateViewModel(package, packagePath);
                 _mruManager.NotifyFileAdded(packagePath, package.ToString(), packageType);
+
             }
         }
 
@@ -79,7 +97,7 @@ namespace PackageExplorer {
                 return;
             }
 
-            DataContext = new PackageViewModel(new EmptyPackage(), String.Empty);
+            DataContext = PackageViewModelFactory.CreateViewModel(new EmptyPackage(), String.Empty);
         }
 
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e) {
@@ -107,9 +125,7 @@ namespace PackageExplorer {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
-                    PackageExplorer.Resources.Resources.Dialog_Title,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    MessageLevel.Warning);
                 return;
             }
 
@@ -252,6 +268,7 @@ namespace PackageExplorer {
             if (!isCanceled) {
                 try {
                     SaveSettings();
+                    _mruManager.OnParentWindowClosed();
                 }
                 catch (Exception) { }
             }
@@ -265,17 +282,12 @@ namespace PackageExplorer {
             if (HasUnsavedChanges) {
 
                 // if there is unsaved changes, ask user for confirmation
-                var result = MessageBox.Show(
-                    StringResources.Dialog_SaveQuestion,
-                    PackageExplorer.Resources.Resources.Dialog_Title,
-                    MessageBoxButton.YesNoCancel,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Cancel) {
+                var result = MessageBox.ConfirmWithCancel(StringResources.Dialog_SaveQuestion);
+                if (result == null) {
                     return true;
                 }
 
-                if (result == MessageBoxResult.Yes) {
+                if (result == true) {
                     var saveCommand = SaveMenuItem.Command;
                     const string parameter = "Save";
                     if (saveCommand.CanExecute(parameter)) {
@@ -378,9 +390,7 @@ namespace PackageExplorer {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
-                    PackageExplorer.Resources.Resources.Dialog_Title,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    MessageLevel.Warning);
                 return;
             }
 
@@ -389,27 +399,23 @@ namespace PackageExplorer {
             if (!viewModel.IsValid) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.PackageHasNoFile,
-                    PackageExplorer.Resources.Resources.Dialog_Title,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    MessageLevel.Warning);
                 return;
             }
 
-            string key = Settings.Default.PublishPrivateKey;
-            if (String.IsNullOrEmpty(key))
-            {
-                key = SettingsKeyHelper.ReadApiKeyFromSettingFile();
-            }
+            string storedKey = SettingsManager.ReadApiKeyFromSettingFile();
             var publishPackageViewModel = new PublishPackageViewModel(viewModel) {
-                PublishKey = key
+                PublishKey = storedKey
             };
 
             var dialog = new PublishPackageWindow { Owner = this };
             dialog.DataContext = publishPackageViewModel;
             dialog.ShowDialog();
 
-            Settings.Default.PublishPrivateKey = publishPackageViewModel.PublishKey;
-            SettingsKeyHelper.WriteApiKeyToSettingFile(publishPackageViewModel.PublishKey);
+            string newKey = publishPackageViewModel.PublishKey;
+            if (!String.IsNullOrEmpty(newKey)) {
+                SettingsManager.WriteApiKeyToSettingFile(newKey);
+            }
         }
 
         private void CanPublishToFeedCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {
@@ -571,16 +577,7 @@ namespace PackageExplorer {
                 var model = (PackageViewModel)DataContext;
                 if (model != null) {
                     model.Export(rootPath);
-
-                    // after export completes, ask if user wantns to open the folder in windows explorer
-                    var result = MessageBox.Show(
-                        "Package has been exported successfully. Do you want to open the folder?", 
-                        StringResources.Dialog_Title,
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes) {
-                        Process.Start(rootPath);
-                    }
+                    MessageBox.Show("The package has been exported successfully.", MessageLevel.Information);
                 }
             }
 
@@ -591,42 +588,33 @@ namespace PackageExplorer {
             FileContent.ScrollToLine(0);
         }
 
-        private void RecentFileMenuItem_Click(object sender, RoutedEventArgs e)
-        {
+        private void RecentFileMenuItem_Click(object sender, RoutedEventArgs e) {
             bool canceled = AskToSaveCurrentFile();
-            if (canceled)
-            {
+            if (canceled) {
                 return;
             }
 
             MenuItem menuItem = (MenuItem)sender;
             var mruItem = (MruItem)menuItem.DataContext;
-            if (mruItem == null)
-            {
+            if (mruItem == null) {
                 _mruManager.Clear();
             }
-            else
-            {
-                if (mruItem.PackageType == PackageType.ZipPackge)
-                {
+            else {
+                if (mruItem.PackageType == PackageType.ZipPackage) {
                     OpenLocalPackage(mruItem.Path);
                 }
-                else
-                {
+                else {
                     DownloadAndOpenDataServicePackage(mruItem);
                 }
             }
         }
 
-        private void DownloadAndOpenDataServicePackage(MruItem item)
-        {
+        private void DownloadAndOpenDataServicePackage(MruItem item) {
             Uri downloadUrl;
-            if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl))
-            {
+            if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
                 var progressWindow = new DownloadProgressWindow(downloadUrl, item.PackageName) { Owner = this };
                 var result = progressWindow.ShowDialog();
-                if (result ?? false)
-                {
+                if (result ?? false) {
                     ZipPackage package = new ZipPackage(progressWindow.DownloadedFilePath);
                     LoadPackage(package, item.Path, PackageType.DataServicePackage);
                 }

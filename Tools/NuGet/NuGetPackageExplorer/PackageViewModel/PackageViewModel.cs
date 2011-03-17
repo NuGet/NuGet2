@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
-using System.Globalization;
+using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
 
@@ -20,11 +20,23 @@ namespace PackageExplorerViewModel {
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _deleteContentCommand;
         private bool _isInEditMode;
         private string _packageSource;
+        private readonly IMessageBox _messageBox;
 
-        public PackageViewModel(IPackage package, string source) {
+        public IMessageBox MessageBox {
+            get {
+                return _messageBox;
+            }
+        }
+
+        internal PackageViewModel(IPackage package, string source, IMessageBox messageBox) {
             if (package == null) {
                 throw new ArgumentNullException("package");
             }
+            if (messageBox == null) {
+                throw new ArgumentNullException("messageBox");
+            }
+
+            _messageBox = messageBox;
             _package = package;
             _packageMetadata = new EditablePackageMetadata(_package);
             PackageSource = source;

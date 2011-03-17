@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PackageExplorer
+namespace PackageExplorerViewModel.Types
 {
+    public enum PackageType {
+        ZipPackage,
+        DataServicePackage
+    }
+
     public sealed class MruItem : IEquatable<MruItem>
     {
         public string Path { get; set; }
@@ -29,11 +34,5 @@ namespace PackageExplorer
         {
             return Path.GetHashCode();
         }
-    }
-
-    public enum PackageType
-    {
-        ZipPackge,
-        DataServicePackage
     }
 }
