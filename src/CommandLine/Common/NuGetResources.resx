@@ -378,6 +378,9 @@
   <data name="BuildingProjectTargetingFramework" xml:space="preserve">
     <value>Building project for target framework '{0}'.</value>
   </data>
+  <data name="FailedToBuildProject" xml:space="preserve">
+    <value>Failed to build '{0}'.</value>
+  </data>
   <data name="PackageCommandDebugDescription" xml:space="preserve">
     <value>Determines if the debug configuration should be used when building a package from the specified project file.</value>
   </data>

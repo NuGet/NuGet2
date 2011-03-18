@@ -78,8 +78,10 @@ namespace NuGet.Commands {
             }
 
             // Build the project so that the outputs are created
-            // REVIEW: Do we abort if the build fails?
-            _project.Build();
+            if (!_project.Build()) {
+                // If the build fails, report the error
+                throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
+            }
 
             string outputPath = OutputPath;
             Console.WriteLine(NuGetResources.PackagingFilesFromOutputPath, outputPath);

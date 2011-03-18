@@ -196,6 +196,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to build &apos;{0}&apos;..
+        /// </summary>
+        internal static string FailedToBuildProject {
+            get {
+                return ResourceManager.GetString("FailedToBuildProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The Help command displays general help information and help information about other commands..
         /// </summary>
         internal static string HelpCommandDescription {
