@@ -120,16 +120,25 @@
   <data name="ConfirmToDeleteContent" xml:space="preserve">
     <value>Are you sure you want to delete it?</value>
   </data>
-  <data name="ConfirmToOverrideFile" xml:space="preserve">
-    <value>Do you want to override existing file '{0}'?</value>
+  <data name="ConfirmToReplaceExsitingFile" xml:space="preserve">
+    <value>Do you want to replace the existing file?</value>
+  </data>
+  <data name="ConfirmToReplaceFile" xml:space="preserve">
+    <value>Do you want to replace existing file '{0}' on disk?</value>
   </data>
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
+  </data>
+  <data name="FileNameConflictWithExistingDirectory" xml:space="preserve">
+    <value>The new file has the same name as another folder.</value>
   </data>
   <data name="OpenExecutableScriptWarning" xml:space="preserve">
     <value>Opening this file can potentially harm your computer. Do you want to continue?</value>
   </data>
   <data name="PackageHasNoFile" xml:space="preserve">
     <value>There are no contents or dependencies in the package.</value>
+  </data>
+  <data name="RenameCausesNameCollison" xml:space="preserve">
+    <value>There is another file or folder with the same name.</value>
   </data>
 </root>

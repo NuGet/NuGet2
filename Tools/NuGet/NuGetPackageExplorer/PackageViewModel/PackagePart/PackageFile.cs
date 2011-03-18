@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows.Input;
 using NuGet;
-using System.Globalization;
 
 namespace PackageExplorerViewModel {
     public class PackageFile : PackagePart, IPackageFile {
@@ -55,7 +55,7 @@ namespace PackageExplorerViewModel {
             string fullPath = System.IO.Path.Combine(rootPath, Path);
             if (File.Exists(fullPath)) {
                 bool confirmed = PackageViewModel.MessageBox.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToOverrideFile, fullPath)
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullPath)
                 );
                 if (!confirmed) {
                     return;

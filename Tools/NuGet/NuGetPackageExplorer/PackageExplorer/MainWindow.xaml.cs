@@ -479,7 +479,7 @@ namespace PackageExplorer {
                 };
                 bool? result = dialog.ShowDialog();
                 if (result ?? false) {
-                    part.Name = dialog.NewName;
+                    part.Rename(dialog.NewName);
                 }
             }
         }

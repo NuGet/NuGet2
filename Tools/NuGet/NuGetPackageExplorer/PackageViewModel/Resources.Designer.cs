@@ -70,11 +70,20 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you want to override existing file &apos;{0}&apos;?.
+        ///   Looks up a localized string similar to Do you want to replace the existing file?.
         /// </summary>
-        internal static string ConfirmToOverrideFile {
+        internal static string ConfirmToReplaceExsitingFile {
             get {
-                return ResourceManager.GetString("ConfirmToOverrideFile", resourceCulture);
+                return ResourceManager.GetString("ConfirmToReplaceExsitingFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do you want to replace existing file &apos;{0}&apos; on disk?.
+        /// </summary>
+        internal static string ConfirmToReplaceFile {
+            get {
+                return ResourceManager.GetString("ConfirmToReplaceFile", resourceCulture);
             }
         }
         
@@ -84,6 +93,15 @@ namespace PackageExplorerViewModel {
         internal static string Dialog_Title {
             get {
                 return ResourceManager.GetString("Dialog_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The new file has the same name as another folder..
+        /// </summary>
+        internal static string FileNameConflictWithExistingDirectory {
+            get {
+                return ResourceManager.GetString("FileNameConflictWithExistingDirectory", resourceCulture);
             }
         }
         
@@ -102,6 +120,15 @@ namespace PackageExplorerViewModel {
         internal static string PackageHasNoFile {
             get {
                 return ResourceManager.GetString("PackageHasNoFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is another file or folder with the same name..
+        /// </summary>
+        internal static string RenameCausesNameCollison {
+            get {
+                return ResourceManager.GetString("RenameCausesNameCollison", resourceCulture);
             }
         }
     }

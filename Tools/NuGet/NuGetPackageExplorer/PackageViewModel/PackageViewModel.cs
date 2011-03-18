@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
 using PackageExplorerViewModel.Types;
-using System.Globalization;
 
 namespace PackageExplorerViewModel {
 
@@ -375,7 +375,7 @@ namespace PackageExplorerViewModel {
 
             if (File.Exists(fullpath)) {
                 bool confirmed = MessageBox.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToOverrideFile, fullpath)
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullpath)
                 );
                 if (!confirmed) {
                     return;

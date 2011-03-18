@@ -94,6 +94,15 @@ namespace PackageExplorerViewModel {
 
         public void Rename(string newName) {
             if (Name != newName) {
+                if (Parent != null)
+                {
+                    if (Parent.ContainsFile(newName) || Parent.ContainsFolder(newName))
+                    {
+                        PackageViewModel.MessageBox.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
+                        return;
+                    }
+                }
+
                 Name = newName;
                 PackageViewModel.NotifyChanges();
             }

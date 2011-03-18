@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
@@ -88,7 +89,8 @@ namespace PackageExplorerViewModel {
         }
 
         public void AddFolder(string folderName) {
-            if (ContainsFolder(folderName)) {
+            if (ContainsFolder(folderName) || ContainsFile(folderName)) {
+                PackageViewModel.MessageBox.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
                 return;
             }
             var newFolder = new PackageFolder(folderName, this);
@@ -104,8 +106,23 @@ namespace PackageExplorerViewModel {
             }
 
             string name = System.IO.Path.GetFileName(filePath);
-            if (ContainsFile(name)) {
+            if (ContainsFolder(name))
+            {
+                PackageViewModel.MessageBox.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
                 return;
+            }
+
+            if (ContainsFile(name)) {
+                bool confirmed = PackageViewModel.MessageBox.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
+                if (confirmed)
+                {
+                    // remove the existing file before adding the new one
+                    RemoveChildByName(name);
+                }
+                else
+                {
+                    return;
+                }
             }
             
             var physicalFile = new PhysicalFile(filePath);
@@ -114,6 +131,16 @@ namespace PackageExplorerViewModel {
             newFile.IsSelected = true;
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
+        }
+
+        private void RemoveChildByName(string name)
+        {
+            int count = Children.RemoveAll(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(count <= 1);
+            if (count == 1)
+            {
+                PackageViewModel.NotifyChanges();
+            }
         }
 
         public override void Export(string rootPath) {
