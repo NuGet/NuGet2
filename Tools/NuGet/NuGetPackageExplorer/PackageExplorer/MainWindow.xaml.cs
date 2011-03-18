@@ -22,7 +22,7 @@ namespace PackageExplorer {
     [Export]
     public partial class MainWindow : Window {
 
-        private readonly IMruManager _mruManager;
+        private readonly IMruManager _mruManager; 
 
         [Import]
         public IPackageViewModelFactory PackageViewModelFactory {
@@ -298,10 +298,8 @@ namespace PackageExplorer {
 
                 if (result == true) {
                     var saveCommand = SaveMenuItem.Command;
-                    const string parameter = "Save";
-                    if (saveCommand.CanExecute(parameter)) {
-                        saveCommand.Execute(parameter);
-                    }
+                    const string parameter = "ForceSave";
+                    saveCommand.Execute(parameter);
                 }
             }
 
@@ -585,8 +583,13 @@ namespace PackageExplorer {
             if (!String.IsNullOrEmpty(rootPath)) {
                 var model = (PackageViewModel)DataContext;
                 if (model != null) {
-                    model.Export(rootPath);
-                    MessageBox.Show("The package has been exported successfully.", MessageLevel.Information);
+                    try {
+                        model.Export(rootPath);
+                        MessageBox.Show("The package has been exported successfully.", MessageLevel.Information);
+                    }
+                    catch (Exception ex) {
+                        MessageBox.Show(ex.Message, MessageLevel.Error);
+                    }
                 }
             }
 

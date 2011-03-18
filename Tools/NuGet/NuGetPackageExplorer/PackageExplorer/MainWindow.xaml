@@ -51,7 +51,6 @@
             <DataTemplate x:Key="PackageDetailTemplate">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="8">
-
                         <Border 
                             BorderBrush="{StaticResource {x:Static SystemColors.ActiveBorderBrushKey}}" 
                             BorderThickness="0.5" 
@@ -263,7 +262,17 @@
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
                 <Separator />
-                <MenuItem Header="E_xport..." IsEnabled="{Binding Converter={StaticResource nullToBoolConverter}}" Click="OnExportMenuItem_Click" />
+                <MenuItem Header="Expor_t..." Click="OnExportMenuItem_Click">
+                    <MenuItem.Style>
+                        <Style TargetType="{x:Type MenuItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsInEditMode, FallbackValue=True}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </MenuItem.Style>
+                </MenuItem>
                 <self:GrayscaleMenuItem Command="{x:Static self:Commands.PublishToFeedCommand}" Header="_Publish...">
                     <self:GrayscaleMenuItem.Icon>
                         <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/PublishToWebHS.png" />
@@ -394,7 +403,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- package metadata -->
-            <GroupBox Grid.RowSpan="3" BorderThickness="1" BorderBrush="DarkGray" Margin="3" Header="Package metadata" FlowDirection="LeftToRight">
+            <GroupBox Grid.RowSpan="3" BorderThickness="1" BorderBrush="DarkGray" Background="#FCFEF0" Margin="3" Header="Package metadata" FlowDirection="LeftToRight">
                 <Grid>
                     <ContentControl 
                         Content="{Binding PackageMetadata}" 
@@ -486,6 +495,7 @@
                 Visibility="{Binding ShowContentViewer, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}"
                 Margin="3,0,3,3" 
                 Padding="0,4,0,0"
+                Background="#FCFEF0" 
                 BorderBrush="DarkGray" 
                 BorderThickness="1" 
                 IsVisibleChanged="GroupBox_IsVisibleChanged">
@@ -496,7 +506,7 @@
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True" 
-                    Background="#FFEAF7CE"
+                    Background="#FCFEF0"                     
                     Text="{Binding CurrentFileContent, Mode=OneWay}"
                     TextChanged="OnFileContentChanged">
                     <TextBox.ContextMenu>

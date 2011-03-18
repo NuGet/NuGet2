@@ -120,6 +120,9 @@
   <data name="ConfirmToDeleteContent" xml:space="preserve">
     <value>Are you sure you want to delete it?</value>
   </data>
+  <data name="ConfirmToOverrideFile" xml:space="preserve">
+    <value>Do you want to override existing file '{0}'?</value>
+  </data>
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
   </data>

@@ -46,6 +46,7 @@ namespace NuGet
             return _packageBuilder.Files.Where(p => !PackageUtility.IsManifest(p.Path));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public Stream GetStream()
         {
             Stream memoryStream = new MemoryStream();

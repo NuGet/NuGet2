@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using NuGet;
 using PackageExplorerViewModel.Types;
+using System.Globalization;
 
 namespace PackageExplorerViewModel {
 
@@ -21,6 +22,7 @@ namespace PackageExplorerViewModel {
         private bool _isInEditMode;
         private string _packageSource;
         private readonly IMessageBox _messageBox;
+        private readonly IMruManager _mruManager;
 
         public IMessageBox MessageBox {
             get {
@@ -28,14 +30,18 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        internal PackageViewModel(IPackage package, string source, IMessageBox messageBox) {
+        internal PackageViewModel(IPackage package, string source, IMessageBox messageBox, IMruManager mruManager) {
             if (package == null) {
                 throw new ArgumentNullException("package");
             }
             if (messageBox == null) {
                 throw new ArgumentNullException("messageBox");
             }
+            if (mruManager == null) {
+                throw new ArgumentNullException("mruManager");
+            }
 
+            _mruManager = mruManager;
             _messageBox = messageBox;
             _package = package;
             _packageMetadata = new EditablePackageMetadata(_package);
@@ -329,8 +335,12 @@ namespace PackageExplorerViewModel {
             OnPropertyChanged("WindowTitle");
         }
 
-        internal void OnSaved() {
+        internal void OnSaved(string fileName) {
             HasEdit = false;
+            _mruManager.NotifyFileAdded(
+                fileName, 
+                PackageMetadata.Id + " " + PackageMetadata.Version, 
+                PackageType.LocalPackage);
         }
 
         internal void NotifyChanges() {
@@ -359,9 +369,19 @@ namespace PackageExplorerViewModel {
             ExportManifest(rootPath, PackageMetadata);
         }
 
-        private static void ExportManifest(string rootPath, EditablePackageMetadata metadata) {
+        private void ExportManifest(string rootPath, EditablePackageMetadata metadata) {
             string filename = metadata.Id + ".nuspec";
             string fullpath = Path.Combine(rootPath, filename);
+
+            if (File.Exists(fullpath)) {
+                bool confirmed = MessageBox.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToOverrideFile, fullpath)
+                );
+                if (!confirmed) {
+                    return;
+                }
+            }
+
             using (Stream fileStream = File.Create(fullpath)) {
                 Manifest manifest = Manifest.Create(metadata);
                 manifest.Save(fileStream);

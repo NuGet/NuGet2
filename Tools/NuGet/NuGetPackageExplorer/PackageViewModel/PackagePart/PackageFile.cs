@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Input;
 using NuGet;
+using System.Globalization;
 
 namespace PackageExplorerViewModel {
     public class PackageFile : PackagePart, IPackageFile {
@@ -52,10 +53,17 @@ namespace PackageExplorerViewModel {
 
         public override void Export(string rootPath) {
             string fullPath = System.IO.Path.Combine(rootPath, Path);
-            if (!File.Exists(fullPath)) {
-                using (var stream = File.Create(fullPath)) {
-                    GetStream().CopyTo(stream);
+            if (File.Exists(fullPath)) {
+                bool confirmed = PackageViewModel.MessageBox.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToOverrideFile, fullPath)
+                );
+                if (!confirmed) {
+                    return;
                 }
+            }
+
+            using (var stream = File.Create(fullPath)) {
+                GetStream().CopyTo(stream);
             }
         }
     }

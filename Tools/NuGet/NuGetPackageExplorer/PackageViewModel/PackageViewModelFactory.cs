@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.Composition;
 using PackageExplorerViewModel.Types;
-using System.ComponentModel.Composition;
 
 namespace PackageExplorerViewModel {
 
@@ -16,8 +12,14 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [Import]
+        public IMruManager MruManager {
+            get;
+            set;
+        }
+
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
-            return new PackageViewModel(package, packageSource, MessageBoxService);
+            return new PackageViewModel(package, packageSource, MessageBoxService, MruManager);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace PackageExplorerViewModel {
 
         private const string SaveAction = "Save";
         private const string SaveAsAction = "SaveAs";
+        private const string ForceSaveAction = "ForceSave";
 
         public SavePackageCommand(PackageViewModel model)
             : base(model) {
@@ -29,7 +30,10 @@ namespace PackageExplorerViewModel {
 
         public bool CanExecute(object parameter) {
             string action = parameter as string;
-            if (action == SaveAction) {
+            if (action == ForceSaveAction) {
+                return true;
+            }
+            else if (action == SaveAction) {
                 return !ViewModel.IsInEditMode && Path.IsPathRooted(ViewModel.PackageSource);
             }
             else if (action == SaveAsAction) {
@@ -49,26 +53,39 @@ namespace PackageExplorerViewModel {
             }
 
             string action = parameter as string;
-            if (action == SaveAction) {
-                SavePackage(ViewModel.PackageSource);
-                RaiseCanExecuteChangedEvent();
+            if (action == SaveAction || action == ForceSaveAction) {
+                if (String.IsNullOrEmpty(ViewModel.PackageSource)) {
+                    SaveAs();
+                }
+                else {
+                    Save();
+                }
             }
             else if (action == SaveAsAction) {
-                string packageName = ViewModel.PackageMetadata.ToString() + Constants.PackageExtension;
-                string selectedPackageName;
-                if (ViewModel.OpenSaveFileDialog(packageName, true, out selectedPackageName)) {
-                    SavePackage(selectedPackageName);
-                    ViewModel.PackageSource = selectedPackageName;
-                }
-                RaiseCanExecuteChangedEvent();
+                SaveAs();
             }
+        }
+
+        private void Save() {
+            SavePackage(ViewModel.PackageSource);
+            RaiseCanExecuteChangedEvent();
+        }
+
+        private void SaveAs() {
+            string packageName = ViewModel.PackageMetadata.ToString() + Constants.PackageExtension;
+            string selectedPackagePath;
+            if (ViewModel.OpenSaveFileDialog(packageName, true, out selectedPackagePath)) {
+                SavePackage(selectedPackagePath);
+                ViewModel.PackageSource = selectedPackagePath;
+            }
+            RaiseCanExecuteChangedEvent();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void SavePackage(string fileName) {
             try {
                 PackageHelper.SavePackage(ViewModel.PackageMetadata, ViewModel.GetFiles(), fileName, true);
-                ViewModel.OnSaved();
+                ViewModel.OnSaved(fileName);
             }
             catch (Exception ex) {
                 ViewModel.MessageBox.Show(ex.Message, MessageLevel.Error);
