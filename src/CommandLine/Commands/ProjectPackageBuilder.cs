@@ -34,7 +34,7 @@ namespace NuGet.Commands {
 
         private string TargetPath {
             get {
-                return _project.GetPropertyValue("TargetPath");
+                return _project.ExpandString(_project.GetPropertyValue("TargetPath"));
             }
         }
 
