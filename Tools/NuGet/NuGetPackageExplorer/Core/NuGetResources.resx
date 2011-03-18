@@ -141,12 +141,6 @@
   <data name="DuplicateDependenciesDefined" xml:space="preserve">
     <value>'{0}' already has a dependency defined for '{1}'.</value>
   </data>
-  <data name="DependenciesMissingVersion" xml:space="preserve">
-    <value>Dependencies '{0}' must specify a version.</value>
-  </data>
-  <data name="DependencyMissingVersion" xml:space="preserve">
-    <value>Dependency '{0}' must specify a version.</value>
-  </data>
   <data name="PackageDoesNotContainManifest" xml:space="preserve">
     <value>Package does not contain a manifest.</value>
   </data>

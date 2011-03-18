@@ -19,7 +19,7 @@ namespace NuGet {
         }
 
         internal static Uri CreatePartUri(string path) {
-            return PackUriHelper.CreatePartUri(new Uri(path, UriKind.Relative));
+            return PackUriHelper.CreatePartUri(new Uri(Uri.EscapeDataString(path), UriKind.Relative));
         }
     }
 }

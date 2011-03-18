@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Linq;
 
 namespace NuGet
 {
@@ -37,8 +36,9 @@ namespace NuGet
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
         {
-            get;
-            private set;
+            get {
+                return Enumerable.Empty<IPackageAssemblyReference>();
+            }
         }
 
         public IEnumerable<IPackageFile> GetFiles()

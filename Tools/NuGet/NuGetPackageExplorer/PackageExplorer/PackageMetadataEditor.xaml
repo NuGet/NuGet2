@@ -202,12 +202,9 @@
                         
                         <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="3" Grid.Row="2" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
                             <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
-                            <Button.IsEnabled>
-                                <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
-                                    <Binding ElementName="NewDependencyId" Path="Text" />
-                                    <Binding ElementName="NewDependencyVersion" Path="Text" />
-                                </MultiBinding>
-                            </Button.IsEnabled>
+                            <self:GrayscaleButton.IsEnabled>
+                                <Binding Path="Text" ElementName="NewDependencyId" Converter="{StaticResource nullToBoolConverter}" Mode="OneWay" />
+                            </self:GrayscaleButton.IsEnabled>
                         </self:GrayscaleButton>
                     </Grid>
                 </GroupBox>
