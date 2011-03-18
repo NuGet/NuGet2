@@ -298,6 +298,12 @@
       <Progid>NuGet.Package</Progid>
       <DefaultIcon>nuspec.ico</DefaultIcon>
     </FileAssociation>
+    <FileAssociation Include=".nuspec">
+      <Visible>False</Visible>
+      <Description>NuGet spec file</Description>
+      <Progid>NuGet.Package</Progid>
+      <DefaultIcon>nuspec.ico</DefaultIcon>
+    </FileAssociation>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
