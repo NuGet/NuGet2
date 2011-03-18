@@ -25,7 +25,6 @@ namespace NuGet {
             }
         }
 
-
         public PackageBuilder(Stream stream, string basePath)
             : this() {
             ReadManifest(stream, basePath);
@@ -179,8 +178,21 @@ namespace NuGet {
         private void ReadManifest(Stream stream, string basePath) {
             // Deserialize the document and extract the metadata
             Manifest manifest = Manifest.ReadFrom(stream);
-            IPackageMetadata metadata = manifest.Metadata;
 
+            Populate(manifest.Metadata);
+
+            // If there's no base path then ignore the files node
+            if (basePath != null) {
+                if (manifest.Files == null || !manifest.Files.Any()) {
+                    AddFiles(basePath, @"**\*.*", null);
+                }
+                else {
+                    PopulateFiles(basePath, manifest.Files);
+                }
+            }
+        }
+
+        public void Populate(IPackageMetadata metadata) {            
             Id = metadata.Id;
             Version = metadata.Version;
             Title = metadata.Title;
@@ -200,17 +212,11 @@ namespace NuGet {
 
             Dependencies.AddRange(metadata.Dependencies);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
+        }
 
-            // If there's no base path then ignore the files node
-            if (basePath != null) {
-                if (manifest.Files == null || !manifest.Files.Any()) {
-                    AddFiles(basePath, @"**\*.*", null);
-                }
-                else {
-                    foreach (var file in manifest.Files) {
-                        AddFiles(basePath, file.Source, file.Target);
-                    }
-                }
+        public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files) {
+            foreach (var file in files) {
+                AddFiles(basePath, file.Source, file.Target);
             }
         }
 

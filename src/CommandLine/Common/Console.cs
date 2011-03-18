@@ -5,7 +5,6 @@ using System.IO;
 namespace NuGet.Common {
     [Export(typeof(IConsole))]
     public class Console : IConsole {
-
         public int CursorLeft {
             get {
                 try {
@@ -46,8 +45,8 @@ namespace NuGet.Common {
             System.Console.Write(value);
         }
 
-        public void Write(string format, params object[] arg) {
-            System.Console.Write(format, arg);
+        public void Write(string format, params object[] args) {
+            System.Console.Write(format, args);
         }
 
         public void WriteLine() {
@@ -62,8 +61,8 @@ namespace NuGet.Common {
             System.Console.WriteLine(value);
         }
 
-        public void WriteLine(string format, params object[] arg) {
-            System.Console.WriteLine(format, arg);
+        public void WriteLine(string format, params object[] args) {
+            System.Console.WriteLine(format, args);
         }
 
         public void WriteError(object value) {
@@ -71,15 +70,27 @@ namespace NuGet.Common {
         }
 
         public void WriteError(string value) {
-            WriteError(value, null);
+            WriteError(value, new object[0]);
         }
 
-        public void WriteError(string format, params object[] arg) {
-            var currentColor = System.ConsoleColor.Gray;
+        public void WriteError(string format, params object[] args) {
+            WriteColor(System.Console.Error, ConsoleColor.Red, format, args);
+        }
+
+        public void WriteWarning(string value) {
+            WriteWarning(value, new object[0]);
+        }
+
+        public void WriteWarning(string value, params object[] args) {
+            WriteColor(System.Console.Out, ConsoleColor.Yellow, String.Format("WARNING: {0}", value), args);
+        }
+
+        private void WriteColor(TextWriter writer, ConsoleColor color, string value, params object[] args) {
+            var currentColor = System.Console.ForegroundColor;
             try {
                 currentColor = System.Console.ForegroundColor;
-                System.Console.ForegroundColor = System.ConsoleColor.Red;
-                System.Console.Error.WriteLine(format, arg);
+                System.Console.ForegroundColor = color;
+                writer.WriteLine(value, args);
             }
             finally {
                 System.Console.ForegroundColor = currentColor;

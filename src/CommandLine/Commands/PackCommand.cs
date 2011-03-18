@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
@@ -9,8 +8,17 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {
-        private static readonly HashSet<string> _exclude =
-            new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> _excludeExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
+            Constants.PackageExtension, 
+            Constants.ManifestExtension 
+        };
+
+        private static readonly HashSet<string> _allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
+            Constants.ManifestExtension,
+            ".csproj",
+            ".vbproj",
+            ".fsproj",
+        };
 
         [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
@@ -24,36 +32,29 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandVersionDescription")]
         public string Version { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandDebugDescription")]
+        public bool Debug { get; set; }
+
+        [Option(typeof(NuGetResources), "PackageCommandSymbolsDescription")]
+        public bool Symbols { get; set; }
+
         public override void ExecuteCommand() {
-            string nuspecFile;
+            // Get the input file
+            string path = GetInputFile();
 
-            if (Arguments.Any()) {
-                nuspecFile = Arguments[0];
-            }
-            else {
-                string[] possibleNuspecFiles = GetNuSpecFilesInDirectory();
-                if (possibleNuspecFiles.Length == 1) {
-                    nuspecFile = possibleNuspecFiles[0];
-                }
-                else {
-                    throw new CommandLineException(NuGetResources.PackageCommandSpecifyNuSpecFileError);
-                }
-            }
+            Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
-            Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(nuspecFile));
-            
-            PackageBuilder builder = new PackageBuilder(nuspecFile, BasePath ?? Path.GetDirectoryName(nuspecFile));
-            
+            // Get the package builder
+            PackageBuilder builder = GetPackageBuilder(path);
+
             if (!String.IsNullOrEmpty(Version)) {
                 builder.Version = new Version(Version);
             }
 
-            var outputFile = String.Join(".", builder.Id, builder.Version, Constants.PackageExtension.TrimStart('.'));
+            ExcludeFiles(builder);
 
-            // Remove the output file or the package spec might try to include it (which is default behavior)
-            builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
-
-            string outputPath = Path.Combine(OutputDirectory ?? Directory.GetCurrentDirectory(), outputFile);
+            // Get the output path
+            string outputPath = GetOutputPath(builder);
 
             try {
                 using (Stream stream = File.Create(outputPath)) {
@@ -61,27 +62,111 @@ namespace NuGet.Commands {
                 }
             }
             catch {
-                if(File.Exists(outputPath)){
+                if (File.Exists(outputPath)) {
                     File.Delete(outputPath);
                 }
                 throw;
             }
-            if (Verbose) {
-                Console.WriteLine();
 
-                var package = new ZipPackage(outputPath);
-                foreach (var file in package.GetFiles().OrderBy(p => p.Path.Length)) {
-                    Console.WriteLine(NuGetResources.PackageCommandAddedFile, file.Path);
-                }
-                Console.WriteLine();
+            if (Verbose) {
+                PrintVerbose(outputPath);
             }
-            
 
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
         }
 
-        private static string[] GetNuSpecFilesInDirectory() {
-            return Directory.GetFiles(Directory.GetCurrentDirectory(), "*" + Constants.ManifestExtension);
+        private void PrintVerbose(string outputPath) {
+            Console.WriteLine();
+            var package = new ZipPackage(outputPath);
+
+            Console.WriteLine("Id: {0}", package.Id);
+            Console.WriteLine("Version: {0}", package.Version);
+            Console.WriteLine("Authors: {0}", String.Join(", ", package.Authors));
+            Console.WriteLine("Description: {0}", package.Description);
+            if (package.LicenseUrl != null) {
+                Console.WriteLine("License Url: {0}", package.LicenseUrl);
+            }
+            if (package.ProjectUrl != null) {
+                Console.WriteLine("Project Url: {0}", package.ProjectUrl);
+            }
+            if (!String.IsNullOrEmpty(package.Tags)) {
+                Console.WriteLine("Tags: {0}", package.Tags.Trim());
+            }
+            if (package.Dependencies.Any()) {
+                Console.WriteLine("Dependencies: {0}", String.Join(", ", package.Dependencies.Select(d => d.ToString())));
+            }
+            else {
+                Console.WriteLine("Dependencies: None");
+            }
+
+            Console.WriteLine();
+
+            foreach (var file in package.GetFiles().OrderBy(p => p.Path)) {
+                Console.WriteLine(NuGetResources.PackageCommandAddedFile, file.Path);
+            }
+
+            Console.WriteLine();
+        }
+
+        private static void ExcludeFiles(PackageBuilder builder) {
+            // Remove the output file or the package spec might try to include it (which is default behavior)
+            builder.Files.RemoveAll(file => _excludeExtensions.Contains(Path.GetExtension(file.Path)));
+        }
+
+        private string GetOutputPath(PackageBuilder builder) {
+            // Output file is {id}.{version}.nupkg
+            string outputFile = builder.Id + "." + builder.Version + Constants.PackageExtension;
+            string outputDirectory = OutputDirectory ?? Directory.GetCurrentDirectory();
+            return Path.Combine(outputDirectory, outputFile);
+        }
+
+        private PackageBuilder GetPackageBuilder(string path) {
+            string extension = Path.GetExtension(path).ToLowerInvariant();
+
+            switch (extension) {
+                case ".nuspec":
+                    return BuildFromNuspec(path);
+                default:
+                    return BuildFromProjectFile(path);
+            }
+        }
+
+        private PackageBuilder BuildFromNuspec(string path) {
+            if (String.IsNullOrEmpty(BasePath)) {
+                return new PackageBuilder(path);
+            }
+
+            return new PackageBuilder(path, BasePath);
+        }
+
+        private PackageBuilder BuildFromProjectFile(string path) {
+            var projectBuilder = new ProjectPackageBuilder(path, Console) {
+                IncludeSymbols = Symbols,
+                Debug = Debug
+            };
+
+            return projectBuilder.BuildPackage();
+        }
+
+        private string GetInputFile() {
+            IEnumerable<string> files = null;
+
+            if (Arguments.Any()) {
+                files = Arguments;
+            }
+            else {
+                files = Directory.GetFiles(Directory.GetCurrentDirectory());
+            }
+
+            var candidates = files.Where(file => _allowedExtensions.Contains(Path.GetExtension(file)))
+                                  .ToList();
+
+            switch (candidates.Count) {
+                case 1:
+                    return candidates.Single();
+                default:
+                    throw new CommandLineException(NuGetResources.PackageCommandSpecifyInputFileError);
+            }
         }
     }
 }

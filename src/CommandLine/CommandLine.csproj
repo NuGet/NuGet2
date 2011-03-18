@@ -9,10 +9,12 @@
     <AssemblyName>NuGet</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
@@ -29,6 +31,7 @@
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
+    <Compile Include="Commands\ProjectPackageBuilder.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
     <Compile Include="Commands\SpecCommand.cs" />
     <Compile Include="Commands\PublishCommand.cs" />
@@ -39,6 +42,7 @@
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="Common\AssemblyMetadataExtractor.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>

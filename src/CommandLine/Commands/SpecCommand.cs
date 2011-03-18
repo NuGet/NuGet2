@@ -23,19 +23,7 @@ namespace NuGet.Commands {
         public override void ExecuteCommand() {
             var builder = new PackageBuilder();
             if (!String.IsNullOrEmpty(AssemblyPath)) {
-                // Load the assembly and try to read the attributes from them
-                // REVIEW: ReflectionOnlyLoad would probably be better but we have to read attributes
-                // using GetCustomAttributeData() which is a bit wonky
-                Assembly assembly = Assembly.LoadFrom(AssemblyPath);
-                AssemblyName assemblyName = assembly.GetName();
-                builder.Id = assemblyName.Name;
-                builder.Version = assemblyName.Version;
-                builder.Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(assembly, a => a.Title);
-                builder.Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(assembly, a => a.Description);
-                string author = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(assembly, a => a.Company);
-                if (!String.IsNullOrEmpty(author)) {
-                    builder.Authors.Add(author);
-                }
+                AssemblyMetadataExtractor.ExtractMetadata(AssemblyPath, builder);                
             }
             else {
                 builder.Id = "Package";

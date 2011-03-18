@@ -27,6 +27,15 @@ namespace NuGet {
             { "Full", String.Empty }
         };
 
+        private static readonly Dictionary<string, string> _identifierToFrameworkFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { NetFrameworkIdentifier, "net" },
+            { "Silverlight", "sl" }
+        };
+
+        private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "WindowsPhone", "wp" }
+        };
+
         public static Version DefaultTargetFrameworkVersion {
             get {
                 // We need to parse the version name out from the mscorlib's assembly name since
@@ -251,6 +260,27 @@ namespace NuGet {
             return name + "-" + frameworkName.Profile;
         }
 
+        public static string GetFrameworkFolder(FrameworkName frameworkName) {
+            string name;
+            if (!_identifierToFrameworkFolder.TryGetValue(frameworkName.Identifier, out name)) {
+                name = frameworkName.Identifier;
+            }
+
+            // Remove the . from versions
+            name += frameworkName.Version.ToString().Replace(".", String.Empty);
+
+            if (String.IsNullOrEmpty(frameworkName.Profile)) {
+                return name;
+            }
+
+            string profile;
+            if (!_identifierToProfileFolder.TryGetValue(frameworkName.Profile, out profile)) {
+                profile = frameworkName.Profile;
+            }
+
+            return name + "-" + profile;
+        }
+
         internal static FrameworkName ParseFrameworkFolderName(string path) {
             // The path for a reference might look like this for assembly foo.dll:            
             // foo.dll
@@ -267,6 +297,81 @@ namespace NuGet {
             }
 
             return null;
+        }
+
+        public static bool TryGetCompatibleItems<T>(FrameworkName projectFramework, IEnumerable<T> items, out IEnumerable<T> compatibleItems) where T : IFrameworkTargetable {
+            if (!items.Any()) {
+                compatibleItems = Enumerable.Empty<T>();
+                return true;
+            }
+
+            // Default framework for assembly references with an unspecified framework name
+            // always match the project framework's identifier by is the lowest possible version
+            var defaultFramework = new FrameworkName(projectFramework.Identifier, new Version(), projectFramework.Profile);
+
+            // Turn something that looks like this:
+            // item -> [Framework1, Framework2, Framework3] into
+            // [{item, Framework1}, {item, Framework2}, {item, Framework3}]
+            var normalizedItems = from item in items
+                                  let frameworks = item.SupportedFrameworks.Any() ? item.SupportedFrameworks : new FrameworkName[] { null }
+                                  from framework in frameworks
+                                  select new {
+                                      Item = item,
+                                      TargetFramework = framework
+                                  };
+
+            // Group references by target framework (if there is no target framework we assume it is the default)
+            var frameworkGroups = normalizedItems.GroupBy(g => g.TargetFramework ?? defaultFramework, g => g.Item);
+
+            // Try to find the best match
+            compatibleItems = (from g in frameworkGroups
+                               where IsCompatible(g.Key, projectFramework)
+                               orderby GetProfileCompatibility(g.Key, projectFramework) descending,
+                                       g.Key.Version descending
+                               select g).FirstOrDefault();
+
+            return compatibleItems != null && compatibleItems.Any();
+        }
+
+        private static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
+            if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase)) {
+                return false;
+            }
+
+            if (frameworkName.Version > targetFrameworkName.Version) {
+                return false;
+            }
+
+            // If there is no target framework then do nothing
+            if (String.IsNullOrEmpty(targetFrameworkName.Profile)) {
+                return true;
+            }
+
+            string targetProfile = frameworkName.Profile;
+
+            if (String.IsNullOrEmpty(targetProfile)) {
+                // We consider net40 to mean net40-full which is a superset of any specific profile.
+                // This means that a dll that is net40 will work for a project targeting net40-client.
+                targetProfile = targetFrameworkName.Profile;
+            }
+
+            return targetFrameworkName.Profile.Equals(targetProfile, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Given 2 framework names, this method returns a number which determines how compatible
+        /// the names are. The higher the number the more compatible the frameworks are.
+        /// </summary>
+        private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
+            // Things with matching profiles are more compatible than things without.
+            // This means that if we have net40 and net40-client assemblies and the target framework is
+            // net40, both sets of assemblies are compatible but we prefer net40 since it matches
+            // the profile exactly.
+            if (targetFrameworkName.Profile.Equals(frameworkName.Profile, StringComparison.OrdinalIgnoreCase)) {
+                return 1;
+            }
+
+            return 0;
         }
     }
 }

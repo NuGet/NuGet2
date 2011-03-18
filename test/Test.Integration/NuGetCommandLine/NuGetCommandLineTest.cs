@@ -72,7 +72,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
 
             // Assert
             Assert.AreEqual(1, result);
-            Assert.AreEqual("Please specify a nuspec file to use.", consoleOutput.ToString().Trim());
+            Assert.AreEqual("Please specify a nuspec or project file to use.", consoleOutput.ToString().Trim());
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
 
             // Assert
             Assert.AreEqual(1, result);
-            Assert.AreEqual("Please specify a nuspec file to use.", consoleOutput.ToString().Trim());
+            Assert.AreEqual("Please specify a nuspec or project file to use.", consoleOutput.ToString().Trim());
         }
 
         [TestMethod]

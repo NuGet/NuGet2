@@ -190,13 +190,13 @@
     <value>The Base Path of the files defined in the nuspec file.</value>
   </data>
   <data name="PackageCommandDescription" xml:space="preserve">
-    <value>Creates a NuGet package based on the specified NuSpec file.</value>
+    <value>Creates a NuGet package based on the specified nuspec or project file.</value>
   </data>
   <data name="PackageCommandOutputDirDescription" xml:space="preserve">
     <value>Specifies the directory for the created NuGet package file</value>
   </data>
-  <data name="PackageCommandSpecifyNuSpecFileError" xml:space="preserve">
-    <value>Please specify a nuspec file to use.</value>
+  <data name="PackageCommandSpecifyInputFileError" xml:space="preserve">
+    <value>Please specify a nuspec or project file to use.</value>
   </data>
   <data name="PackageCommandSuccess" xml:space="preserve">
     <value>Successfully created package '{0}'.</value>
@@ -374,5 +374,29 @@
   </data>
   <data name="SetApiKeyCommandUsageSummary" xml:space="preserve">
     <value>&lt;API key&gt; [Source]</value>
+  </data>
+  <data name="BuildingProjectTargetingFramework" xml:space="preserve">
+    <value>Building project for target framework '{0}'.</value>
+  </data>
+  <data name="PackageCommandDebugDescription" xml:space="preserve">
+    <value>Determines if the debug configuration should be used when building a package from the specified project file.</value>
+  </data>
+  <data name="PackageCommandSymbolsDescription" xml:space="preserve">
+    <value>Determines if symbols and sources should be included in this package. Only valid when building a package from a project.</value>
+  </data>
+  <data name="PackagingFilesFromOutputPath" xml:space="preserve">
+    <value>Packing files from '{0}'.</value>
+  </data>
+  <data name="UnableToExtractAssemblyMetadata" xml:space="preserve">
+    <value>Unable to extract metadata from '{0}'.</value>
+  </data>
+  <data name="UsingPackagesConfigForDependencies" xml:space="preserve">
+    <value>Found packages.config. Using packages listed as dependencies</value>
+  </data>
+  <data name="Warning_FileDoesNotExist" xml:space="preserve">
+    <value>'{0}' was included in the project but doesn't exist. Skipping...</value>
+  </data>
+  <data name="Warning_UnspecifiedField" xml:space="preserve">
+    <value>{0} was not specified. Using '{1}'.</value>
   </data>
 </root>

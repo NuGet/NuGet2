@@ -77,6 +77,10 @@ namespace NuGet {
         }
 
         public static Manifest ReadFrom(Stream stream) {
+            return ReadFrom(stream, validate: true);
+        }
+
+        public static Manifest ReadFrom(Stream stream, bool validate) {
             // Read the document
             XDocument document = XDocument.Load(stream);
 
@@ -87,8 +91,11 @@ namespace NuGet {
                 }
             }
 
-            // Validate the schema
-            ValidateManifestSchema(document);
+            if (validate) {
+                // Validate the schema
+                ValidateManifestSchema(document);
+            }
+
 
             // Remove the namespace from the outer tag to match CTP2 expectations
             document.Root.Name = document.Root.Name.LocalName;
@@ -96,8 +103,10 @@ namespace NuGet {
             var serializer = new XmlSerializer(typeof(Manifest));
             var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
 
-            // Validate before returning
-            Validate(manifest);
+            if (validate) {
+                // Validate before returning
+                Validate(manifest);
+            }
 
             // Trim fields in case they have extra whitespace
             manifest.Metadata.Id = manifest.Metadata.Id.SafeTrim();

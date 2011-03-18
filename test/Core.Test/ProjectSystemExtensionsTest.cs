@@ -160,7 +160,7 @@ namespace NuGet.Test {
 
         private IEnumerable<T> GetCompatibleItems<T>(FrameworkName frameworkName, IEnumerable<T> items) where T : IFrameworkTargetable {
             IEnumerable<T> compatibleItems;
-            ProjectSystemExtensions.TryGetCompatibleItemsCore(frameworkName, items, out compatibleItems);
+            VersionUtility.TryGetCompatibleItems(frameworkName, items, out compatibleItems);
             return compatibleItems;
         }
     }
