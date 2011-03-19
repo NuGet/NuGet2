@@ -1,10 +1,37 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace NuGet {
-    internal static class PathResolver {
-        public static PathSearchFilter ResolveSearchFilter(string basePath, string source) {
+    public static class PathResolver {
+        /// <summary>
+        /// Returns a collection of files from the source that matches the wildcard.
+        /// </summary>
+        /// <param name="source">The collection of files to match.</param>
+        /// <param name="getPath">Function that returns the path to filter a package file </param>
+        /// <param name="wildCard">The wildcard to apply to match the path with.</param>
+        /// <returns></returns>
+        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildCards)  where T : IPackageFile {
+            var filters = wildCards.Select(WildCardToRegex);
+            return source.Where(item => {
+                string path = getPath(item);
+                return filters.Any(f => f.IsMatch(path));
+            });
+        }
+
+        public static void FilterPackageFiles<T>(ICollection<T> source, Func<T, string> getPath, IEnumerable<string> wildCards) where T : IPackageFile {
+            var matchedFiles = new HashSet<T>(GetMatches(source, getPath, wildCards));
+            source.RemoveAll(p => matchedFiles.Contains(p));
+        }
+
+        private static Regex WildCardToRegex(string wildCard) {
+            return new Regex('^' + Regex.Escape(wildCard).Replace(@"\*", ".*").Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase);
+        }
+
+        internal static PathSearchFilter ResolveSearchFilter(string basePath, string source) {
             basePath = basePath ?? String.Empty;
             string pathFromBase = Path.Combine(basePath, source.TrimStart(Path.DirectorySeparatorChar));
 
@@ -57,7 +84,7 @@ namespace NuGet {
         /// <param name="searchFilter">The search filter used to add the file.</param>
         /// <param name="path">The absolute path to the file being added.</param>
         /// <param name="targetPath">The target path prefix for the .</param>
-        public static string ResolvePackagePath(PathSearchFilter searchFilter, string path, string targetPath) {
+        internal static string ResolvePackagePath(PathSearchFilter searchFilter, string path, string targetPath) {
             string packagePath = null;
             if (!searchFilter.WildCardSearch && Path.GetExtension(searchFilter.SearchPattern).Equals(Path.GetExtension(targetPath), StringComparison.OrdinalIgnoreCase)) {
                 // If the search does not contain wild cards, and the target path shares the same extension, copy it
