@@ -15,6 +15,13 @@ namespace NuGet.Commands {
         private readonly Project _project;
         private FrameworkName _frameworkName;
 
+        // Files we want to always exclude from the resulting package
+        private static readonly HashSet<string> _excludeFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+            PackageReferenceRepository.PackageReferenceFile,
+            "Web.Debug.config",
+            "Web.Release.config"
+        };
+
         // Packaging folders
         private const string ContentFolder = "content";
         private const string ReferenceFolder = "lib";
@@ -335,8 +342,7 @@ namespace NuGet.Commands {
             foreach (var item in _project.GetItems(itemType)) {
                 string file = Path.Combine(_project.DirectoryPath, item.UnevaluatedInclude);
 
-                // Skip the packages.config file
-                if (Path.GetFileName(file).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
+                if (_excludeFiles.Contains(Path.GetFileName(file))) {
                     continue;
                 }
 
