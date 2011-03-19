@@ -90,15 +90,18 @@ namespace NuGet.Commands {
                 ExtractMetadataFromProject(builder);
             }
 
-            if (!builder.Files.Any() || IncludeSources) {
+            bool anyNuspecFiles = builder.Files.Any();
+
+            if (!anyNuspecFiles || IncludeSources) {
                 // Add output files
                 AddOutputFiles(builder);
             }
 
-            if (!builder.Files.Any()) {
+            if (!anyNuspecFiles) {
                 // Add content files
                 AddFiles(builder, ContentItemType, ContentFolder);
             }
+
 
             // Add sources if this is a symbol package
             if (IncludeSources) {
