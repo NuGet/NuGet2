@@ -253,7 +253,6 @@
     <CodeAnalysisDictionary Include="..\..\..\..\CodeAnalysisDictionary.xml">
       <Link>CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
-    <Resource Include="Images\FolderOpen.png" />
     <Resource Include="Images\NoteHS.png" />
     <Resource Include="Images\Folder.ico" />
     <Content Include="nuspec.ico" />
