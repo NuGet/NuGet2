@@ -148,7 +148,7 @@ namespace NuGet.Commands {
             BuildParameters parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
             parameters.NodeExeLocation = typeof(ProjectPackageBuilder).Assembly.Location;
-            parameters.ToolsetDefinitionLocations = ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile;
+            parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
             BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
             // Build the project so that the outputs are created
             if (result.OverallResult == BuildResultCode.Failure) {
