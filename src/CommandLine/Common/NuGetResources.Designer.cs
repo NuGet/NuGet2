@@ -457,6 +457,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Determines if sources and symbols should be included in this package. Only valid when building a package from a project..
+        /// </summary>
+        internal static string PackageCommandSourcesDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandSourcesDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please specify a nuspec or project file to use..
         /// </summary>
         internal static string PackageCommandSpecifyInputFileError {
@@ -471,15 +480,6 @@ namespace NuGet.Common {
         internal static string PackageCommandSuccess {
             get {
                 return ResourceManager.GetString("PackageCommandSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Determines if symbols and sources should be included in this package. Only valid when building a package from a project..
-        /// </summary>
-        internal static string PackageCommandSymbolsDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandSymbolsDescription", resourceCulture);
             }
         }
         

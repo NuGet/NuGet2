@@ -35,8 +35,8 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandDebugDescription")]
         public bool Debug { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandSymbolsDescription")]
-        public bool Symbols { get; set; }
+        [Option(typeof(NuGetResources), "PackageCommandSourcesDescription")]
+        public bool Sources { get; set; }
 
         public override void ExecuteCommand() {
             // Get the input file
@@ -114,8 +114,17 @@ namespace NuGet.Commands {
         }
 
         private string GetOutputPath(PackageBuilder builder) {
-            // Output file is {id}.{version}.nupkg
-            string outputFile = builder.Id + "." + builder.Version + Constants.PackageExtension;
+            // Output file is {id}.{version}
+            string outputFile = builder.Id + "." + builder.Version;
+
+            // If this is a source package then add .Sources to the package file name
+            if (Sources) {
+                outputFile += ".Sources";
+            }
+
+            // Add the extension
+            outputFile += Constants.PackageExtension;
+
             string outputDirectory = OutputDirectory ?? Directory.GetCurrentDirectory();
             return Path.Combine(outputDirectory, outputFile);
         }
@@ -141,7 +150,7 @@ namespace NuGet.Commands {
 
         private PackageBuilder BuildFromProjectFile(string path) {
             var projectBuilder = new ProjectPackageBuilder(path, Console) {
-                IncludeSymbols = Symbols,
+                IncludeSources = Sources,
                 Debug = Debug
             };
 

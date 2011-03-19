@@ -5,6 +5,9 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -18,9 +21,6 @@ namespace NuGet.Commands {
         private const string ToolsFolder = "tools";
         private const string SourcesFolder = "src";
 
-        // Convention for symbol packages
-        private const string SymbolsId = "Symbols";
-
         // Common item types
         private const string SourcesItemType = "Compile";
         private const string ContentItemType = "Content";
@@ -33,14 +33,16 @@ namespace NuGet.Commands {
         }
 
         private string TargetPath {
-            get {
-                return _project.ExpandString(_project.GetPropertyValue("TargetPath"));
-            }
+            get;
+            set;
         }
 
         private string OutputPath {
             get {
-                return _project.GetPropertyValue("OutputPath");
+                if (TargetPath == null) {
+                    return null;
+                }
+                return Path.GetDirectoryName(TargetPath.Substring(_project.DirectoryPath.Length).TrimEnd(Path.DirectorySeparatorChar));
             }
         }
 
@@ -59,32 +61,20 @@ namespace NuGet.Commands {
             }
         }
 
-        internal bool IncludeSymbols { get; set; }
+        internal bool IncludeSources { get; set; }
 
         internal bool Debug { get; set; }
 
         private IConsole Console { get; set; }
 
         internal PackageBuilder BuildPackage() {
-            if (!Debug) {
-                _project.SetProperty("Configuration", "Release");
-            }
-            else {
-                _project.SetProperty("Configuration", "Debug");
-            }
-
             if (TargetFramework != null) {
                 Console.WriteLine(NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
             }
 
-            // Build the project so that the outputs are created
-            if (!_project.Build()) {
-                // If the build fails, report the error
-                throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
-            }
+            BuildProject();
 
-            string outputPath = OutputPath;
-            Console.WriteLine(NuGetResources.PackagingFilesFromOutputPath, outputPath);
+            Console.WriteLine(NuGetResources.PackagingFilesFromOutputPath, OutputPath);
 
             var builder = new PackageBuilder();
 
@@ -100,7 +90,7 @@ namespace NuGet.Commands {
                 ExtractMetadataFromProject(builder);
             }
 
-            if (!builder.Files.Any() || IncludeSymbols) {
+            if (!builder.Files.Any() || IncludeSources) {
                 // Add output files
                 AddOutputFiles(builder);
             }
@@ -111,18 +101,13 @@ namespace NuGet.Commands {
             }
 
             // Add sources if this is a symbol package
-            if (IncludeSymbols) {
+            if (IncludeSources) {
                 AddFiles(builder, SourcesItemType, SourcesFolder);
             }
 
 
             if (!builder.Dependencies.Any()) {
                 ProcessDependencies(builder);
-            }
-
-            // Add .Symbols to the package id if we are including symbols
-            if (IncludeSymbols) {
-                builder.Id += "." + SymbolsId;
             }
 
             // Set defaults if some required fields are missing
@@ -139,14 +124,46 @@ namespace NuGet.Commands {
             return builder;
         }
 
+        private void BuildProject() {
+            var properties = new Dictionary<string, string>();
+            if (!Debug) {
+                properties["Configuration"] = "Release";
+            }
+            else {
+                properties["Configuration"] = "Debug";
+            }
+
+            var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile);
+            BuildRequestData requestData = new BuildRequestData(_project.FullPath, properties, _project.ToolsVersion, new string[0], null);
+            BuildParameters parameters = new BuildParameters(projectCollection);
+            parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
+            parameters.NodeExeLocation = typeof(ProjectPackageBuilder).Assembly.Location;
+            parameters.ToolsetDefinitionLocations = ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile;
+            BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
+            // Build the project so that the outputs are created
+            if (result.OverallResult == BuildResultCode.Failure) {
+                // If the build fails, report the error
+                throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
+            }
+
+            TargetResult targetResult;
+            if (result.ResultsByTarget.TryGetValue("Build", out targetResult)) {
+                if (targetResult.Items.Any()) {
+                    TargetPath = targetResult.Items.First().ItemSpec;
+                }
+            }
+
+            TargetPath = TargetPath ?? _project.GetPropertyValue("TargetPath");
+        }
+
         private void ExtractMetadataFromProject(PackageBuilder builder) {
-            builder.Id = builder.Id ?? 
-                        _project.GetPropertyValue("AssemblyName") ?? 
+            builder.Id = builder.Id ??
+                        _project.GetPropertyValue("AssemblyName") ??
                         Path.GetFileNameWithoutExtension(_project.FullPath);
 
             string version = _project.GetPropertyValue("Version");
-            builder.Version = builder.Version ?? 
-                              VersionUtility.ParseOptionalVersion(version) ?? 
+            builder.Version = builder.Version ??
+                              VersionUtility.ParseOptionalVersion(version) ??
                               new Version("1.0");
         }
 
@@ -164,7 +181,7 @@ namespace NuGet.Commands {
                 ".xml"
             };
 
-            if (IncludeSymbols) {
+            if (IncludeSources) {
                 // Include pdbs for symbol packages
                 allowedOutputExtensions.Add(".pdb");
             }
