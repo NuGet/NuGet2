@@ -234,7 +234,6 @@
     <Resource Include="Images\CopyHS.png" />
     <Resource Include="Images\CutHS.png" />
     <Resource Include="Images\PasteHS.png" />
-    <Resource Include="Images\NoteHS.png" />
     <Resource Include="Images\Tools.png" />
     <Resource Include="Images\Add.png" />
     <Resource Include="Images\Delete.png" />
@@ -254,6 +253,9 @@
     <CodeAnalysisDictionary Include="..\..\..\..\CodeAnalysisDictionary.xml">
       <Link>CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
+    <Resource Include="Images\FolderOpen.png" />
+    <Resource Include="Images\NoteHS.png" />
+    <Resource Include="Images\Folder.ico" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

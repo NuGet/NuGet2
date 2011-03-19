@@ -131,5 +131,14 @@ namespace PackageExplorerViewModel {
                 return ResourceManager.GetString("RenameCausesNameCollison", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to *** The format of this file is not supported. ***.
+        /// </summary>
+        internal static string UnsupportedFormatMessage {
+            get {
+                return ResourceManager.GetString("UnsupportedFormatMessage", resourceCulture);
+            }
+        }
     }
 }

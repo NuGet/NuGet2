@@ -56,7 +56,7 @@
                             BorderThickness="0.5" 
                             HorizontalAlignment="Left" 
                             Padding="2"
-                            Background="Transparent"
+                            Background="White"
                             Margin="0,0,0,5"
                             ToolTipService.ToolTip="{Binding IconUrl, Mode=OneTime}"
                             Visibility="{Binding IconUrl, Converter={StaticResource NullToVisibilityConverter}}">
@@ -199,23 +199,20 @@
 
             <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
                 <StackPanel Background="Transparent" Orientation="Horizontal" ContextMenu="{StaticResource FolderSharedContextMenu}">
-                    <Image x:Name="ItemIcon" Visibility="Collapsed" Margin="0,0,2,0" />
+                    <Image x:Name="ItemIcon" Margin="0,0,2,0" Source="/NuGetPackageExplorer;component/Images/Folder.ico" />
                     <TextBlock x:Name="Header" Text="{Binding Path, Converter={StaticResource frameworkConverter}}" FontWeight="SemiBold" />
                 </StackPanel>
 
                 <HierarchicalDataTemplate.Triggers>
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="LIB">
-                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
                         <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Lib.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="CONTENT">
-                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
                         <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/NoteHS.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS">
-                        <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
                         <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Tools.png" />
                     </DataTrigger>
                 </HierarchicalDataTemplate.Triggers>
@@ -244,7 +241,7 @@
                         </Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <self:GrayscaleMenuItem Command="Open" Header="_Open">
+                <self:GrayscaleMenuItem Command="Open" Header="_Open...">
                     <self:GrayscaleMenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/openHS.png">
                         </Image>
