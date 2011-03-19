@@ -8,6 +8,8 @@ namespace NuGet.Commands {
         MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
     public class PushCommand : Command {
+        private const string DefaultSymbolServer = "http://nuget.gw.symbolsource.org/Public/NuGet";
+        private const string SourcesExtension = ".sources.nupkg";
 
         [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
         public bool CreateOnly { get; set; }
@@ -16,7 +18,6 @@ namespace NuGet.Commands {
         public string Source { get; set; }
 
         public override void ExecuteCommand() {
-
             //Frist argument should be the package
             string packagePath = Arguments[0];
 
@@ -25,15 +26,8 @@ namespace NuGet.Commands {
             if (Arguments.Count > 1) {
                 userSetApiKey = Arguments[1];
             }
-
-            //If the user passed a source use it for the gallery location
-            string galleryServerUrl;
-            if (String.IsNullOrEmpty(Source)) {
-                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
-            }
-            else {
-                galleryServerUrl = Source;
-            }
+            
+            string galleryServerUrl = GetSource(packagePath);
 
             var gallery = new GalleryServer(galleryServerUrl);
 
@@ -64,7 +58,26 @@ namespace NuGet.Commands {
             else {
                 Console.WriteLine(NuGetResources.PushCommandPackageCreated);
             }
+        }
 
+        private string GetSource(string packagePath) {
+            //If the user passed a source use it for the gallery location
+            string galleryServerUrl;
+            if (String.IsNullOrEmpty(Source)) {
+                galleryServerUrl = GetDefaultUrl(packagePath);
+            }
+            else {
+                galleryServerUrl = Source;
+            }
+
+            return galleryServerUrl;
+        }
+
+        private string GetDefaultUrl(string packagePath) {
+            if (packagePath.EndsWith(SourcesExtension, StringComparison.OrdinalIgnoreCase)) {
+                return DefaultSymbolServer;
+            }
+            return GalleryServer.DefaultGalleryServerUrl;
         }
     }
 }

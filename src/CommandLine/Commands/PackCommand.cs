@@ -119,7 +119,7 @@ namespace NuGet.Commands {
 
             // If this is a source package then add .Sources to the package file name
             if (Sources) {
-                outputFile += ".Sources";
+                outputFile += ".sources";
             }
 
             // Add the extension
