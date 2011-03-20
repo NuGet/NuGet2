@@ -4,7 +4,6 @@
         xmlns:self="clr-namespace:PackageExplorer"
         xmlns:effect="clr-namespace:GrayscaleEffect;assembly=GrayscaleEffect"
         xmlns:settings="clr-namespace:PackageExplorer.Properties"
-        xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         Title="Select package" 
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
@@ -36,45 +35,6 @@
                 <GradientStop Color="#E3E9EF" Offset="1"/>
             </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
-
-        <Style x:Key="SearchBoxStyle" TargetType="{x:Type TextBoxBase}" BasedOn="{x:Null}">
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="1"/>
-            <Setter Property="AllowDrop" Value="true"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
-            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                        <theme:ListBoxChrome x:Name="Bd"
-                                         BorderThickness="{TemplateBinding BorderThickness}"
-                                         BorderBrush="{TemplateBinding BorderBrush}"
-                                         Background="{TemplateBinding Background}"
-                                         RenderMouseOver="{TemplateBinding IsMouseOver}"
-                                         RenderFocused="{TemplateBinding IsKeyboardFocusWithin}"
-                                         SnapsToDevicePixels="true">
-                            
-                            <StackPanel Orientation="Horizontal">
-                                <ScrollViewer x:Name="PART_ContentHost"
-                                      Width="150"
-                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                <Image IsEnabled="{TemplateBinding IsEnabled}" Grid.Column="1" Source="/NuGetPackageExplorer;component/Images/Search.png" />
-                            </StackPanel>                            
-                        </theme:ListBoxChrome>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
@@ -142,17 +102,24 @@
         <!-- search box -->
         <TextBox 
             x:Name="SearchBox" 
-            Style="{StaticResource SearchBoxStyle}" 
             ToolTipService.ToolTip="Search for package" 
             Grid.Column="1" 
             Grid.Row="1" 
             HorizontalAlignment="Right" 
-            Padding="2,2,3,2" 
+            Padding="2" 
             KeyDown="SearchBox_KeyDown" 
             IsEnabled="{Binding IsEditable}"
             Tag="{Binding SearchCommand}" 
             VerticalAlignment="Center">
         </TextBox>
+        
+        <Image
+            Grid.Column="1"
+            Grid.Row="1"
+            Margin="0,4,6,0"
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Center"
+            Source="/NuGetPackageExplorer;component/Images/search.png" />
 
         <!-- package list view -->
         <ListView x:Name="PackageGrid" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Packages}" SelectionMode="Single" IsTextSearchEnabled="False">

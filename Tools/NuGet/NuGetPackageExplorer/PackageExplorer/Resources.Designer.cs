@@ -241,7 +241,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to RC.
+        ///   Looks up a localized string similar to RTM.
         /// </summary>
         public static string ProductRelease {
             get {

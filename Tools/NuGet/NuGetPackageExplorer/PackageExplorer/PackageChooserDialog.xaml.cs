@@ -92,7 +92,19 @@ namespace PackageExplorer {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
+            AdjustSearchBox();
+
             Dispatcher.BeginInvoke(new Action(LoadPackages), DispatcherPriority.Background);
+        }
+
+        private void AdjustSearchBox() {
+            if (SearchBox.Template != null) {
+                var contentHost = SearchBox.Template.FindName("PART_ContentHost", SearchBox) as FrameworkElement;
+                if (contentHost != null) {
+                    contentHost.Margin = new Thickness(0, 0, 20, 0);
+                    contentHost.Width = 150;
+                }
+            }
         }
 
         private void LoadPackages() {
