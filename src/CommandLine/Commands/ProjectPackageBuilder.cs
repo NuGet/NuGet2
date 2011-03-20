@@ -382,27 +382,27 @@ namespace NuGet.Commands {
         }
 
         private IEnumerable<string> GetFiles(string itemType) {
-            return _project.GetItems(itemType).Select(item => Path.Combine(_project.DirectoryPath, item.UnevaluatedInclude));
+            return _project.GetItems(itemType).Select(item => item.GetMetadataValue("FullPath"));
         }
 
         private void AddFiles(PackageBuilder builder, string itemType, string targetFolder) {
             // Get the content files from the project
             foreach (var item in _project.GetItems(itemType)) {
-                string file = Path.Combine(_project.DirectoryPath, item.UnevaluatedInclude);
+                string fullPath = item.GetMetadataValue("FullPath");
 
-                if (_excludeFiles.Contains(Path.GetFileName(file))) {
+                if (_excludeFiles.Contains(Path.GetFileName(fullPath))) {
                     continue;
                 }
 
                 string targetFilePath = GetTargetPath(item);
 
-                if (!File.Exists(file)) {
+                if (!File.Exists(fullPath)) {
                     Console.WriteWarning(NuGetResources.Warning_FileDoesNotExist, targetFilePath);
                     continue;
                 }
 
                 builder.Files.Add(new PhysicalPackageFile {
-                    SourcePath = file,
+                    SourcePath = fullPath,
                     TargetPath = Path.Combine(targetFolder, targetFilePath)
                 });
             }
