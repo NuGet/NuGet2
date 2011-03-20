@@ -271,12 +271,12 @@ namespace NuGet.Commands {
             var transformGroups = transformFiles.GroupBy(file => RemoveExtension(file.Path), StringComparer.OrdinalIgnoreCase);
             var fileLookup = builder.Files.ToDictionary(file => file.Path, StringComparer.OrdinalIgnoreCase);
 
-            foreach (var g in transformGroups) {
+            foreach (var tranfromGroup in transformGroups) {
                 IPackageFile file;
-                if (fileLookup.TryGetValue(g.Key, out file)) {
+                if (fileLookup.TryGetValue(tranfromGroup.Key, out file)) {
                     // Replace the original file with a file that removes the transforms
                     builder.Files.Remove(file);
-                    builder.Files.Add(new ReverseTransformFormFile(file, g.AsEnumerable()));
+                    builder.Files.Add(new ReverseTransformFormFile(file, tranfromGroup));
                 }
             }
         }
