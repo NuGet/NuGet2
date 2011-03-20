@@ -56,9 +56,13 @@
           <Find><![CDATA[ProductVersion = "\d+\.\d+\.\d+\.\d+"]]></Find>
           <ReplaceWith><![CDATA[ProductVersion = "$(Version)"]]></ReplaceWith>
         </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\**\*.nuspec">
+            <Find><![CDATA[<version>\d+\.\d+\.\d+\.\d+</version>]]></Find>
+            <ReplaceWith><![CDATA[<version>$(Version)</version>]]></ReplaceWith>
+        </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
     </Target>
     
     <Target Name="CheckFxCop">
@@ -105,7 +109,7 @@
 
     <Target Name="CopyExecutableOutputToDropDirectory">
         <ItemGroup>
-            <ExeOutputItems Exclude="$(ExeBuildDirectory)\**\*.pdb" Include="$(ExeBuildDirectory)\**\*.*" />
+            <ExeOutputItems Exclude="$(ExeBuildDirectory)\**\*.pdb" Include="$(ExeBuildDirectory)\**\*.*;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExeOutputItems)" DestinationFiles="@(ExeOutputItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -166,6 +170,14 @@
       <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:dll /out:$(MSBuildILMergeFileFinalName) /log:&quot;$(ILMergeArtifactDirectory)\ilmerge.msbuild.log&quot; /ndebug /allowDup $(MSBuildILMergeFileFinalName) %(MSBuildILMergeItems.FileName)%(MSBuildILMergeItems.Extension)" WorkingDirectory="$(MSBuildDropDirectory)" />
       <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
       <Delete Files="@(MSBuildILMergeItems)" />
+    </Target>
+
+    <Target Name="BuildPackages">
+        <PropertyGroup>
+            <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
+        </PropertyGroup>
+        <Exec Command="&quot;$(NuGetExe)&quot; pack" WorkingDirectory="$(ExeDropDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(ServerDropDirectory)" WorkingDirectory="$(ServerBuildDirectory)" />
     </Target>
     
     <Target Name="RunIntegrationTests">

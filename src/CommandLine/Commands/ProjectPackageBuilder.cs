@@ -33,6 +33,7 @@ namespace NuGet.Commands {
         private const string ContentItemType = "Content";
         private const string NuGetConfig = "nuget.config";
         private const string PackagesFolder = "packages";
+        private const string TransformFileExtension = ".transform";
 
         public ProjectPackageBuilder(string path, IConsole console) {
             _project = new Project(path);
@@ -71,6 +72,8 @@ namespace NuGet.Commands {
         internal bool IncludeSources { get; set; }
 
         internal bool Debug { get; set; }
+
+        internal bool IsTool { get; set; }
 
         private IConsole Console { get; set; }
 
@@ -115,10 +118,7 @@ namespace NuGet.Commands {
                 AddFiles(builder, SourcesItemType, SourcesFolder);
             }
 
-
-            if (!builder.Dependencies.Any()) {
-                ProcessDependencies(builder);
-            }
+            ProcessDependencies(builder);
 
             // Set defaults if some required fields are missing
             if (String.IsNullOrEmpty(builder.Description)) {
@@ -207,18 +207,23 @@ namespace NuGet.Commands {
                     continue;
                 }
 
-                string targetFilePath = null;
+                string targetFolder = null;
 
-                if (targetFramework == null) {
-                    targetFilePath = ReferenceFolder;
+                if (IsTool) {
+                    targetFolder = ToolsFolder;
                 }
                 else {
-                    targetFilePath = Path.Combine(ReferenceFolder, VersionUtility.GetFrameworkFolder(targetFramework));
+                    if (targetFramework == null) {
+                        targetFolder = ReferenceFolder;
+                    }
+                    else {
+                        targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetFrameworkFolder(targetFramework));
+                    }
                 }
 
                 builder.Files.Add(new PhysicalPackageFile {
                     SourcePath = file,
-                    TargetPath = Path.Combine(targetFilePath, Path.GetFileName(file))
+                    TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
                 });
             }
         }
@@ -237,8 +242,14 @@ namespace NuGet.Commands {
             // Try to find the package and remove all files we added from the output
             // that are part of packages
             IPackageRepository repository = GetPackagesRepository(_project.DirectoryPath);
+            var transformFiles = new List<IPackageFile>();
 
             foreach (PackageReference reference in file.GetPackageReferences()) {
+                // Don't add duplicates
+                if (builder.Dependencies.Any(d => d.Id.Equals(reference.Id, StringComparison.OrdinalIgnoreCase))) {
+                    continue;
+                }
+
                 IVersionSpec spec = VersionUtility.ParseVersionSpec(reference.Version.ToString());
                 var dependency = new PackageDependency(reference.Id, spec);
                 builder.Dependencies.Add(dependency);
@@ -246,16 +257,53 @@ namespace NuGet.Commands {
                 if (repository != null) {
                     IPackage package = repository.FindPackage(reference.Id, reference.Version);
                     if (package != null) {
-                        IEnumerable<IPackageAssemblyReference> compatibleAssemblies;
-                        if (VersionUtility.TryGetCompatibleItems(TargetFramework, package.AssemblyReferences, out compatibleAssemblies)) {
-                            var assemblies = new HashSet<string>(compatibleAssemblies.Select(a => Path.GetFileNameWithoutExtension(a.Path)));
-                            var filesToRemove = builder.Files.Where(f => assemblies.Contains(Path.GetFileNameWithoutExtension(f.Path))).ToList();
-
-                            foreach (var item in filesToRemove) {
-                                builder.Files.Remove(item);
-                            }
-                        }
+                        RemovePackageFiles(builder, package);
+                        transformFiles.AddRange(GetTransformFiles(package));
                     }
+                }
+            }
+
+            ProcessTransformFiles(builder, transformFiles);
+        }
+
+        private void ProcessTransformFiles(PackageBuilder builder, List<IPackageFile> transformFiles) {
+            // Group transform by target file
+            var transformGroups = transformFiles.GroupBy(file => RemoveExtension(file.Path), StringComparer.OrdinalIgnoreCase);
+            var fileLookup = builder.Files.ToDictionary(file => file.Path, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var g in transformGroups) {
+                IPackageFile file;
+                if (fileLookup.TryGetValue(g.Key, out file)) {
+                    // Replace the original file with a file that removes the transforms
+                    builder.Files.Remove(file);
+                    builder.Files.Add(new ReverseTransformFormFile(file, g.AsEnumerable()));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes a file extension keeping the full path intact
+        /// </summary>
+        private static string RemoveExtension(string path) {
+            return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+        }
+
+        private IEnumerable<IPackageFile> GetTransformFiles(IPackage package) {
+            return package.GetContentFiles().Where(IsTransformFile);
+        }
+
+        private static bool IsTransformFile(IPackageFile file) {
+            return Path.GetExtension(file.Path).Equals(TransformFileExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void RemovePackageFiles(PackageBuilder builder, IPackage package) {
+            IEnumerable<IPackageAssemblyReference> compatibleAssemblies;
+            if (VersionUtility.TryGetCompatibleItems(TargetFramework, package.AssemblyReferences, out compatibleAssemblies)) {
+                var assemblies = new HashSet<string>(compatibleAssemblies.Select(a => Path.GetFileNameWithoutExtension(a.Path)));
+                var filesToRemove = builder.Files.Where(f => assemblies.Contains(Path.GetFileNameWithoutExtension(f.Path))).ToList();
+
+                foreach (var item in filesToRemove) {
+                    builder.Files.Remove(item);
                 }
             }
         }
@@ -365,6 +413,46 @@ namespace NuGet.Commands {
                 return item.GetMetadataValue("Link");
             }
             return item.UnevaluatedInclude;
+        }
+
+        private class ReverseTransformFormFile : IPackageFile {
+            private readonly Lazy<Func<Stream>> _streamFactory;
+
+            public ReverseTransformFormFile(IPackageFile file, IEnumerable<IPackageFile> transforms) {
+                Path = file.Path + ".transform";
+                _streamFactory = new Lazy<Func<Stream>>(() => ReverseTransform(file, transforms), isThreadSafe: false);
+            }
+
+            public string Path {
+                get;
+                private set;
+            }
+
+            public Stream GetStream() {
+                return _streamFactory.Value();   
+            }
+
+            private static Func<Stream> ReverseTransform(IPackageFile file, IEnumerable<IPackageFile> transforms) {
+                // Get the original
+                XElement element = GetElement(file);
+
+                // Remove all the transforms
+                foreach (var transformFile in transforms) {
+                    element.Except(GetElement(transformFile));
+                }
+
+                // Create the stream with the transformed content
+                var ms = new MemoryStream();
+                element.Save(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                return ms.ToStreamFactory();
+            }
+
+            private static XElement GetElement(IPackageFile file) {
+                using (Stream stream = file.GetStream()) {
+                    return XElement.Load(stream);
+                }
+            }
         }
     }
 }

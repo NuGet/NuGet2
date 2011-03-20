@@ -38,6 +38,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandSourcesDescription")]
         public bool Sources { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
+        public bool Tool { get; set; }
+
         public override void ExecuteCommand() {
             // Get the input file
             string path = GetInputFile();
@@ -151,7 +154,8 @@ namespace NuGet.Commands {
         private PackageBuilder BuildFromProjectFile(string path) {
             var projectBuilder = new ProjectPackageBuilder(path, Console) {
                 IncludeSources = Sources,
-                Debug = Debug
+                Debug = Debug,
+                IsTool = Tool
             };
 
             return projectBuilder.BuildPackage();

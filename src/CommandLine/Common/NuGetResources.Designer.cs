@@ -484,6 +484,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Determines if the output files of the project should be in the tool folder. .
+        /// </summary>
+        internal static string PackageCommandToolDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandToolDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specify the location of the manifest (Nuspec) file to create a package..
         /// </summary>
         internal static string PackageCommandUsageDescription {
