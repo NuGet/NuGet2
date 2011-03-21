@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -12,9 +10,9 @@ namespace NuGet.Commands {
     public class PackCommand : Command {
         private static readonly string[] _defaultExcludes = new[] {
             // Exclude previous package files
-            "*" + Constants.PackageExtension, 
+            @"**\*" + Constants.PackageExtension, 
             // Exclude all files and directories that begin with "."
-            @".*", @"*\.*", @"*/.*",
+            @"**\\.**",
         };
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -67,8 +65,8 @@ namespace NuGet.Commands {
                 builder.Version = new Version(Version);
             }
 
-            // Remove the output file or the package spec might try to include it (which is default behavior)
-            ExcludeFiles(builder.Files, path, _excludes, enableDefaultExcludes: !NoDefaultExcludes);
+            var basePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
+            ExcludeFiles(builder.Files, basePath, _excludes, enableDefaultExcludes: !NoDefaultExcludes);
 
             // Get the output path
             string outputPath = GetOutputPath(builder);
@@ -128,7 +126,7 @@ namespace NuGet.Commands {
 
         internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, string basePath, IEnumerable<string> excludeFilters, bool enableDefaultExcludes) {
             // Always exclude the nuspec file
-            var wildCards = excludeFilters.Concat(new[] { "*" + Constants.ManifestExtension } );
+            var wildCards = excludeFilters.Concat(new[] { @"**\*" + Constants.ManifestExtension } );
             if (enableDefaultExcludes) {
                 wildCards = wildCards.Concat(_defaultExcludes);
             }
@@ -136,11 +134,11 @@ namespace NuGet.Commands {
                 var path = (p as PhysicalPackageFile).SourcePath;
                 int index = path.IndexOf(basePath, StringComparison.OrdinalIgnoreCase);
                 if (index != -1) {
-                    path = path.Substring(index + basePath.Length);
+                    path = path.Substring(index + basePath.Length).TrimStart(Path.DirectorySeparatorChar);
                 }
                 return path;
             };
-            PathResolver.FilterPackageFiles(packageFiles, getPath, wildCards);// (packageFiles, getPath, wildCards);
+            PathResolver.FilterPackageFiles(packageFiles, getPath, wildCards);
         }
 
         private string GetOutputPath(PackageBuilder builder) {

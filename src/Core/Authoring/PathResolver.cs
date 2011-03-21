@@ -14,21 +14,25 @@ namespace NuGet {
         /// <param name="getPath">Function that returns the path to filter a package file </param>
         /// <param name="wildCard">The wildcard to apply to match the path with.</param>
         /// <returns></returns>
-        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildCards)  where T : IPackageFile {
-            var filters = wildCards.Select(WildCardToRegex);
+        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildcards)  where T : IPackageFile {
+            var filters = wildcards.Select(WildCardToRegex);
             return source.Where(item => {
                 string path = getPath(item);
                 return filters.Any(f => f.IsMatch(path));
             });
         }
 
-        public static void FilterPackageFiles<T>(ICollection<T> source, Func<T, string> getPath, IEnumerable<string> wildCards) where T : IPackageFile {
-            var matchedFiles = new HashSet<T>(GetMatches(source, getPath, wildCards));
+        public static void FilterPackageFiles<T>(ICollection<T> source, Func<T, string> getPath, IEnumerable<string> wildcards) where T : IPackageFile {
+            var matchedFiles = new HashSet<T>(GetMatches(source, getPath, wildcards));
             source.RemoveAll(p => matchedFiles.Contains(p));
         }
 
         private static Regex WildCardToRegex(string wildCard) {
-            return new Regex('^' + Regex.Escape(wildCard).Replace(@"\*", ".*").Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase);
+            return new Regex('^' + Regex.Escape(wildCard)
+                .Replace(@"\*\*\\", ".*") //For recursive wildcards \**\, include the current directory.
+                .Replace(@"\*\*", ".*")
+                .Replace(@"\*", @"[^\\]*(\\)?")
+                .Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase);
         }
 
         internal static PathSearchFilter ResolveSearchFilter(string basePath, string source) {

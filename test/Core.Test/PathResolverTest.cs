@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test {
@@ -376,6 +378,104 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(targetPath, result);
+        }
+
+        [TestMethod]
+        public void GetMatchesFiltersByWildCards() {
+            // Arrange
+            var files = new[] { 
+                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile { SourcePath = @"baz.pdb" },
+            };
+
+            // Act
+            var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\*.txt", "*.pdb" });
+
+            // Assert
+            Assert.AreEqual(2, matches.Count());
+            Assert.AreEqual(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.AreEqual(@"baz.pdb", matches.ElementAt(1).SourcePath);
+        }
+
+        [TestMethod]
+        public void GetMatchesAllowsRecursiveWildcardMatches() {
+            // Arrange
+            var files = new[] { 
+                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile { SourcePath = @"lib\baz.pdb" },
+                new PhysicalPackageFile { SourcePath = @"baz.dll" },
+            };
+
+            // Act
+            var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\**\.txt", "**.pdb" });
+
+            // Assert
+            Assert.AreEqual(3, matches.Count());
+            Assert.AreEqual(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.AreEqual(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
+            Assert.AreEqual(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
+        }
+
+        [TestMethod]
+        public void GetMatchesPerformsRecursiveWildcardSearch() {
+            // Arrange
+            var files = new[] { 
+                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile { SourcePath = @"lib\baz.pdb" },
+                new PhysicalPackageFile { SourcePath = @"baz.dll" },
+            };
+
+            // Act
+            var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\**\.txt", "**.pdb" });
+
+            // Assert
+            Assert.AreEqual(3, matches.Count());
+            Assert.AreEqual(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.AreEqual(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
+            Assert.AreEqual(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
+        }
+
+        [TestMethod]
+        public void GetMatchesPerformsExactMatches() {
+            // Arrange
+            var files = new[] { 
+                new PhysicalPackageFile { SourcePath = @"foo.dll" }, 
+                new PhysicalPackageFile { SourcePath = @"content\foo.dll" },
+                new PhysicalPackageFile { SourcePath = @"bin\debug\baz.dll" },
+                new PhysicalPackageFile { SourcePath = @"bin\debug\notbaz.dll" },
+            };
+
+            // Act
+            var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"foo.dll", @"bin\*\b*.dll" });
+
+            // Assert
+            Assert.AreEqual(2, matches.Count());
+            Assert.AreEqual(@"foo.dll", matches.ElementAt(0).SourcePath);
+            Assert.AreEqual(@"bin\debug\baz.dll", matches.ElementAt(1).SourcePath);
+        }
+
+        [TestMethod]
+        public void FilterPathRemovesItemsThatMatchWildcard() {
+            // Arrange
+            var files = new List<IPackageFile>(new[] { 
+                new PhysicalPackageFile { TargetPath = @"foo.dll" }, 
+                new PhysicalPackageFile { TargetPath = @"content\foo.dll" },
+                new PhysicalPackageFile { TargetPath = @"bin\debug\baz.dll" },
+                new PhysicalPackageFile { TargetPath = @"bin\debug\notbaz.dll" },
+                new PhysicalPackageFile { TargetPath = @"bin\debug\baz.pdb" },
+                new PhysicalPackageFile { TargetPath = @"bin\debug\notbaz.pdb" },
+            });
+
+            // Act
+            PathResolver.FilterPackageFiles(files, f => f.Path, new[] { @"**\f*.dll", @"**\*.pdb" });
+
+            // Assert
+            Assert.AreEqual(2, files.Count());
+            Assert.AreEqual(@"bin\debug\baz.dll", files[0].Path);
+            Assert.AreEqual(@"bin\debug\notbaz.dll", files[1].Path);
         }
 
         private void AssertEqual(PathSearchFilter expected, PathSearchFilter actual) {

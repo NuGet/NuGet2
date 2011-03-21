@@ -78,7 +78,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { "*.ext" }, true);
+            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, true);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -97,7 +97,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { "*.ext" }, true);
+            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, true);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -116,7 +116,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { "*.ext" }, true);
+            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, true);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -135,7 +135,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { "*.EXt" }, true);
+            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.EXt" }, true);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -155,7 +155,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { "*.ext" }, enableDefaultExcludes: false);
+            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, enableDefaultExcludes: false);
 
             // Assert
             Assert.AreEqual(3, files.Count);

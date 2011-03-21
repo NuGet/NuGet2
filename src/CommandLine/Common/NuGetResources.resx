@@ -405,6 +405,9 @@
   <data name="Warning_UnspecifiedField" xml:space="preserve">
     <value>{0} was not specified. Using '{1}'.</value>
   </data>
+  <data name="PackageCommandNoDefaultExcludes" xml:space="preserve">
+    <value>Prevent default exclusion of .nupkg files and files and folders starting with a dot e.g. .svn.</value>
+  </data>
   <data name="PackageCommandToolDescription" xml:space="preserve">
     <value>Determines if the output files of the project should be in the tool folder. </value>
   </data>
