@@ -258,7 +258,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="PackageExplorer_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
