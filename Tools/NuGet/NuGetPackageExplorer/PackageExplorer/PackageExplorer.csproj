@@ -29,7 +29,7 @@
     <InstallUrl>http://nuget.codeplex.com/releases/clickonce/</InstallUrl>
     <SupportUrl>http://nuget.codeplex.com</SupportUrl>
     <ProductName>NuGet Package Explorer</ProductName>
-    <PublisherName>Outercurve</PublisherName>
+    <PublisherName>Outercurve Foundation</PublisherName>
     <SuiteName>NuGet</SuiteName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>0</ApplicationRevision>
