@@ -486,6 +486,7 @@
 
             <!-- content viewer -->
             <GroupBox
+                x:Name="FileContentContainer"
                 Header="{Binding CurrentFileName, TargetNullValue='Content Viewer'}"
                 Grid.Row="2"
                 Grid.Column="1" 
@@ -495,8 +496,8 @@
                 Background="#FCFEF0" 
                 BorderBrush="DarkGray" 
                 BorderThickness="1" 
-                IsVisibleChanged="GroupBox_IsVisibleChanged">
-                <TextBox 
+                IsVisibleChanged="FileContentContainer_IsVisibleChanged">
+                <!--<self:SyntaxHighlightingTextBox 
                     x:Name="FileContent"
                     BorderThickness="0"
                     AcceptsReturn="True"
@@ -504,15 +505,16 @@
                     VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True" 
                     Background="#FCFEF0"                     
-                    Text="{Binding CurrentFileContent, Mode=OneWay}"
+                    SourceCode="{Binding CurrentFileContent, Mode=OneWay}"
+                    SourceLanguage="{Binding CurrentFileLanguage, Mode=OneWay, FallbackValue=Plain}"
                     TextChanged="OnFileContentChanged">
-                    <TextBox.ContextMenu>
+                    <self:SyntaxHighlightingTextBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="SelectAll" />
                             <MenuItem Command="Copy" />
                         </ContextMenu>
-                    </TextBox.ContextMenu>
-                </TextBox>
+                    </self:SyntaxHighlightingTextBox.ContextMenu>
+                </self:SyntaxHighlightingTextBox>-->
             </GroupBox>
             
             <Button 

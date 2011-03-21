@@ -109,6 +109,20 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private SourceLanguageType _currentFileLanguage;
+
+        public SourceLanguageType CurrentFileLanguage {
+            get {
+                return _currentFileLanguage;
+            }
+            set {
+                if (_currentFileLanguage != value) {
+                    _currentFileLanguage = value;
+                    OnPropertyChanged("CurrentFileLanguage");
+                }
+            }
+        }
+
         public ICollection<PackagePart> PackageParts {
             get {
                 return _packageRoot.Children;
@@ -268,9 +282,10 @@ namespace PackageExplorerViewModel {
             private set;
         }
 
-        public void ShowFile(string name, string content) {
+        public void ShowFile(string name, string content, SourceLanguageType language) {
             CurrentFileName = name;
             CurrentFileContent = content;
+            CurrentFileLanguage = language;
             ShowContentViewer = true;
         }
 

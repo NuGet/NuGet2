@@ -99,6 +99,7 @@
     </Compile>
     <Compile Include="Commands\ViewContentCommand.cs" />
     <Compile Include="Commands\SavePackageCommand.cs" />
+    <Compile Include="Types\SourceLanguageType.cs" />
     <Compile Include="Types\IMessageBox.cs" />
     <Compile Include="Types\IMruManager.cs" />
     <Compile Include="Types\IPackageViewModelFactory.cs" />

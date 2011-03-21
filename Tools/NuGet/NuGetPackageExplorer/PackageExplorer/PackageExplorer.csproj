@@ -94,6 +94,9 @@
     <Reference Include="GrayscaleEffect">
       <HintPath>..\GrayscaleEffect.dll</HintPath>
     </Reference>
+    <Reference Include="SyntaxHighlighting">
+      <HintPath>..\SyntaxHighlighting.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -118,7 +121,7 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BrowseForFolder.cs" />
+    <Compile Include="Interop\BrowseForFolder.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
@@ -134,17 +137,17 @@
     <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="Converters\VersionSpecConverter.cs" />
     <Compile Include="Converters\PackagePartToBoolConverter.cs" />
-    <Compile Include="DialogWithNoMinimizeAndMaximize.cs" />
+    <Compile Include="Controls\DialogWithNoMinimizeAndMaximize.cs" />
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="FileUtility.cs" />
-    <Compile Include="GrayscaleButton.cs" />
-    <Compile Include="GrayscaleImage.cs" />
-    <Compile Include="GrayscaleMenuItem.cs" />
-    <Compile Include="SettingsManager.cs" />
-    <Compile Include="MessageBoxService.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Controls\GrayscaleButton.cs" />
+    <Compile Include="Controls\GrayscaleImage.cs" />
+    <Compile Include="Controls\GrayscaleMenuItem.cs" />
+    <Compile Include="MefServices\SettingsManager.cs" />
+    <Compile Include="MefServices\MessageBoxService.cs" />
+    <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">
       <DependentUpon>PackageChooserDialog.xaml</DependentUpon>
     </Compile>
@@ -168,10 +171,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SortAdorner.cs" />
+    <Compile Include="Controls\SortAdorner.cs" />
+    <Compile Include="Controls\SyntaxHighlightingTextBox.cs" />
     <Compile Include="UriHelper.cs" />
-    <Compile Include="WindowPlacement.cs" />
-    <Compile Include="WindowPlacementHelper.cs" />
+    <Compile Include="Interop\WindowPlacement.cs" />
+    <Compile Include="Interop\WindowPlacementHelper.cs" />
     <Page Include="AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

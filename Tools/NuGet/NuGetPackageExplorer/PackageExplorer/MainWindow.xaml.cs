@@ -14,6 +14,9 @@ using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using PackageExplorerViewModel.Types;
 using StringResources = PackageExplorer.Resources.Resources;
+using System.Runtime.CompilerServices;
+using System.Windows.Media;
+using System.Windows.Data;
 
 namespace PackageExplorer {
     /// <summary>
@@ -380,17 +383,52 @@ namespace PackageExplorer {
             }
         }
 
-        private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+        private void FileContentContainer_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
             var settings = Properties.Settings.Default;
 
             if ((bool)e.NewValue) {
                 ContentGrid.RowDefinitions[2].Height = new GridLength(settings.ContentViewerPanelHeight, GridUnitType.Pixel);
-                FileContent.ScrollToLine(0);
+
+                if (FileContentContainer.Content == null) {
+                    RichTextBox fileContent = CreateFileContentViewer();
+                    fileContent.TextChanged += (o, args) => {
+                        ((RichTextBox)o).ScrollToHome();
+                    };
+                    FileContentContainer.Content = fileContent;
+                }
+
+                ((RichTextBox)FileContentContainer.Content).ScrollToHome();
             }
             else {
                 settings.ContentViewerPanelHeight = ContentGrid.RowDefinitions[2].Height.Value;
                 ContentGrid.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Auto);
             }
+        }
+
+        // delay load the Syntax HighlightTextBox, avoid loading SyntaxHighlighting.dll upfront
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static RichTextBox CreateFileContentViewer() {
+            var textBox = new SyntaxHighlightingTextBox() {
+                BorderThickness = new Thickness(0),
+                AcceptsReturn = true,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                IsReadOnly = true,
+                Background = new SolidColorBrush(Color.FromArgb(0xFF, 0xFC, 0xFE, 0xF0)),
+            };
+
+            var sourceCodeBinding = new Binding("CurrentFileContent") {
+                Mode = BindingMode.OneWay
+            };
+            textBox.SetBinding(SyntaxHighlightingTextBox.SourceCodeProperty, sourceCodeBinding);
+
+            var sourceLanguageBinding = new Binding("CurrentFileLanguage") {
+                Mode = BindingMode.OneWay,
+                FallbackValue = SourceLanguageType.Plain
+            };
+            textBox.SetBinding(SyntaxHighlightingTextBox.SourceLanguageProperty, sourceLanguageBinding);
+
+            return textBox;
         }
 
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
@@ -594,10 +632,6 @@ namespace PackageExplorer {
             }
 
             e.Handled = true;
-        }
-
-        private void OnFileContentChanged(object sender, TextChangedEventArgs e) {
-            FileContent.ScrollToLine(0);
         }
 
         private void RecentFileMenuItem_Click(object sender, RoutedEventArgs e) {
