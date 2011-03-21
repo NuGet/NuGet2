@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Commands;
+using Moq;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
     [TestClass]
@@ -162,6 +163,21 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.AreEqual(files[0].Path, @"p:\some-file\test.txt");
             Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\ext\sample.nupkg");
             Assert.AreEqual(files[2].Path, @"p:\some-file\should-not-be-removed\.hgignore");
+        }
+
+        [TestMethod]
+        public void ExcludeFilesUsesPathIfFileIsNotPhysicalPackageFile() {
+            // Arrange
+            var mockFile = new Mock<IPackageFile>();
+            mockFile.Setup(c => c.Path).Returns(@"content\foo.txt");
+            var files = GetPackageFiles(@"p:\some-file\test.txt").Concat(new[] { mockFile.Object }).ToList();
+
+            // Act
+            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"content\f*" }, enableDefaultExcludes: false);
+
+            // Assert
+            Assert.AreEqual(1, files.Count);
+            Assert.AreEqual(files[0].Path, @"p:\some-file\test.txt");
         }
 
         private static IList<IPackageFile> GetPackageFiles(params string[] paths) {

@@ -58,7 +58,6 @@ namespace NuGet.Commands {
 
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
-            //var basePath = ;
             PackageBuilder builder = GetPackageBuilder(path);
 
             if (!String.IsNullOrEmpty(Version)) {
@@ -131,7 +130,12 @@ namespace NuGet.Commands {
                 wildCards = wildCards.Concat(_defaultExcludes);
             }
             Func<IPackageFile, string> getPath = p => {
-                var path = (p as PhysicalPackageFile).SourcePath;
+                var packageFile = p as PhysicalPackageFile;
+                // For PhysicalPackageFiles, we want to filter by SourcePaths, the path on disk. The Path value maps to the TargetPath
+                if (packageFile == null) {
+                    return p.Path;
+                }
+                var path = packageFile.SourcePath;
                 int index = path.IndexOf(basePath, StringComparison.OrdinalIgnoreCase);
                 if (index != -1) {
                     path = path.Substring(index + basePath.Length).TrimStart(Path.DirectorySeparatorChar);
