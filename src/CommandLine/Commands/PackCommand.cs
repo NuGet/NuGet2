@@ -12,7 +12,7 @@ namespace NuGet.Commands {
             // Exclude previous package files
             @"**\*" + Constants.PackageExtension, 
             // Exclude all files and directories that begin with "."
-            @"**\\.**",
+            @"**\\.**", ".**"
         };
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -64,8 +64,9 @@ namespace NuGet.Commands {
                 builder.Version = new Version(Version);
             }
 
-            var basePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
-            ExcludeFiles(builder.Files, basePath, _excludes, enableDefaultExcludes: !NoDefaultExcludes);
+            // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
+            BasePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
+            ExcludeFiles(builder.Files);
 
             // Get the output path
             string outputPath = GetOutputPath(builder);
@@ -123,26 +124,32 @@ namespace NuGet.Commands {
             Console.WriteLine();
         }
 
-        internal static void ExcludeFiles(ICollection<IPackageFile> packageFiles, string basePath, IEnumerable<string> excludeFilters, bool enableDefaultExcludes) {
+        internal void ExcludeFiles(ICollection<IPackageFile> packageFiles) {
             // Always exclude the nuspec file
-            var wildCards = excludeFilters.Concat(new[] { @"**\*" + Constants.ManifestExtension } );
-            if (enableDefaultExcludes) {
+            // Review: This exclusion should be done by the package builder because it knows which file would collide with the auto-generated
+            // manifest file.
+            var wildCards = _excludes.Concat(new[] { @"**\*" + Constants.ManifestExtension });
+            if (!NoDefaultExcludes) {
+                // The user has not explicitly disabled default filtering.
                 wildCards = wildCards.Concat(_defaultExcludes);
             }
-            Func<IPackageFile, string> getPath = p => {
-                var packageFile = p as PhysicalPackageFile;
-                // For PhysicalPackageFiles, we want to filter by SourcePaths, the path on disk. The Path value maps to the TargetPath
-                if (packageFile == null) {
-                    return p.Path;
-                }
-                var path = packageFile.SourcePath;
-                int index = path.IndexOf(basePath, StringComparison.OrdinalIgnoreCase);
-                if (index != -1) {
-                    path = path.Substring(index + basePath.Length).TrimStart(Path.DirectorySeparatorChar);
-                }
-                return path;
-            };
-            PathResolver.FilterPackageFiles(packageFiles, getPath, wildCards);
+            PathResolver.FilterPackageFiles(packageFiles, ResolvePath, wildCards);
+        }
+
+        private string ResolvePath(IPackageFile packageFile) {
+            var physicalPackageFile = packageFile as PhysicalPackageFile;
+            // For PhysicalPackageFiles, we want to filter by SourcePaths, the path on disk. The Path value maps to the TargetPath
+            if (physicalPackageFile == null) {
+                return packageFile.Path;
+            }
+            var path = physicalPackageFile.SourcePath;
+            int index = path.IndexOf(BasePath, StringComparison.OrdinalIgnoreCase);
+            if (index != -1) {
+                // Since wildcards are going to be relative to the base path, remove the BasePath portion of the file's source path. 
+                // Also remove any leading path separator slashes
+                path = path.Substring(index + BasePath.Length).TrimStart(Path.DirectorySeparatorChar);
+            }
+            return path;
         }
 
         private string GetOutputPath(PackageBuilder builder) {

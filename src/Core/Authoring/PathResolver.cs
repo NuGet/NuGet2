@@ -14,7 +14,7 @@ namespace NuGet {
         /// <param name="getPath">Function that returns the path to filter a package file </param>
         /// <param name="wildCard">The wildcard to apply to match the path with.</param>
         /// <returns></returns>
-        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildcards)  where T : IPackageFile {
+        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildcards) where T : IPackageFile {
             var filters = wildcards.Select(WildCardToRegex);
             return source.Where(item => {
                 string path = getPath(item);
@@ -28,11 +28,13 @@ namespace NuGet {
         }
 
         private static Regex WildCardToRegex(string wildCard) {
-            return new Regex('^' + Regex.Escape(wildCard)
+            return new Regex('^'
+               + Regex.Escape(wildCard)
                 .Replace(@"\*\*\\", ".*") //For recursive wildcards \**\, include the current directory.
-                .Replace(@"\*\*", ".*")
-                .Replace(@"\*", @"[^\\]*(\\)?")
-                .Replace(@"\?", ".") + '$', RegexOptions.IgnoreCase);
+                .Replace(@"\*\*", ".*") // For recursive wildcards that don't end in a slash e.g. **.txt would be treated as a .txt file at any depth
+                .Replace(@"\*", @"[^\\]*(\\)?") // For non recursive searches, limit it any character that is not a directory separator
+                .Replace(@"\?", ".") // ? translates to a single any character
+               + '$', RegexOptions.IgnoreCase);
         }
 
         internal static PathSearchFilter ResolveSearchFilter(string basePath, string source) {

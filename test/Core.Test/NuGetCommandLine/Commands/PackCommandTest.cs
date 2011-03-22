@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Commands;
 using Moq;
+using NuGet.Commands;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
     [TestClass]
@@ -20,8 +20,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            var packCommand = new PackCommand();
-            PackCommand.ExcludeFiles(files, @"x:\packagefiles\", Enumerable.Empty<string>(), true);
+            var packCommand = new PackCommand { BasePath = @"x:\packagefiles\", NoDefaultExcludes = false };
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(3, files.Count);
@@ -38,12 +38,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                     @"x:\packagefiles\folder\.hg",
                     @"x:\packagefiles\folder\should-not-exclude\hg",
                     @"x:\packagefiles\repo\.git\HEAD",
-                    @"x:\packagefiles\svnrepo\.svn\all-wcrops"
+                    @"x:\packagefiles\svnrepo\.svn\all-wcrops",
+                    @"x:\packagefiles\.git\should-not-exist"
             );
 
             // Act
-            var packCommand = new PackCommand();
-            PackCommand.ExcludeFiles(files, @"x:\packagefiles\", Enumerable.Empty<string>(), true);
+            var packCommand = new PackCommand { BasePath = @"x:\packagefiles\", NoDefaultExcludes = false };
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -61,8 +62,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            var packCommand = new PackCommand();
-            PackCommand.ExcludeFiles(files, @"x:\packagefiles", Enumerable.Empty<string>(), true);
+            var packCommand = new PackCommand { BasePath = @"x:\packagefiles", NoDefaultExcludes = false };
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(1, files.Count);
@@ -79,7 +80,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, true);
+            var packCommand = new PackCommand { BasePath = @"p:\some-file", NoDefaultExcludes = false };
+            packCommand.Exclude.Add(@"**\*.ext");
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -98,7 +101,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, true);
+            var packCommand = new PackCommand { BasePath = @"p:\some-file", NoDefaultExcludes = false };
+            packCommand.Exclude.Add(@"**\*.ext");
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -117,12 +122,15 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, true);
+            var packCommand = new PackCommand { BasePath = @"p:\some-file", NoDefaultExcludes = true };
+            packCommand.Exclude.Add(@"**\*.ext");
+            packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(2, files.Count);
+            Assert.AreEqual(3, files.Count);
             Assert.AreEqual(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
-            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
+            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\.ext\sample2.txt");
+            Assert.AreEqual(files[2].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
         }
 
         [TestMethod]
@@ -136,7 +144,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.EXt" }, true);
+            var packCommand = new PackCommand { BasePath = @"p:\some-file", NoDefaultExcludes = false };
+            packCommand.Exclude.Add(@"**\*.EXt");
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(2, files.Count);
@@ -156,7 +166,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"**\*.ext" }, enableDefaultExcludes: false);
+            var packCommand = new PackCommand { BasePath = @"p:\some-file", NoDefaultExcludes = true };
+            packCommand.Exclude.Add(@"**\*.ext");
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(3, files.Count);
@@ -173,7 +185,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var files = GetPackageFiles(@"p:\some-file\test.txt").Concat(new[] { mockFile.Object }).ToList();
 
             // Act
-            PackCommand.ExcludeFiles(files, @"p:\some-file", new[] { @"content\f*" }, enableDefaultExcludes: false);
+            var packCommand = new PackCommand { BasePath = @"p:\some-file", NoDefaultExcludes = true };
+            packCommand.Exclude.Add(@"content\f*");
+            packCommand.ExcludeFiles(files);
 
             // Assert
             Assert.AreEqual(1, files.Count);

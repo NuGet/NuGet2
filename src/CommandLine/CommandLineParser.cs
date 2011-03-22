@@ -82,13 +82,17 @@ namespace NuGet {
 
         private static void AssignValue(PropertyInfo property, ICommand command, string option, object value) {
             try {
-                var genericCollection = CommandLineUtility.GetGenericCollectionType(property.PropertyType);
-                if (genericCollection != null && (value as string) != null) {
+
+                if (CommandLineUtility.IsMultiValuedProperty(property)) {
+                    // If we were able to look up a parent of type ICollection<>, perform a Add operation on it.
+                    // Note that we expect the value is a string.
                     var stringValue = value as string;
                     Debug.Assert(stringValue != null);
-                    var method = genericCollection.GetMethod("Add");
+
+                    dynamic list = property.GetValue(command, null);
+                    // The parameter value is one or more semi-colon separated values: nuget pack -option "foo;bar;baz"
                     foreach (var item in stringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
-                        method.Invoke(property.GetValue(command, null), new object[] { item });
+                        list.Add(item);
                     }
                 }
                 else {

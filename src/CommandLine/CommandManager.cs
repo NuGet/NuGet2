@@ -22,8 +22,8 @@ namespace NuGet {
             }
 
             IEnumerable<ICommand> results = from command in _commands
-                                            where command.CommandAttribute.CommandName.StartsWith(commandName, StringComparison.OrdinalIgnoreCase) || 
-                                            (command.CommandAttribute.AltName ?? String.Empty).StartsWith(commandName, StringComparison.OrdinalIgnoreCase) 
+                                            where command.CommandAttribute.CommandName.StartsWith(commandName, StringComparison.OrdinalIgnoreCase) ||
+                                            (command.CommandAttribute.AltName ?? String.Empty).StartsWith(commandName, StringComparison.OrdinalIgnoreCase)
                                             select command;
 
             if (!results.Any()) {
@@ -33,9 +33,9 @@ namespace NuGet {
             var matchedCommand = results.First();
             if (results.Skip(1).Any()) {
                 // Were there more than one results found?
-                matchedCommand = results.FirstOrDefault(c => c.CommandAttribute.CommandName.Equals(commandName, StringComparison.OrdinalIgnoreCase) 
+                matchedCommand = results.FirstOrDefault(c => c.CommandAttribute.CommandName.Equals(commandName, StringComparison.OrdinalIgnoreCase)
                     || commandName.Equals(c.CommandAttribute.AltName, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (matchedCommand == null) {
                     // No exact match was found and the result returned multiple prefixes.
                     throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousCommand, commandName,
@@ -50,7 +50,9 @@ namespace NuGet {
 
             foreach (PropertyInfo propInfo in command.GetType().GetProperties()) {
                 foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true)) {
-                    if (!propInfo.CanWrite && !CommandLineUtility.IsMultiValuedProperty(propInfo)) { 
+                    if (!propInfo.CanWrite && !CommandLineUtility.IsMultiValuedProperty(propInfo)) {
+                        // If the property has neither a setter nor is of a type that can be cast to ICollection<> then there's no way to assign 
+                        // values to it. In this case throw.
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
                             NuGetResources.OptionInvalidWithoutSetter, command.GetType().FullName + "." + propInfo.Name));
                     }
