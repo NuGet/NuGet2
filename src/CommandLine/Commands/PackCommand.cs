@@ -8,12 +8,15 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
         UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
     public class PackCommand : Command {
+        internal static readonly string SymbolsExtension = ".symbols" + Constants.PackageExtension;
+
         private static readonly string[] _defaultExcludes = new[] {
             // Exclude previous package files
             @"**\*" + Constants.PackageExtension, 
             // Exclude all files and directories that begin with "."
             @"**\\.**", ".**"
         };
+
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly HashSet<string> _allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
@@ -43,8 +46,8 @@ namespace NuGet.Commands {
             get { return _excludes; }
         }
 
-        [Option(typeof(NuGetResources), "PackageCommandSourcesDescription")]
-        public bool Sources { get; set; }
+        [Option(typeof(NuGetResources), "PackageCommandSymbolsDescription")]
+        public bool Symbols { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
@@ -156,14 +159,13 @@ namespace NuGet.Commands {
             // Output file is {id}.{version}
             string outputFile = builder.Id + "." + builder.Version;
 
-
-            // If this is a source package then add .Sources to the package file name
-            if (Sources) {
-                outputFile += ".sources";
+            // If this is a source package then add .symbols.nupkg to the package file name
+            if (Symbols) {
+                outputFile += SymbolsExtension;
             }
-
-            // Add the extension
-            outputFile += Constants.PackageExtension;
+            else {
+                outputFile += Constants.PackageExtension;
+            }
 
             string outputDirectory = OutputDirectory ?? Directory.GetCurrentDirectory();
             return Path.Combine(outputDirectory, outputFile);
@@ -190,7 +192,7 @@ namespace NuGet.Commands {
 
         private PackageBuilder BuildFromProjectFile(string path) {
             var projectBuilder = new ProjectPackageBuilder(path, Console) {
-                IncludeSources = Sources,
+                IncludeSources = Symbols,
                 Debug = Debug,
                 IsTool = Tool
             };

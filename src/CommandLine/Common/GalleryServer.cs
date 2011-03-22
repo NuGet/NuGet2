@@ -5,16 +5,17 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 
-namespace NuGet.Common {   
+namespace NuGet.Common {
     public class GalleryServer {
-        public readonly static string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
+        public static readonly string DefaultSymbolServerUrl = "http://nuget.gw.symbolsource.org/Public/NuGet";
+        public static readonly string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
         private const string PublichPackageService = "PublishedPackages/Publish";
 
         //REVIEW: What should be the User agent
         private const string _UserAgentPattern = "NuGet/{0} ({1})";
-        
+
         private string _baseGalleryServerUrl;
         private string _userAgent;
 

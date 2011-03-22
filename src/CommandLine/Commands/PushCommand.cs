@@ -7,10 +7,7 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "push", "PushCommandDescription",
         MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary")]
-    public class PushCommand : Command {
-        private const string DefaultSymbolServer = "http://nuget.gw.symbolsource.org/Public/NuGet";
-        private const string SourcesExtension = ".sources.nupkg";
-
+    public class PushCommand : Command {      
         [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
         public bool CreateOnly { get; set; }
 
@@ -51,7 +48,7 @@ namespace NuGet.Commands {
             if (!CreateOnly) {
                 var cmd = new PublishCommand();
                 cmd.Console = Console;
-                cmd.Source = Source;
+                cmd.Source = galleryServerUrl;
                 cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), apiKey };
                 cmd.Execute();
             }
@@ -74,8 +71,8 @@ namespace NuGet.Commands {
         }
 
         private string GetDefaultUrl(string packagePath) {
-            if (packagePath.EndsWith(SourcesExtension, StringComparison.OrdinalIgnoreCase)) {
-                return DefaultSymbolServer;
+            if (packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase)) {
+                return GalleryServer.DefaultSymbolServerUrl;
             }
             return GalleryServer.DefaultGalleryServerUrl;
         }
