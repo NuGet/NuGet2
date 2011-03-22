@@ -94,7 +94,7 @@
     <Reference Include="GrayscaleEffect">
       <HintPath>..\GrayscaleEffect.dll</HintPath>
     </Reference>
-    <Reference Include="SyntaxHighlighting">
+    <Reference Include="SyntaxHighlighting, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7f238d79773caa06, processorArchitecture=MSIL">
       <HintPath>..\SyntaxHighlighting.dll</HintPath>
     </Reference>
     <Reference Include="System" />

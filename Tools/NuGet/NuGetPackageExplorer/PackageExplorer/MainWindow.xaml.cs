@@ -3,10 +3,13 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using NuGet;
@@ -14,9 +17,6 @@ using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using PackageExplorerViewModel.Types;
 using StringResources = PackageExplorer.Resources.Resources;
-using System.Runtime.CompilerServices;
-using System.Windows.Media;
-using System.Windows.Data;
 
 namespace PackageExplorer {
     /// <summary>
@@ -427,6 +427,11 @@ namespace PackageExplorer {
                 FallbackValue = SourceLanguageType.Plain
             };
             textBox.SetBinding(SyntaxHighlightingTextBox.SourceLanguageProperty, sourceLanguageBinding);
+
+            var fileCounterBinding = new Binding("CurrentFileCounter") {
+                Mode = BindingMode.OneWay
+            };
+            textBox.SetBinding(SyntaxHighlightingTextBox.SourceCounterProperty, fileCounterBinding);
 
             return textBox;
         }

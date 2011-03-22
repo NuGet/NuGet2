@@ -35,22 +35,8 @@ namespace PackageExplorer
                 "SourceLanguage",
                 typeof(SourceLanguageType),
                 typeof(SyntaxHighlightingTextBox),
-                new PropertyMetadata(SourceLanguageType.Plain, OnSourceLanguagePropertyChanged));
+                new PropertyMetadata(SourceLanguageType.Plain));
 
-        /// <summary>
-        /// SourceLanguageProperty property changed handler.
-        /// </summary>
-        /// <param name="d">SyntaxHighlightingTextBlock that changed its SourceLanguage.</param>
-        /// <param name="e">Event arguments.</param>
-        private static void OnSourceLanguagePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            SyntaxHighlightingTextBox source = d as SyntaxHighlightingTextBox;
-            SourceLanguageType value = (SourceLanguageType)e.NewValue;
-            if (e.NewValue != e.OldValue)
-            {
-                source.HighlightContents();
-            }
-        }
         #endregion public SourceLanguageType SourceLanguage
 
         #region public string SourceCode
@@ -72,19 +58,29 @@ namespace PackageExplorer
                 "SourceCode",
                 typeof(string),
                 typeof(SyntaxHighlightingTextBox),
-                new PropertyMetadata(string.Empty, OnSourceCodePropertyChanged));
+                new PropertyMetadata(null));
 
-        /// <summary>
-        /// SourceCodeProperty property changed handler.
-        /// </summary>
-        /// <param name="d">SyntaxHighlightingTextBlock that changed its SourceCode.</param>
-        /// <param name="e">Event arguments.</param>
-        private static void OnSourceCodePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            SyntaxHighlightingTextBox source = d as SyntaxHighlightingTextBox;
-            source.HighlightContents();
-        }
+        
         #endregion public string SourceCode
+
+        public int SourceCounter {
+            get { return (int)GetValue(SourceCounterProperty); }
+            set { SetValue(SourceCounterProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for SourceCounter.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SourceCounterProperty =
+            DependencyProperty.Register(
+                "SourceCounter", 
+                typeof(int), 
+                typeof(SyntaxHighlightingTextBox), 
+                new PropertyMetadata(0, new PropertyChangedCallback(OnSourceCounterPropertyChanged)));
+
+        private static void OnSourceCounterPropertyChanged(object sender, DependencyPropertyChangedEventArgs args) {
+            SyntaxHighlightingTextBox textBox = (SyntaxHighlightingTextBox)sender;
+            textBox.HighlightContents();
+        }
+
 
         /// <summary>
         /// Initializes a new instance of the SyntaxHighlightingTextBlock
@@ -94,6 +90,7 @@ namespace PackageExplorer
         {
             IsReadOnly = true;
             Document = new FlowDocument();
+            Document.PageWidth = 1000;
         }
 
         /// <summary>
@@ -101,8 +98,11 @@ namespace PackageExplorer
         /// </summary>
         private void HighlightContents()
         {
-            Document.Blocks.Clear();
-            SyntaxHighlighter.Highlight(SourceCode, Document, CreateLanguageInstance(SourceLanguage));
+            SyntaxHighlighter.Highlight(
+                SourceCode, 
+                Document, 
+                CreateLanguageInstance(SourceLanguage),
+                "Loading and parsing content...");
         }
 
         /// <summary>

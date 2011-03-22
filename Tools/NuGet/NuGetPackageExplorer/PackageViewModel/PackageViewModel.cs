@@ -110,7 +110,6 @@ namespace PackageExplorerViewModel {
         }
 
         private SourceLanguageType _currentFileLanguage;
-
         public SourceLanguageType CurrentFileLanguage {
             get {
                 return _currentFileLanguage;
@@ -119,6 +118,19 @@ namespace PackageExplorerViewModel {
                 if (_currentFileLanguage != value) {
                     _currentFileLanguage = value;
                     OnPropertyChanged("CurrentFileLanguage");
+                }
+            }
+        }
+
+        private int _currentFileCounter;
+        public int CurrentFileCounter {
+            get {
+                return _currentFileCounter;
+            }
+            set {
+                if (_currentFileCounter != value) {
+                    _currentFileCounter = value;
+                    OnPropertyChanged("CurrentFileCounter");
                 }
             }
         }
@@ -287,6 +299,7 @@ namespace PackageExplorerViewModel {
             CurrentFileContent = content;
             CurrentFileLanguage = language;
             ShowContentViewer = true;
+            CurrentFileCounter++;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
