@@ -3,9 +3,7 @@ using System.IO;
 using System.Net;
 
 namespace NuGet {
-    public class HttpClient : IHttpClient {
-        private const int RequestTimeOut = 5000;
-
+    public class HttpClient : IHttpClient {        
         public event EventHandler<ProgressEventArgs> ProgressAvailable;
 
         public string UserAgent {
@@ -30,11 +28,6 @@ namespace NuGet {
                 // If we are going through a proxy then just set the default credentials
                 request.Proxy.Credentials = CredentialCache.DefaultCredentials;
             }
-
-            // Don't do this in debug mode so we can debug requests without worrying about timeouts
-#if !DEBUG
-            request.Timeout = RequestTimeOut;
-#endif
         }
 
         public Uri GetRedirectedUri(Uri uri) {
