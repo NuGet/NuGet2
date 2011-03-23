@@ -9,7 +9,7 @@
         Title="{Binding WindowTitle, FallbackValue={x:Static resources:Resources.Dialog_Title}}" 
         Height="650" 
         Width="750" 
-        MinWidth="500" 
+        MinWidth="600" 
         MinHeight="300" 
         Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}"
         Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
@@ -247,7 +247,7 @@
                         </Image>
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
-                <MenuItem Header="Open from Nu_Get Feed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
+                <MenuItem Header="Open from F_eed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
                 </MenuItem>
                 <Separator />
                 <MenuItem Command="Close" Header="_Close" />
@@ -370,6 +370,7 @@
                 </self:GrayscaleMenuItem>
                 <MenuItem Header="How to _Create Package" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
                 <MenuItem Header="_Version Range Specification" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/wikipage?title=Version%20Range%20Specification" />
+                <MenuItem Header="Framework Assembly F_ormat" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/wikipage?title=.nuspec%20v1.2%20Format#x_frameworkassemblies" />
                 <Separator />
                 <MenuItem Header="_Open Bug..." Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/WorkItem/Create" />
                 <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
@@ -487,7 +488,7 @@
             <!-- content viewer -->
             <GroupBox
                 x:Name="FileContentContainer"
-                Header="{Binding CurrentFileName, TargetNullValue='Content Viewer'}"
+                Header="{Binding CurrentFileInfo.Name, TargetNullValue='Content Viewer'}"
                 Grid.Row="2"
                 Grid.Column="1" 
                 Visibility="{Binding ShowContentViewer, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}"

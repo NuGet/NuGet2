@@ -12,21 +12,16 @@ namespace PackageExplorer {
             switch (msg) {
                 case NativeMethods.BFFM_INITIALIZED: // Required to set initialPath
                 {
-                    //Win32.SendMessage(new HandleRef(null, hWnd), BFFM_SETSELECTIONA, 1, lpData);
                     // Use BFFM_SETSELECTIONW if passing a Unicode string, i.e. native CLR Strings.
                     NativeMethods.SendMessage(new HandleRef(null, hwnd), NativeMethods.BFFM_SETSELECTIONW, 1, _initialPath);
                     break;
                 }
                 case NativeMethods.BFFM_SELCHANGED: {
-                    //IntPtr pathPtr = Marshal.AllocHGlobal((int)(260 * Marshal.SystemDefaultCharSize));
-
                     StringBuilder sb = new StringBuilder(260);
                     if (NativeMethods.SHGetPathFromIDList(lp, sb) != 0) {
                         NativeMethods.SendMessage(new HandleRef(null, hwnd), NativeMethods.BFFM_SETSTATUSTEXTW, 0, sb.ToString());
-                        
                     }
 
-                    //Marshal.FreeHGlobal(pathPtr);
                     break;
                 }
             }

@@ -121,6 +121,10 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ContentViewerPane.xaml.cs">
+      <DependentUpon>ContentViewerPane.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\FileSizeConverter.cs" />
     <Compile Include="Interop\BrowseForFolder.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />
@@ -177,6 +181,10 @@
     <Compile Include="Interop\WindowPlacement.cs" />
     <Compile Include="Interop\WindowPlacementHelper.cs" />
     <Page Include="AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ContentViewerPane.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

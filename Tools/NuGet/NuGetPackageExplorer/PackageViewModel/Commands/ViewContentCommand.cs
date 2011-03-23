@@ -28,36 +28,75 @@ namespace PackageExplorerViewModel {
             else {
                 var file = parameter as PackageFile;
                 if (file != null) {
-                    string content = IsBinaryFile(file.Name) ? Resources.UnsupportedFormatMessage : ReadFileContent(file);
-                    ViewModel.ShowFile(file.Path, content, DetermineLanguage(file.Name));
+                    ShowFile(file);
                 }
             }
         }
 
-        private static string ReadFileContent(PackageFile file) {
+        private void ShowFile(PackageFile file)
+        {
+            bool isBinary = IsBinaryFile(file.Name);
+            long size;
+            string content;
+
+            if (isBinary)
+            {
+                content = Resources.UnsupportedFormatMessage;
+                using (Stream stream = file.GetStream())
+                {
+                    size = stream.Length;
+                }
+            }
+            else
+            {
+                content = ReadFileContent(file, out size);
+            }
+
+            var fileInfo = new FileContentInfo(
+                file,
+                file.Path,
+                content,
+                !isBinary,
+                size,
+                DetermineLanguage(file.Name));
+
+            ViewModel.ShowFile(fileInfo);
+        }
+
+        private static string ReadFileContent(PackageFile file, out long size) {
             const int MaxLengthToOpen = 10 * 1024;      // limit to 10K 
             const int BufferSize = 2 * 1024;
             char[] buffer = new char[BufferSize];       // read 2K at a time
 
             StringBuilder sb = new StringBuilder();
-            using (StreamReader reader = new StreamReader(file.GetStream())) {
-                while (sb.Length < MaxLengthToOpen) {
-                    int bytesRead = reader.Read(buffer, 0, BufferSize);
-                    if (bytesRead == 0) {
-                        break;
+            using (Stream stream = file.GetStream())
+            {
+                size = stream.Length;
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    while (sb.Length < MaxLengthToOpen)
+                    {
+                        int bytesRead = reader.Read(buffer, 0, BufferSize);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            sb.Append(new string(buffer, 0, bytesRead));
+                        }
                     }
-                    else {
-                        sb.Append(new string(buffer, 0, bytesRead));
-                    }
-                }
 
-                // if not reaching the end of the stream yet, append the text "Truncating..."
-                if (reader.Peek() > -1) {
-                    // continue reading the rest of the current line to avoid dangling line
-                    sb.AppendLine(reader.ReadLine());
+                    // if not reaching the end of the stream yet, append the text "Truncating..."
+                    if (reader.Peek() > -1)
+                    {
+                        // continue reading the rest of the current line to avoid dangling line
+                        sb.AppendLine(reader.ReadLine());
 
-                    if (reader.Peek() > -1) {
-                        sb.AppendLine().AppendLine("*** The rest of the content is truncated. ***");
+                        if (reader.Peek() > -1)
+                        {
+                            sb.AppendLine().AppendLine("*** The rest of the content is truncated. ***");
+                        }
                     }
                 }
             }
@@ -130,10 +169,11 @@ namespace PackageExplorerViewModel {
                 case ".XML":
                 case ".XSD":
                 case ".CONFIG":
+                case ".PS1XML":
                     return SourceLanguageType.Xml;
 
                 default:
-                    return SourceLanguageType.Plain;
+                    return SourceLanguageType.Text;
             }
         }
     }

@@ -62,6 +62,7 @@ namespace PackageExplorer {
         public const uint BIF_BROWSEFORPRINTER = 0x2000;// Browsing for Printers
         public const uint BIF_BROWSEINCLUDEFILES = 0x4000; // Browsing for Everything
         public const uint BIF_SHAREABLE = 0x8000;  // sharable resources displayed (remote shares, requires BIF_USENEWUI)
+        public const uint WM_SETICON = 0x0080;
 
         [DllImport("shell32.dll")]
         public static extern IntPtr SHBrowseForFolder(ref BROWSEINFO lpbi);
@@ -72,7 +73,7 @@ namespace PackageExplorer {
         public static extern uint SHGetPathFromIDList(IntPtr pidl, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszPath);
 
         [DllImport("user32.dll", PreserveSig = true)]
-        public static extern IntPtr SendMessage(HandleRef hWnd, uint Msg, long wParam, IntPtr lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, long wParam, IntPtr lParam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, int wParam, string lParam);

@@ -35,7 +35,7 @@ namespace PackageExplorer
                 "SourceLanguage",
                 typeof(SourceLanguageType),
                 typeof(SyntaxHighlightingTextBox),
-                new PropertyMetadata(SourceLanguageType.Plain));
+                new PropertyMetadata(SourceLanguageType.Text, new PropertyChangedCallback(OnPropertyChanged)));
 
         #endregion public SourceLanguageType SourceLanguage
 
@@ -58,29 +58,15 @@ namespace PackageExplorer
                 "SourceCode",
                 typeof(string),
                 typeof(SyntaxHighlightingTextBox),
-                new PropertyMetadata(null));
-
+                new PropertyMetadata(null, new PropertyChangedCallback(OnPropertyChanged)));
         
         #endregion public string SourceCode
 
-        public int SourceCounter {
-            get { return (int)GetValue(SourceCounterProperty); }
-            set { SetValue(SourceCounterProperty, value); }
+        private static void OnPropertyChanged(object sender, DependencyPropertyChangedEventArgs args) {
+            ((SyntaxHighlightingTextBox)sender)._propertyChanged = true;
         }
 
-        // Using a DependencyProperty as the backing store for SourceCounter.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty SourceCounterProperty =
-            DependencyProperty.Register(
-                "SourceCounter", 
-                typeof(int), 
-                typeof(SyntaxHighlightingTextBox), 
-                new PropertyMetadata(0, new PropertyChangedCallback(OnSourceCounterPropertyChanged)));
-
-        private static void OnSourceCounterPropertyChanged(object sender, DependencyPropertyChangedEventArgs args) {
-            SyntaxHighlightingTextBox textBox = (SyntaxHighlightingTextBox)sender;
-            textBox.HighlightContents();
-        }
-
+        private bool _propertyChanged;
 
         /// <summary>
         /// Initializes a new instance of the SyntaxHighlightingTextBlock
@@ -96,13 +82,20 @@ namespace PackageExplorer
         /// <summary>
         /// Clears and updates the contents.
         /// </summary>
-        private void HighlightContents()
+        public void Reparse()
         {
+            // if no property has changed since the last parse, don't bother to reparse it.
+            if (!_propertyChanged) {
+                return;
+            }
+
             SyntaxHighlighter.Highlight(
                 SourceCode, 
                 Document, 
                 CreateLanguageInstance(SourceLanguage),
                 "Loading and parsing content...");
+
+            _propertyChanged = false;
         }
 
         /// <summary>
@@ -114,7 +107,7 @@ namespace PackageExplorer
         {
             switch (type)
             {
-                case SourceLanguageType.Plain:
+                case SourceLanguageType.Text:
                     return Languages.PlainText;
 
                 case SourceLanguageType.Asax:

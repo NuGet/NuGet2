@@ -116,7 +116,7 @@ namespace PackageExplorerViewModel {
 
             if (Parent != null) {
                 Parent.Children.Remove(this);
-                PackageViewModel.NotifyChanges();
+                PackageViewModel.NotifyContentDeleted(this);
             }
         }
 

@@ -390,14 +390,9 @@ namespace PackageExplorer {
                 ContentGrid.RowDefinitions[2].Height = new GridLength(settings.ContentViewerPanelHeight, GridUnitType.Pixel);
 
                 if (FileContentContainer.Content == null) {
-                    RichTextBox fileContent = CreateFileContentViewer();
-                    fileContent.TextChanged += (o, args) => {
-                        ((RichTextBox)o).ScrollToHome();
-                    };
+                    UserControl fileContent = CreateFileContentViewer();
                     FileContentContainer.Content = fileContent;
                 }
-
-                ((RichTextBox)FileContentContainer.Content).ScrollToHome();
             }
             else {
                 settings.ContentViewerPanelHeight = ContentGrid.RowDefinitions[2].Height.Value;
@@ -407,33 +402,10 @@ namespace PackageExplorer {
 
         // delay load the Syntax HighlightTextBox, avoid loading SyntaxHighlighting.dll upfront
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static RichTextBox CreateFileContentViewer() {
-            var textBox = new SyntaxHighlightingTextBox() {
-                BorderThickness = new Thickness(0),
-                AcceptsReturn = true,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                IsReadOnly = true,
-                Background = new SolidColorBrush(Color.FromArgb(0xFF, 0xFC, 0xFE, 0xF0)),
-            };
-
-            var sourceCodeBinding = new Binding("CurrentFileContent") {
-                Mode = BindingMode.OneWay
-            };
-            textBox.SetBinding(SyntaxHighlightingTextBox.SourceCodeProperty, sourceCodeBinding);
-
-            var sourceLanguageBinding = new Binding("CurrentFileLanguage") {
-                Mode = BindingMode.OneWay,
-                FallbackValue = SourceLanguageType.Plain
-            };
-            textBox.SetBinding(SyntaxHighlightingTextBox.SourceLanguageProperty, sourceLanguageBinding);
-
-            var fileCounterBinding = new Binding("CurrentFileCounter") {
-                Mode = BindingMode.OneWay
-            };
-            textBox.SetBinding(SyntaxHighlightingTextBox.SourceCounterProperty, fileCounterBinding);
-
-            return textBox;
+        private static UserControl CreateFileContentViewer() {
+            var content = new ContentViewerPane();
+            content.SetBinding(UserControl.DataContextProperty, new Binding("CurrentFileInfo"));
+            return content;
         }
 
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {

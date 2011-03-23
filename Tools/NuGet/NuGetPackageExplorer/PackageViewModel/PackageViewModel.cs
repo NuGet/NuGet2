@@ -15,8 +15,6 @@ namespace PackageExplorerViewModel {
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
         private PackageFolder _packageRoot;
-        private string _currentFileContent;
-        private string _currentFileName;
         private ICommand _saveCommand, _editCommand, _cancelCommand, _applyCommand, _viewContentCommand, _saveContentCommand, _openContentFileCommand, _openWithContentFileCommand;
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _deleteContentCommand;
         private bool _isInEditMode;
@@ -85,52 +83,65 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public string CurrentFileName {
-            get {
-                return _currentFileName;
-            }
-            internal set {
-                if (_currentFileName != value) {
-                    _currentFileName = value;
-                    OnPropertyChanged("CurrentfileName");
-                }
-            }
-        }
+        //public string CurrentFileName {
+        //    get {
+        //        return _currentFileName;
+        //    }
+        //    internal set {
+        //        if (_currentFileName != value) {
+        //            _currentFileName = value;
+        //            OnPropertyChanged("CurrentfileName");
+        //        }
+        //    }
+        //}
 
-        public string CurrentFileContent {
-            get {
-                return _currentFileContent;
-            }
-            internal set {
-                if (_currentFileContent != value) {
-                    _currentFileContent = value;
-                    OnPropertyChanged("CurrentFileContent");
-                }
-            }
-        }
+        //public string CurrentFileContent {
+        //    get {
+        //        return _currentFileContent;
+        //    }
+        //    internal set {
+        //        if (_currentFileContent != value) {
+        //            _currentFileContent = value;
+        //            OnPropertyChanged("CurrentFileContent");
+        //        }
+        //    }
+        //}
 
-        private SourceLanguageType _currentFileLanguage;
-        public SourceLanguageType CurrentFileLanguage {
-            get {
-                return _currentFileLanguage;
-            }
+        //private SourceLanguageType _currentFileLanguage;
+        //public SourceLanguageType CurrentFileLanguage {
+        //    get {
+        //        return _currentFileLanguage;
+        //    }
+        //    set {
+        //        if (_currentFileLanguage != value) {
+        //            _currentFileLanguage = value;
+        //            OnPropertyChanged("CurrentFileLanguage");
+        //        }
+        //    }
+        //}
+
+        //private int _currentFileCounter;
+        //public int CurrentFileCounter {
+        //    get {
+        //        return _currentFileCounter;
+        //    }
+        //    set {
+        //        if (_currentFileCounter != value) {
+        //            _currentFileCounter = value;
+        //            OnPropertyChanged("CurrentFileCounter");
+        //        }
+        //    }
+        //}
+
+        private FileContentInfo _currentFileInfo;
+        public FileContentInfo CurrentFileInfo
+        {
+            get { return _currentFileInfo; }
             set {
-                if (_currentFileLanguage != value) {
-                    _currentFileLanguage = value;
-                    OnPropertyChanged("CurrentFileLanguage");
-                }
-            }
-        }
-
-        private int _currentFileCounter;
-        public int CurrentFileCounter {
-            get {
-                return _currentFileCounter;
-            }
-            set {
-                if (_currentFileCounter != value) {
-                    _currentFileCounter = value;
-                    OnPropertyChanged("CurrentFileCounter");
+                if (_currentFileInfo != value)
+                {
+                    _currentFileInfo = value;
+                    OnPropertyChanged("CurrentFileInfo");
                 }
             }
         }
@@ -294,12 +305,9 @@ namespace PackageExplorerViewModel {
             private set;
         }
 
-        public void ShowFile(string name, string content, SourceLanguageType language) {
-            CurrentFileName = name;
-            CurrentFileContent = content;
-            CurrentFileLanguage = language;
+        public void ShowFile(FileContentInfo fileInfo) {
             ShowContentViewer = true;
-            CurrentFileCounter++;
+            CurrentFileInfo = fileInfo;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
@@ -414,6 +422,23 @@ namespace PackageExplorerViewModel {
                 Manifest manifest = Manifest.Create(metadata);
                 manifest.Save(fileStream);
             }
+        }
+
+        internal void NotifyContentDeleted(PackagePart packagePart)
+        {
+            // if the deleted file is being shown in the content pane, close the content pane
+            if (CurrentFileInfo != null && CurrentFileInfo.File == packagePart)
+            {
+                CloseContentViewer();
+            }
+
+            NotifyChanges();
+        }
+
+        internal void CloseContentViewer()
+        {
+            ShowContentViewer = false;
+            CurrentFileInfo = null;
         }
     }
 }

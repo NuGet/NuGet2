@@ -26,8 +26,22 @@
                 </Hyperlink>
             </TextBlock>
 
-            <TextBlock Text="Author: Luan Nguyen (@dotnetjunky)" Margin="0,10,0,0" />
-            <Button Content="_OK" Padding="20,0,20,0" HorizontalAlignment="Right" Margin="0,30,0,0" IsDefault="True" Click="Button_Click" />
+            <TextBlock Margin="0,10,0,0">
+                <Run Text="Author: Luan Nguyen (" />
+                <Hyperlink NavigateUri="http://twitter.com/dotnetjunky/" Click="Hyperlink_Click">
+                    <Run Text="@dotnetjunky" />
+                </Hyperlink>
+                <Run Text=")" />
+            </TextBlock>
+            <TextBlock Margin="0,10,0,0">
+                <Run Text="Syntax highlighting viewer powered by " />
+                <Hyperlink NavigateUri="http://colorcode.codeplex.com" Click="Hyperlink_Click">
+                    <Run Text="ColorCode" />
+                </Hyperlink>
+                <Run Text="." />
+            </TextBlock>
+            
+            <Button Content="_OK" Padding="20,0,20,0" HorizontalAlignment="Right" Margin="0,30,0,0" IsDefault="True" IsCancel="True" Click="Button_Click" />
         </StackPanel>
     </DockPanel>
 </self:DialogWithNoMinimizeAndMaximize>

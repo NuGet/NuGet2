@@ -9,7 +9,7 @@
         Title="Publish package"
         ShowInTaskbar="False"
         ResizeMode="NoResize"                              
-        Width="410"
+        Width="500"
         FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
         WindowStartupLocation="CenterOwner"
         SizeToContent="Height">
