@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -223,6 +224,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private void DisplayDisclaimerAndHelpText() {
             WriteLine(VsResources.Console_DisclaimerText);
             WriteLine();
+
+            WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.PowerShellHostTitle, _myHost.Version.ToString()));
+            WriteLine();
+
             WriteLine(VsResources.Console_HelpText);
             WriteLine();
         }
