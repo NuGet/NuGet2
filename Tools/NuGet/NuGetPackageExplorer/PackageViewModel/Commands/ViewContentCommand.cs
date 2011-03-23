@@ -69,34 +69,26 @@ namespace PackageExplorerViewModel {
             char[] buffer = new char[BufferSize];       // read 2K at a time
 
             StringBuilder sb = new StringBuilder();
-            using (Stream stream = file.GetStream())
-            {
-                size = stream.Length;
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    while (sb.Length < MaxLengthToOpen)
-                    {
-                        int bytesRead = reader.Read(buffer, 0, BufferSize);
-                        if (bytesRead == 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            sb.Append(new string(buffer, 0, bytesRead));
-                        }
+            Stream stream = file.GetStream();
+            size = stream.Length;
+            using (StreamReader reader = new StreamReader(stream)) {
+                while (sb.Length < MaxLengthToOpen) {
+                    int bytesRead = reader.Read(buffer, 0, BufferSize);
+                    if (bytesRead == 0) {
+                        break;
                     }
+                    else {
+                        sb.Append(new string(buffer, 0, bytesRead));
+                    }
+                }
 
-                    // if not reaching the end of the stream yet, append the text "Truncating..."
-                    if (reader.Peek() > -1)
-                    {
-                        // continue reading the rest of the current line to avoid dangling line
-                        sb.AppendLine(reader.ReadLine());
+                // if not reaching the end of the stream yet, append the text "Truncating..."
+                if (reader.Peek() > -1) {
+                    // continue reading the rest of the current line to avoid dangling line
+                    sb.AppendLine(reader.ReadLine());
 
-                        if (reader.Peek() > -1)
-                        {
-                            sb.AppendLine().AppendLine("*** The rest of the content is truncated. ***");
-                        }
+                    if (reader.Peek() > -1) {
+                        sb.AppendLine().AppendLine("*** The rest of the content is truncated. ***");
                     }
                 }
             }

@@ -17,7 +17,6 @@
 
         <self:SyntaxHighlightingTextBox
             x:Name="contentBox"
-            Margin="0,0,0,0"
             Padding="0"
             BorderThickness="0"
             AcceptsReturn="True"
@@ -40,6 +39,7 @@
                     <Label Content="Choose _Language:" Target="LanguageBox" />
                     <ComboBox 
                         x:Name="LanguageBox"
+                        Style="{StaticResource {x:Static ToolBar.ComboBoxStyleKey}}"
                         Margin="0,2,0,0"
                         Width="150"
                         DataContextChanged="UserControl_DataContextChanged"
