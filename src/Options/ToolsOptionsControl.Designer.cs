@@ -148,6 +148,7 @@ namespace NuGet.Options {
             // BrowseButton
             // 
             resources.ApplyResources(this.BrowseButton, "BrowseButton");
+            this.BrowseButton.Font = new System.Drawing.Font("Arial", 11F);
             this.BrowseButton.Name = "BrowseButton";
             this.BrowseButton.UseVisualStyleBackColor = true;
             this.BrowseButton.Click += new System.EventHandler(this.OnBrowseButtonClicked);
