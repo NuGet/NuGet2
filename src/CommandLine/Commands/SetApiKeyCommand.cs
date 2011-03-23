@@ -9,9 +9,11 @@ namespace NuGet.Commands {
         MinArgs = 1, MaxArgs = 1, UsageDescriptionResourceName = "SetApiKeyCommandUsageDescription",
         UsageSummaryResourceName = "SetApiKeyCommandUsageSummary")]
     public class SetApiKeyCommand : Command {
-
         [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
+
+        [Option(typeof(NuGetResources), "SetApiKeyCommandSymbolsDescription")]
+        public bool Symbols { get; set; }
         
         public override void ExecuteCommand() {
             //Frist argument should be the ApiKey
@@ -20,7 +22,7 @@ namespace NuGet.Commands {
             //If the user passed a source use it for the gallery location
             string galleryServerUrl;
             if (String.IsNullOrEmpty(Source)) {
-                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
+                galleryServerUrl = Symbols ? GalleryServer.DefaultSymbolServerUrl : GalleryServer.DefaultGalleryServerUrl;
             }
             else {
                 galleryServerUrl = Source;
