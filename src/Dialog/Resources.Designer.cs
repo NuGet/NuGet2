@@ -250,7 +250,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default.
+        ///   Looks up a localized string similar to Most Recent.
         /// </summary>
         public static string Dialog_RecentPackagesDefaultSort {
             get {

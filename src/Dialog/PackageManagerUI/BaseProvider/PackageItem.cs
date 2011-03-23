@@ -53,6 +53,12 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        public string Summary {
+            get {
+                return String.IsNullOrEmpty(_packageIdentity.Summary) ? _packageIdentity.Description : _packageIdentity.Summary;
+            }
+        }
+
         /// <summary>
         /// Version of the underlying reference
         /// </summary>

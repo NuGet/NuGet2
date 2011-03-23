@@ -9,6 +9,7 @@
         <ResourceDictionary Source="TemplateStyles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <self:NormalizeTextConverter x:Key="NormalizeTextConverter" />
     <self:FixUrlConverter x:Key="urlConverter" />
     <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
     <self:CountToVisibilityConverter x:Key="countConverter" />
@@ -37,10 +38,11 @@
                 </self:TextBlockControl>
 
                 <self:TextBlockControl
-                    Text="{Binding Description}" 
+                    x:Name="SummaryText"
+                    Text="{Binding Summary, Converter={StaticResource NormalizeTextConverter}}" 
                     Style="{StaticResource TileDescriptionTextBoxStyle}">
                     <TextBlock.ToolTip>
-                        <TextBlock Text="{Binding Description}" Style="{StaticResource TileToolTipStyle}"/>
+                        <TextBlock Text="{Binding Summary, Converter={StaticResource NormalizeTextConverter}}" Style="{StaticResource TileToolTipStyle}"/>
                     </TextBlock.ToolTip>
                 </self:TextBlockControl>
             </StackPanel>
@@ -144,7 +146,7 @@
                 </TextBlock>
 
                 <!-- Description -->
-                <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
+                <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >
                 </self:TextBlockControl>
 
                 <!-- Dependencies list -->
@@ -154,6 +156,11 @@
                     x:Name="DependencyItems"
                     Margin="25,5,0,0"
                     ItemsSource="{Binding Dependencies}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <self:TextBlockControl 
