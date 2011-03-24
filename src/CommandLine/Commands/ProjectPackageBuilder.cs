@@ -14,6 +14,7 @@ namespace NuGet.Commands {
     internal class ProjectPackageBuilder {
         private readonly Project _project;
         private FrameworkName _frameworkName;
+        private ILogger _logger;
 
         // Files we want to always exclude from the resulting package
         private static readonly HashSet<string> _excludeFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
@@ -35,9 +36,12 @@ namespace NuGet.Commands {
         private const string PackagesFolder = "packages";
         private const string TransformFileExtension = ".transform";
 
-        public ProjectPackageBuilder(string path, IConsole console) {
+        public ProjectPackageBuilder(string path) {
             _project = new Project(path);
-            Console = console;
+        }
+
+        public ProjectPackageBuilder(Project project) {
+            _project = project;
         }
 
         private string TargetPath {
@@ -69,22 +73,29 @@ namespace NuGet.Commands {
             }
         }
 
-        internal bool IncludeSources { get; set; }
+        public bool IncludeSources { get; set; }
 
-        internal bool Debug { get; set; }
+        public bool Debug { get; set; }
 
-        internal bool IsTool { get; set; }
+        public bool IsTool { get; set; }
 
-        private IConsole Console { get; set; }
+        public ILogger Logger {
+            get {
+                return _logger ?? NullLogger.Instance;
+            }
+            set {
+                _logger = value;
+            }
+        }
 
-        internal PackageBuilder BuildPackage() {
+        public PackageBuilder BuildPackage() {
             if (TargetFramework != null) {
-                Console.WriteLine(NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
+                Logger.Log(MessageLevel.Info, NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
             }
 
             BuildProject();
 
-            Console.WriteLine(NuGetResources.PackagingFilesFromOutputPath, OutputPath);
+            Logger.Log(MessageLevel.Info, NuGetResources.PackagingFilesFromOutputPath, OutputPath);
 
             var builder = new PackageBuilder();
 
@@ -96,7 +107,7 @@ namespace NuGet.Commands {
                 AssemblyMetadataExtractor.ExtractMetadata(TargetPath, builder);
             }
             catch {
-                Console.WriteWarning(NuGetResources.UnableToExtractAssemblyMetadata, Path.GetFileName(TargetPath));
+                Logger.Log(MessageLevel.Warning, NuGetResources.UnableToExtractAssemblyMetadata, Path.GetFileName(TargetPath));
                 ExtractMetadataFromProject(builder);
             }
 
@@ -123,12 +134,12 @@ namespace NuGet.Commands {
             // Set defaults if some required fields are missing
             if (String.IsNullOrEmpty(builder.Description)) {
                 builder.Description = "Description";
-                Console.WriteWarning(NuGetResources.Warning_UnspecifiedField, "Description", "Description");
+                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Description", "Description");
             }
 
             if (!builder.Authors.Any()) {
                 builder.Authors.Add("Author");
-                Console.WriteWarning(NuGetResources.Warning_UnspecifiedField, "Author", "Author");
+                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Author", "Author");
             }
 
             return builder;
@@ -236,7 +247,7 @@ namespace NuGet.Commands {
                 return;
             }
 
-            Console.WriteLine(NuGetResources.UsingPackagesConfigForDependencies);
+            Logger.Log(MessageLevel.Info, NuGetResources.UsingPackagesConfigForDependencies);
             var file = new PackageReferenceFile(packagesConfig);
 
             // Try to find the package and remove all files we added from the output
@@ -397,7 +408,7 @@ namespace NuGet.Commands {
                 string targetFilePath = GetTargetPath(item);
 
                 if (!File.Exists(fullPath)) {
-                    Console.WriteWarning(NuGetResources.Warning_FileDoesNotExist, targetFilePath);
+                    Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileDoesNotExist, targetFilePath);
                     continue;
                 }
 

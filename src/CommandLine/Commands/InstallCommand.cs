@@ -50,7 +50,7 @@ namespace NuGet.Commands {
                 new DefaultPackagePathResolver(installPath, useSideBySidePaths: !ExcludeVersion), 
                 new PhysicalFileSystem(installPath));
 
-            packageManager.Logger = new Logger { Console = Console };
+            packageManager.Logger = Console;
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
@@ -91,14 +91,6 @@ namespace NuGet.Commands {
             string packagePath = Path.Combine(path, packageDir, packageFile);
 
             return File.Exists(packagePath);
-        }
-
-        private class Logger : ILogger {
-            public IConsole Console { get; set; }
-
-            public void Log(MessageLevel level, string message, params object[] args) {
-                Console.WriteLine(message, args);
-            }
         }
     }
 }

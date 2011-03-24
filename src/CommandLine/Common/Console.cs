@@ -134,5 +134,21 @@ namespace NuGet.Common {
                 System.Console.ForegroundColor = currentColor;
             }
         }
+
+        public void Log(MessageLevel level, string message, params object[] args) {
+            switch (level) {
+                case MessageLevel.Info:
+                    WriteLine(message, args);
+                    break;
+                case MessageLevel.Warning:
+                    WriteWarning(message, args);
+                    break;
+                case MessageLevel.Debug:
+                    WriteColor(System.Console.Out, ConsoleColor.Gray, message, args);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

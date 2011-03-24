@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
 namespace NuGet.Common {
-    public interface IConsole {
+    public interface IConsole : ILogger {
         int CursorLeft { get; set; }
         TextWriter Error { get; }
         int WindowWidth { get; set; }
