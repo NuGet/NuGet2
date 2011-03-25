@@ -47,7 +47,7 @@ namespace NuGet.VisualStudio {
         }
 
         public bool ExecuteInitScriptOnStartup {
-            get { return false; }
+            get { return true; }
         }
 
         public void Write(string text) {
