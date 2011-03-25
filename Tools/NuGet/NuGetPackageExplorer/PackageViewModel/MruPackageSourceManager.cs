@@ -80,7 +80,7 @@ namespace PackageExplorerViewModel
 
         private void AddSource(string newSource) {
             if (newSource == null) {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException("newSource");
             }
 
             if (newSource.Equals(NuGetFeed, StringComparison.OrdinalIgnoreCase))

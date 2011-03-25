@@ -7,6 +7,7 @@ namespace PackageExplorerViewModel.Types {
         IList<string> GetMruFiles();
         void SetMruFiles(IEnumerable<string> files);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         IList<string> GetMruPackageSources();
         void SetMruPackageSources(IEnumerable<string> sources);
 
