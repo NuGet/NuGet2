@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Documents;
 
 using Microsoft.VisualStudio.PlatformUI;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI {
     /// <summary>

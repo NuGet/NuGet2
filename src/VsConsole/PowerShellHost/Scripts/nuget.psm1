@@ -83,6 +83,23 @@ Register-TabExpansion 'Update-Package' @{
     }
 }
 
+Register-TabExpansion 'Open-PackagePage' @{
+    'Id' = {
+        param($context)
+        GetPackageIds (GetPackages $context)
+    }
+    'Version' = {
+        param($context)
+
+        $parameters = @{}
+
+        if ($context.Id) { $parameters.filter = $context.Id }
+        if ($context.Source) { $parameters.source = $context.Source }
+
+        GetPackageVersions (Get-Package @parameters -Remote -ErrorAction SilentlyContinue) $context 
+    }
+}
+
 Register-TabExpansion 'New-Package' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Add-BindingRedirect' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }

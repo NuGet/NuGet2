@@ -174,4 +174,16 @@
   <data name="Cmdlet_InvalidProjectManagerInstance" xml:space="preserve">
     <value>The specified IProjectManager instance is not recognized.</value>
   </data>
+  <data name="Cmdlet_UrlMissing" xml:space="preserve">
+    <value>The package '{0}' does not provide the requested URL.</value>
+  </data>
+  <data name="Cmdlet_PackageIdNotFound" xml:space="preserve">
+    <value>Package with the Id '{0}' is not found in the specified source.</value>
+  </data>
+  <data name="Cmdlet_OpenPackagePageAction" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Cmdlet_PackageIdAndVersionNotFound" xml:space="preserve">
+    <value>Package with the Id '{0}' and version '{1}' is not found in the specified source.</value>
+  </data>
 </root>

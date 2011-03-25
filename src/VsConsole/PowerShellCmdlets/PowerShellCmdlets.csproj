@@ -41,6 +41,7 @@
     <Compile Include="NewPackageCommand.cs" />
     <Compile Include="NuGetBaseCommand.cs" />
     <Compile Include="NuGetErrorId.cs" />
+    <Compile Include="OpenPackagePageCommand.cs" />
     <Compile Include="ProcessPackageBaseCommand.cs" />
     <Compile Include="ProgressActivityIds.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

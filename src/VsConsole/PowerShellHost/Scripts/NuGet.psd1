@@ -61,7 +61,7 @@ NestedModules = @('NuGet.Cmdlets.dll')
 FunctionsToExport = @('NugetTabExpansion', 'Register-TabExpansion')
 
 # Cmdlets to export from this module
-CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect')
+CmdletsToExport = @('Install-Package', 'Uninstall-Package', 'Update-Package', 'Get-Package', 'New-Package', 'Get-Project', 'Add-BindingRedirect', 'Open-PackagePage')
 
 # Variables to export from this module
 VariablesToExport = ''

@@ -1,24 +1,24 @@
 using System;
 
-namespace NuGet.Dialog.PackageManagerUI {
-    internal static class UriHelper {
+namespace NuGet.VisualStudio {
+    public static class UriHelper {
 
-        public static void OpenExternalLink(Uri licenseUrl) {
-            if (licenseUrl == null) {
+        public static void OpenExternalLink(Uri url) {
+            if (url == null) {
                 return;
             }
 
             // mitigate security risk
-            if (licenseUrl.IsFile || licenseUrl.IsLoopback || licenseUrl.IsUnc) {
+            if (url.IsFile || url.IsLoopback || url.IsUnc) {
                 return;
             }
 
-            string scheme = licenseUrl.Scheme;
+            string scheme = url.Scheme;
             if (scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
                 scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)) {
                 // REVIEW: Will this allow a package author to execute arbitrary program on user's machine?
                 // We have limited the url to be HTTP only, but is it sufficient?
-                System.Diagnostics.Process.Start(licenseUrl.AbsoluteUri);
+                System.Diagnostics.Process.Start(url.AbsoluteUri);
             }
         }
     }

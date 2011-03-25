@@ -168,7 +168,6 @@
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PackageManagerUI\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
