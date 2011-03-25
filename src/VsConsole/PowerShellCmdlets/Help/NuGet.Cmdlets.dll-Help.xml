@@ -695,7 +695,7 @@
       </command:name>
       <maml:description>
         <maml:para>
-          Open the browser pointing to ProjectUrl or LicenseUrl or ReportAbuseUrl of the specified package.
+          Open the browser pointing to ProjectUrl, LicenseUrl or ReportAbuseUrl of the specified package.
         </maml:para>
       </maml:description>
       <maml:copyright>
@@ -708,7 +708,7 @@
 
     <maml:description>
       <maml:para>
-        Open the browser pointing to ProjectUrl or LicenseUrl or ReportAbuseUrl of the specified package.</maml:para>
+        Open the browser pointing to ProjectUrl, LicenseUrl or ReportAbuseUrl of the specified package.</maml:para>
     </maml:description>
 
     <!-- Cmdlet syntax section-->
@@ -749,13 +749,13 @@
       <command:parameter required="false" position="named">
         <maml:name>Version</maml:name>
         <maml:description>
-          <maml:para>Specfiies the Version of the package to search for.</maml:para>
+          <maml:para>Specifies the version of the package to search for. If omitted, defaults to the latest version.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the source of the repository to search for package.</maml:para>
+          <maml:para>Specifies the source of the repository to search for package. If omitted, defaults to the selected source in the package source dropdown control.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">

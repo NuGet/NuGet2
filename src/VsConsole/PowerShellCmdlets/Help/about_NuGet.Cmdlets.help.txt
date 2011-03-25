@@ -30,7 +30,7 @@ LONG DESCRIPTION
 		Get-Project				Returns a reference to the DTE (Development Tools Environment) for the active 
 								or specified project.
 
-        Open-PackagePage        Open the browser pointing to ProjectUrl or LicenseUrl or ReportAbuseUrl of the
+        Open-PackagePage        Open the browser pointing to ProjectUrl, LicenseUrl or ReportAbuseUrl of the
                                 specified package.
 
 SEE ALSO
