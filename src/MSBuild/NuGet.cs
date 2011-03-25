@@ -28,6 +28,9 @@ namespace NuGet.MSBuild {
         [Required]
         public string SpecFile { get; set; }
 
+        [Output]
+        public string OutputPackage { get; set; }
+
         public override bool Execute() {
             if (string.IsNullOrWhiteSpace(SpecFile)) {
                 Log.LogError(Resources.NuGetResources.SpecFileMustNotBeEmpty);
@@ -70,6 +73,8 @@ namespace NuGet.MSBuild {
                 using (Stream stream = _fileSystem.CreateFile(packageFilePath)) {
                     packageBuilder.Save(stream);
                 }
+
+                OutputPackage = packageFilePath;
 
                 Log.LogMessage(String.Format(
                     Resources.NuGetResources.CreatedPackage,

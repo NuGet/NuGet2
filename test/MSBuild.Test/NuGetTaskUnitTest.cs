@@ -31,6 +31,20 @@ namespace NuGet.Test.MSBuild {
         }
 
         [TestMethod]
+        public void WillSetOutputPathWhenRun()
+        {
+            var packageStreamStub = new Mock<Stream>();
+            var packageBuilderStub = new Mock<IPackageBuilder>();
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, packageStreamStub: packageStreamStub);
+
+            bool actualResut = task.Execute();
+            string packagePath = task.OutputPackage;
+
+            packageBuilderStub.Verify(x => x.Save(packageStreamStub.Object));
+            Assert.AreEqual(createdPackage, packagePath);
+        }
+
+        [TestMethod]
         public void WillErrorWhenTheSpecFileDoesNotExist() {
             string actualMessage = null;
             var fileSystemStub = new Mock<IExtendedFileSystem>();
@@ -133,6 +147,8 @@ namespace NuGet.Test.MSBuild {
             Assert.IsFalse(actualResut);
         }
 
+        private const string createdPackage = "/thePackageId.1.0.nupkg";
+
         static NuGet.MSBuild.NuGet CreateTaskWithDefaultStubs(
             Mock<IExtendedFileSystem> fileSystemStub = null,
             Mock<IPackageBuilderFactory> packageBuilderFactoryStub = null,
@@ -170,7 +186,7 @@ namespace NuGet.Test.MSBuild {
                 .Setup(x => x.GetCurrentDirectory())
                 .Returns("/");
             fileSystemStub
-                .Setup(x => x.CreateFile("/thePackageId.1.0.nupkg"))
+                .Setup(x => x.CreateFile(createdPackage))
                 .Returns(packageStreamStub.Object);
 
             var task = new global::NuGet.MSBuild.NuGet(fileSystemStub.Object, packageBuilderFactoryStub.Object);
