@@ -9,7 +9,6 @@
         WindowStartupLocation="CenterOwner"
         Tag="{Binding LoadedCommand}"
         Loaded="Window_Loaded"
-        Closed="Window_Closed"
         PreviewKeyDown="Window_PreviewKeyDown"
         FocusManager.FocusedElement="{Binding ElementName=SearchBox}"
         FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
@@ -22,19 +21,6 @@
         <Style TargetType="{x:Type Button}" x:Key="NavigationButtonStyle">
             <Setter Property="Margin" Value="0,0,5,0" />
         </Style>
-
-        <Style TargetType="{x:Type DataGridColumnHeader}" x:Key="DataGridHeaderStyle">
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-
-        <LinearGradientBrush x:Key="TextBoxBorder" StartPoint="0,0" EndPoint="0,20" MappingMode="Absolute">
-            <LinearGradientBrush.GradientStops>
-                <GradientStop Color="#ABADB3" Offset="0.05"/>
-                <GradientStop Color="#E2E3EA" Offset="0.07"/>
-                <GradientStop Color="#E3E9EF" Offset="1"/>
-            </LinearGradientBrush.GradientStops>
-        </LinearGradientBrush>
     </Window.Resources>
 
     <Grid Margin="10">
@@ -51,16 +37,9 @@
         </Grid.ColumnDefinitions>
 
         <!-- change package source elements -->
-        <Grid Grid.ColumnSpan="3" Margin="0,0,0,15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            
-            <Label Content="_Package source:" Target="{Binding ElementName=PackageSourceBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="PackageSourceBox" IsEnabled="{Binding IsEditable}" VerticalContentAlignment="Center" Grid.Column="1" Text="{Binding PackageSource, Mode=OneWay}" Margin="4,0" />
-            <Button Grid.Column="2" Content="_Apply" HorizontalAlignment="Center" Padding="10,0" Command="{Binding ChangePackageSourceCommand}" CommandParameter="{Binding Text, ElementName=PackageSourceBox}">
+        <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,15" LastChildFill="True">            
+            <Label DockPanel.Dock="Left" Content="_Package source:" Target="{Binding ElementName=PackageSourceBox}" VerticalAlignment="Center" />
+            <Button DockPanel.Dock="Right" Content="_Apply" HorizontalAlignment="Center" Padding="10,0" Command="{Binding ChangePackageSourceCommand}" CommandParameter="{Binding Text, ElementName=PackageSourceBox}">
                 <Button.IsEnabled>
                     <MultiBinding Converter="{StaticResource andConverter}">
                         <Binding Path="Text" ElementName="PackageSourceBox" Converter="{StaticResource nullToBoolConverter}" />
@@ -68,7 +47,9 @@
                     </MultiBinding>
                 </Button.IsEnabled>
             </Button>
-        </Grid>
+
+            <ComboBox x:Name="PackageSourceBox" ItemsSource="{Binding PackageSources}" IsReadOnly="False" IsEditable="True" IsEnabled="{Binding IsEditable}" VerticalContentAlignment="Center" Text="{Binding PackageSource, Mode=OneWay}" Margin="4,0" />
+        </DockPanel>
 
         <!-- navigation buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal">

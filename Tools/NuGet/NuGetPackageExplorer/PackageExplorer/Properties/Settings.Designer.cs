@@ -93,5 +93,16 @@ namespace PackageExplorer.Properties {
                 this["MruFiles"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection MruPackageSources {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["MruPackageSources"]));
+            }
+            set {
+                this["MruPackageSources"] = value;
+            }
+        }
     }
 }

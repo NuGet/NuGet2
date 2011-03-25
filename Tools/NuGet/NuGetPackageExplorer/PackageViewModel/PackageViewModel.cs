@@ -83,56 +83,6 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        //public string CurrentFileName {
-        //    get {
-        //        return _currentFileName;
-        //    }
-        //    internal set {
-        //        if (_currentFileName != value) {
-        //            _currentFileName = value;
-        //            OnPropertyChanged("CurrentfileName");
-        //        }
-        //    }
-        //}
-
-        //public string CurrentFileContent {
-        //    get {
-        //        return _currentFileContent;
-        //    }
-        //    internal set {
-        //        if (_currentFileContent != value) {
-        //            _currentFileContent = value;
-        //            OnPropertyChanged("CurrentFileContent");
-        //        }
-        //    }
-        //}
-
-        //private SourceLanguageType _currentFileLanguage;
-        //public SourceLanguageType CurrentFileLanguage {
-        //    get {
-        //        return _currentFileLanguage;
-        //    }
-        //    set {
-        //        if (_currentFileLanguage != value) {
-        //            _currentFileLanguage = value;
-        //            OnPropertyChanged("CurrentFileLanguage");
-        //        }
-        //    }
-        //}
-
-        //private int _currentFileCounter;
-        //public int CurrentFileCounter {
-        //    get {
-        //        return _currentFileCounter;
-        //    }
-        //    set {
-        //        if (_currentFileCounter != value) {
-        //            _currentFileCounter = value;
-        //            OnPropertyChanged("CurrentFileCounter");
-        //        }
-        //    }
-        //}
-
         private FileContentInfo _currentFileInfo;
         public FileContentInfo CurrentFileInfo
         {

@@ -29,8 +29,11 @@ namespace PackageExplorer {
             // Update the window's non-client area to reflect the changes
             NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
-            NativeMethods.SendMessage(hwnd, NativeMethods.WM_SETICON, 0, (IntPtr)0);
-            NativeMethods.SendMessage(hwnd, NativeMethods.WM_SETICON, 1, (IntPtr)0);
+            if (!System.Diagnostics.Debugger.IsAttached)
+            {
+                NativeMethods.SendMessage(hwnd, NativeMethods.WM_SETICON, 0, (IntPtr)0);
+                NativeMethods.SendMessage(hwnd, NativeMethods.WM_SETICON, 1, (IntPtr)0);
+            }
         }
     }
 }

@@ -7,6 +7,11 @@ namespace PackageExplorerViewModel.Types {
         IList<string> GetMruFiles();
         void SetMruFiles(IEnumerable<string> files);
 
+        IList<string> GetMruPackageSources();
+        void SetMruPackageSources(IEnumerable<string> sources);
+
+        string ActivePackageSource { get; set; }
+
         string ReadApiKeyFromSettingFile();
         void WriteApiKeyToSettingFile(string apiKey);
     }

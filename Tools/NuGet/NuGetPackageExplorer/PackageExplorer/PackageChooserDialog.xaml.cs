@@ -6,7 +6,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using NuGet;
-using PackageExplorerViewModel;
 
 namespace PackageExplorer {
     /// <summary>
@@ -14,40 +13,68 @@ namespace PackageExplorer {
     /// </summary>
     public partial class PackageChooserDialog : DialogWithNoMinimizeAndMaximize {
 
-        private const string NuGetFeed = "https://go.microsoft.com/fwlink/?LinkID=206669";
+        public string SortColumn
+        {
+            get { return (string)GetValue(SortColumnProperty); }
+            set { SetValue(SortColumnProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for SortColumn.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SortColumnProperty =
+            DependencyProperty.Register("SortColumn", typeof(string), typeof(PackageChooserDialog), null);
+
+        public ListSortDirection SortDirection
+        {
+            get { return (ListSortDirection)GetValue(SortDirectionProperty); }
+            set { SetValue(SortDirectionProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for SortDirection.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SortDirectionProperty =
+            DependencyProperty.Register("SortDirection", typeof(ListSortDirection), typeof(PackageChooserDialog), null);
+
+        public int SortCounter
+        {
+            get { return (int)GetValue(SortCounterProperty); }
+            set { SetValue(SortCounterProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for SortCounter.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SortCounterProperty =
+            DependencyProperty.Register(
+                "SortCounter", 
+                typeof(int), 
+                typeof(PackageChooserDialog), 
+                new UIPropertyMetadata(0, new PropertyChangedCallback(OnSortCounterPropertyChanged)));
+
+        private static void OnSortCounterPropertyChanged(object sender, DependencyPropertyChangedEventArgs args) {
+            var dialog = (PackageChooserDialog)sender;
+            dialog.RedrawSortGlyph();
+        }
 
         public PackageChooserDialog() {
             InitializeComponent();
-
-            var viewModel = new PackageChooserViewModel();
-            viewModel.PropertyChanged += OnViewModelPropertyChanged;
-            DataContext = viewModel;
-
-            // retrieve the package source from settings.
-            string source = Properties.Settings.Default.PackageSource;
-            if (String.IsNullOrEmpty(source)) {
-                source = NuGetFeed;
-            }
-            viewModel.PackageSource = source;
         }
 
-        private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-            string name = e.PropertyName;
-            if (name.Equals("CurrentSortColumn") || name.Equals("SortDirection")) {
-                var viewModel = (PackageChooserViewModel)sender;
-                string columnName = viewModel.CurrentSortColumn;
-                ListSortDirection direction = (ListSortDirection)viewModel.SortDirection;
-
-                foreach (var column in PackageGridView.Columns) {
-                    var header = (GridViewColumnHeader)column.Header;
-                    if (header.Tag != null) {
-                        AdornerLayer.GetAdornerLayer(header).Remove((Adorner) header.Tag);
+        private void RedrawSortGlyph() {
+            foreach (var column in PackageGridView.Columns) {
+                var header = (GridViewColumnHeader)column.Header;
+                if (header.Tag != null) {
+                    AdornerLayer layer = AdornerLayer.GetAdornerLayer(header);
+                    if (layer != null)
+                    {
+                        layer.Remove((Adorner)header.Tag);
                     }
+                }
 
-                    if ((string)header.CommandParameter == columnName) {
-                        var newAdorner = new SortAdorner(header, direction);
-                        header.Tag = newAdorner;
-                        AdornerLayer.GetAdornerLayer(header).Add(newAdorner);
+                if ((string)header.CommandParameter == SortColumn) {
+                    var newAdorner = new SortAdorner(header, SortDirection);
+                    header.Tag = newAdorner;
+
+                    AdornerLayer layer = AdornerLayer.GetAdornerLayer(header);
+                    if (layer != null)
+                    {
+                        layer.Add(newAdorner);
                     }
                 }
             }
@@ -98,6 +125,7 @@ namespace PackageExplorer {
         }
 
         private void AdjustSearchBox() {
+            // HACK: Make space for the search image inside the search box
             if (SearchBox.Template != null) {
                 var contentHost = SearchBox.Template.FindName("PART_ContentHost", SearchBox) as FrameworkElement;
                 if (contentHost != null) {
@@ -110,12 +138,6 @@ namespace PackageExplorer {
         private void LoadPackages() {
             var loadedCommand = (ICommand)Tag;
             loadedCommand.Execute(null);
-        }
-
-        private void Window_Closed(object sender, EventArgs e) {
-            // persist the package source
-            var viewModel = (PackageChooserViewModel)DataContext;
-            Properties.Settings.Default.PackageSource = viewModel.PackageSource;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {

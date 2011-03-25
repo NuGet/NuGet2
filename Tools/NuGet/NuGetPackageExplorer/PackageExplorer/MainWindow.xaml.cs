@@ -45,6 +45,9 @@ namespace PackageExplorer {
             set;
         }
 
+        [Import]
+        public IMruPackageSourceManager PackageSourceManager { get; set; }
+
         [ImportingConstructor]
         public MainWindow(IMruManager mruManager) {
             InitializeComponent();
@@ -150,6 +153,11 @@ namespace PackageExplorer {
             }
 
             var dialog = new PackageChooserDialog() { Owner = this };
+            dialog.DataContext = PackageViewModelFactory.CreatePackageChooserViewModel();
+            dialog.SetBinding(PackageChooserDialog.SortColumnProperty, new Binding("SortColumn") { Mode = BindingMode.OneWay });
+            dialog.SetBinding(PackageChooserDialog.SortDirectionProperty, new Binding("SortDirection") { Mode = BindingMode.OneWay });
+            dialog.SetBinding(PackageChooserDialog.SortCounterProperty, new Binding("SortCounter") { Mode = BindingMode.OneWay });
+
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
                 var selectedPackage = dialog.SelectedPackage;
@@ -281,6 +289,7 @@ namespace PackageExplorer {
                 try {
                     SaveSettings();
                     _mruManager.OnApplicationExit();
+                    PackageSourceManager.OnApplicationExit();
                 }
                 catch (Exception) { }
             }

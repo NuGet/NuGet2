@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NuGet;
+using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
@@ -13,24 +14,59 @@ namespace PackageExplorerViewModel {
         private IPackageRepository _packageRepository;
         private IQueryable<IPackage> _currentQuery;
         private string _currentSearch;
+        private IMruPackageSourceManager _packageSourceManager;
 
-        public PackageChooserViewModel() {
+        public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager) {
             Packages = new ObservableCollection<IPackage>();
             NavigationCommand = new NavigateCommand(this);
             SortCommand = new SortCommand(this);
             SearchCommand = new SearchCommand(this);
             LoadedCommand = new LoadedCommand(this);
             ChangePackageSourceCommand = new ChangePackageSourceCommand(this);
+           
+            _packageSourceManager = packageSourceManager;
         }
 
-        public string CurrentSortColumn {
-            get;
-            set;
+        private string _sortColumn;
+
+        public string SortColumn
+        {
+            get { return _sortColumn; }
+            set {
+                if (_sortColumn != value)
+                {
+                    _sortColumn = value;
+                    OnPropertyChanged("SortColumn");
+                }
+            }
         }
 
-        public ListSortDirection SortDirection {
-            get;
-            set;
+        private ListSortDirection _sortDirection;
+
+        public ListSortDirection SortDirection
+        {
+            get { return _sortDirection; }
+            set {
+                if (_sortDirection != value)
+                {
+                    _sortDirection = value;
+                    OnPropertyChanged("SortDirection");
+                }
+            }
+        }
+
+        private int _sortCounter;
+
+        public int SortCounter
+        {
+            get { return _sortCounter; }
+            set {
+                if (_sortCounter != value)
+                {
+                    _sortCounter = value;
+                    OnPropertyChanged("SortCounter");
+                }
+            }
         }
 
         private bool _isEditable = true;
@@ -62,15 +98,18 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private string _packageSource;
+        public ObservableCollection<string> PackageSources
+        {
+            get { return _packageSourceManager.PackageSources; }
+        }
 
         public string PackageSource {
-            get { return _packageSource; }
-            set {
-                if (_packageSource != value) {
-                    _packageSource = value;
-                    OnPropertyChanged("PackageSource");
-                }
+            get {
+                return _packageSourceManager.ActivePackageSource; 
+            }
+            private set {
+                _packageSourceManager.ActivePackageSource = value;
+                OnPropertyChanged("PackageSource");
             }
         }
 
@@ -207,7 +246,7 @@ namespace PackageExplorerViewModel {
                 query = query.Find(_currentSearch.Split(' '));
             }
 
-            switch (CurrentSortColumn) {
+            switch (SortColumn) {
                 case "Id":
                     query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
                     break;
@@ -239,7 +278,7 @@ namespace PackageExplorerViewModel {
         }
 
         public void Sort(string column, ListSortDirection? direction = null) {
-            if (CurrentSortColumn == column) {
+            if (SortColumn == column) {
                 if (direction.HasValue) {
                     SortDirection = direction.Value;
                 }
@@ -250,16 +289,20 @@ namespace PackageExplorerViewModel {
                 }
             }
             else {
-                CurrentSortColumn = column;
+                SortColumn = column;
                 SortDirection = direction ?? ListSortDirection.Ascending;
             }
-            
+
+            // trigger the dialog to update Sort glyph
+            SortCounter++;
+
             LoadPackages();
         }
 
         public void ChangePackageSource(string source) {
             if (PackageSource != source || _currentQuery == null) {
                 PackageSource = source;
+                _packageSourceManager.NotifyPackageSourceAdded(source);
 
                 if (PackageRepository != null) {
                     LoadPackages();

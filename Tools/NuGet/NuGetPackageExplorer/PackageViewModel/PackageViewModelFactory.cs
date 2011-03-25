@@ -18,8 +18,25 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [Import]
+        public IMruPackageSourceManager MruPackageSourceManager
+        {
+            get;
+            set;
+        }
+
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
             return new PackageViewModel(package, packageSource, MessageBoxService, MruManager);
+        }
+
+        private PackageChooserViewModel _packageChooserViewModel;
+        public PackageChooserViewModel CreatePackageChooserViewModel()
+        {
+            if (_packageChooserViewModel == null)
+            {
+                _packageChooserViewModel = new PackageChooserViewModel(MruPackageSourceManager);
+            }
+            return _packageChooserViewModel;
         }
     }
 }
