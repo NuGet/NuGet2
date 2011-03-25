@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NuGet;
 using PackageExplorerViewModel.Types;
@@ -83,19 +84,21 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        /// <summary>
+        /// This method needs to be run on background thread so as not to block UI thread
+        /// </summary>
+        /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private IPackageRepository PackageRepository {
-            get {
-                if (_packageRepository == null || _packageRepository.Source != PackageSource) {
-                    try {
-                        _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
-                    }
-                    catch (Exception) {
-                        _packageRepository = null;
-                    }
+        private IPackageRepository GetPackageRepository() {
+            if (_packageRepository == null || _packageRepository.Source != PackageSource) {
+                try {
+                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
                 }
-                return _packageRepository;
+                catch (Exception) {
+                    _packageRepository = null;
+                }
             }
+            return _packageRepository;
         }
 
         public ObservableCollection<string> PackageSources
@@ -213,13 +216,13 @@ namespace PackageExplorerViewModel {
                     if (result.IsFaulted) {
                         AggregateException exception = result.Exception;
                         StatusContent = (exception.InnerException ?? exception).Message;
-
                         ClearPackages();
                     }
                     else if (!result.IsCanceled) {
                         ShowPackages(result.Result.Item1, result.Result.Item2, page);
                         StatusContent = String.Empty;
-                        OnPropertyChanged("SortDirection");
+                        // update sort column glyph
+                        SortCounter++;
                     }
 
                     IsEditable = true;
@@ -237,37 +240,51 @@ namespace PackageExplorerViewModel {
         }
 
         private void LoadPackages() {
-            if (PackageRepository == null) {
-                return;
-            }
+            StatusContent = "Connecting to package source...";
 
-            var query = PackageRepository.GetPackages();
-            if (!String.IsNullOrEmpty(_currentSearch)) {
-                query = query.Find(_currentSearch.Split(' '));
-            }
+            TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            Task.Factory.StartNew<IPackageRepository>(GetPackageRepository).ContinueWith(
+                task => {
+                    IPackageRepository repository = task.Result;
+                    if (repository == null)
+                    {
+                        StatusContent = String.Empty;
+                        ClearPackages();
+                        return;
+                    }
 
-            switch (SortColumn) {
-                case "Id":
-                    query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
-                    break;
+                    var query = repository.GetPackages();
+                    if (!String.IsNullOrEmpty(_currentSearch)) {
+                        query = query.Find(_currentSearch.Split(' '));
+                    }
 
-                case "Authors":
-                    query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
-                    break;
+                    switch (SortColumn) {
+                        case "Id":
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id);
+                            break;
 
-                case "VersionDownloadCount":
-                    query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.VersionDownloadCount) : query.OrderBy(p => p.VersionDownloadCount);
-                    break;
+                        case "Authors":
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
+                            break;
 
-                default:
-                    query = query.OrderByDescending(p => p.VersionDownloadCount);
-                    break;
-            }
+                        case "VersionDownloadCount":
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.VersionDownloadCount) : query.OrderBy(p => p.VersionDownloadCount);
+                            break;
 
-            _currentQuery = query;
+                        default:
+                            query = query.OrderByDescending(p => p.VersionDownloadCount);
+                            break;
+                    }
 
-            // every time the search query changes, we reset to page 0
-            LoadPage(0);
+                    _currentQuery = query;
+
+                    // every time the search query changes, we reset to page 0
+                    LoadPage(0);
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnRanToCompletion,
+                uiScheduler
+            );
         }
 
         public void Search(string searchTerm) {
@@ -302,14 +319,10 @@ namespace PackageExplorerViewModel {
         public void ChangePackageSource(string source) {
             if (PackageSource != source || _currentQuery == null) {
                 PackageSource = source;
+                // add the new source to MRU list
                 _packageSourceManager.NotifyPackageSourceAdded(source);
 
-                if (PackageRepository != null) {
-                    LoadPackages();
-                }
-                else {
-                    ClearPackages();
-                }
+                LoadPackages();
             }
         }
 
