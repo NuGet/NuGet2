@@ -127,7 +127,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             ActiveConsole = console;
 
             if (_initialized.HasValue) {
-                if (_initialized.Value && console.ShowDisclaimerHeader) {
+                if (_initialized.Value && console.IsInteractive) {
                     DisplayDisclaimerAndHelpText();
                 }
             }
@@ -139,12 +139,19 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                     _initialized = true;
 
-                    if (console.ShowDisclaimerHeader) {
+                    // when initializing host from the dialog, we don't want to execute existing init scripts in the solution, if any.
+                    if (console.IsInteractive) {
                         DisplayDisclaimerAndHelpText();
-                    }
-
+                    
                     ExecuteInitScripts();
-                    _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
+                        _solutionManager.SolutionOpened += (o, e) => {
+                            ExecuteInitScripts();
+                            UpdateWorkingDirectory();
+                        };
+
+                        UpdateWorkingDirectory();
+
+                        _solutionManager.SolutionClosed += (o, e) => UpdateWorkingDirectory();
                 }
                 catch (Exception ex) {
                     // catch all exception as we don't want it to crash VS
@@ -155,6 +162,19 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     ExceptionHelper.WriteToActivityLog(ex);
                 }
             }
+        }
+
+        private void UpdateWorkingDirectory() {
+            string targetDir;
+            if (_solutionManager.IsSolutionOpen) {
+                targetDir = "'" + _solutionManager.SolutionDirectory + "'";
+            }
+            else {
+                // if there is no solution open, we set the active directory to be user profile folder
+                targetDir = "$Env:USERPROFILE";
+            }
+
+            Runspace.Invoke("Set-Location " + targetDir, null, false);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

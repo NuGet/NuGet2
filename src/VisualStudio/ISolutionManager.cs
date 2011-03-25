@@ -6,6 +6,7 @@ namespace NuGet.VisualStudio {
     public interface ISolutionManager {
         event EventHandler SolutionOpened;
         event EventHandler SolutionClosing;
+        event EventHandler SolutionClosed;
 
         string SolutionDirectory { get; }
 

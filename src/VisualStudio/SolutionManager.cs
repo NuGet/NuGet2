@@ -32,6 +32,7 @@ namespace NuGet.VisualStudio {
             _solutionEvents = _dte.Events.SolutionEvents;
             _solutionEvents.Opened += OnSolutionOpened;
             _solutionEvents.BeforeClosing += OnBeforeClosing;
+            _solutionEvents.AfterClosing += OnAfterClosing;
             _solutionEvents.ProjectAdded += OnProjectAdded;
             _solutionEvents.ProjectRemoved += OnProjectRemoved;
             _solutionEvents.ProjectRenamed += OnProjectRenamed;
@@ -60,6 +61,8 @@ namespace NuGet.VisualStudio {
         public event EventHandler SolutionOpened;
 
         public event EventHandler SolutionClosing;
+
+        public event EventHandler SolutionClosed;
 
         /// <summary>
         /// Gets a value indicating whether there is a solution open in the IDE.
@@ -132,6 +135,12 @@ namespace NuGet.VisualStudio {
             }
 
             return null;
+        }
+
+        private void OnAfterClosing() {
+            if (SolutionClosed != null) {
+                SolutionClosed(this, EventArgs.Empty);
+            }
         }
 
         private void OnBeforeClosing() {

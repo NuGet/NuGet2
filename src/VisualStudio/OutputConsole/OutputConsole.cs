@@ -37,7 +37,7 @@ namespace NuGet.VisualStudio {
             set;
         }
 
-        public bool ShowDisclaimerHeader {
+        public bool IsInteractive {
             get {
                 return false;
             }

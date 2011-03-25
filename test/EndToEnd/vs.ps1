@@ -424,3 +424,9 @@ function Remove-Project {
 function Get-SolutionPath {
     $dte.Solution.Properties.Item("Path").Value
 }
+
+function Close-Solution {
+    if ($dte.Solution) {
+        $dte.Solution.Close()
+    }
+}

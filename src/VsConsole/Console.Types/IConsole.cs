@@ -13,9 +13,9 @@ namespace NuGetConsole {
         IHost Host { get; set; }
 
         /// <summary>
-        /// Indicates to the active host whether this console wants to show a disclaimer header.
+        /// Indicates to the active host whether this console is an interactive one.
         /// </summary>
-        bool ShowDisclaimerHeader { get; }
+        /// <remarks>
         
         /// <summary>
         /// Get the console dispatcher which dispatches user interaction.

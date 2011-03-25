@@ -8,6 +8,8 @@ namespace NuGet.VisualStudio.Test.Mocks {
 
         public event EventHandler SolutionClosing;
 
+        public event EventHandler SolutionClosed;
+
         public abstract string SolutionDirectory {
             get;
         }
@@ -32,6 +34,10 @@ namespace NuGet.VisualStudio.Test.Mocks {
         public void CloseSolution() {
             if (SolutionClosing != null) {
                 SolutionClosing(this, EventArgs.Empty);
+            }
+
+            if (SolutionClosed != null) {
+                SolutionClosed(this, EventArgs.Empty);
             }
         }
 

@@ -253,33 +253,3 @@ function GetArgumentName($command, $index) {
 
     return $command.Parameters.Values | ?{ $_.ParameterSets[$parameterSet].Position -eq $index } | Select -ExpandProperty Name
 }
-
-# Hook up Solution events
-
-$solutionEvents = Get-Interface $dte.Events.SolutionEvents ([EnvDTE._dispSolutionEvents_Event])
-
-$solutionEvents.add_Opened([EnvDTE._dispSolutionEvents_OpenedEventHandler]{
-    UpdateWorkingDirectory
-})
-
-$solutionEvents.add_AfterClosing([EnvDTE._dispSolutionEvents_AfterClosingEventHandler]{
-    UpdateWorkingDirectory
-})
-
-function UpdateWorkingDirectory {
-    $SolutionDir = if(IsSolutionOpen) { Split-Path $DTE.Solution.Properties.Item("Path").Value -Parent }
-    if ($SolutionDir) {
-        Set-Location $SolutionDir
-    }
-    else {
-        Set-Location $Env:USERPROFILE
-    }
-}
-
-function IsSolutionOpen() {
-   return ($dte -and $dte.Solution -and $dte.Solution.IsOpen)
-}
-
-if (IsSolutionOpen) {
-    UpdateWorkingDirectory
-}
