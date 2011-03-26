@@ -38,6 +38,8 @@ namespace NuGet.Server.DataServices {
             Published = derivedData.Created.UtcDateTime;
             DownloadCount = -1;
             Rating = -1;
+            VersionDownloadCount = -1;
+            VersionRatingsCount = -1;
         }
 
         public string Id {
@@ -85,7 +87,17 @@ namespace NuGet.Server.DataServices {
             set;
         }
 
+        public int VersionDownloadCount {
+            get; 
+            set;
+        }
+
         public int RatingsCount {
+            get;
+            set;
+        }
+
+        public int VersionRatingsCount {
             get;
             set;
         }
