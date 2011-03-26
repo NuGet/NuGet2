@@ -95,6 +95,7 @@ namespace PackageExplorer
                 CreateLanguageInstance(SourceLanguage),
                 "Loading and parsing content...");
 
+            ScrollToHome();
             _propertyChanged = false;
         }
 

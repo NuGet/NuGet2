@@ -4,7 +4,6 @@ using System.Net.Cache;
 
 namespace NuGet {
     public class HttpClient : IHttpClient {
-        private const int RequestTimeOut = 5000;
 
         public string UserAgent {
             get;
@@ -22,17 +21,12 @@ namespace NuGet {
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
             }
-            
+
             request.UseDefaultCredentials = true;
             if (request.Proxy != null) {
                 // If we are going through a proxy then just set the default credentials
                 request.Proxy.Credentials = CredentialCache.DefaultCredentials;
             }
-
-            // Don't do this in debug mode so we can debug requests without worrying about timeouts
-#if !DEBUG
-            request.Timeout = RequestTimeOut;
-#endif
         }
 
         public Uri GetRedirectedUri(Uri uri) {
