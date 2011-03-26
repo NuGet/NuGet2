@@ -337,6 +337,11 @@ namespace NuGet.Dialog.Providers {
 
             _loadingInProgress = false;
 
+            // if this node is no longer selected, don't bother to process result
+            if (!IsSelected) {
+                return;
+            }
+
             if (task.IsCanceled) {
                 HideProgressPane();
             }
