@@ -337,39 +337,37 @@ namespace NuGet.Dialog.Providers {
 
             _loadingInProgress = false;
 
-            // if this node is no longer selected, don't bother to process result
-            if (!IsSelected) {
-                return;
-            }
-
-            if (task.IsCanceled) {
-                HideProgressPane();
-            }
-            else if (task.IsFaulted) {
-                // show error message in the Message pane
-                ShowMessagePane((exception.InnerException ?? exception).Message);
-            }
-            else {
-                LoadPageResult result = task.Result;
-
-                IEnumerable<IPackage> packages = result.Packages;
-
-                _extensions.Clear();
-                foreach (IPackage package in packages) {
-                    _extensions.Add(Provider.CreateExtension(package));
+            // Only process the result if this node is still selected.
+            if (IsSelected) {
+                if (task.IsCanceled) {
+                    HideProgressPane();
                 }
-
-                if (_extensions.Count > 0) {
-                    _extensions[0].IsSelected = true;
+                else if (task.IsFaulted) {
+                    // show error message in the Message pane
+                    ShowMessagePane((exception.InnerException ?? exception).Message);
                 }
+                else {
+                    LoadPageResult result = task.Result;
 
-                int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
-                int pageNumber = result.PageNumber;
+                    IEnumerable<IPackage> packages = result.Packages;
 
-                TotalPages = Math.Max(1, totalPages);
-                CurrentPage = Math.Max(1, pageNumber);
+                    _extensions.Clear();
+                    foreach (IPackage package in packages) {
+                        _extensions.Add(Provider.CreateExtension(package));
+                    }
 
-                HideProgressPane();
+                    if (_extensions.Count > 0) {
+                        _extensions[0].IsSelected = true;
+                    }
+
+                    int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
+                    int pageNumber = result.PageNumber;
+
+                    TotalPages = Math.Max(1, totalPages);
+                    CurrentPage = Math.Max(1, pageNumber);
+
+                    HideProgressPane();
+                }
             }
 
             if (QueryExecutionCallback != null) {

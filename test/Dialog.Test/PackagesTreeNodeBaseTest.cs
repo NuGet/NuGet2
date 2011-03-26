@@ -193,6 +193,7 @@ namespace NuGet.Dialog.Test {
             // Arrange
             var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Ascending);
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: 5);
+            node.IsSelected = true;
 
             // Act            
             TreeNodeActionTest(node,
@@ -256,6 +257,7 @@ namespace NuGet.Dialog.Test {
                                                int? numberOfPackages = null) {
             const int defaultNumberOfPackages = 10;
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: numberOfPackages ?? defaultNumberOfPackages);
+            node.IsSelected = true;
             TreeNodeActionTest(node, treeNodeAction, callback, pageSize);
         }
 
@@ -322,6 +324,7 @@ namespace NuGet.Dialog.Test {
 
             PackagesProviderBase provider = new MockPackagesProvider();
             return new MockTreeNode(parentTreeNode, provider, numberOfPackages);
+            
         }
 
         private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null) {
@@ -330,7 +333,9 @@ namespace NuGet.Dialog.Test {
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
-            return new MockTreeNode(parentTreeNode, provider, packages);
+            return new MockTreeNode(parentTreeNode, provider, packages) {
+                IsSelected = true
+            };
         }
     }
 }
