@@ -7,7 +7,7 @@ namespace NuGet.Commands {
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",
         UsageSummaryResourceName = "PublishCommandUsageSummary")]
     public class PublishCommand : Command {
-        
+
         private string _apiKey;
         private string _packageId;
         private string _packageVersion;
@@ -33,7 +33,7 @@ namespace NuGet.Commands {
                 gallery = new GalleryServer(Source);
             }
 
-            Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, _packageId, _packageVersion);
+            Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, _packageId, _packageVersion, CommandLineUtility.GetSourceText(Source));
             gallery.PublishPackage(_apiKey, _packageId, _packageVersion);
             Console.WriteLine(NuGetResources.PublishCommandPackagePublished);
         }

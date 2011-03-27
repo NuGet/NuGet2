@@ -115,6 +115,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to the symbol server.
+        /// </summary>
+        internal static string DefaultSymbolServer {
+            get {
+                return ResourceManager.GetString("DefaultSymbolServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete canceled.
         /// </summary>
         internal static string DeleteCommandCanceled {
@@ -376,6 +385,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to the NuGet gallery feed.
+        /// </summary>
+        internal static string LiveFeed {
+            get {
+                return ResourceManager.GetString("LiveFeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
         /// </summary>
         internal static string MissingOptionValueError {
@@ -385,7 +403,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No API Key was provided and no API Key could be found for this source. To save an API Key for a source use the &apos;SetApiKey&apos; command..
+        ///   Looks up a localized string similar to No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the &apos;SetApiKey&apos; command..
         /// </summary>
         internal static string NoApiKeyFound {
             get {
@@ -574,7 +592,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your package was published to the feed..
+        ///   Looks up a localized string similar to Your package was published..
         /// </summary>
         internal static string PublishCommandPackagePublished {
             get {
@@ -583,7 +601,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Publishing {0} {1} to the live feed....
+        ///   Looks up a localized string similar to Publishing {0} {1} to {2}....
         /// </summary>
         internal static string PublishCommandPublishingPackage {
             get {
@@ -628,15 +646,6 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creating an entry for {0}....
-        /// </summary>
-        internal static string PushCommandCreatingPackage {
-            get {
-                return ResourceManager.GetString("PushCommandCreatingPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Pushes a package to the server and optionally publish it to the feed..
         /// </summary>
         internal static string PushCommandDescription {
@@ -664,11 +673,20 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your package was uploaded to the server but not published..
+        ///   Looks up a localized string similar to Your package was uploaded to &apos;{0}&apos; but not published..
         /// </summary>
         internal static string PushCommandPackageCreated {
             get {
                 return ResourceManager.GetString("PushCommandPackageCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pushing {0} to {1}....
+        /// </summary>
+        internal static string PushCommandPushingPackage {
+            get {
+                return ResourceManager.GetString("PushCommandPushingPackage", resourceCulture);
             }
         }
         
@@ -822,6 +840,15 @@ namespace NuGet.Common {
         internal static string SpecCommandForceDescription {
             get {
                 return ResourceManager.GetString("SpecCommandForceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for {1}. To save an API Key use the &apos;SetApiKey&apos; command with the -Symbols flag..
+        /// </summary>
+        internal static string SymbolServerNotConfigured {
+            get {
+                return ResourceManager.GetString("SymbolServerNotConfigured", resourceCulture);
             }
         }
         

@@ -211,10 +211,10 @@
     <value>Publishes a package that was uploaded to the server but not added to the live feed.</value>
   </data>
   <data name="PublishCommandPackagePublished" xml:space="preserve">
-    <value>Your package was published to the feed.</value>
+    <value>Your package was published.</value>
   </data>
   <data name="PublishCommandPublishingPackage" xml:space="preserve">
-    <value>Publishing {0} {1} to the live feed...</value>
+    <value>Publishing {0} {1} to {2}...</value>
   </data>
   <data name="PublishCommandSourceDescription" xml:space="preserve">
     <value>Specifies the base GalleryServer Url.</value>
@@ -225,8 +225,8 @@
   <data name="PublishCommandUsageSummary" xml:space="preserve">
     <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
   </data>
-  <data name="PushCommandCreatingPackage" xml:space="preserve">
-    <value>Creating an entry for {0}...</value>
+  <data name="PushCommandPushingPackage" xml:space="preserve">
+    <value>Pushing {0} to {1}...</value>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
     <value>Pushes a package to the server and optionally publish it to the feed.</value>
@@ -238,7 +238,7 @@
     <value>There is no default source, please specify a source.</value>
   </data>
   <data name="PushCommandPackageCreated" xml:space="preserve">
-    <value>Your package was uploaded to the server but not published.</value>
+    <value>Your package was uploaded to '{0}' but not published.</value>
   </data>
   <data name="PushCommandCreateOnlyDescription" xml:space="preserve">
     <value>Specifies if the package should be created and uploaded to the server but not published to the live feed. False by default.</value>
@@ -361,7 +361,7 @@
     <value>All packages listed in {0} are already installed.</value>
   </data>
   <data name="NoApiKeyFound" xml:space="preserve">
-    <value>No API Key was provided and no API Key could be found for this source. To save an API Key for a source use the 'SetApiKey' command.</value>
+    <value>No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the 'SetApiKey' command.</value>
   </data>
   <data name="SetApiKeyCommandApiKeySaved" xml:space="preserve">
     <value>The API Key '{0}' was saved for the source '{1}'.</value>
@@ -414,7 +414,16 @@
   <data name="SetApiKeyCommandSymbolsDescription" xml:space="preserve">
     <value>Sets the API key for the default symbol server.</value>
   </data>
+  <data name="DefaultSymbolServer" xml:space="preserve">
+    <value>the symbol server</value>
+  </data>
+  <data name="LiveFeed" xml:space="preserve">
+    <value>the NuGet gallery feed</value>
+  </data>
   <data name="PackageCommandAttemptingToBuildSymbolsPackage" xml:space="preserve">
     <value>Attempting to build symbols package for '{0}'.</value>
+  </data>
+  <data name="SymbolServerNotConfigured" xml:space="preserve">
+    <value>Found symbols package '{0}', but no API key was specified for {1}. To save an API Key use the 'SetApiKey' command with the -Symbols flag.</value>
   </data>
 </root>

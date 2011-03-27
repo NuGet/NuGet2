@@ -66,7 +66,7 @@ namespace NuGet {
         public static bool IsMultiValuedProperty(PropertyInfo property) {
             return GetGenericCollectionType(property.PropertyType) != null;
         }
-        
+
         public static string GetLocalizedString(Type resourceType, string resourceName) {
             if (String.IsNullOrEmpty(resourceName)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "resourceName");
@@ -105,12 +105,22 @@ namespace NuGet {
             return _cachedResourceStrings[resourceName];
         }
 
-        public static string GetApiKey(ISettings settings, string source) {
+        public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true) {
             var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
-            if (String.IsNullOrEmpty(value)) {
-                throw new CommandLineException(NuGetResources.NoApiKeyFound);
+            if (String.IsNullOrEmpty(value) && throwIfNotFound) {
+                throw new CommandLineException(NuGetResources.NoApiKeyFound, GetSourceText(source));
             }
             return value;
+        }
+
+        public static string GetSourceText(string source) {
+            if (String.IsNullOrEmpty(source) || source.Equals(GalleryServer.DefaultGalleryServerUrl)) {
+                return NuGetResources.LiveFeed;
+            }
+            if (source.Equals(GalleryServer.DefaultSymbolServerUrl)) {
+                return NuGetResources.DefaultSymbolServer;
+            }
+            return "'" + source + "'";
         }
     }
 }
