@@ -16,6 +16,8 @@ namespace NuGet {
         private const string AssembliesCacheKey = "ASSEMBLIES";
         private const string FilesCacheKey = "FILES";
 
+        private readonly bool _enableCaching;
+
         private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
 
         private static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(15);
@@ -27,10 +29,15 @@ namespace NuGet {
         // so we don't have to hold on to that resource
         private Func<Stream> _streamFactory;
 
-        public ZipPackage(string fileName) {
+        public ZipPackage(string fileName)
+            : this(fileName, enableCaching: false) {
+        }
+
+        internal ZipPackage(string fileName, bool enableCaching) {
             if (String.IsNullOrEmpty(fileName)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "fileName");
             }
+            _enableCaching = enableCaching;
             _streamFactory = () => File.OpenRead(fileName);
             EnsureManifest();
         }
@@ -39,6 +46,7 @@ namespace NuGet {
             if (streamFactory == null) {
                 throw new ArgumentNullException("streamFactory");
             }
+            _enableCaching = true;
             _streamFactory = streamFactory;
             EnsureManifest();
         }
@@ -139,7 +147,10 @@ namespace NuGet {
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return MemoryCache.Default.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
+                if (_enableCaching) {
+                    return MemoryCache.Default.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
+                }
+                return GetAssembliesNoCache();
             }
         }
 
@@ -149,7 +160,10 @@ namespace NuGet {
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
-            return MemoryCache.Default.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
+            if (_enableCaching) {
+                return MemoryCache.Default.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
+            }
+            return GetFilesNoCache();
         }
 
         public Stream GetStream() {

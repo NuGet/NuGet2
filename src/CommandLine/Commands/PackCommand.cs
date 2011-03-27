@@ -46,8 +46,8 @@ namespace NuGet.Commands {
             get { return _excludes; }
         }
 
-        [Option(typeof(NuGetResources), "PackageCommandSymbolsDescription")]
-        public bool Symbols { get; set; }
+        [Option(typeof(NuGetResources), "PackageCommandNoSymbolsDescription")]
+        public bool NoSymbols { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
@@ -61,18 +61,19 @@ namespace NuGet.Commands {
 
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
-            PackageBuilder builder = GetPackageBuilder(path);
+            BuildPackage(path);
+        }
 
+        private void BuildPackage(string path, PackageBuilder builder, string outputPath = null) {
             if (!String.IsNullOrEmpty(Version)) {
                 builder.Version = new Version(Version);
             }
 
+            outputPath = outputPath ?? GetOutputPath(builder);
+
             // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
             BasePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
             ExcludeFiles(builder.Files);
-
-            // Get the output path
-            string outputPath = GetOutputPath(builder);
 
             try {
                 using (Stream stream = File.Create(outputPath)) {
@@ -155,12 +156,12 @@ namespace NuGet.Commands {
             return path;
         }
 
-        private string GetOutputPath(PackageBuilder builder) {
+        private string GetOutputPath(PackageBuilder builder, bool symbols = false) {
             // Output file is {id}.{version}
             string outputFile = builder.Id + "." + builder.Version;
 
             // If this is a source package then add .symbols.nupkg to the package file name
-            if (Symbols) {
+            if (symbols) {
                 outputFile += SymbolsExtension;
             }
             else {
@@ -171,33 +172,56 @@ namespace NuGet.Commands {
             return Path.Combine(outputDirectory, outputFile);
         }
 
-        private PackageBuilder GetPackageBuilder(string path) {
+        private void BuildPackage(string path) {
             string extension = Path.GetExtension(path).ToLowerInvariant();
 
             switch (extension) {
                 case ".nuspec":
-                    return BuildFromNuspec(path);
+                    BuildFromNuspec(path);
+                    break;
                 default:
-                    return BuildFromProjectFile(path);
+                    BuildFromProjectFile(path);
+                    break;
             }
         }
 
-        private PackageBuilder BuildFromNuspec(string path) {
+        private void BuildFromNuspec(string path) {
+            PackageBuilder builder = null;
+
             if (String.IsNullOrEmpty(BasePath)) {
-                return new PackageBuilder(path);
+                builder = new PackageBuilder(path);
+            }
+            else {
+                builder = new PackageBuilder(path, BasePath);
             }
 
-            return new PackageBuilder(path, BasePath);
+            BuildPackage(path, builder);
         }
 
-        private PackageBuilder BuildFromProjectFile(string path) {
+        private void BuildFromProjectFile(string path) {
             var projectBuilder = new ProjectPackageBuilder(path, Console) {
-                IncludeSources = Symbols,
                 Debug = Debug,
                 IsTool = Tool
             };
 
-            return projectBuilder.BuildPackage();
+            // Create a builder for the main package as well as the sources/symbols package
+            PackageBuilder mainPackageBuilder = projectBuilder.BuildPackage();
+            // Build the main package
+            BuildPackage(path, mainPackageBuilder);
+
+            // If we're excluding symbols then do nothing else
+            if (NoSymbols) {
+                return;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildSymbolsPackage, Path.GetFileName(path));
+
+            projectBuilder.IncludeSources = true;
+            PackageBuilder symbolsBuilder = projectBuilder.BuildPackage();
+            // Get the file name for the sources package and build it
+            string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
+            BuildPackage(path, symbolsBuilder, outputPath);
         }
 
         private string GetInputFile() {

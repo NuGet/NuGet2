@@ -421,6 +421,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Attempting to build symbols package for &apos;{0}&apos;..
+        /// </summary>
+        internal static string PackageCommandAttemptingToBuildSymbolsPackage {
+            get {
+                return ResourceManager.GetString("PackageCommandAttemptingToBuildSymbolsPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The Base Path of the files defined in the nuspec file..
         /// </summary>
         internal static string PackageCommandBasePathDescription {
@@ -466,6 +475,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Determines if sources and symbols should be excluded in this package. Only valid when building a package from a project..
+        /// </summary>
+        internal static string PackageCommandNoSymbolsDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandNoSymbolsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
@@ -489,15 +507,6 @@ namespace NuGet.Common {
         internal static string PackageCommandSuccess {
             get {
                 return ResourceManager.GetString("PackageCommandSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Determines if sources and symbols should be included in this package. Only valid when building a package from a project..
-        /// </summary>
-        internal static string PackageCommandSymbolsDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandSymbolsDescription", resourceCulture);
             }
         }
         
