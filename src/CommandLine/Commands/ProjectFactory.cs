@@ -11,7 +11,7 @@ using Microsoft.Build.Logging;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    internal class ProjectPackageBuilder {
+    internal class ProjectFactory {
         private readonly Project _project;
         private FrameworkName _frameworkName;
         private ILogger _logger;
@@ -36,11 +36,11 @@ namespace NuGet.Commands {
         private const string PackagesFolder = "packages";
         private const string TransformFileExtension = ".transform";
 
-        public ProjectPackageBuilder(string path) {
+        public ProjectFactory(string path) {
             _project = new Project(path);
         }
 
-        public ProjectPackageBuilder(Project project) {
+        public ProjectFactory(Project project) {
             _project = project;
         }
 
@@ -73,7 +73,7 @@ namespace NuGet.Commands {
             }
         }
 
-        public bool IncludeSources { get; set; }
+        public bool IncludeSymbols { get; set; }
 
         public bool Debug { get; set; }
 
@@ -88,7 +88,7 @@ namespace NuGet.Commands {
             }
         }
 
-        public PackageBuilder BuildPackage() {
+        public PackageBuilder CreateBuilder() {
             if (TargetFramework != null) {
                 Logger.Log(MessageLevel.Info, NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
             }
@@ -113,7 +113,7 @@ namespace NuGet.Commands {
 
             bool anyNuspecFiles = builder.Files.Any();
 
-            if (!anyNuspecFiles || IncludeSources) {
+            if (!anyNuspecFiles || IncludeSymbols) {
                 // Add output files
                 AddOutputFiles(builder);
             }
@@ -125,7 +125,7 @@ namespace NuGet.Commands {
 
 
             // Add sources if this is a symbol package
-            if (IncludeSources) {
+            if (IncludeSymbols) {
                 AddFiles(builder, SourcesItemType, SourcesFolder);
             }
 
@@ -158,7 +158,7 @@ namespace NuGet.Commands {
             BuildRequestData requestData = new BuildRequestData(_project.FullPath, properties, _project.ToolsVersion, new string[0], null);
             BuildParameters parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
-            parameters.NodeExeLocation = typeof(ProjectPackageBuilder).Assembly.Location;
+            parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;
             parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
             BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
             // Build the project so that the outputs are created
@@ -202,7 +202,7 @@ namespace NuGet.Commands {
                 ".xml"
             };
 
-            if (IncludeSources) {
+            if (IncludeSymbols) {
                 // Include pdbs for symbol packages
                 allowedOutputExtensions.Add(".pdb");
             }
@@ -440,7 +440,7 @@ namespace NuGet.Commands {
             }
 
             public Stream GetStream() {
-                return _streamFactory.Value();   
+                return _streamFactory.Value();
             }
 
             private static Func<Stream> ReverseTransform(IPackageFile file, IEnumerable<IPackageFile> transforms) {

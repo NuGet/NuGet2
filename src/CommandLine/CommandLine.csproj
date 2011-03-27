@@ -44,7 +44,7 @@
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
-    <Compile Include="Commands\ProjectPackageBuilder.cs" />
+    <Compile Include="Commands\ProjectFactory.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
     <Compile Include="Commands\SpecCommand.cs" />
     <Compile Include="Commands\PublishCommand.cs" />

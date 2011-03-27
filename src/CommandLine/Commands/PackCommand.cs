@@ -199,13 +199,14 @@ namespace NuGet.Commands {
         }
 
         private void BuildFromProjectFile(string path) {
-            var projectBuilder = new ProjectPackageBuilder(path, Console) {
+            var factory = new ProjectFactory(path) {
                 Debug = Debug,
-                IsTool = Tool
+                IsTool = Tool,
+                Logger = Console
             };
 
             // Create a builder for the main package as well as the sources/symbols package
-            PackageBuilder mainPackageBuilder = projectBuilder.BuildPackage();
+            PackageBuilder mainPackageBuilder = factory.CreateBuilder();
             // Build the main package
             BuildPackage(path, mainPackageBuilder);
 
@@ -217,8 +218,8 @@ namespace NuGet.Commands {
             Console.WriteLine();
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildSymbolsPackage, Path.GetFileName(path));
 
-            projectBuilder.IncludeSources = true;
-            PackageBuilder symbolsBuilder = projectBuilder.BuildPackage();
+            factory.IncludeSymbols = true;
+            PackageBuilder symbolsBuilder = factory.CreateBuilder();
             // Get the file name for the sources package and build it
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(path, symbolsBuilder, outputPath);
