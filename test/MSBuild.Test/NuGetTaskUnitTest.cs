@@ -31,8 +31,7 @@ namespace NuGet.Test.MSBuild {
         }
 
         [TestMethod]
-        public void WillSetOutputPathWhenRun()
-        {
+        public void WillSetOutputPathWhenRun() {
             var packageStreamStub = new Mock<Stream>();
             var packageBuilderStub = new Mock<IPackageBuilder>();
             NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, packageStreamStub: packageStreamStub);
