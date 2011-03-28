@@ -175,6 +175,7 @@ namespace NuGet.Test {
             var f3 = VersionUtility.ParseFrameworkFolderName(@"SL4\foo.dll");
             var f4 = VersionUtility.ParseFrameworkFolderName(@"SL3\sub1\foo.dll");
             var f5 = VersionUtility.ParseFrameworkFolderName(@"SL20\sub1\sub2\foo.dll");
+            var f6 = VersionUtility.ParseFrameworkFolderName(@"net\foo.dll");
 
             Assert.IsNull(f1);
             Assert.AreEqual("Unsupported", f2.Identifier);
@@ -184,6 +185,8 @@ namespace NuGet.Test {
             Assert.AreEqual(new Version("3.0"), f4.Version);
             Assert.AreEqual("Silverlight", f5.Identifier);
             Assert.AreEqual(new Version("2.0"), f5.Version);
+            Assert.AreEqual(".NETFramework", f6.Identifier);
+            Assert.AreEqual(VersionUtility.DefaultTargetFrameworkVersion, f6.Version);
         }
 
         [TestMethod]
