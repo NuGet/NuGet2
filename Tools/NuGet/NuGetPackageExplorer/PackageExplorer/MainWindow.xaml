@@ -81,24 +81,16 @@
                         </StackPanel>
 
                         <!-- Authors -->
-                        <Grid Margin="0,3,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                            <TextBlock Grid.Column="1" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
-                        </Grid>
+                        <DockPanel Margin="0,3,0,0">
+                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                        </DockPanel>
 
                         <!-- Owners -->
-                        <Grid Margin="0,3,0,0" Visibility="{Binding Owners, Converter={StaticResource NullToVisibilityConverter}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Static resources:Resources.Dialog_OwnersLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                            <TextBlock Grid.Column="1" Text="{Binding Owners, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
-                        </Grid>
+                        <DockPanel Margin="0,3,0,0" Visibility="{Binding Owners, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_OwnersLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding Owners, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                        </DockPanel>
 
                         <!-- Tags -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding Tags, Converter={StaticResource NullToVisibilityConverter}}">
@@ -132,7 +124,17 @@
                             </Hyperlink>
                         </TextBlock>
 
+                        <!-- Summary -->
+                        <TextBlock Text="Summary:" Margin="0,3,0,0" Style="{StaticResource DetailMetadataLabelStyle}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
+                        </TextBlock>
+
+                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Summary}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
+                        </TextBlock>
+
                         <!-- Description -->
+                        <TextBlock Text="Description:" Margin="0,3,0,0" Style="{StaticResource DetailMetadataLabelStyle}">
+                        </TextBlock>
+                        
                         <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
                         </TextBlock>
 
@@ -231,6 +233,10 @@
         <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
     </Window.CommandBindings>
     
+    <Window.InputBindings>
+        <KeyBinding Key="K" Modifiers="Control" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="{Binding MetadataBindingGroup, ElementName=PackageMetadataEditor}" />
+    </Window.InputBindings>
+    
     <DockPanel LastChildFill="True">
         <!-- Menu bar -->
         <Menu DockPanel.Dock="Top">
@@ -298,7 +304,7 @@
             </self:GrayscaleMenuItem>
 
             <self:GrayscaleMenuItem Header="_Edit">
-                <self:GrayscaleMenuItem Header="Edit _Package Metadata" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="{Binding MetadataBindingGroup, ElementName=PackageMetadataEditor}" />
+                <self:GrayscaleMenuItem Header="Edit _Package Metadata" InputGestureText="Ctrl+K" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="{Binding MetadataBindingGroup, ElementName=PackageMetadataEditor}" />
                 <Separator />
                 <self:GrayscaleMenuItem Command="Cut">
                     <self:GrayscaleMenuItem.Icon>
