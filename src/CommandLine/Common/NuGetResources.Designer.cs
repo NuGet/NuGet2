@@ -844,7 +844,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for {1}. To save an API Key use the &apos;SetApiKey&apos; command with the -Symbols flag..
+        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;nuget.exe SetApiKey -Symbols [your API key from http://www.symbolsource.org]&apos;..
         /// </summary>
         internal static string SymbolServerNotConfigured {
             get {

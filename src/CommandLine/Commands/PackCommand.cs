@@ -157,8 +157,10 @@ namespace NuGet.Commands {
         }
 
         private string GetOutputPath(PackageBuilder builder, bool symbols = false) {
+            string version = String.IsNullOrEmpty(Version) ? builder.Version.ToString() : Version;
+
             // Output file is {id}.{version}
-            string outputFile = builder.Id + "." + builder.Version;
+            string outputFile = builder.Id + "." + version;
 
             // If this is a source package then add .symbols.nupkg to the package file name
             if (symbols) {
