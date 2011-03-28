@@ -72,6 +72,14 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        public PackagePart this[string name]
+        {
+            get
+            {
+                return Children.SingleOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
         public bool ContainsFolder(string folderName) {
             if (Children == null) {
                 return false;
@@ -88,19 +96,20 @@ namespace PackageExplorerViewModel {
             return Children.Any(p => p is PackageFile && p.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public void AddFolder(string folderName) {
+        public PackageFolder AddFolder(string folderName) {
             if (ContainsFolder(folderName) || ContainsFile(folderName)) {
                 PackageViewModel.MessageBox.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
-                return;
+                return null;
             }
             var newFolder = new PackageFolder(folderName, this);
             Children.Add(newFolder);
             newFolder.IsSelected = true;
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
+            return newFolder;
         }
 
-        public void AddFile(string filePath) {
+        public PackageFile AddFile(string filePath) {
             if (!File.Exists(filePath)) {
                 throw new ArgumentException("File does not exist.", "filePath");
             }
@@ -109,7 +118,7 @@ namespace PackageExplorerViewModel {
             if (ContainsFolder(name))
             {
                 PackageViewModel.MessageBox.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
-                return;
+                return null;
             }
 
             if (ContainsFile(name)) {
@@ -121,7 +130,7 @@ namespace PackageExplorerViewModel {
                 }
                 else
                 {
-                    return;
+                    return null;
                 }
             }
             
@@ -131,6 +140,7 @@ namespace PackageExplorerViewModel {
             newFile.IsSelected = true;
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
+            return newFile;
         }
 
         private void RemoveChildByName(string name)

@@ -17,6 +17,7 @@ using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using PackageExplorerViewModel.Types;
 using StringResources = PackageExplorer.Resources.Resources;
+using System.Globalization;
 
 namespace PackageExplorer {
     /// <summary>
@@ -239,29 +240,74 @@ namespace PackageExplorer {
         }
 
         private void OnTreeViewItemDrop(object sender, DragEventArgs e) {
-            PackageFolder folder;
+            PackageFolder folder = null;
 
             TreeViewItem item = sender as TreeViewItem;
             if (item != null) {
                 folder = item.DataContext as PackageFolder;
             }
-            else {
-                folder = (DataContext as PackageViewModel).RootFolder;
+            //else {
+            //    folder = (DataContext as PackageViewModel).RootFolder;
+            //}
+
+            var data = e.Data;
+            if (data.GetDataPresent(DataFormats.FileDrop)) {
+                object value = data.GetData(DataFormats.FileDrop);
+                string[] filenames = value as string[];
+                if (filenames != null && filenames.Length > 0) {
+                    foreach (string file in filenames) {
+                        AddFileToFolder(folder, file);
+                    }
+
+                    e.Handled = true;
+                }
             }
+        }
 
-            if (folder != null) {
-                var data = e.Data;
-                if (data.GetDataPresent(DataFormats.FileDrop)) {
-                    object value = data.GetData(DataFormats.FileDrop);
-                    string[] filenames = value as string[];
-                    if (filenames != null && filenames.Length > 0) {
-                        foreach (string file in filenames) {
-                            folder.AddFile(file);
-                        }
+        private void AddFileToFolder(PackageFolder folder, string file)
+        {
+            if (folder == null)
+            {
+                string guessFolderName = GuessFolderNameFromFile(file);
+                bool confirmed = MessageBox.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, "Do you want to place the file '{0}' into '{1}' folder?", file, guessFolderName));
 
-                        e.Handled = true;
+                var rootFolder = (DataContext as PackageViewModel).RootFolder;
+
+                if (confirmed)
+                {
+                    if (rootFolder.ContainsFolder(guessFolderName))
+                    {
+                        folder = (PackageFolder)rootFolder[guessFolderName];
+                    }
+                    else
+                    {
+                        folder = rootFolder.AddFolder(guessFolderName);
                     }
                 }
+                else
+                {
+                    folder = rootFolder;
+                }
+            }
+
+            folder.AddFile(file);
+        }
+
+        private static string GuessFolderNameFromFile(string file)
+        {
+            string extension = Path.GetExtension(file).ToUpperInvariant();
+            if (extension == ".DLL")
+            {
+                return "lib";
+            }
+            else if (extension == ".PS1" || extension == ".PSM1" || extension == ".PSD1")
+            {
+                return "tools";
+            }
+            else
+            {
+                return "content";
             }
         }
 
