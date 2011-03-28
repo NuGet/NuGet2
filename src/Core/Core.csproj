@@ -33,6 +33,8 @@
     <Compile Include="..\..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="Authoring\AssemblyMetadata.cs" />
+    <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
     <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\ManifestDependency.cs" />

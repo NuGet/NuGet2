@@ -23,7 +23,7 @@ namespace NuGet.Commands {
         public override void ExecuteCommand() {
             var builder = new PackageBuilder();
             if (!String.IsNullOrEmpty(AssemblyPath)) {
-                AssemblyMetadataExtractor.ExtractMetadata(AssemblyPath, builder);                
+                AssemblyMetadataExtractor.ExtractMetadata(builder, AssemblyPath);                
             }
             else {
                 builder.Id = "Package";
@@ -63,20 +63,6 @@ namespace NuGet.Commands {
                     throw;
                 }
             }
-        }
-
-        private string GetAttributeValueOrDefault<T>(Assembly assembly, Func<T, string> selector) where T : Attribute {
-            // Get the attribute
-            T attribute = assembly.GetCustomAttributes(typeof(T), inherit: false).Cast<T>().FirstOrDefault();
-
-            if (attribute != null) {
-                string value = selector(attribute);
-                // Return the value only if it isn't null or empty so that we can use ?? to fall back
-                if (!String.IsNullOrEmpty(value)) {
-                    return value;
-                }
-            }
-            return null;
         }
     }
 }
