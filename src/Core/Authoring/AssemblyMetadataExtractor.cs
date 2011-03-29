@@ -7,7 +7,11 @@ using NuGet.Runtime;
 namespace NuGet {
     public static class AssemblyMetadataExtractor {
         public static AssemblyMetadata GetMetadata(string assemblyPath) {
-            AppDomain domain = AppDomain.CreateDomain("metadata");
+            var setup = new AppDomainSetup {
+                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory
+            };
+
+            AppDomain domain = AppDomain.CreateDomain("metadata", AppDomain.CurrentDomain.Evidence, setup);
             try {
                 var extractor = domain.CreateInstance<MetadataExtractor>();
                 return extractor.GetMetadata(assemblyPath);

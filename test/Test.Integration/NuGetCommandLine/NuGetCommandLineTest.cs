@@ -13,6 +13,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private const string TwoSpecsFolder = @".\twospecs\";
         private const string OutputFolder = @".\output\";
         private const string SpecificFilesFolder = @".\specific_files\";
+        private const string ProjectFilesFolder = @".\projects\";
         private const string NugetExePath = @".\NuGet.exe";
 
         private StringWriter consoleOutput;
@@ -30,6 +31,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             Directory.CreateDirectory(TwoSpecsFolder);
             Directory.CreateDirectory(SpecificFilesFolder);
             Directory.CreateDirectory(OutputFolder);
+            Directory.CreateDirectory(ProjectFilesFolder);
 
             originalConsoleOutput = System.Console.Out;
             originalErrorConsoleOutput = System.Console.Error;
@@ -52,7 +54,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand() {
             // Arrange 
             string[] args = new string[0];
-            
+
             // Act
             int result = Program.Main(args);
 
@@ -165,6 +167,95 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [TestMethod]
+        public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
+            // Arrange            
+            string expectedPackage = "FakeProject.1.2.0.0.nupkg";
+            string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
+            File.WriteAllText(Path.Combine(ProjectFilesFolder, "Runner.cs"), @"using System;
+public class Runner { 
+    public static void Run() { 
+        Console.WriteLine(""Hello World"");
+    }
+}");
+            CreateAssemblyInfo("FakeProject",
+                               "1.2.0.0",
+                               "David Inc",
+                               "This is a test. Ignore me");
+
+            CreateProject("FakeProject", compile: new[] { "Runner.cs" });
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.IsTrue(File.Exists(expectedSymbolsPackage));
+
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
+            Assert.AreEqual("FakeProject", package.Id);
+            Assert.AreEqual(new Version("1.2.0.0"), package.Version);
+            Assert.AreEqual("David Inc", package.Authors.First());
+            Assert.AreEqual("This is a test. Ignore me", package.Description);
+            VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Runner.cs", 
+                                                                  @"src\Properties\AssemblyInfo.cs",
+                                                                  @"lib\net40\FakeProject.dll",
+                                                                  @"lib\net40\FakeProject.pdb" });
+        }
+
+        [TestMethod]
+        public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput() {
+            // Arrange                        
+            string expectedPackage = "ProjectWithCotent.1.5.0.0.nupkg";
+            var contentFiles = new[] { "Foo.xml", "Bar.txt" };
+            var sourceFiles = new[] { "A.cs", "B.cs" };
+
+            foreach (var contentFile in contentFiles) {
+                File.WriteAllText(Path.Combine(ProjectFilesFolder, contentFile), contentFile);
+            }
+
+            int index = 0;
+            foreach (var sourceFile in sourceFiles) {
+                string path = Path.Combine(ProjectFilesFolder, sourceFile);
+                File.WriteAllText(path, String.Format(@"using System;
+public class Cl_{0} {{
+    public void Foo() {{ }}
+}}
+", index++));
+            }
+
+            CreateAssemblyInfo("ProjectWithCotent",
+                               "1.5.0.0",
+                               "David",
+                               "Project with content");
+
+            CreateProject("ProjectWithCotent", content: contentFiles, compile: sourceFiles);
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithCotent.dll",
+                                                                         @"content\Foo.xml",
+                                                                         @"content\Bar.txt" });
+            Assert.AreEqual("ProjectWithCotent", package.Id);
+            Assert.AreEqual(new Version("1.5.0.0"), package.Version);
+            Assert.AreEqual("David", package.Authors.First());
+            Assert.AreEqual("Project with content", package.Description);
+        }
+
+        [TestMethod]
         public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
@@ -190,10 +281,103 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             Assert.IsFalse(File.Exists(expectedPackage));
         }
 
-        private void VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
+        private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
             var package = new ZipPackage(packageFile);
             var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToList();
             CollectionAssert.AreEqual(expectedFiles.OrderBy(f => f).ToList(), files);
+            return package;
+        }
+
+        private void CreateProject(string projectName, IEnumerable<string> content = null, IEnumerable<string> compile = null) {
+            string projectFile = Path.Combine(ProjectFilesFolder, projectName + ".csproj");
+            File.WriteAllText(projectFile, GetProjectContent(projectName, compile: compile, content: content));
+        }
+
+        private static string GetProjectContent(string projectName, string targetFrameworkVersion = "4.0", IEnumerable<string> compile = null, IEnumerable<string> content = null) {
+            compile = compile ?? Enumerable.Empty<string>();
+            content = content ?? Enumerable.Empty<string>();
+            string compileItemGroup = String.Join(Environment.NewLine, compile.Select(path => String.Format(@"<Compile Include=""{0}"" />", path)));
+            string contentItemGroup = String.Join(Environment.NewLine, content.Select(path => String.Format(@"<Content Include=""{0}"" />", path)));
+            return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project ToolsVersion=""4.0"" DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <PropertyGroup>
+    <Configuration Condition="" '$(Configuration)' == '' "">Debug</Configuration>
+    <Platform Condition="" '$(Platform)' == '' "">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{{572A487C-B388-4490-B7E8-0382ABDAF729}}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>{0}</RootNamespace>
+    <AssemblyName>{0}</AssemblyName>
+    <TargetFrameworkVersion>v{1}</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include=""System"" />
+    <Reference Include=""System.Core"" />
+    <Reference Include=""System.Xml.Linq"" />
+    <Reference Include=""System.Data.DataSetExtensions"" />
+    <Reference Include=""Microsoft.CSharp"" />
+    <Reference Include=""System.Data"" />
+    <Reference Include=""System.Xml"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include=""Properties\AssemblyInfo.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    {2}
+  </ItemGroup>
+  <ItemGroup>
+    {3}
+  </ItemGroup>
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
+</Project>
+", projectName, targetFrameworkVersion, contentItemGroup, compileItemGroup);
+        }
+
+        private static void CreateAssemblyInfo(string assemblyName, string version, string author, string description) {
+            var propertiesDir = Path.Combine(ProjectFilesFolder, "Properties");
+            Directory.CreateDirectory(propertiesDir);
+            string assemblyInfo = Path.Combine(propertiesDir, "AssemblyInfo.cs");
+            File.WriteAllText(assemblyInfo,
+                              GetAssemblyInfoContent(assemblyName, version, author, description));
+        }
+
+        private static string GetAssemblyInfoContent(string assemblyName, string version, string author, string description) {
+            return String.Format(@"using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+[assembly: AssemblyTitle(""{0}"")]
+[assembly: AssemblyDescription(""{3}"")]
+[assembly: AssemblyConfiguration("""")]
+[assembly: AssemblyCompany(""{2}"")]
+[assembly: AssemblyProduct(""{0}"")]
+[assembly: AssemblyCopyright(""Copyright © NuGet"")]
+[assembly: AssemblyTrademark("""")]
+[assembly: AssemblyCulture("""")]
+[assembly: ComVisible(false)]
+[assembly: AssemblyVersion(""{1}"")]
+[assembly: AssemblyFileVersion(""{1}"")]
+", assemblyName, version, author, description);
         }
 
         private static void DeleteDirs() {
@@ -202,6 +386,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             DeleteDir(TwoSpecsFolder);
             DeleteDir(SpecificFilesFolder);
             DeleteDir(OutputFolder);
+            DeleteDir(ProjectFilesFolder);
         }
 
         private static void DeleteDir(string directory) {
