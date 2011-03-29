@@ -23,7 +23,8 @@ namespace NuGet.Commands {
         public override void ExecuteCommand() {
             var builder = new PackageBuilder();
             if (!String.IsNullOrEmpty(AssemblyPath)) {
-                AssemblyMetadataExtractor.ExtractMetadata(builder, AssemblyPath);                
+                string path = Path.Combine(Directory.GetCurrentDirectory(), AssemblyPath);
+                AssemblyMetadataExtractor.ExtractMetadata(builder, path);
             }
             else {
                 builder.Id = "Package";
