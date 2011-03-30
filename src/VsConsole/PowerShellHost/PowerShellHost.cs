@@ -31,7 +31,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         // store the current command typed so far
         private ComplexCommand _complexCommand;
 
-        public PowerShellHost(string name, IRunspaceManager runspaceManager) {
+        protected PowerShellHost(string name, IRunspaceManager runspaceManager) {
             _runspaceManager = runspaceManager;
 
             // TODO: Take these as ctor arguments
@@ -62,7 +62,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         public bool IsCommandEnabled {
-            get; private set;
+            get;
+            private set;
         }
 
         protected Runspace Runspace {
@@ -96,8 +97,23 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         public string Prompt {
             get {
-                return ComplexCommand.IsComplete ? "PM>" : ">> ";
+                return ComplexCommand.IsComplete ? EvaluatePrompt() : ">> ";
             }
+        }
+
+        private string EvaluatePrompt() {            
+            string prompt = "PM>";
+
+            try {
+                PSObject output = this.Runspace.Invoke("prompt", null, outputResults: false).FirstOrDefault();
+                if (output != null) {
+                    prompt = output.BaseObject.ToString();
+                }
+            }
+            catch (RuntimeException ex) {
+                ReportError(ex);
+            }
+            return prompt;
         }
 
         /// <summary>
@@ -142,9 +158,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want execution of init scripts to crash our console.")]
+            Justification = "We don't want execution of init scripts to crash our console.")]
         private void ExecuteInitScripts() {
             if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
                 try {
@@ -195,7 +211,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             ActiveConsole = console;
 
             string fullCommand;
-            if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {                
+            if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand)) {
                 return ExecuteHost(fullCommand, command, inputs);
             }
             return false; // constructing multi-line command
@@ -305,7 +321,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public SimpleExpansion GetPathExpansions(string line) {
             PSObject expansion = Runspace.Invoke(
                 "$input|%{$__pc_args=$_}; _TabExpansionPath $__pc_args; Remove-Variable __pc_args -Scope 0",
-                new object[] {line},
+                new object[] { line },
                 outputResults: false).FirstOrDefault();
             if (expansion != null) {
                 int replaceStart = (int)expansion.Properties["ReplaceStart"].Value;

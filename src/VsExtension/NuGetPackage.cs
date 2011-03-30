@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.Design;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -38,6 +39,7 @@ namespace NuGet.Tools {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
         public const string ProductVersion = "1.2.0.0";
+        private const string PSModulePathEnvVariable = "PSModulePath";
 
         private uint _debuggingContextCookie, _solutionBuildingContextCookie;
         private DTE _dte;
@@ -93,7 +95,7 @@ namespace NuGet.Tools {
                 else {
                     errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
                 }
-                
+
                 MessageBox.Show(
                     errorMessage,
                     NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
@@ -158,7 +160,25 @@ namespace NuGet.Tools {
             _dte = ServiceLocator.GetInstance<DTE>();
             _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
 
+            // set up powershell environment variable for module search path
+            // ensuring our own Modules folder is searched before system or user-level 
+            AddPowerShellModuleSearchPath();
+
             // Add our command handlers for menu (commands must exist in the .vsct file)
+            AddMenuCommandHandlers();
+        }
+
+        private static void AddPowerShellModuleSearchPath() {
+            string psModulePath = Environment.GetEnvironmentVariable(PSModulePathEnvVariable) ?? String.Empty;
+            string extensionRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // EnvironmentPermission demand?
+            Environment.SetEnvironmentVariable(PSModulePathEnvVariable,
+                                               String.Format("{0}\\Modules\\;{1}", extensionRoot, psModulePath),
+                                               EnvironmentVariableTarget.Process);
+        }
+
+        private void AddMenuCommandHandlers() {
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs) {
                 // Create the command for the tool window
