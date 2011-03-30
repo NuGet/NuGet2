@@ -115,6 +115,7 @@
       <DependentUpon>ContentViewerPane.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\FileSizeConverter.cs" />
+    <Compile Include="Converters\NormalizeTextConverter.cs" />
     <Compile Include="Interop\BrowseForFolder.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />

@@ -128,14 +128,14 @@
                         <TextBlock Text="Summary:" Margin="0,3,0,0" Style="{StaticResource DetailMetadataLabelStyle}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
                         </TextBlock>
 
-                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Summary}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Summary, Converter={StaticResource NormalizeTextConverter}}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
                         </TextBlock>
 
                         <!-- Description -->
                         <TextBlock Text="Description:" Margin="0,3,0,0" Style="{StaticResource DetailMetadataLabelStyle}">
                         </TextBlock>
                         
-                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
+                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >
                         </TextBlock>
 
                         <!-- Dependencies list -->
