@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ConfirmToDeleteContent" xml:space="preserve">
-    <value>Are you sure you want to delete it?</value>
+    <value>Are you sure you want to delete '{0}'?</value>
   </data>
   <data name="ConfirmToReplaceExsitingFile" xml:space="preserve">
     <value>Do you want to replace the existing file?</value>

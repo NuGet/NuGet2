@@ -22,6 +22,7 @@ namespace PackageExplorer {
         private EditableFrameworkAssemblyReference _newFrameworkAssembly;
 
         public IMessageBox MessageBox { get; set; }
+        public IPackageViewModelFactory PackageViewModelFactory { get; set; }
 
         public PackageMetadataEditor() {
             InitializeComponent();
@@ -106,7 +107,10 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog() { Owner = Window.GetWindow(this) };
+            var dialog = new PackageChooserDialog() { 
+                Owner = Window.GetWindow(this),
+                DataContext = PackageViewModelFactory.CreatePackageChooserViewModel()
+            };
             var result = dialog.ShowDialog();
             if (result ?? false) {
                 var selectedPackage = dialog.SelectedPackage;

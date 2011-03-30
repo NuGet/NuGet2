@@ -109,7 +109,9 @@ namespace PackageExplorerViewModel {
         }
 
         public void Delete() {
-            bool confirm = PackageViewModel.MessageBox.Confirm(Resources.ConfirmToDeleteContent, isWarning: true);
+            bool confirm = PackageViewModel.MessageBox.Confirm(
+                String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToDeleteContent, Name),
+                isWarning: true);
             if (!confirm) {
                 return;
             }
