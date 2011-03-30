@@ -27,12 +27,15 @@ namespace NuGet.VisualStudio {
 
         // List of project types
         // http://www.mztools.com/articles/2008/MZ2008017.aspx
-        private static readonly string[] _supportedProjectTypes = new[] { VsConstants.WebSiteProjectTypeGuid, 
+        private static readonly HashSet<string> _supportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { 
+                                                                          VsConstants.WebSiteProjectTypeGuid, 
                                                                           VsConstants.CsharpProjectTypeGuid, 
                                                                           VsConstants.VbProjectTypeGuid,
-                                                                          VsConstants.FsharpProjectTypeGuid };
+                                                                          VsConstants.FsharpProjectTypeGuid 
+        };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
+
         // Get the ProjectItems for a folder path
         public static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false) {
             // Traverse the path to get at the directory
@@ -55,6 +58,35 @@ namespace NuGet.VisualStudio {
             }
 
             return projectItem;
+        }
+
+        /// <summary>
+        /// Recursively retrieves all supported child projects of a virtual folder.
+        /// </summary>
+        /// <param name="project">The root container project</param>
+        public static IEnumerable<Project> GetSupportedChildProjects(this Project project) {
+            if (!project.IsSolutionFolder()) {
+                yield break;
+            }
+
+            var containerProjects = new Queue<Project>();
+            containerProjects.Enqueue(project);
+
+            while(containerProjects.Any()) {
+                var containerProject = containerProjects.Dequeue();
+                foreach (ProjectItem item in containerProject.ProjectItems) {
+                    var nestedProject = item.SubProject;
+                    if (nestedProject == null) {
+                        continue;
+                    }
+                    else if (nestedProject.IsSupported()) {
+                        yield return nestedProject;
+                    }
+                    else if (nestedProject.IsSolutionFolder()) {
+                        containerProjects.Enqueue(nestedProject);
+                    }
+                }
+            }
         }
 
         public static bool DeleteProjectItem(this Project project, string path) {
@@ -224,8 +256,11 @@ namespace NuGet.VisualStudio {
         }
 
         public static bool IsSupported(this Project project) {
-            return project.Kind != null &&
-                   _supportedProjectTypes.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
+            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind);
+        }
+
+        public static bool IsSolutionFolder(this Project project) {
+            return project.Kind != null && project.Kind.Equals(VsConstants.VsProjectItemKindSolutionFolder, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsUnloaded(this Project project) {

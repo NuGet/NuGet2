@@ -144,17 +144,25 @@ namespace NuGet.VisualStudio {
 
         private void OnProjectRenamed(Project project, string oldName) {
             if (!String.IsNullOrEmpty(oldName)) {
-                if (project.IsSupported()) {
-                    EnsureProjectCache();
+                EnsureProjectCache();
 
+                if (project.IsSupported()) {
                     RemoveProjectFromCache(oldName);
                     AddProjectToCache(project);
+                }
+                else {
+                    // In the case where a solution directory was changed, project FullNames are unchanged. 
+                    // We only need to invalidate the projects under the current tree so as to sync the CustomUniqueNames.
+                    foreach (var item in project.GetSupportedChildProjects()) {
+                        RemoveProjectFromCache(item.FullName);
+                        AddProjectToCache(item);
+                    }
                 }
             }
         }
 
         private void OnProjectRemoved(Project project) {
-            RemoveProjectFromCache(project.UniqueName);
+            RemoveProjectFromCache(project.FullName);
         }
 
         private void OnProjectAdded(Project project) {
@@ -184,6 +192,9 @@ namespace NuGet.VisualStudio {
         }
 
         private void AddProjectToCache(Project project) {
+            if (!project.IsSupported()) {
+                return;
+            }
             ProjectName oldProjectName;
             _projectCache.TryGetProjectNameByShortName(project.Name, out oldProjectName);
 

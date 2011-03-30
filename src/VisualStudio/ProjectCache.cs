@@ -98,6 +98,7 @@ namespace NuGet.VisualStudio {
 
             _projectNamesCache[projectName.CustomUniqueName] = projectName;
             _projectNamesCache[projectName.UniqueName] = projectName;
+            _projectNamesCache[projectName.FullName] = projectName;
 
             // Add the entry mapping project name to the actual project
             _projectCache[projectName] = project;
@@ -159,6 +160,7 @@ namespace NuGet.VisualStudio {
         private void RemoveProjectName(ProjectName projectName) {
             _projectNamesCache.Remove(projectName.CustomUniqueName);
             _projectNamesCache.Remove(projectName.UniqueName);
+            _projectNamesCache.Remove(projectName.FullName);
             _projectCache.Remove(projectName);
         }
     }

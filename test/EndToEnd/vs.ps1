@@ -98,7 +98,8 @@ function New-Project {
     
     # Return the project
     if ($SolutionFolder) {
-        $project = Get-Project "$($SolutionFolder.Name)\$projectName" -ErrorAction SilentlyContinue
+        $solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
+        $project = Get-Project "$($solutionFolderPath)$projectName" -ErrorAction SilentlyContinue
     }
     else {
         $project = Get-Project $projectName -ErrorAction SilentlyContinue
@@ -109,6 +110,15 @@ function New-Project {
     }
     
     $project
+}
+
+function Get-SolutionFolderPathRecursive([parameter(mandatory=$true)]$solutionFolder) {
+    $path = ''
+    while ($solutionFolder -ne $null) {
+        $path = "$($solutionFolder.Name)\$path"
+        $solutionFolder = $solutionFolder.ParentProjectItem.ContainingProject
+    }
+    return $path
 }
 
 function New-SolutionFolder {

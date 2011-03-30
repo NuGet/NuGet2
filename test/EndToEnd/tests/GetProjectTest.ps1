@@ -132,6 +132,83 @@ function Test-RemovingAmbiguousProjectAllowsSimpleNameToBeUsed {
     Assert-AreEqual $p2 (Get-Project -Name A)
 }
 
+function Test-RenameCreatingAmbiguityFollowedByRemovalAllowsSimpleNameToBeUsed {
+    # Act
+    $f1 = New-SolutionFolder 'foo'
+    $p1 = New-ClassLibrary 'A'
+    $p2 = $f1 | New-ClassLibrary 'B'
+    
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\B)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+
+    $p2.Name =  'A'
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\A)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+
+    Remove-Project $p1
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\A)
+    Assert-AreEqual $p2 (Get-Project -Name A)
+}
+
+function Test-RenamingSolutionFolderDoesNotAffectGetProject {
+    # Act
+    $f1 = New-SolutionFolder 'foo'
+    $p1 = New-ClassLibrary 'A'
+    $p2 = $f1 | New-ClassLibrary 'B'
+    
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\B)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+
+    $p2.Name =  'A'
+
+    Assert-AreEqual $p2 (Get-Project -Name foo\A)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+
+    $f1.Name = 'bar'
+    
+    Assert-AreEqual $p2 (Get-Project -Name bar\A)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+    
+    Remove-Project $p1
+    Assert-AreEqual $p2 (Get-Project -Name bar\A)
+    Assert-AreEqual $p2 (Get-Project -Name A)
+}
+
+function Test-RenamingSolutionFolderWithDeeplyNestedProjectsDoesNotAffectGetProject {
+    # Act
+    $f1 = New-SolutionFolder 'foo'
+    $f2 = $f1 | New-SolutionFolder 'bar'
+    $f3 = $f1 | New-SolutionFolder 'empty'
+    
+    $p1 = New-ClassLibrary 'A'
+    $p2 = $f2 | New-ClassLibrary 'B'
+    
+    Add-File $f1 "$($context.RepositoryRoot)\coolpackage.nuspec"
+    Add-File $f2 "$($context.RepositoryRoot)\secondpackage.nuspec"
+    
+    
+    Assert-AreEqual $p2 (Get-Project -Name foo\bar\B)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+    
+    $p2.Name =  'A'
+    
+    Assert-AreEqual $p2 (Get-Project -Name foo\bar\A)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+    
+    $f1.Name = 'bar'
+    
+    Assert-AreEqual $p2 (Get-Project -Name bar\bar\A)
+    Assert-AreEqual $p1 (Get-Project -Name A)
+    
+    Remove-Project $p1
+    Assert-AreEqual $p2 (Get-Project -Name bar\bar\A)
+    Assert-AreEqual $p2 (Get-Project -Name A)
+}
+
 function Test-AmbiguousStartupProject {
     # Arrange
     $f = New-SolutionFolder foo

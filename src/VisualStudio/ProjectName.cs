@@ -7,21 +7,26 @@ namespace NuGet.VisualStudio {
     /// </summary>
     internal class ProjectName : IEquatable<ProjectName> {
         public ProjectName(Project project) {
+            FullName = project.FullName;
             UniqueName = project.UniqueName;
             ShortName = project.Name;
             CustomUniqueName = project.GetCustomUniqueName();
         }
 
+        public string FullName { get; private set; }
         public string UniqueName { get; private set; }
         public string ShortName { get; private set; }
         public string CustomUniqueName { get; private set; }
 
+        /// <summary>
+        /// Two projects are equal if they share the same FullNames.
+        /// </summary>
         public bool Equals(ProjectName other) {
-            return other.UniqueName.Equals(other.UniqueName, StringComparison.OrdinalIgnoreCase);
+            return other.FullName.Equals(other.FullName, StringComparison.OrdinalIgnoreCase);
         }
 
         public override int GetHashCode() {
-            return UniqueName.GetHashCode();
+            return FullName.GetHashCode();
         }
 
         public override string ToString() {
