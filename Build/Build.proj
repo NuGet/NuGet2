@@ -177,7 +177,7 @@
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
         </PropertyGroup>
         <Exec Command="&quot;$(NuGetExe)&quot; pack" WorkingDirectory="$(ExeDropDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(ServerDropDirectory)" WorkingDirectory="$(ServerBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(ServerDropDirectory) -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
     </Target>
     
     <Target Name="RunIntegrationTests">
