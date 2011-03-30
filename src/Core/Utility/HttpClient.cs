@@ -23,6 +23,8 @@ namespace NuGet {
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
+                httpRequest.Headers[HttpRequestHeader.AcceptEncoding] = "gzip, deflate";
+                httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             }
 
             request.UseDefaultCredentials = true;
