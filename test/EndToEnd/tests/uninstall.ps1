@@ -285,3 +285,24 @@ function Test-UninstallPackageWithXmlTransformAndTokenReplacement {
     $content = [System.IO.File]::ReadAllText($path)
     Assert-False ($content.Contains($expectedContent))
 }
+
+function Test-UninstallPackageAfterRenaming {
+    param(
+        $context
+    )
+    # Arrange
+    $f = New-SolutionFolder 'Folder1' | New-SolutionFolder 'Folder2'
+    $p0 = New-ClassLibrary 'ProjectX'
+    $p1 = $f | New-ClassLibrary 'ProjectA'
+    $p2 = $f | New-ClassLibrary 'ProjectB'
+
+    # Act
+    $p1 | Install-Package NestedFolders -Source $context.RepositoryRoot 
+    #$p1.Name = "ProjectX"
+
+    Uninstall-Package NestedFolders -Project Folder1\Folder2\ProjectA
+
+    $p2 | Install-Package NestedFolders -Source $context.RepositoryRoot 
+    $f.Name = "Folder3"
+    #Uninstall-Package NestedFolders -Project Folder1\Folder3\ProjectB
+}

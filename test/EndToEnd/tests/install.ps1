@@ -826,3 +826,25 @@ function Test-InstallPackageWithXmlTransformAndTokenReplacement {
     $expectedContent = "type=`"$ns.MyModule, $assemblyName`""
     Assert-True ($content.Contains($expectedContent))
 }
+
+function Test-InstallPackageAfterRenaming {
+    param(
+        $context
+    )
+    # Arrange
+    $f = New-SolutionFolder 'Folder1' | New-SolutionFolder 'Folder2'
+    $p0 = New-ClassLibrary 'ProjectX'
+    $p1 = $f | New-ClassLibrary 'ProjectA'
+    $p2 = $f | New-ClassLibrary 'ProjectB'
+
+    # Act
+    $p1.Name = "ProjectX"
+    Install-Package jquery -Source $context.RepositoryRoot -project "Folder1\Folder2\ProjectX"
+
+    $f.Name = "Folder3"
+    Install-Package jquery -Source $context.RepositoryRoot -project "Folder1\Folder3\ProjectB"
+
+    # Assert
+    Assert-Null (Get-ProjectItem $p1 foo) "foo exists in the project!"
+    Assert-Null (Get-ProjectItem $p2 foo) "foo exists in the project!"
+}

@@ -150,7 +150,7 @@ namespace NuGet.VisualStudio {
                     RemoveProjectFromCache(oldName);
                     AddProjectToCache(project);
                 }
-                else {
+                else if (project.IsSolutionFolder()) {
                     // In the case where a solution directory was changed, project FullNames are unchanged. 
                     // We only need to invalidate the projects under the current tree so as to sync the CustomUniqueNames.
                     foreach (var item in project.GetSupportedChildProjects()) {
