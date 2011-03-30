@@ -134,6 +134,7 @@
         <Message Text="Copying the NuGet Server output to $(ServerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\www\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Exec Command="&quot;$(ZipExe)&quot; a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
+        <RemoveDir Directories="$(ServerDropDirectory)\www" />
     </Target>
     
     <Target Name="CopyPackageExplorerOutputToDropDirectory">
@@ -147,6 +148,7 @@
         <Message Text="Copying the PackageExplorer output to $(PackageExplorerDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(PackageExplorerOutputItems)" DestinationFiles="@(PackageExplorerOutputItems ->'$(PackageExplorerDropDirectory)\app\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Exec Command="&quot;$(ZipExe)&quot; a ..\PackageExplorer.zip" WorkingDirectory="$(PackageExplorerDropDirectory)\app" />
+        <RemoveDir Directories="$(PackageExplorerDropDirectory)\app" />
     </Target>
 
     <Target Name="CopyMSBuildOutputToDropDirectory">
