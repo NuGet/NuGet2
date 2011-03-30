@@ -12,6 +12,8 @@
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
         <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
+        <PackageExplorerBuildDirectory>$(NuGetRoot)\Tools\NuGet\NuGetPackageExplorer\PackageExplorer\bin\$(Configuration)</PackageExplorerBuildDirectory>
+        <PackageExplorerDropDirectory>$(NuGetDropDirectory)\PackageExplorer</PackageExplorerDropDirectory>
         <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <ServerBuildDirectory>$(NuGetSrcRoot)\Server</ServerBuildDirectory>
@@ -62,7 +64,7 @@
         </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyPackageExplorerOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
     </Target>
     
     <Target Name="CheckFxCop">
@@ -77,6 +79,7 @@
 
     <Target Name="Build">
         <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+        <MSBuild Projects="$(NuGetRoot)\Tools\NuGet\NuGetPackageExplorer\NuGetPackageExplorer.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
 
     <Target Name="RunTests">
@@ -105,6 +108,7 @@
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(MSBuildDropDirectory)" Condition="!Exists('$(MSBuildDropDirectory)')" />
+        <MakeDir Directories="$(PackageExplorerDropDirectory)" Condition="!Exists('$(PackageExplorerDropDirectory)')" />
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
@@ -131,6 +135,19 @@
         <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\www\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Exec Command="&quot;$(ZipExe)&quot; a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
     </Target>
+    
+    <Target Name="CopyPackageExplorerOutputToDropDirectory">
+        <ItemGroup>
+            <PackageExplorerOutputItems Exclude="$(PackageExplorerBuildDirectory)\**\*.pdb;
+                                                 $(PackageExplorerBuildDirectory)\**\*.vshost.*;
+                                                 $(PackageExplorerBuildDirectory)\**\*.manifest;
+                                                 $(PackageExplorerBuildDirectory)\**\*.application" 
+                                        Include="$(PackageExplorerBuildDirectory)\**\*.*" />
+        </ItemGroup>
+        <Message Text="Copying the PackageExplorer output to $(PackageExplorerDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(PackageExplorerOutputItems)" DestinationFiles="@(PackageExplorerOutputItems ->'$(PackageExplorerDropDirectory)\app\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Exec Command="&quot;$(ZipExe)&quot; a ..\PackageExplorer.zip" WorkingDirectory="$(PackageExplorerDropDirectory)\app" />
+    </Target>
 
     <Target Name="CopyMSBuildOutputToDropDirectory">
       <ItemGroup>
@@ -148,6 +165,7 @@
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(PackageExplorerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
     <Target Name="ILMergeTheExecutable">
         <Message Text="ILMerging the executable contents in $(ExeDropDirectory)" />
