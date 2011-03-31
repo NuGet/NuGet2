@@ -191,6 +191,7 @@
     <None Include="Class diagrams\Packages.cd" />
     <None Include="Class diagrams\PackageWalkers.cd" />
     <None Include="Class diagrams\Repositories.cd" />
+    <None Include="Properties\NuGet.Core.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

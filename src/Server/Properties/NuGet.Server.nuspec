@@ -4,8 +4,14 @@
         <id>NuGet.Server</id>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
+        <frameworkAssemblies>
+          <frameworkAssembly assemblyName="System.ServiceModel" />
+          <frameworkAssembly assemblyName="System.ServiceModel.Web" />
+          <frameworkAssembly assemblyName="System.ServiceModel.Activation" />
+          <frameworkAssembly assemblyName="System.Data.Services" />
+        </frameworkAssemblies>
         <dependencies>
-            <dependency id="NuGet.Core" />
+            <dependency id="NuGet.Core" version="1.2" />
         </dependencies>
     </metadata>
 </package>

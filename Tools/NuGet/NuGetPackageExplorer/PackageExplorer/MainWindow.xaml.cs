@@ -26,13 +26,8 @@ namespace PackageExplorer {
     [Export]
     public partial class MainWindow : Window {
 
-        private readonly IMruManager _mruManager; 
-
-        [Import]
-        public IPackageViewModelFactory PackageViewModelFactory {
-            get;
-            set;
-        }
+        private readonly IMruManager _mruManager;
+        private readonly IPackageViewModelFactory _packageViewModelFactory;
 
         [Import]
         public IMessageBox MessageBox {
@@ -50,11 +45,13 @@ namespace PackageExplorer {
         public IMruPackageSourceManager PackageSourceManager { get; set; }
 
         [ImportingConstructor]
-        public MainWindow(IMruManager mruManager) {
+        public MainWindow(IMruManager mruManager, IPackageViewModelFactory packageViewModelFactory) {
             InitializeComponent();
 
             PackageMetadataEditor.MessageBox = MessageBox;
+            PackageMetadataEditor.PackageViewModelFactory = packageViewModelFactory;
             RecentFilesMenuItem.DataContext = _mruManager = mruManager;
+            _packageViewModelFactory = packageViewModelFactory;
         }
 
         protected override void OnSourceInitialized(EventArgs e) {
@@ -102,7 +99,7 @@ namespace PackageExplorer {
 
         private void LoadPackage(IPackage package, string packagePath, PackageType packageType) {
             if (package != null) {
-                DataContext = PackageViewModelFactory.CreateViewModel(package, packagePath);
+                DataContext = _packageViewModelFactory.CreateViewModel(package, packagePath);
                 if (!String.IsNullOrEmpty(packagePath))
                 {
                     _mruManager.NotifyFileAdded(packagePath, package.ToString(), packageType);
@@ -116,7 +113,7 @@ namespace PackageExplorer {
                 return;
             }
 
-            DataContext = PackageViewModelFactory.CreateViewModel(new EmptyPackage(), String.Empty);
+            DataContext = _packageViewModelFactory.CreateViewModel(new EmptyPackage(), String.Empty);
         }
 
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e) {
@@ -153,11 +150,10 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog() { Owner = this };
-            dialog.DataContext = PackageViewModelFactory.CreatePackageChooserViewModel();
-            dialog.SetBinding(PackageChooserDialog.SortColumnProperty, new Binding("SortColumn") { Mode = BindingMode.OneWay });
-            dialog.SetBinding(PackageChooserDialog.SortDirectionProperty, new Binding("SortDirection") { Mode = BindingMode.OneWay });
-            dialog.SetBinding(PackageChooserDialog.SortCounterProperty, new Binding("SortCounter") { Mode = BindingMode.OneWay });
+            var dialog = new PackageChooserDialog() { 
+                Owner = this,
+                DataContext = _packageViewModelFactory.CreatePackageChooserViewModel()
+            };
 
             bool? result = dialog.ShowDialog();
             if (result ?? false) {

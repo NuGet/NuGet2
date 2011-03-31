@@ -6,6 +6,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using NuGet;
+using System.Windows.Data;
 
 namespace PackageExplorer {
     /// <summary>
@@ -54,6 +55,10 @@ namespace PackageExplorer {
 
         public PackageChooserDialog() {
             InitializeComponent();
+
+            SetBinding(SortColumnProperty, new Binding("SortColumn") { Mode = BindingMode.OneWay });
+            SetBinding(SortDirectionProperty, new Binding("SortDirection") { Mode = BindingMode.OneWay });
+            SetBinding(SortCounterProperty, new Binding("SortCounter") { Mode = BindingMode.OneWay });
         }
 
         private void RedrawSortGlyph() {

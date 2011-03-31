@@ -8,7 +8,7 @@ using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server.DataServices {
     // Disabled for live service
-    // [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
+    [System.ServiceModel.ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {       
         private IServerPackageRepository Repository {
             get {

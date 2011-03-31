@@ -61,7 +61,7 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure you want to delete it?.
+        ///   Looks up a localized string similar to Are you sure you want to delete &apos;{0}&apos;?.
         /// </summary>
         internal static string ConfirmToDeleteContent {
             get {

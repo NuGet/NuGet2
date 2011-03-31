@@ -93,10 +93,10 @@
                         </DockPanel>
 
                         <!-- Tags -->
-                        <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding Tags, Converter={StaticResource NullToVisibilityConverter}}">
-                            <TextBlock Text="{x:Static resources:Resources.Dialog_TagLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                            <TextBlock Text="{Binding Tags}" Style="{StaticResource DetailMetadataValueStyle}"  />
-                        </StackPanel>
+                        <DockPanel Margin="0,3,0,0" Visibility="{Binding Tags, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TagLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding Tags}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                        </DockPanel>
 
                         <!-- Language -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding Language, Converter={StaticResource NullToVisibilityConverter}}">
@@ -128,14 +128,14 @@
                         <TextBlock Text="Summary:" Margin="0,3,0,0" Style="{StaticResource DetailMetadataLabelStyle}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
                         </TextBlock>
 
-                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Summary}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Summary, Converter={StaticResource NormalizeTextConverter}}" Visibility="{Binding Summary, Converter={StaticResource NullToVisibilityConverter}}">
                         </TextBlock>
 
                         <!-- Description -->
                         <TextBlock Text="Description:" Margin="0,3,0,0" Style="{StaticResource DetailMetadataLabelStyle}">
                         </TextBlock>
                         
-                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description}" >
+                        <TextBlock Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >
                         </TextBlock>
 
                         <!-- Dependencies list -->
@@ -328,11 +328,12 @@
                     <self:GrayscaleMenuItem Header="_Normal" Tag="12" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="_Larger" Tag="14" Click="OnFontSizeItem_Click" IsCheckable="True" />
                     <self:GrayscaleMenuItem Header="L_argest" Tag="16" Click="OnFontSizeItem_Click" IsCheckable="True" />
-                    
+
                     <MenuItem.Icon>
                         <Image Source="/NuGetPackageExplorer;component/Images/FontDialogHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Show Status _Bar" x:Name="ShowStatusBarMenuItem" IsCheckable="True" IsChecked="True" />
             </MenuItem>
 
             <MenuItem Header="_Content" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
@@ -384,7 +385,7 @@
         </Menu>
 
         <!-- Status bar -->
-        <StatusBar Grid.Row="2" DockPanel.Dock="Bottom">
+        <StatusBar Grid.Row="2" DockPanel.Dock="Bottom" Visibility="{Binding IsChecked, ElementName=ShowStatusBarMenuItem, Converter={StaticResource boolToVis}}">
             <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource, FallbackValue=Ready}" />
         </StatusBar>
 

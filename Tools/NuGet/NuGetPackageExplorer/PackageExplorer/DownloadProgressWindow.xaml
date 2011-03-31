@@ -4,22 +4,17 @@
         xmlns:self="clr-namespace:PackageExplorer"
         xmlns:settings="clr-namespace:PackageExplorer.Properties"
         ShowInTaskbar="False"
-        SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         Loaded="OnLoaded"
         FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
-        MaxWidth="500"
         Closing="Window_Closing"
-        MinWidth="300">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>        
-        
-        <TextBlock x:Name="StatusText" Text="Downloading..." TextWrapping="Wrap" />
-        <ProgressBar Grid.Row="1" x:Name="Progress" Margin="0,10,0,10" Maximum="100" Minimum="0" Width="300" VerticalAlignment="Center" Height="30" />
-        <Button x:Name="CancelButton" Grid.Row="2" HorizontalAlignment="Right" Content="_Cancel" IsCancel="False" Padding="10,2,10,2" Margin="5,5,0,5" Click="CancelButtonClicked" />
-    </Grid>
+        Width="400"
+        Height="200"
+        MinWidth="300"
+        MinHeight="200">
+    <DockPanel Margin="10">        
+        <TextBlock DockPanel.Dock="Top" x:Name="StatusText" Text="Downloading..." TextWrapping="Wrap" />
+        <ProgressBar DockPanel.Dock="Top" x:Name="Progress" Margin="0,10,0,10" Maximum="100" Minimum="0" Height="26" />
+        <Button DockPanel.Dock="Bottom" x:Name="CancelButton" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Content="_Cancel" IsCancel="True" Padding="10,2,10,2" Margin="5,5,0,5" Click="CancelButtonClicked" />
+    </DockPanel>
 </self:DialogWithNoMinimizeAndMaximize>

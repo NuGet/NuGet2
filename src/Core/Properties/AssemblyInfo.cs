@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 
 [assembly: AssemblyTitle("NuGet.Core")]
-[assembly: AssemblyDescription("Core API for NuGet")]
+[assembly: AssemblyDescription("NuGet.Core is the core framework assembly for NuGet that the rest of NuGet builds upon.")]
 [assembly: CLSCompliant(true)]
 
 [assembly: InternalsVisibleTo("NuGet.Test")]
