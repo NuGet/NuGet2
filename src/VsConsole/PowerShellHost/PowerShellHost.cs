@@ -12,9 +12,8 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
-
     internal abstract class PowerShellHost : IHost, IPathExpansion, IDisposable {
-
+        private static readonly object _lockObject = new object();
         private readonly string _name;
         private readonly IRunspaceManager _runspaceManager;
         private readonly IPackageSourceProvider _packageSourceProvider;
@@ -124,11 +123,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                         DisplayDisclaimerAndHelpText();
                     }
 
-                    // when initializing host from the dialog, we don't want to execute existing init scripts in the solution, if any
-                    if (console.ExecuteInitScriptOnStartup) {
-                        ExecuteInitScripts();
-                        _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
-                    }
+                    ExecuteInitScripts();
+                    _solutionManager.SolutionOpened += (o, e) => ExecuteInitScripts();
                 }
                 catch (Exception ex) {
                     // catch all exception as we don't want it to crash VS
@@ -142,9 +138,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want execution of init scripts to crash our console.")]
+            Justification = "We don't want execution of init scripts to crash our console.")]
         private void ExecuteInitScripts() {
             if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
                 try {
@@ -217,6 +213,22 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 }
                 else {
                     property.Value = isSync;
+                }
+            }
+        }
+
+        public void SetDefaultRunspace() {
+            if (Runspace.DefaultRunspace == null) {
+                lock (_lockObject) {
+                    if (Runspace.DefaultRunspace == null) {
+                        // Set this runspace as DefaultRunspace so I can script DTE events.
+                        //
+                        // WARNING: MSDN says this is unsafe. The runspace must not be shared across
+                        // threads. I need this to be able to use ScriptBlock for DTE events. The
+                        // ScriptBlock event handlers execute on DefaultRunspace.
+
+                        Runspace.DefaultRunspace = Runspace;
+                    }
                 }
             }
         }

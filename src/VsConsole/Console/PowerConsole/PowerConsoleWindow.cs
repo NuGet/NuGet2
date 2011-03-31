@@ -8,8 +8,12 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGetConsole.Implementation.PowerConsole {
     [Export(typeof(IPowerConsoleWindow))]
-    class PowerConsoleWindow : IPowerConsoleWindow {
+    [Export(typeof(IHostInitializer))]
+    internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer {
         public const string ContentType = "PackageConsole";
+        
+        private Dictionary<string, HostInfo> _hostInfos;
+        private HostInfo _activeHostInfo;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import(typeof(SVsServiceProvider))]
@@ -23,7 +27,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
         [ImportMany]
         internal IEnumerable<Lazy<IHostProvider, IHostMetadata>> HostProviders { get; set; }
 
-        Dictionary<string, HostInfo> _hostInfos;
         Dictionary<string, HostInfo> HostInfos {
             get {
                 if (_hostInfos == null) {
@@ -37,7 +40,6 @@ namespace NuGetConsole.Implementation.PowerConsole {
             }
         }
 
-        HostInfo _activeHostInfo;
         internal HostInfo ActiveHostInfo {
             get {
                 if (_activeHostInfo == null) {
@@ -48,6 +50,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
             }
         }
 
+        // represent the default feed
         public string ActivePackageSource {
             get {
                 HostInfo hi = ActiveHostInfo;
@@ -103,6 +106,14 @@ namespace NuGetConsole.Implementation.PowerConsole {
                     ErrorHandler.ThrowOnFailure(frame.Show());
                 }
             }
+        }
+
+        public void Start() {
+            ActiveHostInfo.WpfConsole.Dispatcher.Start();
+        }
+
+        public void SetDefaultRunspace() {
+            ActiveHostInfo.WpfConsole.Host.SetDefaultRunspace();
         }
     }
 }

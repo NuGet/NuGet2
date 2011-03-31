@@ -55,5 +55,8 @@ namespace NuGetConsole.Host.PowerShellProvider {
         public string[] GetAvailableProjects() {
             return new string[0];
         }
+
+        public void SetDefaultRunspace() {            
+        }
     }
 }

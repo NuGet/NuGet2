@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace NuGetConsole {
     /// <summary>
@@ -17,6 +16,11 @@ namespace NuGetConsole {
         /// </summary>
         /// <param name="console">The console requesting the initialization.</param>
         void Initialize(IConsole console);
+
+        /// <summary>
+        /// Sets the default runspace from the console
+        /// </summary>
+        void SetDefaultRunspace(); 
 
         /// <summary>
         /// Get the current command prompt used by this host.

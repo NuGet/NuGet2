@@ -47,10 +47,6 @@ namespace NuGet.VisualStudio {
                 get { return _baseConsole.ShowDisclaimerHeader; }
             }
 
-            public bool ExecuteInitScriptOnStartup {
-                get { return _baseConsole.ExecuteInitScriptOnStartup; }
-            }
-
             public IConsoleDispatcher Dispatcher {
                 get { return _baseConsole.Dispatcher; }
             }
