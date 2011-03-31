@@ -298,11 +298,13 @@ function Test-UninstallPackageAfterRenaming {
 
     # Act
     $p1 | Install-Package NestedFolders -Source $context.RepositoryRoot 
-    #$p1.Name = "ProjectX"
-
-    Uninstall-Package NestedFolders -Project Folder1\Folder2\ProjectA
+    $p1.Name = "ProjectX"
+    Uninstall-Package NestedFolders -Project Folder1\Folder2\ProjectX
 
     $p2 | Install-Package NestedFolders -Source $context.RepositoryRoot 
     $f.Name = "Folder3"
-    #Uninstall-Package NestedFolders -Project Folder1\Folder3\ProjectB
+    Uninstall-Package NestedFolders -Project Folder1\Folder3\ProjectB
+
+    Assert-Null (Get-ProjectItem $p1 scripts\jquery-1.5.js)
+    Assert-Null (Get-ProjectItem $p2 scripts\jquery-1.5.js)
 }

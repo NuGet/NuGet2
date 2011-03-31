@@ -845,6 +845,6 @@ function Test-InstallPackageAfterRenaming {
     Install-Package jquery -Source $context.RepositoryRoot -project "Folder1\Folder3\ProjectB"
 
     # Assert
-    Assert-Null (Get-ProjectItem $p1 foo) "foo exists in the project!"
-    Assert-Null (Get-ProjectItem $p2 foo) "foo exists in the project!"
+    Assert-NotNull (Get-ProjectItem $p1 scripts\jquery-1.5.js)
+    Assert-NotNull (Get-ProjectItem $p2 scripts\jquery-1.5.js) 
 }
