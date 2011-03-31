@@ -107,7 +107,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             try {
                 PSObject output = this.Runspace.Invoke("prompt", null, outputResults: false).FirstOrDefault();
                 if (output != null) {
-                    prompt = output.BaseObject.ToString();
+                    string result = output.BaseObject.ToString();
+                    if (!String.IsNullOrEmpty(result)) {
+                        prompt = result;
+                    }
                 }
             }
             catch (Exception ex) {                
