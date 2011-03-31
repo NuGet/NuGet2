@@ -15,9 +15,13 @@ namespace NuGet.Dialog.PackageManagerUI {
     public partial class PackageManagerWindow : DialogWindow {
         private const string F1Keyword = "vs.ExtensionManager";
 
+        private bool _hasOpenedOnlineProvider;
+
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
         private readonly MenuCommandService _menuCommandService;
         private readonly ISelectedProviderSettings _selectedProviderSettings;
+        private VsExtensionsProvider _onlineProvider;
+        private readonly IProductUpdateService _productUpdateService;
 
         public PackageManagerWindow(MenuCommandService menuService) :
             this(menuService,
@@ -28,7 +32,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<ProviderServices>(),
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
                  ServiceLocator.GetInstance<IProgressProvider>(),
-                 ServiceLocator.GetInstance<ISelectedProviderSettings>()) {
+                 ServiceLocator.GetInstance<ISelectedProviderSettings>(),
+                 ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public PackageManagerWindow(MenuCommandService menuCommandService,
@@ -39,13 +44,16 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     ProviderServices providerServices,
                                     IRecentPackageRepository recentPackagesRepository,
                                     IProgressProvider progressProvider,
-                                    ISelectedProviderSettings selectedProviderSettings)
+                                    ISelectedProviderSettings selectedProviderSettings,
+                                    IProductUpdateService productUpdateService)
             : base(F1Keyword) {
 
             InitializeComponent();
 
+            LayoutRoot.Children.Add(new ProductUpdateBar(productUpdateService));
             _menuCommandService = menuCommandService;
             _selectedProviderSettings = selectedProviderSettings;
+            _productUpdateService = productUpdateService;
 
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
@@ -105,7 +113,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices,
                 progressProvider);
 
-            var onlineProvider = new OnlineProvider(
+            _onlineProvider = new OnlineProvider(
                 activeProject,
                 projectManager,
                 Resources,
@@ -299,6 +307,11 @@ namespace NuGet.Dialog.PackageManagerUI {
 
                 // save the selected provider to user settings
                 _selectedProviderSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
+                // if this is the first time online provider is opened, call to check for update
+                if (selectedProvider == _onlineProvider && !_hasOpenedOnlineProvider) {
+                    _hasOpenedOnlineProvider = true;
+                    _productUpdateService.CheckForAvailableUpdateAsync();
+                }
             }
         }
     }

@@ -108,6 +108,9 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="ConsoleInitializer.cs" />
+    <Compile Include="ConsoleContainer.xaml.cs">
+      <DependentUpon>ConsoleContainer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Console\IPrivateConsoleStatus.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="IHostInitializer.cs" />
@@ -147,7 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -158,10 +161,20 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\VisualStudio\VisualStudio.csproj">
+      <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
+      <Name>VisualStudio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
       <Name>Console.Types</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="ConsoleContainer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Choose>
     <When Condition="Exists($(VsSdkTargets))" />

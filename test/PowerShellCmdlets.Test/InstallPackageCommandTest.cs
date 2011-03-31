@@ -15,7 +15,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null);
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, null);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
@@ -30,7 +30,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var sourceVsPackageManager = new MockVsPackageManager();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             packageManagerFactory.Setup(m => m.CreatePackageManager("somesource")).Returns(sourceVsPackageManager);
-            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null) { CallBase = true };
             cmdlet.Object.Source = "somesource";
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
@@ -48,7 +48,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null) { CallBase = true };
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
 
@@ -66,7 +66,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null) { CallBase = true };
             cmdlet.Object.Id = "my-id";
             cmdlet.Object.Version = new Version("2.8");
             cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);

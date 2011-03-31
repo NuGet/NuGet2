@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 
 using NuGetConsole.Implementation.Console;
 using NuGetConsole.Implementation.PowerConsole;
+using NuGet.VisualStudio;
 
 namespace NuGetConsole.Implementation {
     /// <summary>
@@ -30,6 +31,12 @@ namespace NuGetConsole.Implementation {
         private IComponentModel ComponentModel {
             get {
                 return this.GetService<IComponentModel>(typeof(SComponentModel));
+            }
+        }
+
+        private IProductUpdateService ProductUpdateService {
+            get {
+                return ComponentModel.GetService<IProductUpdateService>();
             }
         }
 
@@ -58,7 +65,7 @@ namespace NuGetConsole.Implementation {
             get {
                 return _wpfConsole != null &&
                        _wpfConsole.Dispatcher.IsStartCompleted &&
-                       _wpfConsole.Host != null && 
+                       _wpfConsole.Host != null &&
                        _wpfConsole.Host.IsCommandEnabled;
             }
         }
@@ -154,7 +161,7 @@ namespace NuGetConsole.Implementation {
 
                 if (isEnabled) {
                     bool isStopButton = (prgCmds[0].cmdID == 0x0600);   // 0x0600 is the Command ID of the Stop button, defined in .vsct
-                    
+
                     // when command is executing: enable stop button and disable the rest
                     // when command is not executing: disable the stop button and enable the rest
                     isEnabled = !isStopButton ^ WpfConsole.Dispatcher.IsExecutingCommand;
@@ -296,7 +303,7 @@ namespace NuGetConsole.Implementation {
         private void LoadConsoleEditor() {
             if (WpfConsole != null) {
                 FrameworkElement consolePane = WpfConsole.Content as FrameworkElement;
-                ConsoleParentPane.Children.Add(consolePane);
+                ConsoleParentPane.AddConsoleEditor(consolePane);
 
                 // WPF doesn't handle input focus automatically in this scenario. We
                 // have to set the focus manually, otherwise the editor is displayed but
@@ -343,7 +350,7 @@ namespace NuGetConsole.Implementation {
             MoveFocus(PendingFocusPane);
             PendingFocusPane = null;
         }
-        
+
         private void MoveFocus(FrameworkElement consolePane) {
             // TAB focus into editor (consolePane.Focus() does not work due to editor layouts)
             consolePane.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
@@ -362,11 +369,7 @@ namespace NuGetConsole.Implementation {
                 if (WpfConsole.Host.IsCommandEnabled) {
                     try {
                         WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
-                            // after the console finishes initializing the host, 
-                            // we remove the "Initializing..." text block
-                            if (ConsoleParentPane.Children.Count > 0) {
-                                ConsoleParentPane.Children.RemoveAt(0);
-                            }
+                            ConsoleParentPane.NotifyInitializationCompleted();
 
                             // force the UI to update the toolbar
                             VsUIShell.UpdateCommandUI(0 /* false = update UI asynchronously */);
@@ -418,27 +421,15 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        private Grid _consoleParentPane;
+        private ConsoleContainer _consoleParentPane;
 
         /// <summary>
         /// Get the parent pane of console panes. This serves as the Content of this tool window.
         /// </summary>
-        private Grid ConsoleParentPane {
+        private ConsoleContainer ConsoleParentPane {
             get {
                 if (_consoleParentPane == null) {
-                    // display the text "initializing..." while the host is initialized.
-                    var textBlock = new TextBlock {
-                        Text = Resources.ToolWindowInitializing,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Focusable = false
-                    };
-
-                    // render the textblock above the editor
-                    Canvas.SetZIndex(textBlock, 1);
-
-                    _consoleParentPane = new Grid();
-                    _consoleParentPane.Children.Add(textBlock);
+                    _consoleParentPane = new ConsoleContainer(ProductUpdateService);
                 }
                 return _consoleParentPane;
             }

@@ -17,6 +17,7 @@ namespace NuGet.PowerShell.Commands {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepository _recentPackagesRepository;
+        private readonly IProductUpdateService _productUpdateService;
         private int _firstValue;
         private bool _firstValueSpecified;
 
@@ -26,7 +27,8 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IRecentPackageRepository>(), 
-                   ServiceLocator.GetInstance<IProgressProvider>()) {
+                   ServiceLocator.GetInstance<IProgressProvider>(),
+                   ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public GetPackageCommand(IPackageRepositoryFactory repositoryFactory,
@@ -34,7 +36,8 @@ namespace NuGet.PowerShell.Commands {
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,
                                 IPackageRepository recentPackagesRepository,
-                                IProgressProvider progressProvider)
+                                IProgressProvider progressProvider,
+                                IProductUpdateService productUpdateService)
             : base(solutionManager, packageManagerFactory, progressProvider) {
 
             if (repositoryFactory == null) {
@@ -50,6 +53,7 @@ namespace NuGet.PowerShell.Commands {
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _recentPackagesRepository = recentPackagesRepository;
+            _productUpdateService = productUpdateService;
         }
 
         [Parameter(Position = 0)]
@@ -252,6 +256,20 @@ namespace NuGet.PowerShell.Commands {
             }
 
             return showProgress;
+        }
+
+        protected override void EndProcessing() {
+            base.EndProcessing();
+
+            if (UseRemoteSource) {
+                CheckForNuGetUpdate();
+            }
+        }
+
+        protected void CheckForNuGetUpdate() {
+            if (_productUpdateService != null) {
+                _productUpdateService.CheckForAvailableUpdateAsync();
+            }
         }
     }
 }

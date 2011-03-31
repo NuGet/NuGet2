@@ -286,7 +286,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
-            var cmdlet = new Mock<GetPackageCommand>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, new Mock<IPackageRepository>().Object, null) { CallBase = true }.Object;
+            var cmdlet = new Mock<GetPackageCommand>(GetRepositoryFactory(), new Mock<IPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, new Mock<IPackageRepository>().Object, null, null) { CallBase = true }.Object;
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act and Assert
@@ -337,6 +337,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 
                 packageManagerFactory.Object,
                 recentPackageRepository,
+                null,
                 null);
         }
 

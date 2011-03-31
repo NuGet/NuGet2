@@ -10,16 +10,21 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsData.Update, "Package")]
     public class UpdatePackageCommand : ProcessPackageBaseCommand {
 
+        private readonly IProductUpdateService _productUpdateService;
+
         public UpdatePackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IProgressProvider>()) {
+                   ServiceLocator.GetInstance<IProgressProvider>(),
+                   ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public UpdatePackageCommand(ISolutionManager solutionManager, 
                                     IVsPackageManagerFactory packageManagerFactory, 
-                                    IProgressProvider progressProvider)
+                                    IProgressProvider progressProvider,
+                                    IProductUpdateService productUpdateService)
             : base(solutionManager, packageManagerFactory, progressProvider) {
+            _productUpdateService = productUpdateService;
         }
 
         [Parameter(Position = 2)]
@@ -53,6 +58,18 @@ namespace NuGet.PowerShell.Commands {
             }
             finally {
                 UnsubscribeFromProgressEvents();
+            }
+        }
+
+        protected override void EndProcessing() {
+            base.EndProcessing();
+
+            CheckForNuGetUpdate();
+        }
+
+        protected void CheckForNuGetUpdate() {
+            if (_productUpdateService != null) {
+                _productUpdateService.CheckForAvailableUpdateAsync();
             }
         }
     }

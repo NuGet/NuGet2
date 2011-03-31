@@ -27,7 +27,7 @@ namespace NuGet.PowerShell.Commands {
                           IVsPackageManagerFactory packageManagerFactory,
                           IPackageRepository recentPackagesRepository,
                           IProgressProvider progressProvider) 
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, progressProvider) {
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, progressProvider, null) {
         }
 
         protected override void ProcessRecordCore() {

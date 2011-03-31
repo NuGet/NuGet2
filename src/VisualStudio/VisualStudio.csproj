@@ -16,8 +16,13 @@
   <ItemGroup>
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="IProductUpdateService.cs" />
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="IVsActivityLogger.cs" />
+    <Compile Include="ProductUpdateBar.xaml.cs">
+      <DependentUpon>ProductUpdateBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProductUpdateService.cs" />
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
@@ -65,10 +70,12 @@
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -163,6 +170,12 @@
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="ProductUpdateBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
