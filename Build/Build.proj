@@ -18,6 +18,8 @@
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <ServerBuildDirectory>$(NuGetSrcRoot)\Server</ServerBuildDirectory>
         <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
+        <NuGetCoreBuildDirectory>$(NuGetSrcRoot)\Core</NuGetCoreBuildDirectory>
+        <NuGetCoreDropDirectory>$(NuGetDropDirectory)\Core</NuGetCoreDropDirectory>
         <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
@@ -109,6 +111,7 @@
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(MSBuildDropDirectory)" Condition="!Exists('$(MSBuildDropDirectory)')" />
         <MakeDir Directories="$(PackageExplorerDropDirectory)" Condition="!Exists('$(PackageExplorerDropDirectory)')" />
+        <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
@@ -198,6 +201,7 @@
         </PropertyGroup>
         <Exec Command="&quot;$(NuGetExe)&quot; pack" WorkingDirectory="$(ExeDropDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(ServerDropDirectory) -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(NuGetCoreDropDirectory)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
     </Target>
     
     <Target Name="RunIntegrationTests">
