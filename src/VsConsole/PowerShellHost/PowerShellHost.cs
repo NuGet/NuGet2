@@ -101,6 +101,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private string EvaluatePrompt() {            
             string prompt = "PM>";
 
@@ -110,8 +111,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     prompt = output.BaseObject.ToString();
                 }
             }
-            catch (RuntimeException ex) {
-                ReportError(ex);
+            catch (Exception ex) {                
+                ExceptionHelper.WriteToActivityLog(ex);
             }
             return prompt;
         }
