@@ -1,7 +1,7 @@
 ﻿@{
 
 # Script module or binary module file associated with this manifest
-ModuleToProcess = 'Scripts\nuget.psm1'
+ModuleToProcess = 'nuget.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.3.0.0'
@@ -46,13 +46,13 @@ RequiredModules = @()
 RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module
-ScriptsToProcess = @('Scripts\profile.ps1')
+ScriptsToProcess = @('profile.ps1')
 
 # Type files (.ps1xml) to be loaded when importing this module
-TypesToProcess = @('Scripts\NuGet.Types.ps1xml')
+TypesToProcess = @('NuGet.Types.ps1xml')
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('Scripts\NuGet.Format.ps1xml')
+FormatsToProcess = @('NuGet.Format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
 NestedModules = @('NuGet.Cmdlets.dll')

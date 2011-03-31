@@ -158,3 +158,8 @@ function TabExpansion($line, $lastWord) {
         return $nugetSuggestions
     }
 }
+
+# default prompt
+function prompt {
+    "PM>"
+}

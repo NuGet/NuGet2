@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -13,10 +14,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class RunspaceManager : IRunspaceManager {
 
         // Cache Runspace by name. There should be only one Runspace instance created though.
-        private ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
+        private readonly ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
 
-        public const string ProfilePrefix = "Nuget";
-        public const string NuGetModuleFile = "nuget.psd1";
+        public const string ProfilePrefix = "NuGet";
+        public const string NuGetCoreModuleName = "NuGet";
 
         public Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName) {
             return _runspaceCache.GetOrAdd(hostName, name => CreateAndSetupRunspace(console, name));
@@ -88,9 +89,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 runspace.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
             }
 
-            string extensionLocation = Path.GetDirectoryName(typeof(RunspaceManager).Assembly.Location);
-            string nugetPath = Path.Combine(extensionLocation, NuGetModuleFile);
-            runspace.ImportModule(nugetPath);
+            runspace.ImportModule(NuGetCoreModuleName);
 
 #if DEBUG
             if (File.Exists(DebugConstants.TestModulePath)) {

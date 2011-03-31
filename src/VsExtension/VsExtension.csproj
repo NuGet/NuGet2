@@ -49,15 +49,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\VsConsole\PowerShellCmdlets\Help\about_NuGet.Cmdlets.help.txt">
-      <Link>about_NuGet.Cmdlets.help.txt</Link>
+      <Link>Modules\NuGet\about_NuGet.Cmdlets.help.txt</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellCmdlets\Help\NuGet.Cmdlets.dll-Help.xml">
-      <Link>NuGet.Cmdlets.dll-Help.xml</Link>
+      <Link>Modules\NuGet\NuGet.Cmdlets.dll-Help.xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\Profile.ps1">
-      <Link>Scripts\Profile.ps1</Link>
+      <Link>Modules\NuGet\Profile.ps1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <VSCTCompile Include="NuGetTools.vsct">
@@ -73,19 +73,19 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.psd1">
-      <Link>NuGet.psd1</Link>
+      <Link>Modules\NuGet\NuGet.psd1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\nuget.psm1">
-      <Link>Scripts\nuget.psm1</Link>
+      <Link>Modules\NuGet\nuget.psm1</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.Format.ps1xml">
-      <Link>Scripts\NuGet.Format.ps1xml</Link>
+      <Link>Modules\NuGet\NuGet.Format.ps1xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.Types.ps1xml">
-      <Link>Scripts\NuGet.Types.ps1xml</Link>
+      <Link>Modules\NuGet\NuGet.Types.ps1xml</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="Resources\Toolbar.png" />
@@ -115,6 +115,7 @@
     <ProjectReference Include="..\VsConsole\PowerShellCmdlets\PowerShellCmdlets.csproj">
       <Project>{84AC92A6-06B4-41B7-81EC-EFE91356D17C}</Project>
       <Name>PowerShellCmdlets</Name>
+      <VSIXSubPath>Modules\NuGet</VSIXSubPath>
     </ProjectReference>
     <ProjectReference Include="..\VsConsole\PowerShellHostProvider\PowerShellHostProvider.csproj">
       <Project>{A5E7AEB3-738F-4C39-A459-00F90483B2FE}</Project>
@@ -183,6 +184,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Condition="Exists($(VsSdkTargets))" Project="$(VsSdkTargets)" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
