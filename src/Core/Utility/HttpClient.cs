@@ -11,18 +11,20 @@ namespace NuGet {
             set;
         }
 
-        public WebRequest CreateRequest(Uri uri) {
+        public WebRequest CreateRequest(Uri uri, bool acceptCompression) {
             WebRequest request = WebRequest.Create(uri);
-            InitializeRequest(request);
+            InitializeRequest(request, acceptCompression);
             return request;
         }
 
-        public void InitializeRequest(WebRequest request) {
+        public void InitializeRequest(WebRequest request, bool acceptCompression) {
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
-                httpRequest.Headers[HttpRequestHeader.AcceptEncoding] = "gzip, deflate";
-                httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+                if (acceptCompression) {
+                    httpRequest.Headers[HttpRequestHeader.AcceptEncoding] = "gzip, deflate";
+                    httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+                }
             }
 
             request.UseDefaultCredentials = true;
@@ -33,7 +35,7 @@ namespace NuGet {
         }
 
         public Uri GetRedirectedUri(Uri uri) {
-            WebRequest request = CreateRequest(uri);
+            WebRequest request = CreateRequest(uri, acceptCompression: false);
             using (WebResponse response = request.GetResponse()) {
                 if (response == null) {
                     return null;
@@ -48,7 +50,8 @@ namespace NuGet {
 
             byte[] buffer = null;
 
-            WebRequest request = CreateRequest(uri);
+            // we don't want to enable compression when downloading packages
+            WebRequest request = CreateRequest(uri, acceptCompression: false);
             using (var response = request.GetResponse()) {
 
                 // total response length

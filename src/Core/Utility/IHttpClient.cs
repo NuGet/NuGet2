@@ -8,8 +8,8 @@ namespace NuGet {
             set;
         }
 
-        WebRequest CreateRequest(Uri uri);
-        void InitializeRequest(WebRequest request);
+        WebRequest CreateRequest(Uri uri, bool acceptCompression);
+        void InitializeRequest(WebRequest request, bool acceptCompression);
         Uri GetRedirectedUri(Uri uri);
 
         byte[] DownloadData(Uri uri);
