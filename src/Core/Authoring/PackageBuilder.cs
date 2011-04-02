@@ -192,7 +192,7 @@ namespace NuGet {
             }
         }
 
-        public void Populate(IPackageMetadata metadata) {            
+        public void Populate(IPackageMetadata metadata) {
             Id = metadata.Id;
             Version = metadata.Version;
             Title = metadata.Title;
@@ -231,7 +231,7 @@ namespace NuGet {
 
             using (Stream stream = packagePart.GetStream()) {
                 Manifest manifest = Manifest.Create(this);
-                manifest.Save(stream, stampVersion: true);
+                manifest.Save(stream);
             }
         }
 

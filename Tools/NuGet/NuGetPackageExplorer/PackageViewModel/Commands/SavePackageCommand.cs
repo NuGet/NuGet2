@@ -34,7 +34,9 @@ namespace PackageExplorerViewModel {
                 return true;
             }
             else if (action == SaveAction) {
-                return !ViewModel.IsInEditMode && Path.IsPathRooted(ViewModel.PackageSource);
+                return !ViewModel.IsInEditMode && 
+                    Path.IsPathRooted(ViewModel.PackageSource) && 
+                    Path.GetExtension(ViewModel.PackageSource).Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
             }
             else if (action == SaveAsAction) {
                 return !ViewModel.IsInEditMode;

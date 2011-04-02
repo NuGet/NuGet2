@@ -224,7 +224,7 @@ namespace NuGet {
 
             using (Stream stream = packagePart.GetStream()) {
                 Manifest manifest = Manifest.Create(this);
-                manifest.Save(stream, stampVersion: true);
+                manifest.Save(stream);
             }
         }
 

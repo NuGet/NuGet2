@@ -29,14 +29,9 @@ namespace PackageExplorerViewModel {
             return new PackageViewModel(package, packageSource, MessageBoxService, MruManager);
         }
 
-        private PackageChooserViewModel _packageChooserViewModel;
         public PackageChooserViewModel CreatePackageChooserViewModel()
         {
-            if (_packageChooserViewModel == null)
-            {
-                _packageChooserViewModel = new PackageChooserViewModel(MruPackageSourceManager);
-            }
-            return _packageChooserViewModel;
+            return new PackageChooserViewModel(MruPackageSourceManager);
         }
     }
 }
