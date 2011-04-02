@@ -639,11 +639,13 @@ namespace PackageExplorer {
             e.Handled = true;
         }
 
+        private string _folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
         private void OnExportMenuItem_Click(object sender, RoutedEventArgs e) {
             BrowseForFolder dialog = new BrowseForFolder();
             string rootPath = dialog.SelectFolder(
                 "Choose a folder to export package to:",
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                _folderPath,
                 new System.Windows.Interop.WindowInteropHelper(this).Handle);
 
             if (!String.IsNullOrEmpty(rootPath)) {
@@ -657,6 +659,8 @@ namespace PackageExplorer {
                         MessageBox.Show(ex.Message, MessageLevel.Error);
                     }
                 }
+
+                _folderPath = rootPath;
             }
 
             e.Handled = true;
