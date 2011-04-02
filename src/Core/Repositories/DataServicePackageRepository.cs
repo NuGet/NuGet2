@@ -62,7 +62,7 @@ namespace NuGet {
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             // Initialize the request
-            _httpClient.InitializeRequest(e.Request);
+            _httpClient.InitializeRequest(e.Request, acceptCompression: true);
         }
 
         public override IQueryable<IPackage> GetPackages() {

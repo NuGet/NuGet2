@@ -13,7 +13,7 @@ namespace NuGet.Test {
             var httpClient = new HttpClient();
 
             // Act
-            WebRequest request = httpClient.CreateRequest(new Uri("http://example.com/"));
+            WebRequest request = httpClient.CreateRequest(new Uri("http://example.com/"), acceptCompression: false);
 
             // Assert
             Assert.IsTrue(request.UseDefaultCredentials);
@@ -29,7 +29,7 @@ namespace NuGet.Test {
             var httpClient = new HttpClient();
 
             // Act
-            httpClient.InitializeRequest(request.Object);
+            httpClient.InitializeRequest(request.Object, acceptCompression: false);
 
             // Assert
             Assert.AreEqual(CredentialCache.DefaultCredentials, request.Object.Proxy.Credentials);
