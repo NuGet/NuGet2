@@ -25,23 +25,19 @@ namespace NuGet.VisualStudio {
             { "web.release.config", "web.config" }
         };
 
-        // List of project types
-        // http://www.mztools.com/articles/2008/MZ2008017.aspx
-        private static readonly HashSet<string> _supportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { 
+        private static readonly HashSet<string> _supportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                           VsConstants.WebSiteProjectTypeGuid, 
                                                                           VsConstants.CsharpProjectTypeGuid, 
                                                                           VsConstants.VbProjectTypeGuid,
                                                                           VsConstants.FsharpProjectTypeGuid,
-                                                                          VsConstants.WixProjectTypeGuid
-                                                                         };
+                                                                          VsConstants.WixProjectTypeGuid };
 
         // List of project types that cannot have references added to them
-        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid};
+        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
         // List of project types that cannot have binding redirects added
         private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
-
         // Get the ProjectItems for a folder path
         public static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false) {
             // Traverse the path to get at the directory
@@ -78,7 +74,7 @@ namespace NuGet.VisualStudio {
             var containerProjects = new Queue<Project>();
             containerProjects.Enqueue(project);
 
-            while(containerProjects.Any()) {
+            while (containerProjects.Any()) {
                 var containerProject = containerProjects.Dequeue();
                 foreach (ProjectItem item in containerProject.ProjectItems) {
                     var nestedProject = item.SubProject;
@@ -275,7 +271,7 @@ namespace NuGet.VisualStudio {
         }
 
         public static bool SupportsBindingRedirects(this Project project) {
-            return project.Kind != null & 
+            return project.Kind != null &
                 !_unsupportedProjectTypesForBindingRedirects.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
         }
 

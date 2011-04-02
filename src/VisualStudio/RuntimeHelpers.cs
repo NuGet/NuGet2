@@ -8,7 +8,11 @@ using NuGet.Runtime;
 namespace NuGet.VisualStudio {
     public static class RuntimeHelpers {
         public static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain) {
-            return AddBindingRedirects(project, domain, new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase));
+            if (project.SupportsBindingRedirects()) {
+                return AddBindingRedirects(project, domain, new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase));
+            }
+
+            return Enumerable.Empty<AssemblyBinding>();
         }
 
         private static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain, IDictionary<string, HashSet<string>> projectAssembliesCache) {

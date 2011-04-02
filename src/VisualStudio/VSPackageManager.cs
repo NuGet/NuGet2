@@ -317,8 +317,8 @@ namespace NuGet.VisualStudio {
             // Find the project by it's unique name
             Project project = _solutionManager.GetProject(vsProjectSystem.UniqueName);
 
-            // If we can't find the project then don't add any redirects
-            if (project == null) {
+            // If we can't find the project or it doesn't support binding redirects then don't add any redirects
+            if (project == null || !project.SupportsBindingRedirects()) {
                 return;
             }
 
