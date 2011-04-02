@@ -17,6 +17,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
         private readonly MenuCommandService _menuCommandService;
+        private readonly ISelectedProviderSettings _selectedProviderSettings;
 
         public PackageManagerWindow(MenuCommandService menuService) :
             this(menuService,
@@ -26,7 +27,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
                  ServiceLocator.GetInstance<ProviderServices>(),
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
-                 ServiceLocator.GetInstance<IProgressProvider>()) {
+                 ServiceLocator.GetInstance<IProgressProvider>(),
+                 ServiceLocator.GetInstance<ISelectedProviderSettings>()) {
         }
 
         public PackageManagerWindow(MenuCommandService menuCommandService,
@@ -36,12 +38,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
                                     IRecentPackageRepository recentPackagesRepository,
-                                    IProgressProvider progressProvider)
+                                    IProgressProvider progressProvider,
+                                    ISelectedProviderSettings selectedProviderSettings)
             : base(F1Keyword) {
 
             InitializeComponent();
 
             _menuCommandService = menuCommandService;
+            _selectedProviderSettings = selectedProviderSettings;
 
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
@@ -119,17 +123,17 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices,
                 progressProvider);
 
-            explorer.Providers.Add(recentProvider);
-            explorer.Providers.Add(updatesProvider);
             explorer.Providers.Add(installedProvider);
             explorer.Providers.Add(onlineProvider);
+            explorer.Providers.Add(updatesProvider);
+            explorer.Providers.Add(recentProvider);
 
-            // make the Installed provider as selected by default
-            explorer.SelectedProvider = installedProvider;
+            // retrieve the selected provider from the settings
+            int selectedProvider = Math.Min(3, _selectedProviderSettings.SelectedProvider);
+            explorer.SelectedProvider = explorer.Providers[selectedProvider];
         }
 
         private void CanExecuteCommandOnPackage(object sender, CanExecuteRoutedEventArgs e) {
-
             if (OperationCoordinator.IsBusy) {
                 e.CanExecute = false;
                 return;
@@ -292,6 +296,9 @@ namespace NuGet.Dialog.PackageManagerUI {
             var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
             if (selectedProvider != null) {
                 explorer.NoItemsMessage = selectedProvider.NoItemsMessage;
+
+                // save the selected provider to user settings
+                _selectedProviderSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
             }
         }
     }

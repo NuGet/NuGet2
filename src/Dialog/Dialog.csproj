@@ -112,6 +112,7 @@
       <Link>RegistryHelper.cs</Link>
     </Compile>
     <Compile Include="Extensions\QueryExtensions.cs" />
+    <Compile Include="ISelectedProviderSettings.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
@@ -168,6 +169,7 @@
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectedProviderSettingsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
