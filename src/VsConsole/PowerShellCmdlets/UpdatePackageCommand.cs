@@ -11,6 +11,7 @@ namespace NuGet.PowerShell.Commands {
     public class UpdatePackageCommand : ProcessPackageBaseCommand {
 
         private readonly IProductUpdateService _productUpdateService;
+        private bool _hasConnectedToHttpSource;
 
         public UpdatePackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
@@ -54,7 +55,10 @@ namespace NuGet.PowerShell.Commands {
             try {
                 SubscribeToProgressEvents();
                 IProjectManager projectManager = ProjectManager;
-                PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                if (PackageManager != null) {
+                    PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                    _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
+                }
             }
             finally {
                 UnsubscribeFromProgressEvents();
@@ -67,8 +71,8 @@ namespace NuGet.PowerShell.Commands {
             CheckForNuGetUpdate();
         }
 
-        protected void CheckForNuGetUpdate() {
-            if (_productUpdateService != null) {
+        private void CheckForNuGetUpdate() {
+            if (_productUpdateService != null && _hasConnectedToHttpSource) {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
         }

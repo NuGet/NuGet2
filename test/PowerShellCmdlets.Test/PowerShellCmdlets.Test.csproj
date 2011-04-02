@@ -39,6 +39,7 @@
     <Compile Include="GetPackageCommandTest.cs" />
     <Compile Include="InstallPackageCommandTest.cs" />
     <Compile Include="MockCommandRuntime.cs" />
+    <Compile Include="MockProductUpdateService.cs" />
     <Compile Include="NewPackageCommandTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetProjectCommandTest.cs" />

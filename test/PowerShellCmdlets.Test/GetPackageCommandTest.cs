@@ -318,12 +318,116 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.AreSame(packageC, packages[2]);
         }
 
+        [TestMethod]
+        public void GetPackageInvokeProductUpdateCheckWhenSourceIsHttp() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
+            cmdlet.Source = "http://bing.com";
+            cmdlet.ListAvailable = true;
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
+        }
+
+        [TestMethod]
+        public void GetPackageInvokeProductUpdateCheckWhenActiveSourceIsHttp() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(isSolutionOpen: false, productUpdateService: productUpdateService.Object, activeSourceName: "http://msn.com");
+            cmdlet.ListAvailable = true;
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
+        }
+
+        [TestMethod]
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenActiveSourceIsNotHttp() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(isSolutionOpen: false, productUpdateService: productUpdateService.Object);
+            cmdlet.ListAvailable = true;
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
+        [TestMethod]
+        public void GetPackageInvokeProductUpdateCheckWhenSourceIsNotHttp() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
+            cmdlet.Source = "foo";
+            cmdlet.ListAvailable = true;
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
+        [TestMethod]
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetLocalPackages() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
+        [TestMethod]
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetUpdatesPackages() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
+            cmdlet.Updates = true;
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
+        [TestMethod]
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetRecentPackages() {
+            // Arrange
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
+            cmdlet.Recent = true;
+
+            // Act
+            var packages = cmdlet.GetResults();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
         private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
             Assert.AreEqual(a.Id, b.Id);
             Assert.AreEqual(a.Version, b.Version);
         }
 
-        private static GetPackageCommand BuildCmdlet(bool isSolutionOpen = true, IPackageRepository recentPackageRepository = null) {
+        private static GetPackageCommand BuildCmdlet(
+            bool isSolutionOpen = true, 
+            IPackageRepository recentPackageRepository = null, 
+            IProductUpdateService productUpdateService = null,
+            string activeSourceName = "ActiveRepo") {
+
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
 
@@ -332,23 +436,24 @@ namespace NuGet.PowerShell.Commands.Test {
             }
 
             return new GetPackageCommand(
-                GetRepositoryFactory(), 
-                GetSourceProvider(), 
+                GetRepositoryFactory(activeSourceName), 
+                GetSourceProvider(activeSourceName), 
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen), 
                 packageManagerFactory.Object,
                 recentPackageRepository,
                 null,
-                null);
+                productUpdateService);
         }
 
-        private static IPackageRepositoryFactory GetRepositoryFactory() {
+        private static IPackageRepositoryFactory GetRepositoryFactory(string activeSourceName = "ActiveRepo") {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
             var packages = new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("http://bing.com", "http://bing.com"))).Returns(repository.Object);
             repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foo"))).Returns(repository.Object);
-            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("ActiveRepo", "ActiveRepo"))).Returns(GetActiveRepository());
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource(activeSourceName, activeSourceName))).Returns(GetActiveRepository());
 
             return repositoryFactory.Object;
         }
@@ -370,9 +475,9 @@ namespace NuGet.PowerShell.Commands.Test {
             return remoteRepo.Object;
         }
 
-        private static IPackageSourceProvider GetSourceProvider() {
+        private static IPackageSourceProvider GetSourceProvider(string activeSourceName) {
             Mock<IPackageSourceProvider> sourceProvider = new Mock<IPackageSourceProvider>();
-            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("ActiveRepo", "ActiveRepo"));
+            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource(activeSourceName, activeSourceName));
             return sourceProvider.Object;
         }
     }

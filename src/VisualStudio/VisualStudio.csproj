@@ -19,6 +19,7 @@
     <Compile Include="IProductUpdateService.cs" />
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="IVsActivityLogger.cs" />
+    <Compile Include="ProductUpdateAvailableEventArgs.cs" />
     <Compile Include="ProductUpdateBar.xaml.cs">
       <DependentUpon>ProductUpdateBar.xaml</DependentUpon>
     </Compile>

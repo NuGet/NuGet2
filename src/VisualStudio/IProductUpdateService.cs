@@ -6,6 +6,6 @@ namespace NuGet.VisualStudio {
         void CheckForAvailableUpdateAsync();
         void Update();
         void DeclineUpdate();
-        event EventHandler UpdateAvailable;
+        event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;
     }
 }

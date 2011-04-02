@@ -50,7 +50,8 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             InitializeComponent();
 
-            LayoutRoot.Children.Add(new ProductUpdateBar(productUpdateService));
+            AddUpdateBar(productUpdateService);
+
             _menuCommandService = menuCommandService;
             _selectedProviderSettings = selectedProviderSettings;
             _productUpdateService = productUpdateService;
@@ -75,6 +76,12 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices,
                 recentPackagesRepository,
                 progressProvider);
+        }
+
+        private void AddUpdateBar(IProductUpdateService productUpdateService) {
+            var updateBar = new ProductUpdateBar(productUpdateService);
+            Grid.SetRow(updateBar, 1);
+            LayoutRoot.Children.Add(updateBar);
         }
 
         private void SetupProviders(DTE dte,

@@ -20,6 +20,7 @@ namespace NuGet.PowerShell.Commands {
         private readonly IProductUpdateService _productUpdateService;
         private int _firstValue;
         private bool _firstValueSpecified;
+        private bool _hasConnectedToHttpSource;
 
         public GetPackageCommand()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
@@ -144,6 +145,8 @@ namespace NuGet.PowerShell.Commands {
         /// </summary>
         private IPackageRepository GetRemoteRepository() {
             if (!String.IsNullOrEmpty(Source)) {
+
+                _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
                 // If a Source parameter is explicitly specified, use it
                 return _repositoryFactory.CreateRepository(Source);
             }
@@ -155,12 +158,23 @@ namespace NuGet.PowerShell.Commands {
                 return PackageManager.SourceRepository;
             }
             else if (_packageSourceProvider.ActivePackageSource != null) {
+                _hasConnectedToHttpSource |= IsHttpSource(_packageSourceProvider);
                 // No solution available. Use the repository Url to create a new repository
                 return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource);
             }
             else {
                 // No active source has been specified. 
                 throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
+            }
+        }
+
+        private static bool IsHttpSource(IPackageSourceProvider packageSourceProvider) {
+            var activeSource = packageSourceProvider.ActivePackageSource;
+            if (activeSource.IsAggregate) {
+                return packageSourceProvider.GetPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
+            }
+            else {
+                return UriHelper.IsHttpSource(activeSource.Source);
             }
         }
 
@@ -261,13 +275,11 @@ namespace NuGet.PowerShell.Commands {
         protected override void EndProcessing() {
             base.EndProcessing();
 
-            if (UseRemoteSource) {
-                CheckForNuGetUpdate();
-            }
+            CheckForNuGetUpdate();
         }
 
-        protected void CheckForNuGetUpdate() {
-            if (_productUpdateService != null) {
+        private void CheckForNuGetUpdate() {
+            if (_productUpdateService != null && _hasConnectedToHttpSource) {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
         }

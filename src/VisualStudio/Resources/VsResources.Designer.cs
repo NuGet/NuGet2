@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A new version of NuGet is available. Do you want to install it?.
+        ///   Looks up a localized string similar to NuGet {0} is now available. You are currently using NuGet {1}..
         /// </summary>
         public static string AskForUpdateMessage {
             get {
@@ -192,6 +192,15 @@ namespace NuGet.VisualStudio.Resources {
         public static string Dialog_DisclaimerText {
             get {
                 return ResourceManager.GetString("Dialog_DisclaimerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Don&apos;t remind me again.
+        /// </summary>
+        public static string DoNotRemindAgain {
+            get {
+                return ResourceManager.GetString("DoNotRemindAgain", resourceCulture);
             }
         }
         

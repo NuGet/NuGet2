@@ -80,9 +80,61 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.IsTrue(vsPackageManager.IgnoreDependencies);
         }
 
+        [TestMethod]
+        public void InstallPackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddress() {
+            // Arrange
+            string source = "http://bing.com";
+
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var sourceRepository = new Mock<IPackageRepository>();
+            sourceRepository.Setup(p => p.Source).Returns(source);
+            var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<string>())).Returns(vsPackageManager);
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
+            cmdlet.Object.Source = source;
+
+            // Act
+            cmdlet.Object.Execute();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
+        }
+
+        [TestMethod]
+        public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress() {
+            // Arrange
+            string source = "ftp://bing.com";
+
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var sourceRepository = new Mock<IPackageRepository>();
+            sourceRepository.Setup(p => p.Source).Returns(source);
+            var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<string>())).Returns(vsPackageManager);
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
+            cmdlet.Object.Source = source;
+
+            // Act
+            cmdlet.Object.Execute();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
         private class MockVsPackageManager : VsPackageManager {
             public MockVsPackageManager()
-                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object) {
+                : this(new Mock<IPackageRepository>().Object) {
+            }
+
+            public MockVsPackageManager(IPackageRepository sourceRepository)
+                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object) {
             }
 
             public IProjectManager ProjectManager { get; set; }

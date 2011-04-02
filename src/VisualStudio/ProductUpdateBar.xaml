@@ -24,14 +24,18 @@
 
     <Border x:Name="UpdateBar" VerticalAlignment="Center" Visibility="Collapsed" Background="{DynamicResource {x:Static vsfx:VsBrushes.InfoBackgroundKey}}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.ActiveBorderKey}}">
         <TextBlock HorizontalAlignment="Center" Margin="0,6,0,6" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}">
-            <Run Text="{x:Static resx:VsResources.AskForUpdateMessage}" />
-            <Run Text=" " />
+            <Run x:Name="UpdateMessage" />
+            <Run Text="  " />
             <Hyperlink Click="OnUpdateLinkClick" Style="{StaticResource CommonHyperlinkStyle}" >
                 <Run Text="{x:Static resx:VsResources.Yes}" />
             </Hyperlink>
-            <Run Text=" " />
+            <Run Text="  " />
             <Hyperlink Click="OnDeclineUpdateLinkClick" Style="{StaticResource CommonHyperlinkStyle}" >
                 <Run Text="{x:Static resx:VsResources.No}" />
+            </Hyperlink>
+            <Run Text="  " />
+            <Hyperlink Click="OnDeclineUpdateLinkClick" Style="{StaticResource CommonHyperlinkStyle}" >
+                <Run Text="{x:Static resx:VsResources.DoNotRemindAgain}" />
             </Hyperlink>
         </TextBlock>
     </Border>

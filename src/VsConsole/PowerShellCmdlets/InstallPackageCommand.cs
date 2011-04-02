@@ -11,6 +11,7 @@ namespace NuGet.PowerShell.Commands {
     public class InstallPackageCommand : ProcessPackageBaseCommand {
 
         private readonly IProductUpdateService _productUpdateService;
+        private bool _hasConnectedToHttpSource;
 
         public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
@@ -39,7 +40,7 @@ namespace NuGet.PowerShell.Commands {
         [Parameter]
         public SwitchParameter IgnoreDependencies { get; set; }
 
-        protected override IVsPackageManager  CreatePackageManager() {
+        protected override IVsPackageManager CreatePackageManager() {
             if (!SolutionManager.IsSolutionOpen) {
                 return null;
             }
@@ -59,7 +60,10 @@ namespace NuGet.PowerShell.Commands {
             try {
                 SubscribeToProgressEvents();
                 IProjectManager projectManager = ProjectManager;
-                PackageManager.InstallPackage(projectManager, Id, Version, IgnoreDependencies.IsPresent, this);
+                if (PackageManager != null) {
+                    PackageManager.InstallPackage(projectManager, Id, Version, IgnoreDependencies.IsPresent, this);
+                    _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
+                }
             }
             finally {
                 UnsubscribeFromProgressEvents();
@@ -72,8 +76,8 @@ namespace NuGet.PowerShell.Commands {
             CheckForNuGetUpdate();
         }
 
-        protected void CheckForNuGetUpdate() {
-            if (_productUpdateService != null) {
+        private void CheckForNuGetUpdate() {
+            if (_productUpdateService != null && _hasConnectedToHttpSource) {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
         }

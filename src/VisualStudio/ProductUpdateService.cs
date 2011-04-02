@@ -20,14 +20,14 @@ namespace NuGet.VisualStudio {
             Task.Factory.StartNew(() => {
                 Thread.Sleep(2000);
 
-                RaiseUpdateEvent();
+                RaiseUpdateEvent(new ProductUpdateAvailableEventArgs(new Version("1.3"), new Version("1.4")));
             });
         }
 
-        private void RaiseUpdateEvent() {
-            EventHandler handler = UpdateAvailable;
+        private void RaiseUpdateEvent(ProductUpdateAvailableEventArgs args) {
+            EventHandler<ProductUpdateAvailableEventArgs> handler = UpdateAvailable;
             if (handler != null) {
-                handler(this, EventArgs.Empty);
+                handler(this, args);
             }
         }
 
@@ -43,6 +43,6 @@ namespace NuGet.VisualStudio {
             _updateDeclined = true;
         }
 
-        public event EventHandler UpdateAvailable;
+        public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;
     }
 }

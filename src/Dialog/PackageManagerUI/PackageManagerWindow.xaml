@@ -66,12 +66,12 @@
 
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" Padding="0,0,0,4" Grid.Row="1">
+        <Border Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" Padding="0,0,0,4">
             <shared:VSExtensionsExplorerCtl
                 x:Name="explorer"
                 ActiveView="MediumIcons"
@@ -88,7 +88,6 @@
 
         <Border 
             x:Name="DisclaimerText"
-            Grid.Row="1"
             Width="220"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
