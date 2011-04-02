@@ -37,10 +37,6 @@ namespace NuGet {
         public List<ManifestFile> Files { get; set; }
 
         public void Save(Stream stream) {
-            Save(stream, stampVersion: false);
-        }
-
-        internal void Save(Stream stream, bool stampVersion) {
             // Validate before saving
             Validate(this);
 
@@ -51,7 +47,8 @@ namespace NuGet {
             // Need to force the namespace here again as the default in order to get the XML output clean
             var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
 
-            if (stampVersion) {
+            // Only stamp the version if there are framework assemblies
+            if (Metadata.FrameworkAssemblies != null && Metadata.FrameworkAssemblies.Any()) {
                 using (var ms = new MemoryStream()) {
                     serializer.Serialize(ms, this, ns);
 

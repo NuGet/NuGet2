@@ -40,6 +40,39 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void CreatePackageAddsVersionStampIfFrameworkAssembliesAreUsed() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("David");
+            builder.FrameworkReferences.Add(new FrameworkAssemblyReference("System.Web"));
+            var ms = new MemoryStream();
+
+            // Act
+            Manifest.Create(builder).Save(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata schemaVersion=""2"">
+    <id>A</id>
+    <version>1.0</version>
+    <authors>David</authors>
+    <owners>David</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName=""System.Web"" targetFramework="""" />
+    </frameworkAssemblies>
+  </metadata>
+</package>", ms.ReadToEnd());
+        }
+
+        [TestMethod]
         public void CreatePackageTrimsExtraWhitespace() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
