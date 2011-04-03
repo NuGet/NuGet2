@@ -154,6 +154,7 @@ namespace NuGet.PowerShell.Commands {
                 return _recentPackagesRepository;
             }
             else if (SolutionManager.IsSolutionOpen) {
+                _hasConnectedToHttpSource |= IsHttpSource(_packageSourceProvider);
                 // If the solution is open, retrieve the cached repository instance
                 return PackageManager.SourceRepository;
             }

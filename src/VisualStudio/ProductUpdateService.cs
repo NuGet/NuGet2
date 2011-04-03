@@ -11,13 +11,23 @@ namespace NuGet.VisualStudio {
 
         private static readonly Guid ExtensionManagerCommandGuid = new Guid("{5dd0bb59-7076-4c59-88d3-de36931f63f0}");
         private const int ExtensionManagerCommandId = (int)0xBB8;
+        private IMenuCommandService _menuCommandService;
         
         private bool _updateDeclined;
+        private bool _updateAccepted;
+
+        public ProductUpdateService() :
+            this(ServiceLocator.GetInstance<IMenuCommandService>()) {
+        }
+
+        public ProductUpdateService(IMenuCommandService menuCommandService) {
+            _menuCommandService = menuCommandService;
+        }
 
         public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;
 
         public void CheckForAvailableUpdateAsync() {
-            if (_updateDeclined) {
+            if (_updateDeclined || _updateAccepted) {
                 return;
             }
 
@@ -42,10 +52,11 @@ namespace NuGet.VisualStudio {
                 return;
             }
 
-            IMenuCommandService mcs = ServiceLocator.GetInstance<IMenuCommandService>();
-            if (mcs != null) {
+            _updateAccepted = true;
+
+            if (_menuCommandService != null) {
                 CommandID extensionManagerCommand = new CommandID(ExtensionManagerCommandGuid, ExtensionManagerCommandId);
-                mcs.GlobalInvoke(extensionManagerCommand);
+                _menuCommandService.GlobalInvoke(extensionManagerCommand);
             }
         }
 

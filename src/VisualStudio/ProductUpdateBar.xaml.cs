@@ -16,7 +16,10 @@ namespace NuGet.VisualStudio {
         public ProductUpdateBar(IProductUpdateService productUpdateService) {
             InitializeComponent();
 
-            Debug.Assert(productUpdateService != null);
+            if (productUpdateService == null) {
+                throw new ArgumentNullException("productUpdateService");
+            }
+            
             _productUpdateService = productUpdateService;
             _productUpdateService.UpdateAvailable += OnUpdateAvailable;
         }
