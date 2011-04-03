@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -13,14 +14,34 @@ namespace NuGet.VisualStudio {
     /// This class unifies all the different ways of getting services within visual studio.
     /// </summary>
     // REVIEW: Make this internal 
-    public static class ServiceLocator {       
+    public static class ServiceLocator {
+
+        private static Dictionary<Type, object> _knownServices = new Dictionary<Type,object>();
+
+        public static void AddService(Type serviceType, object serviceInstance) {
+            if (serviceInstance == null) {
+                throw new ArgumentNullException("serviceInstance");
+            }
+
+            if (_knownServices.ContainsKey(serviceType)) {
+                throw new InvalidOperationException();
+            }
+
+            _knownServices.Add(serviceType, serviceInstance);
+        }
+
         public static TService GetInstance<TService>() where TService : class {
             // Special case IServiceProvider
             if (typeof(TService) == typeof(IServiceProvider)) {
                 return (TService)GetServiceProvider();
             }
 
-            // First try to find the service as a global service, then try dte then try component model
+            // check the known services dictionary first
+            if (_knownServices.ContainsKey(typeof(TService))) {
+                return (TService)_knownServices[typeof(TService)];
+            }
+
+            // then try to find the service as a global service, then try dte then try component model
             return GetGlobalService<TService, TService>() ??
                    GetDTEService<TService>() ??
                    GetComponentModelService<TService>();

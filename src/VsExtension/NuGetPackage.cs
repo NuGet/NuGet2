@@ -148,6 +148,10 @@ namespace NuGet.Tools {
         protected override void Initialize() {
             base.Initialize();
 
+            // register the IMenuCommandService for the rest of the app to use
+            IMenuCommandService imcs = (IMenuCommandService)GetService(typeof(IMenuCommandService));
+            ServiceLocator.AddService(typeof(IMenuCommandService), imcs);
+
             // get the UI context cookie for the debugging mode
             _vsMonitorSelection = (IVsMonitorSelection)GetService(typeof(IVsMonitorSelection));
             // get debugging context cookie

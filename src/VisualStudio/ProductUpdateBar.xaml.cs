@@ -11,6 +11,8 @@ namespace NuGet.VisualStudio {
 
         private readonly IProductUpdateService _productUpdateService;
 
+        public event EventHandler UpdateStarting = delegate { };
+
         public ProductUpdateBar(IProductUpdateService productUpdateService) {
             InitializeComponent();
 
@@ -26,6 +28,8 @@ namespace NuGet.VisualStudio {
 
         private void OnUpdateLinkClick(object sender, RoutedEventArgs e) {
             HideUpdateBar();
+
+            UpdateStarting(this, EventArgs.Empty);
 
             // invoke with priority as Background so that our window is closed first before the Update method is called.
             Dispatcher.BeginInvoke(new Action(_productUpdateService.Update), DispatcherPriority.Background);

@@ -20,7 +20,6 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
         private readonly MenuCommandService _menuCommandService;
         private readonly ISelectedProviderSettings _selectedProviderSettings;
-        private VsExtensionsProvider _onlineProvider;
         private readonly IProductUpdateService _productUpdateService;
 
         public PackageManagerWindow(MenuCommandService menuService) :
@@ -80,6 +79,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void AddUpdateBar(IProductUpdateService productUpdateService) {
             var updateBar = new ProductUpdateBar(productUpdateService);
+            updateBar.UpdateStarting += ExecutedClose;
             Grid.SetRow(updateBar, 1);
             LayoutRoot.Children.Add(updateBar);
         }
@@ -120,7 +120,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices,
                 progressProvider);
 
-            _onlineProvider = new OnlineProvider(
+            var onlineProvider = new OnlineProvider(
                 activeProject,
                 projectManager,
                 Resources,
@@ -202,7 +202,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        private void ExecutedClose(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecutedClose(object sender, EventArgs e) {
             Close();
         }
 
@@ -315,7 +315,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 // save the selected provider to user settings
                 _selectedProviderSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
                 // if this is the first time online provider is opened, call to check for update
-                if (selectedProvider == _onlineProvider && !_hasOpenedOnlineProvider) {
+                if (selectedProvider == explorer.Providers[1] && !_hasOpenedOnlineProvider) {
                     _hasOpenedOnlineProvider = true;
                     _productUpdateService.CheckForAvailableUpdateAsync();
                 }

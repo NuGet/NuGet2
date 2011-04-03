@@ -1,14 +1,20 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.ComponentModel.Design;
 using System.Threading;
-using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 
 namespace NuGet.VisualStudio {
 
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
 
+        private static readonly Guid ExtensionManagerCommandGuid = new Guid("{5dd0bb59-7076-4c59-88d3-de36931f63f0}");
+        private const int ExtensionManagerCommandId = (int)0xBB8;
+        
         private bool _updateDeclined;
+
+        public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;
 
         public void CheckForAvailableUpdateAsync() {
             if (_updateDeclined) {
@@ -36,13 +42,15 @@ namespace NuGet.VisualStudio {
                 return;
             }
 
-            // TODO (Fowler): Do the actual update
+            IMenuCommandService mcs = ServiceLocator.GetInstance<IMenuCommandService>();
+            if (mcs != null) {
+                CommandID extensionManagerCommand = new CommandID(ExtensionManagerCommandGuid, ExtensionManagerCommandId);
+                mcs.GlobalInvoke(extensionManagerCommand);
+            }
         }
 
         public void DeclineUpdate() {
             _updateDeclined = true;
         }
-
-        public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;
     }
 }
