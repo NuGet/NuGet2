@@ -228,16 +228,15 @@
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="NewMenuItem_Click" />
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
-        <CommandBinding Command="Save" Executed="SaveMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
-        <CommandBinding Command="SaveAs" Executed="SaveAsMenuItem_Click" CanExecute="CanExecuteSaveCommand" />
         <CommandBinding Command="Close" Executed="CloseMenuItem_Click" CanExecute="CanExecuteCloseCommand" />
-        <CommandBinding Command="{x:Static self:Commands.OpenFromFeedCommand}" Executed="OpenPackageFromNuGetFeed" />
         <CommandBinding Command="{x:Static self:Commands.PublishToFeedCommand}" Executed="OnPublishButtonClick" CanExecute="CanPublishToFeedCommand" />
         <CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />
     </Window.CommandBindings>
     
     <Window.InputBindings>
         <KeyBinding Key="K" Modifiers="Control" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="{Binding MetadataBindingGroup, ElementName=PackageMetadataEditor}" />
+        <KeyBinding Key="G" Modifiers="Control" Command="Open" CommandParameter="Feed" />
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" />
     </Window.InputBindings>
     
     <DockPanel LastChildFill="True">
@@ -256,17 +255,17 @@
                         </Image>
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
-                <MenuItem Header="Open from F_eed..." Command="{x:Static self:Commands.OpenFromFeedCommand}">
+                <MenuItem Header="Open from F_eed..." Command="Open" CommandParameter="Feed" InputGestureText="Ctrl+G">
                 </MenuItem>
                 <Separator />
                 <MenuItem Command="Close" Header="_Close" />
                 <Separator />
-                <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="Save" CommandParameter="Save">
+                <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" InputGestureText="Ctrl+S">
                     <self:GrayscaleMenuItem.Icon>
                         <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/saveHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
-                <self:GrayscaleMenuItem Header="Save _As..." Command="SaveAs" CommandParameter="SaveAs" />
+                <self:GrayscaleMenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
                 <Separator />
                 <MenuItem Header="Expor_t..." Click="OnExportMenuItem_Click">
                     <MenuItem.Style>

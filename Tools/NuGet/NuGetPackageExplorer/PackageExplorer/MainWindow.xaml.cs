@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -9,7 +10,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using NuGet;
@@ -17,7 +17,6 @@ using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using PackageExplorerViewModel.Types;
 using StringResources = PackageExplorer.Resources.Resources;
-using System.Globalization;
 
 namespace PackageExplorer {
     /// <summary>
@@ -116,7 +115,19 @@ namespace PackageExplorer {
             DataContext = _packageViewModelFactory.CreateViewModel(new EmptyPackage(), String.Empty);
         }
 
-        private void OpenMenuItem_Click(object sender, RoutedEventArgs e) {
+        private void OpenMenuItem_Click(object sender, ExecutedRoutedEventArgs e) {
+            string parameter = (string)e.Parameter;
+            if (parameter == "Feed")
+            {
+                OpenPackageFromNuGetFeed();
+            }
+            else
+            {
+                OpenPackageFromLocal();
+            }
+        }
+
+        private void OpenPackageFromLocal() {
             bool canceled = AskToSaveCurrentFile();
             if (canceled) {
                 return;
@@ -137,7 +148,7 @@ namespace PackageExplorer {
             }
         }
 
-        private void OpenPackageFromNuGetFeed(object sender, RoutedEventArgs e) {
+        private void OpenPackageFromNuGetFeed() {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
@@ -494,31 +505,6 @@ namespace PackageExplorer {
         private void CanPublishToFeedCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {
             var model = DataContext as PackageViewModel;
             bool canExecute = model == null ? false : !model.IsInEditMode;
-
-            e.CanExecute = canExecute;
-            e.Handled = true;
-        }
-
-        private void SaveMenuItem_Click(object sender, RoutedEventArgs args) {
-            ExecuteSaveCommand("Save");
-            args.Handled = true;
-        }
-
-        private void SaveAsMenuItem_Click(object sender, RoutedEventArgs args) {
-            ExecuteSaveCommand("SaveAs");
-            args.Handled = true;
-        }
-
-        private void ExecuteSaveCommand(object parameter) {
-            var model = DataContext as PackageViewModel;
-            if (model != null) {
-                model.SaveCommand.Execute(parameter);
-            }
-        }
-
-        private void CanExecuteSaveCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {
-            var model = DataContext as PackageViewModel;
-            bool canExecute = model == null ? false : model.SaveCommand.CanExecute(e.Parameter);
 
             e.CanExecute = canExecute;
             e.Handled = true;
