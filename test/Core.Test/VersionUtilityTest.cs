@@ -23,6 +23,22 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames() {
+            // Arrange
+            var knownNameFormats = new[] { "netmf4.1", ".NETMicroFramework4.1" };
+            Version version41 = new Version("4.1");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames) {
+                Assert.AreEqual(".NETMicroFramework", frameworkName.Identifier);
+                Assert.AreEqual(version41, frameworkName.Version);
+            }
+        }
+
+        [TestMethod]
         public void ParseFrameworkNameNormalizesSupportedSilverlightNames() {
             // Arrange
             var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight", "Silverlight " };
@@ -208,6 +224,7 @@ namespace NuGet.Test {
             var sl3 = new FrameworkName("Silverlight", new Version(3, 0));
             var sl4 = new FrameworkName("Silverlight", new Version(4, 0));
             var wp7 = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone");
+            var netMicro41 = new FrameworkName(".NETMicroFramework", new Version(4, 1));
 
             // Act
             string net40Value = VersionUtility.GetFrameworkString(net40);
@@ -215,6 +232,7 @@ namespace NuGet.Test {
             string sl3Value = VersionUtility.GetFrameworkString(sl3);
             string sl4Value = VersionUtility.GetFrameworkString(sl4);
             string wp7Value = VersionUtility.GetFrameworkString(wp7);
+            string netMicro41Value = VersionUtility.GetFrameworkString(netMicro41);
 
             // Assert
             Assert.AreEqual(".NETFramework4.0", net40Value);
@@ -222,6 +240,7 @@ namespace NuGet.Test {
             Assert.AreEqual("Silverlight3.0", sl3Value);
             Assert.AreEqual("Silverlight4.0", sl4Value);
             Assert.AreEqual("Silverlight4.0-WindowsPhone", wp7Value);
+            Assert.AreEqual(".NETMicroFramework4.1", netMicro41Value);
         }
 
         [TestMethod]

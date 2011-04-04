@@ -17,6 +17,8 @@ namespace NuGet {
             { ".NET", NetFrameworkIdentifier },
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
+            { ".NETMicroFramework", ".NETMicroFramework" },
+            { "netmf", ".NETMicroFramework" },
             { "SL", "Silverlight" },
             { "Silverlight", "Silverlight" }
         };
@@ -30,6 +32,7 @@ namespace NuGet {
 
         private static readonly Dictionary<string, string> _identifierToFrameworkFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { NetFrameworkIdentifier, "net" },
+            { ".NETMicroFramework", "netmf" },
             { "Silverlight", "sl" }
         };
 
