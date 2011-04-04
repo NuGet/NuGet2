@@ -202,7 +202,10 @@
             <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
                 <StackPanel Background="Transparent" Orientation="Horizontal" ContextMenu="{StaticResource FolderSharedContextMenu}">
                     <Image x:Name="ItemIcon" Margin="0,0,2,0" Source="/NuGetPackageExplorer;component/Images/Folder.ico" />
-                    <TextBlock x:Name="Header" Text="{Binding Path, Converter={StaticResource frameworkConverter}}" FontWeight="SemiBold" />
+                    <TextBlock x:Name="Header" FontWeight="SemiBold">
+                        <Run Text="{Binding Name}" />
+                        <Run Text="{Binding Path, Converter={StaticResource frameworkConverter}}" Foreground="Salmon" />
+                    </TextBlock>
                 </StackPanel>
 
                 <HierarchicalDataTemplate.Triggers>

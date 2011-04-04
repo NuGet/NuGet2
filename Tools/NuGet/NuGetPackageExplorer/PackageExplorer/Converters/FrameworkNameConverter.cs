@@ -15,11 +15,14 @@ namespace PackageExplorer {
             if (parts.Length == 2 && parts[0].Equals("LIB", StringComparison.OrdinalIgnoreCase)) {
                 var frameworkName = VersionUtility.ParseFrameworkName(name);
                 if (frameworkName != VersionUtility.UnsupportedFrameworkName) {
-                    return String.Format(CultureInfo.CurrentCulture, "{0}  ({1})", name, frameworkName);
+                    return " (" + frameworkName.ToString() + ")";
+                }
+                else {
+                    return " (Unrecognized framework)";
                 }
             }
 
-            return name;
+            return String.Empty;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
