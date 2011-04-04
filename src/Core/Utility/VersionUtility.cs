@@ -24,6 +24,7 @@ namespace NuGet {
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "Client", "Client" },
             { "WP", "WindowsPhone" },
+            { "CF", "CompactFramework" },
             { "Full", String.Empty }
         };
 
@@ -33,7 +34,8 @@ namespace NuGet {
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-            { "WindowsPhone", "wp" }
+            { "WindowsPhone", "wp" },
+            { "CompactFramework", "cf" }
         };
 
         public static Version DefaultTargetFrameworkVersion {

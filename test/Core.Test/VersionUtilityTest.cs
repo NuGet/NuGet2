@@ -144,6 +144,17 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ParseFrameworkNameWithCFProfileGetNormalizedToCompactFramework() {
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("net20-cf");
+
+            // Assert
+            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
+            Assert.AreEqual(new Version("2.0"), frameworkName.Version);
+            Assert.AreEqual("CompactFramework", frameworkName.Profile);
+        }
+
+        [TestMethod]
         public void ParseFrameworkNameWithEmptyProfile() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("sl4-");
