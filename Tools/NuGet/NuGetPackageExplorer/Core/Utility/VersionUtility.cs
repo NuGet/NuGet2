@@ -18,6 +18,8 @@ namespace NuGet {
             { ".NET", NetFrameworkIdentifier },
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
+            { ".NETMicroFramework", ".NETMicroFramework" },
+            { "netmf", ".NETMicroFramework" },
             { "SL", "Silverlight" },
             { "Silverlight", "Silverlight" }
         };
@@ -25,6 +27,7 @@ namespace NuGet {
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "Client", "Client" },
             { "WP", "WindowsPhone" },
+            { "CF", "CompactFramework" },
             { "Full", String.Empty }
         };
 
