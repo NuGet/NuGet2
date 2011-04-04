@@ -306,7 +306,7 @@
                 <MenuItem Header="E_xit" Click="ExitMenuItem_Click" />
             </self:GrayscaleMenuItem>
 
-            <self:GrayscaleMenuItem Header="_Edit">
+            <self:GrayscaleMenuItem Header="_Edit" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
                 <self:GrayscaleMenuItem Header="Edit _Package Metadata" InputGestureText="Ctrl+K" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="{Binding MetadataBindingGroup, ElementName=PackageMetadataEditor}" />
                 <Separator />
                 <self:GrayscaleMenuItem Command="Cut">
