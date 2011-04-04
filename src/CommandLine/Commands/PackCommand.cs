@@ -74,14 +74,15 @@ namespace NuGet.Commands {
             // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
             BasePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
             ExcludeFiles(builder.Files);
-
+            // Track if the package file was already present on disk
+            bool isExistingPackage = File.Exists(outputPath);
             try {
                 using (Stream stream = File.Create(outputPath)) {
                     builder.Save(stream);
                 }
             }
             catch {
-                if (File.Exists(outputPath)) {
+                if (!isExistingPackage && File.Exists(outputPath)) {
                     File.Delete(outputPath);
                 }
                 throw;
