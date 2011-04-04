@@ -11,8 +11,6 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
         private static readonly Guid ExtensionManagerCommandGuid = new Guid("{5dd0bb59-7076-4c59-88d3-de36931f63f0}");
-        private static readonly Lazy<bool> _isElevated = new Lazy<bool>(IsElevated);
-
         private const string NuGetVSIXId = "NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5";
         private const int ExtensionManagerCommandId = (int)0xBB8;
         private readonly IMenuCommandService _menuCommandService;
@@ -35,7 +33,7 @@ namespace NuGet.VisualStudio {
 
         public void CheckForAvailableUpdateAsync() {
             // If the user isn't admin then they can't perform update check.
-            if (!_isElevated.Value || _updateDeclined || _updateAccepted) {
+            if (_updateDeclined || _updateAccepted) {
                 return;
             }            
 
@@ -60,12 +58,6 @@ namespace NuGet.VisualStudio {
                 }
 
             });
-        }
-
-        private static bool IsElevated() {
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            var principal = new WindowsPrincipal(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
         private void RaiseUpdateEvent(ProductUpdateAvailableEventArgs args) {
