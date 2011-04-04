@@ -1,12 +1,16 @@
 ﻿using System;
+using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.VisualStudio {
     public static class ExceptionHelper {
+        private const string LogEntrySource = "NuGet Package Manager";
+
         public static void WriteToActivityLog(Exception exception) {
-            IVsActivityLogger logger = ServiceLocator.GetInstance<IVsActivityLogger>();
-            if (logger != null) {
-                logger.LogEntry(ActivityLogEntryType.Error, exception.Message + exception.StackTrace);
+            if (exception == null) {
+                throw new ArgumentNullException("exception");
             }
+
+            ActivityLog.LogError(LogEntrySource, exception.Message + exception.StackTrace);
         }
     }
 }
