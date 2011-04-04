@@ -50,6 +50,8 @@ namespace PackageExplorer {
             PackageMetadataEditor.MessageBox = MessageBox;
             PackageMetadataEditor.PackageViewModelFactory = packageViewModelFactory;
             RecentFilesMenuItem.DataContext = _mruManager = mruManager;
+            RecentFilesContainer.Collection = _mruManager.Files;
+            
             _packageViewModelFactory = packageViewModelFactory;
         }
 
@@ -659,7 +661,7 @@ namespace PackageExplorer {
             }
 
             MenuItem menuItem = (MenuItem)sender;
-            var mruItem = (MruItem)menuItem.DataContext;
+            var mruItem = menuItem.DataContext as MruItem;
             if (mruItem == null) {
                 _mruManager.Clear();
             }

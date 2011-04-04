@@ -284,20 +284,21 @@
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <Separator />
-                <MenuItem Header="_Recent Files" x:Name="RecentFilesMenuItem" Visibility="{Binding Files.Count, Converter={StaticResource countConverter}}" ItemsSource="{Binding Files}">
+                <MenuItem Header="_Recent Files" x:Name="RecentFilesMenuItem" Visibility="{Binding Files.Count, Converter={StaticResource countConverter}}">
+                    <MenuItem.ItemsSource>
+                        <CompositeCollection>
+                            <CollectionContainer x:Name="RecentFilesContainer" />
+                            <MenuItem Header="Clear Recen_t File List">
+                                <MenuItem.Icon>
+                                    <Image Source="Images/Delete.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </CompositeCollection>
+                    </MenuItem.ItemsSource>
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="{x:Type MenuItem}">
                             <EventSetter Event="Click" Handler="RecentFileMenuItem_Click" />
-                            <Setter Property="Header" Value="{Binding Path,Converter={StaticResource TruncatePathConverter}, FallbackValue='Clear Recent Files List'}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
-                                    <Setter Property="Icon">
-                                        <Setter.Value>
-                                            <Image Source="/NuGetPackageExplorer;component/Images/Delete.png" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </DataTrigger>
-                            </Style.Triggers>
+                            <Setter Property="Header" Value="{Binding Path, Converter={StaticResource TruncatePathConverter}}" />
                         </Style>
                     </MenuItem.ItemContainerStyle>
                 </MenuItem>

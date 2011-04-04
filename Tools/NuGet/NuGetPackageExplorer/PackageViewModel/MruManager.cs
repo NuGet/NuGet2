@@ -68,19 +68,11 @@ namespace PackageExplorerViewModel {
                 throw new ArgumentNullException("s");
             }
 
-            // remove the padding 'null' value at the end
-            _files.Remove(null);
-
             _files.Remove(s);
             _files.Insert(0, s);
 
             if (_files.Count > MaxFile) {
                 _files.RemoveAt(_files.Count - 1);
-            }
-
-            // pad the 'null' value back to the end
-            if (_files.Count > 0) {
-                _files.Add(null);
             }
         }
 
