@@ -54,11 +54,11 @@
         <!-- navigation buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="First">
-                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MoveFirstHS.png" />
+                <self:GrayscaleImage Source="Images/MoveFirstHS.png" />
             </self:GrayscaleButton>
 
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Previous">
-                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MovePreviousHS.png" />
+                <self:GrayscaleImage Source="Images/MovePreviousHS.png" />
             </self:GrayscaleButton>
 
             <TextBlock Margin="0,0,7,0" VerticalAlignment="Center">
@@ -72,11 +72,11 @@
             </TextBlock>
 
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Next">
-                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MoveNextHS.png" />
+                <self:GrayscaleImage Source="Images/MoveNextHS.png" />
             </self:GrayscaleButton>
 
             <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
-                <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/MoveLastHS.png" />
+                <self:GrayscaleImage Source="Images/MoveLastHS.png" />
             </self:GrayscaleButton>
         </StackPanel>
 
@@ -100,7 +100,7 @@
             Margin="0,4,6,0"
             HorizontalAlignment="Right" 
             VerticalAlignment="Center"
-            Source="/NuGetPackageExplorer;component/Images/search.png" />
+            Source="Images/search.png" />
 
         <!-- package list view -->
         <ListView x:Name="PackageGrid" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Packages}" SelectionMode="Single" IsTextSearchEnabled="False">

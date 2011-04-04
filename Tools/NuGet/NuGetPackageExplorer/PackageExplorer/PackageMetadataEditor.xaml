@@ -51,7 +51,7 @@
                 <TextBlock Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, TargetNullValue='(not set)', Mode=OneWay}" />
                 <Button Grid.Column="2" ToolTipService.ToolTip="Remove this dependency" Click="RemoveDependencyButtonClicked">
-                    <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
+                    <Image Style="{StaticResource ImageStyle}" Source="Images/delete.png" />
                 </Button>
             </Grid>
         </DataTemplate>
@@ -67,7 +67,7 @@
                 <TextBlock Grid.Column="0" Text="{Binding AssemblyName, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
                 <TextBlock Grid.Column="1" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
                 <Button Grid.Column="2" ToolTipService.ToolTip="Remove this framework assembly" Click="RemoveFrameworkAssemblyButtonClicked">
-                    <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/delete.png" />
+                    <Image Style="{StaticResource ImageStyle}" Source="Images/delete.png" />
                 </Button>
             </Grid>
         </DataTemplate>
@@ -193,7 +193,7 @@
                         </ItemsControl>
 
                         <Button Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" ToolTipService.ToolTip="Select dependency from NuGet feed" Click="SelectDependencyButtonClicked">
-                            <Image Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/properties.png">
+                            <Image Style="{StaticResource ImageStyle}" Source="Images/properties.png">
                             </Image>
                         </Button>
 
@@ -201,7 +201,7 @@
                         <TextBox x:Name="NewDependencyVersion" Text="{Binding VersionSpec, Converter={StaticResource VersionSpecConverter}, NotifyOnValidationError=True, ValidatesOnDataErrors=True, BindingGroupName=NewPackageDependency}" Margin="2" Grid.Column="2" Grid.Row="2" />
                         
                         <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="3" Grid.Row="2" ToolTipService.ToolTip="Add new dependency" Click="AddDependencyButtonClicked">
-                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
+                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="Images/add.png" />
                             <self:GrayscaleButton.IsEnabled>
                                 <Binding Path="Text" ElementName="NewDependencyId" Converter="{StaticResource nullToBoolConverter}" Mode="OneWay" />
                             </self:GrayscaleButton.IsEnabled>
@@ -238,7 +238,7 @@
                         <TextBox x:Name="NewSupportedFramework" Text="{Binding SupportedFrameworks, Converter={StaticResource FrameworkNameConverter}, NotifyOnValidationError=True, BindingGroupName=NewFrameworkAssembly}" Margin="2" Grid.Column="1" Grid.Row="2" />
 
                         <self:GrayscaleButton Margin="0,2,0,2" Grid.Column="2" Grid.Row="2" ToolTipService.ToolTip="Add new framework assembly" Click="AddFrameworkAssemblyButtonClicked">
-                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="/NuGetPackageExplorer;component/Images/add.png" />
+                            <self:GrayscaleImage Style="{StaticResource ImageStyle}" Source="Images/add.png" />
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource StringsConverter}" Mode="OneWay">
                                     <Binding ElementName="NewAssemblyName" Path="Text" />

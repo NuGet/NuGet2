@@ -12,7 +12,7 @@
         MinWidth="600" 
         MinHeight="300" 
         Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}"
-        Icon="/NuGetPackageExplorer;component/Images/packageicon.png" 
+        Icon="Images/packageicon.png" 
         FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
         AllowDrop="True"
         DragOver="Window_DragOver"
@@ -184,24 +184,24 @@
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INSTALL.PS1">
                         <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
-                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Script.png" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="Images/Script.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\UNINSTALL.PS1">
                         <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
-                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Script.png" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="Images/Script.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS\INIT.PS1">
                         <Setter TargetName="ItemIcon" Property="Visibility" Value="Visible" />
-                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Script.png" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="Images/Script.png" />
                     </DataTrigger>
                 </DataTemplate.Triggers>
             </DataTemplate>
 
             <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
                 <StackPanel Background="Transparent" Orientation="Horizontal" ContextMenu="{StaticResource FolderSharedContextMenu}">
-                    <Image x:Name="ItemIcon" Margin="0,0,2,0" Source="/NuGetPackageExplorer;component/Images/Folder.ico" />
+                    <Image x:Name="ItemIcon" Margin="0,0,2,0" Source="Images/Folder.ico" />
                     <TextBlock x:Name="Header" FontWeight="SemiBold">
                         <Run Text="{Binding Name}" />
                         <Run Text="{Binding Path, Converter={StaticResource frameworkConverter}}" Foreground="Salmon" />
@@ -210,15 +210,15 @@
 
                 <HierarchicalDataTemplate.Triggers>
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="LIB">
-                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Lib.png" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="Images/Lib.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="CONTENT">
-                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/NoteHS.png" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="Images/NoteHS.png" />
                     </DataTrigger>
 
                     <DataTrigger Binding="{Binding Path, Converter={StaticResource upperCaseConverter}}" Value="TOOLS">
-                        <Setter TargetName="ItemIcon" Property="Source" Value="/NuGetPackageExplorer;component/Images/Tools.png" />
+                        <Setter TargetName="ItemIcon" Property="Source" Value="Images/Tools.png" />
                     </DataTrigger>
                 </HierarchicalDataTemplate.Triggers>
             </HierarchicalDataTemplate>
@@ -245,13 +245,13 @@
             <self:GrayscaleMenuItem Header="_File">
                 <MenuItem Command="New" Header="_New">
                     <MenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/NewDocumentHS.png">
+                        <Image Source="Images/NewDocumentHS.png">
                         </Image>
                     </MenuItem.Icon>
                 </MenuItem>
                 <self:GrayscaleMenuItem Command="Open" Header="_Open...">
                     <self:GrayscaleMenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/openHS.png">
+                        <Image Source="Images/openHS.png">
                         </Image>
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
@@ -262,7 +262,7 @@
                 <Separator />
                 <self:GrayscaleMenuItem x:Name="SaveMenuItem" Header="_Save" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" InputGestureText="Ctrl+S">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/saveHS.png" />
+                        <self:GrayscaleImage Source="Images/saveHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
@@ -280,7 +280,7 @@
                 </MenuItem>
                 <self:GrayscaleMenuItem Command="{x:Static self:Commands.PublishToFeedCommand}" Header="_Publish...">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/PublishToWebHS.png" />
+                        <self:GrayscaleImage Source="Images/PublishToWebHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <Separator />
@@ -311,17 +311,17 @@
                 <Separator />
                 <self:GrayscaleMenuItem Command="Cut">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/CutHS.png" />
+                        <self:GrayscaleImage Source="Images/CutHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Command="Copy">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/CopyHS.png" />
+                        <self:GrayscaleImage Source="Images/CopyHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <self:GrayscaleMenuItem Command="Paste">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/PasteHS.png" />
+                        <self:GrayscaleImage Source="Images/PasteHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
             </self:GrayscaleMenuItem>
@@ -333,7 +333,7 @@
                     <self:GrayscaleMenuItem Header="L_argest" Tag="16" Click="OnFontSizeItem_Click" IsCheckable="True" />
 
                     <MenuItem.Icon>
-                        <Image Source="/NuGetPackageExplorer;component/Images/FontDialogHS.png" />
+                        <Image Source="Images/FontDialogHS.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Show Status _Bar" x:Name="ShowStatusBarMenuItem" IsCheckable="True" IsChecked="True" />
@@ -347,23 +347,23 @@
                     <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
                     <self:GrayscaleMenuItem Header="_New Folder" Click="OnAddNewFolderClick" IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=folder, FallbackValue=False, TargetNullValue=true}">
                         <self:GrayscaleMenuItem.Icon>
-                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NewFolderHS.png" />
+                            <self:GrayscaleImage Source="Images/NewFolderHS.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                     <Separator />
                     <self:GrayscaleMenuItem Header="_Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
                         <self:GrayscaleMenuItem.Icon>
-                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
+                            <self:GrayscaleImage Source="Images/NoteHS.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                     <self:GrayscaleMenuItem Header="_Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
                         <self:GrayscaleMenuItem.Icon>
-                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
+                            <self:GrayscaleImage Source="Images/Lib.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                     <self:GrayscaleMenuItem Header="_Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
                         <self:GrayscaleMenuItem.Icon>
-                            <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
+                            <self:GrayscaleImage Source="Images/Tools.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                 </MenuItem>
@@ -375,7 +375,7 @@
             <self:GrayscaleMenuItem Header="_Help">
                 <self:GrayscaleMenuItem Header="_NuGet Documentation" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation">
                     <self:GrayscaleMenuItem.Icon>
-                        <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Book_angleHS.png" />
+                        <self:GrayscaleImage Source="Images/Book_angleHS.png" />
                     </self:GrayscaleMenuItem.Icon>
                 </self:GrayscaleMenuItem>
                 <MenuItem Header="How to _Create Package" Click="ViewFileFormatItem_Click" Tag="http://nuget.codeplex.com/documentation?title=Creating%20a%20Package" />
@@ -458,23 +458,23 @@
                             <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
                             <MenuItem Header="_New Folder" Click="OnAddNewFolder2Click">
                                 <MenuItem.Icon>
-                                    <Image Source="/NuGetPackageExplorer;component/Images/NewFolderHS.png" />
+                                    <Image Source="Images/NewFolderHS.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator />
                             <self:GrayscaleMenuItem Header="Add _Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
                                 <self:GrayscaleMenuItem.Icon>
-                                    <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/NoteHS.png" />
+                                    <self:GrayscaleImage Source="Images/NoteHS.png" />
                                 </self:GrayscaleMenuItem.Icon>
                             </self:GrayscaleMenuItem>
                             <self:GrayscaleMenuItem Header="Add _Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
                                 <self:GrayscaleMenuItem.Icon>
-                                    <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Lib.png" />
+                                    <self:GrayscaleImage Source="Images/Lib.png" />
                                 </self:GrayscaleMenuItem.Icon>
                             </self:GrayscaleMenuItem>
                             <self:GrayscaleMenuItem Header="Add _Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
                                 <self:GrayscaleMenuItem.Icon>
-                                    <self:GrayscaleImage Source="/NuGetPackageExplorer;component/Images/Tools.png" />
+                                    <self:GrayscaleImage Source="Images/Tools.png" />
                                 </self:GrayscaleMenuItem.Icon>
                             </self:GrayscaleMenuItem>
                         </ContextMenu>
@@ -522,7 +522,7 @@
                 Grid.Row="2" 
                 Grid.Column="1"
                 ToolTipService.ToolTip="Close viewer pane">
-                <Image Source="/NuGetPackageExplorer;component/Images/Delete.png" />
+                <Image Source="Images/Delete.png" />
             </Button>
         </Grid>
               

@@ -13,7 +13,7 @@
     
     <DockPanel Margin="20" LastChildFill="true">
         
-        <Image Style="{x:Null}" DockPanel.Dock="Left" Stretch="None" VerticalAlignment="Top" Source="/NuGetPackageExplorer;component/Images/packageicon.png" />
+        <Image Style="{x:Null}" DockPanel.Dock="Left" Stretch="None" VerticalAlignment="Top" Source="Images/packageicon.png" />
         
         <StackPanel Orientation="Vertical" Grid.Column="1" Margin="20,0,0,0">
             <TextBlock x:Name="ProductTitle" Text="NuGet Package Explorer Beta 2" FontWeight="Bold" />
