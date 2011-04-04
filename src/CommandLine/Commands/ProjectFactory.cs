@@ -420,10 +420,24 @@ namespace NuGet.Commands {
         }
 
         private string GetTargetPath(ProjectItem item) {
+            string path = item.UnevaluatedInclude;
             if (item.HasMetadata("Link")) {
-                return item.GetMetadataValue("Link");
+                path = item.GetMetadataValue("Link");
             }
-            return item.UnevaluatedInclude;
+            return Normalize(path);
+        }
+
+        private string Normalize(string path) {
+            string projectDirectoryPath = PathUtility.EnsureTrailingSlash(_project.DirectoryPath);
+            string fullPath = PathUtility.GetAbsolutePath(projectDirectoryPath, path);
+
+            // If the file is under the project root then remove the project root
+            if (fullPath.StartsWith(projectDirectoryPath, StringComparison.OrdinalIgnoreCase)) {
+                return fullPath.Substring(_project.DirectoryPath.Length).TrimStart(Path.DirectorySeparatorChar);
+            }
+
+            // Otherwise the file is probably a shortcut so just take the file name
+            return Path.GetFileName(fullPath);
         }
 
         private class ReverseTransformFormFile : IPackageFile {

@@ -177,12 +177,32 @@ public class Runner {
         Console.WriteLine(""Hello World"");
     }
 }");
+            File.WriteAllText(Path.Combine(ProjectFilesFolder, @"..\Foo.cs"), @"using System;
+public class Foo { 
+    public static void Run() { 
+        Console.WriteLine(""Hello World"");
+    }
+}");
+            File.WriteAllText(Path.Combine(ProjectFilesFolder, @"Bar.cs"), @"using System;
+public class Bar { 
+    public static void Run() { 
+        Console.WriteLine(""Hello World"");
+    }
+}");
+            File.WriteAllText(Path.Combine(ProjectFilesFolder, @"..\Baz.cs"), @"using System;
+public class Baz { 
+    public static void Run() { 
+        Console.WriteLine(""Hello World"");
+    }
+}");
             CreateAssemblyInfo("FakeProject",
                                "1.2.0.0",
                                "David Inc",
                                "This is a test. Ignore me");
 
-            CreateProject("FakeProject", compile: new[] { "Runner.cs" });
+            CreateProject("FakeProject",
+                          compile: new[] { "Runner.cs", @"..\Foo.cs", @"..\projects\Bar.cs" },
+                          links: new[] { Tuple.Create(@"..\Baz.cs", @"Folder\Baz.cs") });
 
             string[] args = new string[] { "pack" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
@@ -201,7 +221,10 @@ public class Runner {
             Assert.AreEqual(new Version("1.2.0.0"), package.Version);
             Assert.AreEqual("David Inc", package.Authors.First());
             Assert.AreEqual("This is a test. Ignore me", package.Description);
-            VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Runner.cs", 
+            VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
+                                                                  @"src\Runner.cs",
+                                                                  @"src\Folder\Baz.cs",
+                                                                  @"src\Bar.cs",
                                                                   @"src\Properties\AssemblyInfo.cs",
                                                                   @"lib\net40\FakeProject.dll",
                                                                   @"lib\net40\FakeProject.pdb" });
@@ -288,16 +311,22 @@ public class Cl_{0} {{
             return package;
         }
 
-        private void CreateProject(string projectName, IEnumerable<string> content = null, IEnumerable<string> compile = null) {
+        private void CreateProject(string projectName, IEnumerable<string> content = null, IEnumerable<string> compile = null, IEnumerable<Tuple<string, string>> links = null) {
             string projectFile = Path.Combine(ProjectFilesFolder, projectName + ".csproj");
-            File.WriteAllText(projectFile, GetProjectContent(projectName, compile: compile, content: content));
+            File.WriteAllText(projectFile, GetProjectContent(projectName, compile: compile, content: content, links: links));
         }
 
-        private static string GetProjectContent(string projectName, string targetFrameworkVersion = "4.0", IEnumerable<string> compile = null, IEnumerable<string> content = null) {
+        private static string GetProjectContent(string projectName,
+                                                string targetFrameworkVersion = "4.0",
+                                                IEnumerable<string> compile = null,
+                                                IEnumerable<string> content = null,
+                                                IEnumerable<Tuple<string, string>> links = null) {
             compile = compile ?? Enumerable.Empty<string>();
             content = content ?? Enumerable.Empty<string>();
+            links = links ?? Enumerable.Empty<Tuple<string, string>>();
             string compileItemGroup = String.Join(Environment.NewLine, compile.Select(path => String.Format(@"<Compile Include=""{0}"" />", path)));
             string contentItemGroup = String.Join(Environment.NewLine, content.Select(path => String.Format(@"<Content Include=""{0}"" />", path)));
+            string linkItemGroup = String.Join(Environment.NewLine, links.Select(link => String.Format(@"<Compile Include=""{0}""><Link>{1}</Link></Compile>", link.Item1, link.Item2)));
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project ToolsVersion=""4.0"" DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <PropertyGroup>
@@ -348,9 +377,12 @@ public class Cl_{0} {{
   <ItemGroup>
     {3}
   </ItemGroup>
+  <ItemGroup>
+    {4}
+  </ItemGroup>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>
-", projectName, targetFrameworkVersion, contentItemGroup, compileItemGroup);
+", projectName, targetFrameworkVersion, contentItemGroup, compileItemGroup, linkItemGroup);
         }
 
         private static void CreateAssemblyInfo(string assemblyName, string version, string author, string description) {
