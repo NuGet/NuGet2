@@ -126,9 +126,24 @@ namespace NuGet.Tools {
             return false;
         }
 
-        private void ShowSettingsWindow(object sender, EventArgs args) {
+        private void ShowPackageSourcesOptionPage(object sender, EventArgs args) {
             try {
                 ShowOptionPage(typeof(ToolsOptionsPage));
+            }
+            catch (Exception exception) {
+                MessageBox.Show(
+                    exception.Message,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                ExceptionHelper.WriteToActivityLog(exception);
+            }
+        }
+
+        private void ShowGeneralSettingsOptionPage(object sender, EventArgs args) {
+            try {
+                ShowOptionPage(typeof(GeneralOptionPage));
             }
             catch (Exception exception) {
                 MessageBox.Show(
@@ -192,8 +207,12 @@ namespace NuGet.Tools {
                 mcs.AddCommand(menuItem);
 
                 CommandID settingsCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidSourceSettings);
-                OleMenuCommand settingsMenuCommand = new OleMenuCommand(ShowSettingsWindow, settingsCommandID);
+                OleMenuCommand settingsMenuCommand = new OleMenuCommand(ShowPackageSourcesOptionPage, settingsCommandID);
                 mcs.AddCommand(settingsMenuCommand);
+
+                CommandID generalSettingsCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, (int)PkgCmdIDList.cmdIdGeneralSettings);
+                OleMenuCommand generalSettingsCommand = new OleMenuCommand(ShowGeneralSettingsOptionPage, generalSettingsCommandID);
+                mcs.AddCommand(generalSettingsCommand);
             }
         }
 

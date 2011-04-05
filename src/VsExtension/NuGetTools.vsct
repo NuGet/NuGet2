@@ -77,6 +77,14 @@
               <ButtonText>Add Library Pac&amp;kage Reference...</ButtonText>
           </Strings>
       </Button>
+
+        <Button guid="guidToolsGroup" id="idGeneralSettings" priority="0xF200" type="Button">
+            <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+            <Strings>
+                <CommandName>cmdidGeneralSettings</CommandName>
+                <ButtonText>&amp;Package Manager Settings</ButtonText>
+            </Strings>
+        </Button>
     </Buttons>
 
     <Combos>
@@ -116,10 +124,6 @@
     </CommandPlacement>
 
     <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
-      <Parent guid="guidToolsGroup" id="idToolsGroup"/>
-    </CommandPlacement>
-
-    <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidSourceSettings" priority="0xF200">
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
     
@@ -165,6 +169,7 @@
     <GuidSymbol name="guidToolsGroup" value="{C0D88179-5D25-4982-BFE6-EC5FD59AC103}">
       <IDSymbol name="idLibraryPackageManager" value="0x100" />
       <IDSymbol name="idToolsGroup" value="0x200" />
+      <IDSymobl name="idGeneralSettings" value="0x300" />
     </GuidSymbol>
                 
     <!-- This is the guid used to group the menu commands together -->
