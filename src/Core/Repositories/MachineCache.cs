@@ -31,7 +31,7 @@ namespace NuGet {
         public override void AddPackage(IPackage package) {
             // If we exceed the package count then clear the cache
             var files = GetPackageFiles().ToList();
-            if (files.Count == MaxPackages) {
+            if (files.Count >= MaxPackages) {
                 Clear(files);
             }
 
