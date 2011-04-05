@@ -7,13 +7,23 @@ namespace NuGet {
     public class LocalPackageRepository : PackageRepositoryBase, IPackageLookup {
         private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<PackageName, string> _packagePathLookup = new Dictionary<PackageName, string>();
+        private readonly bool _enableCaching;
 
         public LocalPackageRepository(string physicalPath)
-            : this(new DefaultPackagePathResolver(physicalPath),
-                   new PhysicalFileSystem(physicalPath)) {
+            : this(physicalPath, enableCaching: true) {
         }
 
-        public LocalPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem) {
+        public LocalPackageRepository(string physicalPath, bool enableCaching)
+            : this(new DefaultPackagePathResolver(physicalPath),
+                   new PhysicalFileSystem(physicalPath),
+                   enableCaching) {
+        }
+
+        public LocalPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem)
+            : this(pathResolver, fileSystem, enableCaching: true) {
+        }
+
+        public LocalPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem, bool enableCaching) {
             if (pathResolver == null) {
                 throw new ArgumentNullException("pathResolver");
             }
@@ -24,6 +34,7 @@ namespace NuGet {
 
             FileSystem = fileSystem;
             PathResolver = pathResolver;
+            _enableCaching = enableCaching;
         }
 
         public override string Source {
@@ -72,7 +83,7 @@ namespace NuGet {
             string path;
             if (!_packagePathLookup.TryGetValue(packageName, out path)) {
                 // Try to find the path based on id and version
-                path = GetPackageFilePath(packageName);
+                path = GetPackageFilePath(packageName.PackageId, packageName.Version);
 
                 // If this path doesn't exist try the other one
                 if (!FileSystem.FileExists(path)) {
@@ -113,12 +124,15 @@ namespace NuGet {
                 // Create the package
                 IPackage package = openPackage(packagePath);
 
+                
                 // create a cache entry with the last modified time
                 cacheEntry = new PackageCacheEntry(package, lastModified);
 
-                // Store the entry
-                _packageCache[packagePath] = cacheEntry;
-                _packagePathLookup[new PackageName(package.Id, package.Version)] = path;
+                if (_enableCaching) {
+                    // Store the entry
+                    _packageCache[packagePath] = cacheEntry;
+                    _packagePathLookup[new PackageName(package.Id, package.Version)] = path;
+                }
             }
 
             return cacheEntry.Package;
@@ -144,14 +158,14 @@ namespace NuGet {
             return new ZipPackage(() => FileSystem.OpenFile(path));
         }
 
-        private string GetPackageFilePath(IPackage package) {
+        protected virtual string GetPackageFilePath(IPackage package) {
             return Path.Combine(PathResolver.GetPackageDirectory(package),
                                 PathResolver.GetPackageFileName(package));
         }
 
-        private string GetPackageFilePath(PackageName packageName) {
-            return Path.Combine(PathResolver.GetPackageDirectory(packageName.PackageId, packageName.Version),
-                                PathResolver.GetPackageFileName(packageName.PackageId, packageName.Version));
+        protected virtual string GetPackageFilePath(string id, Version version) {
+            return Path.Combine(PathResolver.GetPackageDirectory(id, version),
+                                PathResolver.GetPackageFileName(id, version));
         }
 
         private class PackageCacheEntry {

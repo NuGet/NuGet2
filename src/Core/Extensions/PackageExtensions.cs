@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -27,12 +28,23 @@ namespace NuGet {
             return package.GetFiles(Constants.ContentDirectory);
         }
 
+        public static string GetHash(this IPackage package) {
+            return GetHash(package, new CryptoHashProvider());
+        }
+
+        public static string GetHash(this IPackage package, IHashProvider hashProvider) {
+            using (Stream stream = package.GetStream()) {
+                byte[] packageBytes = stream.ReadAllBytes();
+                return Convert.ToBase64String(hashProvider.CalculateHash(packageBytes));
+            }
+        }
+
         /// <summary>
         /// Returns true if a package has no content that applies to a project.
         /// </summary>
         public static bool HasProjectContent(this IPackage package) {
             return package.FrameworkAssemblies.Any() ||
-                   package.AssemblyReferences.Any() || 
+                   package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any();
         }
 

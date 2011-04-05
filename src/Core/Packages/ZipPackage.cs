@@ -257,5 +257,15 @@ namespace NuGet {
         private string GetAssembliesCacheKey() {
             return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, AssembliesCacheKey, Id, Version);
         }
+
+        internal static void ClearCache(IPackage package) {
+            var zipPackage = package as ZipPackage;
+
+            // Remove the cache entries for files and assemblies
+            if (zipPackage != null) {
+                MemoryCache.Default.Remove(zipPackage.GetAssembliesCacheKey());
+                MemoryCache.Default.Remove(zipPackage.GetFilesCacheKey());
+            }
+        }
     }
 }

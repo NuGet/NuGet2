@@ -47,6 +47,7 @@
     <Compile Include="DataServicePackageTest.cs" />
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
+    <Compile Include="MachineCacheTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\PackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
     <Compile Include="NuGetCommandLine\CommandTest.cs" />

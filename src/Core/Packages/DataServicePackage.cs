@@ -16,14 +16,7 @@ namespace NuGet {
         private readonly LazyWithRecreate<IPackage> _package;
 
         public DataServicePackage() {
-            _package = new LazyWithRecreate<IPackage>(DownloadAndVerifyPackage, () => {
-                // If the hash changed then update the hash and redownload the package.
-                if (OldHash != PackageHash) {
-                    OldHash = PackageHash;
-                    return true;
-                }
-                return false;
-            });
+            _package = new LazyWithRecreate<IPackage>(DownloadAndVerifyPackage, ShouldUpdatePackage);
         }
 
         public string Id {
@@ -137,7 +130,7 @@ namespace NuGet {
             set;
         }
 
-        private string OldHash {
+        internal string OldHash {
             get;
             set;
         }
@@ -212,13 +205,66 @@ namespace NuGet {
             return this.GetFullName();
         }
 
-        internal IPackage DownloadAndVerifyPackage() {
+        private bool ShouldUpdatePackage() {
+            return ShouldUpdatePackage(MachineCache.Default);
+        }
+
+        internal bool ShouldUpdatePackage(IPackageRepository repository) {
+            // If the hash changed re-download the package.
+            if (OldHash != PackageHash) {
+                return true;
+            }
+
+            // If the package hasn't been cached, then re-download the package.
+            IPackage package = GetPackage(repository);
+
+            if (package == null) {
+                return true;
+            }
+
+            // If the cached package hash isn't the same as incoming package hash
+            // then re-download the package.
+            string cachedHash = package.GetHash();
+            if (cachedHash != PackageHash) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private IPackage DownloadAndVerifyPackage() {
+            return DownloadAndVerifyPackage(MachineCache.Default);
+        }
+
+        internal IPackage DownloadAndVerifyPackage(IPackageRepository repository) {
             if (String.IsNullOrEmpty(PackageHash)) {
                 throw new InvalidOperationException(NuGetResources.PackageContentsVerifyError);
             }
 
-            byte[] hashBytes = Convert.FromBase64String(PackageHash);
-            return Downloader.DownloadPackage(DownloadUrl, hashBytes, this);
+            IPackage package = null;
+
+            // If OldHash is null, we're looking at a new instance of the data service package.
+            // The package might be stored in the cache so we're going to try the looking there before attempting a download.
+            if (OldHash == null) {
+                package = GetPackage(repository);
+            }
+
+            if (package == null) {
+                byte[] hashBytes = Convert.FromBase64String(PackageHash);
+
+                package = Downloader.DownloadPackage(DownloadUrl, hashBytes, this);
+
+                // Add the package to the cache
+                repository.AddPackage(package);
+
+                // Clear the cache for this package
+                ZipPackage.ClearCache(package);
+            }
+
+            // Update the hash
+            OldHash = PackageHash;
+
+            return package;
         }
 
         /// <summary>
@@ -248,6 +294,10 @@ namespace NuGet {
             return new PackageDependency(id, versionSpec);
         }
 
+        private IPackage GetPackage(IPackageRepository repository) {
+            return repository.FindPackage(Id, ((IPackageMetadata)this).Version);
+        }
+
         /// <summary>
         /// We can't use the built in Lazy for 2 reasons:
         /// 1. It caches the exception if any is thrown from the creator func (this means it won't retry calling the function).
@@ -258,7 +308,7 @@ namespace NuGet {
             private readonly Func<bool> _shouldRecreate;
             private T _value;
             private bool _isValueCreated;
-            
+
             public LazyWithRecreate(Func<T> creator, Func<bool> shouldRecreate) {
                 _creator = creator;
                 _shouldRecreate = shouldRecreate;
@@ -274,6 +324,6 @@ namespace NuGet {
                     return _value;
                 }
             }
-        }        
+        }
     }
 }

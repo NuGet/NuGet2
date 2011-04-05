@@ -154,6 +154,7 @@ function global:Run-Test {
                 try {           
                     # Clear the cache after running each test
                     [System.Runtime.Caching.MemoryCache]::Default.Trim(100) | Out-Null
+                    [NuGet.MachineCache]::Default.Clear()
                 }
                 catch {
                     # The type might not be loaded so don't fail if it isn't

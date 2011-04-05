@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
     [TestClass]
@@ -51,10 +52,67 @@ namespace NuGet.Test {
         [TestMethod]
         public void DownloadAndVerifyThrowsIfPackageHashIsNull() {
             // Arrange
-            var servicePackage = new DataServicePackage();
+            var servicePackage = new DataServicePackage {
+                Id = "A",
+                Version = "1.2"
+            };
 
             // Act & Asert
-            ExceptionAssert.Throws<InvalidOperationException>(() => servicePackage.DownloadAndVerifyPackage(), "Failed to download package correctly. The contents of the package could not be verified.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => servicePackage.DownloadAndVerifyPackage(new MockPackageRepository()), "Failed to download package correctly. The contents of the package could not be verified.");
+        }
+
+        [TestMethod]
+        public void ShouldUpdateReturnsTrueIfOldHashAndPackageHashAreDifferent() {
+            // Arrange
+            var servicePackage = new DataServicePackage {
+                Id = "A",
+                Version = "1.2",
+                PackageHash = "NEWHASH"
+            };
+
+            // Act
+            bool shouldUpdate = servicePackage.ShouldUpdatePackage(new MockPackageRepository());
+
+            // Assert
+            Assert.IsTrue(shouldUpdate);
+        }
+
+        [TestMethod]
+        public void ShouldUpdateReturnsTrueIfPackageNotInRepository() {
+            // Arrange
+            var servicePackage = new DataServicePackage {
+                Id = "A",
+                Version = "1.2",
+                PackageHash = "HASH",
+                OldHash = "HASH"
+            };
+
+            // Act
+            bool shouldUpdate = servicePackage.ShouldUpdatePackage(new MockPackageRepository());
+
+            // Assert
+            Assert.IsTrue(shouldUpdate);
+        }
+
+        [TestMethod]
+        public void ShouldUpdateReturnsTrueIfRepositoryPackageHashIsDifferentFromPackageHash() {
+            // Arrange
+            var servicePackage = new DataServicePackage {
+                Id = "A",
+                Version = "1.2",
+                PackageHash = "HASH",
+                OldHash = "HASH"
+            };
+
+            var repository = new MockPackageRepository {
+                PackageUtility.CreatePackage("A", "1.2")
+            };
+            
+            // Act
+            bool shouldUpdate = servicePackage.ShouldUpdatePackage(repository);
+
+            // Assert
+            Assert.IsTrue(shouldUpdate);
         }
     }
 }
