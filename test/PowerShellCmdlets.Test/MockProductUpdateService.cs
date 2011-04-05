@@ -12,7 +12,7 @@ namespace NuGet.Cmdlets.Test {
         public void Update() {
         }
 
-        public void DeclineUpdate() {           
+        public void DeclineUpdate(bool doNotRemindAgain) {           
         }
 
         public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;

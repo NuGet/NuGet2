@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,7 +39,12 @@ namespace NuGet.VisualStudio {
 
         private void OnDeclineUpdateLinkClick(object sender, RoutedEventArgs e) {
             HideUpdateBar();
-            _productUpdateService.DeclineUpdate();
+            _productUpdateService.DeclineUpdate(false);
+        }
+
+        private void OnDeclineUpdateLinkClickNoRemind(object sender, RoutedEventArgs e) {
+            HideUpdateBar();
+            _productUpdateService.DeclineUpdate(true);
         }
 
         public void ShowUpdateBar(Version currentVersion, Version newVersion) {

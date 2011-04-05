@@ -31,7 +31,13 @@ namespace NuGet.Options {
 
         protected override void OnActivate(CancelEventArgs e) {
             base.OnActivate(e);
-            this.OptionsControl.Font = VsShellUtilities.GetEnvironmentFont(this);
+            OptionsControl.Font = VsShellUtilities.GetEnvironmentFont(this);
+            OptionsControl.OnActivated();
+        }
+
+        protected override void OnApply(PageApplyEventArgs e) {
+            base.OnApply(e);
+            OptionsControl.OnApply();
         }
 
         private RecentPackagesOptionsControl OptionsControl {

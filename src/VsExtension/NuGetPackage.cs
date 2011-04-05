@@ -28,7 +28,7 @@ namespace NuGet.Tools {
         Window = "{34E76E81-EE4A-11D0-AE2E-00A0C90FFFC3}",      // this is the guid of the Output tool window, which is present in both VS and VWD
         Orientation = ToolWindowOrientation.Right)]
     [ProvideOptionPage(typeof(ToolsOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
-    [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "Recent Packages", 113, 115, true)]
+    [ProvideOptionPage(typeof(RecentPackagesPage), "Package Manager", "General", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [FontAndColorsRegistration(
         "Package Manager Console",
@@ -147,10 +147,6 @@ namespace NuGet.Tools {
         /// </summary>
         protected override void Initialize() {
             base.Initialize();
-
-            // register the IMenuCommandService for the rest of the app to use
-            IMenuCommandService imcs = (IMenuCommandService)GetService(typeof(IMenuCommandService));
-            ServiceLocator.AddService(typeof(IMenuCommandService), imcs);
 
             // get the UI context cookie for the debugging mode
             _vsMonitorSelection = (IVsMonitorSelection)GetService(typeof(IVsMonitorSelection));

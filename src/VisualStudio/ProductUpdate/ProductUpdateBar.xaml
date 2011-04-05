@@ -34,7 +34,7 @@
                 <Run Text="{x:Static resx:VsResources.No}" />
             </Hyperlink>
             <Run Text="  " />
-            <Hyperlink Click="OnDeclineUpdateLinkClick" Style="{StaticResource CommonHyperlinkStyle}" >
+            <Hyperlink Click="OnDeclineUpdateLinkClickNoRemind" Style="{StaticResource CommonHyperlinkStyle}" >
                 <Run Text="{x:Static resx:VsResources.DoNotRemindAgain}" />
             </Hyperlink>
         </TextBlock>

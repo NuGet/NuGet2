@@ -4,11 +4,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using NuGet.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.VisualStudio;
 
 namespace NuGet.Options {
     /// <summary>

@@ -16,13 +16,15 @@
   <ItemGroup>
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
-    <Compile Include="IProductUpdateService.cs" />
+    <Compile Include="ProductUpdate\IProductUpdateService.cs" />
     <Compile Include="IProgressReporter.cs" />
-    <Compile Include="ProductUpdateAvailableEventArgs.cs" />
-    <Compile Include="ProductUpdateBar.xaml.cs">
+    <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
+    <Compile Include="ProductUpdate\ProductUpdateAvailableEventArgs.cs" />
+    <Compile Include="ProductUpdate\ProductUpdateBar.xaml.cs">
       <DependentUpon>ProductUpdateBar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ProductUpdateService.cs" />
+    <Compile Include="ProductUpdate\ProductUpdateService.cs" />
+    <Compile Include="ProductUpdate\VsProductUpdateSettings.cs" />
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
@@ -80,6 +82,8 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="UIAutomationClient" />
+    <Reference Include="UIAutomationTypes" />
     <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -174,7 +178,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ProductUpdateBar.xaml">
+    <Page Include="ProductUpdate\ProductUpdateBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

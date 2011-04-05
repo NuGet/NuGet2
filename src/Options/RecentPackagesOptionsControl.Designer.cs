@@ -25,6 +25,7 @@
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RecentPackagesOptionsControl));
             this.ClearButton = new System.Windows.Forms.Button();
+            this.checkForUpdate = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // ClearButton
@@ -34,10 +35,17 @@
             this.ClearButton.UseVisualStyleBackColor = true;
             this.ClearButton.Click += new System.EventHandler(this.ClearButton_Click);
             // 
+            // checkForUpdate
+            // 
+            resources.ApplyResources(this.checkForUpdate, "checkForUpdate");
+            this.checkForUpdate.Name = "checkForUpdate";
+            this.checkForUpdate.UseVisualStyleBackColor = true;
+            // 
             // RecentPackagesOptionsControl
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.checkForUpdate);
             this.Controls.Add(this.ClearButton);
             this.Name = "RecentPackagesOptionsControl";
             this.ResumeLayout(false);
@@ -48,5 +56,6 @@
         #endregion
 
         private System.Windows.Forms.Button ClearButton;
+        private System.Windows.Forms.CheckBox checkForUpdate;
     }
 }
