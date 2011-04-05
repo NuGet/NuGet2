@@ -59,8 +59,6 @@ namespace NuGetConsole.Implementation.Console {
                 else {
                     _dispatcher = new SyncHostConsoleDispatcher(this);
                 }
-
-                TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 
                 Task.Factory.StartNew(
                     // gives the host a chance to do initialization works before the console starts accepting user inputs
@@ -71,19 +69,17 @@ namespace NuGetConsole.Implementation.Console {
                             var exception = task.Exception;
                             WriteError((exception.InnerException ?? exception).Message);
                         }
-                        
+
                         if (host.IsCommandEnabled) {
-                            _dispatcher.Start();
+                            Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(_dispatcher.Start);
                         }
 
                         if (StartCompleted != null) {
-                            StartCompleted(this, EventArgs.Empty);
+                            Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(() => StartCompleted(this, EventArgs.Empty));
                         }
                         IsStartCompleted = true;
                     },
-                    CancellationToken.None,
-                    TaskContinuationOptions.NotOnCanceled,
-                    uiScheduler
+                    TaskContinuationOptions.NotOnCanceled
                 );
             }
         }

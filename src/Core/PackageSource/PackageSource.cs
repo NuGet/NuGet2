@@ -58,7 +58,7 @@ namespace NuGet {
         }
 
         public override int GetHashCode() {
-            return Name.GetHashCode() ^ Source.GetHashCode();
+            return Name.GetHashCode() * 3137 + Source.GetHashCode();
         }
     }
 }

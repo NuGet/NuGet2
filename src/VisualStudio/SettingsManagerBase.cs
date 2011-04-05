@@ -55,6 +55,11 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        protected bool DeleteProperty(string settingsRoot, string property) {
+            WritableSettingsStore userSettingsStore = GetWritableSettingsStore(settingsRoot);
+            return userSettingsStore.DeleteProperty(settingsRoot, property);
+        }
+
         protected void WriteStrings(string settingsRoot, string[] properties, string[] values) {
             Debug.Assert(properties.Length == values.Length);
 

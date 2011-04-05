@@ -25,7 +25,12 @@ namespace NuGet.VisualStudio {
                 return ReadString(SettingsRoot, PackageSourcesSettingProperty, "");
             }
             set {
-                WriteString(SettingsRoot, PackageSourcesSettingProperty, value ?? "");
+                if (value == null) {
+                    DeleteProperty(SettingsRoot, PackageSourcesSettingProperty);
+                }
+                else {
+                    WriteString(SettingsRoot, PackageSourcesSettingProperty, value);
+                }
             }
         }
 
@@ -38,7 +43,12 @@ namespace NuGet.VisualStudio {
                 return ReadString(SettingsRoot, ActivePackageSourceSettingProperty, "");
             }
             set {
-                WriteString(SettingsRoot, ActivePackageSourceSettingProperty, value ?? "");
+                if (value == null) {
+                    DeleteProperty(SettingsRoot, ActivePackageSourceSettingProperty);
+                }
+                else {
+                    WriteString(SettingsRoot, ActivePackageSourceSettingProperty, value);
+                }
             }
         }
     }

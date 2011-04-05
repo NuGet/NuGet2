@@ -8,19 +8,34 @@ namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IPackageSourceProvider {
+
+        private const string FileSettingsSectionName = "packageSources";
+        private const string FileSettingsActiveSectionName = "activePackageSource";
+
         private const string AggregateSourceValue = "(Aggregate source)";
         internal const string DefaultPackageSource = "https://go.microsoft.com/fwlink/?LinkID=206669";
         internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
         private static readonly PackageSource AggregateSourceInstance = new PackageSource("(Aggregate source)", Resources.VsResources.AggregateSourceName) { IsAggregate = true };
+        
+        private readonly ISettings _fileSettingsManager;
 
-        private readonly IPackageSourceSettingsManager _settingsManager;
+        private readonly IPackageSourceSettingsManager _registrySettingsManager;
 
         private List<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
         [ImportingConstructor]
-        public VsPackageSourceProvider(IPackageSourceSettingsManager settingsManager) {
-            _settingsManager = settingsManager;
+        public VsPackageSourceProvider(IPackageSourceSettingsManager registrySettingsManager) : 
+            this(registrySettingsManager, new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory))) {
+        }
+
+        internal VsPackageSourceProvider(IPackageSourceSettingsManager registrySettingsManager, ISettings fileSettingsManager) {
+            if (fileSettingsManager == null) {
+                throw new ArgumentNullException("fileSettingsManager");
+            }
+
+            _registrySettingsManager = registrySettingsManager;
+            _fileSettingsManager = fileSettingsManager;
 
             DeserializePackageSources();
             DeserializeActivePackageSource();
@@ -43,9 +58,7 @@ namespace NuGet.VisualStudio {
                 }
 
                 _activePackageSource = value;
-
-                // persist the value into VS settings store
-                _settingsManager.ActivePackageSourceString = SerializationHelper.Serialize(value);
+                PersistActivePackageSource();
             }
         }
 
@@ -107,15 +120,31 @@ namespace NuGet.VisualStudio {
         }
 
         private void PersistPackageSources() {
-            _settingsManager.PackageSourcesString = SerializationHelper.Serialize(_packageSources);
+            // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
+
+            // clear the old values
+            _fileSettingsManager.ClearValues(FileSettingsSectionName);
+
+            // and write the new ones
+            foreach (var source in _packageSources) {
+                // don't persist aggregate source
+                if (!source.IsAggregate) {
+                    _fileSettingsManager.SetValue(FileSettingsSectionName, source.Name, source.Source);
+                }
+            }
+        }
+
+        private void PersistActivePackageSource() {
+            // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
+            _fileSettingsManager.ClearValues(FileSettingsActiveSectionName);
+
+            if (_activePackageSource != null) {
+                _fileSettingsManager.SetValue(FileSettingsActiveSectionName, _activePackageSource.Name, _activePackageSource.Source);
+            }
         }
 
         private void DeserializePackageSources() {
-            string propertyString = _settingsManager.PackageSourcesString;
-
-            if (!String.IsNullOrEmpty(propertyString)) {
-                _packageSources = SerializationHelper.Deserialize<List<PackageSource>>(propertyString);
-            }
+            LoadAndMigratePackageSources();
 
             if (_packageSources == null) {
                 _packageSources = new List<PackageSource>();
@@ -155,8 +184,51 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        private void LoadAndMigratePackageSources() {
+            // read from nuget.config first
+            IDictionary<string, string> settingsValue = _fileSettingsManager.GetValues(FileSettingsSectionName);
+            if (settingsValue != null && settingsValue.Count > 0) {
+                _packageSources = new List<PackageSource>();
+
+                foreach (var pair in settingsValue) {
+                    _packageSources.Add(new PackageSource(pair.Value, pair.Key));
+                }
+            }
+            else {
+                string propertyString = _registrySettingsManager.PackageSourcesString;
+                if (!String.IsNullOrEmpty(propertyString)) {
+                    _packageSources = SerializationHelper.Deserialize<List<PackageSource>>(propertyString);
+
+                    // if reading from VS registry, do the migration to nuget.config here
+                    PersistPackageSources();
+
+                    // delete the values in VS registry
+                    _registrySettingsManager.PackageSourcesString = null;
+                }
+            }
+        }
+
         private void DeserializeActivePackageSource() {
-            var packageSource = SerializationHelper.Deserialize<PackageSource>(_settingsManager.ActivePackageSourceString);
+            // try reading from the nuget.config file first
+            var settingValues = _fileSettingsManager.GetValues(FileSettingsActiveSectionName);
+
+            PackageSource packageSource;
+            if (settingValues != null && settingValues.Any()) {
+                KeyValuePair<string, string> pair = settingValues.First();
+                if (AggregateSourceInstance.Name.Equals(pair.Key, StringComparison.CurrentCultureIgnoreCase)) {
+                    packageSource = AggregateSourceInstance;
+                }
+                else {
+                    packageSource = new PackageSource(pair.Value, pair.Key);
+                }
+            }
+            else {
+                packageSource = SerializationHelper.Deserialize<PackageSource>(_registrySettingsManager.ActivePackageSourceString);
+
+                // do the migration here, delete the property in VS registry
+                _registrySettingsManager.ActivePackageSourceString = null;
+            }
+            
             if (packageSource != null) {
                 // this is to guard against corrupted VS user settings store
                 AddPackageSource(packageSource);
