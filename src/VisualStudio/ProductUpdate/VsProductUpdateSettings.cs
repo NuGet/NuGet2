@@ -5,7 +5,6 @@ namespace NuGet.VisualStudio.ProductUpdate {
 
     [Export(typeof(IProductUpdateSettings))]
     public class VsProductUpdateSettings : SettingsManagerBase, IProductUpdateSettings  {
-
         private const string SettingsRoot = "NuGet";
         private const string CheckUpdatePropertyName = "ShouldCheckForUpdate";
 

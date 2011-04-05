@@ -80,8 +80,19 @@ namespace NuGet.Dialog.PackageManagerUI {
         private void AddUpdateBar(IProductUpdateService productUpdateService) {
             var updateBar = new ProductUpdateBar(productUpdateService);
             updateBar.UpdateStarting += ExecutedClose;
-            Grid.SetRow(updateBar, 1);
             LayoutRoot.Children.Add(updateBar);
+            updateBar.SizeChanged += OnUpdateBarSizeChanged;
+        }
+
+        private void OnUpdateBarSizeChanged(object sender, SizeChangedEventArgs e) {
+            // when the update bar appears, we adjust the window position 
+            // so that it doesn't push the main content area down
+            if (e.HeightChanged) {
+                double heightDifference = e.NewSize.Height - e.PreviousSize.Height;
+                if (heightDifference > 0) {
+                    Top = Math.Max(0, Top - heightDifference);
+                }
+            }
         }
 
         private void SetupProviders(DTE dte,

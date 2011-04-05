@@ -5,38 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources"
-             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
-             d:DesignHeight="100" 
-             d:DesignWidth="500">
-    <UserControl.Resources>
-        <Style TargetType="{x:Type Hyperlink}" x:Key="CommonHyperlinkStyle">
-            <Setter  Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ControlLinkTextKey}}" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ControlLinkTextHoverKey}}" />
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="False">
-                    <Setter Property="TextBlock.TextDecorations" Value="{x:Null}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Resources>
-
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0">
     <Border x:Name="UpdateBar" VerticalAlignment="Center" Visibility="Collapsed" Background="{DynamicResource {x:Static vsfx:VsBrushes.InfoBackgroundKey}}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.ActiveBorderKey}}">
-        <TextBlock HorizontalAlignment="Center" Margin="0,6,0,6" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}">
-            <Run x:Name="UpdateMessage" />
-            <Run Text="  " />
-            <Hyperlink Click="OnUpdateLinkClick" Style="{StaticResource CommonHyperlinkStyle}" >
-                <Run Text="{x:Static resx:VsResources.Yes}" />
-            </Hyperlink>
-            <Run Text="  " />
-            <Hyperlink Click="OnDeclineUpdateLinkClick" Style="{StaticResource CommonHyperlinkStyle}" >
-                <Run Text="{x:Static resx:VsResources.No}" />
-            </Hyperlink>
-            <Run Text="  " />
-            <Hyperlink Click="OnDeclineUpdateLinkClickNoRemind" Style="{StaticResource CommonHyperlinkStyle}" >
-                <Run Text="{x:Static resx:VsResources.DoNotRemindAgain}" />
-            </Hyperlink>
-        </TextBlock>
+        <DockPanel Margin="0,4,0,6" LastChildFill="False">
+            <Button Click="OnDeclineUpdateLinkClick" BorderBrush="#00FFFFFF" Background="#00FFFFFF" Margin="8,0,5,0" VerticalAlignment="Center" Width="16" Height="16" DockPanel.Dock="Right" ToolTip="{x:Static resx:VsResources.IgnoreUpgrade}">
+                <Path Stretch="Fill" StrokeThickness="0.5" Stroke="#FF333333" Fill="#FF969696" Data="F1M2.28484E-07,1.33331L1.33333,0 4.00001,2.66669 6.66667,6.10352E-05 8,1.33331 5.33334,4 8,6.66669 6.66667,8 4,5.33331 1.33333,8 1.086E-07,6.66669 2.66667,4 2.28484E-07,1.33331z" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </Button>
+            <Button DockPanel.Dock="Right" Content="{x:Static resx:VsResources.DoNotRemindAgain}" Click="OnDeclineUpdateLinkClickNoRemind" Margin="10,0,0,0" Padding="5,2,5,2" />
+
+            <TextBlock x:Name="UpdateMessage" DockPanel.Dock="Left" TextOptions.TextFormattingMode="Display" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" Margin="5,0,5,0" />
+            <Button DockPanel.Dock="Left" Content="{x:Static resx:VsResources.Upgrade}" Click="OnUpdateLinkClick" Margin="5,0,0,0" Padding="8,2,8,2" />
+        </DockPanel>
     </Border>
 </UserControl>

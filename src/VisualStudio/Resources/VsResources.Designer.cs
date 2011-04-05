@@ -196,7 +196,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t remind me again.
+        ///   Looks up a localized string similar to Don&apos;t show again.
         /// </summary>
         public static string DoNotRemindAgain {
             get {
@@ -259,20 +259,20 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore for now.
+        /// </summary>
+        public static string IgnoreUpgrade {
+            get {
+                return ResourceManager.GetString("IgnoreUpgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already installed..
         /// </summary>
         public static string Log_PackageAlreadyInstalled {
             get {
                 return ResourceManager.GetString("Log_PackageAlreadyInstalled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No.
-        /// </summary>
-        public static string No {
-            get {
-                return ResourceManager.GetString("No", resourceCulture);
             }
         }
         
@@ -367,6 +367,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Upgrade.
+        /// </summary>
+        public static string Upgrade {
+            get {
+                return ResourceManager.GetString("Upgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to generate binding redirects for &apos;{0}&apos;. {1}.
         /// </summary>
         public static string Warning_FailedToAddBindingRedirects {
@@ -381,15 +390,6 @@ namespace NuGet.VisualStudio.Resources {
         public static string Warning_FileAlreadyExists {
             get {
                 return ResourceManager.GetString("Warning_FileAlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Yes.
-        /// </summary>
-        public static string Yes {
-            get {
-                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }

@@ -7,7 +7,6 @@ using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     public partial class ProductUpdateBar : UserControl {
-
         private readonly IProductUpdateService _productUpdateService;
 
         public event EventHandler UpdateStarting = delegate { };

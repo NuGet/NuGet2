@@ -12,6 +12,7 @@ using Task = System.Threading.Tasks.Task;
 using Thread = System.Threading.Thread;
 
 namespace NuGet.VisualStudio {
+
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
 
@@ -94,29 +95,31 @@ namespace NuGet.VisualStudio {
         }
 
         private void ShowUpdatesTabInExtensionManager() {
-            Task.Factory.StartNew(delegate {
+            Task.Factory.StartNew(() => {
                 lock (_showUpdatesLock) {
                     try {
+                        // check if the Extension Manager window is already open
                         AutomationElement extensionManagerWindow = GetExtensionManagerWindow();
                         if (extensionManagerWindow == null) {
-
+                            // if not, invoke the command to bring it up
                             Guid pguidCmdGroup = VSConstants.VsStd2010;
                             object pvaIn = null;
                             _vsUIShell.PostExecCommand(ref pguidCmdGroup, 0xbb8, 0, ref pvaIn);
                         }
+
+                        // it will take a brief moment for the window to show up, polling until it does
                         while (extensionManagerWindow == null) {
                             extensionManagerWindow = GetExtensionManagerWindow();
                             Thread.Sleep(100);
                         }
-                        AutomationElement element2 = FindUpdateProviderTab(extensionManagerWindow);
-                        if (element2 != null) {
-                            (element2.GetCurrentPattern(SelectionItemPattern.Pattern) as SelectionItemPattern).Select();
+
+                        // search for the Updates tab on the window and select it through Automation
+                        AutomationElement updatesTab = FindUpdateProviderTab(extensionManagerWindow);
+                        if (updatesTab != null) {
+                            (updatesTab.GetCurrentPattern(SelectionItemPattern.Pattern) as SelectionItemPattern).Select();
                         }
                     }
                     catch (Exception) {
-                        if (System.Diagnostics.Debugger.IsAttached) {
-                            System.Diagnostics.Debugger.Break();
-                        }
                     }
                 }
             });
@@ -128,16 +131,16 @@ namespace NuGet.VisualStudio {
         }
 
         private AutomationElement FindUpdateProviderTab(AutomationElement extensionManagerWindow) {
-            AutomationElement element = extensionManagerWindow.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.AutomationIdProperty, "ProvidersUid"));
-            if (element == null) {
+            // look for the treeView element hosting the providers tab
+            AutomationElement treeViewElement = extensionManagerWindow.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.AutomationIdProperty, "ProvidersUid"));
+            if (treeViewElement == null) {
                 return null;
             }
 
-            return element.FindAll(TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem)).
+            // pick the Updates tab among the children TreeViewItem instances
+            return treeViewElement.FindAll(TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem)).
                 Cast<AutomationElement>().
-                FirstOrDefault<AutomationElement>(delegate(AutomationElement x) {
-                    return x.Current.AutomationId.StartsWith("Updates");
-                });
+                FirstOrDefault<AutomationElement>(x => x.Current.AutomationId.StartsWith("Updates"));
         }
     }
 }
