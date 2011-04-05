@@ -123,6 +123,9 @@
   <data name="BrowseFolderDialogSelectButton" xml:space="preserve">
     <value>Select</value>
   </data>
+  <data name="ShowInfo_ClearPackageCache" xml:space="preserve">
+    <value>All packages have been cleared from the cache.</value>
+  </data>
   <data name="ShowInfo_ClearRecentPackages" xml:space="preserve">
     <value>All items have been cleared from the recent packages list.</value>
   </data>

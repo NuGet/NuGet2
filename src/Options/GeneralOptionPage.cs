@@ -11,8 +11,8 @@ namespace NuGet.Options {
     [Guid("0F052CF7-BF62-4743-B190-87FA4D49421E")]
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.AutoDual)]
-    public class RecentPackagesPage : DialogPage, IServiceProvider {
-        private RecentPackagesOptionsControl _optionsWindow;
+    public class GeneralOptionPage : DialogPage, IServiceProvider {
+        private GeneralOptionControl _optionsWindow;
 
         //We override the base implementation of LoadSettingsFromStorage and SaveSettingsToStorage
         //since we already provide settings persistance using the SettingsManager. These two APIs
@@ -40,10 +40,10 @@ namespace NuGet.Options {
             OptionsControl.OnApply();
         }
 
-        private RecentPackagesOptionsControl OptionsControl {
+        private GeneralOptionControl OptionsControl {
             get {
                 if (_optionsWindow == null) {
-                    _optionsWindow = new RecentPackagesOptionsControl();
+                    _optionsWindow = new GeneralOptionControl();
                     _optionsWindow.Location = new Point(0, 0);
                 }
 

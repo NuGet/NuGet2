@@ -4,12 +4,12 @@ using System.Windows.Forms;
 using NuGet.VisualStudio;
 
 namespace NuGet.Options {
-    public partial class RecentPackagesOptionsControl : UserControl {
+    public partial class GeneralOptionControl : UserControl {
 
         private IRecentPackageRepository _recentPackageRepository;
         private IProductUpdateSettings _productUpdateSettings;
 
-        public RecentPackagesOptionsControl() {
+        public GeneralOptionControl() {
             InitializeComponent();
 
             _productUpdateSettings = ServiceLocator.GetInstance<IProductUpdateSettings>();
@@ -19,7 +19,7 @@ namespace NuGet.Options {
             Debug.Assert(_recentPackageRepository != null);
         }
 
-        private void ClearButton_Click(object sender, EventArgs e) {
+        private void OnClearRecentPackagesClick(object sender, EventArgs e) {
             _recentPackageRepository.Clear();
             MessageHelper.ShowInfoMessage(Resources.ShowInfo_ClearRecentPackages, Resources.ShowWarning_Title);
         }
@@ -30,6 +30,15 @@ namespace NuGet.Options {
 
         internal void OnApply() {
             _productUpdateSettings.ShouldCheckForUpdate = checkForUpdate.Checked;
+        }
+
+        private void OnClearPackageCacheClick(object sender, EventArgs e) {
+            MachineCache.Default.Clear();
+            MessageHelper.ShowInfoMessage(Resources.ShowInfo_ClearRecentPackages, Resources.ShowWarning_Title);
+        }
+
+        private void OnBrowsePackageCacheClick(object sender, EventArgs e) {
+            Process.Start(MachineCache.Default.Source);
         }
     }
 }

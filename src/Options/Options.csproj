@@ -39,13 +39,13 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="MessageHelper.cs" />
-    <Compile Include="RecentPackagesOptionsControl.cs">
+    <Compile Include="GeneralOptionControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="RecentPackagesOptionsControl.Designer.cs">
-      <DependentUpon>RecentPackagesOptionsControl.cs</DependentUpon>
+    <Compile Include="GeneralOptionControl.Designer.cs">
+      <DependentUpon>GeneralOptionControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="RecentPackagesPage.cs">
+    <Compile Include="GeneralOptionPage.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Resources.Designer.cs">
@@ -65,8 +65,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="RecentPackagesOptionsControl.resx">
-      <DependentUpon>RecentPackagesOptionsControl.cs</DependentUpon>
+    <EmbeddedResource Include="GeneralOptionControl.resx">
+      <DependentUpon>GeneralOptionControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
