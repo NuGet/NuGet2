@@ -41,6 +41,7 @@ namespace NuGet.Options {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.BrowseButton = new System.Windows.Forms.Button();
+            this.packageListToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -117,11 +118,13 @@ namespace NuGet.Options {
             this.PackageSourcesListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tableLayoutPanel1.SetColumnSpan(this.PackageSourcesListBox, 3);
             this.PackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
-            this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.PackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
             this.PackageSourcesListBox.FormattingEnabled = true;
             this.PackageSourcesListBox.Name = "PackageSourcesListBox";
             this.PackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.PackageSourcesListBox_DrawItem);
+            this.PackageSourcesListBox.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.PackageSourcesListBox_MeasureItem);
             this.PackageSourcesListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyUp);
+            this.PackageSourcesListBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseMove);
             this.PackageSourcesListBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseUp);
             // 
             // tableLayoutPanel1
@@ -187,5 +190,6 @@ namespace NuGet.Options {
         private TableLayoutPanel tableLayoutPanel1;
         private TableLayoutPanel tableLayoutPanel2;
         private Button BrowseButton;
+        private ToolTip packageListToolTip;
     }
 }

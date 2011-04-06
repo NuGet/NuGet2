@@ -499,7 +499,7 @@
     <value>GrowAndShrink</value>
   </data>
   <data name="BrowseButton.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Microsoft Sans Serif, 7.8pt, style=Bold</value>
+    <value>Arial, 11pt</value>
   </data>
   <data name="BrowseButton.Location" type="System.Drawing.Point, System.Drawing">
     <value>445, 235</value>
@@ -599,6 +599,12 @@
   </data>
   <data name="&gt;&gt;CopyPackageSourceStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;packageListToolTip.Name" xml:space="preserve">
+    <value>packageListToolTip</value>
+  </data>
+  <data name="&gt;&gt;packageListToolTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>ToolsOptionsControl</value>

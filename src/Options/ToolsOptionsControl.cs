@@ -243,6 +243,7 @@ namespace NuGet.Options {
         private readonly Color SelectionFocusGradientDarkColor = Color.FromArgb(0xC9, 0xE0, 0xFC);
         private readonly Color SelectionFocusBorderColor = Color.FromArgb(0x89, 0xB0, 0xDF);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Drawing.Graphics.MeasureString(System.String,System.Drawing.Font,System.Int32,System.Drawing.StringFormat)")]
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
             // Draw the background of the ListBox control for each item.
             if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
@@ -276,19 +277,59 @@ namespace NuGet.Options {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
+
                 // draw package source as
                 // 1. Name
                 //    Source (italics)
-                int ordinal = e.Index + 1;
-                e.Graphics.DrawString(ordinal + ".", e.Font, foreBrush, e.Bounds,
-                                        drawFormat);
-                var nameBounds = NewBounds(e.Bounds, 16, 0);
+                string ordinal = (e.Index + 1) + ". ";
+                e.Graphics.DrawString(ordinal, e.Font, foreBrush, e.Bounds, drawFormat);
+                SizeF ordinalSize = e.Graphics.MeasureString(ordinal, e.Font, e.Bounds.Width, drawFormat);
+
+                var nameBounds = NewBounds(e.Bounds, (int)ordinalSize.Width, 0);
                 e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
-                var sourceBounds = NewBounds(nameBounds, 0, 16);
+                SizeF nameSize = e.Graphics.MeasureString(ordinal, e.Font, nameBounds.Width, drawFormat);
+
+                var sourceBounds = NewBounds(nameBounds, 0, (int)nameSize.Height);
                 e.Graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
 
                 // If the ListBox has focus, draw a focus rectangle around the selected item.
                 e.DrawFocusRectangle();
+            }
+        }
+
+        private void PackageSourcesListBox_MeasureItem(object sender, MeasureItemEventArgs e) {
+            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count) {
+                return;
+            }
+
+            PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
+            using (StringFormat drawFormat = new StringFormat())
+            using (Font italicFont = new Font(Font, FontStyle.Italic)) {
+                drawFormat.Alignment = StringAlignment.Near;
+                drawFormat.Trimming = StringTrimming.EllipsisCharacter;
+                drawFormat.LineAlignment = StringAlignment.Near;
+
+                SizeF nameLineHeight = e.Graphics.MeasureString(currentItem.Name, Font, e.ItemWidth, drawFormat);
+                SizeF sourceLineHeight = e.Graphics.MeasureString(currentItem.Source, italicFont, e.ItemWidth, drawFormat);
+
+                e.ItemHeight = (int)Math.Ceiling(nameLineHeight.Height + sourceLineHeight.Height);
+            }
+        }
+
+        private void PackageSourcesListBox_MouseMove(object sender, MouseEventArgs e) {
+            int index = PackageSourcesListBox.IndexFromPoint(e.X, e.Y);
+
+            //System.Diagnostics.Debug.WriteLine("mouse move " + index);
+            if (index >= 0 && index < PackageSourcesListBox.Items.Count && e.Y <= PackageSourcesListBox.PreferredHeight) {
+                string newToolTip = ((PackageSource)PackageSourcesListBox.Items[index]).Source;
+                string currentToolTip = packageListToolTip.GetToolTip(PackageSourcesListBox);
+                if (currentToolTip != newToolTip) {
+                    packageListToolTip.SetToolTip(PackageSourcesListBox, newToolTip);
+                }
+            }
+            else {
+                packageListToolTip.SetToolTip(PackageSourcesListBox, null);
+                packageListToolTip.Hide(PackageSourcesListBox);
             }
         }
 
