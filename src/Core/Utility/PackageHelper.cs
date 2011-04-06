@@ -30,6 +30,11 @@ namespace NuGet {
 
             // We still didn't find it so throw
             if (package == null) {
+                if (version != null) {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture,
+                        NuGetResources.UnknownPackageSpecificVersion, packageId, version));
+                }
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.UnknownPackage, packageId));

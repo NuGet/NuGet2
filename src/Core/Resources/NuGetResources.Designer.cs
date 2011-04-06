@@ -547,6 +547,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to find version &apos;{1}&apos; of package &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnknownPackageSpecificVersion {
+            get {
+                return ResourceManager.GetString("UnknownPackageSpecificVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Key &apos;{0}&apos; does not exist..
         /// </summary>
         internal static string UserSettings_KeyDoesNotExist {
