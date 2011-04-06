@@ -103,10 +103,11 @@ namespace NuGet.VisualStudio {
                                                 out appliesToProject);
 
             if (appliesToProject) {
-                projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies);
+                RunProjectActionWithRemoveEvent(projectManager, () => projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies));
             }
-
-            UninstallPackage(package, forceRemove, removeDependencies);
+            else {
+                UninstallPackage(package, forceRemove, removeDependencies);
+            }
         }
 
         public void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {

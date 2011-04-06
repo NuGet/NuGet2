@@ -16,6 +16,28 @@ function Test-RemovingPackageFromProjectDoesNotRemoveIfInUse {
     Assert-SolutionPackage Ninject
 }
 
+function Test-RemovingPackageWithDependencyFromProjectDoesNotRemoveIfInUse {
+    # Arrange
+    $p1 = New-WebApplication
+    $p2 = New-WebApplication
+    
+    $p1 | Install-Package jquery.Validation
+    Assert-Package $p1 jquery.Validation
+    Assert-Package $p1 jquery
+    
+    $p2 | Install-Package jquery.Validation
+    Assert-Package $p1 jquery.Validation
+    Assert-Package $p1 jquery
+    
+    $p1 | Uninstall-Package jquery.Validation
+    $p1 | Uninstall-Package jquery
+    
+    Assert-Null (Get-ProjectPackage $p1 jquery.Validation)
+    Assert-Null (Get-ProjectPackage $p1 jquery)
+    Assert-SolutionPackage jquery.Validation
+    Assert-SolutionPackage jquery
+}
+
 function Test-RemovePackageRemovesPackageFromSolutionIfNotInUse {
     # Arrange
     $p1 = New-WebApplication
