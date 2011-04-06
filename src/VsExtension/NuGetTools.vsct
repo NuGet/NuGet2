@@ -80,6 +80,7 @@
 
         <Button guid="guidToolsGroup" id="idGeneralSettings" priority="0xF200" type="Button">
             <Parent guid="guidToolsGroup" id="idToolsGroup"/>
+            <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
             <Strings>
                 <CommandName>cmdidGeneralSettings</CommandName>
                 <ButtonText>&amp;Package Manager Settings</ButtonText>

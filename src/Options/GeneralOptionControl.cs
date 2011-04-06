@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 using NuGet.VisualStudio;
 
@@ -26,6 +27,7 @@ namespace NuGet.Options {
 
         internal void OnActivated() {
             checkForUpdate.Checked = _productUpdateSettings.ShouldCheckForUpdate;
+            browsePackageCacheButton.Enabled = clearPackageCacheButton.Enabled = Directory.Exists(MachineCache.Default.Source);
         }
 
         internal void OnApply() {
@@ -38,7 +40,9 @@ namespace NuGet.Options {
         }
 
         private void OnBrowsePackageCacheClick(object sender, EventArgs e) {
-            Process.Start(MachineCache.Default.Source);
+            if (Directory.Exists(MachineCache.Default.Source)) {
+                Process.Start(MachineCache.Default.Source);
+            }
         }
     }
 }
