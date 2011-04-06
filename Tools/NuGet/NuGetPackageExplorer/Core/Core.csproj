@@ -85,6 +85,7 @@
     <Compile Include="Repositories\IDataServiceContext.cs" />
     <Compile Include="Repositories\IDataServiceQuery.cs" />
     <Compile Include="Repositories\IPackageRepository.cs" />
+    <Compile Include="Repositories\MachineCache.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
     <Compile Include="Extensions\AssemblyExtensions.cs" />

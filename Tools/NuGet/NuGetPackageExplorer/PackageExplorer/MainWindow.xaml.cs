@@ -172,13 +172,26 @@ namespace PackageExplorer {
             if (result ?? false) {
                 var selectedPackage = dialog.SelectedPackage;
                 if (selectedPackage != null) {
-                    var progressWindow = new DownloadProgressWindow(selectedPackage.DownloadUrl, selectedPackage.ToString()) {
-                        Owner = this
-                    };
+                    // check the machine cache first
+                    string cachePackagePath = MachineCache.Default.FindPackage(selectedPackage.Id, ((IPackage)selectedPackage).Version);
+                    if (cachePackagePath == null) {
+                        // if not in the cache, download it
+                        var progressWindow = new DownloadProgressWindow(
+                            selectedPackage.DownloadUrl, 
+                            selectedPackage.ToString(),
+                            selectedPackage.Id,
+                            ((IPackage)selectedPackage).Version) {
+                            Owner = this
+                        };
 
-                    result = progressWindow.ShowDialog();
-                    if (result ?? false) {
-                        selectedPackage.SetData(progressWindow.DownloadedFilePath);
+                        result = progressWindow.ShowDialog();
+                        if (result ?? false) {
+                            cachePackagePath = progressWindow.DownloadedFilePath;
+                        }
+                    }
+
+                    if (cachePackagePath != null) {
+                        selectedPackage.SetData(cachePackagePath);
                         LoadPackage(selectedPackage, selectedPackage.DownloadUrl.ToString(), PackageType.DataServicePackage);
                     }
                 }
@@ -678,7 +691,7 @@ namespace PackageExplorer {
         private void DownloadAndOpenDataServicePackage(MruItem item) {
             Uri downloadUrl;
             if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
-                var progressWindow = new DownloadProgressWindow(downloadUrl, item.PackageName) { Owner = this };
+                var progressWindow = new DownloadProgressWindow(downloadUrl, item.PackageName, null, null) { Owner = this };
                 var result = progressWindow.ShowDialog();
                 if (result ?? false) {
                     ZipPackage package = new ZipPackage(progressWindow.DownloadedFilePath);

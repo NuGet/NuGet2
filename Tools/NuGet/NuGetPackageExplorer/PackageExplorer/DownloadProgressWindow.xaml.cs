@@ -3,8 +3,8 @@ using System.IO;
 using System.Net;
 using System.Windows;
 using System.Windows.Media;
-using NuGet;
 using System.Windows.Threading;
+using NuGet;
 
 namespace PackageExplorer {
     /// <summary>
@@ -14,8 +14,10 @@ namespace PackageExplorer {
 
         private readonly Uri _downloadUri;
         private WebClient _client;
+        private readonly string _id;
+        private readonly Version _version;
 
-        public DownloadProgressWindow(Uri downloadUri, string packageName) {
+        public DownloadProgressWindow(Uri downloadUri, string packageName, string id, Version version) {
             if (downloadUri == null)
             {
                 throw new ArgumentNullException("downloadUri");
@@ -23,6 +25,8 @@ namespace PackageExplorer {
 
             InitializeComponent();
 
+            _id = id;
+            _version = version;
             Title = "Downloading package " + packageName;
             _downloadUri = downloadUri;
         }
@@ -45,7 +49,7 @@ namespace PackageExplorer {
                         OnError(e.Error);
                     }
                     else {
-                        DownloadedFilePath = SaveResultToTempFile(e.Result);
+                        DownloadedFilePath = SaveResultToMachineCache(e.Result);
                         OnCompleted();
                     }
                 }
@@ -58,10 +62,8 @@ namespace PackageExplorer {
             _client.DownloadDataAsync(uri);
         }
 
-        private string SaveResultToTempFile(byte[] bytes) {
-            string tempFile = Path.GetTempFileName();
-            File.WriteAllBytes(tempFile, bytes);
-            return tempFile;
+        private string SaveResultToMachineCache(byte[] bytes) {
+            return MachineCache.Default.AddPackage(_id, _version, bytes);
         }
 
         private void CancelButtonClicked(object sender, RoutedEventArgs e) {
