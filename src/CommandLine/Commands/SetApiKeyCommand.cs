@@ -12,9 +12,6 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "SetApiKeyCommandSymbolsDescription")]
-        public bool Symbols { get; set; }
-        
         public override void ExecuteCommand() {
             //Frist argument should be the ApiKey
             string apiKey = Arguments[0];
@@ -22,7 +19,7 @@ namespace NuGet.Commands {
             //If the user passed a source use it for the gallery location
             string galleryServerUrl;
             if (String.IsNullOrEmpty(Source)) {
-                galleryServerUrl = Symbols ? GalleryServer.DefaultSymbolServerUrl : GalleryServer.DefaultGalleryServerUrl;
+                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
             }
             else {
                 galleryServerUrl = Source;

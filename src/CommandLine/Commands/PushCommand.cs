@@ -18,14 +18,17 @@ namespace NuGet.Commands {
             // Frist argument should be the package
             string packagePath = Arguments[0];
 
+#if SYMBOL_SOURCE
             // Don't push symbols by default
             bool pushSymbols = false;
+#endif
             string source = null;
 
             if (!String.IsNullOrEmpty(Source)) {
                 source = Source;
             }
             else {
+#if SYMBOL_SOURCE
                 if (packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase)) {
                     source = GalleryServer.DefaultSymbolServerUrl;
                 }
@@ -33,10 +36,14 @@ namespace NuGet.Commands {
                     source = GalleryServer.DefaultGalleryServerUrl;
                     pushSymbols = true;
                 }
+#else
+                source = GalleryServer.DefaultGalleryServerUrl;
+#endif
             }
 
             PushPackage(packagePath, source);
 
+#if SYMBOL_SOURCE
             if (pushSymbols) {
                 // Get the symbol package for this package
                 string symbolPackagePath = GetSymbolsPath(packagePath);
@@ -56,6 +63,7 @@ namespace NuGet.Commands {
                     }
                 }
             }
+#endif
         }
 
         /// <summary>

@@ -457,11 +457,11 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Determines if the debug configuration should be used when building a package from the specified project file..
+        ///   Looks up a localized string similar to Determines what configuration should be used when building a package from the specified project file..
         /// </summary>
-        internal static string PackageCommandDebugDescription {
+        internal static string PackageCommandConfigurationDescription {
             get {
-                return ResourceManager.GetString("PackageCommandDebugDescription", resourceCulture);
+                return ResourceManager.GetString("PackageCommandConfigurationDescription", resourceCulture);
             }
         }
         
