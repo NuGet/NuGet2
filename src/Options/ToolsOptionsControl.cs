@@ -319,7 +319,6 @@ namespace NuGet.Options {
         private void PackageSourcesListBox_MouseMove(object sender, MouseEventArgs e) {
             int index = PackageSourcesListBox.IndexFromPoint(e.X, e.Y);
 
-            //System.Diagnostics.Debug.WriteLine("mouse move " + index);
             if (index >= 0 && index < PackageSourcesListBox.Items.Count && e.Y <= PackageSourcesListBox.PreferredHeight) {
                 string newToolTip = ((PackageSource)PackageSourcesListBox.Items[index]).Source;
                 string currentToolTip = packageListToolTip.GetToolTip(PackageSourcesListBox);

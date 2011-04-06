@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="ClearButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="ClearButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -127,7 +130,7 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="ClearButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 54</value>
+    <value>6, 117</value>
   </data>
   <data name="ClearButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 3, 2</value>
@@ -139,7 +142,7 @@
     <value>214, 27</value>
   </data>
   <data name="ClearButton.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+    <value>3</value>
   </data>
   <data name="ClearButton.Text" xml:space="preserve">
     <value>&amp;Clear Recent Packages List</value>
@@ -154,25 +157,28 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;ClearButton.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>9</value>
   </data>
+  <metadata name="checkForUpdate.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <data name="checkForUpdate.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="checkForUpdate.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 15</value>
+    <value>6, 42</value>
   </data>
   <data name="checkForUpdate.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
   </data>
   <data name="checkForUpdate.Size" type="System.Drawing.Size, System.Drawing">
-    <value>140, 21</value>
+    <value>227, 21</value>
   </data>
   <data name="checkForUpdate.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
   <data name="checkForUpdate.Text" xml:space="preserve">
-    <value>Check for &amp;Update</value>
+    <value>Automatically Check for &amp;Update</value>
   </data>
   <data name="&gt;&gt;checkForUpdate.Name" xml:space="preserve">
     <value>checkForUpdate</value>
@@ -184,13 +190,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;checkForUpdate.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>8</value>
   </data>
+  <metadata name="clearPackageCacheButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <data name="clearPackageCacheButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
+  <data name="clearPackageCacheButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
+  </data>
   <data name="clearPackageCacheButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 103</value>
+    <value>6, 206</value>
   </data>
   <data name="clearPackageCacheButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -199,10 +211,10 @@
     <value>11, 0, 11, 0</value>
   </data>
   <data name="clearPackageCacheButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>183, 27</value>
+    <value>176, 27</value>
   </data>
   <data name="clearPackageCacheButton.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
+    <value>5</value>
   </data>
   <data name="clearPackageCacheButton.Text" xml:space="preserve">
     <value>Clear &amp;Package Cache</value>
@@ -217,13 +229,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;clearPackageCacheButton.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>7</value>
   </data>
+  <metadata name="browsePackageCacheButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <data name="browsePackageCacheButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
+  <data name="browsePackageCacheButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
+  </data>
   <data name="browsePackageCacheButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>195, 103</value>
+    <value>190, 206</value>
   </data>
   <data name="browsePackageCacheButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -232,10 +250,10 @@
     <value>11, 0, 11, 0</value>
   </data>
   <data name="browsePackageCacheButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>103, 27</value>
+    <value>98, 27</value>
   </data>
   <data name="browsePackageCacheButton.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
+    <value>6</value>
   </data>
   <data name="browsePackageCacheButton.Text" xml:space="preserve">
     <value>&amp;Browse...</value>
@@ -250,9 +268,192 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;browsePackageCacheButton.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <metadata name="RecentPackagesHeader.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="RecentPackagesHeader.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="RecentPackagesHeader.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="RecentPackagesHeader.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 88</value>
+  </data>
+  <data name="RecentPackagesHeader.Size" type="System.Drawing.Size, System.Drawing">
+    <value>119, 17</value>
+  </data>
+  <data name="RecentPackagesHeader.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="RecentPackagesHeader.Text" xml:space="preserve">
+    <value>Recent Packages</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeader.Name" xml:space="preserve">
+    <value>RecentPackagesHeader</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeader.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeader.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeader.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <metadata name="RecentPackagesHeaderDivider.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="RecentPackagesHeaderDivider.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <data name="RecentPackagesHeaderDivider.Location" type="System.Drawing.Point, System.Drawing">
+    <value>125, 97</value>
+  </data>
+  <data name="RecentPackagesHeaderDivider.Size" type="System.Drawing.Size, System.Drawing">
+    <value>398, 2</value>
+  </data>
+  <data name="RecentPackagesHeaderDivider.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeaderDivider.Name" xml:space="preserve">
+    <value>RecentPackagesHeaderDivider</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeaderDivider.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeaderDivider.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;RecentPackagesHeaderDivider.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <metadata name="UpdateHeaderDivider.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="UpdateHeaderDivider.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <data name="UpdateHeaderDivider.Location" type="System.Drawing.Point, System.Drawing">
+    <value>60, 20</value>
+  </data>
+  <data name="UpdateHeaderDivider.Size" type="System.Drawing.Size, System.Drawing">
+    <value>463, 2</value>
+  </data>
+  <data name="UpdateHeaderDivider.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeaderDivider.Name" xml:space="preserve">
+    <value>UpdateHeaderDivider</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeaderDivider.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeaderDivider.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeaderDivider.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <metadata name="UpdateHeader.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="UpdateHeader.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="UpdateHeader.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="UpdateHeader.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 11</value>
+  </data>
+  <data name="UpdateHeader.Size" type="System.Drawing.Size, System.Drawing">
+    <value>54, 17</value>
+  </data>
+  <data name="UpdateHeader.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
+  <data name="UpdateHeader.Text" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeader.Name" xml:space="preserve">
+    <value>UpdateHeader</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeader.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeader.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;UpdateHeader.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <metadata name="PackagesCacheHeaderDivider.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="PackagesCacheHeaderDivider.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <data name="PackagesCacheHeaderDivider.Location" type="System.Drawing.Point, System.Drawing">
+    <value>120, 184</value>
+  </data>
+  <data name="PackagesCacheHeaderDivider.Size" type="System.Drawing.Size, System.Drawing">
+    <value>403, 2</value>
+  </data>
+  <data name="PackagesCacheHeaderDivider.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeaderDivider.Name" xml:space="preserve">
+    <value>PackagesCacheHeaderDivider</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeaderDivider.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeaderDivider.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeaderDivider.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <metadata name="PackagesCacheHeader.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="PackagesCacheHeader.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="PackagesCacheHeader.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="PackagesCacheHeader.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 175</value>
+  </data>
+  <data name="PackagesCacheHeader.Size" type="System.Drawing.Size, System.Drawing">
+    <value>114, 17</value>
+  </data>
+  <data name="PackagesCacheHeader.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="PackagesCacheHeader.Text" xml:space="preserve">
+    <value>Packages Cache</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeader.Name" xml:space="preserve">
+    <value>PackagesCacheHeader</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeader.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeader.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PackagesCacheHeader.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="$this.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
@@ -262,7 +463,7 @@
     <value>3, 2, 3, 2</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>531, 151</value>
+    <value>531, 261</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>GeneralOptionControl</value>
