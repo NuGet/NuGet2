@@ -36,12 +36,13 @@ namespace NuGet.Commands {
         private const string PackagesFolder = "packages";
         private const string TransformFileExtension = ".transform";
 
-        public ProjectFactory(string path) {
-            _project = new Project(path);
+        public ProjectFactory(string path)
+            : this(new Project(path)) {
         }
 
         public ProjectFactory(Project project) {
             _project = project;
+            Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         private string TargetPath {
@@ -75,7 +76,7 @@ namespace NuGet.Commands {
 
         public bool IncludeSymbols { get; set; }
 
-        public bool Debug { get; set; }
+        public Dictionary<string, string> Properties { get; private set; }
 
         public bool IsTool { get; set; }
 
@@ -111,17 +112,12 @@ namespace NuGet.Commands {
                 ExtractMetadataFromProject(builder);
             }
 
-            bool anyNuspecFiles = builder.Files.Any();
+            // Add output files
+            AddOutputFiles(builder);
 
-            if (!anyNuspecFiles || IncludeSymbols) {
-                // Add output files
-                AddOutputFiles(builder);
-            }
 
-            if (!anyNuspecFiles) {
-                // Add content files
-                AddFiles(builder, ContentItemType, ContentFolder);
-            }
+            // Add content files
+            AddFiles(builder, ContentItemType, ContentFolder);
 
 
             // Add sources if this is a symbol package
@@ -146,16 +142,8 @@ namespace NuGet.Commands {
         }
 
         private void BuildProject() {
-            var properties = new Dictionary<string, string>();
-            if (!Debug) {
-                properties["Configuration"] = "Release";
-            }
-            else {
-                properties["Configuration"] = "Debug";
-            }
-
             var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile);
-            BuildRequestData requestData = new BuildRequestData(_project.FullPath, properties, _project.ToolsVersion, new string[0], null);
+            BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
             BuildParameters parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
             parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;

@@ -384,8 +384,8 @@
   <data name="FailedToBuildProject" xml:space="preserve">
     <value>Failed to build '{0}'.</value>
   </data>
-  <data name="PackageCommandDebugDescription" xml:space="preserve">
-    <value>Determines if the debug configuration should be used when building a package from the specified project file.</value>
+  <data name="PackageCommandConfigurationDescription" xml:space="preserve">
+    <value>Determines what configuration should be used when building a package from the specified project file.</value>
   </data>
   <data name="PackageCommandNoSymbolsDescription" xml:space="preserve">
     <value>Determines if sources and symbols should be excluded in this package. Only valid when building a package from a project.</value>

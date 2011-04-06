@@ -11,7 +11,7 @@ namespace NuGet.Commands {
     public class SetApiKeyCommand : Command {
         [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-        
+
         public override void ExecuteCommand() {
             //Frist argument should be the ApiKey
             string apiKey = Arguments[0];

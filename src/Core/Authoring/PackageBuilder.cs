@@ -237,7 +237,7 @@ namespace NuGet {
 
         private void WriteFiles(Package package) {
             // Add files that might not come from expanding files on disk
-            foreach (IPackageFile file in Files) {
+            foreach (IPackageFile file in new HashSet<IPackageFile>(Files)) {
                 using (Stream stream = file.GetStream()) {
                     CreatePart(package, file.Path, stream);
                 }

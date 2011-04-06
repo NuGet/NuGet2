@@ -38,16 +38,18 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandVersionDescription")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandDebugDescription")]
-        public bool Debug { get; set; }
+        [Option(typeof(NuGetResources), "PackageCommandConfigurationDescription")]
+        public string Configuration { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandExcludeDescription")]
         public ICollection<string> Exclude {
             get { return _excludes; }
         }
 
+#if SYMBOL_SOURCE
         [Option(typeof(NuGetResources), "PackageCommandNoSymbolsDescription")]
         public bool NoSymbols { get; set; }
+#endif
 
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
@@ -203,16 +205,19 @@ namespace NuGet.Commands {
 
         private void BuildFromProjectFile(string path) {
             var factory = new ProjectFactory(path) {
-                Debug = Debug,
                 IsTool = Tool,
                 Logger = Console
             };
+
+            // Specify the configuration
+            factory.Properties.Add("Configuration", Configuration ?? "Release");
 
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder();
             // Build the main package
             BuildPackage(path, mainPackageBuilder);
 
+#if SYMBOL_SOURCE
             // If we're excluding symbols then do nothing else
             if (NoSymbols) {
                 return;
@@ -226,6 +231,7 @@ namespace NuGet.Commands {
             // Get the file name for the sources package and build it
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(path, symbolsBuilder, outputPath);
+#endif
         }
 
         private string GetInputFile() {
