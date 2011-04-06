@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -9,13 +10,16 @@ using NuGet.Dialog.Providers;
 namespace NuGet.Dialog.Extensions {
     internal static class QueryExtensions {
         internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, PackageSortDescriptor descriptor, params Type[] knownTypes) {
-            return source.SortBy<T>(descriptor.Name, descriptor.Direction, knownTypes);
+            var sortExpression = GetSortExpression(source, descriptor.SortProperties, descriptor.Direction, knownTypes);
+            return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(sortExpression);
         }
 
-        internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, string propertyName, ListSortDirection direction, params Type[] knownTypes) {
-            // Get the property being sorted on
-            PropertyInfo propertyInfo = GetProperty(source.ElementType, propertyName, knownTypes);
+        internal static MethodCallExpression GetSortExpression<T>(this IQueryable<T> source, IEnumerable<string> sortProperties, ListSortDirection direction, params Type[] knownTypes) {
+            Debug.Assert(sortProperties != null && sortProperties.Any());
 
+            // Get the property being sorted on
+            PropertyInfo propertyInfo = GetProperty(source.ElementType, sortProperties.First(), knownTypes);
+            
             Debug.Assert(propertyInfo != null, "Unable to find property");
 
             // Make a parameter expression with the element type
@@ -29,22 +33,32 @@ namespace NuGet.Dialog.Extensions {
             }
 
             // Get the member access expression 
-            MemberExpression property = Expression.Property(convertExpression, propertyInfo);
+            Expression expression = Expression.Property(convertExpression, propertyInfo);
 
-            // Build the expression p => p.PropertyName
-            LambdaExpression lambda = Expression.Lambda(property, parameter);
+            MethodInfo concatMethod = typeof(string).GetMethod("Concat", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(string), typeof(string) }, null);
+            // Build the expression p => p.PropertyName1 + p.PropertyName2 if the IEnumerable contains more than one item.
+            foreach (var item in sortProperties.Skip(1)) {
+                propertyInfo = GetProperty(source.ElementType, item);
+                Debug.Assert(propertyInfo.PropertyType == typeof(string), "Chaining only works for strings");
+                expression = Expression.Call(concatMethod,
+                    expression,
+                    Expression.Property(convertExpression, propertyInfo)
+                );
+            }
+            
+            // Build the expression p => p.PropertyName or p => String.Concat(p.Property1, p.Property2, ... )
+            LambdaExpression lambda = Expression.Lambda(expression, parameter);
 
             // Pick a method based on which way we're ordering
             string methodName = direction == ListSortDirection.Ascending ? "OrderBy" : "OrderByDescending";
 
-            Expression methodCallExpression = Expression.Call(typeof(Queryable),
-                                                              methodName,
-                                                              new Type[] { source.ElementType, property.Type },
-                                                              source.Expression,
-                                                              Expression.Quote(lambda));
-
-            return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(methodCallExpression);
+            return Expression.Call(typeof(Queryable),
+                        methodName,
+                        new Type[] { source.ElementType, expression.Type },
+                        source.Expression,
+                        Expression.Quote(lambda));
         }
+
 
         private static PropertyInfo GetProperty(Type type, string propertyName, params Type[] knownTypes) {
             // Try to get the property from the type

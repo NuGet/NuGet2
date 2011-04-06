@@ -73,6 +73,7 @@
     <Compile Include="PackagesTreeNodeBaseTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PackageItemTest.cs" />
+    <Compile Include="QueryExtensionsTest.cs" />
     <Compile Include="SimpleTreeNodeTest.cs" />
     <Compile Include="UpdatesProviderTest.cs" />
     <Compile Include="UpdatesTreeNodeTest.cs" />

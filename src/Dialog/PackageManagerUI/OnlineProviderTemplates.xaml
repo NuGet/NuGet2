@@ -100,7 +100,13 @@
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl Grid.Column="1" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
                 </Grid>
-                
+
+                <!-- Id -->
+                <StackPanel Style="{StaticResource DetailMetadataStyle}">
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding Id}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                </StackPanel>
+
                 <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />

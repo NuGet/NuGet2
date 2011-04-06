@@ -1,19 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
     public class PackageSortDescriptor : IVsSortDescriptor {
-        public PackageSortDescriptor(string displayName, string name)
-            : this(displayName, name, ListSortDirection.Ascending) {
+        public PackageSortDescriptor(string displayName, string sortProperties, ListSortDirection direction)
+            : this(displayName, new[] { sortProperties }, direction) {
         }
 
-        public PackageSortDescriptor(string displayName, string name, ListSortDirection direction) {
-            if (name == null) {
-                throw new ArgumentNullException("name");
+        public PackageSortDescriptor(string displayName, IEnumerable<string> sortProperties, ListSortDirection direction) {
+            if (sortProperties == null || !sortProperties.Any()) {
+                throw new ArgumentNullException("sortProperties");
             }
             DisplayName = displayName;
-            Name = name;
+            SortProperties = sortProperties;
             Direction = direction;
         }
 
@@ -22,7 +24,7 @@ namespace NuGet.Dialog.Providers {
             private set;
         }
 
-        public string Name {
+        public IEnumerable<string> SortProperties {
             get;
             private set;
         }
@@ -32,13 +34,18 @@ namespace NuGet.Dialog.Providers {
             private set;
         }
 
+        public string Name {
+            get { return DisplayName; }
+        }
+
+
         public int Compare(object x, object y) {
             throw new NotSupportedException();
         }
 
         public override string ToString() {
-            return DisplayName ?? Name;
+            return DisplayName ?? String.Join(" ", SortProperties);
         }
-    }
 
+    }
 }

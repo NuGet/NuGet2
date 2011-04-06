@@ -46,9 +46,11 @@ namespace NuGet.Dialog.Test {
 
             // Assert
             Assert.AreEqual(2, descriptors.Count);
-            Assert.AreEqual("Id", descriptors[0].Name);
+            Assert.AreEqual("Title", descriptors[0].SortProperties.First());
+            Assert.AreEqual("Id", descriptors[0].SortProperties.Last());
             Assert.AreEqual(ListSortDirection.Ascending, descriptors[0].Direction);
-            Assert.AreEqual("Id", descriptors[1].Name);
+            Assert.AreEqual("Title", descriptors[1].SortProperties.First());
+            Assert.AreEqual("Id", descriptors[1].SortProperties.Last());
             Assert.AreEqual(ListSortDirection.Descending, descriptors[1].Direction);
         }
 
