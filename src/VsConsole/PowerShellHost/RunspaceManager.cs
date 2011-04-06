@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
@@ -12,6 +12,7 @@ using NuGet.VisualStudio.Resources;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class RunspaceManager : IRunspaceManager {
+        private const string PSModulePathEnvVariable = "PSModulePath";
 
         // Cache Runspace by name. There should be only one Runspace instance created though.
         private readonly ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
@@ -24,6 +25,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName) {
+            // set up powershell environment variable for module search path
+            // ensuring our own Modules folder is searched before system or user-level 
+            AddPowerShellModuleSearchPath();
+
             Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
             LoadStartupScripts(runspace.Item1);
             LoadProfilesIntoRunspace(runspace.Item1);
@@ -68,6 +73,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             Runspace.DefaultRunspace = runspace;
 
             return Tuple.Create(runspace, host);
+        }
+
+        private static void AddPowerShellModuleSearchPath() {
+            string psModulePath = Environment.GetEnvironmentVariable(PSModulePathEnvVariable) ?? String.Empty;
+            string extensionRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // EnvironmentPermission demand?
+            Environment.SetEnvironmentVariable(PSModulePathEnvVariable,
+                                               String.Format("{0}\\Modules\\;{1}", extensionRoot, psModulePath),
+                                               EnvironmentVariableTarget.Process);
         }
 
         private static void LoadStartupScripts(Runspace runspace) {
