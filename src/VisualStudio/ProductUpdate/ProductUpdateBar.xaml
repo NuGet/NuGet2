@@ -13,8 +13,8 @@
             </Button>
             <Button DockPanel.Dock="Right" Content="{x:Static resx:VsResources.DoNotRemindAgain}" Click="OnDeclineUpdateLinkClickNoRemind" Margin="10,0,0,0" Padding="5,2,5,2" />
 
-            <TextBlock x:Name="UpdateMessage" DockPanel.Dock="Left" TextOptions.TextFormattingMode="Display" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" Margin="5,0,5,0" />
-            <Button DockPanel.Dock="Left" Content="{x:Static resx:VsResources.Upgrade}" Click="OnUpdateLinkClick" Margin="5,0,0,0" Padding="8,2,8,2" />
+            <TextBlock Text="{x:Static resx:VsResources.AskForUpdateMessage}" DockPanel.Dock="Left" TextOptions.TextFormattingMode="Display" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" Margin="5,0,5,0" />
+            <Button DockPanel.Dock="Left" Content="{x:Static resx:VsResources.ShowDetails}" Click="OnUpdateLinkClick" Margin="5,0,0,0" Padding="8,2,8,2" />
         </DockPanel>
     </Border>
 </UserControl>

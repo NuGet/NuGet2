@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuGet {0} is now available. You are currently using NuGet {1}..
+        ///   Looks up a localized string similar to A new version of NuGet Package Manager is available..
         /// </summary>
         public static string AskForUpdateMessage {
             get {
@@ -331,6 +331,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show Details.
+        /// </summary>
+        public static string ShowDetails {
+            get {
+                return ResourceManager.GetString("ShowDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to locate the solution directory. Please ensure that the solution has been saved..
         /// </summary>
         public static string SolutionDirectoryNotAvailable {
@@ -363,15 +372,6 @@ namespace NuGet.VisualStudio.Resources {
         public static string UnknownPackageInProject {
             get {
                 return ResourceManager.GetString("UnknownPackageInProject", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Upgrade.
-        /// </summary>
-        public static string Upgrade {
-            get {
-                return ResourceManager.GetString("Upgrade", resourceCulture);
             }
         }
         

@@ -48,7 +48,6 @@ namespace NuGet.VisualStudio {
 
         public void ShowUpdateBar(Version currentVersion, Version newVersion) {
             if (IsVisible) {
-                UpdateMessage.Text = String.Format(CultureInfo.CurrentCulture, VsResources.AskForUpdateMessage, newVersion, currentVersion);
                 UpdateBar.Visibility = Visibility.Visible;
             }
         }

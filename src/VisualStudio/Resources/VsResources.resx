@@ -217,10 +217,10 @@
     <value>'{0}' already exists. Skipping...</value>
   </data>
   <data name="AskForUpdateMessage" xml:space="preserve">
-    <value>NuGet {0} is now available. You are currently using NuGet {1}.</value>
+    <value>A new version of NuGet Package Manager is available.</value>
   </data>
-  <data name="Upgrade" xml:space="preserve">
-    <value>Upgrade</value>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>Show Details</value>
   </data>
   <data name="DoNotRemindAgain" xml:space="preserve">
     <value>Don't show again</value>
