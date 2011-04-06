@@ -375,6 +375,38 @@ public class Cl_{0} {{
         }
 
         [TestMethod]
+        public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced() {
+            // Arrange                        
+            string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.0.nupkg";
+            WriteAssemblyInfo("ProjectWithAssembliesInOutputPath",
+                               "1.3.0.0",
+                               "David2",
+                               "Project with nuspec that has files");
+
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            WriteProjectFile(@"bin\Release\Fake.dll", "Some fakedll");
+
+            CreateProject("ProjectWithAssembliesInOutputPath", compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "ProjectWithAssembliesInOutputPath.csproj" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithAssembliesInOutputPath.dll" });
+            Assert.AreEqual("ProjectWithAssembliesInOutputPath", package.Id);
+            Assert.AreEqual(new Version("1.3.0.0"), package.Version);
+            Assert.AreEqual("David2", package.Authors.First());
+            Assert.AreEqual("Project with nuspec that has files", package.Description);
+        }
+
+        [TestMethod]
         public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
