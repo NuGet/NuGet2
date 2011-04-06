@@ -50,15 +50,6 @@ namespace NuGet.Commands {
             set;
         }
 
-        private string OutputPath {
-            get {
-                if (TargetPath == null) {
-                    return null;
-                }
-                return Path.GetDirectoryName(TargetPath.Substring(_project.DirectoryPath.Length).TrimEnd(Path.DirectorySeparatorChar));
-            }
-        }
-
         private FrameworkName TargetFramework {
             get {
                 if (_frameworkName == null) {
@@ -96,7 +87,7 @@ namespace NuGet.Commands {
 
             BuildProject();
 
-            Logger.Log(MessageLevel.Info, NuGetResources.PackagingFilesFromOutputPath, OutputPath);
+            Logger.Log(MessageLevel.Info, NuGetResources.PackagingFilesFromOutputPath, Path.GetDirectoryName(TargetPath));
 
             var builder = new PackageBuilder();
 
@@ -197,8 +188,10 @@ namespace NuGet.Commands {
 
             string projectOutputDirectory = Path.GetDirectoryName(targetPath);
 
+            string targetFileName = Path.GetFileNameWithoutExtension(targetPath);
+
             // By default we add all files in the project's output directory
-            foreach (var file in Directory.GetFiles(projectOutputDirectory)) {
+            foreach (var file in Directory.GetFiles(projectOutputDirectory, targetFileName + "*")) {
                 string extension = Path.GetExtension(file).ToLowerInvariant();
 
                 // Only look at files we care about
@@ -256,7 +249,6 @@ namespace NuGet.Commands {
                 if (repository != null) {
                     IPackage package = repository.FindPackage(reference.Id, reference.Version);
                     if (package != null) {
-                        RemovePackageFiles(builder, package);
                         transformFiles.AddRange(GetTransformFiles(package));
                     }
                 }
@@ -293,18 +285,6 @@ namespace NuGet.Commands {
 
         private static bool IsTransformFile(IPackageFile file) {
             return Path.GetExtension(file.Path).Equals(TransformFileExtension, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private void RemovePackageFiles(PackageBuilder builder, IPackage package) {
-            IEnumerable<IPackageAssemblyReference> compatibleAssemblies;
-            if (VersionUtility.TryGetCompatibleItems(TargetFramework, package.AssemblyReferences, out compatibleAssemblies)) {
-                var assemblies = new HashSet<string>(compatibleAssemblies.Select(a => Path.GetFileNameWithoutExtension(a.Path)));
-                var filesToRemove = builder.Files.Where(f => assemblies.Contains(Path.GetFileNameWithoutExtension(f.Path))).ToList();
-
-                foreach (var item in filesToRemove) {
-                    builder.Files.Remove(item);
-                }
-            }
         }
 
         private IPackageRepository GetPackagesRepository(string path) {
