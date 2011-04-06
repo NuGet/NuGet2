@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -81,7 +82,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
             // EnvironmentPermission demand?
             Environment.SetEnvironmentVariable(PSModulePathEnvVariable,
-                                               String.Format("{0}\\Modules\\;{1}", extensionRoot, psModulePath),
+                                               String.Format(CultureInfo.InvariantCulture, "{0}\\Modules\\;{1}", extensionRoot, psModulePath),
                                                EnvironmentVariableTarget.Process);
         }
 
