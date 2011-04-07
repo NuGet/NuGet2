@@ -7,10 +7,17 @@ using System.Reflection;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Common;
 using NuGet.Commands;
+using System.IO;
 
 namespace NuGet {
     internal static class CommandLineUtility {
         private static Dictionary<string, string> _cachedResourceStrings;
+
+        private static readonly HashSet<string> _supportedProjectExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
+            ".csproj",
+            ".vbproj",
+            ".fsproj",
+        };
 
         public readonly static string ApiKeysSectionName = "apikeys";
 
@@ -121,6 +128,22 @@ namespace NuGet {
                 return NuGetResources.DefaultSymbolServer;
             }
             return "'" + source + "'";
+        }
+
+        public static bool TryGetProjectFile(out string projectFile) {
+            projectFile = null;
+            var files = Directory.GetFiles(Directory.GetCurrentDirectory());
+
+            var candidates = files.Where(file => _supportedProjectExtensions.Contains(Path.GetExtension(file)))
+                                  .ToList();
+
+            switch (candidates.Count) {
+                case 1:
+                    projectFile = candidates.Single();
+                    break;
+            }
+
+            return !String.IsNullOrEmpty(projectFile);
         }
     }
 }
