@@ -58,7 +58,8 @@ function global:Run-Test {
     
     $testRunId = New-Guid
     $testRunOutputPath = Join-Path $testOutputPath $testRunId
-    $testRunResultsFile = Join-Path $testRunOutputPath "Results.html"
+    $testRunResultsFile = Join-Path $testRunOutputPath Results.html
+    $testLogFile = Join-Path $testRunOutputPath log.txt
     
     # Create the output folder
     mkdir $testRunOutputPath | Out-Null
@@ -99,6 +100,9 @@ function global:Run-Test {
             $name = $_.Name.Substring(5)
             
             "Running Test $name..."
+
+            # Write to log file as we run tests
+            "Running Test $name..." >> $testLogFile
             
             $repositoryPath = Join-Path $testRepositoryPath $name
             $values = @{

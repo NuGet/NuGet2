@@ -43,6 +43,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandParser.cs" />
     <Compile Include="DebugConstants.cs" Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' ">
+        <InProject>false</InProject>
     </Compile>
     <Compile Include="IRunspaceManager.cs" />
     <Compile Include="ProjectExtensions.cs">
