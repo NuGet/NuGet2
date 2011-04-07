@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -9,7 +10,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using NuGet;
@@ -17,7 +17,6 @@ using PackageExplorer.Properties;
 using PackageExplorerViewModel;
 using PackageExplorerViewModel.Types;
 using StringResources = PackageExplorer.Resources.Resources;
-using System.Globalization;
 
 namespace PackageExplorer {
     /// <summary>
