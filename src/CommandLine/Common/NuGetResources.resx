@@ -426,4 +426,7 @@
   <data name="SymbolServerNotConfigured" xml:space="preserve">
     <value>Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'nuget.exe SetApiKey -Symbols [your API key from http://www.symbolsource.org]'.</value>
   </data>
+  <data name="SpecCommandUsageSummary" xml:space="preserve">
+    <value>[packageid]</value>
+  </data>
 </root>

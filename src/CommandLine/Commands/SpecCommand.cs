@@ -6,7 +6,7 @@ using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 0)]
+    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "SpecCommandUsageSummary")]
     public class SpecCommand : Command {
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
         public string AssemblyPath {
@@ -27,7 +27,7 @@ namespace NuGet.Commands {
                 AssemblyMetadataExtractor.ExtractMetadata(builder, path);
             }
             else {
-                builder.Id = "Package";
+                builder.Id = Arguments.Any() ? Arguments[0] : "Package";
                 builder.Version = new Version("1.0");
             }
 
@@ -44,7 +44,7 @@ namespace NuGet.Commands {
             builder.Tags.Add("Tag2");
             builder.Dependencies.Add(new PackageDependency("SampleDependency", VersionUtility.ParseVersionSpec("1.0")));
 
-            string nuspecFile = builder.Id + ".nuspec";
+            string nuspecFile = builder.Id + Constants.ManifestExtension;
 
             // Skip the creation if the file exists and force wasn't specified
             if (File.Exists(nuspecFile) && !Force) {

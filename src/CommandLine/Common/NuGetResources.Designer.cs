@@ -844,6 +844,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [packageid].
+        /// </summary>
+        internal static string SpecCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("SpecCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;nuget.exe SetApiKey -Symbols [your API key from http://www.symbolsource.org]&apos;..
         /// </summary>
         internal static string SymbolServerNotConfigured {
