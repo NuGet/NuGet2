@@ -24,6 +24,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                 ReportError(e.PipelineStateInfo.Reason);
                             }
 
+                            OnExecuteCommandEnd();
                             ExecuteEnd.Raise(this, EventArgs.Empty);
                             break;
                     }

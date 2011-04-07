@@ -13,6 +13,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             SetSyncModeOnHost(true);
             try {
                 Runspace.Invoke(fullCommand, inputs, true);
+                OnExecuteCommandEnd();
             }
             catch (RuntimeException e) {
                 ReportError(e.ErrorRecord);

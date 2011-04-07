@@ -72,7 +72,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A-215C-4327-8DAA-AB00C59EF489}"
 	ProjectSection(SolutionItems) = preProject
-		test\EndToEnd\tests\CurrentLocationTest.ps1 = test\EndToEnd\tests\CurrentLocationTest.ps1
 		test\EndToEnd\tests\GetPackageTest.ps1 = test\EndToEnd\tests\GetPackageTest.ps1
 		test\EndToEnd\tests\GetProjectTest.ps1 = test\EndToEnd\tests\GetProjectTest.ps1
 		test\EndToEnd\tests\install.ps1 = test\EndToEnd\tests\install.ps1

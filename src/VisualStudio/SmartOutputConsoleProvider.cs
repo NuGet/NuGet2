@@ -43,8 +43,8 @@ namespace NuGet.VisualStudio {
                 }
             }
 
-            public bool IsInteractive {
-                get { return _baseConsole.IsInteractive; }
+            public bool ShowDisclaimerHeader {
+                get { return _baseConsole.ShowDisclaimerHeader; }
             }
 
             public IConsoleDispatcher Dispatcher {

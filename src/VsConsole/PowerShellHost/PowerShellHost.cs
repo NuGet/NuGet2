@@ -20,9 +20,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
 
+        private string _targetDir;
+        private bool _updateWorkingDirectoryPending;
         private IConsole _activeConsole;
         private Runspace _runspace;
-        private NuGetPSHost _myHost;
+        private NuGetPSHost _nugetHost;
         // indicates whether this host has been initialized. 
         // null = not initilized, true = initialized successfully, false = initialized unsuccessfully
         private bool? _initialized;
@@ -54,8 +56,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
             set {
                 _activeConsole = value;
-                if (_myHost != null) {
-                    _myHost.ActiveConsole = value;
+                if (_nugetHost != null) {
+                    _nugetHost.ActiveConsole = value;
                 }
             }
         }
@@ -127,7 +129,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             ActiveConsole = console;
 
             if (_initialized.HasValue) {
-                if (_initialized.Value && console.IsInteractive) {
+                if (_initialized.Value && console.ShowDisclaimerHeader) {
                     DisplayDisclaimerAndHelpText();
                 }
             }
@@ -135,23 +137,24 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 try {
                     Tuple<Runspace, NuGetPSHost> tuple = _runspaceManager.GetRunspace(console, _name);
                     _runspace = tuple.Item1;
-                    _myHost = tuple.Item2;
+                    _nugetHost = tuple.Item2;
 
                     _initialized = true;
 
                     // when initializing host from the dialog, we don't want to execute existing init scripts in the solution, if any.
-                    if (console.IsInteractive) {
+                    if (console.ShowDisclaimerHeader) {
                         DisplayDisclaimerAndHelpText();
-                    
-                    ExecuteInitScripts();
-                        _solutionManager.SolutionOpened += (o, e) => {
-                            ExecuteInitScripts();
-                            UpdateWorkingDirectory();
-                        };
+                    }
 
+                    _solutionManager.SolutionOpened += (o, e) => {
                         UpdateWorkingDirectory();
+                        ExecuteInitScripts();
+                    };
 
-                        _solutionManager.SolutionClosed += (o, e) => UpdateWorkingDirectory();
+                    UpdateWorkingDirectory();
+                    ExecuteInitScripts();
+
+                    _solutionManager.SolutionClosed += (o, e) => UpdateWorkingDirectory();
                 }
                 catch (Exception ex) {
                     // catch all exception as we don't want it to crash VS
@@ -174,7 +177,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 targetDir = "$Env:USERPROFILE";
             }
 
-            Runspace.Invoke("Set-Location " + targetDir, null, false);
+            if (Runspace.RunspaceAvailability == RunspaceAvailability.Available) {
+                Runspace.ChangePSDirectory(targetDir);
+            }
+            else {
+                // If we are in the middle of executing some other scripts, which triggerred the solution to be opened/closed, then we 
+                // can't execute Set-Location here because of reentrancy policy. So we save the location and change it later when the 
+                // executing command finishes running.
+                _targetDir = targetDir;
+                _updateWorkingDirectoryPending = true;
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -228,6 +240,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 throw new ArgumentNullException("command");
             }
 
+            _updateWorkingDirectoryPending = false;
             ActiveConsole = console;
 
             string fullCommand;
@@ -235,6 +248,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 return ExecuteHost(fullCommand, command, inputs);
             }
             return false; // constructing multi-line command
+        }
+
+        protected void OnExecuteCommandEnd() {
+            if (_updateWorkingDirectoryPending == true) {
+                Runspace.ChangePSDirectory(_targetDir);
+                _updateWorkingDirectoryPending = false;
+                _targetDir = null;
+            }
         }
 
         public void Abort() {
@@ -245,11 +266,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         protected void SetSyncModeOnHost(bool isSync) {
-            if (_myHost != null) {
-                PSPropertyInfo property = _myHost.PrivateData.Properties["IsSyncMode"];
+            if (_nugetHost != null) {
+                PSPropertyInfo property = _nugetHost.PrivateData.Properties["IsSyncMode"];
                 if (property == null) {
                     property = new PSNoteProperty("IsSyncMode", isSync);
-                    _myHost.PrivateData.Properties.Add(property);
+                    _nugetHost.PrivateData.Properties.Add(property);
                 }
                 else {
                     property.Value = isSync;
@@ -277,7 +298,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             WriteLine(VsResources.Console_DisclaimerText);
             WriteLine();
 
-            WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.PowerShellHostTitle, _myHost.Version.ToString()));
+            WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.PowerShellHostTitle, _nugetHost.Version.ToString()));
             WriteLine();
 
             WriteLine(VsResources.Console_HelpText);

@@ -329,7 +329,7 @@ namespace NuGetConsole.Implementation.Console {
                 get { return Invoke(() => _impl.InputHistory); }
             }
 
-            public bool IsInteractive {
+            public bool ShowDisclaimerHeader {
                 get {
                     return true;
                 }

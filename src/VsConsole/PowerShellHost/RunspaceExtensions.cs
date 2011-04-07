@@ -128,5 +128,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                    outputResults: true);
             }
         }
+
+        public static void ChangePSDirectory(this Runspace runspace, string directory) {
+            if (!String.IsNullOrWhiteSpace(directory)) {
+                runspace.Invoke("Set-Location " + directory, null, false);
+            }
+        }
     }
 }
