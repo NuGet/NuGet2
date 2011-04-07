@@ -142,6 +142,23 @@ namespace NuGet {
             return new FrameworkName(identifierPart, version, profilePart);
         }
 
+        /// <summary>
+        /// Trims trailing zeros in revision and build.
+        /// </summary>
+        public static Version TrimVersion(Version version) {
+            if (version == null) {
+                throw new ArgumentNullException("version");
+            }
+
+            if (version.Build == 0 && version.Revision == 0) {
+                version = new Version(version.Major, version.Minor);
+            }
+            else if (version.Revision == 0) {
+                version = new Version(version.Major, version.Minor, version.Build);
+            }
+
+            return version;
+        }
 
         /// <summary>
         /// The version string is either a simple version or an arithmetic range

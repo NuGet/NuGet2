@@ -970,6 +970,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Using &apos;{0}&apos; for metadata..
+        /// </summary>
+        internal static string UsingNuspecForMetadata {
+            get {
+                return ResourceManager.GetString("UsingNuspecForMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found packages.config. Using packages listed as dependencies.
         /// </summary>
         internal static string UsingPackagesConfigForDependencies {

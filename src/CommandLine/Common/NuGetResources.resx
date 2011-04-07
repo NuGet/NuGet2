@@ -429,4 +429,7 @@
   <data name="SpecCommandUsageSummary" xml:space="preserve">
     <value>[packageid]</value>
   </data>
+  <data name="UsingNuspecForMetadata" xml:space="preserve">
+    <value>Using '{0}' for metadata.</value>
+  </data>
 </root>

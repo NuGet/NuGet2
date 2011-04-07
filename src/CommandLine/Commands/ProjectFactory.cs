@@ -103,6 +103,8 @@ namespace NuGet.Commands {
                 ExtractMetadataFromProject(builder);
             }
 
+            builder.Version = VersionUtility.TrimVersion(builder.Version);
+
             // Add output files
             AddOutputFiles(builder);
 
@@ -229,35 +231,46 @@ namespace NuGet.Commands {
             }
 
             Logger.Log(MessageLevel.Info, NuGetResources.UsingPackagesConfigForDependencies);
+
             var file = new PackageReferenceFile(packagesConfig);
 
-            // Try to find the package and remove all files we added from the output
-            // that are part of packages
+            // Get the solution repository
             IPackageRepository repository = GetPackagesRepository(_project.DirectoryPath);
-            var transformFiles = new List<IPackageFile>();
 
+            // Collect all packages
+            var packages = new List<IPackage>();
             foreach (PackageReference reference in file.GetPackageReferences()) {
-                // Don't add duplicates
-                if (builder.Dependencies.Any(d => d.Id.Equals(reference.Id, StringComparison.OrdinalIgnoreCase))) {
-                    continue;
-                }
-
-                IVersionSpec spec = VersionUtility.ParseVersionSpec(reference.Version.ToString());
-                var dependency = new PackageDependency(reference.Id, spec);
-                builder.Dependencies.Add(dependency);
-
                 if (repository != null) {
                     IPackage package = repository.FindPackage(reference.Id, reference.Version);
                     if (package != null) {
-                        transformFiles.AddRange(GetTransformFiles(package));
+                        packages.Add(package);
                     }
                 }
             }
 
-            ProcessTransformFiles(builder, transformFiles);
+            // Add the transform file to the package builder
+            ProcessTransformFiles(builder, packages.SelectMany(GetTransformFiles));
+
+            // Reduce the set of packages we want to include as dependencies to the minimal set.
+            // Normally, packages.config has the full closure included, we to only add top level
+            // packages, i.e packages with in-degree 0
+            foreach (var package in GetMinimumSet(packages)) {
+                // Don't add duplicate dependencies
+                if (builder.Dependencies.Any(d => d.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase))) {
+                    continue;
+                }
+
+                IVersionSpec spec = VersionUtility.ParseVersionSpec(package.Version.ToString());
+                var dependency = new PackageDependency(package.Id, spec);
+                builder.Dependencies.Add(dependency);
+            }
         }
 
-        private void ProcessTransformFiles(PackageBuilder builder, List<IPackageFile> transformFiles) {
+        private IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages) {
+            return new Walker(packages).GetMinimalSet();
+        }
+
+        private void ProcessTransformFiles(PackageBuilder builder, IEnumerable<IPackageFile> transformFiles) {
             // Group transform by target file
             var transformGroups = transformFiles.GroupBy(file => RemoveExtension(file.Path), StringComparer.OrdinalIgnoreCase);
             var fileLookup = builder.Files.ToDictionary(file => file.Path, StringComparer.OrdinalIgnoreCase);
@@ -335,6 +348,8 @@ namespace NuGet.Commands {
                 return;
             }
 
+            Logger.Log(MessageLevel.Info, NuGetResources.UsingNuspecForMetadata, Path.GetFileName(nuspecFile));
+
             using (Stream stream = File.OpenRead(nuspecFile)) {
                 // Don't validate the manifest since this might be a partial manifest
                 // The bulk of the metadata might be coming from the project.
@@ -349,7 +364,14 @@ namespace NuGet.Commands {
         }
 
         private string GetNuspec() {
-            return GetContentOrNone(file => Path.GetExtension(file).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase));
+            return GetNuspecPaths().FirstOrDefault(File.Exists);
+        }
+
+        private IEnumerable<string> GetNuspecPaths() {
+            // Check for a nuspec in the project file
+            yield return GetContentOrNone(file => Path.GetExtension(file).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase));
+            // Check for a nuspec named after the project
+            yield return Path.Combine(_project.DirectoryPath, Path.GetFileNameWithoutExtension(_project.FullPath) + Constants.ManifestExtension);
         }
 
         private string GetPackagesConfig() {
@@ -406,6 +428,47 @@ namespace NuGet.Commands {
 
             // Otherwise the file is probably a shortcut so just take the file name
             return Path.GetFileName(fullPath);
+        }
+
+        private class Walker : PackageWalker {
+            private readonly IPackageRepository _repository;
+            private readonly List<IPackage> _packages;
+
+            public Walker(List<IPackage> packages) {
+                _packages = packages;
+                _repository = new PackageRepository(packages.ToList());
+            }
+
+            protected override IPackage ResolveDependency(PackageDependency dependency) {
+                return _repository.FindDependency(dependency);
+            }
+
+            protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {
+                _packages.Remove(dependency);
+                return base.OnAfterResolveDependency(package, dependency);
+            }
+
+            public IEnumerable<IPackage> GetMinimalSet() {
+                foreach (var package in _repository.GetPackages()) {
+                    Walk(package);
+                }
+                return _packages;
+            }
+
+            private class PackageRepository : PackageRepositoryBase {
+                private readonly IEnumerable<IPackage> _packages;
+                public PackageRepository(IEnumerable<IPackage> packages) {
+                    _packages = packages;
+                }
+
+                public override string Source {
+                    get { return null; }
+                }
+
+                public override IQueryable<IPackage> GetPackages() {
+                    return _packages.AsQueryable();
+                }
+            }
         }
 
         private class ReverseTransformFormFile : IPackageFile {
