@@ -34,9 +34,7 @@ namespace PackageExplorerViewModel {
                 return true;
             }
             else if (action == SaveAction) {
-                return !ViewModel.IsInEditMode && 
-                    Path.IsPathRooted(ViewModel.PackageSource) && 
-                    Path.GetExtension(ViewModel.PackageSource).Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
+                return !ViewModel.IsInEditMode && CanSaveTo(ViewModel.PackageSource);
             }
             else if (action == SaveAsAction) {
                 return !ViewModel.IsInEditMode;
@@ -56,16 +54,22 @@ namespace PackageExplorerViewModel {
 
             string action = parameter as string;
             if (action == SaveAction || action == ForceSaveAction) {
-                if (String.IsNullOrEmpty(ViewModel.PackageSource)) {
-                    SaveAs();
+                if (CanSaveTo(ViewModel.PackageSource)) {
+                    Save();
                 }
                 else {
-                    Save();
+                    SaveAs();
                 }
             }
             else if (action == SaveAsAction) {
                 SaveAs();
             }
+        }
+
+        private static bool CanSaveTo(string packageSource) {
+            return !String.IsNullOrEmpty(packageSource) && 
+                    Path.IsPathRooted(packageSource) &&
+                    Path.GetExtension(packageSource).Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         private void Save() {
