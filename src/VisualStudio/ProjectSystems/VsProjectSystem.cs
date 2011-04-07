@@ -74,6 +74,12 @@ namespace NuGet.VisualStudio {
         }
 
         public override void DeleteDirectory(string path, bool recursive = false) {
+            // Only delete this folder if it is empty and we didn't specify that we want to recurse
+            if (!recursive && (base.GetFiles(path, "*.*").Any() || base.GetDirectories(path).Any())) {
+                Logger.Log(MessageLevel.Warning, VsResources.Warning_DirectoryNotEmpty, path);
+                return;
+            }
+
             if (Project.DeleteProjectItem(path)) {
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFolder, path);
             }

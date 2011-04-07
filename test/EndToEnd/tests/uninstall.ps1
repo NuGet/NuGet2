@@ -330,3 +330,24 @@ function Test-UninstallPackageAfterRenaming {
     Assert-Null (Get-ProjectItem $p1 scripts\jquery-1.5.js)
     Assert-Null (Get-ProjectItem $p2 scripts\jquery-1.5.js)
 }
+
+function Test-UninstallDoesNotRemoveFolderIfNotEmpty {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebApplication
+    $p | Install-Package PackageWithFolder -Source $context.RepositoryRoot
+
+    # Get the path to the foo folder
+    $fooPath = (Join-Path (Split-Path $p.FullName) Foo)
+
+    # Add 5 files to that folder (on disk but not in the project)
+    0..5 | %{ "foo" | Out-File (Join-Path $fooPath "file$_.out") }
+
+    Uninstall-Package PackageWithFolder
+
+    Assert-Null (Get-ProjectPackage $p PackageWithFolder)
+    Assert-Null (Get-SolutionPackage PackageWithFolder)
+    Assert-PathExists $fooPath
+}

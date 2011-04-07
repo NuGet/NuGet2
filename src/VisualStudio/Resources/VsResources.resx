@@ -228,4 +228,7 @@
   <data name="IgnoreUpgrade" xml:space="preserve">
     <value>Ignore for now</value>
   </data>
+  <data name="Warning_DirectoryNotEmpty" xml:space="preserve">
+    <value>Directory '{0}' is not empty. Skipping...</value>
+  </data>
 </root>
