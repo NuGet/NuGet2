@@ -37,8 +37,14 @@ namespace NuGet {
         public List<ManifestFile> Files { get; set; }
 
         public void Save(Stream stream) {
-            // Validate before saving
-            Validate(this);
+            Save(stream, validate: true);
+        }
+
+        public void Save(Stream stream, bool validate) {
+            if (validate) {
+                // Validate before saving
+                Validate(this);
+            }
 
             // Define the namespaces to use when serializing
             var ns = new XmlSerializerNamespaces();

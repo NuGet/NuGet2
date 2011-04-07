@@ -1,12 +1,10 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 0)]
+    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "SpecCommandUsageSummary")]
     public class SpecCommand : Command {
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
         public string AssemblyPath {
@@ -22,29 +20,43 @@ namespace NuGet.Commands {
 
         public override void ExecuteCommand() {
             var builder = new PackageBuilder();
+            string projectFile = null;
+            string fileName = null;
+
             if (!String.IsNullOrEmpty(AssemblyPath)) {
+                // Extract metadata from the assembly
                 string path = Path.Combine(Directory.GetCurrentDirectory(), AssemblyPath);
                 AssemblyMetadataExtractor.ExtractMetadata(builder, path);
             }
             else {
-                builder.Id = "Package";
-                builder.Version = new Version("1.0");
+                // If we didn't find one, you can 
+                if (!CommandLineUtility.TryGetProjectFile(out projectFile)) {
+                    builder.Id = Arguments.Any() ? Arguments[0] : "Package";
+                    builder.Version = new Version("1.0");
+                }
             }
 
-            builder.Description = builder.Description ?? "Package description";
-            if (!builder.Authors.Any()) {
-                builder.Authors.Add("Author here");
+            // Get the file name from the id or the project file
+            fileName = builder.Id ?? Path.GetFileNameWithoutExtension(projectFile);
+
+            // If we're using a project file then we want the a minimal nuspec
+            if (String.IsNullOrEmpty(projectFile)) {
+                builder.Description = builder.Description ?? "Package description";
+                if (!builder.Authors.Any()) {
+                    builder.Authors.Add("Author here");
+                }
+
+                builder.Owners.Add("Owner here");
+                builder.Dependencies.Add(new PackageDependency("SampleDependency", VersionUtility.ParseVersionSpec("1.0")));
             }
 
-            builder.Owners.Add("Owner here");
             builder.ProjectUrl = new Uri("http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE");
             builder.LicenseUrl = new Uri("http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE");
             builder.IconUrl = new Uri("http://ICON_URL_HERE_OR_DELETE_THIS_LINE");
             builder.Tags.Add("Tag1");
             builder.Tags.Add("Tag2");
-            builder.Dependencies.Add(new PackageDependency("SampleDependency", VersionUtility.ParseVersionSpec("1.0")));
 
-            string nuspecFile = builder.Id + ".nuspec";
+            string nuspecFile = fileName + Constants.ManifestExtension;
 
             // Skip the creation if the file exists and force wasn't specified
             if (File.Exists(nuspecFile) && !Force) {
@@ -53,7 +65,7 @@ namespace NuGet.Commands {
             else {
                 try {
                     using (Stream stream = File.Create(nuspecFile)) {
-                        Manifest.Create(builder).Save(stream);
+                        Manifest.Create(builder).Save(stream, validate: false);
                     }
 
                     Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);

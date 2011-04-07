@@ -169,7 +169,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         [TestMethod]
         public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
             // Arrange            
-            string expectedPackage = "FakeProject.1.2.0.0.nupkg";
+            string expectedPackage = "FakeProject.1.2.nupkg";
 #if SYMBOL_SOURCE
             string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
 #endif
@@ -218,7 +218,7 @@ public class Baz {
             Assert.IsTrue(File.Exists(expectedPackage));
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
             Assert.AreEqual("FakeProject", package.Id);
-            Assert.AreEqual(new Version("1.2.0.0"), package.Version);
+            Assert.AreEqual(new Version("1.2"), package.Version);
             Assert.AreEqual("David Inc", package.Authors.First());
             Assert.AreEqual("This is a test. Ignore me", package.Description);
 
@@ -238,7 +238,7 @@ public class Baz {
         [TestMethod]
         public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput() {
             // Arrange                        
-            string expectedPackage = "ProjectWithCotent.1.5.0.0.nupkg";
+            string expectedPackage = "ProjectWithCotent.1.5.nupkg";
             var contentFiles = new[] { "Foo.xml", "Bar.txt" };
             var sourceFiles = new[] { "A.cs", "B.cs" };
 
@@ -277,7 +277,7 @@ public class Cl_{0} {{
                                                                          @"content\Foo.xml",
                                                                          @"content\Bar.txt" });
             Assert.AreEqual("ProjectWithCotent", package.Id);
-            Assert.AreEqual(new Version("1.5.0.0"), package.Version);
+            Assert.AreEqual(new Version("1.5"), package.Version);
             Assert.AreEqual("David", package.Authors.First());
             Assert.AreEqual("Project with content", package.Description);
         }
@@ -285,7 +285,7 @@ public class Cl_{0} {{
         [TestMethod]
         public void PackageCommand_SpecifyingProjectFileWithPartialNuSpecMergesMetadata() {
             // Arrange                        
-            string expectedPackage = "ProjectWithNuSpec.1.2.0.0.nupkg";
+            string expectedPackage = "ProjectWithNuSpec.1.2.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpec",
                                "1.2.0.0",
                                "David",
@@ -323,7 +323,7 @@ public class Cl_{0} {{
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpec.dll" });
             Assert.AreEqual("ProjectWithNuSpec", package.Id);
-            Assert.AreEqual(new Version("1.2.0.0"), package.Version);
+            Assert.AreEqual(new Version("1.2"), package.Version);
             Assert.AreEqual("David", package.Authors.First());
             Assert.AreEqual("Description from nuspec", package.Description);
             var dependencies = package.Dependencies.ToList();
@@ -334,9 +334,49 @@ public class Cl_{0} {{
         }
 
         [TestMethod]
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata() {
+            // Arrange                        
+            string expectedPackage = "Test.1.2.nupkg";
+            WriteAssemblyInfo("FooProject",
+                               "1.5.0.0",
+                               "David",
+                               "Project with content");
+
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            WriteProjectFile("FooProject.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>Test</id>
+    <version>1.2</version>
+    <description>Description from nuspec</description>    
+    <authors>John</authors>
+  </metadata>
+</package>");
+
+            CreateProject("FooProject", compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "FooProject.csproj" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FooProject.dll" });
+            Assert.AreEqual("Test", package.Id);
+            Assert.AreEqual(new Version("1.2"), package.Version);
+            Assert.AreEqual("John", package.Authors.First());
+            Assert.AreEqual("Description from nuspec", package.Description);            
+        }
+
+        [TestMethod]
         public void PackageCommand_SpecifyingProjectFileWithPartialNuSpecWithFilesMergesFiles() {
             // Arrange                        
-            string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.0.0.nupkg";
+            string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecAndFiles",
                                "1.3.0.0",
                                "David2",
@@ -369,7 +409,7 @@ public class Cl_{0} {{
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecAndFiles.dll", 
                                                                          @"lib\net40\ProjectWithNuSpecAndFiles.pdb" });
             Assert.AreEqual("ProjectWithNuSpecAndFiles", package.Id);
-            Assert.AreEqual(new Version("1.3.0.0"), package.Version);
+            Assert.AreEqual(new Version("1.3"), package.Version);
             Assert.AreEqual("David2", package.Authors.First());
             Assert.AreEqual("Project with nuspec that has files", package.Description);
         }
@@ -377,7 +417,7 @@ public class Cl_{0} {{
         [TestMethod]
         public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced() {
             // Arrange                        
-            string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.0.nupkg";
+            string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.nupkg";
             WriteAssemblyInfo("ProjectWithAssembliesInOutputPath",
                                "1.3.0.0",
                                "David2",
@@ -401,7 +441,7 @@ public class Cl_{0} {{
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithAssembliesInOutputPath.dll" });
             Assert.AreEqual("ProjectWithAssembliesInOutputPath", package.Id);
-            Assert.AreEqual(new Version("1.3.0.0"), package.Version);
+            Assert.AreEqual(new Version("1.3"), package.Version);
             Assert.AreEqual("David2", package.Authors.First());
             Assert.AreEqual("Project with nuspec that has files", package.Description);
         }
@@ -519,7 +559,7 @@ public class Cl_{0} {{
             File.WriteAllText(fullPath, contents);
         }
 
-        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description) {            
+        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description) {
             WriteProjectFile(@"Properties\AssemblyInfo.cs", GetAssemblyInfoContent(assemblyName, version, author, description));
         }
 

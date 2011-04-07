@@ -375,5 +375,37 @@ namespace NuGet.Test {
             Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
             Assert.IsTrue(versionInfo.IsMaxInclusive);
         }
+
+        [TestMethod]
+        public void TrimVersionTrimsRevisionIfZero() {
+            // Act
+            var version = VersionUtility.TrimVersion(new Version("1.2.3.0"));
+
+            // Assert
+            Assert.AreEqual(new Version("1.2.3"), version);
+        }
+
+        [TestMethod]
+        public void TrimVersionTrimsRevisionAndBuildIfZero() {
+            // Act
+            var version = VersionUtility.TrimVersion(new Version("1.2.0.0"));
+
+            // Assert
+            Assert.AreEqual(new Version("1.2"), version);
+        }
+
+        [TestMethod]
+        public void TrimVersionTrimsBuildIfRevisionIsNonZero() {
+            // Act
+            var version = VersionUtility.TrimVersion(new Version("1.2.0.5"));
+
+            // Assert
+            Assert.AreEqual(new Version("1.2.0.5"), version);
+        }
+
+        [TestMethod]
+        public void TrimVersionThrowsIfVersionNull() {
+            ExceptionAssert.ThrowsArgNull(() => VersionUtility.TrimVersion(null), "version");
+        }
     }
 }
