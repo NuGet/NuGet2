@@ -299,6 +299,14 @@ namespace NuGet.VisualStudio {
             return hierarchy;
         }
 
+        public static IVsProjectBuildSystem ToVsProjectBuildSystem(this Project project) {
+            if (project == null) {
+                throw new ArgumentNullException("project");
+            }
+            // Convert the project to an IVsHierarchy and see if it implements IVsProjectBuildSystem
+            return project.ToVsHierarchy() as IVsProjectBuildSystem;
+        }
+
         public static IEnumerable<string> GetProjectTypeGuids(this Project project) {
             // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
             var aggregatableProject = (IVsAggregatableProject)project.ToVsHierarchy();

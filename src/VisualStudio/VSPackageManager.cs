@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
@@ -307,16 +308,21 @@ namespace NuGet.VisualStudio {
             AddPackageToRecentRepository(package);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If we failed to add binding redirects we don't want it to stop the install/update.")]
-        private void AddBindingRedirects(IProjectManager projectManager) {
+        private Project GetProject(IProjectManager projectManager) {
             // We only support project systems that implement IVsProjectSystem
             var vsProjectSystem = projectManager.Project as IVsProjectSystem;
             if (vsProjectSystem == null) {
-                return;
+                return null;
             }
 
             // Find the project by it's unique name
-            Project project = _solutionManager.GetProject(vsProjectSystem.UniqueName);
+            return _solutionManager.GetProject(vsProjectSystem.UniqueName);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If we failed to add binding redirects we don't want it to stop the install/update.")]
+        private void AddBindingRedirects(IProjectManager projectManager) {            
+            // Find the project by it's unique name
+            Project project = GetProject(projectManager);
 
             // If we can't find the project or it doesn't support binding redirects then don't add any redirects
             if (project == null || !project.SupportsBindingRedirects()) {
@@ -328,7 +334,7 @@ namespace NuGet.VisualStudio {
             }
             catch (Exception e) {
                 // If there was an error adding binding redirects then print a warning and continue
-                Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, VsResources.Warning_FailedToAddBindingRedirects, vsProjectSystem.ProjectName, e.Message));
+                Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, VsResources.Warning_FailedToAddBindingRedirects, projectManager.Project.ProjectName, e.Message));
             }
         }
 
@@ -337,21 +343,46 @@ namespace NuGet.VisualStudio {
                 return;
             }
 
+            var packagesToRemove = new List<IPackage>();
             EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
-                // Remove any packages that would be removed as a result of updating a dependency or the package itself
-                // We can execute the uninstall directly since we don't need to resolve dependencies again
-                ExecuteUninstall(e.Package);
+                packagesToRemove.Add(e.Package);
             };
+
+            // Try to get the project for this project manager
+            Project project = GetProject(projectManager);
+            
+            IVsProjectBuildSystem build = null;
+
+            if (project != null) {
+                build = project.ToVsProjectBuildSystem();
+            }
 
             // Add the handlers
             projectManager.PackageReferenceRemoved += removeHandler;
 
             try {
+                if (build != null) {
+                    // Start a batch edit so there is no background compilation until we're done
+                    // processing project actions
+                    build.StartBatchEdit();
+                }
+
                 action();
             }
             finally {
+                if (build != null) {
+                    // End the batch edit when we are done.
+                    build.EndBatchEdit();
+                }
+
                 // Remove the handlers
                 projectManager.PackageReferenceRemoved -= removeHandler;
+
+                // Remove any packages that would be removed as a result of updating a dependency or the package itself
+                // We can execute the uninstall directly since we don't need to resolve dependencies again.
+                foreach (var package in packagesToRemove) {
+                    ExecuteUninstall(package);
+                }
             }
 
             AddBindingRedirects(projectManager);
