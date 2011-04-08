@@ -4,10 +4,103 @@ using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Dialog.Extensions;
+using NuGet.Dialog.Providers;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
     public class QueryExtensionsTest {
+        [TestMethod]
+        public void SortBySortsOnOneItem() {
+            // Arrange
+            var list = (new[] { 
+                new MockQueryClass { Id = "B" }, new MockQueryClass { Id = "A" }, new MockQueryClass { Id = "C" }
+            }).AsQueryable();
+
+            // Act
+            var result = list.SortBy(new PackageSortDescriptor(null, "Id", ListSortDirection.Ascending));
+
+            // Assert
+            Assert.AreEqual(result.ElementAt(0).Id, "A");
+            Assert.AreEqual(result.ElementAt(1).Id, "B");
+            Assert.AreEqual(result.ElementAt(2).Id, "C");
+        }
+
+        [TestMethod]
+        public void SortBySortsOnOnePropertyDescending() {
+            // Arrange
+            var list = (new[] { 
+                new MockQueryClass { Id = "A" }, new MockQueryClass { Id = "B" }, new MockQueryClass { Id = "C" }
+            }).AsQueryable();
+
+            // Act
+            var result = list.SortBy(new PackageSortDescriptor(null, "Id", ListSortDirection.Descending));
+
+            // Assert
+            Assert.AreEqual(result.ElementAt(0).Id, "C");
+            Assert.AreEqual(result.ElementAt(1).Id, "B");
+            Assert.AreEqual(result.ElementAt(2).Id, "A");
+        }
+
+        [TestMethod]
+        public void SortBySortsOnMultiplePropertyAscending() {
+            // Arrange
+            var list = (new[] { 
+                new MockQueryClass { Id = "X", Name = "A" }, 
+                new MockQueryClass { Id = "Z", Name = "" }, 
+                new MockQueryClass { Id = "P", Name = null },
+                new MockQueryClass { Id = "Q", Name = "R" }
+            }).AsQueryable();
+
+            // Act
+            var result = list.SortBy(new PackageSortDescriptor(null, new[] { "Name", "Id" }, ListSortDirection.Ascending));
+
+            // Assert
+            Assert.AreEqual(result.ElementAt(0).Id, "X");
+            Assert.AreEqual(result.ElementAt(1).Id, "P");
+            Assert.AreEqual(result.ElementAt(2).Id, "Q");
+            Assert.AreEqual(result.ElementAt(3).Id, "Z");
+        }
+
+        [TestMethod]
+        public void SortBySortsOnMultiplePropertyDescending() {
+            // Arrange
+            var list = (new[] { 
+                new MockQueryClass { Id = "X", Name = "A" }, 
+                new MockQueryClass { Id = "Z", Name = "" }, 
+                new MockQueryClass { Id = "P", Name = null },
+                new MockQueryClass { Id = "Q", Name = "R" }
+            }).AsQueryable();
+
+            // Act
+            var result = list.SortBy(new PackageSortDescriptor(null, new[] { "Name", "Id" }, ListSortDirection.Descending));
+
+            // Assert
+            Assert.AreEqual(result.ElementAt(0).Id, "Z");
+            Assert.AreEqual(result.ElementAt(1).Id, "Q");
+            Assert.AreEqual(result.ElementAt(2).Id, "P");
+            Assert.AreEqual(result.ElementAt(3).Id, "X");
+        }
+
+        [TestMethod]
+        public void SortBySortsOnMoreThanTwoProperties() {
+            // Arrange
+            var list = (new[] { 
+                new MockQueryClass { Id = "X", Name = "A", Description = "D0" }, 
+                new MockQueryClass { Id = "Z", Name = "" , Description = null }, 
+                new MockQueryClass { Id = "P", Name = null, Description = "" },
+                new MockQueryClass { Id = "Q", Name = "R", Description = "D1" }
+            }).AsQueryable();
+
+            // Act
+            var result = list.SortBy(new PackageSortDescriptor(null, new[] { "Description", "Name", "Id" }, ListSortDirection.Ascending));
+
+            // Assert
+            Assert.AreEqual(result.ElementAt(0).Id, "X");
+            Assert.AreEqual(result.ElementAt(1).Id, "Q");
+            Assert.AreEqual(result.ElementAt(2).Id, "P");
+            Assert.AreEqual(result.ElementAt(3).Id, "Z");
+        }
+
         [TestMethod]
         public void GetSortExpressionForSingleParameter() {
             // Arrange
@@ -69,6 +162,8 @@ namespace NuGet.Dialog.Test {
             public string Id { get; set; }
 
             public string Name { get; set; }
+
+            public string Description { get; set; }
         }
     }
 }

@@ -6,8 +6,8 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
     public class PackageSortDescriptor : IVsSortDescriptor {
-        public PackageSortDescriptor(string displayName, string sortProperties, ListSortDirection direction)
-            : this(displayName, new[] { sortProperties }, direction) {
+        public PackageSortDescriptor(string displayName, string sortProperty, ListSortDirection direction)
+            : this(displayName, new[] { sortProperty }, direction) {
         }
 
         public PackageSortDescriptor(string displayName, IEnumerable<string> sortProperties, ListSortDirection direction) {

@@ -39,7 +39,7 @@ namespace NuGet.Dialog.Providers {
         /// </summary>
         public string Name {
             get {
-                return _packageIdentity.Title ?? _packageIdentity.Id;
+                return String.IsNullOrEmpty(_packageIdentity.Title) ? _packageIdentity.Id : _packageIdentity.Title;
             }
         }
 
