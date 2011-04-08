@@ -31,12 +31,6 @@ namespace NuGet {
             using (Stream outputStream = File.Create(GetFullPath(path))) {
                 stream.CopyTo(outputStream);
             }
-
-            WriteAddedFileAndDirectory(path);
-        }
-
-        private static void WriteAddedFileAndDirectory(string path) {
-            string folderPath = Path.GetDirectoryName(path);
         }
 
         public virtual void DeleteFile(string path) {
@@ -47,7 +41,6 @@ namespace NuGet {
             try {
                 path = GetFullPath(path);
                 File.Delete(path);
-                string folderPath = Path.GetDirectoryName(path);
             }
             catch (FileNotFoundException) {
 

@@ -26,7 +26,6 @@ namespace PackageExplorer {
             if (borderWidth == 0.0 || borderHeight == 0.0) {
                 return null;
             }
-            double num4 = (!(parameter is string)) ? ((double)parameter) : double.Parse((string)parameter, NumberFormatInfo.InvariantInfo);
             Grid grid = new Grid();
             grid.Width = borderWidth;
             grid.Height = borderHeight;

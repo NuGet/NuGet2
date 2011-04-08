@@ -8,18 +8,18 @@ namespace PackageExplorer {
 
         private string _initialPath;
 
-        public int OnBrowseEvent(IntPtr hwnd, int msg, IntPtr lp, IntPtr lpData) {
+        public int OnBrowseEvent(IntPtr handle, int msg, IntPtr lp, IntPtr lpData) {
             switch (msg) {
                 case NativeMethods.BFFM_INITIALIZED: // Required to set initialPath
                 {
                     // Use BFFM_SETSELECTIONW if passing a Unicode string, i.e. native CLR Strings.
-                    NativeMethods.SendMessage(new HandleRef(null, hwnd), NativeMethods.BFFM_SETSELECTIONW, 1, _initialPath);
+                    NativeMethods.SendMessage(new HandleRef(null, handle), NativeMethods.BFFM_SETSELECTIONW, 1, _initialPath);
                     break;
                 }
                 case NativeMethods.BFFM_SELCHANGED: {
                     StringBuilder sb = new StringBuilder(260);
                     if (NativeMethods.SHGetPathFromIDList(lp, sb) != 0) {
-                        NativeMethods.SendMessage(new HandleRef(null, hwnd), NativeMethods.BFFM_SETSTATUSTEXTW, 0, sb.ToString());
+                        NativeMethods.SendMessage(new HandleRef(null, handle), NativeMethods.BFFM_SETSTATUSTEXTW, 0, sb.ToString());
                     }
 
                     break;

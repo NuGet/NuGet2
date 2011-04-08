@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Data;
 
 namespace PackageExplorer
@@ -19,17 +20,17 @@ namespace PackageExplorer
                     if (fileSize % sizes[i] == 0)
                     {
                         long f = fileSize / sizes[i];
-                        return f.ToString() + unit[i];
+                        return f.ToString(CultureInfo.CurrentCulture) + unit[i];
                     }
                     else
                     {
                         double f = fileSize * 1.0 / sizes[i];
-                        return f.ToString("F2") + unit[i];
+                        return f.ToString("F2", CultureInfo.CurrentCulture) + unit[i];
                     }
                 }
             }
 
-            return fileSize.ToString();
+            return fileSize.ToString(CultureInfo.CurrentCulture);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

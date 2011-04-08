@@ -9,10 +9,12 @@ namespace PackageExplorer {
         public const int SW_SHOWMINIMIZED = 2;
 
         [DllImport("user32.dll")]
-        public static extern bool SetWindowPlacement(IntPtr hWnd, [In] ref WINDOWPLACEMENT lpwndpl);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowPlacement(IntPtr hWnd, [In] ref WindowPlacement lpwndpl);
 
         [DllImport("user32.dll")]
-        public static extern bool GetWindowPlacement(IntPtr hWnd, out WINDOWPLACEMENT lpwndpl);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowPlacement(IntPtr hWnd, out WindowPlacement lpwndpl);
 
         [DllImport("user32.dll")]
         public extern static int SetWindowLong(IntPtr hwnd, int index, int value);
@@ -21,6 +23,7 @@ namespace PackageExplorer {
         public extern static int GetWindowLong(IntPtr hwnd, int index);
 
         [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowPos(IntPtr hwnd, IntPtr hwndInsertAfter, int x, int y, int width, int height, uint flags);
 
         // Constants for sending and receiving messages in BrowseCallBackProc

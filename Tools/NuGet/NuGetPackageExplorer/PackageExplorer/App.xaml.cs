@@ -13,6 +13,7 @@ namespace PackageExplorer {
 
         private CompositionContainer _container;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal CompositionContainer Container {
             get {
                 if (_container == null) {

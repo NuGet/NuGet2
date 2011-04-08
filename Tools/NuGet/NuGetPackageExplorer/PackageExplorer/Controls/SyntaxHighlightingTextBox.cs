@@ -104,7 +104,7 @@ namespace PackageExplorer
         /// </summary>
         /// <param name="type">The language type to create.</param>
         /// <returns>Returns a new instance of the language parser.</returns>
-        private ILanguage CreateLanguageInstance(SourceLanguageType type)
+        private static ILanguage CreateLanguageInstance(SourceLanguageType type)
         {
             switch (type)
             {

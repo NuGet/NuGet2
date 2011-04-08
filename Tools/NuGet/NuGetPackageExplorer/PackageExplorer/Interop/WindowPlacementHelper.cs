@@ -11,8 +11,8 @@ namespace PackageExplorer {
                 return;
             }
 
-            WINDOWPLACEMENT wp = WINDOWPLACEMENT.Parse(setting);
-            wp.length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
+            WindowPlacement wp = WindowPlacement.Parse(setting);
+            wp.length = Marshal.SizeOf(typeof(WindowPlacement));
             wp.flags = 0;
             wp.showCmd = (wp.showCmd == NativeMethods.SW_SHOWMINIMIZED ? NativeMethods.SW_SHOWNORMAL : wp.showCmd);
 
@@ -21,7 +21,7 @@ namespace PackageExplorer {
         }
 
         public static string SaveWindowPlacementToSettings(this Window window) {
-            WINDOWPLACEMENT wp = new WINDOWPLACEMENT();
+            WindowPlacement wp = new WindowPlacement();
             IntPtr hwnd = new WindowInteropHelper(window).Handle;
 
             NativeMethods.GetWindowPlacement(hwnd, out wp);

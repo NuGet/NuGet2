@@ -7,7 +7,7 @@ using System.IO;
 
 namespace PackageExplorer
 {
-    class TruncateFilePathConverter : IValueConverter
+    public class TruncateFilePathConverter : IValueConverter
     {
         const int MaxLength = 50;
 
@@ -32,7 +32,7 @@ namespace PackageExplorer
             }
         }
 
-        private string Truncate(string path)
+        private static string Truncate(string path)
         {
             char separator;
             string prefix = "";
@@ -50,7 +50,7 @@ namespace PackageExplorer
             else
             {
                 separator = '/';
-                int index = path.IndexOf(Uri.SchemeDelimiter);
+                int index = path.IndexOf(Uri.SchemeDelimiter, StringComparison.OrdinalIgnoreCase);
                 if (index > -1)
                 {
                     prefix = path.Substring(0, Math.Min(path.Length, index + 3));
