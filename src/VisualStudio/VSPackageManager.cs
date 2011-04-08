@@ -394,7 +394,7 @@ namespace NuGet.VisualStudio {
             }
             finally {
                 // Remove the event handler
-                PackageInstalling -= installedHandler;
+                PackageInstalled -= installedHandler;
             }
         }
 
