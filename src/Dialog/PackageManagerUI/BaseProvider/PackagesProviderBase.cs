@@ -330,6 +330,14 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected virtual void OnExecuteCompleted(PackageItem item) {
+            // After every operation, just update the status of all packages in the current node.
+            // Strictly speaking, this is not required; only affected packages need to be updated.
+            // But doing so would require us to keep a Dictionary<IPackage, PackageItem> which is not worth it.
+            if (SelectedNode != null) {
+                foreach (PackageItem node in SelectedNode.Extensions) {
+                    node.UpdateEnabledStatus();
+                }
+            }
         }
 
         public virtual string NoItemsMessage {

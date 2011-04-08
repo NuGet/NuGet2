@@ -84,6 +84,8 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override void OnExecuteCompleted(PackageItem item) {
+            base.OnExecuteCompleted(item);
+
             if (SelectedNode != null) {
                 SelectedNode.Extensions.Remove((IVsExtension)item);
             }

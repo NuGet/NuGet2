@@ -153,10 +153,6 @@ namespace NuGet.Dialog.Providers {
             activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
         }
 
-        protected override void OnExecuteCompleted(PackageItem item) {
-            item.UpdateEnabledStatus();
-        }
-
         public override bool CanExecute(PackageItem item) {
             // Only enable command on a Package in the Online provider if it is not installed yet
             return !ProjectManager.IsInstalled(item.PackageIdentity);
