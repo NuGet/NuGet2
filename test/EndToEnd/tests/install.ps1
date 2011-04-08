@@ -880,3 +880,69 @@ function Test-InstallingPackageWithDependencyThatFailsShouldRollbackSuccessfully
     Assert-Null (Get-ProjectPackage $p PackageWithBadInstallScript)
     Assert-Null (Get-SolutionPackage PackageWithBadInstallScript)
 }
+
+function Test-WebsiteInstallPackageWithCSSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithCSSourceFiles -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithCSSourceFiles
+    Assert-SolutionPackage PackageWithCSSourceFiles
+    Assert-NotNull (Get-ProjectItem $p App_Code\Foo.cs)
+    Assert-NotNull (Get-ProjectItem $p App_Code\Bar.cs)
+}
+
+function Test-WebsiteInstallPackageWithVBSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithVBSourceFiles -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithVBSourceFiles
+    Assert-SolutionPackage PackageWithVBSourceFiles
+    Assert-NotNull (Get-ProjectItem $p App_Code\Foo.vb)
+    Assert-NotNull (Get-ProjectItem $p App_Code\Bar.vb)
+}
+
+function Test-WebsiteInstallPackageWithSourceFileUnderAppCode {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithSourceFileUnderAppCode -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithSourceFileUnderAppCode
+    Assert-SolutionPackage PackageWithSourceFileUnderAppCode
+    Assert-NotNull (Get-ProjectItem $p App_Code\Class1.cs)
+}
+
+function Test-WebSiteInstallPackageWithNestedSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package netfx-Guard -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p netfx-Guard
+    Assert-SolutionPackage netfx-Guard
+    Assert-NotNull (Get-ProjectItem $p App_Code\netfx\System\Guard.cs)
+}

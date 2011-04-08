@@ -210,7 +210,12 @@ namespace NuGet.VisualStudio {
                 container.AddFromFileCopy(fullPath);
             });
 
+
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
+        }
+
+        public virtual string ResolvePath(string path) {
+            return path;
         }
 
         public override IEnumerable<string> GetFiles(string path, string filter) {

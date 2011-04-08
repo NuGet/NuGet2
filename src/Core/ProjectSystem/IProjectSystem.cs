@@ -21,5 +21,6 @@ namespace NuGet {
         bool ReferenceExists(string name);
         void RemoveReference(string name);
         bool IsSupportedFile(string path);
+        string ResolvePath(string path);
     }
 }

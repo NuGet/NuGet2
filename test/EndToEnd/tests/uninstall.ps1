@@ -351,3 +351,55 @@ function Test-UninstallDoesNotRemoveFolderIfNotEmpty {
     Assert-Null (Get-SolutionPackage PackageWithFolder)
     Assert-PathExists $fooPath
 }
+
+function Test-WebSiteUninstallPackageWithNestedSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package netfx-Guard -Source $context.RepositoryRoot
+    Assert-Package $p netfx-Guard
+    Assert-SolutionPackage netfx-Guard
+    Assert-NotNull (Get-ProjectItem $p App_Code\netfx\System\Guard.cs)
+    
+    # Assert
+    $p | Uninstall-Package netfx-Guard
+    Assert-Null (Get-ProjectPackage $p netfx-Guard)
+    Assert-Null (Get-SolutionPackage netfx-Guard)
+    Assert-Null (Get-ProjectItem $p App_Code\netfx\System\Guard.cs)
+    Assert-Null (Get-ProjectItem $p App_Code\netfx\System)
+    Assert-Null (Get-ProjectItem $p App_Code\netfx)
+    Assert-Null (Get-ProjectItem $p App_Code)
+}
+
+function Test-WebSiteUninstallPackageWithNestedSourceFilesAndAnotherProject {
+    param(
+        $context
+    )
+    # Arrange
+    $p1 = New-WebSite
+    $p2 = New-WebApplication
+    
+    # Act
+    $p1 | Install-Package netfx-Guard -Source $context.RepositoryRoot
+    Assert-Package $p1 netfx-Guard
+    Assert-SolutionPackage netfx-Guard
+    Assert-NotNull (Get-ProjectItem $p1 App_Code\netfx\System\Guard.cs)
+
+    $p2 | Install-Package netfx-Guard -Source $context.RepositoryRoot
+    Assert-Package $p2 netfx-Guard
+    Assert-SolutionPackage netfx-Guard
+    Assert-NotNull (Get-ProjectItem $p2 netfx\System\Guard.cs)
+    
+    # Assert
+    $p1 | Uninstall-Package netfx-Guard
+    Assert-NotNull (Get-SolutionPackage netfx-Guard)
+    Assert-Null (Get-ProjectPackage $p1 netfx-Guard)
+    Assert-Null (Get-ProjectItem $p1 App_Code\netfx\System\Guard.cs)
+    Assert-Null (Get-ProjectItem $p1 App_Code\netfx\System)
+    Assert-Null (Get-ProjectItem $p1 App_Code\netfx)
+    Assert-Null (Get-ProjectItem $p1 App_Code)
+}

@@ -57,5 +57,10 @@ namespace NuGet.Test.Mocks {
         public void AddFrameworkReference(string name) {
             References[name] = name;
         }
+
+
+        public virtual string ResolvePath(string path) {
+            return path;
+        }
     }
 }

@@ -1,14 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
-using System.Globalization;
 
 namespace NuGet.VisualStudio {
     public class WebSiteProjectSystem : WebProjectSystem {
         private const string RootNamespace = "RootNamespace";
         private const string DefaultNamespace = "ASP";
+        private const string AppCodeFolder = "App_Code";
+        private const string GeneratedFilesFolder = "Generated___Files";
 
         public WebSiteProjectSystem(Project project)
             : base(project) {
@@ -35,6 +39,23 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public override string ResolvePath(string path) {
+            // If we're adding a source file that isn't already in the app code folder then add App_Code to the path
+            if (RequiresAppCodeRemapping(path)) {
+                path = Path.Combine(AppCodeFolder, path);
+            }
+
+            return base.ResolvePath(path);
+        }
+
+        public override IEnumerable<string> GetDirectories(string path) {
+            if (IsUnderAppCode(path)) {
+                // There is an invisible folder called Generated___Files under app code that we want to exclude from our search
+                return base.GetDirectories(path).Except(new[] { GeneratedFilesFolder }, StringComparer.OrdinalIgnoreCase);
+            }
+            return base.GetDirectories(path);
+        }
+
         protected override void AddGacReference(string name) {
             Project.Object.References.AddFromGAC(name);
         }
@@ -49,6 +70,22 @@ namespace NuGet.VisualStudio {
         protected override bool ExcludeFile(string path) {
             // Exclude nothing from website projects
             return false;
+        }
+
+        /// <summary>
+        /// Determines if we need a source file to be under the App_Code folder
+        /// </summary>
+        private bool RequiresAppCodeRemapping(string path) {
+            return !IsUnderAppCode(path) && IsSourceFile(path);
+        }
+
+        private static bool IsUnderAppCode(string path) {
+            return path.StartsWith(AppCodeFolder, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool IsSourceFile(string path) {
+            string extension = Path.GetExtension(path).ToLowerInvariant();
+            return extension.Equals(".cs") || extension.Equals(".vb");
         }
     }
 }

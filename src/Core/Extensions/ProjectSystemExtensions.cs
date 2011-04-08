@@ -17,7 +17,7 @@ namespace NuGet {
             // This shouldn't matter for any other scenario.
             foreach (IPackageFile file in files.OrderByDescending(p => p.Path)) {
                 // Remove the redundant folder from the path
-                string path = RemoveContentDirectory(file.Path);
+                string path = ResolvePath(project, file.Path);
 
                 // Try to get the package file modifier for the extension
                 string extension = Path.GetExtension(file.Path);
@@ -45,7 +45,7 @@ namespace NuGet {
                                        IDictionary<string, IPackageFileTransformer> fileTransformers) {
 
             // First get all directories that contain files
-            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(p.Path));
+            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolvePath(project, p.Path)));
 
 
             // Get all directories that this package may have added
@@ -58,14 +58,14 @@ namespace NuGet {
             foreach (var directory in directories) {
                 var directoryFiles = directoryLookup.Contains(directory) ? directoryLookup[directory] : Enumerable.Empty<IPackageFile>();
 
-                string dirPath = RemoveContentDirectory(directory);
-                if (!project.DirectoryExists(dirPath)) {
+                if (!project.DirectoryExists(directory)) {
                     continue;
                 }
 
                 foreach (var file in directoryFiles) {
                     // Remove the content folder from the path
-                    string path = RemoveContentDirectory(file.Path);
+                    string path = ResolvePath(project, file.Path);
+
                     // Try to get the package file modifier for the extension
                     string extension = Path.GetExtension(file.Path);
                     IPackageFileTransformer transformer;
@@ -95,9 +95,9 @@ namespace NuGet {
                 }
 
                 // If the directory is empty then delete it
-                if (!project.GetFilesSafe(dirPath).Any() &&
-                    !project.GetDirectoriesSafe(dirPath).Any()) {
-                    project.DeleteDirectorySafe(dirPath, recursive: false);
+                if (!project.GetFilesSafe(directory).Any() &&
+                    !project.GetDirectoriesSafe(directory).Any()) {
+                    project.DeleteDirectorySafe(directory, recursive: false);
                 }
             }
         }
@@ -136,10 +136,14 @@ namespace NuGet {
             return Enumerable.Empty<T>();
         }
 
+        private static string ResolvePath(IProjectSystem projectSystem, string path) {
+            return projectSystem.ResolvePath(RemoveContentDirectory(path));
+        }
+
         private static string RemoveContentDirectory(string path) {
             Debug.Assert(path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
 
-            return path.Substring(Constants.ContentDirectory.Length).TrimStart('\\');
+            return path.Substring(Constants.ContentDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
         }
 
         private static string RemoveExtension(string path) {
