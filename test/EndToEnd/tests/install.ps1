@@ -861,3 +861,22 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     Assert-SolutionPackage NuGet.Core
     Assert-Null (Get-ProjectPackage $p2 NuGet.Core)
 }
+
+function Test-InstallingPackageWithDependencyThatFailsShouldRollbackSuccessfully {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Assert-Throws { $p | Install-Package GoodPackageWithBadDependency -Source $context.RepositoryRoot } "NOT #WINNING"
+
+    # Assert    
+    Assert-Null (Get-ProjectPackage $p GoodPackageWithBadDependency)
+    Assert-Null (Get-SolutionPackage GoodPackageWithBadDependency)
+    Assert-Null (Get-ProjectPackage $p PackageWithBadDependency)
+    Assert-Null (Get-SolutionPackage PackageWithBadDependency)
+    Assert-Null (Get-ProjectPackage $p PackageWithBadInstallScript)
+    Assert-Null (Get-SolutionPackage PackageWithBadInstallScript)
+}

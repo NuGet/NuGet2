@@ -407,7 +407,7 @@ namespace NuGet.VisualStudio {
             }
 
             // Keep track of what was added and removed
-            var packagesAdded = new List<IPackage>();
+            var packagesAdded = new Stack<IPackage>();
             var packagesRemoved = new List<IPackage>();
 
             EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
@@ -415,7 +415,7 @@ namespace NuGet.VisualStudio {
             };
 
             EventHandler<PackageOperationEventArgs> addedHandler = (sender, e) => {
-                packagesAdded.Add(e.Package);
+                packagesAdded.Push(e.Package);
             };
 
             // Try to get the project for this project manager
@@ -439,6 +439,9 @@ namespace NuGet.VisualStudio {
                 }
 
                 action();
+
+                // Only add binding redirects if install was successful
+                AddBindingRedirects(projectManager);
             }
             catch {
                 // We need to Remove the handlers here since we're going to attempt
@@ -467,11 +470,12 @@ namespace NuGet.VisualStudio {
                 // We can execute the uninstall directly since we don't need to resolve dependencies again.
                 Uninstall(packagesRemoved);
             }
-
-            AddBindingRedirects(projectManager);
         }
 
         private static void RollbackProjectActions(IProjectManager projectManager, IEnumerable<IPackage> packagesAdded, IEnumerable<IPackage> packagesRemoved) {
+            // Disable logging when rolling back project operations
+            projectManager.Logger = null;
+
             foreach (var package in packagesAdded) {
                 // Remove each package that was added
                 projectManager.RemovePackageReference(package, forceRemove: false, removeDependencies: false);
