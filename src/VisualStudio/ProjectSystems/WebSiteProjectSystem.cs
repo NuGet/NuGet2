@@ -14,6 +14,8 @@ namespace NuGet.VisualStudio {
         private const string AppCodeFolder = "App_Code";
         private const string GeneratedFilesFolder = "Generated___Files";
 
+        private static readonly string[] _sourceFileExtensions = new[] { ".cs", ".vb" };
+
         public WebSiteProjectSystem(Project project)
             : base(project) {
         }
@@ -75,7 +77,7 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Determines if we need a source file to be under the App_Code folder
         /// </summary>
-        private bool RequiresAppCodeRemapping(string path) {
+        private static bool RequiresAppCodeRemapping(string path) {
             return !IsUnderAppCode(path) && IsSourceFile(path);
         }
 
@@ -83,9 +85,9 @@ namespace NuGet.VisualStudio {
             return path.StartsWith(AppCodeFolder, StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool IsSourceFile(string path) {
-            string extension = Path.GetExtension(path).ToLowerInvariant();
-            return extension.Equals(".cs") || extension.Equals(".vb");
+        private static bool IsSourceFile(string path) {
+            string extension = Path.GetExtension(path);
+            return _sourceFileExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
         }
     }
 }
