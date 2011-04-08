@@ -8,6 +8,9 @@ namespace PackageExplorer {
     [Export(typeof(IMessageBox))]
     public class MessageBoxService : IMessageBox {
 
+        [Import]
+        public Lazy<MainWindow> Window { get; set; }
+
         public MessageBoxService() {
         }
 
@@ -17,6 +20,7 @@ namespace PackageExplorer {
 
         public bool Confirm(string message, bool isWarning) {
             MessageBoxResult result = MessageBox.Show(
+                Window.Value,
                 message,
                 Resources.Resources.Dialog_Title,
                 MessageBoxButton.YesNo,
@@ -26,6 +30,7 @@ namespace PackageExplorer {
 
         public bool? ConfirmWithCancel(string message) {
             MessageBoxResult result = MessageBox.Show(
+                Window.Value,
                 message, 
                 Resources.Resources.Dialog_Title, 
                 MessageBoxButton.YesNoCancel, 
@@ -58,6 +63,7 @@ namespace PackageExplorer {
             }
 
             MessageBox.Show(
+                Window.Value,
                 message,
                 Resources.Resources.Dialog_Title,
                 MessageBoxButton.OK,
