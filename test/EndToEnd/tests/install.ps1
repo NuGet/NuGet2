@@ -95,7 +95,7 @@ function Test-WebsiteConfigElementsAreRemovedEvenIfReordered {
     Assert-Null $config.configuration.configSections
 }
 
-function Test-FailedInstallStillMarksPackageAsInstalled {
+function Test-FailedInstallRollsBackInstall {
     param(
         $context
     )
@@ -104,11 +104,11 @@ function Test-FailedInstallStillMarksPackageAsInstalled {
 
     # Act & Assert
     Assert-Throws { Install-Package haack.metaweblog -Project $p.Name -Source $context.RepositoryRoot } "The replacement token 'namespace' has no value."
-    Assert-Package $p haack.metaweblog 0.1.0
-    Assert-SolutionPackage haack.metaweblog 0.1.0
+    Assert-Null (Get-ProjectPackage $p haack.metaweblog 0.1.0)
+    Assert-Null (Get-SolutionPackage haack.metaweblog 0.1.0)
 }
 
-function Test-PackageWithIncompatibleAssembliesDontMarkPackageAsInstalled {
+function Test-PackageWithIncompatibleAssembliesRollsInstallBack {
     param(
         $context
     )
@@ -118,7 +118,7 @@ function Test-PackageWithIncompatibleAssembliesDontMarkPackageAsInstalled {
     # Act & Assert
     Assert-Throws { Install-Package BingMapAppSDK -Project $p.Name -Source $context.RepositoryRoot } "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v4.0'."
     Assert-Null (Get-ProjectPackage $p BingMapAppSDK 1.0.1011.1716)
-    Assert-SolutionPackage BingMapAppSDK 1.0.1011.1716
+    Assert-Null (Get-SolutionPackage BingMapAppSDK 1.0.1011.1716)
 }
 
 function Test-InstallPackageInvokeInstallScriptAndInitScript {
@@ -343,12 +343,10 @@ function Test-InstallPackageWithUnsupportedReference {
     
     # Act
     Assert-Throws { $p | Install-Package PackageWithUnsupportedReferences -Source $context.RepositoryRoot } "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v4.0'."
-    $package = Get-Package PackageWithUnsupportedReferences
-    $reference = @($package.AssemblyReferences)[0]
 
     # Assert    
-    Assert-AreEqual "Unsupported" $reference.TargetFramework.Identifier
-    Assert-Null (Get-AssemblyReference $p CommonServiceLocator.NinjectAdapter)
+    Assert-Null (Get-ProjectPackage $p PackageWithUnsupportedReferences)
+    Assert-Null (Get-SolutionPackage PackageWithUnsupportedReferences)
 }
 
 function Test-InstallPackageWithExeReference {
@@ -847,4 +845,19 @@ function Test-InstallPackageAfterRenaming {
     # Assert
     Assert-NotNull (Get-ProjectItem $p1 scripts\jquery-1.5.js)
     Assert-NotNull (Get-ProjectItem $p2 scripts\jquery-1.5.js) 
+}
+
+function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRollbackIfInUse {
+    # Arrange
+    $p1 = New-WebApplication
+    $p2 = New-WindowsPhoneClassLibrary
+
+    # Act
+    $p1 | Install-Package NuGet.Core    
+    Assert-Throws { $p2 | Install-Package NuGet.Core } "Unable to find assembly references that are compatible with the target framework 'Silverlight,Version=v4.0,Profile=WindowsPhone'."
+
+    # Assert    
+    Assert-Package $p1 NuGet.Core
+    Assert-SolutionPackage NuGet.Core
+    Assert-Null (Get-ProjectPackage $p2 NuGet.Core)
 }

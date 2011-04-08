@@ -231,4 +231,7 @@
   <data name="Warning_DirectoryNotEmpty" xml:space="preserve">
     <value>Directory '{0}' is not empty. Skipping...</value>
   </data>
+  <data name="Warning_RollingBack" xml:space="preserve">
+    <value>Install failed. Rolling back...</value>
+  </data>
 </root>

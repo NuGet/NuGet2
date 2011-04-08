@@ -124,7 +124,7 @@ namespace NuGet {
             AddPackageReference(package, ignoreDependencies);
         }
 
-        protected virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
+        public virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
             Execute(package, new ProjectInstallWalker(LocalRepository,
                                                       SourceRepository,
                                                       new DependentsWalker(LocalRepository),
@@ -246,12 +246,12 @@ namespace NuGet {
             RemovePackageReference(package, forceRemove, removeDependencies);
         }
 
-        protected virtual void RemovePackageReference(IPackage package, bool force, bool removeDependencies) {
+        public virtual void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies) {
             Execute(package, new UninstallWalker(LocalRepository,
                                                  new DependentsWalker(LocalRepository),
                                                  NullLogger.Instance,
                                                  removeDependencies,
-                                                 force));
+                                                 forceRemove));
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]

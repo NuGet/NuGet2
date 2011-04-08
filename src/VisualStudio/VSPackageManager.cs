@@ -67,11 +67,10 @@ namespace NuGet.VisualStudio {
 
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version);
 
-            // REVIEW: This isn't transactional, so if add package reference fails
-            // the user has to manually clean it up by uninstalling it
-            InstallPackage(package, ignoreDependencies);
-
-            AddPackageReference(projectManager, packageId, version, ignoreDependencies);
+            RunSolutionAction(() => {
+                InstallPackage(package, ignoreDependencies);
+                AddPackageReference(projectManager, packageId, version, ignoreDependencies);
+            });
 
             // Add package to recent repository
             AddPackageToRecentRepository(package);
@@ -104,7 +103,7 @@ namespace NuGet.VisualStudio {
                                                 out appliesToProject);
 
             if (appliesToProject) {
-                RunProjectActionWithRemoveEvent(projectManager, () => projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies));
+                RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
             }
             else {
                 UninstallPackage(package, forceRemove, removeDependencies);
@@ -130,9 +129,11 @@ namespace NuGet.VisualStudio {
 
             if (newPackage != null && package.Version != newPackage.Version) {
                 if (appliesToProject) {
-                    InstallPackage(newPackage, !updateDependencies);
+                    RunSolutionAction(() => {
+                        InstallPackage(newPackage, !updateDependencies);
+                        UpdatePackageReference(projectManager, packageId, version, updateDependencies);
+                    });
 
-                    UpdatePackageReference(projectManager, packageId, version, updateDependencies);
                 }
                 else {
                     // We might be updating a solution only package
@@ -282,27 +283,33 @@ namespace NuGet.VisualStudio {
                     packages[0].Id));
         }
 
+        private void RemovePackageReference(IProjectManager projectManager, string packageId, bool forceRemove, bool removeDependencies) {
+            RunProjectAction(projectManager, () => projectManager.RemovePackageReference(packageId, forceRemove, removeDependencies));
+        }
+
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {
-            RunProjectActionWithRemoveEvent(projectManager, () => projectManager.UpdatePackageReference(packageId, version, updateDependencies));
+            RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, version, updateDependencies));
         }
 
         private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
-            RunProjectActionWithRemoveEvent(projectManager, () => projectManager.AddPackageReference(packageId, version, ignoreDependencies));
+            RunProjectAction(projectManager, () => projectManager.AddPackageReference(packageId, version, ignoreDependencies));
         }
 
         private void ExecuteOperatonsWithPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, Action action, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
-            if (operations.Any()) {
-                foreach (var operation in operations) {
-                    Execute(operation);
+            RunSolutionAction(() => {
+                if (operations.Any()) {
+                    foreach (var operation in operations) {
+                        Execute(operation);
+                    }
                 }
-            }
-            else if (LocalRepository.Exists(package)) {
-                Logger.Log(MessageLevel.Info, VsResources.Log_PackageAlreadyInstalled, package.GetFullName());
-            }
+                else if (LocalRepository.Exists(package)) {
+                    Logger.Log(MessageLevel.Info, VsResources.Log_PackageAlreadyInstalled, package.GetFullName());
+                }
 
-            action();
+                action();
+            });
 
             // Add package to recent repository
             AddPackageToRecentRepository(package);
@@ -320,7 +327,7 @@ namespace NuGet.VisualStudio {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If we failed to add binding redirects we don't want it to stop the install/update.")]
-        private void AddBindingRedirects(IProjectManager projectManager) {            
+        private void AddBindingRedirects(IProjectManager projectManager) {
             // Find the project by it's unique name
             Project project = GetProject(projectManager);
 
@@ -338,54 +345,11 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void RunProjectActionWithRemoveEvent(IProjectManager projectManager, Action action) {
-            if (projectManager == null) {
-                return;
+        private void AddPackageToRecentRepository(IPackage package) {
+            // add the installed package to the recent repository
+            if (_recentPackagesRepository != null) {
+                _recentPackagesRepository.AddPackage(package);
             }
-
-            var packagesToRemove = new List<IPackage>();
-            EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
-                packagesToRemove.Add(e.Package);
-            };
-
-            // Try to get the project for this project manager
-            Project project = GetProject(projectManager);
-            
-            IVsProjectBuildSystem build = null;
-
-            if (project != null) {
-                build = project.ToVsProjectBuildSystem();
-            }
-
-            // Add the handlers
-            projectManager.PackageReferenceRemoved += removeHandler;
-
-            try {
-                if (build != null) {
-                    // Start a batch edit so there is no background compilation until we're done
-                    // processing project actions
-                    build.StartBatchEdit();
-                }
-
-                action();
-            }
-            finally {
-                if (build != null) {
-                    // End the batch edit when we are done.
-                    build.EndBatchEdit();
-                }
-
-                // Remove the handlers
-                projectManager.PackageReferenceRemoved -= removeHandler;
-
-                // Remove any packages that would be removed as a result of updating a dependency or the package itself
-                // We can execute the uninstall directly since we don't need to resolve dependencies again.
-                foreach (var package in packagesToRemove) {
-                    ExecuteUninstall(package);
-                }
-            }
-
-            AddBindingRedirects(projectManager);
         }
 
         private void InitializeLogger(ILogger logger, IProjectManager projectManager) {
@@ -398,11 +362,130 @@ namespace NuGet.VisualStudio {
                 projectManager.Project.Logger = logger;
             }
         }
+        /// <summary>
+        /// Runs the specified action and rolls back any installed packages if on failure.
+        /// </summary>
+        private void RunSolutionAction(Action action) {
+            var packagesAdded = new List<IPackage>();
 
-        private void AddPackageToRecentRepository(IPackage package) {
-            // add the installed package to the recent repository
-            if (_recentPackagesRepository != null) {
-                _recentPackagesRepository.AddPackage(package);
+            EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) => {
+                // Record packages that we successfully installed
+                packagesAdded.Add(e.Package);
+            };
+
+            PackageInstalled += installedHandler;
+
+            try {
+                // Execute the action
+                action();
+            }
+            catch {
+                if (packagesAdded.Any()) {
+                    // Only print the rollback warning if we have something to rollback
+                    Logger.Log(MessageLevel.Warning, VsResources.Warning_RollingBack);
+                }
+
+                // Don't log anything during the rollback
+                Logger = null;
+
+                // Rollback the install if it fails
+                Uninstall(packagesAdded);
+                throw;
+            }
+            finally {
+                // Remove the event handler
+                PackageInstalling -= installedHandler;
+            }
+        }
+
+        /// <summary>
+        /// Runs action on the project manager and rollsback any package installs if it fails.
+        /// </summary>
+        private void RunProjectAction(IProjectManager projectManager, Action action) {
+            if (projectManager == null) {
+                return;
+            }
+
+            // Keep track of what was added and removed
+            var packagesAdded = new List<IPackage>();
+            var packagesRemoved = new List<IPackage>();
+
+            EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) => {
+                packagesRemoved.Add(e.Package);
+            };
+
+            EventHandler<PackageOperationEventArgs> addedHandler = (sender, e) => {
+                packagesAdded.Add(e.Package);
+            };
+
+            // Try to get the project for this project manager
+            Project project = GetProject(projectManager);
+
+            IVsProjectBuildSystem build = null;
+
+            if (project != null) {
+                build = project.ToVsProjectBuildSystem();
+            }
+
+            // Add the handlers
+            projectManager.PackageReferenceRemoved += removeHandler;
+            projectManager.PackageReferenceAdding += addedHandler;
+
+            try {
+                if (build != null) {
+                    // Start a batch edit so there is no background compilation until we're done
+                    // processing project actions
+                    build.StartBatchEdit();
+                }
+
+                action();
+            }
+            catch {
+                // We need to Remove the handlers here since we're going to attempt
+                // a rollback and we don't want modify the collections while rolling back.
+                projectManager.PackageReferenceRemoved -= removeHandler;
+                projectManager.PackageReferenceAdded -= addedHandler;
+
+                // When things fail attempt a rollback
+                RollbackProjectActions(projectManager, packagesAdded, packagesRemoved);
+
+                // Clear removed packages so we don't try to remove them again (small optimization)
+                packagesRemoved.Clear();
+                throw;
+            }
+            finally {
+                if (build != null) {
+                    // End the batch edit when we are done.
+                    build.EndBatchEdit();
+                }
+
+                // Remove the handlers
+                projectManager.PackageReferenceRemoved -= removeHandler;
+                projectManager.PackageReferenceAdded -= addedHandler;
+
+                // Remove any packages that would be removed as a result of updating a dependency or the package itself
+                // We can execute the uninstall directly since we don't need to resolve dependencies again.
+                Uninstall(packagesRemoved);
+            }
+
+            AddBindingRedirects(projectManager);
+        }
+
+        private static void RollbackProjectActions(IProjectManager projectManager, IEnumerable<IPackage> packagesAdded, IEnumerable<IPackage> packagesRemoved) {
+            foreach (var package in packagesAdded) {
+                // Remove each package that was added
+                projectManager.RemovePackageReference(package, forceRemove: false, removeDependencies: false);
+            }
+
+            foreach (var package in packagesRemoved) {
+                // Add each package that was removed
+                projectManager.AddPackageReference(package, ignoreDependencies: true);
+            }
+        }
+
+        private void Uninstall(IEnumerable<IPackage> packages) {
+            foreach (var package in packages) {
+                ExecuteUninstall(package);
             }
         }
     }

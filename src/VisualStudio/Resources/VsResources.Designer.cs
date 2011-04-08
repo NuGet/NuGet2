@@ -401,5 +401,14 @@ namespace NuGet.VisualStudio.Resources {
                 return ResourceManager.GetString("Warning_FileAlreadyExists", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install failed. Rolling back....
+        /// </summary>
+        public static string Warning_RollingBack {
+            get {
+                return ResourceManager.GetString("Warning_RollingBack", resourceCulture);
+            }
+        }
     }
 }
