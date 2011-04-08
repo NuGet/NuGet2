@@ -432,4 +432,7 @@
   <data name="UsingNuspecForMetadata" xml:space="preserve">
     <value>Using '{0}' for metadata.</value>
   </data>
+  <data name="ListCommandAllVersionsDescription" xml:space="preserve">
+    <value>List all versions of a package. By default, only the latest package version is displayed.</value>
+  </data>
 </root>

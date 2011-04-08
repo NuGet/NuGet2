@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using NuGet.Common;
+using System.Diagnostics;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "list", "ListCommandDescription", 
@@ -16,6 +17,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "ListCommandVerboseListDescription")]
         public bool Verbose { get; set; }
 
+        [Option(typeof(NuGetResources), "ListCommandAllVersionsDescription")]
+        public bool AllVersions { get; set; }
+
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         [ImportingConstructor]
@@ -27,7 +31,7 @@ namespace NuGet.Commands {
             RepositoryFactory = packageRepositoryFactory;
         }
 
-        public IQueryable<IPackage> GetPackages() {
+        public IEnumerable<IPackage> GetPackages() {
             var feedUrl = DefaultFeedUrl;
             if (!String.IsNullOrEmpty(Source)) {
                 feedUrl = Source;
@@ -35,11 +39,15 @@ namespace NuGet.Commands {
 
             var packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl, "feed"));
 
+            IQueryable<IPackage> packages = packageRepository.GetPackages();
             if (Arguments != null && Arguments.Any()) {
-                return packageRepository.GetPackages().Find(Arguments.ToArray());
+                packages = packages.Find(Arguments.ToArray());
             }
-
-            return packageRepository.GetPackages();
+            if (AllVersions) {
+                // Do not collapse versions
+                return packages;
+            }
+            return packages.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
         public override void ExecuteCommand() {

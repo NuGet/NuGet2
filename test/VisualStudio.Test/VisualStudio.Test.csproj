@@ -30,7 +30,6 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />

@@ -95,7 +95,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ScriptExecutorExtensions.cs" />
     <Compile Include="IRepositorySettings.cs" />
     <Compile Include="IFileSystemProvider.cs" />
