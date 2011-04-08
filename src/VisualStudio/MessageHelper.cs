@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio {
                ServiceLocator.GetInstance<IServiceProvider>(),
                message,
                title,
-               OLEMSGICON.OLEMSGICON_CRITICAL,
+               OLEMSGICON.OLEMSGICON_WARNING,
                OLEMSGBUTTON.OLEMSGBUTTON_OK,
                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
