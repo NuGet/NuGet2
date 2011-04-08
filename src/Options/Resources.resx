@@ -142,7 +142,7 @@
     <value>The source specified cannot be empty. Please provide a valid source.</value>
   </data>
   <data name="ShowWarning_Title" xml:space="preserve">
-    <value>Visual Studio</value>
+    <value>Package Manager Options</value>
   </data>
   <data name="ShowWarning_UniqueName" xml:space="preserve">
     <value>The name specified has already been added to the list of available package sources. Please provide a unique name.</value>

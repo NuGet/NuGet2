@@ -3,7 +3,6 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -72,11 +71,9 @@ namespace NuGet.Tools {
                     window.ShowModal();
                 }
                 catch (TargetInvocationException exception) {
-                    MessageBox.Show(
+                    MessageHelper.ShowErrorMessage(
                         (exception.InnerException ?? exception).Message,
-                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                     ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
                 }
@@ -94,11 +91,9 @@ namespace NuGet.Tools {
                     errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
                 }
 
-                MessageBox.Show(
-                    errorMessage,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                MessageHelper.ShowWarningMessage(
+                    errorMessage, 
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
             }
         }
 
@@ -129,11 +124,9 @@ namespace NuGet.Tools {
                 ShowOptionPage(typeof(ToolsOptionsPage));
             }
             catch (Exception exception) {
-                MessageBox.Show(
-                    exception.Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageHelper.ShowErrorMessage(
+                    (exception.InnerException ?? exception).Message,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                 ExceptionHelper.WriteToActivityLog(exception);
             }
@@ -144,11 +137,9 @@ namespace NuGet.Tools {
                 ShowOptionPage(typeof(GeneralOptionPage));
             }
             catch (Exception exception) {
-                MessageBox.Show(
-                    exception.Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageHelper.ShowErrorMessage(
+                    (exception.InnerException ?? exception).Message,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                 ExceptionHelper.WriteToActivityLog(exception);
             }
@@ -166,14 +157,13 @@ namespace NuGet.Tools {
             // get debugging context cookie
             Guid debuggingContextGuid = VSConstants.UICONTEXT_Debugging;
             _vsMonitorSelection.GetCmdUIContextCookie(ref debuggingContextGuid, out _debuggingContextCookie);
+
             // get the solution building cookie
             Guid solutionBuildingContextGuid = VSConstants.UICONTEXT_SolutionBuilding;
             _vsMonitorSelection.GetCmdUIContextCookie(ref solutionBuildingContextGuid, out _solutionBuildingContextCookie);
 
             _dte = ServiceLocator.GetInstance<DTE>();
             _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
-
-
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();

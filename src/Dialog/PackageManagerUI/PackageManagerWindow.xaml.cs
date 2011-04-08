@@ -206,7 +206,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                     provider.Execute(selectedItem);
                 }
                 catch (Exception exception) {
-                    MessageHelper.ShowErrorMessage(exception);
+                    MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                     ExceptionHelper.WriteToActivityLog(exception);
                 }
