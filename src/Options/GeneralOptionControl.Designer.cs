@@ -34,35 +34,9 @@
             this.UpdateHeader = new System.Windows.Forms.Label();
             this.PackagesCacheHeaderDivider = new System.Windows.Forms.GroupBox();
             this.PackagesCacheHeader = new System.Windows.Forms.Label();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // UpdateHeader
-            // 
-            resources.ApplyResources(this.UpdateHeader, "UpdateHeader");
-            this.UpdateHeader.Name = "UpdateHeader";
-            // 
-            // UpdateHeaderDivider
-            // 
-            resources.ApplyResources(this.UpdateHeaderDivider, "UpdateHeaderDivider");
-            this.UpdateHeaderDivider.Name = "UpdateHeaderDivider";
-            this.UpdateHeaderDivider.TabStop = false;
-            // 
-            // checkForUpdate
-            // 
-            resources.ApplyResources(this.checkForUpdate, "checkForUpdate");
-            this.checkForUpdate.Name = "checkForUpdate";
-            this.checkForUpdate.UseVisualStyleBackColor = true;
-            // 
-            // RecentPackagesHeader
-            // 
-            resources.ApplyResources(this.RecentPackagesHeader, "RecentPackagesHeader");
-            this.RecentPackagesHeader.Name = "RecentPackagesHeader";
-            // 
-            // RecentPackagesHeaderDivider
-            // 
-            resources.ApplyResources(this.RecentPackagesHeaderDivider, "RecentPackagesHeaderDivider");
-            this.RecentPackagesHeaderDivider.Name = "RecentPackagesHeaderDivider";
-            this.RecentPackagesHeaderDivider.TabStop = false;
             // 
             // ClearButton
             // 
@@ -71,16 +45,11 @@
             this.ClearButton.UseVisualStyleBackColor = true;
             this.ClearButton.Click += new System.EventHandler(this.OnClearRecentPackagesClick);
             // 
-            // PackagesCacheHeader
+            // checkForUpdate
             // 
-            resources.ApplyResources(this.PackagesCacheHeader, "PackagesCacheHeader");
-            this.PackagesCacheHeader.Name = "PackagesCacheHeader";
-            // 
-            // PackagesCacheHeaderDivider
-            // 
-            resources.ApplyResources(this.PackagesCacheHeaderDivider, "PackagesCacheHeaderDivider");
-            this.PackagesCacheHeaderDivider.Name = "PackagesCacheHeaderDivider";
-            this.PackagesCacheHeaderDivider.TabStop = false;
+            resources.ApplyResources(this.checkForUpdate, "checkForUpdate");
+            this.checkForUpdate.Name = "checkForUpdate";
+            this.checkForUpdate.UseVisualStyleBackColor = true;
             // 
             // clearPackageCacheButton
             // 
@@ -96,6 +65,46 @@
             this.browsePackageCacheButton.UseVisualStyleBackColor = true;
             this.browsePackageCacheButton.Click += new System.EventHandler(this.OnBrowsePackageCacheClick);
             // 
+            // RecentPackagesHeader
+            // 
+            resources.ApplyResources(this.RecentPackagesHeader, "RecentPackagesHeader");
+            this.RecentPackagesHeader.Name = "RecentPackagesHeader";
+            // 
+            // RecentPackagesHeaderDivider
+            // 
+            resources.ApplyResources(this.RecentPackagesHeaderDivider, "RecentPackagesHeaderDivider");
+            this.RecentPackagesHeaderDivider.Name = "RecentPackagesHeaderDivider";
+            this.RecentPackagesHeaderDivider.TabStop = false;
+            // 
+            // UpdateHeaderDivider
+            // 
+            resources.ApplyResources(this.UpdateHeaderDivider, "UpdateHeaderDivider");
+            this.UpdateHeaderDivider.Name = "UpdateHeaderDivider";
+            this.UpdateHeaderDivider.TabStop = false;
+            // 
+            // UpdateHeader
+            // 
+            resources.ApplyResources(this.UpdateHeader, "UpdateHeader");
+            this.UpdateHeader.Name = "UpdateHeader";
+            // 
+            // PackagesCacheHeaderDivider
+            // 
+            resources.ApplyResources(this.PackagesCacheHeaderDivider, "PackagesCacheHeaderDivider");
+            this.PackagesCacheHeaderDivider.Name = "PackagesCacheHeaderDivider";
+            this.PackagesCacheHeaderDivider.TabStop = false;
+            // 
+            // PackagesCacheHeader
+            // 
+            resources.ApplyResources(this.PackagesCacheHeader, "PackagesCacheHeader");
+            this.PackagesCacheHeader.Name = "PackagesCacheHeader";
+            // 
+            // tableLayoutPanel1
+            // 
+            resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
+            this.tableLayoutPanel1.Controls.Add(this.clearPackageCacheButton, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.browsePackageCacheButton, 1, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            // 
             // GeneralOptionControl
             // 
             resources.ApplyResources(this, "$this");
@@ -108,9 +117,10 @@
             this.Controls.Add(this.ClearButton);
             this.Controls.Add(this.PackagesCacheHeader);
             this.Controls.Add(this.PackagesCacheHeaderDivider);
-            this.Controls.Add(this.clearPackageCacheButton);
-            this.Controls.Add(this.browsePackageCacheButton);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "GeneralOptionControl";
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -128,5 +138,6 @@
         private System.Windows.Forms.Label UpdateHeader;
         private System.Windows.Forms.GroupBox PackagesCacheHeaderDivider;
         private System.Windows.Forms.Label PackagesCacheHeader;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
