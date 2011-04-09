@@ -15,7 +15,6 @@ namespace NuGet.VisualStudio {
     /// </summary>
     // REVIEW: Make this internal 
     public static class ServiceLocator {
-
         private static Dictionary<Type, object> _knownServices = new Dictionary<Type, object>();
 
         public static void AddService(Type serviceType, object serviceInstance) {
