@@ -18,17 +18,15 @@ namespace NuGet.Commands {
             // Frist argument should be the package
             string packagePath = Arguments[0];
 
-#if SYMBOL_SOURCE
             // Don't push symbols by default
             bool pushSymbols = false;
-#endif
             string source = null;
 
             if (!String.IsNullOrEmpty(Source)) {
+                CommandLineUtility.ValidateSource(Source);
                 source = Source;
             }
             else {
-#if SYMBOL_SOURCE
                 if (packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase)) {
                     source = GalleryServer.DefaultSymbolServerUrl;
                 }
@@ -36,14 +34,10 @@ namespace NuGet.Commands {
                     source = GalleryServer.DefaultGalleryServerUrl;
                     pushSymbols = true;
                 }
-#else
-                source = GalleryServer.DefaultGalleryServerUrl;
-#endif
             }
 
             PushPackage(packagePath, source);
 
-#if SYMBOL_SOURCE
             if (pushSymbols) {
                 // Get the symbol package for this package
                 string symbolPackagePath = GetSymbolsPath(packagePath);
@@ -56,14 +50,13 @@ namespace NuGet.Commands {
                     string apiKey = GetApiKey(source, configOnly: true, throwIfNotFound: false);
 
                     if (String.IsNullOrEmpty(apiKey)) {
-                        Console.WriteWarning(NuGetResources.SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
+                        Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
                     }
                     else {
                         PushPackage(symbolPackagePath, source, apiKey);
                     }
                 }
             }
-#endif
         }
 
         /// <summary>
@@ -84,7 +77,7 @@ namespace NuGet.Commands {
             // Push the package to the server
             var package = new ZipPackage(packagePath);
 
-            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceText(source));
+            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(source));
 
             using (Stream stream = package.GetStream()) {
                 gallery.CreatePackage(apiKey, stream);

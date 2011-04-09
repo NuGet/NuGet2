@@ -16,19 +16,34 @@ namespace NuGet.Commands {
             //Frist argument should be the ApiKey
             string apiKey = Arguments[0];
 
+            bool setSymbolServerKey = false;
+
             //If the user passed a source use it for the gallery location
             string galleryServerUrl;
             if (String.IsNullOrEmpty(Source)) {
                 galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
+                // If no source was specified, set the default symbol server key to be the same
+                setSymbolServerKey = true;
             }
             else {
+                CommandLineUtility.ValidateSource(Source);
                 galleryServerUrl = Source;
             }
 
             var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, galleryServerUrl, apiKey);
-
-            Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, galleryServerUrl);
+            
+            // Setup the symbol server key
+            if (setSymbolServerKey) {
+                settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, GalleryServer.DefaultSymbolServerUrl, apiKey);
+                Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved, 
+                                  apiKey,
+                                  CommandLineUtility.GetSourceDisplayName(galleryServerUrl),
+                                  CommandLineUtility.GetSourceDisplayName(GalleryServer.DefaultSymbolServerUrl));
+            }
+            else {
+                Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, CommandLineUtility.GetSourceDisplayName(galleryServerUrl));
+            }
         }
     }
 }
