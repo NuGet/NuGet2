@@ -21,19 +21,16 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private static void AddExistingFileToFolder(PackageFolder folder) {
-            OpenFileDialog dialog = new OpenFileDialog() {
-                CheckFileExists = true,
-                CheckPathExists = true,
-                DefaultExt = "*.*",
-                Multiselect = true,
-                ValidateNames = true,
-                Filter = "All files (*.*)|*.*"
-            };
+        private void AddExistingFileToFolder(PackageFolder folder) {
 
-            bool? result = dialog.ShowDialog();
-            if (result ?? false) {
-                foreach (string file in dialog.FileNames) {
+            string[] selectedFiles;
+            bool result = ViewModel.UIServices.OpenMultipleFilesDialog(
+                "Select Files",
+                "All files (*.*)|*.*",
+                out selectedFiles);
+
+            if (result) {
+                foreach (string file in selectedFiles) {
                     folder.AddFile(file);
                 }
             }

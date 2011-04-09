@@ -9,7 +9,7 @@ using PackageExplorerViewModel.Types;
 namespace PackageExplorer {
 
     [Export(typeof(ISettingsManager))]
-    public class SettingsManager : ISettingsManager {
+    internal class SettingsManager : ISettingsManager {
 
         public const string ApiKeysSectionName = "apikeys";
 

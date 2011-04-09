@@ -64,6 +64,7 @@
     <Compile Include="Commands\OpenContentFileCommand.cs" />
     <Compile Include="Commands\OpenWithContentFileCommand.cs" />
     <Compile Include="Commands\PackagePartCommandBase.cs" />
+    <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="EmptyPackage.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MruManager.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Commands\SavePackageCommand.cs" />
     <Compile Include="Types\FileContentInfo.cs" />
     <Compile Include="Types\IMruPackageSourceManager.cs" />
+    <Compile Include="Types\IUIServices.cs" />
     <Compile Include="Types\SourceLanguageType.cs" />
     <Compile Include="Types\IMessageBox.cs" />
     <Compile Include="Types\IMruManager.cs" />

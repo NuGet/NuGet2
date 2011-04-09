@@ -26,7 +26,9 @@ namespace PackageExplorerViewModel {
 
         private void SaveFile(PackageFile file) {
             string selectedFileName;
-            if (ViewModel.OpenSaveFileDialog(file.Name, false, out selectedFileName))
+            string title = "Save " + file.Name;
+            string filter = "All files (*.*)|*.*";
+            if (ViewModel.UIServices.OpenSaveFileDialog(title, file.Name, filter, out selectedFileName))
             {
                 using (FileStream fileStream = File.OpenWrite(selectedFileName))
                 {

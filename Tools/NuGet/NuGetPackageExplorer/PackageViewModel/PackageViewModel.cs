@@ -21,6 +21,7 @@ namespace PackageExplorerViewModel {
         private string _packageSource;
         private readonly IMessageBox _messageBox;
         private readonly IMruManager _mruManager;
+        private readonly IUIServices _uiServices;
 
         public IMessageBox MessageBox {
             get {
@@ -28,7 +29,19 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        internal PackageViewModel(IPackage package, string source, IMessageBox messageBox, IMruManager mruManager) {
+        public IUIServices UIServices {
+            get {
+                return _uiServices;
+            }
+        }
+
+        internal PackageViewModel(
+            IPackage package, 
+            string source, 
+            IMessageBox messageBox, 
+            IMruManager mruManager,
+            IUIServices uiServices) {
+
             if (package == null) {
                 throw new ArgumentNullException("package");
             }
@@ -38,7 +51,11 @@ namespace PackageExplorerViewModel {
             if (mruManager == null) {
                 throw new ArgumentNullException("mruManager");
             }
+            if (uiServices == null) {
+                throw new ArgumentNullException("uiServices");
+            }
 
+            _uiServices = uiServices;
             _mruManager = mruManager;
             _messageBox = messageBox;
             _package = package;
@@ -258,31 +275,6 @@ namespace PackageExplorerViewModel {
         public void ShowFile(FileContentInfo fileInfo) {
             ShowContentViewer = true;
             CurrentFileInfo = fileInfo;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
-        public bool OpenSaveFileDialog(string defaultName, bool addPackageExtension, out string selectedFileName) {
-
-            var filter = "All files (*.*)|*.*";
-            if (addPackageExtension) {
-                filter = "NuGet package file (*.nupkg)|*.nupkg|" + filter;
-            }
-            var dialog = new SaveFileDialog() {
-                OverwritePrompt = true,
-                Title = "Save " + defaultName,
-                Filter = filter,
-                FileName = defaultName
-            };
-
-            bool? result = dialog.ShowDialog();
-            if (result ?? false) {
-                selectedFileName = dialog.FileName;
-                return true;
-            }
-            else {
-                selectedFileName = null;
-                return false;
-            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]

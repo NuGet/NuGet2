@@ -79,8 +79,10 @@ namespace PackageExplorerViewModel {
 
         private void SaveAs() {
             string packageName = ViewModel.PackageMetadata.ToString() + Constants.PackageExtension;
+            string title = "Save " + packageName;
+            string filter = "NuGet package file (*.nupkg)|*.nupkg|All files (*.*)|*.*";
             string selectedPackagePath;
-            if (ViewModel.OpenSaveFileDialog(packageName, true, out selectedPackagePath)) {
+            if (ViewModel.UIServices.OpenSaveFileDialog(title, packageName, filter, out selectedPackagePath)) {
                 SavePackage(selectedPackagePath);
                 ViewModel.PackageSource = selectedPackagePath;
             }

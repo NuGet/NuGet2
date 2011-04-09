@@ -11,7 +11,6 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Microsoft.Win32;
 using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
@@ -29,7 +28,7 @@ namespace PackageExplorer {
         private readonly IPackageViewModelFactory _packageViewModelFactory;
 
         [Import]
-        public IMessageBox MessageBox {
+        public IMessageBox MessageBoxServices {
             get;
             set;
         }
@@ -43,15 +42,18 @@ namespace PackageExplorer {
         [Import]
         public IMruPackageSourceManager PackageSourceManager { get; set; }
 
+        [Import]
+        public IUIServices UIServices { get; set; }
+
         [ImportingConstructor]
         public MainWindow(IMruManager mruManager, IPackageViewModelFactory packageViewModelFactory) {
             InitializeComponent();
 
-            PackageMetadataEditor.MessageBox = MessageBox;
+            PackageMetadataEditor.MessageBox = MessageBoxServices;
             PackageMetadataEditor.PackageViewModelFactory = packageViewModelFactory;
             RecentFilesMenuItem.DataContext = _mruManager = mruManager;
             RecentFilesContainer.Collection = _mruManager.Files;
-            
+
             _packageViewModelFactory = packageViewModelFactory;
         }
 
@@ -66,7 +68,7 @@ namespace PackageExplorer {
 
         internal void OpenLocalPackage(string packagePath) {
             if (!File.Exists(packagePath)) {
-                MessageBox.Show("File not found at " + packagePath, MessageLevel.Error);
+                MessageBoxServices.Show("File not found at " + packagePath, MessageLevel.Error);
                 return;
             }
             PackageSourceItem.SetCurrentValue(ContentControl.ContentProperty, "Loading " + packagePath + "...");
@@ -75,21 +77,19 @@ namespace PackageExplorer {
 
         private void OpenLocalPackageCore(string packagePath) {
             IPackage package = null;
-            
+
             try {
                 string extension = Path.GetExtension(packagePath);
-                if (extension.Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
-                {
+                if (extension.Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase)) {
                     package = new ZipPackage(packagePath);
                 }
-                else if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
-                {
+                else if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
                     PackageBuilder builder = new PackageBuilder(packagePath);
                     package = builder.Build();
                 }
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.Message, MessageLevel.Error);
+                MessageBoxServices.Show(ex.Message, MessageLevel.Error);
                 return;
             }
 
@@ -101,8 +101,7 @@ namespace PackageExplorer {
         private void LoadPackage(IPackage package, string packagePath, PackageType packageType) {
             if (package != null) {
                 DataContext = _packageViewModelFactory.CreateViewModel(package, packagePath);
-                if (!String.IsNullOrEmpty(packagePath))
-                {
+                if (!String.IsNullOrEmpty(packagePath)) {
                     _mruManager.NotifyFileAdded(package, packagePath, packageType);
                 }
             }
@@ -119,12 +118,10 @@ namespace PackageExplorer {
 
         private void OpenMenuItem_Click(object sender, ExecutedRoutedEventArgs e) {
             string parameter = (string)e.Parameter;
-            if (parameter == "Feed")
-            {
+            if (parameter == "Feed") {
                 OpenPackageFromNuGetFeed();
             }
-            else
-            {
+            else {
                 OpenPackageFromLocal();
             }
         }
@@ -135,24 +132,20 @@ namespace PackageExplorer {
                 return;
             }
 
-            OpenFileDialog dialog = new OpenFileDialog() {
-                CheckFileExists = true,
-                CheckPathExists = true,
-                FilterIndex = 0,
-                Multiselect = false,
-                ValidateNames = true,
-                Filter = StringResources.Dialog_OpenFileFilter
-            };
+            string selectedFile;
+            bool result = UIServices.OpenFileDialog(
+                "Select File",
+                StringResources.Dialog_OpenFileFilter,
+                out selectedFile);
 
-            bool? result = dialog.ShowDialog();
-            if (result ?? false) {
-                OpenLocalPackage(dialog.FileName);
+            if (result) {
+                OpenLocalPackage(selectedFile);
             }
         }
 
         private void OpenPackageFromNuGetFeed() {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                MessageBox.Show(
+                MessageBoxServices.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;
@@ -163,7 +156,7 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog() { 
+            var dialog = new PackageChooserDialog() {
                 Owner = this,
                 DataContext = _packageViewModelFactory.CreatePackageChooserViewModel()
             };
@@ -176,11 +169,11 @@ namespace PackageExplorer {
                     if (cachePackage == null || cachePackage.GetHash() != selectedPackage.PackageHash) {
                         // if not in the cache, or if the cache package's hash is different from the feed hash, (re)download it
                         var progressWindow = new DownloadProgressWindow(
-                            selectedPackage.DownloadUrl, 
-                            selectedPackage.Id, 
+                            selectedPackage.DownloadUrl,
+                            selectedPackage.Id,
                             ((IPackage)selectedPackage).Version) {
-                            Owner = this
-                        };
+                                Owner = this
+                            };
 
                         result = progressWindow.ShowDialog();
                         if (result ?? false) {
@@ -284,29 +277,23 @@ namespace PackageExplorer {
             }
         }
 
-        private void AddFileToFolder(PackageFolder folder, string file)
-        {
-            if (folder == null)
-            {
+        private void AddFileToFolder(PackageFolder folder, string file) {
+            if (folder == null) {
                 string guessFolderName = GuessFolderNameFromFile(file);
-                bool confirmed = MessageBox.Confirm(
+                bool confirmed = MessageBoxServices.Confirm(
                     String.Format(CultureInfo.CurrentCulture, "Do you want to place the file '{0}' into '{1}' folder?", file, guessFolderName));
 
                 var rootFolder = (DataContext as PackageViewModel).RootFolder;
 
-                if (confirmed)
-                {
-                    if (rootFolder.ContainsFolder(guessFolderName))
-                    {
+                if (confirmed) {
+                    if (rootFolder.ContainsFolder(guessFolderName)) {
                         folder = (PackageFolder)rootFolder[guessFolderName];
                     }
-                    else
-                    {
+                    else {
                         folder = rootFolder.AddFolder(guessFolderName);
                     }
                 }
-                else
-                {
+                else {
                     folder = rootFolder;
                 }
             }
@@ -314,19 +301,15 @@ namespace PackageExplorer {
             folder.AddFile(file);
         }
 
-        private static string GuessFolderNameFromFile(string file)
-        {
+        private static string GuessFolderNameFromFile(string file) {
             string extension = Path.GetExtension(file).ToUpperInvariant();
-            if (extension == ".DLL")
-            {
+            if (extension == ".DLL") {
                 return "lib";
             }
-            else if (extension == ".PS1" || extension == ".PSM1" || extension == ".PSD1")
-            {
+            else if (extension == ".PS1" || extension == ".PSM1" || extension == ".PSD1") {
                 return "tools";
             }
-            else
-            {
+            else {
                 return "content";
             }
         }
@@ -369,7 +352,7 @@ namespace PackageExplorer {
             if (HasUnsavedChanges) {
 
                 // if there is unsaved changes, ask user for confirmation
-                var result = MessageBox.ConfirmWithCancel(StringResources.Dialog_SaveQuestion);
+                var result = MessageBoxServices.ConfirmWithCancel(StringResources.Dialog_SaveQuestion);
                 if (result == null) {
                     return true;
                 }
@@ -485,7 +468,7 @@ namespace PackageExplorer {
 
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                MessageBox.Show(
+                MessageBoxServices.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;
@@ -494,7 +477,7 @@ namespace PackageExplorer {
             var viewModel = (PackageViewModel)DataContext;
 
             if (!viewModel.IsValid) {
-                MessageBox.Show(
+                MessageBoxServices.Show(
                     PackageExplorer.Resources.Resources.PackageHasNoFile,
                     MessageLevel.Warning);
                 return;
@@ -652,10 +635,10 @@ namespace PackageExplorer {
                 if (model != null) {
                     try {
                         model.Export(rootPath);
-                        MessageBox.Show("The package has been exported successfully.", MessageLevel.Information);
+                        MessageBoxServices.Show("The package has been exported successfully.", MessageLevel.Information);
                     }
                     catch (Exception ex) {
-                        MessageBox.Show(ex.Message, MessageLevel.Error);
+                        MessageBoxServices.Show(ex.Message, MessageLevel.Error);
                     }
                 }
 
@@ -689,8 +672,8 @@ namespace PackageExplorer {
         private void DownloadAndOpenDataServicePackage(MruItem item) {
             Uri downloadUrl;
             if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
-                var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version) { 
-                    Owner = this 
+                var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version) {
+                    Owner = this
                 };
                 var result = progressWindow.ShowDialog();
                 if (result ?? false) {

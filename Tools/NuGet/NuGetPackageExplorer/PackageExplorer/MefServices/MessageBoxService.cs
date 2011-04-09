@@ -6,7 +6,7 @@ using PackageExplorerViewModel.Types;
 namespace PackageExplorer {
 
     [Export(typeof(IMessageBox))]
-    public class MessageBoxService : IMessageBox {
+    internal class MessageBoxService : IMessageBox {
 
         [Import]
         public Lazy<MainWindow> Window { get; set; }

@@ -19,18 +19,22 @@ namespace PackageExplorerViewModel {
         }
 
         [Import]
-        public IMruPackageSourceManager MruPackageSourceManager
-        {
+        public IMruPackageSourceManager MruPackageSourceManager {
+            get;
+            set;
+        }
+
+        [Import]
+        public IUIServices UIServices {
             get;
             set;
         }
 
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
-            return new PackageViewModel(package, packageSource, MessageBoxService, MruManager);
+            return new PackageViewModel(package, packageSource, MessageBoxService, MruManager, UIServices);
         }
 
-        public PackageChooserViewModel CreatePackageChooserViewModel()
-        {
+        public PackageChooserViewModel CreatePackageChooserViewModel() {
             return new PackageChooserViewModel(MruPackageSourceManager);
         }
     }
