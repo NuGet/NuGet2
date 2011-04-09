@@ -93,6 +93,7 @@
     <Compile Include="VersionSpecTest.cs" />
     <Compile Include="VersionUtilityTest.cs" />
     <Compile Include="XmlExtensionsTest.cs" />
+    <Compile Include="ZipPackageTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\Core.csproj">

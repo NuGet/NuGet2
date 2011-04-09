@@ -33,6 +33,15 @@ namespace NuGet {
             : this(fileName, enableCaching: false) {
         }
 
+        public ZipPackage(Stream stream) {
+            if (stream == null) {
+                throw new ArgumentNullException("stream");
+            }
+            _enableCaching = false;
+            _streamFactory = stream.ToStreamFactory();
+            EnsureManifest();
+        }
+
         internal ZipPackage(string fileName, bool enableCaching) {
             if (String.IsNullOrEmpty(fileName)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "fileName");
