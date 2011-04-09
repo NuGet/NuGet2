@@ -2,24 +2,24 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Design;
 using System.Linq;
-using System.Windows.Automation;
-using Microsoft.VisualStudio;
+using System.Windows;
+using System.Windows.Threading;
 using Microsoft.VisualStudio.ExtensionManager;
 using Microsoft.VisualStudio.ExtensionManager.UI;
-using Microsoft.VisualStudio.Shell.Interop;
-
+using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Task = System.Threading.Tasks.Task;
-using Thread = System.Threading.Thread;
 
 namespace NuGet.VisualStudio {
 
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
-
         private static readonly object _showUpdatesLock = new object();
+        private static readonly Guid ExtensionManagerCommandGuid = new Guid("{5dd0bb59-7076-4c59-88d3-de36931f63f0}");
+        private const int ExtensionManagerCommandId = (int)0xBB8;
         private const string NuGetVSIXId = "NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5";
+        
+        private readonly IMenuCommandService _menuCommandService;
         private readonly IVsExtensionRepository _extensionRepository;
-        private readonly IVsUIShell _vsUIShell;
         private readonly IProductUpdateSettings _productUpdateSettings;
 
         private bool _updateDeclined;
@@ -27,17 +27,17 @@ namespace NuGet.VisualStudio {
 
         public ProductUpdateService() :
             this(ServiceLocator.GetGlobalService<SVsExtensionRepository, IVsExtensionRepository>(),
-                 ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
+                 ServiceLocator.GetInstance<IMenuCommandService>(),
                  ServiceLocator.GetInstance<IProductUpdateSettings>()) {
         }
 
-        public ProductUpdateService(IVsExtensionRepository extensionRepository, IVsUIShell vsUIShell, IProductUpdateSettings productUpdateSettings) {
+        public ProductUpdateService(IVsExtensionRepository extensionRepository, IMenuCommandService menuCommandService, IProductUpdateSettings productUpdateSettings) {
             if (productUpdateSettings == null) {
                 throw new ArgumentNullException("productUpdateSettings");
             }
 
+            _menuCommandService = menuCommandService;
             _extensionRepository = extensionRepository;
-            _vsUIShell = vsUIShell;
             _productUpdateSettings = productUpdateSettings;
         }
 
@@ -95,52 +95,55 @@ namespace NuGet.VisualStudio {
         }
 
         private void ShowUpdatesTabInExtensionManager() {
-            Task.Factory.StartNew(() => {
-                lock (_showUpdatesLock) {
-                    try {
-                        // check if the Extension Manager window is already open
-                        AutomationElement extensionManagerWindow = GetExtensionManagerWindow();
-                        if (extensionManagerWindow == null) {
-                            // if not, invoke the command to bring it up
-                            Guid pguidCmdGroup = VSConstants.VsStd2010;
-                            object pvaIn = null;
-                            _vsUIShell.PostExecCommand(ref pguidCmdGroup, 0xbb8, 0, ref pvaIn);
-                        }
+            if (_menuCommandService != null) {
+                // first, bring up the extension manager
+                CommandID extensionManagerCommand = new CommandID(ExtensionManagerCommandGuid, ExtensionManagerCommandId);
+                _menuCommandService.GlobalInvoke(extensionManagerCommand);
 
-                        // it will take a brief moment for the window to show up, polling until it does
-                        while (extensionManagerWindow == null) {
-                            extensionManagerWindow = GetExtensionManagerWindow();
-                            Thread.Sleep(100);
-                        }
+                // The Extension Manager dialog may take a while to load. Use dispatcher timer to poll it until it shows up.
+                DispatcherTimer timer = new DispatcherTimer() {
+                    Interval = TimeSpan.FromMilliseconds(100),
+                    Tag = 0     // store the number of pollings completed
+                };
+                timer.Tick += OnTimerTick;
+                timer.Start();
+            }
+        }
 
-                        // search for the Updates tab on the window and select it through Automation
-                        AutomationElement updatesTab = FindUpdateProviderTab(extensionManagerWindow);
-                        if (updatesTab != null) {
-                            (updatesTab.GetCurrentPattern(SelectionItemPattern.Pattern) as SelectionItemPattern).Select();
-                        }
-                    }
-                    catch (Exception) {
+        private void OnTimerTick(object sender, EventArgs e) {
+            var timer = (DispatcherTimer)sender;
+            timer.Stop();
+
+            // search through all open windows in the current application and look for the Extension Manager window
+            Window extensionManager = Application.Current.Windows.OfType<ExtensionManagerWindow>().FirstOrDefault();
+            if (extensionManager != null) {
+                ActivateUpdatesTab(extensionManager);
+            }
+            else {
+                // if we didn't find it, try again after 100 miliseconds
+                int times = (int)timer.Tag;
+                // but only try maximum of 10 times.
+                if (times < 10) {
+                    timer.Tag = times + 1;
+                    timer.Start();
+                }
+            }
+        }
+
+        private static void ActivateUpdatesTab(Window extensionManager) {
+            var layoutRoot = extensionManager.Content as FrameworkElement;
+            if (layoutRoot != null) {
+                // first, search for the Extension Explorer control inside the Extension manager window
+                var explorerControl = layoutRoot.FindName("explorer") as VSExtensionsExplorerCtl;
+                if (explorerControl != null) {
+                    // now get the Updates provider, which should be the last one according to the SortOrder
+                    var updatesProvider = explorerControl.Providers.OrderByDescending(p => p.SortOrder).FirstOrDefault();
+                    if (updatesProvider != null) {
+                        // Select the updates provider
+                        explorerControl.SelectedProvider = updatesProvider;
                     }
                 }
-            });
-        }
-
-        private AutomationElement GetExtensionManagerWindow() {
-            return AutomationElement.FromHandle(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle).
-                FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.AutomationIdProperty, "ExtensionManagerDialog"));
-        }
-
-        private AutomationElement FindUpdateProviderTab(AutomationElement extensionManagerWindow) {
-            // look for the treeView element hosting the providers tab
-            AutomationElement treeViewElement = extensionManagerWindow.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.AutomationIdProperty, "ProvidersUid"));
-            if (treeViewElement == null) {
-                return null;
             }
-
-            // pick the Updates tab among the children TreeViewItem instances
-            return treeViewElement.FindAll(TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem)).
-                Cast<AutomationElement>().
-                FirstOrDefault<AutomationElement>(x => x.Current.AutomationId.StartsWith("Updates"));
         }
     }
 }
