@@ -324,8 +324,8 @@ namespace PackageExplorerViewModel {
         internal void OnSaved(string fileName) {
             HasEdit = false;
             _mruManager.NotifyFileAdded(
+                PackageMetadata,
                 fileName, 
-                PackageMetadata.Id + " " + PackageMetadata.Version, 
                 PackageType.LocalPackage);
         }
 

@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.IO;
 
 namespace NuGet {
     public static class PackageExtensions {
@@ -19,12 +20,23 @@ namespace NuGet {
             return package.GetFiles(Constants.ContentDirectory);
         }
 
+        public static string GetHash(this IPackage package) {
+            return GetHash(package, new CryptoHashProvider());
+        }
+
+        public static string GetHash(this IPackage package, IHashProvider hashProvider) {
+            using (Stream stream = package.GetStream()) {
+                byte[] packageBytes = stream.ReadAllBytes();
+                return Convert.ToBase64String(hashProvider.CalculateHash(packageBytes));
+            }
+        }
+
         /// <summary>
         /// Returns true if a package has no content that applies to a project.
         /// </summary>
         public static bool HasProjectContent(this IPackage package) {
             return package.FrameworkAssemblies.Any() ||
-                   package.AssemblyReferences.Any() || 
+                   package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any();
         }
 
@@ -38,7 +50,7 @@ namespace NuGet {
         public static string GetFullName(this IPackageMetadata package) {
             return package.Id + " " + package.Version;
         }
-        
+
         public static IQueryable<IPackage> Find(this IQueryable<IPackage> packages, params string[] searchTerms) {
             if (searchTerms == null) {
                 return packages;

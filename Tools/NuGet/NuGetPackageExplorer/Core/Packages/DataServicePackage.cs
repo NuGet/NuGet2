@@ -13,19 +13,8 @@ namespace NuGet {
     [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     public class DataServicePackage : IPackage {
-        private readonly LazyWithRecreate<IPackage> _package;
-        private string _zipFileName;
-
         public DataServicePackage() {
             VersionDownloadCount = -1;
-            _package = new LazyWithRecreate<IPackage>(DownloadAndVerifyPackage, () => {
-                // If the hash changed then update the hash and redownload the package.
-                if (OldHash != PackageHash) {
-                    OldHash = PackageHash;
-                    return true;
-                }
-                return false;
-            });
         }
 
         public string Id {
@@ -144,15 +133,12 @@ namespace NuGet {
             set;
         }
 
-        private string OldHash {
-            get;
-            set;
-        }
-
         internal DataServiceContext Context {
             get;
             set;
         }
+
+        public IPackage CorePackage { get; set; }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
@@ -195,39 +181,26 @@ namespace NuGet {
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
-                return _package.Value.AssemblyReferences;
+                return CorePackage.AssemblyReferences;
             }
         }
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
             get {
-                return _package.Value.FrameworkAssemblies;
+                return CorePackage.FrameworkAssemblies;
             }
         }
 
         public IEnumerable<IPackageFile> GetFiles() {
-            return _package.Value.GetFiles();
+            return CorePackage.GetFiles();
         }
 
         public Stream GetStream() {
-            return _package.Value.GetStream();
+            return CorePackage.GetStream();
         }
 
         public override string ToString() {
             return this.GetFullName();
-        }
-
-        public void SetData(string zipFileName) {
-            _zipFileName = zipFileName;
-        }
-
-        internal IPackage DownloadAndVerifyPackage() {
-            if (String.IsNullOrEmpty(PackageHash)) {
-                throw new InvalidOperationException(NuGetResources.PackageContentsVerifyError);
-            }
-
-            var factory = new ZipPackageFactory();
-            return factory.CreatePackage(() => File.OpenRead(_zipFileName));
         }
 
         /// <summary>
@@ -255,32 +228,6 @@ namespace NuGet {
             }
 
             return new PackageDependency(id, versionSpec);
-        }
-
-        /// <summary>
-        /// We can't use the built in Lazy for 2 reasons:
-        /// 1. It caches the exception if any is thrown from the creator func (this means it won't retry calling the function).
-        /// 2. There's no way to force a retry or expiration of the cache.
-        /// </summary>
-        private class LazyWithRecreate<T> {
-            private readonly Func<T> _creator;
-            private readonly Func<bool> _shouldRecreate;
-            private T _value;
-            
-            public LazyWithRecreate(Func<T> creator, Func<bool> shouldRecreate) {
-                _creator = creator;
-                _shouldRecreate = shouldRecreate;
-            }
-
-            public T Value {
-                get {                    
-                    if (_shouldRecreate()) {
-                        _value = _creator();
-                    }
-
-                    return _value;
-                }
-            }
         }
     }
 }

@@ -9,8 +9,9 @@ namespace PackageExplorerViewModel.Types
 
     public sealed class MruItem : IEquatable<MruItem>
     {
+        public string Id { get; set; }
+        public Version Version { get; set; }
         public string Path { get; set; }
-        public string PackageName { get; set; }
         public PackageType PackageType { get; set; }
 
         public bool Equals(MruItem other)

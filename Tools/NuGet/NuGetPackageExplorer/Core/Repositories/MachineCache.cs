@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -30,7 +29,7 @@ namespace NuGet {
         }
 
         public override void AddPackage(IPackage package) {
-            string existingPackage = FindPackage(package.Id, package.Version);
+            var existingPackage = FindPackage(package.Id, package.Version);
             if (existingPackage == null) {
                 string path = GetPackageFilePath(package);
 
@@ -46,21 +45,21 @@ namespace NuGet {
             }
         }
 
-        public string AddPackage(string id, Version version, byte[] bytes) {
-            string path = GetPackageFilePath(id, version);
+        //public string AddPackage(string id, Version version, byte[] bytes) {
+        //    string path = GetPackageFilePath(id, version);
 
-            if (!Directory.Exists(path)) {
-                Directory.CreateDirectory(path);
-            }
+        //    if (!Directory.Exists(path)) {
+        //        Directory.CreateDirectory(path);
+        //    }
 
-            if (!Directory.Exists(path)) {
-                using (Stream stream = File.Create(path)) {
-                    stream.Write(bytes, 0, bytes.Length);
-                }
-            }
+        //    if (!Directory.Exists(path)) {
+        //        using (Stream stream = File.Create(path)) {
+        //            stream.Write(bytes, 0, bytes.Length);
+        //        }
+        //    }
 
-            return path;
-        }
+        //    return path;
+        //}
 
         public override IQueryable<IPackage> GetPackages() {
             throw new NotSupportedException();
@@ -73,11 +72,11 @@ namespace NuGet {
             }
         }
 
-        public string FindPackage(string packageId, Version version) {
+        public IPackage FindPackage(string packageId, Version version) {
             string path = GetPackageFilePath(packageId, version);
 
             if (File.Exists(path)) {
-                return path;
+                return new ZipPackage(path);
             }
             else {
                 return null;

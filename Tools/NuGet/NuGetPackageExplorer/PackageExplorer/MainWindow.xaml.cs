@@ -103,7 +103,7 @@ namespace PackageExplorer {
                 DataContext = _packageViewModelFactory.CreateViewModel(package, packagePath);
                 if (!String.IsNullOrEmpty(packagePath))
                 {
-                    _mruManager.NotifyFileAdded(packagePath, package.ToString(), packageType);
+                    _mruManager.NotifyFileAdded(package, packagePath, packageType);
                 }
             }
         }
@@ -172,26 +172,24 @@ namespace PackageExplorer {
             if (result ?? false) {
                 var selectedPackage = dialog.SelectedPackage;
                 if (selectedPackage != null) {
-                    // check the machine cache first
-                    string cachePackagePath = MachineCache.Default.FindPackage(selectedPackage.Id, ((IPackage)selectedPackage).Version);
-                    if (cachePackagePath == null) {
-                        // if not in the cache, download it
+                    IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackage.Id, ((IPackage)selectedPackage).Version); ;
+                    if (cachePackage == null || cachePackage.GetHash() != selectedPackage.PackageHash) {
+                        // if not in the cache, or if the cache package's hash is different from the feed hash, (re)download it
                         var progressWindow = new DownloadProgressWindow(
                             selectedPackage.DownloadUrl, 
-                            selectedPackage.ToString(),
-                            selectedPackage.Id,
+                            selectedPackage.Id, 
                             ((IPackage)selectedPackage).Version) {
                             Owner = this
                         };
 
                         result = progressWindow.ShowDialog();
                         if (result ?? false) {
-                            cachePackagePath = progressWindow.DownloadedFilePath;
+                            cachePackage = progressWindow.DownloadedPackage;
                         }
                     }
 
-                    if (cachePackagePath != null) {
-                        selectedPackage.SetData(cachePackagePath);
+                    if (cachePackage != null) {
+                        selectedPackage.CorePackage = cachePackage;
                         LoadPackage(selectedPackage, selectedPackage.DownloadUrl.ToString(), PackageType.DataServicePackage);
                     }
                 }
@@ -691,11 +689,12 @@ namespace PackageExplorer {
         private void DownloadAndOpenDataServicePackage(MruItem item) {
             Uri downloadUrl;
             if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
-                var progressWindow = new DownloadProgressWindow(downloadUrl, item.PackageName, null, null) { Owner = this };
+                var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version) { 
+                    Owner = this 
+                };
                 var result = progressWindow.ShowDialog();
                 if (result ?? false) {
-                    ZipPackage package = new ZipPackage(progressWindow.DownloadedFilePath);
-                    LoadPackage(package, item.Path, PackageType.DataServicePackage);
+                    LoadPackage(progressWindow.DownloadedPackage, item.Path, PackageType.DataServicePackage);
                 }
             }
         }

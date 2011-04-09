@@ -14,10 +14,8 @@ namespace PackageExplorer {
 
         private readonly Uri _downloadUri;
         private WebClient _client;
-        private readonly string _id;
-        private readonly Version _version;
 
-        public DownloadProgressWindow(Uri downloadUri, string packageName, string id, Version version) {
+        public DownloadProgressWindow(Uri downloadUri, string id, Version version) {
             if (downloadUri == null)
             {
                 throw new ArgumentNullException("downloadUri");
@@ -25,13 +23,11 @@ namespace PackageExplorer {
 
             InitializeComponent();
 
-            _id = id;
-            _version = version;
-            Title = "Downloading package " + packageName;
+            Title = "Downloading package " + id + " " + version.ToString();
             _downloadUri = downloadUri;
         }
 
-        public string DownloadedFilePath
+        public IPackage DownloadedPackage
         {
             get;
             private set;
@@ -49,7 +45,8 @@ namespace PackageExplorer {
                         OnError(e.Error);
                     }
                     else {
-                        DownloadedFilePath = SaveResultToMachineCache(e.Result);
+                        string tempFilePath = SaveResultToTempFile(e.Result);
+                        DownloadedPackage = new ZipPackage(tempFilePath);
                         OnCompleted();
                     }
                 }
@@ -62,8 +59,10 @@ namespace PackageExplorer {
             _client.DownloadDataAsync(uri);
         }
 
-        private string SaveResultToMachineCache(byte[] bytes) {
-            return MachineCache.Default.AddPackage(_id, _version, bytes);
+        private string SaveResultToTempFile(byte[] bytes) {
+            string tempFile = Path.GetTempFileName();
+            File.WriteAllBytes(tempFile, bytes);
+            return tempFile;
         }
 
         private void CancelButtonClicked(object sender, RoutedEventArgs e) {
