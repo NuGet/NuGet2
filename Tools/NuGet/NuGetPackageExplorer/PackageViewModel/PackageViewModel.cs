@@ -344,13 +344,10 @@ namespace PackageExplorerViewModel {
             RootFolder.Export(rootPath);
 
             // export .nuspec file
-            ExportManifest(rootPath, PackageMetadata);
+            ExportManifest(Path.Combine(rootPath, PackageMetadata.Id + ".nuspec"));
         }
 
-        private void ExportManifest(string rootPath, EditablePackageMetadata metadata) {
-            string filename = metadata.Id + ".nuspec";
-            string fullpath = Path.Combine(rootPath, filename);
-
+        internal void ExportManifest(string fullpath) {
             if (File.Exists(fullpath)) {
                 bool confirmed = MessageBox.Confirm(
                     String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullpath)
@@ -361,7 +358,7 @@ namespace PackageExplorerViewModel {
             }
 
             using (Stream fileStream = File.Create(fullpath)) {
-                Manifest manifest = Manifest.Create(metadata);
+                Manifest manifest = Manifest.Create(PackageMetadata);
                 manifest.Save(fileStream);
             }
         }

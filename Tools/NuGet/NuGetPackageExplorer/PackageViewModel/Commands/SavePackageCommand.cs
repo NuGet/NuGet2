@@ -14,6 +14,7 @@ namespace PackageExplorerViewModel {
         private const string SaveAction = "Save";
         private const string SaveAsAction = "SaveAs";
         private const string ForceSaveAction = "ForceSave";
+        private const string SaveMetadataAction = "SaveMetadataAs";
 
         public SavePackageCommand(PackageViewModel model)
             : base(model) {
@@ -39,6 +40,9 @@ namespace PackageExplorerViewModel {
             else if (action == SaveAsAction) {
                 return !ViewModel.IsInEditMode;
             }
+            else if (action == SaveMetadataAction) {
+                return !ViewModel.IsInEditMode;
+            }
             else {
                 return false;
             }
@@ -47,12 +51,14 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            if (!ViewModel.IsValid) {
+            string action = parameter as string;
+
+            // if the action is Save Metadata, we don't care if the package is valid
+            if (action != SaveMetadataAction && !ViewModel.IsValid) {
                 ViewModel.MessageBox.Show(Resources.PackageHasNoFile, MessageLevel.Warning);
                 return;
             }
 
-            string action = parameter as string;
             if (action == SaveAction || action == ForceSaveAction) {
                 if (CanSaveTo(ViewModel.PackageSource)) {
                     Save();
@@ -63,6 +69,9 @@ namespace PackageExplorerViewModel {
             }
             else if (action == SaveAsAction) {
                 SaveAs();
+            }
+            else if (action == SaveMetadataAction) {
+                SaveMetadataAs();
             }
         }
 
@@ -78,7 +87,7 @@ namespace PackageExplorerViewModel {
         }
 
         private void SaveAs() {
-            string packageName = ViewModel.PackageMetadata.ToString() + Constants.PackageExtension;
+            string packageName = ViewModel.PackageMetadata.ToString();
             string title = "Save " + packageName;
             string filter = "NuGet package file (*.nupkg)|*.nupkg|All files (*.*)|*.*";
             string selectedPackagePath;
@@ -87,6 +96,16 @@ namespace PackageExplorerViewModel {
                 ViewModel.PackageSource = selectedPackagePath;
             }
             RaiseCanExecuteChangedEvent();
+        }
+
+        private void SaveMetadataAs() {
+            string packageName = ViewModel.PackageMetadata.ToString();
+            string title = "Save " + packageName;
+            string filter = "NuGet manifest file (*.nuspec)|*.nuspec|All files (*.*)|*.*";
+            string selectedPath;
+            if (ViewModel.UIServices.OpenSaveFileDialog(title, packageName, filter, out selectedPath)) {
+                ViewModel.ExportManifest(selectedPath);
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
