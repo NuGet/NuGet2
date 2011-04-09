@@ -7,15 +7,14 @@ namespace NuGet {
         private readonly DataServiceContext _context;
         private DataServiceQuery<DataServicePackage> _query;
         private readonly IHttpClient _httpClient;
-        private readonly string _source;
+        //private readonly string _source;
 
-        public DataServicePackageRepository(Uri serviceRoot)
-            : this(serviceRoot, new HttpClient()) {
-        }
+        //public DataServicePackageRepository(Uri serviceRoot)
+        //    : this(serviceRoot, new HttpClient()) {
+        //}
 
-        public DataServicePackageRepository(Uri serviceRoot, IHttpClient client)
-            : this(new DataServiceContext(serviceRoot), client) {
-            _source = serviceRoot.OriginalString;
+        public DataServicePackageRepository(IHttpClient client)
+            : this(new DataServiceContext(client.Uri), client) {
         }
 
         private DataServicePackageRepository(DataServiceContext context, IHttpClient httpClient) {
@@ -37,7 +36,7 @@ namespace NuGet {
 
         public override string Source {
             get {
-                return _source;
+                return _httpClient.Uri.OriginalString;
             }
         }
 

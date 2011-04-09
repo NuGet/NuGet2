@@ -109,6 +109,7 @@ namespace NuGet.PowerShell.Commands {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
+            
 
             IPackageRepository repository;
             if (UseRemoteSource) {

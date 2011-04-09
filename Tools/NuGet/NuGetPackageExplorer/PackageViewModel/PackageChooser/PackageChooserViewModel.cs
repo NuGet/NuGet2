@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NuGet;
 using PackageExplorerViewModel.Types;
+using NuGet.Utility;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
@@ -92,6 +93,10 @@ namespace PackageExplorerViewModel {
         private IPackageRepository GetPackageRepository() {
             if (_packageRepository == null || _packageRepository.Source != PackageSource) {
                 try {
+                    if (HttpClientUtility.IsProxyRequired(PackageSource))
+                    {
+                        HttpClientUtility.SetProxyCredentials();
+                    }
                     _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
                 }
                 catch (Exception) {

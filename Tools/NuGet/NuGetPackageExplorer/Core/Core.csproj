@@ -84,6 +84,7 @@
     <Compile Include="Repositories\DataServiceContextWrapper.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
     <Compile Include="Repositories\DataServiceQueryWrapper.cs" />
+    <Compile Include="Repositories\HttpClientFactory.cs" />
     <Compile Include="Repositories\IDataServiceContext.cs" />
     <Compile Include="Repositories\IDataServiceQuery.cs" />
     <Compile Include="Repositories\IPackageRepository.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Utility\GalleryServer.cs" />
     <Compile Include="Utility\HttpClient.cs" />
+    <Compile Include="Utility\HttpClientUtility.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
     <Compile Include="Utility\IPackageFactory.cs" />

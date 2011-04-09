@@ -7,9 +7,12 @@ namespace NuGet {
             get;
             set;
         }
+        Uri Uri { get; set; }
 
-        WebRequest CreateRequest(Uri uri);
+        //WebRequest CreateRequest(Uri uri);
+        WebRequest CreateRequest();
         void InitializeRequest(WebRequest request);
-        Uri GetRedirectedUri(Uri uri);
+        //Uri GetRedirectedUri(Uri uri);
+        IHttpClient GetRedirectedClient(Uri uri);
     }
 }

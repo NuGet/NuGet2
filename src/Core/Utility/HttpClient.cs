@@ -27,10 +27,16 @@ namespace NuGet {
                 httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             }
 
-            request.UseDefaultCredentials = true;
+            if (null == request.Proxy)
+            {
+                request.UseDefaultCredentials = true;
+            }
             if (request.Proxy != null) {
-                // If we are going through a proxy then just set the default credentials
-                request.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                if (null == request.Proxy.Credentials)
+                {
+                    // If we are going through a proxy then just set the default credentials
+                    request.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                }
             }
 
             // Don't do this in debug mode so we can debug requests without worrying about timeouts

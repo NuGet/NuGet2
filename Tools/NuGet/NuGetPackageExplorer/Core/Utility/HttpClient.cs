@@ -9,9 +9,26 @@ namespace NuGet {
             get;
             set;
         }
+        public Uri Uri { get; set; }
 
-        public WebRequest CreateRequest(Uri uri) {
-            WebRequest request = WebRequest.Create(uri);
+        //public WebRequest CreateRequest(Uri uri) {
+        //    WebRequest request = WebRequest.Create(uri);
+        //    InitializeRequest(request);
+        //    return request;
+        //}
+
+        public HttpClient(Uri uri)
+        {
+            if (null == uri)
+            {
+                throw new ArgumentNullException("uri");
+            }
+            Uri = uri;
+        }
+
+        public WebRequest CreateRequest()
+        {
+            WebRequest request = WebRequest.Create(Uri);
             InitializeRequest(request);
             return request;
         }
@@ -31,14 +48,24 @@ namespace NuGet {
             }
         }
 
-        public Uri GetRedirectedUri(Uri uri) {
-            WebRequest request = CreateRequest(uri);
-            using (WebResponse response = request.GetResponse()) {
-                if (response == null) {
+        public IHttpClient GetRedirectedClient(Uri uri) {
+            IHttpClient client = new HttpClient(uri);
+            WebRequest request = client.CreateRequest();
+            using (WebResponse response = request.GetResponse())
+            {
+                if (null == response)
+                {
                     return null;
                 }
-                return response.ResponseUri;
+                return new HttpClient(response.ResponseUri);
             }
+            //WebRequest request = CreateRequest(uri);
+            //using (WebResponse response = request.GetResponse()) {
+            //    if (response == null) {
+            //        return null;
+            //    }
+            //    return response.ResponseUri;
+            //}
         }
     }
 }

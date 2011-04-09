@@ -14,6 +14,7 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 using NuGetConsole.Implementation;
+using System.Net;
 
 namespace NuGet.Tools {
     /// <summary>
@@ -157,6 +158,13 @@ namespace NuGet.Tools {
 
             _dte = ServiceLocator.GetInstance<DTE>();
             _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
+
+            //WebProxy proxy = new WebProxy("http://usweb:80", true);
+            //proxy.UseDefaultCredentials = false;
+            //throw new InvalidOperationException();
+            //NetworkCredential cred = new NetworkCredential("lozovil", "xxx");
+            //proxy.Credentials = cred;
+            //HttpWebRequest.DefaultWebProxy = proxy;
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
