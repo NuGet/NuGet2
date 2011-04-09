@@ -170,9 +170,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
             // Arrange            
             string expectedPackage = "FakeProject.1.2.nupkg";
-#if SYMBOL_SOURCE
-            string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
-#endif
+            string expectedSymbolsPackage = "FakeProject.1.2.symbols.nupkg";
+
             WriteProjectFile("Runner.cs", @"using System;
 public class Runner { 
     public static void Run() { 
@@ -206,7 +205,7 @@ public class Baz {
                           compile: new[] { "Runner.cs", @"..\Foo.cs", @"..\projects\Bar.cs" },
                           links: new[] { Tuple.Create(@"..\Baz.cs", @"Folder\Baz.cs") });
 
-            string[] args = new string[] { "pack" };
+            string[] args = new string[] { "pack", "-Symbols" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -221,8 +220,6 @@ public class Baz {
             Assert.AreEqual(new Version("1.2"), package.Version);
             Assert.AreEqual("David Inc", package.Authors.First());
             Assert.AreEqual("This is a test. Ignore me", package.Description);
-
-#if SYMBOL_SOURCE
             Assert.IsTrue(File.Exists(expectedSymbolsPackage));
             VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
                                                                   @"src\Runner.cs",
@@ -231,7 +228,6 @@ public class Baz {
                                                                   @"src\Properties\AssemblyInfo.cs",
                                                                   @"lib\net40\FakeProject.dll",
                                                                   @"lib\net40\FakeProject.pdb" });
-#endif
         }
 
 

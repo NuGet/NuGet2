@@ -46,10 +46,8 @@ namespace NuGet.Commands {
             get { return _excludes; }
         }
 
-#if SYMBOL_SOURCE
-        [Option(typeof(NuGetResources), "PackageCommandNoSymbolsDescription")]
-        public bool NoSymbols { get; set; }
-#endif
+        [Option(typeof(NuGetResources), "PackageCommandSymbolsDescription")]
+        public bool Symbols { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
@@ -217,9 +215,9 @@ namespace NuGet.Commands {
             // Build the main package
             BuildPackage(path, mainPackageBuilder);
 
-#if SYMBOL_SOURCE
+
             // If we're excluding symbols then do nothing else
-            if (NoSymbols) {
+            if (!Symbols) {
                 return;
             }
 
@@ -231,7 +229,6 @@ namespace NuGet.Commands {
             // Get the file name for the sources package and build it
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(path, symbolsBuilder, outputPath);
-#endif
         }
 
         private string GetInputFile() {

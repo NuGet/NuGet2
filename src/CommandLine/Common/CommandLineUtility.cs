@@ -115,19 +115,25 @@ namespace NuGet {
         public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true) {
             var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
             if (String.IsNullOrEmpty(value) && throwIfNotFound) {
-                throw new CommandLineException(NuGetResources.NoApiKeyFound, GetSourceText(source));
+                throw new CommandLineException(NuGetResources.NoApiKeyFound, GetSourceDisplayName(source));
             }
             return value;
         }
 
-        public static string GetSourceText(string source) {
+        public static string GetSourceDisplayName(string source) {
             if (String.IsNullOrEmpty(source) || source.Equals(GalleryServer.DefaultGalleryServerUrl)) {
-                return NuGetResources.LiveFeed;
+                return NuGetResources.LiveFeed + " (" + GalleryServer.DefaultGalleryServerUrl + ")";
             }
             if (source.Equals(GalleryServer.DefaultSymbolServerUrl)) {
-                return NuGetResources.DefaultSymbolServer;
+                return NuGetResources.DefaultSymbolServer + " (" + GalleryServer.DefaultSymbolServerUrl + ")";
             }
             return "'" + source + "'";
+        }
+
+        public static void ValidateSource(string source) {
+            if (!PathValidator.IsValidUrl(source)) {
+                throw new CommandLineException(NuGetResources.InvalidSource, source);
+            }
         }
 
         public static bool TryGetProjectFile(out string projectFile) {

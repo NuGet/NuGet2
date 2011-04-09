@@ -331,6 +331,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified source &apos;{0}&apos; is invalid. Please provide a valid source..
+        /// </summary>
+        internal static string InvalidSource {
+            get {
+                return ResourceManager.GetString("InvalidSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is specified the default feed is used..
         /// </summary>
         internal static string ListCommandDescription {
@@ -493,15 +502,6 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Determines if sources and symbols should be excluded in this package. Only valid when building a package from a project..
-        /// </summary>
-        internal static string PackageCommandNoSymbolsDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandNoSymbolsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
@@ -525,6 +525,15 @@ namespace NuGet.Common {
         internal static string PackageCommandSuccess {
             get {
                 return ResourceManager.GetString("PackageCommandSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Determines if a package containing sources and symbols should be created. Only valid when building a package from a project..
+        /// </summary>
+        internal static string PackageCommandSymbolsDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandSymbolsDescription", resourceCulture);
             }
         }
         
@@ -745,11 +754,20 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for the source &apos;{1}&apos;..
+        ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for {1}..
         /// </summary>
         internal static string SetApiKeyCommandApiKeySaved {
             get {
                 return ResourceManager.GetString("SetApiKeyCommandApiKeySaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for {1} and {2}..
+        /// </summary>
+        internal static string SetApiKeyCommandDefaultApiKeysSaved {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandDefaultApiKeysSaved", resourceCulture);
             }
         }
         
@@ -849,15 +867,6 @@ namespace NuGet.Common {
         internal static string SpecCommandUsageSummary {
             get {
                 return ResourceManager.GetString("SpecCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;nuget.exe SetApiKey -Symbols [your API key from http://www.symbolsource.org]&apos;..
-        /// </summary>
-        internal static string SymbolServerNotConfigured {
-            get {
-                return ResourceManager.GetString("SymbolServerNotConfigured", resourceCulture);
             }
         }
         
@@ -993,6 +1002,15 @@ namespace NuGet.Common {
         internal static string Warning_FileDoesNotExist {
             get {
                 return ResourceManager.GetString("Warning_FileDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;nuget.exe SetApiKey [your API key from http://www.nuget.org]&apos;..
+        /// </summary>
+        internal static string Warning_SymbolServerNotConfigured {
+            get {
+                return ResourceManager.GetString("Warning_SymbolServerNotConfigured", resourceCulture);
             }
         }
         

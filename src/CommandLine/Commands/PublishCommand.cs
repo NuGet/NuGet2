@@ -30,10 +30,11 @@ namespace NuGet.Commands {
                 gallery = new GalleryServer();
             }
             else {
+                CommandLineUtility.ValidateSource(Source);
                 gallery = new GalleryServer(Source);
             }
 
-            Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, _packageId, _packageVersion, CommandLineUtility.GetSourceText(Source));
+            Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, _packageId, _packageVersion, CommandLineUtility.GetSourceDisplayName(Source));
             gallery.PublishPackage(_apiKey, _packageId, _packageVersion);
             Console.WriteLine(NuGetResources.PublishCommandPackagePublished);
         }

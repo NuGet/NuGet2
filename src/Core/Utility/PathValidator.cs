@@ -3,8 +3,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace NuGet.VisualStudio {
+namespace NuGet {
     public static class PathValidator {
+        /// <summary>
+        /// Validates that a source is a valid path or url.
+        /// </summary>
+        /// <param name="source">The path to validate.</param>
+        /// <returns>True if valid, False if invalid.</returns>
+        public static bool IsValidSource(string source) {
+            return PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source);
+        }
+
         /// <summary>
         /// Validates that path is properly formatted as a local path. 
         /// </summary>
