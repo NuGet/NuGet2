@@ -946,3 +946,19 @@ function Test-WebSiteInstallPackageWithNestedSourceFiles {
     Assert-SolutionPackage netfx-Guard
     Assert-NotNull (Get-ProjectItem $p App_Code\netfx\System\Guard.cs)
 }
+
+function Test-WebSiteInstallPackageWithFileNamedAppCode {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithFileNamedAppCode -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithFileNamedAppCode
+    Assert-SolutionPackage PackageWithFileNamedAppCode
+    Assert-NotNull (Get-ProjectItem $p App_Code\App_Code.cs)
+}

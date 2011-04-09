@@ -82,7 +82,7 @@ namespace NuGet.VisualStudio {
         }
 
         private static bool IsUnderAppCode(string path) {
-            return path.StartsWith(AppCodeFolder, StringComparison.OrdinalIgnoreCase);
+            return PathUtility.EnsureTrailingSlash(path).StartsWith(AppCodeFolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsSourceFile(string path) {
