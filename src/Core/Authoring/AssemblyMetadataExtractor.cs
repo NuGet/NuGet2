@@ -36,9 +36,9 @@ namespace NuGet {
         [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "It's constructed using CreateInstanceAndUnwrap in another app domain")]
         private sealed class MetadataExtractor : MarshalByRefObject {
             [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "It's a marshal by ref object used to collection information in another app domain")]
-            [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFile", Justification = "We need to load the assembly to extract metadata")]
+            [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom", Justification = "We need to load the assembly to extract metadata")]
             public AssemblyMetadata GetMetadata(string path) {
-                Assembly assembly = Assembly.LoadFile(path);
+                Assembly assembly = Assembly.LoadFrom(path);
                 AssemblyName assemblyName = assembly.GetName();
 
                 return new AssemblyMetadata {
