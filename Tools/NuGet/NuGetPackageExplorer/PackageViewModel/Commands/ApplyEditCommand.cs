@@ -18,13 +18,13 @@ namespace PackageExplorerViewModel {
         }
 
         public void Execute(object parameter) {
-            var bindingGroup = parameter as BindingGroup;
-            if (bindingGroup != null) {
-                bool valid = bindingGroup.CommitEdit();
-                if (valid) {
-                    ViewModel.CommitEdit();
-                }
-            }
+            //var bindingGroup = parameter as BindingGroup;
+            //if (bindingGroup != null) {
+            //    bool valid = bindingGroup.CommitEdit();
+            //    if (valid) {
+            //        ViewModel.CommitEdit();
+            //    }
+            //}
         }
     }
 }

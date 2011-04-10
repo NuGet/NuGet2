@@ -19,10 +19,10 @@ namespace PackageExplorerViewModel {
         }
 
         public void Execute(object parameter) {
-            var bindingGroup = parameter as BindingGroup;
-            if (bindingGroup != null) {
-                bindingGroup.CancelEdit();
-            }
+            //var bindingGroup = parameter as BindingGroup;
+            //if (bindingGroup != null) {
+            //    bindingGroup.CancelEdit();
+            //}
 
             ViewModel.CancelEdit();
         }

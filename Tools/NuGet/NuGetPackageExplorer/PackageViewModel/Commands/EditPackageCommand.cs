@@ -24,10 +24,10 @@ namespace PackageExplorerViewModel {
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
-            var bindingGroup = parameter as BindingGroup;
-            if (bindingGroup != null) {
-                bindingGroup.BeginEdit();
-            }
+            //var bindingGroup = parameter as BindingGroup;
+            //if (bindingGroup != null) {
+            //    bindingGroup.BeginEdit();
+            //}
 
             ViewModel.BeginEdit();
         }
