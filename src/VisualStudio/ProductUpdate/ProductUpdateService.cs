@@ -56,7 +56,11 @@ namespace NuGet.VisualStudio {
                                                               .AsEnumerable()
                                                               .FirstOrDefault();
                     // Get the current NuGet version
+#if DEBUG
+                    Version version = new Version("1.1");                    
+#else
                     Version version = typeof(ProductUpdateService).Assembly.GetName().Version;
+#endif
 
                     // If we're running an older version then update
                     if (nugetVsix != null && nugetVsix.NonNullVsixVersion > version) {
