@@ -1,24 +1,24 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionManager;
 using Microsoft.VisualStudio.ExtensionManager.UI;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Task = System.Threading.Tasks.Task;
+using Window = System.Windows.Window;
 
 namespace NuGet.VisualStudio {
 
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
         private static readonly object _showUpdatesLock = new object();
-        private static readonly Guid ExtensionManagerCommandGuid = new Guid("{5dd0bb59-7076-4c59-88d3-de36931f63f0}");
-        private const int ExtensionManagerCommandId = (int)0xBB8;
+        private const string ExtensionManagerCommandName = "Tools.ExtensionManager";
         private const string NuGetVSIXId = "NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5";
 
-        private readonly IMenuCommandService _menuCommandService;
+        private readonly DTE _dte;
         private readonly IVsExtensionRepository _extensionRepository;
         private readonly IVsExtensionManager _extensionManager;
         private readonly IProductUpdateSettings _productUpdateSettings;
@@ -29,20 +29,20 @@ namespace NuGet.VisualStudio {
         public ProductUpdateService() :
             this(ServiceLocator.GetGlobalService<SVsExtensionRepository, IVsExtensionRepository>(),
                  ServiceLocator.GetGlobalService<SVsExtensionManager, IVsExtensionManager>(),
-                 ServiceLocator.GetInstance<IMenuCommandService>(),
+                 ServiceLocator.GetInstance<DTE>(),
                  ServiceLocator.GetInstance<IProductUpdateSettings>()) {
         }
 
         public ProductUpdateService(
             IVsExtensionRepository extensionRepository,
             IVsExtensionManager extensionManager,
-            IMenuCommandService menuCommandService, 
+            DTE dte,
             IProductUpdateSettings productUpdateSettings) {
             if (productUpdateSettings == null) {
                 throw new ArgumentNullException("productUpdateSettings");
             }
 
-            _menuCommandService = menuCommandService;
+            _dte = dte;
             _extensionRepository = extensionRepository;
             _extensionManager = extensionManager;
             _productUpdateSettings = productUpdateSettings;
@@ -106,10 +106,11 @@ namespace NuGet.VisualStudio {
         }
 
         private void ShowUpdatesTabInExtensionManager() {
-            if (_menuCommandService != null) {
-                // first, bring up the extension manager
-                CommandID extensionManagerCommand = new CommandID(ExtensionManagerCommandGuid, ExtensionManagerCommandId);
-                _menuCommandService.GlobalInvoke(extensionManagerCommand);
+            if (_dte != null) {
+                // first, bring up the extension manager.
+                // invoke the command asynchronously so that it doesn't block
+                Action<string, string> openExtensionManager = _dte.ExecuteCommand;
+                openExtensionManager.BeginInvoke(ExtensionManagerCommandName, "", null, null);
 
                 // The Extension Manager dialog may take a while to load. Use dispatcher timer to poll it until it shows up.
                 DispatcherTimer timer = new DispatcherTimer() {
