@@ -17,9 +17,10 @@ namespace NuGet.VisualStudio {
         private static readonly Guid ExtensionManagerCommandGuid = new Guid("{5dd0bb59-7076-4c59-88d3-de36931f63f0}");
         private const int ExtensionManagerCommandId = (int)0xBB8;
         private const string NuGetVSIXId = "NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5";
-        
+
         private readonly IMenuCommandService _menuCommandService;
         private readonly IVsExtensionRepository _extensionRepository;
+        private readonly IVsExtensionManager _extensionManager;
         private readonly IProductUpdateSettings _productUpdateSettings;
 
         private bool _updateDeclined;
@@ -27,17 +28,23 @@ namespace NuGet.VisualStudio {
 
         public ProductUpdateService() :
             this(ServiceLocator.GetGlobalService<SVsExtensionRepository, IVsExtensionRepository>(),
+                 ServiceLocator.GetGlobalService<SVsExtensionManager, IVsExtensionManager>(),
                  ServiceLocator.GetInstance<IMenuCommandService>(),
                  ServiceLocator.GetInstance<IProductUpdateSettings>()) {
         }
 
-        public ProductUpdateService(IVsExtensionRepository extensionRepository, IMenuCommandService menuCommandService, IProductUpdateSettings productUpdateSettings) {
+        public ProductUpdateService(
+            IVsExtensionRepository extensionRepository,
+            IVsExtensionManager extensionManager,
+            IMenuCommandService menuCommandService, 
+            IProductUpdateSettings productUpdateSettings) {
             if (productUpdateSettings == null) {
                 throw new ArgumentNullException("productUpdateSettings");
             }
 
             _menuCommandService = menuCommandService;
             _extensionRepository = extensionRepository;
+            _extensionManager = extensionManager;
             _productUpdateSettings = productUpdateSettings;
         }
 
@@ -55,16 +62,16 @@ namespace NuGet.VisualStudio {
                                                               .Where(e => e.VsixID == NuGetVSIXId)
                                                               .AsEnumerable()
                                                               .FirstOrDefault();
-                    // Get the current NuGet version
+                    // Get the current NuGet VSIX version
 #if DEBUG
-                    Version version = new Version("1.1");                    
+                    Version installedVersion = new Version("1.1");                    
 #else
-                    Version version = typeof(ProductUpdateService).Assembly.GetName().Version;
+                    IInstalledExtension installedNuGet = _extensionManager.GetInstalledExtension(NuGetVSIXId);
+                    Version installedVersion = installedNuGet.Header.Version;
 #endif
-
                     // If we're running an older version then update
-                    if (nugetVsix != null && nugetVsix.NonNullVsixVersion > version) {
-                        RaiseUpdateEvent(new ProductUpdateAvailableEventArgs(version, nugetVsix.NonNullVsixVersion));
+                    if (nugetVsix != null && nugetVsix.NonNullVsixVersion > installedVersion) {
+                        RaiseUpdateEvent(new ProductUpdateAvailableEventArgs(installedVersion, nugetVsix.NonNullVsixVersion));
                     }
                 }
                 catch {
