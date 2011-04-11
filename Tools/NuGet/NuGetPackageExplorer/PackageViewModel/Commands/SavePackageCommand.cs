@@ -98,13 +98,20 @@ namespace PackageExplorerViewModel {
             RaiseCanExecuteChangedEvent();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void SaveMetadataAs() {
             string packageName = ViewModel.PackageMetadata.ToString();
             string title = "Save " + packageName;
             string filter = "NuGet manifest file (*.nuspec)|*.nuspec|All files (*.*)|*.*";
             string selectedPath;
             if (ViewModel.UIServices.OpenSaveFileDialog(title, packageName, filter, out selectedPath)) {
-                ViewModel.ExportManifest(selectedPath);
+                try {
+                    ViewModel.ExportManifest(selectedPath);
+                    ViewModel.OnSaved(selectedPath);
+                }
+                catch (Exception ex) {
+                    ViewModel.MessageBox.Show(ex.Message, MessageLevel.Error);
+                }
             }
         }
 
