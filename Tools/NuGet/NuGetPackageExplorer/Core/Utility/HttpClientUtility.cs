@@ -15,7 +15,6 @@ namespace NuGet.Utility
             {
                 throw new ArgumentNullException("url");
             }
-            ProxyType result = ProxyType.None;
             string[] proxyTypes = Enum.GetNames(typeof(ProxyType));
             
             for (int i = 0; i < proxyTypes.Length; i++)
@@ -27,7 +26,7 @@ namespace NuGet.Utility
                         IWebProxy defaultProxy = HttpWebRequest.GetSystemWebProxy();
                         if (IsProxyValid(defaultProxy,url))
                         {
-                            result = type;
+                            return type;
                         }
                         break;
                     case ProxyType.NTLM:
@@ -36,17 +35,16 @@ namespace NuGet.Utility
                         ntlmProxy.Credentials = CredentialCache.DefaultNetworkCredentials;
                         if (IsProxyValid(ntlmProxy,url))
                         {
-                            result = type;
+                            return type;
                         }
                         break;
                     case ProxyType.Basic:
                         // this is our last resort so we will simply return
                         // the ProxyType.Basic so that the user will be prompted
-                        result = type;                        
-                        break;
+                        return type;                        
                 }
             }
-            return result;
+            return ProxyType.Basic;
         }
 
         public static WebProxy GetSystemProxy(string url)
