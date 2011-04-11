@@ -11,12 +11,6 @@ namespace NuGet {
         }
         public Uri Uri { get; set; }
 
-        //public WebRequest CreateRequest(Uri uri) {
-        //    WebRequest request = WebRequest.Create(uri);
-        //    InitializeRequest(request);
-        //    return request;
-        //}
-
         public HttpClient(Uri uri)
         {
             if (null == uri)
@@ -40,12 +34,6 @@ namespace NuGet {
                 httpRequest.Headers[HttpRequestHeader.AcceptEncoding] = "gzip, deflate";
                 httpRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             }
-
-            request.UseDefaultCredentials = true;
-            if (request.Proxy != null) {
-                // If we are going through a proxy then just set the default credentials
-                request.Proxy.Credentials = CredentialCache.DefaultCredentials;
-            }
         }
 
         public IHttpClient GetRedirectedClient(Uri uri) {
@@ -59,13 +47,6 @@ namespace NuGet {
                 }
                 return new HttpClient(response.ResponseUri);
             }
-            //WebRequest request = CreateRequest(uri);
-            //using (WebResponse response = request.GetResponse()) {
-            //    if (response == null) {
-            //        return null;
-            //    }
-            //    return response.ResponseUri;
-            //}
         }
     }
 }

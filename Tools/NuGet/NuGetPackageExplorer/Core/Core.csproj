@@ -115,6 +115,7 @@
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PackageUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\ProxyType.cs" />
     <Compile Include="Utility\QueryableUtility.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Utility\UriUtility.cs" />

@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using NuGet;
 using PackageExplorerViewModel.Types;
 using NuGet.Utility;
+using System.Net;
+using PackageExplorerViewModel.PackageChooser;
+using System.Windows;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
@@ -93,9 +96,24 @@ namespace PackageExplorerViewModel {
         private IPackageRepository GetPackageRepository() {
             if (_packageRepository == null || _packageRepository.Source != PackageSource) {
                 try {
-                    if (HttpClientUtility.IsProxyRequired(PackageSource))
+                    ProxyType proxyType = HttpClientUtility.GetProxyType(PackageSource);
+                    switch (proxyType)
                     {
-                        HttpClientUtility.SetProxyCredentials();
+                        case ProxyType.NTLM:
+                            WebProxy ntmlProxy = HttpClientUtility.GetSystemProxy(PackageSource);
+                            ntmlProxy.UseDefaultCredentials = true;
+                            ntmlProxy.Credentials = CredentialCache.DefaultNetworkCredentials;
+                            HttpWebRequest.DefaultWebProxy = ntmlProxy;
+                            break;
+                        case ProxyType.Basic:
+                            WebProxy basicProxy = HttpClientUtility.GetSystemProxy(PackageSource);
+                            CredentialsDialog dialog = new CredentialsDialog(basicProxy.Address.AbsoluteUri);
+                            if (MessageBoxResult.OK == dialog.Show())
+                            {
+                                basicProxy.Credentials = new NetworkCredential(dialog.Name, dialog.Password);
+                                HttpWebRequest.DefaultWebProxy = basicProxy;
+                            }
+                            break;
                     }
                     _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
                 }
