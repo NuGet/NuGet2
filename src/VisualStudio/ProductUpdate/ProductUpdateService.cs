@@ -9,16 +9,16 @@ using Microsoft.VisualStudio.ExtensionManager.UI;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Task = System.Threading.Tasks.Task;
 using Window = System.Windows.Window;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio;
 
 namespace NuGet.VisualStudio {
 
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
-        private static readonly object _showUpdatesLock = new object();
-        private const string ExtensionManagerCommandName = "Tools.ExtensionManager";
         private const string NuGetVSIXId = "NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5";
 
-        private readonly DTE _dte;
+        private readonly IVsUIShell _vsUIShell;
         private readonly IVsExtensionRepository _extensionRepository;
         private readonly IVsExtensionManager _extensionManager;
         private readonly IProductUpdateSettings _productUpdateSettings;
@@ -29,20 +29,20 @@ namespace NuGet.VisualStudio {
         public ProductUpdateService() :
             this(ServiceLocator.GetGlobalService<SVsExtensionRepository, IVsExtensionRepository>(),
                  ServiceLocator.GetGlobalService<SVsExtensionManager, IVsExtensionManager>(),
-                 ServiceLocator.GetInstance<DTE>(),
+                 ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IProductUpdateSettings>()) {
         }
 
         public ProductUpdateService(
             IVsExtensionRepository extensionRepository,
             IVsExtensionManager extensionManager,
-            DTE dte,
+            IVsUIShell vsUIShell,
             IProductUpdateSettings productUpdateSettings) {
             if (productUpdateSettings == null) {
                 throw new ArgumentNullException("productUpdateSettings");
             }
 
-            _dte = dte;
+            _vsUIShell = vsUIShell;
             _extensionRepository = extensionRepository;
             _extensionManager = extensionManager;
             _productUpdateSettings = productUpdateSettings;
@@ -106,11 +106,12 @@ namespace NuGet.VisualStudio {
         }
 
         private void ShowUpdatesTabInExtensionManager() {
-            if (_dte != null) {
+            if (_vsUIShell != null) {
                 // first, bring up the extension manager.
-                // invoke the command asynchronously so that it doesn't block
-                Action<string, string> openExtensionManager = _dte.ExecuteCommand;
-                openExtensionManager.BeginInvoke(ExtensionManagerCommandName, "", null, null);
+                Guid toolsGroupGuid = VSConstants.VsStd2010;
+                const int extensionManagerCommandId = 0xBB8;
+                object pvaIn = null;
+                _vsUIShell.PostExecCommand(ref toolsGroupGuid, extensionManagerCommandId, 0, ref pvaIn);
 
                 // The Extension Manager dialog may take a while to load. Use dispatcher timer to poll it until it shows up.
                 DispatcherTimer timer = new DispatcherTimer() {
