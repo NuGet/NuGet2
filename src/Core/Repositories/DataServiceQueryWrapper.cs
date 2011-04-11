@@ -65,8 +65,10 @@ namespace NuGet {
 
             DataServiceQueryContinuation continuation = null;
             do {
-                foreach (T item in results) {
-                    yield return item;
+                lock (_context) {
+                    foreach (T item in results) {
+                        yield return item;
+                    }
                 }
 
                 continuation = ((QueryOperationResponse)results).GetContinuation();
