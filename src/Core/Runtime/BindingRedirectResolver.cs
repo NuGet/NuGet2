@@ -95,12 +95,8 @@ namespace NuGet.Runtime {
         }
 
         private static IEnumerable<IAssembly> GetAssemblies(IEnumerable<string> paths, AppDomain domain) {
-            foreach (var path in paths) {
-                var assemblyName = AssemblyName.GetAssemblyName(path);
-                // Only look at assemblies that have a strong name
-                if (assemblyName.GetPublicKey() != null) {
-                    yield return RemoteAssembly.LoadAssembly(path, domain);
-                }
+            foreach (var path in paths) {                
+                yield return RemoteAssembly.LoadAssembly(path, domain);
             }
         }
     }

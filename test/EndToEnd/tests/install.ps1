@@ -744,6 +744,28 @@ function Test-BindingRedirectProjectsThatReferenceSameAssemblyFromDifferentLocat
     Assert-BindingRedirect $b app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
 
+function Test-BindingRedirectsMixNonStrongNameAndStrongNameAssemblies {
+    param(
+        $context
+    )
+    # Arrange
+    $a = New-ConsoleApplication
+
+    # Act
+    $a | Install-Package PackageWithNonStrongNamedLibA -Source $context.RepositoryRoot
+    $a | Install-Package PackageWithNonStrongNamedLibB -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $a PackageWithNonStrongNamedLibA
+    Assert-Package $a PackageWithNonStrongNamedLibA
+    Assert-Package $a PackageWithStrongNamedLib 1.1
+    Assert-Reference $a A 1.0.0.0 
+    Assert-Reference $a B 1.0.0.0
+    Assert-Reference $a Core 1.1.0.0
+
+    Assert-BindingRedirect $a app.config Core '0.0.0.0-1.1.0.0' '1.1.0.0'    
+}
+
 function Test-BindingRedirectProjectsThatReferenceDifferentVersionsOfSameAssembly {
     param(
         $context
