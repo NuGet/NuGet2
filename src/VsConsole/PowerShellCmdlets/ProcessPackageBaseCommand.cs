@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using EnvDTE;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
@@ -171,7 +172,7 @@ namespace NuGet.PowerShell.Commands {
 
                 string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
                 WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath));
-                InvokeCommand.InvokeScript(command);
+                InvokeCommand.InvokeScript(command, false, PipelineResultTypes.Output | PipelineResultTypes.Error, null, null);
 
                 // clear temp variables
                 psVariable.Remove("__rootPath");
