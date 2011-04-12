@@ -520,7 +520,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Source: [TestDir]\bin\release\net40\foo.dll, [TestDir]\bin\release\net35\foo.dll
         /// Search: [TestDir]\bin\release\**\*.dll
         /// Target: lib
-        /// Expected: lib\net40\foo.dll, lib\net35\foo.dll
+        /// Expected: lib\foo.dll
         /// </summary>
         [TestMethod]
         public void AbsolutePathWithWildcard() {
@@ -539,6 +539,59 @@ namespace NuGet.Test.Integration.PathResolver {
             // Assert
             Assert.AreEqual(1, package.Files.Count);
             Assert.AreEqual(package.Files.First().Path, @"lib\foo.dll");
+        }
+
+        /// <summary>
+        /// Source: bin\release\foo.dll;bin\release\bar.dll;sample\test.dll
+        /// Search: bin\release\*.dll;sample\test.dll
+        /// Target: lib
+        /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
+        /// </summary>
+        [TestMethod]
+        public void MultipleFileSourcesCanBeSpecifiedUsingSemiColonSeparator() {
+            // Arrange
+            string root = CreateFileSystem(
+                                            new Dir ("sample", new File("test.dll")),
+                                            new Dir("bin",
+                                                new Dir("release",
+                                                    new File("foo.dll"),
+                                                    new File("bar.dll")
+                                                    )));
+
+            string search = Path.Combine(root, @"bin\release\*.dll;sample\test.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root); 
+
+            // Assert
+            Assert.AreEqual(3, package.Files.Count);
+            Assert.AreEqual(package.Files.ElementAt(0).Path, @"lib\bar.dll");
+            Assert.AreEqual(package.Files.ElementAt(1).Path, @"lib\foo.dll");
+            Assert.AreEqual(package.Files.ElementAt(2).Path, @"lib\test.dll");
+        }
+
+        /// <summary>
+        /// Source: bin\release\foo.dll
+        /// Search: bin\release\foo.dll;bin\release\bar.dll
+        /// Target: lib
+        /// Expected: Exception stating File not found: bin\release\bar.dll
+        /// </summary>
+        [TestMethod]
+        public void PackageBuilderThrowsIfAnyOneItemOfSemiColonSeparatedListIsNotFound() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                    new File("foo.dll")
+                                                    )));
+
+            string search = Path.Combine(root, @"bin\release\foo.dll;bin\release\bar.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act and Assert
+            ExceptionAssert.Throws<FileNotFoundException>(() => new PackageBuilder(manifest, root), @"File not found: 'bin\release\bar.dll'.");
         }
 
         /// <summary>
@@ -581,9 +634,9 @@ namespace NuGet.Test.Integration.PathResolver {
   </metadata><files><file src=""{0}"" target=""{1}"" /></files></package>", search, target).AsStream();
         }
 
-        private string CreateFileSystem(File file) {
+        private string CreateFileSystem(params File[] files) {
             string rootDir = Path.Combine(TestContext.TestDeploymentDir, "PathResolverIntegrationTests", TestContext.TestName);
-            new Dir(rootDir, file).Create();
+            new Dir(rootDir, files).Create();
             return rootDir;
         }
 
