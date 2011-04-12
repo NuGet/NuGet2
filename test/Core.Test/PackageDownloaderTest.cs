@@ -17,7 +17,7 @@ namespace NuGet.Test {
             var downloader = new PackageDownloader(httpClient.Object);
 
             // Assert
-            Assert.IsTrue(httpClient.Object.UserAgent.StartsWith("Package-Installer/"));
+            Assert.IsTrue(httpClient.Object.UserAgent.StartsWith("NuGet Visual Studio Extension/"));
         }
 
         [TestMethod]

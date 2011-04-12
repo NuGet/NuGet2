@@ -6,7 +6,7 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class PackageDownloader : IHttpClientEvents {
-        private const string DefaultUserAgent = "Package-Installer/{0} ({1})";
+        private const string DefaultUserAgentClient = "NuGet Visual Studio Extension";
         private readonly IHttpClient _httpClient;
         private readonly IPackageFactory _packageFactory;
         private readonly IHashProvider _hashProvider;
@@ -38,8 +38,7 @@ namespace NuGet {
             _httpClient = httpClient;
             _packageFactory = packageFactory;
             _hashProvider = hashProvider;
-            var version = typeof(PackageDownloader).Assembly.GetNameSafe().Version;
-            _httpClient.UserAgent = String.Format(CultureInfo.InvariantCulture, DefaultUserAgent, version, Environment.OSVersion);
+            _httpClient.UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient);
         }
 
         public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package) {

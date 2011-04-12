@@ -70,6 +70,7 @@
     <Compile Include="Repositories\MachineCache.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
+    <Compile Include="Utility\HttpUtility.cs" />
     <Compile Include="Utility\IHttpClientEvents.cs" />
     <Compile Include="Repositories\LazyQueue.cs" />
     <Compile Include="Repositories\ProgressEventArgs.cs" />

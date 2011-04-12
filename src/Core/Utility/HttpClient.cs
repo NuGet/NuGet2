@@ -35,12 +35,11 @@ namespace NuGet {
             }
 
             // giving clients a chance to examine/modify the request object before the request actually goes out.
-            OnSendingRequest(request);
+            RaiseSendingRequest(request);
         }
 
         public Uri GetRedirectedUri(Uri uri) {
             WebRequest request = CreateRequest(uri, acceptCompression: false);
-            OnSendingRequest(request);
             using (WebResponse response = request.GetResponse()) {
                 if (response == null) {
                     return null;
@@ -87,7 +86,7 @@ namespace NuGet {
             ProgressAvailable(this, new ProgressEventArgs(percentage));
         }
 
-        private void OnSendingRequest(WebRequest webRequest) {
+        private void RaiseSendingRequest(WebRequest webRequest) {
             SendingRequest(this, new WebRequestEventArgs(webRequest));
         }
     }

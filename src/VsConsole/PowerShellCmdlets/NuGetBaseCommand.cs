@@ -16,8 +16,8 @@ namespace NuGet.PowerShell.Commands {
     /// </summary>
     public abstract class NuGetBaseCommand : PSCmdlet, ILogger, IErrorHandler {
         // User Agent. Do NOT localize
-        private const string PSCommandsUserAgentTemplate = "NuGet Package Manager Console/{0} ({1})";
-        private string _psCommandsUserAgent;
+        private const string PSCommandsUserAgentClient = "NuGet Package Manager Console";
+        private Lazy<string> _psCommandsUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient));
 
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
@@ -114,10 +114,6 @@ namespace NuGet.PowerShell.Commands {
 
         protected override void BeginProcessing() {
             if (_httpClientEvents != null) {
-                // precalculate the user agent used for all requests sent from NuGet cmdlets
-                var version = typeof(PackageDownloader).Assembly.GetNameSafe().Version;
-                _psCommandsUserAgent = String.Format(CultureInfo.InvariantCulture, PSCommandsUserAgentTemplate, version, Environment.OSVersion);
-
                 _httpClientEvents.SendingRequest += OnSendingRequest;
             }
         }
@@ -341,15 +337,8 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-
         private void OnSendingRequest(object sender, WebRequestEventArgs e) {
-            var request = e.Request as HttpWebRequest;
-            if (request != null) {
-                request.UserAgent = _psCommandsUserAgent;
-            }
-            else {
-                e.Request.Headers[HttpRequestHeader.UserAgent] = _psCommandsUserAgent;
-            }
+            HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }
     }
 }
