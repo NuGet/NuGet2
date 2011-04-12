@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -14,8 +13,12 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI {
     public partial class PackageManagerWindow : DialogWindow {
+        private const string DialogUserAgentClient = "NuGet Add Package Dialog";
+        private Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
+
         private const string F1Keyword = "vs.ExtensionManager";
 
+        private readonly IHttpClientEvents _httpClientEvents;
         private bool _hasOpenedOnlineProvider;
 
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
@@ -24,31 +27,36 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly IProductUpdateService _productUpdateService;
 
         public PackageManagerWindow() :
-            this(ServiceLocator.GetInstance<DTE>(), 
+            this(ServiceLocator.GetInstance<DTE>(),
                  ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
                  ServiceLocator.GetInstance<ProviderServices>(),
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
-                 ServiceLocator.GetInstance<IProgressProvider>(),
+                 ServiceLocator.GetInstance<IHttpClientEvents>(),
                  ServiceLocator.GetInstance<ISelectedProviderSettings>(),
                  ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
-        public PackageManagerWindow(DTE dte, 
+        public PackageManagerWindow(DTE dte,
                                     IVsUIShell vsUIShell,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
                                     IRecentPackageRepository recentPackagesRepository,
-                                    IProgressProvider progressProvider,
+                                    IHttpClientEvents httpClientEvents,
                                     ISelectedProviderSettings selectedProviderSettings,
                                     IProductUpdateService productUpdateService)
             : base(F1Keyword) {
 
             InitializeComponent();
+
+            _httpClientEvents = httpClientEvents;
+            if (_httpClientEvents != null) {
+                _httpClientEvents.SendingRequest += OnSendingRequest;
+            }
 
             AddUpdateBar(productUpdateService);
 
@@ -75,7 +83,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 providerServices,
                 recentPackagesRepository,
-                progressProvider);
+                httpClientEvents);
         }
 
         private void AddUpdateBar(IProductUpdateService productUpdateService) {
@@ -102,7 +110,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository,
-                                    IProgressProvider progressProvider) {
+                                    IHttpClientEvents httpClientEvents) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
             Project activeProject = dte.GetActiveProject();
@@ -119,7 +127,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 recentPackagesRepository,
                 packageSourceProvider,
                 providerServices,
-                progressProvider);
+                httpClientEvents);
 
 
             var updatesProvider = new UpdatesProvider(
@@ -130,7 +138,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 packageManagerFactory,
                 providerServices,
-                progressProvider);
+                httpClientEvents);
 
             var onlineProvider = new OnlineProvider(
                 activeProject,
@@ -140,7 +148,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 packageSourceProvider,
                 packageManagerFactory,
                 providerServices,
-                progressProvider);
+                httpClientEvents);
 
             var installedProvider = new InstalledProvider(
                 packageManager,
@@ -148,7 +156,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 projectManager,
                 Resources,
                 providerServices,
-                progressProvider);
+                httpClientEvents);
 
             explorer.Providers.Add(installedProvider);
             explorer.Providers.Add(onlineProvider);
@@ -225,7 +233,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void ShowOptionsPage() {
             // GUID of our options page, defined in ToolsOptionsPage.cs
-            object targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";            
+            object targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
             Guid toolsGroupGuid = VSConstants.GUID_VSStandardCommandSet97;
             _vsUIShell.PostExecCommand(ref toolsGroupGuid, VSConstants.cmdidToolsOptions, 0, ref targetGUID);
         }
@@ -329,6 +337,10 @@ namespace NuGet.Dialog.PackageManagerUI {
                     _productUpdateService.CheckForAvailableUpdateAsync();
                 }
             }
+        }
+
+        private void OnSendingRequest(object sender, WebRequestEventArgs e) {
+            HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value);
         }
     }
 }
