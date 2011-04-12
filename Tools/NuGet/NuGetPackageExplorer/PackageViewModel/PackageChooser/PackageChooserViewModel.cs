@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using Kerr;
 using NuGet;
 using PackageExplorerViewModel.Types;
 using NuGet.Utility;
@@ -101,38 +99,20 @@ namespace PackageExplorerViewModel {
                     ProxyType proxyType = HttpClientUtility.GetProxyType(PackageSource);
                     switch (proxyType)
                     {
-                        case ProxyType.IntegratedAuth:
+                        case ProxyType.NTLM:
                             WebProxy ntmlProxy = HttpClientUtility.GetSystemProxy(PackageSource);
                             ntmlProxy.UseDefaultCredentials = true;
-                            WebRequest.DefaultWebProxy = ntmlProxy;
+                            ntmlProxy.Credentials = CredentialCache.DefaultNetworkCredentials;
+                            HttpWebRequest.DefaultWebProxy = ntmlProxy;
                             break;
-                        case ProxyType.BasicAuth:
+                        case ProxyType.Basic:
                             WebProxy basicProxy = HttpClientUtility.GetSystemProxy(PackageSource);
-                            string proxyHost = basicProxy.Address.Host;
-                            // If the user opted to save the credentials then they will not be
-                            // prompted again even though we are invoking the ShowDialog method
-                            // what we need to do here is to try and detect if the credentials
-                            // actually worked and if they did not then we have to ask the user once
-                            // again and maybe remove the old credentials.
-                            using (PromptForCredential dialog = new PromptForCredential())
+                            CredentialsDialog dialog = new CredentialsDialog(basicProxy.Address.AbsoluteUri);
+                            if (MessageBoxResult.OK == dialog.Show())
                             {
-                                dialog.TargetName = proxyHost;
-                                dialog.Title = string.Format("Connect to: {0}", proxyHost);
-                                dialog.GenericCredentials = true;
-                                if (DialogResult.OK == dialog.ShowDialog())
-                                {
-                                    basicProxy.Credentials = new NetworkCredential(dialog.UserName, dialog.Password);
-                                    WebRequest.DefaultWebProxy = basicProxy;
-                                }
+                                basicProxy.Credentials = new NetworkCredential(dialog.Name, dialog.Password);
+                                HttpWebRequest.DefaultWebProxy = basicProxy;
                             }
-                            break;
-                        case ProxyType.None:
-                            // Before one would use the GlobalProxySelection.GetEmptyWebProxy() method
-                            // to get an empty proxy since we don't want a proxy here but that class is now obsolete
-                            // The recommended approach is to set the DefaultWebProxy to null as per the GlobalProxySelection
-                            // documentation
-                            // http://msdn.microsoft.com/en-us/library/system.net.globalproxyselection.aspx
-                            WebRequest.DefaultWebProxy = null;
                             break;
                     }
                     _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);

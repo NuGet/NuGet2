@@ -8,7 +8,7 @@ namespace NuGet.Utility
     public enum ProxyType
     {
         None,
-        IntegratedAuth,
-        BasicAuth
+        NTLM,
+        Basic
     }
 }
