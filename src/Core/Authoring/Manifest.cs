@@ -106,6 +106,10 @@ namespace NuGet {
             var serializer = new XmlSerializer(typeof(Manifest));
             var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
 
+            // Convert <file source="Foo.cs;.\src\bar.cs" target="content" /> to multiple individual items.
+            // Do this before validating to ensure validation for files still works as before.
+            manifest.SplitManifestFiles();
+
             if (validate) {
                 // Validate before returning
                 Validate(manifest);
@@ -121,8 +125,6 @@ namespace NuGet {
             manifest.Metadata.Language = manifest.Metadata.Language.SafeTrim();
             manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
 
-            // Convert <file source="Foo.cs;.\src\bar.cs" target="content" /> to multiple individual items.
-            manifest.SplitManifestFiles();
 
             return manifest;
         }
@@ -135,9 +137,9 @@ namespace NuGet {
             for (int i = 0; i < length; i++) {
                 var manifestFile = Files[i];
                 // Multiple sources can be specified by using semi-colon separated values. 
-                var sources = manifestFile.Source.Split(';');
+                var sources = manifestFile.Source.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 // Set the source value of the current manifest file to the first item in the list of values
-                manifestFile.Source = sources.First();
+                manifestFile.Source = sources.FirstOrDefault();
                 // Add a ManifestFile for all other items
                 Files.AddRange(from item in sources.Skip(1) 
                                    select new ManifestFile { Source = item, Target = manifestFile.Target });

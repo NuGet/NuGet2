@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -318,7 +319,7 @@ namespace NuGet.Test.Integration.PathResolver {
             string root = CreateFileSystem(new Dir("style",
                                             new File("style.css"),
                                             new Dir("css",
-                                                new Dir("style", 
+                                                new Dir("style",
                                                     new File("style.css")
                                                 )
                                             )));
@@ -379,7 +380,7 @@ namespace NuGet.Test.Integration.PathResolver {
             string search = @"css\*.jpg";
             string target = String.Empty;
             Stream manifest = GetManifest(search, target);
-            string root = CreateFileSystem(new Dir("css", 
+            string root = CreateFileSystem(new Dir("css",
                                                 new File("main.css"),
                                                 new File("main.txt")));
 
@@ -551,25 +552,67 @@ namespace NuGet.Test.Integration.PathResolver {
         public void MultipleFileSourcesCanBeSpecifiedUsingSemiColonSeparator() {
             // Arrange
             string root = CreateFileSystem(
-                                            new Dir ("sample", new File("test.dll")),
+                                            new Dir("sample", new File("test.dll")),
                                             new Dir("bin",
                                                 new Dir("release",
                                                     new File("foo.dll"),
                                                     new File("bar.dll")
                                                     )));
 
-            string search = Path.Combine(root, @"bin\release\*.dll;sample\test.dll");
+            string search = @"bin\release\*.dll;sample\test.dll";
             string target = @"lib";
             Stream manifest = GetManifest(search, target);
 
             // Act
-            var package = new PackageBuilder(manifest, root); 
+            var package = new PackageBuilder(manifest, root);
 
             // Assert
             Assert.AreEqual(3, package.Files.Count);
             Assert.AreEqual(package.Files.ElementAt(0).Path, @"lib\bar.dll");
             Assert.AreEqual(package.Files.ElementAt(1).Path, @"lib\foo.dll");
             Assert.AreEqual(package.Files.ElementAt(2).Path, @"lib\test.dll");
+        }
+
+        /// <summary>
+        /// Source: sample\test.dll
+        /// Search: ;;
+        /// Target: lib
+        /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
+        /// </summary>
+        [TestMethod]
+        public void ManifestThrowsIfFirstFileSourceValuesInSemiColonSeparatedListsAreEmpty() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("sample", new File("test.dll")));
+
+            string search = @";;";
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act and Assert
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(manifest, root), "Source is required.");
+        }
+
+        /// <summary>
+        /// Source: sample\test.dll
+        /// Search: ;;
+        /// Target: lib
+        /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
+        /// </summary>
+        [TestMethod]
+        public void ManifestIgnoresEmptyItemsInSemiColonSeparatedList() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("sample", new File("test.dll")));
+
+            string search = @";sample\test.dll;";
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(package.Files.ElementAt(0).Path, @"lib\test.dll");
         }
 
         /// <summary>
@@ -586,7 +629,7 @@ namespace NuGet.Test.Integration.PathResolver {
                                                     new File("foo.dll")
                                                     )));
 
-            string search = Path.Combine(root, @"bin\release\foo.dll;bin\release\bar.dll");
+            string search = @"bin\release\foo.dll;bin\release\bar.dll";
             string target = @"lib";
             Stream manifest = GetManifest(search, target);
 
