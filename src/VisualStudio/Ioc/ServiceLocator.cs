@@ -28,7 +28,7 @@ namespace NuGet.VisualStudio {
                    GetComponentModelService<TService>();
         }
 
-        internal static TInterface GetGlobalService<TService, TInterface>() {
+        public static TInterface GetGlobalService<TService, TInterface>() {
             return (TInterface)Package.GetGlobalService(typeof(TService));
         }
 

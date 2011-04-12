@@ -1,5 +1,5 @@
 using System;
-using System.ComponentModel.Design;
+using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -8,6 +8,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
 
@@ -18,13 +19,13 @@ namespace NuGet.Dialog.PackageManagerUI {
         private bool _hasOpenedOnlineProvider;
 
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
-        private readonly MenuCommandService _menuCommandService;
+        private readonly IVsUIShell _vsUIShell;
         private readonly ISelectedProviderSettings _selectedProviderSettings;
         private readonly IProductUpdateService _productUpdateService;
 
-        public PackageManagerWindow(MenuCommandService menuService) :
-            this(menuService,
-                 ServiceLocator.GetInstance<DTE>(),
+        public PackageManagerWindow() :
+            this(ServiceLocator.GetInstance<DTE>(), 
+                 ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
@@ -35,8 +36,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
-        public PackageManagerWindow(MenuCommandService menuCommandService,
-                                    DTE dte,
+        public PackageManagerWindow(DTE dte, 
+                                    IVsUIShell vsUIShell,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
@@ -51,7 +52,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             AddUpdateBar(productUpdateService);
 
-            _menuCommandService = menuCommandService;
+            _vsUIShell = vsUIShell;
             _selectedProviderSettings = selectedProviderSettings;
             _productUpdateService = productUpdateService;
 
@@ -224,12 +225,9 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         private void ShowOptionsPage() {
             // GUID of our options page, defined in ToolsOptionsPage.cs
-            const string targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
-
-            var command = new CommandID(
-                VSConstants.GUID_VSStandardCommandSet97,
-                VSConstants.cmdidToolsOptions);
-            _menuCommandService.GlobalInvoke(command, targetGUID);
+            object targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";            
+            Guid toolsGroupGuid = VSConstants.GUID_VSStandardCommandSet97;
+            _vsUIShell.PostExecCommand(ref toolsGroupGuid, VSConstants.cmdidToolsOptions, 0, ref targetGUID);
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {

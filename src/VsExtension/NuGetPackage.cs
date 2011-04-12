@@ -65,8 +65,7 @@ namespace NuGet.Tools {
         /// </summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
             if (HasActiveLoadedSupportedProject) {
-                var menuCommandService = (MenuCommandService)GetService(typeof(IMenuCommandService));
-                var window = new PackageManagerWindow(menuCommandService);
+                var window = new PackageManagerWindow();
                 try {
                     window.ShowModal();
                 }
