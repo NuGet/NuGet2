@@ -271,6 +271,10 @@ namespace PackageExplorerViewModel {
                             query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.VersionDownloadCount) : query.OrderBy(p => p.VersionDownloadCount);
                             break;
 
+                        case "Rating":
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Rating) : query.OrderBy(p => p.Rating);
+                            break;
+
                         default:
                             query = query.OrderByDescending(p => p.VersionDownloadCount);
                             break;
