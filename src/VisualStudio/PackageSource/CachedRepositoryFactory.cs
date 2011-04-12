@@ -6,36 +6,31 @@ using System.Linq;
 namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IPackageRepositoryFactory))]
-    public class CachedRepositoryFactory : IPackageRepositoryFactory {
+    [Export(typeof(IProgressProvider))]
+    [Export(typeof(IHttpClientEvents))]
+    public class CachedRepositoryFactory : IPackageRepositoryFactory, IProgressProvider, IHttpClientEvents {
         private readonly ConcurrentDictionary<PackageSource, IPackageRepository> _repositoryCache = new ConcurrentDictionary<PackageSource, IPackageRepository>();
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
-        private readonly IProgressReporter _progressReporter;
+
+        public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
+        public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
         [ImportingConstructor]
-        public CachedRepositoryFactory(IPackageSourceProvider packageSourceProvider,
-                                       IProgressReporter progressReporter)
-            : this(PackageRepositoryFactory.Default,
-                   progressReporter,
-                   packageSourceProvider) {
+        public CachedRepositoryFactory(IPackageSourceProvider packageSourceProvider)
+            : this(PackageRepositoryFactory.Default, packageSourceProvider) {
         }
 
         internal CachedRepositoryFactory(IPackageRepositoryFactory repositoryFactory,
-                                         IProgressReporter progressReporter,
                                          IPackageSourceProvider packageSourceProvider) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
-            }
-
-            if (progressReporter == null) {
-                throw new ArgumentNullException("progressReporter");
             }
 
             if (packageSourceProvider == null) {
                 throw new ArgumentNullException("packageSourceProvider");
             }
 
-            _progressReporter = progressReporter;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
         }
@@ -62,12 +57,21 @@ namespace NuGet.VisualStudio {
                 if (progressProvider != null) {
                     progressProvider.ProgressAvailable += OnProgressAvailable;
                 }
+
+                var httpEvents = repository as IHttpClientEvents;
+                if (httpEvents != null) {
+                    httpEvents.SendingRequest += OnSendingRequest;
+                }
             }
             return repository;
         }
 
         private void OnProgressAvailable(object sender, ProgressEventArgs e) {
-            _progressReporter.ReportProgress(e.Operation, e.PercentComplete);
+            ProgressAvailable(this, e);           
+        }
+
+        private void OnSendingRequest(object sender, WebRequestEventArgs e) {
+            SendingRequest(this, e);
         }
     }
 }

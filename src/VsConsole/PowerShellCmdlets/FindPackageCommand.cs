@@ -18,7 +18,7 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IRecentPackageRepository>(),
-                   ServiceLocator.GetInstance<IProgressProvider>()) {
+                   ServiceLocator.GetInstance<IHttpClientEvents>()) {
         }
 
         public FindPackageCommand(IPackageRepositoryFactory repositoryFactory,
@@ -26,8 +26,8 @@ namespace NuGet.PowerShell.Commands {
                           ISolutionManager solutionManager,
                           IVsPackageManagerFactory packageManagerFactory,
                           IPackageRepository recentPackagesRepository,
-                          IProgressProvider progressProvider) 
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, progressProvider, null) {
+                          IHttpClientEvents httpClientEvents) 
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, httpClientEvents, null) {
         }
 
         protected override void ProcessRecordCore() {

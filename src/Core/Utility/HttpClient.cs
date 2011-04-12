@@ -3,8 +3,9 @@ using System.IO;
 using System.Net;
 
 namespace NuGet {
-    public class HttpClient : IHttpClient {        
-        public event EventHandler<ProgressEventArgs> ProgressAvailable;
+    public class HttpClient : IHttpClient {
+        public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
+        public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
         public string UserAgent {
             get;
@@ -32,10 +33,14 @@ namespace NuGet {
                 // If we are going through a proxy then just set the default credentials
                 request.Proxy.Credentials = CredentialCache.DefaultCredentials;
             }
+
+            // giving clients a chance to examine/modify the request object before the request actually goes out.
+            OnSendingRequest(request);
         }
 
         public Uri GetRedirectedUri(Uri uri) {
             WebRequest request = CreateRequest(uri, acceptCompression: false);
+            OnSendingRequest(request);
             using (WebResponse response = request.GetResponse()) {
                 if (response == null) {
                     return null;
@@ -79,9 +84,11 @@ namespace NuGet {
         }
 
         private void OnProgressAvailable(int percentage) {
-            if (ProgressAvailable != null) {
-                ProgressAvailable(this, new ProgressEventArgs(percentage));
-            }
+            ProgressAvailable(this, new ProgressEventArgs(percentage));
+        }
+
+        private void OnSendingRequest(WebRequest webRequest) {
+            SendingRequest(this, new WebRequestEventArgs(webRequest));
         }
     }
 }

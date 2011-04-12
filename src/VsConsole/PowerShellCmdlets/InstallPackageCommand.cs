@@ -16,16 +16,16 @@ namespace NuGet.PowerShell.Commands {
         public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(), 
-                   ServiceLocator.GetInstance<IProgressProvider>(),
+                   ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public InstallPackageCommand(
             ISolutionManager solutionManager, 
             IVsPackageManagerFactory packageManagerFactory, 
-            IProgressProvider progressProvider,
+            IHttpClientEvents httpClientEvents,
             IProductUpdateService productUpdateService)
-            : base(solutionManager, packageManagerFactory, progressProvider) {
+            : base(solutionManager, packageManagerFactory, httpClientEvents) {
             _productUpdateService = productUpdateService;
         }
 

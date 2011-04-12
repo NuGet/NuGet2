@@ -18,7 +18,6 @@
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
-    <Compile Include="IProgressReporter.cs" />
     <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
     <Compile Include="ProductUpdate\ProductUpdateAvailableEventArgs.cs" />
     <Compile Include="ProductUpdate\ProductUpdateBar.xaml.cs">
@@ -33,7 +32,6 @@
     <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackage.cs" />
     <Compile Include="Utility\UriHelper.cs" />
-    <Compile Include="VsProgressReporter.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>

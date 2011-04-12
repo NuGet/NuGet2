@@ -20,11 +20,11 @@ namespace NuGet.PowerShell.Commands {
         public NewPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(), 
-                   ServiceLocator.GetInstance<IProgressProvider>()) {
+                   ServiceLocator.GetInstance<IHttpClientEvents>()) {
         }
 
-        public NewPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IProgressProvider progressProvider)
-            : base(solutionManager, packageManagerFactory, progressProvider) {
+        public NewPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents)
+            : base(solutionManager, packageManagerFactory, httpClientEvents) {
         }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]

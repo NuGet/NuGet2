@@ -3,7 +3,7 @@ using System.Data.Services.Client;
 using System.Linq;
 
 namespace NuGet {
-    public class DataServicePackageRepository : PackageRepositoryBase, IProgressProvider {
+    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents {
         private readonly IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly string _source;
@@ -18,6 +18,8 @@ namespace NuGet {
                 _packageDownloader.ProgressAvailable -= value;
             }
         }
+
+        public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
         public DataServicePackageRepository(Uri serviceRoot)
             : this(serviceRoot, new HttpClient()) {
@@ -40,6 +42,7 @@ namespace NuGet {
             _context = context;
             _httpClient = httpClient;
 
+            _packageDownloader.SendingRequest += (sender, e) => RaiseSendingRequestEvent(e);
             _context.SendingRequest += OnSendingRequest;
             _context.ReadingEntity += OnReadingEntity;
             _context.IgnoreMissingProperties = true;
@@ -63,11 +66,16 @@ namespace NuGet {
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             // Initialize the request
             _httpClient.InitializeRequest(e.Request, acceptCompression: true);
+            RaiseSendingRequestEvent(new WebRequestEventArgs(e.Request));
         }
 
         public override IQueryable<IPackage> GetPackages() {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
             return new SmartDataServiceQuery<DataServicePackage>(_context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
+        }
+
+        private void RaiseSendingRequestEvent(WebRequestEventArgs args) {
+            SendingRequest(this, args);
         }
     }
 }

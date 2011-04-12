@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
+using System.Net;
 using System.Reflection;
 using EnvDTE;
 using NuGet.VisualStudio;
@@ -14,16 +15,20 @@ namespace NuGet.PowerShell.Commands {
     /// This is the base class for all NuGet cmdlets.
     /// </summary>
     public abstract class NuGetBaseCommand : PSCmdlet, ILogger, IErrorHandler {
+        // User Agent. Do NOT localize
+        private const string PSCommandsUserAgentTemplate = "NuGet Package Manager Console/{0} ({1})";
+        private string _psCommandsUserAgent;
+
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
-        private readonly IProgressProvider _progressProvider;
+        private readonly IHttpClientEvents _httpClientEvents;
 
-        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IProgressProvider progressProvider) {
+        protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IHttpClientEvents httpClientEvents) {
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
-            _progressProvider = progressProvider;
+            _httpClientEvents = httpClientEvents;
         }
 
         private ProgressRecordCollection ProgressRecordCache {
@@ -107,15 +112,31 @@ namespace NuGet.PowerShell.Commands {
             EndProcessing();
         }
 
+        protected override void BeginProcessing() {
+            if (_httpClientEvents != null) {
+                // precalculate the user agent used for all requests sent from NuGet cmdlets
+                var version = typeof(PackageDownloader).Assembly.GetNameSafe().Version;
+                _psCommandsUserAgent = String.Format(CultureInfo.InvariantCulture, PSCommandsUserAgentTemplate, version, Environment.OSVersion);
+
+                _httpClientEvents.SendingRequest += OnSendingRequest;
+            }
+        }
+
+        protected override void EndProcessing() {
+            if (_httpClientEvents != null) {
+                _httpClientEvents.SendingRequest -= OnSendingRequest;
+            }
+        }
+
         protected void SubscribeToProgressEvents() {
-            if (!IsSyncMode && _progressProvider != null) {
-                _progressProvider.ProgressAvailable += OnProgressAvailable;
+            if (!IsSyncMode && _httpClientEvents != null) {
+                _httpClientEvents.ProgressAvailable += OnProgressAvailable;
             }
         }
 
         protected void UnsubscribeFromProgressEvents() {
-            if (_progressProvider != null) {
-                _progressProvider.ProgressAvailable -= OnProgressAvailable;
+            if (_httpClientEvents != null) {
+                _httpClientEvents.ProgressAvailable -= OnProgressAvailable;
             }
         }
 
@@ -317,6 +338,17 @@ namespace NuGet.PowerShell.Commands {
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord> {
             protected override int GetKeyForItem(ProgressRecord item) {
                 return item.ActivityId;
+            }
+        }
+
+
+        private void OnSendingRequest(object sender, WebRequestEventArgs e) {
+            var request = e.Request as HttpWebRequest;
+            if (request != null) {
+                request.UserAgent = _psCommandsUserAgent;
+            }
+            else {
+                e.Request.Headers[HttpRequestHeader.UserAgent] = _psCommandsUserAgent;
             }
         }
     }

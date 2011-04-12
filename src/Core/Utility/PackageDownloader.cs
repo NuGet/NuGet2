@@ -5,13 +5,14 @@ using System.Net;
 using NuGet.Resources;
 
 namespace NuGet {
-    public class PackageDownloader : IProgressProvider {
-        private const string UserAgent = "Package-Installer/{0} ({1})";
+    public class PackageDownloader : IHttpClientEvents {
+        private const string DefaultUserAgent = "Package-Installer/{0} ({1})";
         private readonly IHttpClient _httpClient;
         private readonly IPackageFactory _packageFactory;
         private readonly IHashProvider _hashProvider;
 
-        public event EventHandler<ProgressEventArgs> ProgressAvailable;
+        public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
+        public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
         public PackageDownloader()
             : this(new HttpClient()) {
@@ -38,7 +39,7 @@ namespace NuGet {
             _packageFactory = packageFactory;
             _hashProvider = hashProvider;
             var version = typeof(PackageDownloader).Assembly.GetNameSafe().Version;
-            _httpClient.UserAgent = String.Format(CultureInfo.InvariantCulture, UserAgent, version, Environment.OSVersion);
+            _httpClient.UserAgent = String.Format(CultureInfo.InvariantCulture, DefaultUserAgent, version, Environment.OSVersion);
         }
 
         public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package) {
@@ -57,12 +58,17 @@ namespace NuGet {
             // Get the operation display text
             string operation = String.Format(CultureInfo.CurrentCulture, NuGetResources.DownloadProgressStatus, package.Id, package.Version);
 
-            EventHandler<ProgressEventArgs> handler = (sender, e) => {
+            EventHandler<ProgressEventArgs> progressAvailableHandler = (sender, e) => {
                 OnPackageDownloadProgress(new ProgressEventArgs(operation, e.PercentComplete));
             };
 
+            EventHandler<WebRequestEventArgs> beforeSendingRequesthandler = (sender, e) => {
+                OnSendingRequest(e.Request);
+            };
+
             try {
-                _httpClient.ProgressAvailable += handler;
+                _httpClient.ProgressAvailable += progressAvailableHandler;
+                _httpClient.SendingRequest += beforeSendingRequesthandler;
 
                 // TODO: This gets held onto in memory which we want to get rid of eventually
                 byte[] buffer = _httpClient.DownloadData(uri);
@@ -76,14 +82,17 @@ namespace NuGet {
                 });
             }
             finally {
-                _httpClient.ProgressAvailable -= handler;
+                _httpClient.ProgressAvailable -= progressAvailableHandler;
+                _httpClient.SendingRequest -= beforeSendingRequesthandler;
             }
         }
 
         private void OnPackageDownloadProgress(ProgressEventArgs e) {
-            if (ProgressAvailable != null) {
-                ProgressAvailable(this, e);
-            }
+            ProgressAvailable(this, e);
+        }
+
+        private void OnSendingRequest(WebRequest webRequest) {
+            SendingRequest(this, new WebRequestEventArgs(webRequest));
         }
     }
 }

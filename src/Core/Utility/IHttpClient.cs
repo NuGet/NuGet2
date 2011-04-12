@@ -2,7 +2,7 @@
 using System.Net;
 
 namespace NuGet {
-    public interface IHttpClient : IProgressProvider {
+    public interface IHttpClient : IHttpClientEvents {
         string UserAgent {
             get;
             set;
