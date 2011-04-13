@@ -92,6 +92,9 @@ namespace NuGet {
             var serializer = new XmlSerializer(typeof(Manifest));
             var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
 
+            // Convert <file source="Foo.cs;.\src\bar.cs" target="content" /> to multiple individual items.
+            manifest.SplitManifestFiles();
+
             // Validate before returning
             Validate(manifest);
 
@@ -106,6 +109,23 @@ namespace NuGet {
             manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
 
             return manifest;
+        }
+
+        private void SplitManifestFiles() {
+            if (Files == null) {
+                return;
+            }
+            int length = Files.Count;
+            for (int i = 0; i < length; i++) {
+                var manifestFile = Files[i];
+                // Multiple sources can be specified by using semi-colon separated values. 
+                var sources = manifestFile.Source.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                // Set the source value of the current manifest file to the first item in the list of values
+                manifestFile.Source = sources.FirstOrDefault();
+                // Add a ManifestFile for all other items
+                Files.AddRange(from item in sources.Skip(1)
+                               select new ManifestFile { Source = item, Target = manifestFile.Target });
+            }
         }
 
         public static Manifest Create(IPackageMetadata metadata) {
