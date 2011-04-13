@@ -76,15 +76,20 @@ namespace NuGet.Repositories
                 switch (type)
                 {
                     case ProxyType.None:
-                        // Since this is a empty proxy then just pass null for the
-                        // proxy property as per microsoft documentation
-                        if (IsProxyValid(null, uri))
+                        // Even though we are testing an empty proxy and Microsoft documentation is telling us to use null
+                        // for an empty proxy, our code does not like it so we have to ask for a System Default proxy to test
+                        // and see if that works
+                        // Also using the GetSystemProxy(uri) local method is not working correctly with an empty proxy
+                        // in the mean time just get a fresh version of the proxy settings from the WebRequest object.
+                        IWebProxy systemProxy = WebRequest.GetSystemWebProxy();
+                        if (IsProxyValid(systemProxy, uri))
                         {
                             return type;
                         }
                         break;
                     case ProxyType.IntegratedAuth:
-                        WebProxy integratedAuthProxy = GetSystemProxy(uri);
+                        IWebProxy integratedAuthProxy = GetSystemProxy(uri);
+                        // Use the same mechanism for retrieving the proxy credentials as the rest of this class
                         integratedAuthProxy.Credentials = _credentialProvider.GetCredentials(type, uri);
                         // Commenting out the Credentials setter based on the Remarks that can be found:
                         // http://msdn.microsoft.com/en-us/library/system.net.webrequest.usedefaultcredentials.aspx

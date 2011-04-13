@@ -105,58 +105,6 @@ namespace PackageExplorerViewModel {
                     Uri packageUri = new Uri(PackageSource);
                     IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
                     IHttpClient packageSourceClient = new RedirectedHttpClient(packageUri, packageSourceProxy);
-                    //ProxyType proxyType = _proxyService.GetProxyType(PackageSource);
-                    //switch (proxyType)
-                    //{
-                    //    case ProxyType.IntegratedAuth:
-                    //        WebProxy ntmlProxy = _proxyService.GetSystemProxy(PackageSource);
-                    //        ntmlProxy.UseDefaultCredentials = true;
-                    //        WebRequest.DefaultWebProxy = ntmlProxy;
-                    //        break;
-                    //    case ProxyType.BasicAuth:
-                    //        WebProxy basicProxy = _proxyService.GetSystemProxy(PackageSource);
-                    //        string proxyHost = basicProxy.Address.Host;
-                    //        // If the user opted to save the credentials then they will not be
-                    //        // prompted again even though we are invoking the ShowDialog method
-                    //        // what we need to do here is to try and detect if the credentials
-                    //        // actually worked and if they did not then we have to ask the user once again
-                    //        using (PromptForCredential dialog = new PromptForCredential())
-                    //        {
-                    //            dialog.TargetName = proxyHost;
-                    //            dialog.Title = string.Format("Connect to: {0}", proxyHost);
-                    //            dialog.GenericCredentials = true;
-                    //            bool validCredentials = false;
-                    //            NetworkCredential credentials = null;
-                    //            while (!validCredentials)
-                    //            {
-                    //                if (DialogResult.OK == dialog.ShowDialog())
-                    //                {
-                    //                    credentials = new NetworkCredential(dialog.UserName, dialog.Password);
-                    //                    if (_proxyService.AreCredentialsValid(credentials, PackageSource))
-                    //                    {
-                    //                        validCredentials = true;
-                    //                    }
-                    //                    else
-                    //                    {
-                    //                        dialog.AlwaysShowUI = true;
-                    //                        validCredentials = false;
-                    //                    }
-                    //                }
-                    //            }
-                    //            basicProxy.Credentials = credentials;
-                    //            WebRequest.DefaultWebProxy = basicProxy;
-                    //        }
-                    //        break;
-                    //    case ProxyType.None:
-                    //        // Before one would use the GlobalProxySelection.GetEmptyWebProxy() method
-                    //        // to get an empty proxy since we don't want a proxy here but that class is now obsolete
-                    //        // The recommended approach is to set the DefaultWebProxy to null as per the GlobalProxySelection
-                    //        // documentation
-                    //        // http://msdn.microsoft.com/en-us/library/system.net.globalproxyselection.aspx
-                    //        WebRequest.DefaultWebProxy = null;
-                    //        break;
-                    //}
-                    //_packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
                     _packageRepository = PackageRepositoryFactory.Default.CreateRepository(packageSourceClient);
                 }
                 catch (Exception) {
