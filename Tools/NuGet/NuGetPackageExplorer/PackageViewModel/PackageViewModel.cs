@@ -267,9 +267,18 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private bool _hasEdit;
+
         public bool HasEdit {
-            get;
-            private set;
+            get {
+                return _hasEdit;
+            }
+            set {
+                if (_hasEdit != value) {
+                    _hasEdit = value;
+                    OnPropertyChanged("HasEdit");
+                }
+            }
         }
 
         public void ShowFile(FileContentInfo fileInfo) {

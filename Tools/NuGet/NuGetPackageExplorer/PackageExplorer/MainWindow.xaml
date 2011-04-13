@@ -192,6 +192,11 @@
         <!-- Status bar -->
         <StatusBar Grid.Row="2" DockPanel.Dock="Bottom" Visibility="{Binding IsChecked, ElementName=ShowStatusBarMenuItem, Converter={StaticResource boolToVis}}">
             <StatusBarItem x:Name="PackageSourceItem" Content="{Binding PackageSource, FallbackValue=Ready}" />
+            <StatusBarItem HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,3,0" Visibility="{Binding HasEdit, Converter={StaticResource boolToVis}, FallbackValue=Collapsed}">
+                <StatusBarItem.Content>
+                    <Ellipse Width="7" Height="7" Fill="Blue" />
+                </StatusBarItem.Content>
+            </StatusBarItem>
         </StatusBar>
               
     </DockPanel>
