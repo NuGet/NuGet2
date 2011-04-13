@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using NuGet.Repositories;
 
 namespace NuGet {   
     public class GalleryServer {
@@ -17,14 +18,18 @@ namespace NuGet {
         private string _baseGalleryServerUrl;
         private string _userAgent;
 
+        IProxyService _proxyService;
+
         public GalleryServer()
-            : this(DefaultGalleryServerUrl) {
+            : this(DefaultGalleryServerUrl,new ProxyService()) {
         }
 
-        public GalleryServer(string galleryServerSource) {
+        public GalleryServer(string galleryServerSource, IProxyService proxyService) {
             _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerSource);
             var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
             _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
+
+            _proxyService = proxyService;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -42,6 +47,7 @@ namespace NuGet {
             var url = new Uri(String.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
 
             WebClient client = new WebClient();
+            client.Proxy = _proxyService.GetProxy(url);
             client.Headers[HttpRequestHeader.ContentType] = "application/octet-stream";
             client.Headers[HttpRequestHeader.UserAgent] = _userAgent;
             client.UploadProgressChanged += OnUploadProgressChanged;
@@ -68,6 +74,7 @@ namespace NuGet {
                 requestStream.Seek(0, SeekOrigin.Begin);
 
                 WebClient client = new WebClient();
+                client.Proxy = _proxyService.GetProxy(url);
                 client.Headers[HttpRequestHeader.ContentType] = "application/json";
                 client.Headers[HttpRequestHeader.UserAgent] = _userAgent;
                 client.UploadProgressChanged += OnUploadProgressChanged;

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using NuGet;
 using System.Windows.Threading;
+using NuGet.Repositories;
 
 namespace PackageExplorer {
     /// <summary>
@@ -14,6 +15,7 @@ namespace PackageExplorer {
 
         private readonly Uri _downloadUri;
         private WebClient _client;
+        IProxyService _proxyService;
 
         public DownloadProgressWindow(Uri downloadUri, string packageName) {
             if (downloadUri == null)
@@ -22,6 +24,8 @@ namespace PackageExplorer {
             }
 
             InitializeComponent();
+
+            _proxyService = new ProxyService(new AutoDiscoverCredentialProvider());
 
             Title = "Downloading package " + packageName;
             _downloadUri = downloadUri;
@@ -39,6 +43,10 @@ namespace PackageExplorer {
 
         private void DownloadData(Uri uri) {
             _client = new WebClient();
+            // Set the WebClient proxy
+            // Maybe we could refactor this code to use the HttpClient so that
+            // it can utilize the already existing implementation of getting the proxy
+            _client.Proxy = _proxyService.GetProxy(uri);
             _client.DownloadDataCompleted += (sender, e) => {
                 if (!e.Cancelled) {
                     if (e.Error != null) {

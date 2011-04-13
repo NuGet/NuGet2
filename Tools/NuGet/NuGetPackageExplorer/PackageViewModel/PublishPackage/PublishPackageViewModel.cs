@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
 using NuGet;
+using NuGet.Repositories;
 
 namespace PackageExplorerViewModel {
 
     public class PublishPackageViewModel : ViewModelBase, IObserver<int> {
         private readonly IPackageMetadata _package;
         private readonly Lazy<Stream> _packageStream;
+        IProxyService _proxyService;
 
         public PublishPackageViewModel(PackageViewModel viewModel) {
             if (viewModel == null) {
@@ -15,6 +17,8 @@ namespace PackageExplorerViewModel {
 
             _package = viewModel.PackageMetadata;
             _packageStream = new Lazy<Stream>(viewModel.GetCurrentPackageStream);
+
+            _proxyService = new ProxyService(new AutoDiscoverCredentialProvider());
         }
 
         private string _publishKey; 
@@ -106,7 +110,7 @@ namespace PackageExplorerViewModel {
         public GalleryServer GalleryServer {
             get {
                 if (_uploadHelper == null) {
-                    _uploadHelper = new GalleryServer();
+                    _uploadHelper = new GalleryServer(GalleryServer.DefaultGalleryServerUrl, _proxyService);
                 }
                 return _uploadHelper;
             }

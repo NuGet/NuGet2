@@ -45,7 +45,10 @@ namespace NuGet.Repositories
                     ICredentials basicCredentials = null;
                     while (!validCredentials)
                     {
-                        basicCredentials = _credentialProvider.GetCredentials(proxyType, uri, retryCredentials);
+                        // Get credentials for the proxy address and not the target url
+                        // because we'll end up prompting the user for a proxy for each different
+                        // package due to the packages having different urls.
+                        basicCredentials = _credentialProvider.GetCredentials(proxyType, proxy.Address, retryCredentials);
                         if (AreCredentialsValid(basicCredentials, uri))
                         {
                             validCredentials = true;
@@ -88,9 +91,9 @@ namespace NuGet.Repositories
                         }
                         break;
                     case ProxyType.IntegratedAuth:
-                        IWebProxy integratedAuthProxy = GetSystemProxy(uri);
+                        WebProxy integratedAuthProxy = GetSystemProxy(uri) as WebProxy;
                         // Use the same mechanism for retrieving the proxy credentials as the rest of this class
-                        integratedAuthProxy.Credentials = _credentialProvider.GetCredentials(type, uri);
+                        integratedAuthProxy.Credentials = _credentialProvider.GetCredentials(type, integratedAuthProxy.Address);
                         // Commenting out the Credentials setter based on the Remarks that can be found:
                         // http://msdn.microsoft.com/en-us/library/system.net.webrequest.usedefaultcredentials.aspx
                         // It is basically saying that it is best to set the UseDefaultCredentials for client applications
