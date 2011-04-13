@@ -114,19 +114,29 @@ namespace PackageExplorerViewModel {
                 throw new ArgumentException("File does not exist.", "filePath");
             }
 
-            string name = System.IO.Path.GetFileName(filePath);
-            if (ContainsFolder(name))
+            string newFileName = System.IO.Path.GetFileName(filePath);
+            if (ContainsFolder(newFileName))
             {
                 PackageViewModel.MessageBox.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
                 return null;
             }
 
-            if (ContainsFile(name)) {
+            bool showingRemovedFile = false;
+            if (ContainsFile(newFileName)) {
                 bool confirmed = PackageViewModel.MessageBox.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
                 if (confirmed)
                 {
+                    // check if we are currently showing the content of the file to be removed.
+                    // if we are, we'll need to show the new content after replacing the file.
+                    if (PackageViewModel.ShowContentViewer) {
+                        PackagePart part = this[newFileName];
+                        if (PackageViewModel.CurrentFileInfo.File == part) {
+                            showingRemovedFile = true;
+                        }
+                    }
+                    
                     // remove the existing file before adding the new one
-                    RemoveChildByName(name);
+                    RemoveChildByName(newFileName);
                 }
                 else
                 {
@@ -135,11 +145,17 @@ namespace PackageExplorerViewModel {
             }
             
             var physicalFile = new PhysicalFile(filePath);
-            var newFile = new PackageFile(physicalFile, name, this);
+            var newFile = new PackageFile(physicalFile, newFileName, this);
             Children.Add(newFile);
             newFile.IsSelected = true;
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
+
+            if (showingRemovedFile) {
+                ICommand command = PackageViewModel.ViewContentCommand;
+                command.Execute(newFile);
+            }
+
             return newFile;
         }
 
