@@ -30,8 +30,7 @@ namespace NuGet.Repositories
                 throw new ArgumentNullException("uri");
             }
 
-            string url = uri.OriginalString;
-            ProxyType proxyType = GetProxyType(url);
+            ProxyType proxyType = GetProxyType(uri);
             WebProxy proxy = null;
             switch (proxyType)
             {
@@ -40,18 +39,20 @@ namespace NuGet.Repositories
                     break;
                 case ProxyType.IntegratedAuth:
                 case ProxyType.BasicAuth:
-                    proxy = GetSystemProxy(url);
+                    proxy = GetSystemProxy(uri);
                     bool validCredentials = false;
+                    bool retryCredentials = false;
                     ICredentials basicCredentials = null;
                     while (!validCredentials)
                     {
-                        basicCredentials = _credentialProvider.GetCredentials(proxyType, uri,true);
-                        if(AreCredentialsValid(basicCredentials,uri.OriginalString))
+                        basicCredentials = _credentialProvider.GetCredentials(proxyType, uri, retryCredentials);
+                        if (AreCredentialsValid(basicCredentials, uri))
                         {
                             validCredentials = true;
                         }
                         else
                         {
+                            retryCredentials = true;
                             validCredentials = false;
                         }
                     }
@@ -61,11 +62,11 @@ namespace NuGet.Repositories
             return proxy;
         }
 
-        private ProxyType GetProxyType(string url)
+        private ProxyType GetProxyType(Uri uri)
         {
-            if (string.IsNullOrEmpty(url))
+            if (null == uri)
             {
-                throw new ArgumentNullException("url");
+                throw new ArgumentNullException("uri");
             }
             string[] proxyTypes = Enum.GetNames(typeof(ProxyType));
 
@@ -75,21 +76,21 @@ namespace NuGet.Repositories
                 switch (type)
                 {
                     case ProxyType.None:
-                        IWebProxy emptyWebproxy = WebRequest.GetSystemWebProxy();
-                        if (IsProxyValid(emptyWebproxy, url))
+                        IWebProxy emptyWebproxy = GetSystemProxy(uri);
+                        if (IsProxyValid(emptyWebproxy, uri))
                         {
                             return type;
                         }
                         break;
                     case ProxyType.IntegratedAuth:
-                        WebProxy integratedAuthProxy = GetSystemProxy(url);
-                        integratedAuthProxy.UseDefaultCredentials = true;
+                        WebProxy integratedAuthProxy = GetSystemProxy(uri);
+                        integratedAuthProxy.Credentials = _credentialProvider.GetCredentials(type, uri);
                         // Commenting out the Credentials setter based on the Remarks that can be found:
                         // http://msdn.microsoft.com/en-us/library/system.net.webrequest.usedefaultcredentials.aspx
                         // It is basically saying that it is best to set the UseDefaultCredentials for client applications
                         // and only use the Credentials property for middle tier applications such as ASP.NET applications.
                         //ntlmProxy.Credentials = CredentialCache.DefaultNetworkCredentials;
-                        if (IsProxyValid(integratedAuthProxy, url))
+                        if (IsProxyValid(integratedAuthProxy, uri))
                         {
                             return type;
                         }
@@ -102,7 +103,7 @@ namespace NuGet.Repositories
             }
             return ProxyType.BasicAuth;
         }
-        private WebProxy GetSystemProxy(string url)
+        private WebProxy GetSystemProxy(Uri uri)
         {
             // Using WebRequest.GetSystemWebProxy() is the best way to get the default system configured
             // proxy settings which are retrieved from IE by default as per
@@ -110,14 +111,14 @@ namespace NuGet.Repositories
             // The documentation states that this method also performs logic to automatically detect proxy settings,
             // use an automatic configuration script, and manual proxy server settings, and advanced manual proxy server settings.
             IWebProxy proxy = WebRequest.GetSystemWebProxy();
-            string proxyUrl = proxy.GetProxy(new Uri(url)).AbsoluteUri;
+            string proxyUrl = proxy.GetProxy(uri).AbsoluteUri;
             WebProxy systemProxy = new WebProxy(proxyUrl);
             return systemProxy;
         }
-        private bool IsProxyValid(IWebProxy proxy, string url)
+        private bool IsProxyValid(IWebProxy proxy, Uri uri)
         {
             bool result = true;
-            WebRequest request = CreateRequest(url);
+            WebRequest request = CreateRequest(uri);
             WebResponse response = null;
             request.Proxy = proxy;
             try
@@ -141,18 +142,18 @@ namespace NuGet.Repositories
             }
             return result;
         }
-        private WebRequest CreateRequest(string url)
+        private WebRequest CreateRequest(Uri uri)
         {
-            IHttpClient client = new HttpClient(new Uri(url));
+            IHttpClient client = new HttpClient(uri);
             WebRequest request = client.CreateRequest();
             return request;
         }
 
-        public bool AreCredentialsValid(ICredentials credentials, string url)
+        public bool AreCredentialsValid(ICredentials credentials, Uri uri)
         {
-            WebProxy proxy = GetSystemProxy(url);
+            WebProxy proxy = GetSystemProxy(uri);
             proxy.Credentials = credentials;
-            return IsProxyValid(proxy, url);
+            return IsProxyValid(proxy, uri);
         }
     }
 }
