@@ -76,8 +76,9 @@ namespace NuGet.Repositories
                 switch (type)
                 {
                     case ProxyType.None:
-                        IWebProxy emptyWebproxy = GetSystemProxy(uri);
-                        if (IsProxyValid(emptyWebproxy, uri))
+                        // Since this is a empty proxy then just pass null for the
+                        // proxy property as per microsoft documentation
+                        if (IsProxyValid(null, uri))
                         {
                             return type;
                         }
