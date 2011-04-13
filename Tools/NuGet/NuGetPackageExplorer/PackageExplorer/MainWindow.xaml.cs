@@ -435,6 +435,13 @@ namespace PackageExplorer {
         }
 
         private void DownloadAndOpenDataServicePackage(MruItem item) {
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                MessageBoxServices.Show(
+                    PackageExplorer.Resources.Resources.NoNetworkConnection,
+                    MessageLevel.Warning);
+                return;
+            }
+
             Uri downloadUrl;
             if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
                 var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version) {
