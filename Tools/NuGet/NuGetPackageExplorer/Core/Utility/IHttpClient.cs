@@ -8,11 +8,9 @@ namespace NuGet {
             set;
         }
         Uri Uri { get; set; }
+        IWebProxy Proxy { get; set; }
 
-        //WebRequest CreateRequest(Uri uri);
         WebRequest CreateRequest();
-        void InitializeRequest(WebRequest request);
-        //Uri GetRedirectedUri(Uri uri);
-        IHttpClient GetRedirectedClient(Uri uri);
+        void InitializeRequest(WebRequest webRequest);
     }
 }

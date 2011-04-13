@@ -1,33 +1,23 @@
 using System;
 using System.Data.Services.Client;
 using System.Linq;
+using System.Net;
+using System.Globalization;
 
 namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase {
         private readonly DataServiceContext _context;
         private DataServiceQuery<DataServicePackage> _query;
-        private readonly IHttpClient _httpClient;
-        //private readonly string _source;
-
-        //public DataServicePackageRepository(Uri serviceRoot)
-        //    : this(serviceRoot, new HttpClient()) {
-        //}
+        IHttpClient _client;
 
         public DataServicePackageRepository(IHttpClient client)
-            : this(new DataServiceContext(client.Uri), client) {
-        }
-
-        private DataServicePackageRepository(DataServiceContext context, IHttpClient httpClient) {
-            if (context == null) {
-                throw new ArgumentNullException("context");
+        {
+            if (null == client)
+            {
+                throw new ArgumentNullException("client");
             }
-
-            if (httpClient == null) {
-                throw new ArgumentNullException("httpClient");
-            }
-
-            _context = context;
-            _httpClient = httpClient;
+            _client = client;
+            _context = new DataServiceContext(client.Uri);
 
             _context.SendingRequest += OnSendingRequest;
             _context.ReadingEntity += OnReadingEntity;
@@ -36,7 +26,7 @@ namespace NuGet {
 
         public override string Source {
             get {
-                return _httpClient.Uri.OriginalString;
+                return _context.BaseUri.OriginalString;
             }
         }
 
@@ -49,8 +39,7 @@ namespace NuGet {
         }
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
-            // Initialize the request
-            _httpClient.InitializeRequest(e.Request);
+            _client.InitializeRequest(e.Request);
         }
 
         public override IQueryable<IPackage> GetPackages() {

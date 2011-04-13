@@ -12,8 +12,8 @@ using NuGet;
 using PackageExplorerViewModel.Types;
 using NuGet.Utility;
 using System.Net;
-using PackageExplorerViewModel.PackageChooser;
 using System.Windows;
+using NuGet.Repositories;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
@@ -22,6 +22,8 @@ namespace PackageExplorerViewModel {
         private IQueryable<IPackage> _currentQuery;
         private string _currentSearch;
         private IMruPackageSourceManager _packageSourceManager;
+        private IProxyService _proxyService;
+        private ICredentialProvider _credentialProvider;
 
         public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager) {
             Packages = new ObservableCollection<IPackage>();
@@ -30,6 +32,8 @@ namespace PackageExplorerViewModel {
             SearchCommand = new SearchCommand(this);
             LoadedCommand = new LoadedCommand(this);
             ChangePackageSourceCommand = new ChangePackageSourceCommand(this);
+            _credentialProvider = new AutoDiscoverCredentialProvider();
+            _proxyService = new ProxyService(_credentialProvider);
            
             _packageSourceManager = packageSourceManager;
         }
@@ -98,44 +102,62 @@ namespace PackageExplorerViewModel {
         private IPackageRepository GetPackageRepository() {
             if (_packageRepository == null || _packageRepository.Source != PackageSource) {
                 try {
-                    ProxyType proxyType = HttpClientUtility.GetProxyType(PackageSource);
-                    switch (proxyType)
-                    {
-                        case ProxyType.IntegratedAuth:
-                            WebProxy ntmlProxy = HttpClientUtility.GetSystemProxy(PackageSource);
-                            ntmlProxy.UseDefaultCredentials = true;
-                            WebRequest.DefaultWebProxy = ntmlProxy;
-                            break;
-                        case ProxyType.BasicAuth:
-                            WebProxy basicProxy = HttpClientUtility.GetSystemProxy(PackageSource);
-                            string proxyHost = basicProxy.Address.Host;
-                            // If the user opted to save the credentials then they will not be
-                            // prompted again even though we are invoking the ShowDialog method
-                            // what we need to do here is to try and detect if the credentials
-                            // actually worked and if they did not then we have to ask the user once
-                            // again and maybe remove the old credentials.
-                            using (PromptForCredential dialog = new PromptForCredential())
-                            {
-                                dialog.TargetName = proxyHost;
-                                dialog.Title = string.Format("Connect to: {0}", proxyHost);
-                                dialog.GenericCredentials = true;
-                                if (DialogResult.OK == dialog.ShowDialog())
-                                {
-                                    basicProxy.Credentials = new NetworkCredential(dialog.UserName, dialog.Password);
-                                    WebRequest.DefaultWebProxy = basicProxy;
-                                }
-                            }
-                            break;
-                        case ProxyType.None:
-                            // Before one would use the GlobalProxySelection.GetEmptyWebProxy() method
-                            // to get an empty proxy since we don't want a proxy here but that class is now obsolete
-                            // The recommended approach is to set the DefaultWebProxy to null as per the GlobalProxySelection
-                            // documentation
-                            // http://msdn.microsoft.com/en-us/library/system.net.globalproxyselection.aspx
-                            WebRequest.DefaultWebProxy = null;
-                            break;
-                    }
-                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
+                    Uri packageUri = new Uri(PackageSource);
+                    IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
+                    IHttpClient packageSourceClient = new RedirectedHttpClient(packageUri, packageSourceProxy);
+                    //ProxyType proxyType = _proxyService.GetProxyType(PackageSource);
+                    //switch (proxyType)
+                    //{
+                    //    case ProxyType.IntegratedAuth:
+                    //        WebProxy ntmlProxy = _proxyService.GetSystemProxy(PackageSource);
+                    //        ntmlProxy.UseDefaultCredentials = true;
+                    //        WebRequest.DefaultWebProxy = ntmlProxy;
+                    //        break;
+                    //    case ProxyType.BasicAuth:
+                    //        WebProxy basicProxy = _proxyService.GetSystemProxy(PackageSource);
+                    //        string proxyHost = basicProxy.Address.Host;
+                    //        // If the user opted to save the credentials then they will not be
+                    //        // prompted again even though we are invoking the ShowDialog method
+                    //        // what we need to do here is to try and detect if the credentials
+                    //        // actually worked and if they did not then we have to ask the user once again
+                    //        using (PromptForCredential dialog = new PromptForCredential())
+                    //        {
+                    //            dialog.TargetName = proxyHost;
+                    //            dialog.Title = string.Format("Connect to: {0}", proxyHost);
+                    //            dialog.GenericCredentials = true;
+                    //            bool validCredentials = false;
+                    //            NetworkCredential credentials = null;
+                    //            while (!validCredentials)
+                    //            {
+                    //                if (DialogResult.OK == dialog.ShowDialog())
+                    //                {
+                    //                    credentials = new NetworkCredential(dialog.UserName, dialog.Password);
+                    //                    if (_proxyService.AreCredentialsValid(credentials, PackageSource))
+                    //                    {
+                    //                        validCredentials = true;
+                    //                    }
+                    //                    else
+                    //                    {
+                    //                        dialog.AlwaysShowUI = true;
+                    //                        validCredentials = false;
+                    //                    }
+                    //                }
+                    //            }
+                    //            basicProxy.Credentials = credentials;
+                    //            WebRequest.DefaultWebProxy = basicProxy;
+                    //        }
+                    //        break;
+                    //    case ProxyType.None:
+                    //        // Before one would use the GlobalProxySelection.GetEmptyWebProxy() method
+                    //        // to get an empty proxy since we don't want a proxy here but that class is now obsolete
+                    //        // The recommended approach is to set the DefaultWebProxy to null as per the GlobalProxySelection
+                    //        // documentation
+                    //        // http://msdn.microsoft.com/en-us/library/system.net.globalproxyselection.aspx
+                    //        WebRequest.DefaultWebProxy = null;
+                    //        break;
+                    //}
+                    //_packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
+                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(packageSourceClient);
                 }
                 catch (Exception) {
                     _packageRepository = null;

@@ -77,7 +77,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
-    <Compile Include="PackageChooser\CredentialsDialog.cs" />
+    <Compile Include="PackageChooser\AutoDiscoverCredentialProvider.cs" />
     <Compile Include="PackageHelper.cs" />
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />
