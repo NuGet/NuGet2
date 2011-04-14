@@ -368,13 +368,19 @@ namespace NuGetConsole.Implementation {
             if (WpfConsole != null && WpfConsole.Content == consolePane) {
                 if (WpfConsole.Host.IsCommandEnabled) {
                     try {
-                        WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
+                        if (WpfConsole.Dispatcher.IsStartCompleted) {
                             ConsoleParentPane.NotifyInitializationCompleted();
-
-                            // force the UI to update the toolbar
                             VsUIShell.UpdateCommandUI(0 /* false = update UI asynchronously */);
-                        };
-                        WpfConsole.Dispatcher.Start();
+                        }
+                        else {
+                            WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
+                                ConsoleParentPane.NotifyInitializationCompleted();
+
+                                // force the UI to update the toolbar
+                                VsUIShell.UpdateCommandUI(0 /* false = update UI asynchronously */);
+                            };
+                            WpfConsole.Dispatcher.Start();
+                        }
                     }
                     catch (Exception x) {
                         WpfConsole.WriteLine(x.ToString());
