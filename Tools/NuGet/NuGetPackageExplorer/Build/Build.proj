@@ -40,8 +40,8 @@
         <PackageExplorerRoot>$(MSBuildProjectDirectory)\..</PackageExplorerRoot>
         <ClickOnceCertificateFile>$(PackageExplorerRoot)\PackageExplorer_TemporaryKey.pfx</ClickOnceCertificateFile>
         <ManifestFilePath>$(MSBuildProjectDirectory)\VisualStyleManifest.xml</ManifestFilePath>
-        <ManifestToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\mt.exe</ManifestToolPath>
-        <MageToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\NETFX 4.0 Tools\mage.exe</MageToolPath>
+        <ManifestToolPath>$(ProgramFiles)\Microsoft SDKs\Windows\v7.0A\Bin\mt.exe</ManifestToolPath>
+        <MageToolPath>$(ProgramFiles)\Microsoft SDKs\Windows\v7.0A\bin\NETFX 4.0 Tools\mage.exe</MageToolPath>
         <CertificateFilePath>$(PackageExplorerRoot)\PackageExplorer_TemporaryKey.pfx</CertificateFilePath>
         <PublisherName>Outercurve Foundation</PublisherName>
         <DropDirectory>$(PackageExplorerRoot)\bin</DropDirectory>
@@ -138,6 +138,6 @@
 	<Target Name="ZipPublishedFiles">
         <MakeDir Directories="$(UploadDirectory)" Condition="!Exists('$(UploadDirectory)')" />
 	
-        <Exec Command="&quot;$(ZipExe)&quot; a $(UploadDirectory)\$(ApplicationName).zip" WorkingDirectory="$(DropDirectory)" />
+        <Exec Command="&quot;$(ZipExe)&quot; a &quot;$(UploadDirectory)\$(ApplicationName).zip&quot;" WorkingDirectory="$(DropDirectory)" />
 	</Target>
 </Project>
