@@ -44,12 +44,12 @@
         <MageToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\NETFX 4.0 Tools\mage.exe</MageToolPath>
         <CertificateFilePath>$(PackageExplorerRoot)\PackageExplorer_TemporaryKey.pfx</CertificateFilePath>
         <PublisherName>Outercurve Foundation</PublisherName>
-        <DropDirectory>$(PackageExplorerRoot)\publish</DropDirectory>
+        <DropDirectory>$(PackageExplorerRoot)\bin</DropDirectory>
         <PublishedDirectory>$(PackageExplorerRoot)\PackageExplorer\bin\$(Configuration)\app.publish</PublishedDirectory>
         <DeploymentManifestFileName>$(ApplicationName).application</DeploymentManifestFileName>
         <ExeFileName>$(ApplicationName).exe</ExeFileName>
         <AppManifestFileName>$(ExeFileName).manifest</AppManifestFileName>
-        <UploadDirectory>$(DropDirectory)\Upload</UploadDirectory>
+        <UploadDirectory>$(DropDirectory)\publish</UploadDirectory>
         <ZipExe>$(PackageExplorerRoot)\..\..\7za920\7za.exe</ZipExe>
 	</PropertyGroup>
 	
