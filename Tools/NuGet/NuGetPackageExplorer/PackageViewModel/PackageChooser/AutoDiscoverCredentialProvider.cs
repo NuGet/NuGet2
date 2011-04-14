@@ -5,7 +5,6 @@ using System.Text;
 using System.Net;
 using NuGet.Utility;
 using Kerr;
-using System.Windows.Forms;
 
 namespace NuGet.Repositories
 {
@@ -51,7 +50,7 @@ namespace NuGet.Repositories
                 dialog.Title = string.Format("Connect to: {0}", proxyHost);
                 dialog.GenericCredentials = true;
                 dialog.AlwaysShowUI = forcePrompt;
-                if (DialogResult.OK == dialog.ShowDialog())
+                if (dialog.ShowDialog())
                 {
                     basicCredentials = new NetworkCredential(dialog.UserName, dialog.Password);
                 }

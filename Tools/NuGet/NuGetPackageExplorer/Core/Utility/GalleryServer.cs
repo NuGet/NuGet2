@@ -9,7 +9,7 @@ using NuGet.Utility;
 
 namespace NuGet {   
     public class GalleryServer {
-        public const string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
+        //public const string DefaultGalleryServerUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
         private const string PublishPackageService = "PublishedPackages/Publish";
@@ -20,9 +20,10 @@ namespace NuGet {
         private string _userAgent;
 
         IProxyService _proxyService;
+        IWebProxy _cachedProxy;
 
-        public GalleryServer()
-            : this(DefaultGalleryServerUrl,new ProxyService()) {
+        public GalleryServer(string galleryServerSource)
+            : this(galleryServerSource, new ProxyService()) {
         }
 
         public GalleryServer(string galleryServerSource, IProxyService proxyService) {
@@ -35,6 +36,7 @@ namespace NuGet {
                 throw new ArgumentNullException("proxyService");
             }
             _proxyService = proxyService;
+            _cachedProxy = _proxyService.GetProxy(new Uri(galleryServerSource));
 
             _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerSource);
             var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
@@ -57,7 +59,7 @@ namespace NuGet {
             var url = new Uri(String.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
 
             WebClient client = new WebClient();
-            client.Proxy = _proxyService.GetProxy(url);
+            client.Proxy = _cachedProxy;
             client.Headers[HttpRequestHeader.ContentType] = "application/octet-stream";
             client.Headers[HttpRequestHeader.UserAgent] = _userAgent;
             client.UploadProgressChanged += OnUploadProgressChanged;
@@ -84,7 +86,7 @@ namespace NuGet {
                 requestStream.Seek(0, SeekOrigin.Begin);
 
                 WebClient client = new WebClient();
-                client.Proxy = _proxyService.GetProxy(url);
+                client.Proxy = _cachedProxy;
                 client.Headers[HttpRequestHeader.ContentType] = "application/json";
                 client.Headers[HttpRequestHeader.UserAgent] = _userAgent;
                 client.UploadProgressChanged += OnUploadProgressChanged;
@@ -159,7 +161,7 @@ namespace NuGet {
         private string GetSafeRedirectedUri(string uri) {
             try {
                 Uri originalUri = new Uri(uri);
-                IWebProxy proxy = _proxyService.GetProxy(originalUri);
+                IWebProxy proxy = _cachedProxy;
                 RedirectedHttpClient client = new RedirectedHttpClient(originalUri,proxy);
                 return client.Uri.ToString();
             }

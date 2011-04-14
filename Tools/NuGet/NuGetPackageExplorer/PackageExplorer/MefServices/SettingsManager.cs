@@ -52,13 +52,13 @@ namespace PackageExplorer {
 
         public string ReadApiKeyFromSettingFile() {
             var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
-            string key = settings.GetDecryptedValue(ApiKeysSectionName, GalleryServer.DefaultGalleryServerUrl);
+            string key = settings.GetDecryptedValue(ApiKeysSectionName, ActivePackageSource);
             return key ?? Properties.Settings.Default.PublishPrivateKey;
         }
 
         public void WriteApiKeyToSettingFile(string apiKey) {
             var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
-            settings.SetEncryptedValue(ApiKeysSectionName, GalleryServer.DefaultGalleryServerUrl, apiKey);
+            settings.SetEncryptedValue(ApiKeysSectionName, ActivePackageSource, apiKey);
         }
     }
 }

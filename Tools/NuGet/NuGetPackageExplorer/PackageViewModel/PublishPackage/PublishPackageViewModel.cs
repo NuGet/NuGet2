@@ -9,12 +9,13 @@ namespace PackageExplorerViewModel {
         private readonly IPackageMetadata _package;
         private readonly Lazy<Stream> _packageStream;
         IProxyService _proxyService;
+        private string _packageSource;
 
-        public PublishPackageViewModel(PackageViewModel viewModel) {
+        public PublishPackageViewModel(string publishUrl, PackageViewModel viewModel) {
             if (viewModel == null) {
                 throw new ArgumentNullException("viewModel");
             }
-
+            _packageSource = publishUrl;
             _package = viewModel.PackageMetadata;
             _packageStream = new Lazy<Stream>(viewModel.GetCurrentPackageStream);
 
@@ -110,7 +111,7 @@ namespace PackageExplorerViewModel {
         public GalleryServer GalleryServer {
             get {
                 if (_uploadHelper == null) {
-                    _uploadHelper = new GalleryServer(GalleryServer.DefaultGalleryServerUrl, _proxyService);
+                    _uploadHelper = new GalleryServer(_packageSource, _proxyService);
                 }
                 return _uploadHelper;
             }
