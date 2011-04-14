@@ -31,9 +31,11 @@
     <ProductName>NuGet Package Explorer</ProductName>
     <PublisherName>Outercurve Foundation</PublisherName>
     <SuiteName>NuGet</SuiteName>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>index.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>4</ApplicationRevision>
-    <ApplicationVersion>1.0.0.4</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.1.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -71,7 +73,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>928D4439EDB05A661237CFE4F0730B6C7A7AFFB9</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>EECD2F8E3D94BBF70C6E79EE77A773462ECE82A1</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestKeyFile>
