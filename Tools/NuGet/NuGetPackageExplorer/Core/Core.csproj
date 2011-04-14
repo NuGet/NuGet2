@@ -79,11 +79,7 @@
     <Compile Include="Packages\SimplePackage.cs" />
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
-    <Compile Include="Repositories\DataServiceContextWrapper.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
-    <Compile Include="Repositories\DataServiceQueryWrapper.cs" />
-    <Compile Include="Repositories\IDataServiceContext.cs" />
-    <Compile Include="Repositories\IDataServiceQuery.cs" />
     <Compile Include="Repositories\IPackageRepository.cs" />
     <Compile Include="Repositories\MachineCache.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
@@ -112,7 +108,6 @@
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PackageUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\QueryableUtility.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Utility\UriUtility.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
