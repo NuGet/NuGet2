@@ -23,5 +23,8 @@
     <Setting Name="MruPackageSources" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="PublishPackageLocation" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://go.microsoft.com/fwlink/?LinkID=207106</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

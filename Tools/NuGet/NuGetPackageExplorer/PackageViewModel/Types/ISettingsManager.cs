@@ -12,6 +12,7 @@ namespace PackageExplorerViewModel.Types {
         void SetMruPackageSources(IEnumerable<string> sources);
 
         string ActivePackageSource { get; set; }
+        string PublishPackageLocation { get; set; }
 
         string ReadApiKeyFromSettingFile();
         void WriteApiKeyToSettingFile(string apiKey);

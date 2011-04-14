@@ -49,7 +49,17 @@ namespace PackageExplorer {
                 Properties.Settings.Default.PackageSource = value;
             }
         }
-
+        public string PublishPackageLocation
+        {
+            get
+            {
+                return Properties.Settings.Default.PublishPackageLocation;
+            }
+            set
+            {
+                Properties.Settings.Default.PublishPackageLocation = value;
+            }
+        }
         public string ReadApiKeyFromSettingFile() {
             var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             string key = settings.GetDecryptedValue(ApiKeysSectionName, ActivePackageSource);
