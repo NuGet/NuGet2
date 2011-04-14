@@ -5,6 +5,7 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using NuGet.Repositories;
+using NuGet.Utility;
 
 namespace NuGet {   
     public class GalleryServer {
@@ -13,7 +14,7 @@ namespace NuGet {
         private const string PackageService = "Packages";
         private const string PublishPackageService = "PublishedPackages/Publish";
 
-        private const string _UserAgentPattern = "NuGet Package Explorer/{0} ({1})";
+        private const string _UserAgentPattern = "NuGet Package Explorer/{0 }({1})";
         
         private string _baseGalleryServerUrl;
         private string _userAgent;
@@ -25,11 +26,20 @@ namespace NuGet {
         }
 
         public GalleryServer(string galleryServerSource, IProxyService proxyService) {
+            if (string.IsNullOrEmpty(galleryServerSource))
+            {
+                throw new ArgumentNullException("galleryServerSource");
+            }
+            if (null == proxyService)
+            {
+                throw new ArgumentNullException("proxyService");
+            }
+            _proxyService = proxyService;
+
             _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerSource);
             var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
             _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
 
-            _proxyService = proxyService;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -146,14 +156,12 @@ namespace NuGet {
             state.ProgressObserver.OnNext(Math.Min(100, 2*e.ProgressPercentage));
         }
 
-        private static string GetSafeRedirectedUri(string uri) {
-            WebRequest request = WebRequest.Create(uri);
+        private string GetSafeRedirectedUri(string uri) {
             try {
-                WebResponse response = request.GetResponse();
-                if (response == null) {
-                    return null;
-                }
-                return response.ResponseUri.ToString();
+                Uri originalUri = new Uri(uri);
+                IWebProxy proxy = _proxyService.GetProxy(originalUri);
+                RedirectedHttpClient client = new RedirectedHttpClient(originalUri,proxy);
+                return client.Uri.ToString();
             }
             catch (WebException e) {
                 return e.Response.ResponseUri.ToString(); ;
