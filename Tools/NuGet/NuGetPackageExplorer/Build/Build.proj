@@ -45,11 +45,11 @@
         <CertificateFilePath>$(PackageExplorerRoot)\PackageExplorer_TemporaryKey.pfx</CertificateFilePath>
         <PublisherName>Outercurve Foundation</PublisherName>
         <DropDirectory>$(PackageExplorerRoot)\bin</DropDirectory>
+        <DeployDirectory>$(DropDirectory)\deploy</DeployDirectory>
         <PublishedDirectory>$(PackageExplorerRoot)\PackageExplorer\bin\$(Configuration)\app.publish</PublishedDirectory>
         <DeploymentManifestFileName>$(ApplicationName).application</DeploymentManifestFileName>
         <ExeFileName>$(ApplicationName).exe</ExeFileName>
         <AppManifestFileName>$(ExeFileName).manifest</AppManifestFileName>
-        <UploadDirectory>$(DropDirectory)\publish</UploadDirectory>
         <ZipExe>$(PackageExplorerRoot)\..\..\7za920\7za.exe</ZipExe>
 	</PropertyGroup>
 	
@@ -58,8 +58,8 @@
 	
 	<Target Name="CheckTools">
         <Error
-            Condition="!Exists('$(ManifestFilePath)')"
-            Text="Could not find the resource tool at $(ManifestFilePath). Cannot proceed." />
+            Condition="!Exists('$(ManifestToolPath)')"
+            Text="Could not find the resource tool at $(ManifestToolPath). Cannot proceed." />
             
         <Error
             Condition="!Exists('$(MageToolPath)')"
@@ -82,6 +82,9 @@
         <Message Text="Making the output directories for the compiled output at '$(DropDirectory)'." />
         <RemoveDir Directories="$(DropDirectory)" Condition="Exists('$(DropDirectory)')" ContinueOnError="True" />
         <MakeDir Directories="$(DropDirectory)" Condition="!Exists('$(DropDirectory)')" />
+        
+        <RemoveDir Directories="$(DeployDirectory)" Condition="Exists('$(DeployDirectory)')" ContinueOnError="True" />
+        <MakeDir Directories="$(DeployDirectory)" Condition="!Exists('$(DeployDirectory)')" />
 	</Target>
 	
 	<Target Name="CopyOutputsToDropDirectories">	
@@ -89,21 +92,21 @@
             <Output TaskParameter="Include" ItemName="PublishedFiles" />
         </CreateItem>
 
-        <Copy SourceFiles="@(PublishedFiles)" DestinationFiles="@(PublishedFiles->'$(DropDirectory)\%(RecursiveDir)%(FileName)%(Extension)')" />
+        <Copy SourceFiles="@(PublishedFiles)" DestinationFiles="@(PublishedFiles->'$(DeployDirectory)\%(RecursiveDir)%(FileName)%(Extension)')" />
 	</Target>
 	
 	<Target Name="AddVisualStyleManifestToDeployment">
         <!-- Rename .deploy files dropping the extension. Required by mage.exe -->
-        <CreateItem Include="$(DropDirectory)\**\*.deploy">
+        <CreateItem Include="$(DeployDirectory)\**\*.deploy">
             <Output TaskParameter="Include" ItemName="DeployedFiles" />
         </CreateItem>
 
-        <Copy SourceFiles="@(DeployedFiles)" DestinationFiles="@(DeployedFiles->'$(DropDirectory)\%(RecursiveDir)%(FileName)')">
+        <Copy SourceFiles="@(DeployedFiles)" DestinationFiles="@(DeployedFiles->'$(DeployDirectory)\%(RecursiveDir)%(FileName)')">
             <Output TaskParameter="CopiedFiles" ItemName="DeployFilesWithoutDeployExtension" />
         </Copy>
         <Delete Files="@(DeployedFiles)" />
         
-        <GetFirstDirectory SearchDirectory="$(DropDirectory)\Application Files">
+        <GetFirstDirectory SearchDirectory="$(DeployDirectory)\Application Files">
             <Output TaskParameter="FirstChildDirectoryName" PropertyName="FirstChildDirectoryName" />
         </GetFirstDirectory>
         
@@ -111,7 +114,7 @@
             <Output TaskParameter="Value" PropertyName="ManifestCodeBase" />
         </CreateProperty>
         
-        <CreateProperty Value="$(DropDirectory)\$(ManifestCodeBase)">
+        <CreateProperty Value="$(DeployDirectory)\$(ManifestCodeBase)">
             <Output TaskParameter="Value" PropertyName="AppManifestDirectory" />
         </CreateProperty>
         
@@ -132,12 +135,10 @@
         <!-- sign deployment manifest with mage.exe -->
         <Exec
             Command="&quot;$(MageToolPath)&quot; -u &quot;$(DeploymentManifestFileName)&quot; -appc &quot;$(ManifestCodeBase)\$(AppManifestFileName)&quot; -appm &quot;$(AppManifestDirectory)\$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -pub &quot;$(PublisherName)&quot; -pu &quot;$(DeploymentUrl)/$(DeploymentManifestFileName)&quot;"
-            WorkingDirectory="$(DropDirectory)" />
+            WorkingDirectory="$(DeployDirectory)" />
 	</Target>
 	
 	<Target Name="ZipPublishedFiles">
-        <MakeDir Directories="$(UploadDirectory)" Condition="!Exists('$(UploadDirectory)')" />
-	
-        <Exec Command="&quot;$(ZipExe)&quot; a &quot;$(UploadDirectory)\$(ApplicationName).zip&quot;" WorkingDirectory="$(DropDirectory)" />
+        <Exec Command="&quot;$(ZipExe)&quot; a &quot;$(DropDirectory)\$(ApplicationName).zip&quot;" WorkingDirectory="$(DeployDirectory)" />
 	</Target>
 </Project>
