@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using NuGet.Utility;
 using System.Net;
@@ -30,17 +31,7 @@ namespace NuGet.Repositories
                 throw new ArgumentNullException("uri");
             }
 
-            return IsSystemProxySet(uri) ? GetProxyInternal(uri) : null;
-        }
-
-        private bool IsSystemProxySet(Uri uri)
-        {
-            WebProxy systemProxy = GetSystemProxy(uri);
-            if (null == systemProxy || null == systemProxy.Address)
-            { 
-                return false; 
-            }
-            return true;
+            return IsSystemProxySet() ? GetProxyInternal(uri) : null;
         }
 
         private IWebProxy GetProxyInternal(Uri uri)
@@ -85,7 +76,7 @@ namespace NuGet.Repositories
                     basicCredentials = _credentialProvider.PromptUserForCredentials(systemProxy.Address, retryCredentials);
                     // If the provider returned credentials that are null that means the user cancelled the prompt
                     // and we want to stop at this point and return nothing.
-                    if(null == basicCredentials)
+                    if (null == basicCredentials)
                     {
                         result = null;
                         retryCredentials = false;
@@ -155,5 +146,34 @@ namespace NuGet.Repositories
             WebRequest request = client.CreateRequest();
             return request;
         }
+
+
+        [DllImport("wininet.dll", CharSet = CharSet.Auto)]
+        private extern static bool InternetGetConnectedState(ref InternetConnectionState_e lpdwFlags, int dwReserved);
+
+
+        [Flags]
+        enum InternetConnectionState_e : int
+        {
+            INTERNET_CONNECTION_MODEM = 0x1,
+            INTERNET_CONNECTION_LAN = 0x2,
+            INTERNET_CONNECTION_PROXY = 0x4,
+            INTERNET_RAS_INSTALLED = 0x10,
+            INTERNET_CONNECTION_OFFLINE = 0x20,
+            INTERNET_CONNECTION_CONFIGURED = 0x40
+        }
+
+        // Return true or false if connecting through a proxy server
+        public bool IsSystemProxySet()
+        {
+            InternetConnectionState_e flags = 0;
+            InternetGetConnectedState(ref flags, 0);
+            bool hasProxy = false;
+
+            hasProxy = (flags & InternetConnectionState_e.INTERNET_CONNECTION_PROXY) != 0;
+
+            return hasProxy;
+        }
+
     }
 }
