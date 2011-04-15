@@ -3,8 +3,10 @@
 namespace NuGet {
     public interface ISettings {
         string GetValue(string section, string key);
-        IDictionary<string, string> GetValues(string section);
+        ICollection<KeyValuePair<string, string>> GetValues(string section);
         void SetValue(string section, string key, string value);
-        void DeleteValue(string section, string key);
+        void SetValues(string section, ICollection<KeyValuePair<string, string>> values);
+        bool DeleteValue(string section, string key);
+        bool DeleteSection(string section);
     }
 }

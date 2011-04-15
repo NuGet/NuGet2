@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
@@ -30,15 +31,29 @@ namespace NuGet {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
             }
 
-            var kvps = GetValues(section);
-            string value;
-            if (kvps == null || !kvps.TryGetValue(key, out value)) {
-                return null;
+            try {
+                // Get the section and return null if it doesnt exist
+                var sectionElement = _config.Root.Element(section);
+                if (sectionElement == null) {
+                    return null;
+                }
+
+                //Get the add element that matches the key and return null if it doesnt exist
+                var element = sectionElement.Elements("add").Where(s => s.GetOptionalAttributeValue("key") == key).FirstOrDefault();
+                if (element == null) {
+                    return null;
+                }
+
+                // Return the optional value which it not there will be null;
+                return element.GetOptionalAttributeValue("value");
             }
-            return value;
+            catch (Exception e) {
+                throw new InvalidOperationException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
+            }
+
         }
 
-        public IDictionary<string, string> GetValues(string section) {
+        public ICollection<KeyValuePair<string, string>> GetValues(string section) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
@@ -49,16 +64,18 @@ namespace NuGet {
                     return null;
                 }
 
-                var kvps = new Dictionary<string, string>();
+                var kvps = new List<KeyValuePair<string, string>>();
                 foreach (var e in sectionElement.Elements("add")) {
                     var key = e.GetOptionalAttributeValue("key");
                     var value = e.GetOptionalAttributeValue("value");
                     if (!String.IsNullOrEmpty(key) && value != null) {
-                        kvps.Add(key, value);
+                        kvps.Add(new KeyValuePair<string, string>(key, value));
                     }
                 }
 
-                return kvps;
+                
+
+                return kvps.AsReadOnly();
             }
             catch (Exception e) {
                 throw new InvalidOperationException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
@@ -66,6 +83,22 @@ namespace NuGet {
         }
 
         public void SetValue(string section, string key, string value) {
+            SetValueInternal(section, key, value);
+            Save(_config);
+        }
+
+        public void SetValues(string section, ICollection<KeyValuePair<string, string>> values) {
+            if (values == null) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "values");
+            }
+
+            foreach (var kvp in values) {
+                SetValueInternal(section, kvp.Key, kvp.Value);
+            }
+            Save(_config);
+        }
+
+        private void SetValueInternal(string section, string key, string value) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
@@ -96,11 +129,9 @@ namespace NuGet {
             addElement.SetAttributeValue("key", key);
             addElement.SetAttributeValue("value", value);
             sectionElement.Add(addElement);
-            Save(_config);
-
         }
 
-        public void DeleteValue(string section, string key) {
+        public bool DeleteValue(string section, string key) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
@@ -110,7 +141,7 @@ namespace NuGet {
 
             var sectionElement = _config.Root.Element(section);
             if (sectionElement == null) {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
+                return false;
             }
 
             XElement elementToDelete = null;
@@ -121,15 +152,33 @@ namespace NuGet {
                 }
             }
             if (elementToDelete == null) {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_SectionDoesNotExist, section));
+                return false;
             }
+
             elementToDelete.Remove();
             Save(_config);
+            return true;
 
+        }
+
+        public bool DeleteSection(string section) {
+            if (String.IsNullOrEmpty(section)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+
+            var sectionElement = _config.Root.Element(section);
+            if (sectionElement == null) {
+                return false;
+            }
+
+            sectionElement.Remove();
+            Save(_config);
+            return true;
         }
 
         private void Save(XDocument document) {
             _fileSystem.AddFile(_configLocation, document.Save);
         }
+
     }
 }

@@ -41,6 +41,7 @@
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="Configuration\ISettings.cs" />
+    <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Configuration\UserSettings.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObjectCacheExtensions.cs" />
