@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Deployment.Application;
 using System.Windows;
 using System.Windows.Documents;
 
@@ -16,7 +17,16 @@ namespace PackageExplorer {
                 "{0} {1} ({2})",
                 StringResources.Dialog_Title,
                 StringResources.ProductRelease,
-                typeof(MainWindow).Assembly.GetName().Version.ToString());
+                GetApplicationVersion().ToString());
+        }
+
+        private static Version GetApplicationVersion() {
+            if (ApplicationDeployment.IsNetworkDeployed) {
+                return ApplicationDeployment.CurrentDeployment.CurrentVersion;
+            }
+            else {
+                return typeof(MainWindow).Assembly.GetName().Version;
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e) {
