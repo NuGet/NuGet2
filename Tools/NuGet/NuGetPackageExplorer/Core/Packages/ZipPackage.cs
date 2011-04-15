@@ -98,6 +98,12 @@ namespace NuGet {
             }
         }
 
+        public double VersionRating {
+            get {
+                return -1;
+            }
+        }
+
         public int RatingsCount {
             get {
                 return 0;

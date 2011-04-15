@@ -93,6 +93,10 @@ namespace PackageExplorerViewModel {
             get { return -1; }
         }
 
+        public double VersionRating {
+            get { return -1; }
+        }
+
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
             get { return Enumerable.Empty<FrameworkAssemblyReference>(); }
         }

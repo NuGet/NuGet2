@@ -168,5 +168,9 @@ namespace NuGet
         {
             get { return -1; }
         }
+
+        public double VersionRating {
+            get { return -1; }
+        }
     }
 }

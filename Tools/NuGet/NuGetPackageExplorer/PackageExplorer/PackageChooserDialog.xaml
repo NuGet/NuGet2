@@ -128,10 +128,19 @@
                     <GridViewColumn Width="175">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Authors}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Authors}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Authors}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                         <GridViewColumnHeader Content="Authors" Command="{Binding SortCommand}" CommandParameter="Authors" Padding="0,3">
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+                    <GridViewColumn Width="60">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding VersionRating, StringFormat={}{0:G2}}" TextAlignment="Center" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                        <GridViewColumnHeader Content="Rating" Command="{Binding SortCommand}" CommandParameter="Rating" Padding="0,3">
                         </GridViewColumnHeader>
                     </GridViewColumn>
                     <GridViewColumn Width="80">
@@ -141,15 +150,6 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                         <GridViewColumnHeader Content="Downloads" Command="{Binding SortCommand}" CommandParameter="VersionDownloadCount" Padding="0,3">
-                        </GridViewColumnHeader>
-                    </GridViewColumn>
-                    <GridViewColumn Width="60">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Rating}" TextAlignment="Center" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                        <GridViewColumnHeader Content="Rating" Command="{Binding SortCommand}" CommandParameter="Rating" Padding="0,3">
                         </GridViewColumnHeader>
                     </GridViewColumn>
                 </GridView>

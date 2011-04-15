@@ -7,5 +7,6 @@ namespace NuGet {
         int VersionDownloadCount { get; }
         int RatingsCount { get; }
         double Rating { get; }
+        double VersionRating { get; }
     }
 }

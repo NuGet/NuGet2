@@ -93,6 +93,11 @@ namespace NuGet {
             set;
         }
 
+        public double VersionRating {
+            get;
+            set;
+        }
+
         public int RatingsCount {
             get;
             set;
