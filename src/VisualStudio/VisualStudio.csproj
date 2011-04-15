@@ -16,6 +16,7 @@
   <ItemGroup>
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
     <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
@@ -32,6 +33,7 @@
     <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackage.cs" />
     <Compile Include="Utility\UriHelper.cs" />
+    <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>

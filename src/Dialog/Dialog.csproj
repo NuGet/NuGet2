@@ -169,6 +169,7 @@
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectedProviderSettingsManager.cs" />
+    <Compile Include="WindowSizePersistenceHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">

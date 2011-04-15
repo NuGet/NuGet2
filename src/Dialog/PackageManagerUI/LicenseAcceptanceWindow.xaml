@@ -5,16 +5,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
+    xmlns:local="clr-namespace:NuGet.Dialog"
     xmlns:resources="clr-namespace:NuGet.Dialog"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     ResizeMode="CanResize"
     MinWidth="350"
     MinHeight="300"
     Width="400"
-    SizeToContent="Height"
     ShowInTaskbar="False"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
+    local:WindowSizePersistenceHelper.WindowToken="LicenseWindow"
     Title="{x:Static resources:Resources.License_DialogTitle}">
     
     <Window.Resources>
@@ -41,15 +42,16 @@
         </DataTemplate>
     </Window.Resources>
     
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <DockPanel Margin="10">
+        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" />        
 
-        <TextBlock Grid.Row="0" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" />
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="{x:Static resources:Resources.License_Decline}" Click="OnDeclineButtonClick" IsCancel="True" />
+            <Button Content="{x:Static resources:Resources.License_Accept}" Click="OnAcceptButtonClick" />
+        </StackPanel>
+
+        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" />
+
         <ItemsControl
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             Grid.Row="1" 
@@ -62,10 +64,6 @@
             ItemsSource="{Binding}"
             ItemTemplate="{StaticResource LicenseItemTemplate}">
         </ItemsControl>
-        <TextBlock Grid.Row="2" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" />
-        <StackPanel Grid.Row="3" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{x:Static resources:Resources.License_Decline}" Click="OnDeclineButtonClick" IsCancel="True" />
-            <Button Content="{x:Static resources:Resources.License_Accept}" Click="OnAcceptButtonClick" />
-        </StackPanel>
-    </Grid>
+
+    </DockPanel>
 </pfui:DialogWindow>
