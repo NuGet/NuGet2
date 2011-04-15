@@ -11,14 +11,26 @@ namespace NuGet.Repositories
 	// by default but can be used as a base class for a more elaborate Proxy Credential Provider
     public class DefaultCredentialProvider: ICredentialProvider
     {
-        public virtual ICredentials GetCredentials(ProxyType proxyType, Uri uri)
+        public virtual ICredentials DefaultCredentials
         {
-            return GetCredentials(proxyType, uri, false);
+            get { return CredentialCache.DefaultCredentials; }
         }
 
-        public virtual ICredentials GetCredentials(ProxyType proxyType, Uri uri, bool forcePrompt)
+        public virtual bool HasCredentials(Uri uri)
+        {
+            ICredentials[] credentials = GetCredentials(uri);
+            return credentials.Count() > 0;
+        }
+
+        public virtual ICredentials[] GetCredentials(Uri uri)
         {
             return null;
         }
+
+        public virtual ICredentials PromptUserForCredentials(Uri uri, bool retryCredentials)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

@@ -9,7 +9,11 @@ namespace NuGet.Repositories
 {
     public interface ICredentialProvider
     {
-        ICredentials GetCredentials(ProxyType proxyType, Uri uri);
-        ICredentials GetCredentials(ProxyType proxyType, Uri uri, bool forcePrompt);
+        bool HasCredentials(Uri uri);
+        
+        ICredentials[] GetCredentials(Uri uri);
+        ICredentials PromptUserForCredentials(Uri uri, bool retryCredentials);
+
+        ICredentials DefaultCredentials { get; }
     }
 }

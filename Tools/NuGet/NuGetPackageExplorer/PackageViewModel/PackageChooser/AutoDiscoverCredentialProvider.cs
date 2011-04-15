@@ -10,32 +10,25 @@ namespace NuGet.Repositories
 {
     public class AutoDiscoverCredentialProvider : DefaultCredentialProvider
     {
-        public override ICredentials GetCredentials(ProxyType proxyType, Uri uri, bool forcePrompt)
+        public override ICredentials PromptUserForCredentials(Uri uri, bool retryCredentials)
+        {
+            return GetBasicCredentials(uri, retryCredentials);
+        }
+
+        public override ICredentials[] GetCredentials(Uri uri)
         {
             if (null == uri)
             {
                 throw new ArgumentNullException("uri");
             }
-            ICredentials credentials = null;
-            switch (proxyType)
+            CredentialSet set = new CredentialSet(uri.Host);
+            if (null == set || set.Count < 1)
             {
-                case ProxyType.None:
-                    // We should not be using a proxy so don't return any credentials
-                    credentials = null;
-                    break;
-                case ProxyType.IntegratedAuth:
-                    // based on the implementation of the UseDefaultCredentials property on the HttpWebRequest object
-                    // return the same credentials instead of setting the property this way the consumer of this
-                    // service can determine how to use these credentials since this provider is only responsible
-                    // for returning a set of credentials and not use them.
-                    credentials = CredentialCache.DefaultCredentials;
-                    break;
-                case ProxyType.BasicAuth:
-                    // Basic authentication requires that we ask the user for credentials unless they were persisted
-                    credentials = GetBasicCredentials(uri, forcePrompt);
-                    break;
+                return new ICredentials[0] { };
             }
-            return credentials;
+            return set
+                .Select(cred => new NetworkCredential(cred.UserName, cred.Password))
+                .ToArray();
         }
 
         private ICredentials GetBasicCredentials(Uri uri, bool forcePrompt)
@@ -46,8 +39,9 @@ namespace NuGet.Repositories
 
             using (PromptForCredential dialog = new PromptForCredential())
             {
-                dialog.TargetName = proxyHost;
-                dialog.Title = string.Format("Connect to: {0}", proxyHost);
+                dialog.TargetName = string.Format("PackageExplorer_{0}", proxyHost);
+                dialog.Title = string.Format("Connect to {0}", proxyHost);
+                dialog.Message = dialog.Title;
                 dialog.GenericCredentials = true;
                 dialog.AlwaysShowUI = forcePrompt;
                 if (dialog.ShowDialog())

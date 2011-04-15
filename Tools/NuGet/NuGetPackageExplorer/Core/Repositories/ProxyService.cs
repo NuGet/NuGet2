@@ -30,82 +30,83 @@ namespace NuGet.Repositories
                 throw new ArgumentNullException("uri");
             }
 
-            ProxyType proxyType = GetProxyType(uri);
-            WebProxy proxy = null;
-            switch (proxyType)
-            {
-                case ProxyType.None:
-                    proxy = null;
-                    break;
-                case ProxyType.IntegratedAuth:
-                case ProxyType.BasicAuth:
-                    proxy = GetSystemProxy(uri);
-                    bool validCredentials = false;
-                    bool retryCredentials = false;
-                    ICredentials basicCredentials = null;
-                    while (!validCredentials)
-                    {
-                        // Get credentials for the proxy address and not the target url
-                        // because we'll end up prompting the user for a proxy for each different
-                        // package due to the packages having different urls.
-                        basicCredentials = _credentialProvider.GetCredentials(proxyType, proxy.Address, retryCredentials);
-                        if (AreCredentialsValid(basicCredentials, uri))
-                        {
-                            validCredentials = true;
-                        }
-                        else
-                        {
-                            retryCredentials = true;
-                            validCredentials = false;
-                        }
-                    }
-                    proxy.Credentials = basicCredentials;
-                    break;
-            }
-            return proxy;
+            return IsSystemProxySet(uri) ? GetProxyInternal(uri) : null;
         }
 
-        private ProxyType GetProxyType(Uri uri)
+        private bool IsSystemProxySet(Uri uri)
         {
-            if (null == uri)
-            {
-                throw new ArgumentNullException("uri");
+            WebProxy systemProxy = GetSystemProxy(uri);
+            if (null == systemProxy || null == systemProxy.Address)
+            { 
+                return false; 
             }
-            string[] proxyTypes = Enum.GetNames(typeof(ProxyType));
+            return true;
+        }
 
-            for (int i = 0; i < proxyTypes.Length; i++)
+        private IWebProxy GetProxyInternal(Uri uri)
+        {
+            IWebProxy result = null;
+            WebProxy systemProxy = GetSystemProxy(uri);
+            // Try and see if we have credentials saved for the system proxy first so that we can
+            // validate and see if we should use them.
+            if (_credentialProvider.HasCredentials(systemProxy.Address))
             {
-                ProxyType type = (ProxyType)Enum.Parse(typeof(ProxyType), proxyTypes[i]);
-                switch (type)
+                WebProxy savedCredentialsProxy = GetSystemProxy(uri);
+                savedCredentialsProxy.Credentials = _credentialProvider.GetCredentials(systemProxy.Address).FirstOrDefault();
+                if (IsProxyValid(savedCredentialsProxy, uri))
                 {
-                    case ProxyType.None:
-                        if (IsProxyValid(null, uri))
-                        {
-                            return type;
-                        }
-                        break;
-                    case ProxyType.IntegratedAuth:
-                        WebProxy integratedAuthProxy = GetSystemProxy(uri) as WebProxy;
-                        // Use the same mechanism for retrieving the proxy credentials as the rest of this class
-                        integratedAuthProxy.Credentials = _credentialProvider.GetCredentials(type, integratedAuthProxy.Address);
-                        // Commenting out the Credentials setter based on the Remarks that can be found:
-                        // http://msdn.microsoft.com/en-us/library/system.net.webrequest.usedefaultcredentials.aspx
-                        // It is basically saying that it is best to set the UseDefaultCredentials for client applications
-                        // and only use the Credentials property for middle tier applications such as ASP.NET applications.
-                        //ntlmProxy.Credentials = CredentialCache.DefaultNetworkCredentials;
-                        if (IsProxyValid(integratedAuthProxy, uri))
-                        {
-                            return type;
-                        }
-                        break;
-                    case ProxyType.BasicAuth:
-                        // this is our last resort so we will simply return
-                        // the ProxyType.Basic so that the user will be prompted
-                        return type;
+                    result = savedCredentialsProxy;
                 }
             }
-            return ProxyType.BasicAuth;
+            // If we did not find any saved credentials then let's try to use Default Credentials which is
+            // used for Integrated Authentication
+            if (null == result)
+            {
+                IWebProxy integratedAuthProxy = GetSystemProxy(uri);
+                integratedAuthProxy.Credentials = _credentialProvider.DefaultCredentials;
+                if (IsProxyValid(integratedAuthProxy, uri))
+                {
+                    result = integratedAuthProxy;
+                }
+            }
+            // If we did not succeed in getting a proxy by this time then let's try and prompt the user for
+            // credentials and do that until we have succeeded.
+            if (null == result)
+            {
+                WebProxy noCredentialsProxy = GetSystemProxy(uri);
+                bool validCredentials = false;
+                bool retryCredentials = false;
+                ICredentials basicCredentials = null;
+                while (!validCredentials)
+                {
+                    // Get credentials for the proxy address and not the target url
+                    // because we'll end up prompting the user for a proxy for each different
+                    // package due to the packages having different urls.
+                    basicCredentials = _credentialProvider.PromptUserForCredentials(systemProxy.Address, retryCredentials);
+                    // If the provider returned credentials that are null that means the user cancelled the prompt
+                    // and we want to stop at this point and return nothing.
+                    if(null == basicCredentials)
+                    {
+                        result = null;
+                        retryCredentials = false;
+                        break;
+                    }
+                    noCredentialsProxy.Credentials = basicCredentials;
+                    if (IsProxyValid(noCredentialsProxy, uri))
+                    {
+                        validCredentials = true;
+                    }
+                    else
+                    {
+                        retryCredentials = true;
+                        validCredentials = false;
+                    }
+                }
+                result = noCredentialsProxy;
+            }
+            return result;
         }
+
         private WebProxy GetSystemProxy(Uri uri)
         {
             // Using WebRequest.GetSystemWebProxy() is the best way to get the default system configured
@@ -153,13 +154,6 @@ namespace NuGet.Repositories
             IHttpClient client = new HttpClient(uri);
             WebRequest request = client.CreateRequest();
             return request;
-        }
-
-        public bool AreCredentialsValid(ICredentials credentials, Uri uri)
-        {
-            WebProxy proxy = GetSystemProxy(uri);
-            proxy.Credentials = credentials;
-            return IsProxyValid(proxy, uri);
         }
     }
 }
