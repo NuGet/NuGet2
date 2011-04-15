@@ -355,7 +355,7 @@ namespace NuGet.Test {
             var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("Section", null));
+            ExceptionAssert.Throws<ArgumentNullException>(() => settings.SetValues("Section", null));
         }
 
         [TestMethod]

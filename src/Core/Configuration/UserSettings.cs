@@ -5,7 +5,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
-using System.Globalization;
 
 namespace NuGet {
     public class UserSettings : ISettings {
@@ -53,7 +52,7 @@ namespace NuGet {
 
         }
 
-        public ICollection<KeyValuePair<string, string>> GetValues(string section) {
+        public IList<KeyValuePair<string, string>> GetValues(string section) {
             if (String.IsNullOrEmpty(section)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
@@ -87,9 +86,9 @@ namespace NuGet {
             Save(_config);
         }
 
-        public void SetValues(string section, ICollection<KeyValuePair<string, string>> values) {
+        public void SetValues(string section, IList<KeyValuePair<string, string>> values) {
             if (values == null) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "values");
+                throw new ArgumentNullException("values");
             }
 
             foreach (var kvp in values) {
