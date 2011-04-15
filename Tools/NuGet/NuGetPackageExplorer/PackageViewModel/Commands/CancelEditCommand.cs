@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 using System.Windows.Input;
+using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     internal class CancelEditCommand : CommandBase, ICommand {
@@ -19,10 +20,10 @@ namespace PackageExplorerViewModel {
         }
 
         public void Execute(object parameter) {
-            //var bindingGroup = parameter as BindingGroup;
-            //if (bindingGroup != null) {
-            //    bindingGroup.CancelEdit();
-            //}
+            var bindingGroup = parameter as IBindingGroup;
+            if (bindingGroup != null) {
+                bindingGroup.CancelEdit();
+            }
 
             ViewModel.CancelEdit();
         }

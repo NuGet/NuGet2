@@ -113,9 +113,11 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BindingGroupWrapper.cs" />
     <Compile Include="ContentViewerPane.xaml.cs">
       <DependentUpon>ContentViewerPane.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BindingGroupConverter.cs" />
     <Compile Include="Converters\FileSizeConverter.cs" />
     <Compile Include="Converters\NormalizeTextConverter.cs" />
     <Compile Include="Interop\BrowseForFolder.cs" />

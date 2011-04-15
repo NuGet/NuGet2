@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using NuGet;
 using PackageExplorerViewModel;
 using PackageExplorerViewModel.Types;
@@ -33,13 +32,14 @@ namespace PackageExplorer {
             if (this.Visibility == System.Windows.Visibility.Visible) {
                 ClearDependencyTextBox();
                 ClearFrameworkAssemblyTextBox();
-                PrepareBindingForDependencyList();
+                PrepareBindings();
+                PackageMetadataGroup.BeginEdit();
             }
         }
 
-        private void PrepareBindingForDependencyList() {
+        private void PrepareBindings() {
             var viewModel = (PackageViewModel)DataContext;
-            
+
             _packageDependencies = new ObservableCollection<PackageDependency>(viewModel.PackageMetadata.Dependencies);
             DependencyList.ItemsSource = _packageDependencies;
 
@@ -60,10 +60,6 @@ namespace PackageExplorer {
 
         private void PopulateLanguagesForLanguageBox() {
             LanguageBox.ItemsSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures).Select(c => c.Name).OrderBy(p => p, StringComparer.OrdinalIgnoreCase);
-        }
-
-        public BindingGroup MetadataBindingGroup {
-            get { return PackageMetadataGroup; }
         }
 
         private void RemoveDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
@@ -99,15 +95,14 @@ namespace PackageExplorer {
         }
 
         private void SelectDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
-            if (!NetworkInterface.GetIsNetworkAvailable())
-            {
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
                 MessageBox.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;
             }
 
-            var dialog = new PackageChooserDialog() { 
+            var dialog = new PackageChooserDialog() {
                 Owner = Window.GetWindow(this),
                 DataContext = PackageViewModelFactory.CreatePackageChooserViewModel()
             };
@@ -123,8 +118,8 @@ namespace PackageExplorer {
         }
 
         private void AddFrameworkAssemblyButtonClicked(object sender, RoutedEventArgs args) {
-            var bindingExpression2 = NewSupportedFramework.GetBindingExpression(TextBox.TextProperty);
-            if (bindingExpression2.HasError) {
+            var bindingExpression = NewSupportedFramework.GetBindingExpression(TextBox.TextProperty);
+            if (bindingExpression.HasError) {
                 return;
             }
 

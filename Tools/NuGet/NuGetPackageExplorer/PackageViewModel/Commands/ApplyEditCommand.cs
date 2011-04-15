@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 using System.Windows.Input;
+using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     internal class ApplyEditCommand : CommandBase, ICommand {
@@ -18,13 +19,13 @@ namespace PackageExplorerViewModel {
         }
 
         public void Execute(object parameter) {
-            //var bindingGroup = parameter as BindingGroup;
-            //if (bindingGroup != null) {
-            //    bool valid = bindingGroup.CommitEdit();
-            //    if (valid) {
-            //        ViewModel.CommitEdit();
-            //    }
-            //}
+            var bindingGroup = parameter as IBindingGroup;
+            if (bindingGroup != null) {
+                bool valid = bindingGroup.CommitEdit();
+                if (valid) {
+                    ViewModel.CommitEdit();
+                }
+            }
         }
     }
 }

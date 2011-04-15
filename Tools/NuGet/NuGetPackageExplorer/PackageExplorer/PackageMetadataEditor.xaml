@@ -253,8 +253,8 @@
 
         <!-- Button -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 8, 0, 0">
-            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="10,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" Click="OkButtonClicked" />
-            <Button x:Name="CancelButton" Padding="10,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup}" />
+            <Button Content="_OK" Width="{Binding ActualWidth, ElementName=CancelButton}" Padding="10,0" Margin="0,0,5,0" Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup, Converter={StaticResource BindingGroupConverter}}" Click="OkButtonClicked" />
+            <Button x:Name="CancelButton" Padding="10,0" Content="_Cancel" Margin="5,0,0,0" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=PackageMetadataGroup, Converter={StaticResource BindingGroupConverter}}" />
         </StackPanel>
     </Grid>
 </UserControl>
