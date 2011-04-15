@@ -27,24 +27,11 @@ namespace NuGet.Commands {
             }
 
             //If the user passed a source use it for the gallery location
-            string galleryServerUrl;
-            if (String.IsNullOrEmpty(Source)) {
-                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
-            }
-            else {
-                galleryServerUrl = Source;
-            }
-
+            string galleryServerUrl = String.IsNullOrEmpty(Source) ? GalleryServer.DefaultGalleryServerUrl : Source;
             var gallery = new GalleryServer(galleryServerUrl);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey;
-            if (String.IsNullOrEmpty(userSetApiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, galleryServerUrl);
-            }
-            else {
-                apiKey = userSetApiKey;
-            }
+            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings.UserSettings, galleryServerUrl) : userSetApiKey;
 
 
             if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion))) {
