@@ -21,7 +21,7 @@ namespace NuGet.Utility
             : this(uri, null)
         {
         }
-        public RedirectedHttpClient(Uri uri,IWebProxy proxy)
+        public RedirectedHttpClient(Uri uri, IWebProxy proxy)
             : base(uri, proxy)
         {
             _originalUri = uri;

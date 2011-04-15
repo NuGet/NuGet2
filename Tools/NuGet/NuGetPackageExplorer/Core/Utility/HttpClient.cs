@@ -38,6 +38,8 @@ namespace NuGet {
                 httpRequest.UserAgent = UserAgent;
                 httpRequest.Headers[HttpRequestHeader.AcceptEncoding] = "gzip, deflate";
                 httpRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                // default Timeout period is 100 seconds
+                httpRequest.Timeout = 1000 * 200;
             }
             request.Proxy = Proxy;
         }

@@ -9,7 +9,6 @@ using NuGet.Utility;
 
 namespace NuGet {   
     public class GalleryServer {
-        //public const string DefaultGalleryServerUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
         private const string PublishPackageService = "PublishedPackages/Publish";
@@ -21,10 +20,6 @@ namespace NuGet {
 
         IProxyService _proxyService;
         IWebProxy _cachedProxy;
-
-        public GalleryServer(string galleryServerSource)
-            : this(galleryServerSource, new ProxyService()) {
-        }
 
         public GalleryServer(string galleryServerSource, IProxyService proxyService) {
             if (string.IsNullOrEmpty(galleryServerSource))
@@ -158,15 +153,27 @@ namespace NuGet {
             state.ProgressObserver.OnNext(Math.Min(100, 2*e.ProgressPercentage));
         }
 
-        private string GetSafeRedirectedUri(string uri) {
+        private string GetSafeRedirectedUri(string url) {
             try {
-                Uri originalUri = new Uri(uri);
+                Uri uri = new Uri(url);
                 IWebProxy proxy = _cachedProxy;
-                RedirectedHttpClient client = new RedirectedHttpClient(originalUri,proxy);
+                RedirectedHttpClient client = new RedirectedHttpClient(uri, proxy);
                 return client.Uri.ToString();
             }
             catch (WebException e) {
-                return e.Response.ResponseUri.ToString(); ;
+                if (WebExceptionStatus.Timeout == e.Status)
+                {
+                    // rethrow the error because if ran into a timeout issue then
+                    // we don't want the code to continue as there is not going to be any good
+                    // result if we can't return a valid url to the caller.
+                    throw;
+                }
+                // we are assuming here that we just got a 403 - Forbidden: Access is denied error
+                // because we are navigating to the publish url of the Gallery Server so we simply
+                // catch the error and return the response url of the response that can be used for publishing
+                // the reason why we get this error is because this is a POST action and IIS gives us this error
+                // because it things that we are trying to navigate to a page.
+                return e.Response.ResponseUri.ToString();
             }
         }
 

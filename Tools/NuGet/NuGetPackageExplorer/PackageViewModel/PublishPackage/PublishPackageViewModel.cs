@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using NuGet;
 using NuGet.Repositories;
 
@@ -139,7 +140,17 @@ namespace PackageExplorerViewModel {
             Stream fileStream = _packageStream.Value;
             fileStream.Seek(0, SeekOrigin.Begin);
 
-            GalleryServer.CreatePackage(PublishKey, fileStream, this, PushOnly == true? (IPackageMetadata)null : _package);
+            try
+            {
+                GalleryServer.CreatePackage(PublishKey, fileStream, this, PushOnly == true ? (IPackageMetadata)null : _package);
+            }
+            catch (WebException e)
+            {
+                if (WebExceptionStatus.Timeout == e.Status)
+                {
+                    OnError(e);
+                }
+            }
         }
 
         public void OnCompleted() {

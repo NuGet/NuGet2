@@ -79,13 +79,7 @@ namespace NuGet.Repositories
                 switch (type)
                 {
                     case ProxyType.None:
-                        // Even though we are testing an empty proxy and Microsoft documentation is telling us to use null
-                        // for an empty proxy, our code does not like it so we have to ask for a System Default proxy to test
-                        // and see if that works
-                        // Also using the GetSystemProxy(uri) local method is not working correctly with an empty proxy
-                        // in the mean time just get a fresh version of the proxy settings from the WebRequest object.
-                        IWebProxy systemProxy = WebRequest.GetSystemWebProxy();
-                        if (IsProxyValid(systemProxy, uri))
+                        if (IsProxyValid(null, uri))
                         {
                             return type;
                         }
@@ -129,7 +123,10 @@ namespace NuGet.Repositories
             bool result = true;
             WebRequest request = CreateRequest(uri);
             WebResponse response = null;
-            request.Proxy = proxy;
+            // if we get a null proxy from the caller then don't use it and just re-set the same proxy that we
+            // already have because I am seeing a strange performance hit when a new instance of a proxy is set
+            // and it can take a few seconds to be changed before the method call continues.
+            request.Proxy = proxy ?? request.Proxy;
             try
             {
                 response = request.GetResponse();
@@ -137,7 +134,7 @@ namespace NuGet.Repositories
             catch (WebException webException)
             {
                 HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if (webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired)
+                if (null == webResponse || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired)
                 {
                     result = false;
                 }
