@@ -291,12 +291,6 @@
   <data name="DownloadProgressStatus" xml:space="preserve">
     <value>Downloading {0} {1}...</value>
   </data>
-  <data name="UserSettings_KeyDoesNotExist" xml:space="preserve">
-    <value>Key '{0}' does not exist.</value>
-  </data>
-  <data name="UserSettings_SectionDoesNotExist" xml:space="preserve">
-    <value>Section'{0}' does not exist.</value>
-  </data>
   <data name="UserSettings_UnableToParseConfigFile" xml:space="preserve">
     <value>Unable to parse config file.</value>
   </data>

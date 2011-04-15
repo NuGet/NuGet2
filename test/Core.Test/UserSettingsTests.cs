@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuGet.Runtime;
-using System.Collections.Generic;
 
 namespace NuGet.Test {
     [TestClass]

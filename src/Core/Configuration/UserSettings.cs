@@ -38,13 +38,13 @@ namespace NuGet {
                     return null;
                 }
 
-                //Get the add element that matches the key and return null if it doesnt exist
+                // Get the add element that matches the key and return null if it doesnt exist
                 var element = sectionElement.Elements("add").Where(s => s.GetOptionalAttributeValue("key") == key).FirstOrDefault();
                 if (element == null) {
                     return null;
                 }
 
-                // Return the optional value which it not there will be null;
+                // Return the optional value which if not there will be null;
                 return element.GetOptionalAttributeValue("value");
             }
             catch (Exception e) {
