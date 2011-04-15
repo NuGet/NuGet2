@@ -4,7 +4,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for RenameWindow.xaml
     /// </summary>
-    public partial class RenameWindow : DialogWithNoMinimizeAndMaximize {
+    public partial class RenameWindow : StandardDialog {
         public RenameWindow() {
             InitializeComponent();
         }

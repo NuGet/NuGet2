@@ -3,7 +3,7 @@ using System.Windows;
 using System.Runtime.InteropServices;
 
 namespace PackageExplorer {
-    public class DialogWithNoMinimizeAndMaximize : Window {
+    public class StandardDialog : Window {
 
         protected override void OnSourceInitialized(EventArgs e) {
             base.OnSourceInitialized(e);

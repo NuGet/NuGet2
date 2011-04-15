@@ -12,7 +12,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for PackageChooserDialog.xaml
     /// </summary>
-    public partial class PackageChooserDialog : DialogWithNoMinimizeAndMaximize {
+    public partial class PackageChooserDialog : StandardDialog {
 
         public string SortColumn
         {

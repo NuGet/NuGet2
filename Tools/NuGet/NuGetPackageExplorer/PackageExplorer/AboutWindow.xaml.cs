@@ -8,7 +8,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for AboutWindow.xaml
     /// </summary>
-    public partial class AboutWindow : DialogWithNoMinimizeAndMaximize {
+    public partial class AboutWindow : StandardDialog {
         public AboutWindow() {
             InitializeComponent();
 

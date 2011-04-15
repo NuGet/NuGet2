@@ -8,7 +8,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for PublishPackageWindow.xaml
     /// </summary>
-    public partial class PublishPackageWindow : DialogWithNoMinimizeAndMaximize {
+    public partial class PublishPackageWindow : StandardDialog {
         public PublishPackageWindow() {
             InitializeComponent();
         }

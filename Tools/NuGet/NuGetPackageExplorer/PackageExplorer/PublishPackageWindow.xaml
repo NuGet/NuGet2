@@ -1,4 +1,4 @@
-﻿<self:DialogWithNoMinimizeAndMaximize x:Class="PackageExplorer.PublishPackageWindow"
+﻿<self:StandardDialog x:Class="PackageExplorer.PublishPackageWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:self="clr-namespace:PackageExplorer"
@@ -93,4 +93,4 @@
             <Button x:Name="CancelButton" IsCancel="True" Content="_Close" Margin="5,5,0,5" Click="CancelButton_Click" Width="{Binding ActualWidth, ElementName=PublishButton}" />
         </StackPanel>
     </Grid>
-</self:DialogWithNoMinimizeAndMaximize>
+</self:StandardDialog>

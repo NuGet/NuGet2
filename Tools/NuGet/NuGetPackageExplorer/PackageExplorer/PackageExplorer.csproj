@@ -134,7 +134,7 @@
     <Compile Include="Converters\VersionConverter.cs" />
     <Compile Include="Converters\VersionSpecConverter.cs" />
     <Compile Include="Converters\PackagePartToBoolConverter.cs" />
-    <Compile Include="Controls\DialogWithNoMinimizeAndMaximize.cs" />
+    <Compile Include="Controls\StandardDialog.cs" />
     <Compile Include="DownloadProgressWindow.xaml.cs">
       <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
     </Compile>
