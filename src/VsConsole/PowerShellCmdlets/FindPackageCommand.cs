@@ -28,28 +28,29 @@ namespace NuGet.PowerShell.Commands {
                           IPackageRepository recentPackagesRepository,
                           IHttpClientEvents httpClientEvents) 
             : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, httpClientEvents, null) {
+
         }
 
         protected override void ProcessRecordCore() {
             // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
             // typing InstallPackage TAB would download the entire feed.
-            First = MaxReturnedPackages;
+            base.AllVersions = false;
+            base.First = MaxReturnedPackages;
             base.ProcessRecordCore();
         }
 
-        protected override IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository) {
+        protected override IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository) {
             var packages = sourceRepository.GetPackages();
             if (!String.IsNullOrEmpty(Filter)) {
                 packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
 
-            return packages.OrderByDescending(p => p.DownloadCount)
-                           .ThenBy(p => p.Id)
-                           .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+            return packages.OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id);
         }
 
-        protected override IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
-            IPackageRepository localRepository = PackageManager.LocalRepository;
+
+        protected override IQueryable<IPackage>  GetPackagesForUpdate(IPackageRepository sourceRepository) {
+ 	        IPackageRepository localRepository = PackageManager.LocalRepository;
             var packagesToUpdate = localRepository.GetPackages();
 
             if (!String.IsNullOrEmpty(Filter)) {
@@ -59,16 +60,12 @@ namespace NuGet.PowerShell.Commands {
             return sourceRepository.GetUpdates(packagesToUpdate)
                                    .OrderByDescending(p => p.DownloadCount)
                                    .ThenBy(p => p.Id)
-                                   .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+                                   .AsQueryable();
         }
+
 
         protected override void Log(MessageLevel level, string formattedMessage) {
             // We don't want this cmdlet to print anything
-        }
-
-        protected override bool ShouldShowProgress(IQueryable<IPackage> packages, out int total) {
-            total = 0;
-            return false;
         }
     }
 }

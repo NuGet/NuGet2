@@ -37,7 +37,7 @@ Register-TabExpansion 'Install-Package' @{
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
 
-        GetPackageVersions (Get-Package @parameters -Remote -ErrorAction SilentlyContinue) $context 
+        GetPackageVersions (Get-Package @parameters -AllVersions -Remote -ErrorAction SilentlyContinue) $context 
     }
 }
 
@@ -79,7 +79,7 @@ Register-TabExpansion 'Update-Package' @{
         $parameters = @{}
         if ($context.id) { $parameters.filter = $context.id }
 
-        GetPackageVersions (Get-Package -Remote @parameters) $context
+        GetPackageVersions (Get-Package -AllVersions -Remote @parameters) $context
     }
 }
 
@@ -96,7 +96,7 @@ Register-TabExpansion 'Open-PackagePage' @{
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
 
-        GetPackageVersions (Get-Package @parameters -Remote -ErrorAction SilentlyContinue) $context 
+        GetPackageVersions (Get-Package @parameters -AllVersions -Remote -ErrorAction SilentlyContinue) $context 
     }
 }
 

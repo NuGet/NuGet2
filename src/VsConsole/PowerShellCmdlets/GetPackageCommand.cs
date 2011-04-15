@@ -76,6 +76,10 @@ namespace NuGet.PowerShell.Commands {
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
+        [Parameter(ParameterSetName = "Remote", Position = 2)]
+        [Parameter(ParameterSetName = "Recent", Position=2)]
+        public SwitchParameter AllVersions { get; set; }
+
         [Parameter]
         [ValidateRange(0, Int32.MaxValue)]
         public int First {
@@ -110,6 +114,12 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
+        protected virtual bool CollapseVersions {
+            get {
+                return !AllVersions.IsPresent && (ListAvailable || Recent);
+            }
+        }
+
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
@@ -123,21 +133,44 @@ namespace NuGet.PowerShell.Commands {
                 repository = PackageManager.LocalRepository;
             }
 
-            IEnumerable<IPackage> packages;
+            IQueryable<IPackage> packages;
             if (Updates.IsPresent) {
-                packages = FilterPackagesForUpdate(repository);
+                packages = GetPackagesForUpdate(repository);
             }
             else {
-                packages = FilterPackages(repository);
+                packages = GetPackages(repository);
             }
 
-            var filteredPackages = packages.AsQueryable().Skip(Skip);
+            var result = FilterPackages(packages);
+
+            WritePackages(result);
+        }
+
+        protected virtual PackageResult FilterPackages(IQueryable<IPackage> packages) {
+            packages = packages.Skip(Skip);
+
+            int packageCount;
 
             if (_firstValueSpecified) {
-                filteredPackages = filteredPackages.Take(First);
+                packages = packages.Take(First);
+                packageCount = First;
+            }
+            else {
+                packageCount = packages.Count();
             }
 
-            WritePackages(filteredPackages);
+            IEnumerable<IPackage> packagesToDisplay = packages;
+
+            // When querying a remote source, collapse versions unless AllVersions is specified.
+            // We need to do this as the last step of the Queryable as the filtering occurs on the client.
+            if (CollapseVersions) {
+                // Since DistinctLast would need to consume the entire sequence before coming up with a count value, we'll settle for an approximation.
+                // The ratio of distinct : total packages is 1:2. So dividing by 2 should give us a good approximation of the number of packages to expect.
+                packageCount /= 2;
+                packagesToDisplay = packagesToDisplay.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+            }
+
+            return new PackageResult { Packages = packagesToDisplay, Count = packageCount };
         }
 
         /// <summary>
@@ -179,8 +212,8 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        protected virtual IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository) {
-            var packages = sourceRepository.GetPackages();
+        protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository) {
+            IQueryable<IPackage> packages = sourceRepository.GetPackages();
             if (!String.IsNullOrEmpty(Filter)) {
                 packages = packages.Find(Filter.Split());
             }
@@ -193,24 +226,23 @@ namespace NuGet.PowerShell.Commands {
             return packages;
         }
 
-        protected virtual IEnumerable<IPackage> FilterPackagesForUpdate(IPackageRepository sourceRepository) {
+        protected virtual IQueryable<IPackage> GetPackagesForUpdate(IPackageRepository sourceRepository) {
             IPackageRepository localRepository = PackageManager.LocalRepository;
             var packagesToUpdate = localRepository.GetPackages();
             if (!String.IsNullOrEmpty(Filter)) {
                 packagesToUpdate = packagesToUpdate.Find(Filter.Split());
             }
-            return sourceRepository.GetUpdates(packagesToUpdate);
+            return sourceRepository.GetUpdates(packagesToUpdate).AsQueryable();
         }
 
-        private void WritePackages(IQueryable<IPackage> packages) {
+        private void WritePackages(PackageResult result) {
             
-            int total = 0;
             int packagesSoFar = 0;
             // don't show progress if we are in sync mode
-            bool showProgress = !IsSyncMode && ShouldShowProgress(packages, out total);
+            bool showProgress = !IsSyncMode && ShouldShowProgress(result.Count);
 
             bool hasPackage = false;
-            foreach (var package in packages) {
+            foreach (var package in result.Packages) {
                 // exit early if ctrl+c pressed
                 if (Stopping) {
                     break;
@@ -223,8 +255,10 @@ namespace NuGet.PowerShell.Commands {
 
                     // only update progress after every 20 packages 
                     if (packagesSoFar % 20 == 0) {
+                        // Because our download stats are approximations, we could be undercounting.
+                        int percent = Math.Min(100, (packagesSoFar * 100) / result.Count);
                         WriteProgress(
-                            ProgressActivityIds.GetPackageId, Resources.Cmdlet_GetPackageProgress, (packagesSoFar * 100 / total));
+                            ProgressActivityIds.GetPackageId, Resources.Cmdlet_GetPackageProgress, percent);
                     }
                 }
             }
@@ -243,34 +277,9 @@ namespace NuGet.PowerShell.Commands {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
-        protected virtual bool ShouldShowProgress(IQueryable<IPackage> packages, out int total) {
+        protected virtual bool ShouldShowProgress(int total) {
             const int ThresholdToShowProgress = 20;
-
-            bool showProgress = UseRemoteSource;
-
-            total = 0;
-            if (showProgress) {
-                total = int.MaxValue;
-
-                if (_firstValueSpecified) {
-                    // work around issue with AggregateQuery not reporting accurate result in this case
-                    total = Math.Min(total, First);
-                }
-
-                // if there are too few packages, don't bother to show progress.
-                if (total < ThresholdToShowProgress) {
-                    showProgress = false;
-                }
-                else {
-                    // calling packages.Count() will potentially make a web request,
-                    // so we try to avoid it if possible
-                    total = Math.Min(total, packages.Count());
-
-                    showProgress = total >= ThresholdToShowProgress;
-                }
-            }
-
-            return showProgress;
+            return UseRemoteSource && (total > ThresholdToShowProgress);
         }
 
         protected override void EndProcessing() {
@@ -283,6 +292,12 @@ namespace NuGet.PowerShell.Commands {
             if (_productUpdateService != null && _hasConnectedToHttpSource) {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
+        }
+
+        protected class PackageResult {
+            public IEnumerable<IPackage> Packages { get; set; }
+
+            public int Count { get; set; } 
         }
     }
 }
