@@ -39,9 +39,8 @@ namespace NuGet.Commands {
 
             //If the user did not pass an API Key look in the config file
             string apiKey;
-            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             if (String.IsNullOrEmpty(userSetApiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(settings, galleryServerUrl);
+                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, galleryServerUrl);
             }
             else {
                 apiKey = userSetApiKey;

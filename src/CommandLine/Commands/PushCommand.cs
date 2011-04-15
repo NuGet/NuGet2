@@ -107,9 +107,8 @@ namespace NuGet.Commands {
             }
 
             // If the user did not pass an API Key look in the config file
-            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(settings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, source, throwIfNotFound);
             }
 
             return apiKey;

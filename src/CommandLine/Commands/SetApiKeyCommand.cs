@@ -30,7 +30,7 @@ namespace NuGet.Commands {
                 galleryServerUrl = Source;
             }
 
-            var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
+            var settings = Settings.UserSettings;
             settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, galleryServerUrl, apiKey);
             
             // Setup the symbol server key
