@@ -31,7 +31,8 @@ namespace NuGet.Repositories
                 throw new ArgumentNullException("uri");
             }
 
-            return IsSystemProxySet() ? GetProxyInternal(uri) : null;
+            bool isSystemProxySet = IsSystemProxySet(uri);
+            return isSystemProxySet ? GetProxyInternal(uri) : null;
         }
 
         private IWebProxy GetProxyInternal(Uri uri)
@@ -105,7 +106,7 @@ namespace NuGet.Repositories
             // http://msdn.microsoft.com/en-us/library/system.net.webrequest.getsystemwebproxy.aspx
             // The documentation states that this method also performs logic to automatically detect proxy settings,
             // use an automatic configuration script, and manual proxy server settings, and advanced manual proxy server settings.
-            IWebProxy proxy = WebRequest.GetSystemWebProxy();
+            IWebProxy proxy = WebRequest.DefaultWebProxy;
             string proxyUrl = proxy.GetProxy(uri).AbsoluteUri;
             WebProxy systemProxy = new WebProxy(proxyUrl);
             return systemProxy;
@@ -164,15 +165,38 @@ namespace NuGet.Repositories
         }
 
         // Return true or false if connecting through a proxy server
-        public bool IsSystemProxySet()
+        public bool IsSystemProxySet(Uri uri)
         {
             InternetConnectionState_e flags = 0;
             InternetGetConnectedState(ref flags, 0);
-            bool hasProxy = false;
 
-            hasProxy = (flags & InternetConnectionState_e.INTERNET_CONNECTION_PROXY) != 0;
+            // Check to see if we have a System Proxy set in IE
+            bool hasProxy = (flags & InternetConnectionState_e.INTERNET_CONNECTION_PROXY) != 0;
 
-            return hasProxy;
+            // Also check to see if we have a default proxy set somewhere in the .NET framework configuration
+            // or if someone has given us a proxy to use through the Static HttpWebRequest.DefaultWebProxy property
+
+            // The reason for not calling the GetSystemProxy is because the object
+            // that will be returned is no longer going to be the proxy that is set by the settings
+            // on the users machine only the Address is going to be the same.
+            // Not sure why the .NET team did not want to expose all of the usefull settings like
+            // ByPass list and other settings that we can't get because of it.
+            // Anyway the reason why we need the DefaultWebProxy is to see if the uri that we are
+            // getting the proxy for to should be bypassed or not. If it should be bypassed then
+            // return that we don't need a proxy and we should try to connect directly.
+            IWebProxy proxy = WebRequest.DefaultWebProxy;
+            if (null != proxy)
+            {
+                Uri proxyAddress = new Uri(proxy.GetProxy(uri).AbsoluteUri);
+                bool bypassUri = proxy.IsBypassed(uri);
+                if (bypassUri)
+                {
+                    return false;
+                }
+                proxy = new WebProxy(proxyAddress);
+            }
+
+            return hasProxy || null != proxy;
         }
 
     }
