@@ -33,6 +33,5 @@ namespace NuGet {
                 httpRequest.Headers[HttpRequestHeader.UserAgent] = userAgent;
             }
         }
-
     }
 }

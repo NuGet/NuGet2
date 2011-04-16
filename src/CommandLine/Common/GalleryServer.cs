@@ -13,11 +13,9 @@ namespace NuGet.Common {
         private const string PackageService = "Packages";
         private const string PublichPackageService = "PublishedPackages/Publish";
 
-        //REVIEW: What should be the User agent
-        private const string _UserAgentPattern = "NuGet/{0} ({1})";
+        private const string _UserAgentClient = "NuGet Command Line";
 
         private string _baseGalleryServerUrl;
-        private string _userAgent;
 
         public GalleryServer()
             : this(DefaultGalleryServerUrl) {
@@ -25,9 +23,6 @@ namespace NuGet.Common {
 
         public GalleryServer(string galleryServerUrl) {
             _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerUrl);
-
-            var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
-            _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
         }
 
         public void CreatePackage(string apiKey, Stream package) {
@@ -109,7 +104,7 @@ namespace NuGet.Common {
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.ContentType = contentType;
             request.Method = method;
-            request.UserAgent = _userAgent;
+            request.UserAgent = HttpUtility.CreateUserAgentString(_UserAgentClient);
             return request;
         }
 
