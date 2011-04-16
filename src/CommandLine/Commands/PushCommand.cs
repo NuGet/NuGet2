@@ -47,7 +47,7 @@ namespace NuGet.Commands {
                     source = GalleryServer.DefaultSymbolServerUrl;
 
                     // See if the api key exists
-                    string apiKey = GetApiKey(source, configOnly: true, throwIfNotFound: false);
+                    string apiKey = GetApiKey(source, throwIfNotFound: false);
 
                     if (String.IsNullOrEmpty(apiKey)) {
                         Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
@@ -96,14 +96,12 @@ namespace NuGet.Commands {
             }
         }
 
-        private string GetApiKey(string source, bool configOnly = false, bool throwIfNotFound = true) {
+        private string GetApiKey(string source, bool throwIfNotFound = true) {
             string apiKey = null;
 
-            if (!configOnly) {
-                // Second argument, if present, should be the API Key
-                if (Arguments.Count > 1) {
-                    apiKey = Arguments[1];
-                }
+            // Second argument, if present, should be the API Key
+            if (Arguments.Count > 1) {
+                apiKey = Arguments[1];
             }
 
             // If the user did not pass an API Key look in the config file
