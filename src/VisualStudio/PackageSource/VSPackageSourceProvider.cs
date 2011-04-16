@@ -208,13 +208,13 @@ namespace NuGet.VisualStudio {
 
             PackageSource packageSource;
             if (settingValues != null && settingValues.Any()) {
-                KeyValuePair<string, string> pair = settingValues.First();
+                KeyValuePair<string, string> setting = settingValues.First();
                 // if the active source is the Aggregate source, we persist it as <add key="All" value="(Aggregate source)" />
-                if (AggregateSourceInstance.Name.Equals(pair.Key, StringComparison.CurrentCultureIgnoreCase)) {
+                if (AggregateSourceInstance.Name.Equals(setting.Key, StringComparison.CurrentCultureIgnoreCase)) {
                     packageSource = AggregateSourceInstance;
                 }
                 else {
-                    packageSource = new PackageSource(pair.Value, pair.Key);
+                    packageSource = new PackageSource(setting.Value, setting.Key);
                 }
             }
             else {
