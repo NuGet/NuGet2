@@ -80,11 +80,10 @@ namespace PackageExplorerViewModel {
         }
 
         private ICommand _deleteCommand;
-
         public ICommand DeleteCommand {
             get {
                 if (_deleteCommand == null) {
-                    _deleteCommand = new DeleteContentCommand2(PackageViewModel);
+                    _deleteCommand = new RelayCommand(Delete);
                 }
                 return _deleteCommand;
             }

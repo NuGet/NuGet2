@@ -2,14 +2,10 @@
 using System.IO;
 using NuGet;
 
-namespace PackageExplorer
-{
-    internal static class FileUtility
-    {
-        public static bool IsSupportedFile(string filepath)
-        {
-            if (String.IsNullOrEmpty(filepath))
-            {
+namespace PackageExplorer {
+    internal static class FileUtility {
+        public static bool IsSupportedFile(string filepath) {
+            if (String.IsNullOrEmpty(filepath)) {
                 return false;
             }
 

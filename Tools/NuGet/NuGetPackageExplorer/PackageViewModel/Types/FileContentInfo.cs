@@ -1,11 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace PackageExplorerViewModel.Types
-{
-    public sealed class FileContentInfo : INotifyPropertyChanged
-    {
-        public FileContentInfo(PackageFile file, string name, string content, bool isTextFile, long size, SourceLanguageType language)
-        {
+namespace PackageExplorerViewModel.Types {
+    public sealed class FileContentInfo : INotifyPropertyChanged {
+        public FileContentInfo(PackageFile file, string name, string content, bool isTextFile, long size, SourceLanguageType language) {
             File = file;
             Name = name;
             Content = content;
@@ -22,22 +19,18 @@ namespace PackageExplorerViewModel.Types
 
         private SourceLanguageType _language;
 
-        public SourceLanguageType Language
-        {
+        public SourceLanguageType Language {
             get { return _language; }
             set {
-                if (_language != value)
-                {
+                if (_language != value) {
                     _language = value;
                     OnPropertyChanged("Language");
                 }
             }
         }
 
-        private void OnPropertyChanged(string name)
-        {
-            if (PropertyChanged != null)
-            {
+        private void OnPropertyChanged(string name) {
+            if (PropertyChanged != null) {
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
         }
