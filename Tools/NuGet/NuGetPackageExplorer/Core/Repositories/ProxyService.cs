@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using NuGet.Utility;
 using System.Net;
 
 namespace NuGet.Repositories
@@ -101,11 +97,8 @@ namespace NuGet.Repositories
 
         private WebProxy GetSystemProxy(Uri uri)
         {
-            // Using WebRequest.GetSystemWebProxy() is the best way to get the default system configured
-            // proxy settings which are retrieved from IE by default as per
-            // http://msdn.microsoft.com/en-us/library/system.net.webrequest.getsystemwebproxy.aspx
-            // The documentation states that this method also performs logic to automatically detect proxy settings,
-            // use an automatic configuration script, and manual proxy server settings, and advanced manual proxy server settings.
+            // WebRequest.DefaultWebProxy seems to be more capable in terms of getting the default
+            // proxy settings instead of the WebRequest.GetSystemProxy()
             IWebProxy proxy = WebRequest.DefaultWebProxy;
             string proxyUrl = proxy.GetProxy(uri).AbsoluteUri;
             WebProxy systemProxy = new WebProxy(proxyUrl);
@@ -148,34 +141,9 @@ namespace NuGet.Repositories
             return request;
         }
 
-
-        [DllImport("wininet.dll", CharSet = CharSet.Auto)]
-        private extern static bool InternetGetConnectedState(ref InternetConnectionState_e lpdwFlags, int dwReserved);
-
-
-        [Flags]
-        enum InternetConnectionState_e : int
-        {
-            INTERNET_CONNECTION_MODEM = 0x1,
-            INTERNET_CONNECTION_LAN = 0x2,
-            INTERNET_CONNECTION_PROXY = 0x4,
-            INTERNET_RAS_INSTALLED = 0x10,
-            INTERNET_CONNECTION_OFFLINE = 0x20,
-            INTERNET_CONNECTION_CONFIGURED = 0x40
-        }
-
         // Return true or false if connecting through a proxy server
         public bool IsSystemProxySet(Uri uri)
         {
-            InternetConnectionState_e flags = 0;
-            InternetGetConnectedState(ref flags, 0);
-
-            // Check to see if we have a System Proxy set in IE
-            bool hasProxy = (flags & InternetConnectionState_e.INTERNET_CONNECTION_PROXY) != 0;
-
-            // Also check to see if we have a default proxy set somewhere in the .NET framework configuration
-            // or if someone has given us a proxy to use through the Static HttpWebRequest.DefaultWebProxy property
-
             // The reason for not calling the GetSystemProxy is because the object
             // that will be returned is no longer going to be the proxy that is set by the settings
             // on the users machine only the Address is going to be the same.
@@ -196,7 +164,8 @@ namespace NuGet.Repositories
                 proxy = new WebProxy(proxyAddress);
             }
 
-            return hasProxy || null != proxy;
+            //return hasProxy || null != proxy;
+            return null != proxy;
         }
 
     }
