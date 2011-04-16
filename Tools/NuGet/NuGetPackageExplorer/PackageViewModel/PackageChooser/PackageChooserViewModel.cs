@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel.Types;
 
@@ -20,10 +21,10 @@ namespace PackageExplorerViewModel {
         public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager) {
             Packages = new ObservableCollection<IPackage>();
             NavigationCommand = new NavigateCommand(this);
-            SortCommand = new SortCommand(this);
-            SearchCommand = new SearchCommand(this);
-            LoadedCommand = new LoadedCommand(this);
-            ChangePackageSourceCommand = new ChangePackageSourceCommand(this);
+            SortCommand = new RelayCommand<string>(Sort, column => TotalPackageCount > 0);
+            SearchCommand = new RelayCommand<string>(Search);
+            LoadedCommand = new RelayCommand(() => Sort("VersionDownloadCount", ListSortDirection.Descending));
+            ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
            
             _packageSourceManager = packageSourceManager;
         }
@@ -124,7 +125,6 @@ namespace PackageExplorerViewModel {
                 if (_totalPackageCount != value) {
                     _totalPackageCount = value;
                     OnPropertyChanged("TotalPackageCount");
-                    SortCommand.RaiseCanExecuteEvent();
                 }
             }
         }
@@ -188,16 +188,12 @@ namespace PackageExplorerViewModel {
         public ObservableCollection<IPackage> Packages { get; private set; }
 
         public NavigateCommand NavigationCommand { get; private set; }
+        public ICommand SortCommand { get; private set; }
+        public ICommand SearchCommand { get; private set; }
+        public ICommand LoadedCommand { get; private set; }
+        public ICommand ChangePackageSourceCommand { get; private set; }
 
-        public SortCommand SortCommand { get; private set; }
-
-        public SearchCommand SearchCommand { get; private set; }
-
-        public LoadedCommand LoadedCommand { get; private set; }
-
-        public ChangePackageSourceCommand ChangePackageSourceCommand { get; private set; }
-
-        public void LoadPage(int page) {
+        internal void LoadPage(int page) {
             Debug.Assert(_currentQuery != null);
 
             page = Math.Max(page, 0);
@@ -291,14 +287,23 @@ namespace PackageExplorerViewModel {
             );
         }
 
-        public void Search(string searchTerm) {
+        private void Search(string searchTerm) {
             if (_currentSearch != searchTerm) {
                 _currentSearch = searchTerm;
                 LoadPackages();
             }
         }
 
-        public void Sort(string column, ListSortDirection? direction = null) {
+        private void Sort(string column) {
+            Sort(column, null);
+        }
+
+        private void Sort(string column, ListSortDirection? direction) {
+            if (column == "Version") {
+                // we can't sort Version
+                return;
+            }
+
             if (SortColumn == column) {
                 if (direction.HasValue) {
                     SortDirection = direction.Value;
@@ -320,7 +325,7 @@ namespace PackageExplorerViewModel {
             LoadPackages();
         }
 
-        public void ChangePackageSource(string source) {
+        private void ChangePackageSource(string source) {
             if (PackageSource != source || _currentQuery == null) {
                 PackageSource = source;
                 // add the new source to MRU list
