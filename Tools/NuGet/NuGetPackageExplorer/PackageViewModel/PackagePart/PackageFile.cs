@@ -54,7 +54,7 @@ namespace PackageExplorerViewModel {
         public override void Export(string rootPath) {
             string fullPath = System.IO.Path.Combine(rootPath, Path);
             if (File.Exists(fullPath)) {
-                bool confirmed = PackageViewModel.MessageBox.Confirm(
+                bool confirmed = PackageViewModel.UIServices.Confirm(
                     String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullPath)
                 );
                 if (!confirmed) {

@@ -20,7 +20,7 @@ namespace PackageExplorer {
         private EditablePackageDependency _newPackageDependency;
         private EditableFrameworkAssemblyReference _newFrameworkAssembly;
 
-        public IMessageBox MessageBox { get; set; }
+        public IUIServices UIServices { get; set; }
         public IPackageViewModelFactory PackageViewModelFactory { get; set; }
 
         public PackageMetadataEditor() {
@@ -96,7 +96,7 @@ namespace PackageExplorer {
 
         private void SelectDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                MessageBox.Show(
+                UIServices.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;

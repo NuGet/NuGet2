@@ -31,7 +31,7 @@ namespace PackageExplorerViewModel {
 
         private void OpenFileInShell(PackageFile file) {
             if (IsExecutableScript(file.Name)) {
-                bool confirm = ViewModel.MessageBox.Confirm(Resources.OpenExecutableScriptWarning, isWarning: true);
+                bool confirm = ViewModel.UIServices.Confirm(Resources.OpenExecutableScriptWarning, isWarning: true);
                 if (!confirm) {
                     return;
                 }

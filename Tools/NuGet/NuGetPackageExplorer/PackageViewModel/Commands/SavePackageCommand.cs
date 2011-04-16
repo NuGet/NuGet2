@@ -55,7 +55,7 @@ namespace PackageExplorerViewModel {
 
             // if the action is Save Metadata, we don't care if the package is valid
             if (action != SaveMetadataAction && !ViewModel.IsValid) {
-                ViewModel.MessageBox.Show(Resources.PackageHasNoFile, MessageLevel.Warning);
+                ViewModel.UIServices.Show(Resources.PackageHasNoFile, MessageLevel.Warning);
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace PackageExplorerViewModel {
                     ViewModel.OnSaved(selectedPath);
                 }
                 catch (Exception ex) {
-                    ViewModel.MessageBox.Show(ex.Message, MessageLevel.Error);
+                    ViewModel.UIServices.Show(ex.Message, MessageLevel.Error);
                 }
             }
         }
@@ -122,7 +122,7 @@ namespace PackageExplorerViewModel {
                 ViewModel.OnSaved(fileName);
             }
             catch (Exception ex) {
-                ViewModel.MessageBox.Show(ex.Message, MessageLevel.Error);
+                ViewModel.UIServices.Show(ex.Message, MessageLevel.Error);
             }
         }
 

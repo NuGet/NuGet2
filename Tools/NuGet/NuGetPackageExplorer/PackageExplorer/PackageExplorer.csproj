@@ -146,7 +146,6 @@
     <Compile Include="Controls\GrayscaleImage.cs" />
     <Compile Include="Controls\GrayscaleMenuItem.cs" />
     <Compile Include="MefServices\SettingsManager.cs" />
-    <Compile Include="MefServices\MessageBoxService.cs" />
     <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="MefServices\UIServices.cs" />
     <Compile Include="PackageChooserDialog.xaml.cs">

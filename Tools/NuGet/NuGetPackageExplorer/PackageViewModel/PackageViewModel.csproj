@@ -97,7 +97,6 @@
     <Compile Include="Types\IMruPackageSourceManager.cs" />
     <Compile Include="Types\IUIServices.cs" />
     <Compile Include="Types\SourceLanguageType.cs" />
-    <Compile Include="Types\IMessageBox.cs" />
     <Compile Include="Types\IMruManager.cs" />
     <Compile Include="Types\IPackageViewModelFactory.cs" />
     <Compile Include="Types\ISettingsManager.cs" />

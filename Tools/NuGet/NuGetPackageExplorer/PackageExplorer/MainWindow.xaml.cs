@@ -24,12 +24,6 @@ namespace PackageExplorer {
         private readonly IPackageViewModelFactory _packageViewModelFactory;
 
         [Import]
-        public IMessageBox MessageBoxServices {
-            get;
-            set;
-        }
-
-        [Import]
         public ISettingsManager SettingsManager {
             get;
             set;
@@ -62,7 +56,7 @@ namespace PackageExplorer {
 
         internal void OpenLocalPackage(string packagePath) {
             if (!File.Exists(packagePath)) {
-                MessageBoxServices.Show("File not found at " + packagePath, MessageLevel.Error);
+                UIServices.Show("File not found at " + packagePath, MessageLevel.Error);
                 return;
             }
             PackageSourceItem.SetCurrentValue(ContentControl.ContentProperty, "Loading " + packagePath + "...");
@@ -83,7 +77,7 @@ namespace PackageExplorer {
                 }
             }
             catch (Exception ex) {
-                MessageBoxServices.Show(ex.Message, MessageLevel.Error);
+                UIServices.Show(ex.Message, MessageLevel.Error);
                 return;
             }
 
@@ -96,7 +90,7 @@ namespace PackageExplorer {
             if (package != null) {
 
                 if (!RootLayout.LastChildFill) {
-                    var packageViewer = new PackageViewer(MessageBoxServices, _packageViewModelFactory);
+                    var packageViewer = new PackageViewer(UIServices, _packageViewModelFactory);
                     Grid.SetRow(packageViewer, 1);
                     RootLayout.Children.Add(packageViewer);
                     RootLayout.LastChildFill = true;
@@ -147,7 +141,7 @@ namespace PackageExplorer {
 
         private void OpenPackageFromNuGetFeed() {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                MessageBoxServices.Show(
+                UIServices.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;
@@ -264,7 +258,7 @@ namespace PackageExplorer {
             if (HasUnsavedChanges) {
 
                 // if there is unsaved changes, ask user for confirmation
-                var result = MessageBoxServices.ConfirmWithCancel(StringResources.Dialog_SaveQuestion);
+                var result = UIServices.ConfirmWithCancel(StringResources.Dialog_SaveQuestion);
                 if (result == null) {
                     return true;
                 }
@@ -334,7 +328,7 @@ namespace PackageExplorer {
 
         private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                MessageBoxServices.Show(
+                UIServices.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;
@@ -343,7 +337,7 @@ namespace PackageExplorer {
             var viewModel = (PackageViewModel)DataContext;
 
             if (!viewModel.IsValid) {
-                MessageBoxServices.Show(
+                UIServices.Show(
                     PackageExplorer.Resources.Resources.PackageHasNoFile,
                     MessageLevel.Warning);
                 return;
@@ -400,10 +394,10 @@ namespace PackageExplorer {
                 if (model != null) {
                     try {
                         model.Export(rootPath);
-                        MessageBoxServices.Show("The package has been exported successfully.", MessageLevel.Information);
+                        UIServices.Show("The package has been exported successfully.", MessageLevel.Information);
                     }
                     catch (Exception ex) {
-                        MessageBoxServices.Show(ex.Message, MessageLevel.Error);
+                        UIServices.Show(ex.Message, MessageLevel.Error);
                     }
                 }
 
@@ -436,7 +430,7 @@ namespace PackageExplorer {
 
         private void DownloadAndOpenDataServicePackage(MruItem item) {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                MessageBoxServices.Show(
+                UIServices.Show(
                     PackageExplorer.Resources.Resources.NoNetworkConnection,
                     MessageLevel.Warning);
                 return;

@@ -19,15 +19,8 @@ namespace PackageExplorerViewModel {
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _deleteContentCommand;
         private bool _isInEditMode;
         private string _packageSource;
-        private readonly IMessageBox _messageBox;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
-
-        public IMessageBox MessageBox {
-            get {
-                return _messageBox;
-            }
-        }
 
         public IUIServices UIServices {
             get {
@@ -38,15 +31,11 @@ namespace PackageExplorerViewModel {
         internal PackageViewModel(
             IPackage package, 
             string source, 
-            IMessageBox messageBox, 
             IMruManager mruManager,
             IUIServices uiServices) {
 
             if (package == null) {
                 throw new ArgumentNullException("package");
-            }
-            if (messageBox == null) {
-                throw new ArgumentNullException("messageBox");
             }
             if (mruManager == null) {
                 throw new ArgumentNullException("mruManager");
@@ -57,7 +46,6 @@ namespace PackageExplorerViewModel {
 
             _uiServices = uiServices;
             _mruManager = mruManager;
-            _messageBox = messageBox;
             _package = package;
             _packageMetadata = new EditablePackageMetadata(_package);
             PackageSource = source;
@@ -358,7 +346,7 @@ namespace PackageExplorerViewModel {
 
         internal void ExportManifest(string fullpath) {
             if (File.Exists(fullpath)) {
-                bool confirmed = MessageBox.Confirm(
+                bool confirmed = UIServices.Confirm(
                     String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullpath)
                 );
                 if (!confirmed) {
