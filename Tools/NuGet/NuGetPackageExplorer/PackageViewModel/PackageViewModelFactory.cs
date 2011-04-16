@@ -7,12 +7,6 @@ namespace PackageExplorerViewModel {
     public class PackageViewModelFactory : IPackageViewModelFactory {
 
         [Import]
-        public IMessageBox MessageBoxService {
-            get;
-            set;
-        }
-
-        [Import]
         public IMruManager MruManager {
             get;
             set;
@@ -31,7 +25,7 @@ namespace PackageExplorerViewModel {
         }
 
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
-            return new PackageViewModel(package, packageSource, MessageBoxService, MruManager, UIServices);
+            return new PackageViewModel(package, packageSource, MruManager, UIServices);
         }
 
         public PackageChooserViewModel CreatePackageChooserViewModel() {

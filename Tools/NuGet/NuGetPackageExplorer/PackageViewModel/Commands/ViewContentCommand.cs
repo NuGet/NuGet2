@@ -9,7 +9,8 @@ using PackageExplorerViewModel.Types;
 namespace PackageExplorerViewModel {
     internal class ViewContentCommand : CommandBase, ICommand {
 
-        public ViewContentCommand(PackageViewModel packageViewModel) : base(packageViewModel) {
+        public ViewContentCommand(PackageViewModel packageViewModel)
+            : base(packageViewModel) {
         }
 
         public bool CanExecute(object parameter) {
@@ -33,22 +34,18 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private void ShowFile(PackageFile file)
-        {
+        private void ShowFile(PackageFile file) {
             bool isBinary = IsBinaryFile(file.Name);
             long size;
             string content;
 
-            if (isBinary)
-            {
+            if (isBinary) {
                 content = Resources.UnsupportedFormatMessage;
-                using (Stream stream = file.GetStream())
-                {
+                using (Stream stream = file.GetStream()) {
                     size = stream.Length;
                 }
             }
-            else
-            {
+            else {
                 content = ReadFileContent(file, out size);
             }
 
@@ -131,7 +128,7 @@ namespace PackageExplorerViewModel {
 
                 case ".CPP":
                     return SourceLanguageType.Cpp;
-                    
+
                 case ".CSS":
                     return SourceLanguageType.Css;
 
@@ -148,7 +145,7 @@ namespace PackageExplorerViewModel {
                 case ".PS1":
                 case ".PSM1":
                     return SourceLanguageType.PowerShell;
- 
+
                 case ".SQL":
                     return SourceLanguageType.Sql;
 

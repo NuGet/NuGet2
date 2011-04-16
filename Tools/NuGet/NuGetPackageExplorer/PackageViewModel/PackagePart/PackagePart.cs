@@ -80,11 +80,10 @@ namespace PackageExplorerViewModel {
         }
 
         private ICommand _deleteCommand;
-
         public ICommand DeleteCommand {
             get {
                 if (_deleteCommand == null) {
-                    _deleteCommand = new DeleteContentCommand2(PackageViewModel);
+                    _deleteCommand = new RelayCommand(Delete);
                 }
                 return _deleteCommand;
             }
@@ -98,7 +97,7 @@ namespace PackageExplorerViewModel {
                 {
                     if (Parent.ContainsFile(newName) || Parent.ContainsFolder(newName))
                     {
-                        PackageViewModel.MessageBox.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
+                        PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
                         return;
                     }
                 }
@@ -109,7 +108,7 @@ namespace PackageExplorerViewModel {
         }
 
         public void Delete() {
-            bool confirm = PackageViewModel.MessageBox.Confirm(
+            bool confirm = PackageViewModel.UIServices.Confirm(
                 String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToDeleteContent, Name),
                 isWarning: true);
             if (!confirm) {

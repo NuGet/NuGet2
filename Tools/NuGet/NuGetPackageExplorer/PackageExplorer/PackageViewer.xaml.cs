@@ -14,14 +14,14 @@ namespace PackageExplorer {
     /// </summary>
     public partial class PackageViewer : UserControl {
 
-        private readonly IMessageBox _messageBoxServices;
+        private readonly IUIServices _messageBoxServices;
 
-        public PackageViewer(IMessageBox messageBoxServices, IPackageViewModelFactory packageViewModelFactory) {
+        public PackageViewer(IUIServices messageBoxServices, IPackageViewModelFactory packageViewModelFactory) {
 
             InitializeComponent();
 
             _messageBoxServices = messageBoxServices;
-            PackageMetadataEditor.MessageBox = messageBoxServices;
+            PackageMetadataEditor.UIServices = messageBoxServices;
             PackageMetadataEditor.PackageViewModelFactory = packageViewModelFactory;
         }
 

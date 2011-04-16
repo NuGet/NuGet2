@@ -46,21 +46,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\AddContentFileCommand.cs" />
-    <Compile Include="Commands\AddContentFolderCommand.cs" />
-    <Compile Include="Commands\AddNewFolderCommand.cs" />
-    <Compile Include="Commands\ApplyEditCommand.cs" />
-    <Compile Include="Commands\CancelEditCommand.cs" />
     <Compile Include="Commands\CommandBase.cs" />
-    <Compile Include="Commands\DeleteContentCommand.cs" />
-    <Compile Include="Commands\DeleteContentCommand2.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
-    <Compile Include="Commands\EditPackageCommand.cs" />
-    <Compile Include="Commands\OpenContentFileCommand.cs" />
-    <Compile Include="Commands\OpenWithContentFileCommand.cs" />
-    <Compile Include="Commands\PackagePartCommandBase.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="EmptyPackage.cs" />
+    <Compile Include="FileHelper.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
@@ -68,17 +58,12 @@
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />
     <Compile Include="EditablePackageMetadata.cs" />
-    <Compile Include="PackageChooser\ChangePackageSourceCommand.cs" />
-    <Compile Include="PackageChooser\LoadedCommand.cs" />
     <Compile Include="PackageChooser\NavigateCommand.cs" />
     <Compile Include="PackageChooser\PackageChooserViewModel.cs" />
-    <Compile Include="PackageChooser\SearchCommand.cs" />
-    <Compile Include="PackageChooser\SortCommand.cs" />
     <Compile Include="PackagePart\PackageFile.cs" />
     <Compile Include="PackagePart\PackageFolder.cs" />
     <Compile Include="PackagePart\PackagePart.cs" />
     <Compile Include="PackagePart\PathToTreeConverter.cs" />
-    <Compile Include="Commands\SaveContentCommand.cs" />
     <Compile Include="PackagePart\PhysicalFile.cs" />
     <Compile Include="PackagePart\SortedCollection.cs" />
     <Compile Include="PackageViewModel.cs" />
@@ -97,7 +82,6 @@
     <Compile Include="Types\IMruPackageSourceManager.cs" />
     <Compile Include="Types\IUIServices.cs" />
     <Compile Include="Types\SourceLanguageType.cs" />
-    <Compile Include="Types\IMessageBox.cs" />
     <Compile Include="Types\IMruManager.cs" />
     <Compile Include="Types\IPackageViewModelFactory.cs" />
     <Compile Include="Types\ISettingsManager.cs" />

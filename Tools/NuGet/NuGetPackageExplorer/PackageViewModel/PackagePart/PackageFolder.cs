@@ -98,7 +98,7 @@ namespace PackageExplorerViewModel {
 
         public PackageFolder AddFolder(string folderName) {
             if (ContainsFolder(folderName) || ContainsFile(folderName)) {
-                PackageViewModel.MessageBox.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
+                PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
                 return null;
             }
             var newFolder = new PackageFolder(folderName, this);
@@ -117,13 +117,13 @@ namespace PackageExplorerViewModel {
             string newFileName = System.IO.Path.GetFileName(filePath);
             if (ContainsFolder(newFileName))
             {
-                PackageViewModel.MessageBox.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
+                PackageViewModel.UIServices.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
                 return null;
             }
 
             bool showingRemovedFile = false;
             if (ContainsFile(newFileName)) {
-                bool confirmed = PackageViewModel.MessageBox.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
+                bool confirmed = PackageViewModel.UIServices.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
                 if (confirmed)
                 {
                     // check if we are currently showing the content of the file to be removed.
