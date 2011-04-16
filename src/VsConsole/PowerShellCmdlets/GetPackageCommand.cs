@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
@@ -27,7 +26,7 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRecentPackageRepository>(), 
+                   ServiceLocator.GetInstance<IRecentPackageRepository>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
@@ -76,8 +75,8 @@ namespace NuGet.PowerShell.Commands {
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
-        [Parameter(ParameterSetName = "Remote", Position = 2)]
-        [Parameter(ParameterSetName = "Recent", Position=2)]
+        [Parameter(ParameterSetName = "Remote")]
+        [Parameter(ParameterSetName = "Recent")]
         public SwitchParameter AllVersions { get; set; }
 
         [Parameter]
@@ -147,20 +146,9 @@ namespace NuGet.PowerShell.Commands {
         }
 
         protected virtual PackageResult FilterPackages(IQueryable<IPackage> packages) {
-            packages = packages.Skip(Skip);
-
-            int packageCount;
-
-            if (_firstValueSpecified) {
-                packages = packages.Take(First);
-                packageCount = First;
-            }
-            else {
-                packageCount = packages.Count();
-            }
+            int packageCount = _firstValueSpecified ? First : packages.Count();
 
             IEnumerable<IPackage> packagesToDisplay = packages;
-
             // When querying a remote source, collapse versions unless AllVersions is specified.
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions) {
@@ -168,6 +156,12 @@ namespace NuGet.PowerShell.Commands {
                 // The ratio of distinct : total packages is 1:2. So dividing by 2 should give us a good approximation of the number of packages to expect.
                 packageCount /= 2;
                 packagesToDisplay = packagesToDisplay.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+            }
+
+            packagesToDisplay = packagesToDisplay.Skip(Skip);
+
+            if (_firstValueSpecified) {
+                packagesToDisplay = packagesToDisplay.Take(First);
             }
 
             return new PackageResult { Packages = packagesToDisplay, Count = packageCount };
@@ -236,7 +230,7 @@ namespace NuGet.PowerShell.Commands {
         }
 
         private void WritePackages(PackageResult result) {
-            
+
             int packagesSoFar = 0;
             // don't show progress if we are in sync mode
             bool showProgress = !IsSyncMode && ShouldShowProgress(result.Count);
@@ -297,7 +291,7 @@ namespace NuGet.PowerShell.Commands {
         protected class PackageResult {
             public IEnumerable<IPackage> Packages { get; set; }
 
-            public int Count { get; set; } 
+            public int Count { get; set; }
         }
     }
 }

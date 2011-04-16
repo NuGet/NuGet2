@@ -72,3 +72,32 @@ function Test-GetPackageReturnPackagesInOrderOfLastInstalledFirst {
     Assert-AreEqual "jQuery" $packages[1].Id
     Assert-AreEqual "Antlr" $packages[2].Id
 }
+
+function Test-GetPackageCollapsesPackageVersionsForListAvailable {
+    # Act
+    $packages = Get-Package -ListAvailable jQuery 
+    $packageWithMoreThanOne = $packages | group "Id" | Where { $_.count -gt 1 } 
+    
+    # Assert
+    Assert-True 1 -le $packages.Count # We have at least some packages
+    Assert-Null $packagesWithMoreThanOne
+}    
+
+
+function Test-GetPackageCollapsesPackageVersionsForRecent {
+    # Arrange
+    $p = New-ConsoleApplication
+    
+    # Act
+    Install-Package jQuery -Project $p.Name -Version 1.4.1
+    Install-Package jQuery -Project $p.Name -Version 1.4.2
+    Install-Package jQuery -Project $p.Name -Version 1.4.4
+    Install-Package Antlr -Project $p.Name
+    
+    $recentPackages = Get-Package -Recent
+    $packageWithMoreThanOne = $recentPackages | group "Id" | Where { $_.count -gt 1 } 
+
+    # Assert
+    Assert-True 1 -le $packages.Count # We have at least some packages
+    Assert-Null $packagesWithMoreThanOne
+}

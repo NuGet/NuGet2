@@ -173,6 +173,9 @@
           <maml:name>Skip</maml:name>
           <command:parameterValue required="true">int</command:parameterValue>
         </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>AllVersions</maml:name>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
 
@@ -208,7 +211,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Filter</maml:name>
         <maml:description>
-          <maml:para>Specifies a filter string used to narrow down the list of packages returned. The filter is searched for in the package Id and in the description.</maml:para>
+          <maml:para>Specifies a filter string used to narrow down the list of packages returned. The filter is searched for in the package Id, the description and tags.</maml:para>
         </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
@@ -221,6 +224,12 @@
         <maml:name>Skip</maml:name>
         <maml:description>
           <maml:para>Skips (does not return) the specified number of packages, counting from the beginning of the list.</maml:para>
+        </maml:description>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>AllVersions</maml:name>
+        <maml:description>
+          <maml:para>Displays all available versions of a package. The latest version of each package is listed by default. </maml:para>
         </maml:description>
       </command:parameter>
     </command:parameters>
