@@ -10,8 +10,9 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void AddSourceThrowsIfSourceIsNull() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var userSettingsManager = new MockUserSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             ExceptionAssert.ThrowsArgNull(() => provider.AddPackageSource(null), "source");
@@ -20,8 +21,9 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void CtorIfFirstRunningAddsDefaultSource() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var userSettingsManager = new MockUserSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -35,10 +37,11 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void CtorAddsDefaultSourceIfAnotherDefaultWasPreviouslyRegistered() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>NuGet official package source</Name><Source>http://some/old/feed</Source></PackageSource></ArrayOfPackageSource>";
-            settingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var userSettingsManager = new MockUserSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>NuGet official package source</Name><Source>http://some/old/feed</Source></PackageSource></ArrayOfPackageSource>";
+            registrySettingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -50,29 +53,11 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void TestUpgradeFromCTP2MultipleSourceNonOffcialActive() {
-            // Here, we start with 4 sources: the CTP2 official feed, and aaa, bbb, ccc.  'bbb' is the active source
-
-            // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>NuGet official package source</Name><Source>http://go.microsoft.com/fwlink/?LinkID=204820</Source></PackageSource><PackageSource><Name>aaa</Name><Source>c:\\a</Source></PackageSource><PackageSource><Name>bbb</Name><Source>c:\\b</Source></PackageSource><PackageSource><Name>ccc</Name><Source>c:\\c</Source></PackageSource></ArrayOfPackageSource>";
-            settingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><Name>bbb</Name><Source>c:\\b</Source></PackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
-
-            // Act
-            var sources = provider.GetPackageSources().ToList();
-
-            // Assert
-            Assert.AreEqual(5, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[1].Source); // Note: [0] is the aggregate
-            Assert.AreEqual("bbb", provider.ActivePackageSource.Name);   // Make sure we didn't change the active source
-        }
-
-        [TestMethod]
         public void CtorAddsAggregrateIfNothingWasPersistedIntoSettingsManager() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var userSettingsManager = new MockUserSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -86,9 +71,10 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void CtorAddsAggregrateIfAggregateWasPersistedIntoSettingsManager() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -103,9 +89,10 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void CtorDoesNotAddNewAggregrateIfAggregatePersistedIntoSettingsManager() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -119,10 +106,11 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void CtorDoesNotAddNewAggregrateIfAggregatePersistedIntoSettingsManagerAndAggregateIsActivePackageSource() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>";
-            settingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>";
+            registrySettingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -134,29 +122,101 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void AddSourceSetsPersistsSourcesToSettingsManager() {
+        public void PackageSourcesAreMigratedToUserSettings() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
-            var source = new PackageSource("a", "a");
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>name1</Name><Source>source1</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>name2</Name><Source>source2</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>name3</Name><Source>source3</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
-            provider.AddPackageSource(source);
+            var values = userSettingsManager.GetValues(VsPackageSourceProvider.FileSettingsSectionName);
 
             // Assert
-            Assert.AreEqual(
-                String.Format(
-                    "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>{0}</Name><Source>{1}</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>",
-                    VsPackageSourceProvider.OfficialFeedName,
-                    VsPackageSourceProvider.DefaultPackageSource),
-                settingsManager.PackageSourcesString);
+            Assert.AreEqual(3, values.Count);
+            AssertPackageSource(values[0], "name1", "source1");
+            AssertPackageSource(values[1], "name2", "source2");
+            AssertPackageSource(values[2], "name3", "source3");
+
+            // also verify that the registry setting is deleted
+            Assert.IsNull(registrySettingsManager.PackageSourcesString);
+        }
+
+        [TestMethod]
+        public void ActivePackageSourceIsMigratedToUserSettings() {
+            // Arrange
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>name1</Name><Source>source1</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>name2</Name><Source>source2</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>name3</Name><Source>source3</Source></PackageSource></ArrayOfPackageSource>";
+            registrySettingsManager.ActivePackageSourceString = "<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>false</IsAggregate><Name>name2</Name><Source>source2</Source></PackageSource>";
+
+            // Act
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
+
+            // Assert
+            var activeValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "name2");
+            Assert.AreEqual("source2", activeValue);
+
+            var invalidActiveValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "invalidName");
+            Assert.IsNull(invalidActiveValue);
+
+            // also verify that the registry setting is deleted
+            Assert.IsNull(registrySettingsManager.ActivePackageSourceString);
+        }
+
+        [TestMethod]
+        public void AddSourceSetsPersistsSourcesToSettingsManager() {
+            // Arrange
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
+
+            // Act
+            for (int i = 0; i < 10; i++) {
+                provider.AddPackageSource(new PackageSource("source" + i, "name" + i));
+            }
+
+            // Assert
+            var values = userSettingsManager.GetValues(VsPackageSourceProvider.FileSettingsSectionName);
+            
+            // 11 = 10 package sources that we added + NuGet offical source
+            Assert.AreEqual(11, values.Count);
+            Assert.AreEqual(Resources.VsResources.OfficialSourceName, values[0].Key);
+            for (int i = 0; i < 10; i++) {
+                AssertPackageSource(values[i + 1], "name" + i, "source" + i);
+            }
+
+            Assert.IsNull(registrySettingsManager.ActivePackageSourceString);
+            Assert.IsNull(registrySettingsManager.PackageSourcesString);
+        }
+
+        [TestMethod]
+        public void SetActivePackageSourcePersistsItToSettingsManager() {
+            // Arrange
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>name</Name><Source>source</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
+
+            // Act
+            provider.ActivePackageSource = new PackageSource("source", "name");
+
+            // Assert
+            var activeValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "name");
+            Assert.AreEqual("source", activeValue);
+
+            var invalidActiveValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "invalidName");
+            Assert.IsNull(invalidActiveValue);
+
+            Assert.IsNull(registrySettingsManager.ActivePackageSourceString);
         }
 
         [TestMethod]
         public void RemoveSourceThrowsIfSourceIsNull() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             ExceptionAssert.ThrowsArgNull(() => provider.RemovePackageSource(null), "source");
@@ -165,8 +225,9 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void RemovingUnknownPackageSourceReturnsFalse() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             bool result = provider.RemovePackageSource(new PackageSource("a", "a"));
@@ -178,9 +239,10 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void RemovingExistingPackageSourceReturnsFalse() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
             var packageSource = new PackageSource("a", "a");
 
             // Act
@@ -188,15 +250,19 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.IsTrue(result);
-            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
+
+            // values should be null because we don't persist aggregate source into user settings file
+            var values = userSettingsManager.GetValues(VsPackageSourceProvider.FileSettingsSectionName);
+            Assert.IsNull(values);
         }
 
         [TestMethod]
         public void RemovingActivePackageSourceSetsActivePackageSourceToNull() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
             var packageSource = new PackageSource("a", "a");
             provider.ActivePackageSource = packageSource;
 
@@ -206,14 +272,18 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.IsTrue(result);
             Assert.IsNull(provider.ActivePackageSource);
-            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
+
+            // values should be null because we don't persist aggregate source into user settings file
+            var values = userSettingsManager.GetValues(VsPackageSourceProvider.FileSettingsSectionName);
+            Assert.IsNull(values);
         }
 
         [TestMethod]
         public void SettingActivePackageSourceToNonExistantSourceThrows() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             ExceptionAssert.ThrowsArgumentException(() => provider.ActivePackageSource = new PackageSource("a", "a"), "value", "The package source does not belong to the collection of available sources.");
@@ -222,23 +292,26 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void SettingActivePackageSourceSetsActivePackageStringOnSettingsManager() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>false</IsAggregate><Name>name</Name><Source>source</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
-            provider.ActivePackageSource = new PackageSource("a", "a");
+            provider.ActivePackageSource = new PackageSource("source", "name");
 
             // Assert
-            Assert.AreEqual("<PackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource>", settingsManager.ActivePackageSourceString);
+            var value = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "name");
+            Assert.AreEqual("source", value);
         }
 
         [TestMethod]
         public void AggregateSourceWithoutIsAggregateFlagSetFlagToTrue() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>NuGet official package source</Name><Source>https://go.microsoft.com/fwlink/?LinkID=206669</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>NuGet official package source</Name><Source>https://go.microsoft.com/fwlink/?LinkID=206669</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -251,9 +324,10 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void SettingsWithMoreThanOneAggregateSourceAreModifiedToHaveOneOnly() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>true</IsAggregate><Name>NuGet official package source</Name><Source>https://go.microsoft.com/fwlink/?LinkID=206669</Source></PackageSource></ArrayOfPackageSource>";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>true</IsAggregate><Name>NuGet official package source</Name><Source>https://go.microsoft.com/fwlink/?LinkID=206669</Source></PackageSource></ArrayOfPackageSource>";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
 
             // Act
             var sources = provider.GetPackageSources().ToList();
@@ -265,42 +339,31 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void SettingPackageSourcesWithoutAggregateWillAddAggregateAsFirstItem() {
+        public void SettingPackageSourcesWithAggregateWillNotAddAggregate() {
             // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "";
-            var provider = new VsPackageSourceProvider(settingsManager);
-            var packageSources = new List<PackageSource> {
-                                                             new PackageSource("a", "a")
-                                                         };
-
-
-            // Act
-            provider.SetPackageSources(packageSources);
-
-            // Assert
-            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
-        }
-
-        [TestMethod]
-        public void SettingPackageSourcesWithAggregateWillNotAddAnotherAggregate() {
-            // Arrange
-            var settingsManager = new MockPackageSourceSettingsManager();
-            settingsManager.PackageSourcesString = "";
-            var provider = new VsPackageSourceProvider(settingsManager);
+            var userSettingsManager = new MockUserSettingsManager();
+            var registrySettingsManager = new MockPackageSourceSettingsManager();
+            registrySettingsManager.PackageSourcesString = "";
+            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager);
             var packageSources = new List<PackageSource> {
                                                              provider.AggregateSource,
-                                                             new PackageSource("a", "a")
+                                                             new PackageSource("source", "name")
                                                          };
 
             // Act
             provider.SetPackageSources(packageSources);
 
             // Assert
-            Assert.AreEqual("<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><IsAggregate>true</IsAggregate><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>a</Name><Source>a</Source></PackageSource></ArrayOfPackageSource>", settingsManager.PackageSourcesString);
+            var values = userSettingsManager.GetValues(VsPackageSourceProvider.FileSettingsSectionName);
+
+            Assert.AreEqual(1, values.Count);
+            AssertPackageSource(values[0], "name", "source");
         }
 
-        
+        private void AssertPackageSource(KeyValuePair<string, string> ps, string name, string source) {
+            Assert.AreEqual(name, ps.Key);
+            Assert.AreEqual(source, ps.Value);
+        }
 
         private class MockPackageSourceSettingsManager : IPackageSourceSettingsManager {
             public string ActivePackageSourceString {

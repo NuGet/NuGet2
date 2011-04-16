@@ -31,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mocks\MockSolutionManager.cs" />
+    <Compile Include="MockUserSettingsManager.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

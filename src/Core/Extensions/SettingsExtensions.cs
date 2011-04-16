@@ -60,22 +60,5 @@ namespace NuGet {
         private static string BytesToString(byte[] bytes) {
             return Encoding.UTF8.GetString(bytes);
         }
-
-        /// <summary>
-        /// Delete all values within a section.
-        /// </summary>
-        /// <param name="section">The section to be cleared.</param>
-        public static void ClearValues(this ISettings settings, string section) {
-            if (String.IsNullOrEmpty(section)) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
-            }
-
-            IDictionary<string, string> values = settings.GetValues(section);
-            if (values != null) {
-                foreach (var key in values.Keys) {
-                    settings.DeleteValue(section, key);
-                }
-            }
-        }
     }
 }
