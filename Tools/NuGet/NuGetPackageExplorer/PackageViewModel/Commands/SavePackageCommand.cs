@@ -15,39 +15,23 @@ namespace PackageExplorerViewModel {
 
         public SavePackageCommand(PackageViewModel model)
             : base(model) {
-            model.PropertyChanged += OnPropertyChanged;
-        }
-
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) {
-            if (e.PropertyName.Equals("IsInEditMode")) {
-                if (CanExecuteChanged != null) {
-                    CanExecuteChanged(this, EventArgs.Empty);
-                }
-            }
         }
 
         public bool CanExecute(object parameter) {
-            string action = parameter as string;
-            if (action == ForceSaveAction) {
-                return true;
-            }
-            else if (action == SaveAction) {
-                return !ViewModel.IsInEditMode && CanSaveTo(ViewModel.PackageSource);
-            }
-            else if (action == SaveAsAction) {
-                return !ViewModel.IsInEditMode;
-            }
-            else if (action == SaveMetadataAction) {
-                return !ViewModel.IsInEditMode;
-            }
-            else {
-                return false;
-            }
+            return true;
         }
 
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter) {
+            if (ViewModel.IsInEditMode) {
+                bool isMetadataValid = ViewModel.ApplyEditExecute();
+                if (!isMetadataValid) {
+                    ViewModel.UIServices.Show(Resources.EditFormHasInvalidInput, MessageLevel.Error);
+                    return;
+                }
+            }
+
             string action = parameter as string;
 
             // if the action is Save Metadata, we don't care if the package is valid

@@ -35,6 +35,9 @@ namespace PackageExplorer {
         [Import]
         public IUIServices UIServices { get; set; }
 
+        [Export]
+        public IPackageEditorService EditorService { get; set; }
+
         [ImportingConstructor]
         public MainWindow(IMruManager mruManager, IPackageViewModelFactory packageViewModelFactory) {
             InitializeComponent();
@@ -94,6 +97,9 @@ namespace PackageExplorer {
                     Grid.SetRow(packageViewer, 1);
                     RootLayout.Children.Add(packageViewer);
                     RootLayout.LastChildFill = true;
+
+                    // set the Export of IPackageMetadataEditor here
+                    EditorService = packageViewer.PackageMetadataEditor;
                 }
 
                 DataContext = _packageViewModelFactory.CreateViewModel(package, packagePath);

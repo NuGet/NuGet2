@@ -81,6 +81,7 @@
     <Compile Include="Types\FileContentInfo.cs" />
     <Compile Include="Types\IBindingGroup.cs" />
     <Compile Include="Types\IMruPackageSourceManager.cs" />
+    <Compile Include="Types\IPackageEditor.cs" />
     <Compile Include="Types\IUIServices.cs" />
     <Compile Include="Types\SourceLanguageType.cs" />
     <Compile Include="Types\IMruManager.cs" />

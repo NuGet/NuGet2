@@ -13,7 +13,7 @@ namespace PackageExplorer {
     /// <summary>
     /// Interaction logic for PackageMetadataEditor.xaml
     /// </summary>
-    public partial class PackageMetadataEditor : UserControl {
+    public partial class PackageMetadataEditor : UserControl, IPackageEditorService {
 
         private ObservableCollection<PackageDependency> _packageDependencies;
         private ObservableCollection<FrameworkAssemblyReference> _frameworkAssemblies;
@@ -33,7 +33,6 @@ namespace PackageExplorer {
                 ClearDependencyTextBox();
                 ClearFrameworkAssemblyTextBox();
                 PrepareBindings();
-                PackageMetadataGroup.BeginEdit();
             }
         }
 
@@ -77,7 +76,6 @@ namespace PackageExplorer {
         }
 
         private void AddDependencyButtonClicked(object sender, System.Windows.RoutedEventArgs e) {
-
             var bindingExpression = NewDependencyId.GetBindingExpression(TextBox.TextProperty);
             if (bindingExpression.HasError) {
                 return;
@@ -110,7 +108,6 @@ namespace PackageExplorer {
             if (result ?? false) {
                 var selectedPackage = dialog.SelectedPackage;
                 if (selectedPackage != null) {
-
                     _newPackageDependency.Id = selectedPackage.Id;
                     _newPackageDependency.VersionSpec = VersionUtility.ParseVersionSpec(selectedPackage.Version.ToString());
                 }
@@ -129,13 +126,27 @@ namespace PackageExplorer {
             ClearFrameworkAssemblyTextBox();
         }
 
-        private void OkButtonClicked(object sender, RoutedEventArgs e) {
-            bool commited = PackageMetadataGroup.CommitEdit();
-            if (commited) {
+        #region IPackageEditorService
+
+        void IPackageEditorService.BeginEdit() {
+            PackageMetadataGroup.BeginEdit();
+        }
+
+        void IPackageEditorService.CancelEdit() {
+            PackageMetadataGroup.CancelEdit();
+        }
+
+        bool IPackageEditorService.CommitEdit() {
+            bool valid = PackageMetadataGroup.CommitEdit();
+            if (valid) {
                 var viewModel = (PackageViewModel)DataContext;
                 _packageDependencies.CopyTo(viewModel.PackageMetadata.Dependencies);
                 _frameworkAssemblies.CopyTo(viewModel.PackageMetadata.FrameworkAssemblies);
             }
+
+            return valid;
         }
+
+        #endregion
     }
 }

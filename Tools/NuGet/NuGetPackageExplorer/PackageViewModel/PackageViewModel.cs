@@ -18,12 +18,14 @@ namespace PackageExplorerViewModel {
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _deleteContentCommand;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
+        private readonly IPackageEditorService _editorService;
 
         internal PackageViewModel(
             IPackage package,
             string source,
             IMruManager mruManager,
-            IUIServices uiServices) {
+            IUIServices uiServices,
+            IPackageEditorService editorService) {
 
             if (package == null) {
                 throw new ArgumentNullException("package");
@@ -34,7 +36,11 @@ namespace PackageExplorerViewModel {
             if (uiServices == null) {
                 throw new ArgumentNullException("uiServices");
             }
+            if (editorService == null) {
+                throw new ArgumentNullException("editorService");
+            }
 
+            _editorService = editorService;
             _uiServices = uiServices;
             _mruManager = mruManager;
             _package = package;
@@ -44,7 +50,7 @@ namespace PackageExplorerViewModel {
             _packageRoot = PathToTreeConverter.Convert(_package.GetFiles().ToList(), this);
         }
 
-        public IUIServices UIServices {
+        internal IUIServices UIServices {
             get {
                 return _uiServices;
             }
@@ -373,6 +379,7 @@ namespace PackageExplorerViewModel {
         }
 
         private void EditPackageExecute() {
+            _editorService.BeginEdit();
             BeginEdit();
         }
 
@@ -383,20 +390,20 @@ namespace PackageExplorerViewModel {
         public ICommand ApplyEditCommand {
             get {
                 if (_applyEditCommand == null) {
-                    _applyEditCommand = new RelayCommand<IBindingGroup>(ApplyEditExecute);
+                    _applyEditCommand = new RelayCommand(()=>ApplyEditExecute());
                 }
 
                 return _applyEditCommand;
             }
         }
 
-        private void ApplyEditExecute(IBindingGroup bindingGroup) {
-            if (bindingGroup != null) {
-                bool valid = bindingGroup.CommitEdit();
-                if (valid) {
-                    CommitEdit();
-                }
+        internal bool ApplyEditExecute() {
+            bool valid = _editorService.CommitEdit();
+            if (valid) {
+                CommitEdit();
             }
+
+            return valid;
         }
 
         #endregion
@@ -406,18 +413,15 @@ namespace PackageExplorerViewModel {
         public ICommand CancelEditCommand {
             get {
                 if (_cancelEditCommand == null) {
-                    _cancelEditCommand = new RelayCommand<IBindingGroup>(CancelEditExecute);
+                    _cancelEditCommand = new RelayCommand(CancelEditExecute);
                 }
 
                 return _cancelEditCommand;
             }
         }
 
-        private void CancelEditExecute(IBindingGroup bindingGroup) {
-            if (bindingGroup != null) {
-                bindingGroup.CancelEdit();
-            }
-
+        private void CancelEditExecute() {
+            _editorService.CancelEdit();
             CancelEdit();
         }
 

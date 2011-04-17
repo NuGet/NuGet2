@@ -129,6 +129,9 @@
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
   </data>
+  <data name="EditFormHasInvalidInput" xml:space="preserve">
+    <value>The operation cannot be completed because the edit form has some invalid input.</value>
+  </data>
   <data name="FileNameConflictWithExistingDirectory" xml:space="preserve">
     <value>The new file has the same name as another folder.</value>
   </data>
