@@ -147,8 +147,8 @@ namespace NuGet.Commands {
             }
 
             if (!builder.Authors.Any()) {
-                builder.Authors.Add("Author");
-                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Author", "Author");
+                builder.Authors.Add(Environment.UserName);
+                Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Author", Environment.UserName);
             }
 
             return builder;
