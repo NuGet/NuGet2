@@ -80,12 +80,12 @@ namespace NuGet {
         }
 
         public static Manifest ReadFrom(Stream stream) {
-            return ReadFrom(stream, validate: true);
+            return ReadFrom(stream, NullPropertyProvider.Instance);
         }
 
-        public static Manifest ReadFrom(Stream stream, bool validate) {
+        public static Manifest ReadFrom(Stream stream, IPropertyProvider propertyProvider) {
             // Read the document
-            XDocument document = XDocument.Load(stream);
+            XDocument document = XDocument.Load(Process(stream, propertyProvider));
 
             // Add the schema namespace if it isn't there
             foreach (var e in document.Descendants()) {
@@ -94,11 +94,8 @@ namespace NuGet {
                 }
             }
 
-            if (validate) {
-                // Validate the schema
-                ValidateManifestSchema(document);
-            }
-
+            // Validate the schema
+            ValidateManifestSchema(document);
 
             // Remove the namespace from the outer tag to match CTP2 expectations
             document.Root.Name = document.Root.Name.LocalName;
@@ -106,10 +103,8 @@ namespace NuGet {
             var serializer = new XmlSerializer(typeof(Manifest));
             var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
 
-            if (validate) {
-                // Validate before returning
-                Validate(manifest);
-            }
+            // Validate before returning
+            Validate(manifest);
 
             // Trim fields in case they have extra whitespace
             manifest.Metadata.Id = manifest.Metadata.Id.SafeTrim();
@@ -122,6 +117,10 @@ namespace NuGet {
             manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
 
             return manifest;
+        }
+
+        private static Stream Process(Stream stream, IPropertyProvider propertyProvider) {
+            return Preprocessor.Process(stream, propertyProvider).AsStream();
         }
 
         public static Manifest Create(IPackageMetadata metadata) {

@@ -11,7 +11,7 @@ using Microsoft.Build.Logging;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    internal class ProjectFactory {
+    internal class ProjectFactory : IPropertyProvider {
         private readonly Project _project;
         private FrameworkName _frameworkName;
         private ILogger _logger;
@@ -22,6 +22,8 @@ namespace NuGet.Commands {
             "Web.Debug.config",
             "Web.Release.config"
         };
+
+        private readonly Dictionary<string, string> _properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // Packaging folders
         private const string ContentFolder = "content";
@@ -91,9 +93,6 @@ namespace NuGet.Commands {
 
             var builder = new PackageBuilder();
 
-            // If the package contains a nuspec file then use it for metadata
-            ProcessNuspec(builder);
-
             try {
                 // Populate the package builder with initial metadata from the assembly/exe
                 AssemblyMetadataExtractor.ExtractMetadata(builder, TargetPath);
@@ -103,15 +102,36 @@ namespace NuGet.Commands {
                 ExtractMetadataFromProject(builder);
             }
 
+            // Set the properties that were resolved from the assembly/project so they can be 
+            // resolved by name if the nuspec contains tokens
+            _properties.Clear();
+            _properties.Add("Id", builder.Id);
+            _properties.Add("Version", builder.Version.ToString());
+
+            if (!String.IsNullOrEmpty(builder.Description)) {
+                _properties.Add("Description", builder.Description);
+            }
+
+            string projectAuthor = builder.Authors.FirstOrDefault();
+            if (!String.IsNullOrEmpty(projectAuthor)) {
+                _properties.Add("Author", projectAuthor);
+            }
+
+            // If the package contains a nuspec file then use it for metadata
+            ProcessNuspec(builder);
+
+            // Remove the extra author
+            if (builder.Authors.Count > 1) {
+                builder.Authors.Remove(projectAuthor);
+            }
+
             builder.Version = VersionUtility.TrimVersion(builder.Version);
 
             // Add output files
             AddOutputFiles(builder);
 
-
             // Add content files
             AddFiles(builder, ContentItemType, ContentFolder);
-
 
             // Add sources if this is a symbol package
             if (IncludeSymbols) {
@@ -134,6 +154,18 @@ namespace NuGet.Commands {
             return builder;
         }
 
+        dynamic IPropertyProvider.GetPropertyValue(string propertyName) {
+            string value;
+            if (!_properties.TryGetValue(propertyName, out value)) {
+                ProjectProperty property = _project.GetProperty(propertyName);
+                if (property != null) {
+                    value = property.EvaluatedValue;
+                }
+            }
+
+            return value;
+        }
+
         private void BuildProject() {
             var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile);
             BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
@@ -148,14 +180,19 @@ namespace NuGet.Commands {
                 throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
             }
 
+            TargetPath = ResolveTargetPath(result);
+        }
+
+        private string ResolveTargetPath(BuildResult result) {
+            string targetPath = null;
             TargetResult targetResult;
             if (result.ResultsByTarget.TryGetValue("Build", out targetResult)) {
                 if (targetResult.Items.Any()) {
-                    TargetPath = targetResult.Items.First().ItemSpec;
+                    targetPath = targetResult.Items.First().ItemSpec;
                 }
             }
 
-            TargetPath = TargetPath ?? _project.GetPropertyValue("TargetPath");
+            return targetPath ?? _project.GetPropertyValue("TargetPath");
         }
 
         private void ExtractMetadataFromProject(PackageBuilder builder) {
@@ -353,7 +390,7 @@ namespace NuGet.Commands {
             using (Stream stream = File.OpenRead(nuspecFile)) {
                 // Don't validate the manifest since this might be a partial manifest
                 // The bulk of the metadata might be coming from the project.
-                Manifest manifest = Manifest.ReadFrom(stream, validate: false);
+                Manifest manifest = Manifest.ReadFrom(stream, this);
                 builder.Populate(manifest.Metadata);
 
                 if (manifest.Files != null) {

@@ -23,16 +23,20 @@ namespace NuGet {
         public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem) {
             Func<Stream> streamFactory = () => Process(file, projectSystem).AsStream();
             FileSystemExtensions.DeleteFileSafe(projectSystem, targetPath, streamFactory);
-        }
-        
-        internal static string Process(IPackageFile file, IProjectSystem projectSystem) {
-            string text = file.GetStream().ReadToEnd();
-            return _tokenRegex.Replace(text, match => ReplaceToken(match, projectSystem));
+        }               
+
+        internal static string Process(IPackageFile file, IPropertyProvider propertyProvider) {
+            return Process(file.GetStream(), propertyProvider);
         }
 
-        private static string ReplaceToken(Match match, IProjectSystem projectSystem) {
+        internal static string Process(Stream stream, IPropertyProvider propertyProvider) {
+            string text = stream.ReadToEnd();
+            return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider));
+        }
+
+        private static string ReplaceToken(Match match, IPropertyProvider propertyProvider) {
             string propertyName = match.Groups["propertyName"].Value;
-            var value = projectSystem.GetPropertyValue(propertyName);
+            var value = propertyProvider.GetPropertyValue(propertyName);
             if (value == null) {
                 throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.TokenHasNoValue, propertyName));
             }

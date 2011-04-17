@@ -2,9 +2,8 @@ using System.IO;
 using System.Runtime.Versioning;
 
 namespace NuGet {
-    public interface IProjectSystem : IFileSystem {
+    public interface IProjectSystem : IFileSystem, IPropertyProvider {
         FrameworkName TargetFramework { get; }
-        dynamic GetPropertyValue(string propertyName);
         string ProjectName { get; }
 
         /// <summary>

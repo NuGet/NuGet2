@@ -36,10 +36,12 @@
     <Compile Include="Authoring\AssemblyMetadata.cs" />
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
+    <Compile Include="Authoring\IPropertyProvider.cs" />
     <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
+    <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\UserSettings.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
