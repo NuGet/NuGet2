@@ -161,5 +161,10 @@ function TabExpansion($line, $lastWord) {
 
 # default prompt
 function prompt {
-    "PM>"
+	$default = get-project | select -expand name
+    if ($default) {
+		"PM {0}>" -f $default
+	} else {	
+		"PM>"
+	}
 }
