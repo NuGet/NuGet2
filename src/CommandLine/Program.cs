@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Reflection;
+using System.IO;
 using NuGet.Commands;
 
 namespace NuGet {
@@ -27,10 +27,13 @@ namespace NuGet {
 
         public static int Main(string[] args) {
             try {
+                // Remove NuGet.exe.old
+                RemoveOldFile();
+
                 // Import Dependecies  
                 var p = new Program();
                 p.Initialize();
-                
+
 
                 // Add commands to the manager
                 foreach (ICommand cmd in p.Commands) {
@@ -38,7 +41,7 @@ namespace NuGet {
                 }
 
                 CommandLineParser parser = new CommandLineParser(p.Manager);
-            
+
                 // Parse the command
                 ICommand command = parser.ParseCommandLine(args) ?? p.HelpCommand;
 
@@ -69,6 +72,18 @@ namespace NuGet {
                 return 1;
             }
             return 0;
+        }
+
+        private static void RemoveOldFile() {
+            string oldFile = typeof(Program).Assembly.Location + ".old";
+            try {
+                if (File.Exists(oldFile)) {
+                    File.Delete(oldFile);
+                }
+            }
+            catch {
+                // We don't want to block the exe from usage if anything failed
+            }
         }
 
         public bool ArgumentCountValid(ICommand command) {
