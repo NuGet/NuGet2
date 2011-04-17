@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
@@ -19,42 +20,51 @@ namespace NuGet.Commands {
         }
 
         public override void ExecuteCommand() {
-            var builder = new PackageBuilder();
+            var manifest = new Manifest();
             string projectFile = null;
             string fileName = null;
 
             if (!String.IsNullOrEmpty(AssemblyPath)) {
                 // Extract metadata from the assembly
                 string path = Path.Combine(Directory.GetCurrentDirectory(), AssemblyPath);
-                AssemblyMetadataExtractor.ExtractMetadata(builder, path);
+                AssemblyMetadata metadata = AssemblyMetadataExtractor.GetMetadata(path);
+                manifest.Metadata.Id = metadata.Name;
+                manifest.Metadata.Version = metadata.Version.ToString();
+                manifest.Metadata.Authors = metadata.Company;
+                manifest.Metadata.Description = metadata.Description;
             }
             else {
                 // If we didn't find one, you can 
                 if (!CommandLineUtility.TryGetProjectFile(out projectFile)) {
-                    builder.Id = Arguments.Any() ? Arguments[0] : "Package";
-                    builder.Version = new Version("1.0");
+                    manifest.Metadata.Id = Arguments.Any() ? Arguments[0] : "Package";
+                    manifest.Metadata.Version = "1.0";
+                }
+                else {
+                    fileName = Path.GetFileNameWithoutExtension(projectFile);
+                    manifest.Metadata.Id = "$id$";
+                    manifest.Metadata.Version = "$version$";
+                    manifest.Metadata.Description = "$description$";
+                    manifest.Metadata.Authors = "$author$";
                 }
             }
 
             // Get the file name from the id or the project file
-            fileName = builder.Id ?? Path.GetFileNameWithoutExtension(projectFile);
+            fileName = fileName ?? manifest.Metadata.Id;
 
             // If we're using a project file then we want the a minimal nuspec
             if (String.IsNullOrEmpty(projectFile)) {
-                builder.Description = builder.Description ?? "Package description";
-                if (!builder.Authors.Any()) {
-                    builder.Authors.Add("Author here");
+                manifest.Metadata.Description = manifest.Metadata.Description ?? "Package description";
+                if (String.IsNullOrEmpty(manifest.Metadata.Authors)) {
+                    manifest.Metadata.Authors = "Author here";
                 }
-
-                builder.Owners.Add("Owner here");
-                builder.Dependencies.Add(new PackageDependency("SampleDependency", VersionUtility.ParseVersionSpec("1.0")));
+                manifest.Metadata.Dependencies = new List<ManifestDependency>();
+                manifest.Metadata.Dependencies.Add(new ManifestDependency { Id = "SampleDependency", Version = "1.0" });
             }
 
-            builder.ProjectUrl = new Uri("http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE");
-            builder.LicenseUrl = new Uri("http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE");
-            builder.IconUrl = new Uri("http://ICON_URL_HERE_OR_DELETE_THIS_LINE");
-            builder.Tags.Add("Tag1");
-            builder.Tags.Add("Tag2");
+            manifest.Metadata.ProjectUrl = "http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE";
+            manifest.Metadata.LicenseUrl = "http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE";
+            manifest.Metadata.IconUrl = "http://ICON_URL_HERE_OR_DELETE_THIS_LINE";
+            manifest.Metadata.Tags = "Tag1 Tag2";
 
             string nuspecFile = fileName + Constants.ManifestExtension;
 
@@ -65,7 +75,7 @@ namespace NuGet.Commands {
             else {
                 try {
                     using (Stream stream = File.Create(nuspecFile)) {
-                        Manifest.Create(builder).Save(stream, validate: false);
+                        manifest.Save(stream, validate: false);
                     }
 
                     Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
