@@ -23,10 +23,10 @@ namespace NuGet {
 
         public static void ExtractMetadata(PackageBuilder builder, string assemblyPath) {
             AssemblyMetadata assemblyMetadata = GetMetadata(assemblyPath);
-            builder.Id = builder.Id ?? assemblyMetadata.Name;
-            builder.Version = builder.Version ?? assemblyMetadata.Version;
-            builder.Title = builder.Title ?? assemblyMetadata.Title;
-            builder.Description = builder.Description ?? assemblyMetadata.Description;
+            builder.Id = assemblyMetadata.Name;
+            builder.Version = assemblyMetadata.Version;
+            builder.Title = assemblyMetadata.Title;
+            builder.Description = assemblyMetadata.Description;
 
             if (!builder.Authors.Any() && !String.IsNullOrEmpty(assemblyMetadata.Company)) {
                 builder.Authors.Add(assemblyMetadata.Company);

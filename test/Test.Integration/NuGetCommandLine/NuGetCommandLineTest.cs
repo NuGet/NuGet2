@@ -279,7 +279,7 @@ public class Cl_{0} {{
         }
 
         [TestMethod]
-        public void PackageCommand_SpecifyingProjectFileWithPartialNuSpecMergesMetadata() {
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject() {
             // Arrange                        
             string expectedPackage = "ProjectWithNuSpec.1.2.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpec",
@@ -291,6 +291,9 @@ public class Cl_{0} {{
             WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <authors>$author$</authors>
     <description>Description from nuspec</description>
     <language>fr-FR</language>
     <tags>t1 t2</tags>
@@ -365,12 +368,47 @@ public class Cl_{0} {{
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FooProject.dll" });
             Assert.AreEqual("Test", package.Id);
             Assert.AreEqual(new Version("1.2"), package.Version);
+            Assert.AreEqual("Description from nuspec", package.Description);
             Assert.AreEqual("John", package.Authors.First());
-            Assert.AreEqual("Description from nuspec", package.Description);            
         }
 
         [TestMethod]
-        public void PackageCommand_SpecifyingProjectFileWithPartialNuSpecWithFilesMergesFiles() {
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithUnsupportedTokensThrows() {
+            // Arrange                        
+            string expectedPackage = "ProjectWithBrokenNuSpec.1.2.nupkg";
+            WriteAssemblyInfo("ProjectWithBrokenNuSpec",
+                               "1.2.0.0",
+                               "David",
+                               "Project with content");
+
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>$id2$</id>
+    <version>$version$</version>
+    <authors>$author$</authors>
+    <description>Description from nuspec</description>
+  </metadata>
+</package>");
+
+            CreateProject("ProjectWithBrokenNuSpec", content: new[] { "package.nuspec" },
+                                               compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "ProjectWithBrokenNuSpec.csproj" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("The replacement token 'id2' has no value."));
+            Assert.IsFalse(File.Exists(expectedPackage));
+        }
+
+        [TestMethod]
+        public void PackageCommand_SpecifyingProjectFileAndNuSpecWithFilesMergesFiles() {
             // Arrange                        
             string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecAndFiles",
@@ -381,6 +419,12 @@ public class Cl_{0} {{
             WriteProjectFile("foo.cs", "public class Foo { }");
             WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
+  <metadata>
+    <id>$AssemblyName$</id>   
+    <version>$version$</version>
+    <description>$description$</description>
+    <authors>$author$</authors>
+  </metadata>
   <files>
     <file src=""bin\Release\*.dll"" target=""lib\net40"" />
     <file src=""bin\Release\*.pdb"" target=""lib\net40"" />
