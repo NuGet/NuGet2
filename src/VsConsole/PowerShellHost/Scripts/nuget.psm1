@@ -68,7 +68,7 @@ Register-TabExpansion 'Update-Package' @{
         $parameters = @{}
         if ($context.id) { $parameters.filter = $context.id }
 
-        GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
+        GetPackageIds (Find-Package @parameters -Updates -ErrorAction SilentlyContinue)
     }
     'ProjectName' = {
         GetProjectNames
