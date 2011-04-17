@@ -34,6 +34,10 @@ namespace PackageExplorerViewModel
             _canExecute = canExecute;
         }
 
+        public void RaiseCanExecuteChanged() {
+            CommandManager.InvalidateRequerySuggested();
+        }
+
         #endregion // Constructors
 
         #region ICommand Members
@@ -108,6 +112,10 @@ namespace PackageExplorerViewModel
         }
 
         #endregion // Constructors
+
+        public void RaiseCanExecuteChanged() {
+            CommandManager.InvalidateRequerySuggested();
+        }
 
         #region ICommand Members
 
