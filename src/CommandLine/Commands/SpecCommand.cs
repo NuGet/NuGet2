@@ -34,7 +34,6 @@ namespace NuGet.Commands {
                 manifest.Metadata.Description = metadata.Description;
             }
             else {
-                // If we didn't find one, you can 
                 if (!CommandLineUtility.TryGetProjectFile(out projectFile)) {
                     manifest.Metadata.Id = Arguments.Any() ? Arguments[0] : "Package";
                     manifest.Metadata.Version = "1.0";
@@ -55,7 +54,7 @@ namespace NuGet.Commands {
             if (String.IsNullOrEmpty(projectFile)) {
                 manifest.Metadata.Description = manifest.Metadata.Description ?? "Package description";
                 if (String.IsNullOrEmpty(manifest.Metadata.Authors)) {
-                    manifest.Metadata.Authors = "Author here";
+                    manifest.Metadata.Authors = Environment.UserName;
                 }
                 manifest.Metadata.Dependencies = new List<ManifestDependency>();
                 manifest.Metadata.Dependencies.Add(new ManifestDependency { Id = "SampleDependency", Version = "1.0" });

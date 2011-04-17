@@ -84,8 +84,10 @@ namespace NuGet {
         }
 
         public static Manifest ReadFrom(Stream stream, IPropertyProvider propertyProvider) {
+            string content = Process(stream, propertyProvider);
+
             // Read the document
-            XDocument document = XDocument.Load(Process(stream, propertyProvider));
+            XDocument document = XDocument.Parse(content);
 
             // Add the schema namespace if it isn't there
             foreach (var e in document.Descendants()) {
@@ -119,8 +121,8 @@ namespace NuGet {
             return manifest;
         }
 
-        private static Stream Process(Stream stream, IPropertyProvider propertyProvider) {
-            return Preprocessor.Process(stream, propertyProvider).AsStream();
+        private static string Process(Stream stream, IPropertyProvider propertyProvider) {
+            return Preprocessor.Process(stream, propertyProvider);
         }
 
         public static Manifest Create(IPackageMetadata metadata) {
