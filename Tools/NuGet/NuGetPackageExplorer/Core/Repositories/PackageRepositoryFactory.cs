@@ -6,16 +6,13 @@ namespace NuGet {
     public class PackageRepositoryFactory {
         private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
         private IHttpClient _httpClient;
-        private const string _UserAgentPattern = "NuGet Package Explorer/{0} ({1})";
+        private const string _UserAgentClient = "NuGet Package Explorer";
 
         public PackageRepositoryFactory() : this(new HttpClient()) { }
 
         public PackageRepositoryFactory(IHttpClient httpClient) {
             _httpClient = httpClient;
-
-            var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
-            var userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
-            httpClient.UserAgent = userAgent;
+            httpClient.UserAgent = HttpUtility.CreateUserAgentString(_UserAgentClient); ;
         }
 
         public static PackageRepositoryFactory Default {

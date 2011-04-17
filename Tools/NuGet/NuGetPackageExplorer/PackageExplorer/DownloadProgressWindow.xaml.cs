@@ -11,7 +11,6 @@ namespace PackageExplorer {
     /// Interaction logic for DownloadProgressWindow.xaml
     /// </summary>
     public partial class DownloadProgressWindow : StandardDialog {
-
         private readonly Uri _downloadUri;
         private WebClient _client;
 
@@ -39,6 +38,8 @@ namespace PackageExplorer {
 
         private void DownloadData(Uri uri) {
             _client = new WebClient();
+            string userAgent = HttpUtility.CreateUserAgentString(PackageExplorerViewModel.Constants.UserAgentClient);
+            _client.Headers[HttpRequestHeader.UserAgent] = userAgent;
             _client.DownloadDataCompleted += (sender, e) => {
                 if (!e.Cancelled) {
                     if (e.Error != null) {

@@ -89,6 +89,7 @@
     <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Utility\GalleryServer.cs" />
     <Compile Include="Utility\HttpClient.cs" />
+    <Compile Include="Utility\HttpUtility.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
     <Compile Include="Utility\IPackageFactory.cs" />

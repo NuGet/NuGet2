@@ -11,20 +11,17 @@ namespace NuGet {
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
         private const string PublishPackageService = "PublishedPackages/Publish";
-
-        private const string _UserAgentPattern = "NuGet Package Explorer/{0} ({1})";
+        private readonly string _userAgent;
         
         private string _baseGalleryServerUrl;
-        private string _userAgent;
 
-        public GalleryServer()
-            : this(DefaultGalleryServerUrl) {
+        public GalleryServer(string userAgent)
+            : this(DefaultGalleryServerUrl, userAgent) {
         }
 
-        public GalleryServer(string galleryServerSource) {
+        public GalleryServer(string galleryServerSource, string userAgent) {
             _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerSource);
-            var version = typeof(GalleryServer).Assembly.GetNameSafe().Version;
-            _userAgent = String.Format(CultureInfo.InvariantCulture, _UserAgentPattern, version, Environment.OSVersion);
+            _userAgent = userAgent;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -32,7 +29,6 @@ namespace NuGet {
             "CA2000:Dispose objects before losing scope",
             Justification="We dispose it in the Completed event handler.")]
         public void CreatePackage(string apiKey, Stream packageStream, IObserver<int> progressObserver, IPackageMetadata metadata = null) {
-
             var state = new PublishState {
                 PublishKey = apiKey,
                 PackageMetadata = metadata, 

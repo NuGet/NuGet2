@@ -106,7 +106,7 @@ namespace PackageExplorerViewModel {
         public GalleryServer GalleryServer {
             get {
                 if (_uploadHelper == null) {
-                    _uploadHelper = new GalleryServer();
+                    _uploadHelper = new GalleryServer(HttpUtility.CreateUserAgentString(Constants.UserAgentClient));
                 }
                 return _uploadHelper;
             }

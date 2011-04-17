@@ -68,10 +68,10 @@ namespace PackageExplorer {
 
             try {
                 string extension = Path.GetExtension(packagePath);
-                if (extension.Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase)) {
+                if (extension.Equals(NuGet.Constants.PackageExtension, StringComparison.OrdinalIgnoreCase)) {
                     package = new ZipPackage(packagePath);
                 }
-                else if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
+                else if (extension.Equals(NuGet.Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
                     PackageBuilder builder = new PackageBuilder(packagePath);
                     package = builder.Build();
                 }

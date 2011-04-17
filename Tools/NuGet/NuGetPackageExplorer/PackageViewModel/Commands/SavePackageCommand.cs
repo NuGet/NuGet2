@@ -75,7 +75,7 @@ namespace PackageExplorerViewModel {
         private static bool CanSaveTo(string packageSource) {
             return !String.IsNullOrEmpty(packageSource) && 
                     Path.IsPathRooted(packageSource) &&
-                    Path.GetExtension(packageSource).Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
+                    Path.GetExtension(packageSource).Equals(NuGet.Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         private void Save() {
