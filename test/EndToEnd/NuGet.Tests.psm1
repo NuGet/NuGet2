@@ -92,6 +92,8 @@ function global:Run-Test {
     }    
     
     $results = @()
+    # The vshost that VS launches caues the functional tests to freeze sometimes so disable it
+    [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
     
     try {
         # Run all tests
@@ -170,7 +172,7 @@ function global:Run-Test {
             }
         }
     }
-    finally {    
+    finally {        
         # Deleting tests
         rm function:\Test*
         
@@ -178,6 +180,9 @@ function global:Run-Test {
         $window.SetFocus()              
                
         Write-TestResults $testRunId $results $testRunResultsFile
+
+        # Clear out the setting when the tests are done running
+        [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
     }
 }
 

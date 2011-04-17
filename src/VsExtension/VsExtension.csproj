@@ -17,7 +17,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <StartAction>Program</StartAction>
     <StartProgram>$(MSBuildProgramFiles32)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.exe</StartProgram>
-    <StartArguments>/rootsuffix Exp</StartArguments>
+    <StartArguments>/rootsuffix Exp /log</StartArguments>
   </PropertyGroup>
   <Choose>
     <When Condition="Exists($(VsSdkTargets))">
