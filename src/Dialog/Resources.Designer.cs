@@ -151,7 +151,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to More Information.
+        ///   Looks up a localized string similar to Project Information.
         /// </summary>
         public static string Dialog_MoreInfo {
             get {

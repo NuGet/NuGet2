@@ -145,7 +145,7 @@
     <value>Operation failed</value>
   </data>
   <data name="Dialog_MoreInfo" xml:space="preserve">
-    <value>More Information</value>
+    <value>Project Information</value>
   </data>
   <data name="Dialog_NoDependencyLabel" xml:space="preserve">
     <value>No Dependencies</value>
