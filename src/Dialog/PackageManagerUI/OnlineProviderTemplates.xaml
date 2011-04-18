@@ -128,6 +128,11 @@
                         </FrameworkElement.ToolTip>
                     </self:RatingControl>
                     <self:TextBlockControl Text="{Binding PackageIdentity.RatingsCount, StringFormat={x:Static resources:Resources.Dialog_VotesCount}}" Style="{StaticResource DetailMetadataValueStyle}" />
+                    <self:TextBlockControl Margin="4,0,0,0" Visibility="{Binding PackageIdentity.GalleryDetailsUrl, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                        <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                            <Run Text="{x:Static resources:Resources.Dialog_RateItLabel}" />
+                        </Hyperlink>
+                    </self:TextBlockControl>
                 </StackPanel>
 
                 <!-- View License link -->

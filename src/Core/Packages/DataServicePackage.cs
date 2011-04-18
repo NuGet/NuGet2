@@ -64,6 +64,11 @@ namespace NuGet {
             set;
         }
 
+        public Uri GalleryDetailsUrl {
+            get;
+            set;
+        }
+
         public Uri DownloadUrl {
             get {
                 return Context.GetReadStreamUri(this);

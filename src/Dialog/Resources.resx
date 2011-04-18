@@ -261,10 +261,13 @@
   <data name="Dialog_IdLabel" xml:space="preserve">
     <value>Id:</value>
   </data>
-<data name="Dialog_RecentPackagesDefaultSort" xml:space="preserve">
+  <data name="Dialog_RecentPackagesDefaultSort" xml:space="preserve">
     <value>Most Recent</value>
   </data>
   <data name="License_AuthorFormatString" xml:space="preserve">
     <value>(Author: {0})</value>
+  </data>
+  <data name="Dialog_RateItLabel" xml:space="preserve">
+    <value>Rate It</value>
   </data>
 </root>
