@@ -9,7 +9,6 @@ namespace NuGet.Commands {
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : Command {
         internal const string DefaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
-        private const string _UserAgentClient = "NuGet Command Line";
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription")]
         public string Source { get; set; }
@@ -38,14 +37,7 @@ namespace NuGet.Commands {
             }
 
             var packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl, "feed"));
-            var httpClientEvents = packageRepository as IHttpClientEvents;
-            if (httpClientEvents != null) {
-                httpClientEvents.SendingRequest += (sender, args) => {
-                    string userAgent = HttpUtility.CreateUserAgentString(_UserAgentClient);
-                    HttpUtility.SetUserAgent(args.Request, userAgent);
-                };
-            }
-
+            
             IQueryable<IPackage> packages = packageRepository.GetPackages();
             if (Arguments != null && Arguments.Any()) {
                 packages = packages.Find(Arguments.ToArray());
