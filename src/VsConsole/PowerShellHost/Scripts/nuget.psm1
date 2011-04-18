@@ -253,3 +253,41 @@ function GetArgumentName($command, $index) {
 
     return $command.Parameters.Values | ?{ $_.ParameterSets[$parameterSet].Position -eq $index } | Select -ExpandProperty Name
 }
+
+function Format-ProjectName {
+    param(
+        [parameter(position=0, mandatory=$true)]
+        [validatenotnull()]
+        $Project,
+        [parameter(position=1, mandatory=$true)]
+        [validaterange(6, 1000)]
+        [int]$ColWidth
+    )
+
+    # only perform special formatting for web site projects
+    if ($project.kind -ne "{E24C65DC-7377-472B-9ABA-BC803B73C61A}") {
+        return $project.name
+    }
+
+    # less than column width, do nothing
+    if ($project.name.length -le $colWidth) {
+        return $project.name
+    }
+
+    $folder = "\{0}\" -f (split-path -leaf $project.name)
+    $root = [io.path]::GetPathRoot($project.name)
+    $maxwidth = $colwidth - 6 # len(root + ellipsis)
+
+    # is the directory name too big?
+    if ($folder.length -ge $maxwidth) {
+        # yes, drop leading backslash and eat into name
+        $abbreviated = "{0}...{1}" -f $root, `
+            $folder.substring($folder.length - $maxwidth)
+    }
+    else {
+        # no, show like VS solution explorer (drive+ellipsis+end)
+        $abbreviated = "{0}...{1}" -f $root, $folder
+    }
+    
+    $abbreviated
+}
