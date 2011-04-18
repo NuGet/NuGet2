@@ -45,7 +45,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void UserSettings_CallingCtorWithMalformedConfigThrowsException() {
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<configuration><sectionName></configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
@@ -59,7 +59,7 @@ namespace NuGet.Test {
         public void UserSetting_CallingGetValuesWithNonExistantSectionReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<configuration></configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
@@ -76,7 +76,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValuesWithSectionButNoValidValuesReturnsEmptyDictionary() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"
 <configuration>
@@ -100,7 +100,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValuesWithoutSectionReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"
 <configuration>
@@ -123,7 +123,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValueWithoutSectionReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"
 <configuration>
@@ -146,7 +146,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValueWithSectionButNoValidKeyReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"
 <configuration>
@@ -169,7 +169,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValuesWithSectionReturnsDictionary() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"
 <configuration>
@@ -193,7 +193,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValueWithSectionAndKeyReturnsValue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"
 <configuration>
@@ -220,7 +220,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWithEmptySectionNameThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("","SomeKey", "SomeValue"));
@@ -230,7 +229,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("SomeKey", "", "SomeValue"));
@@ -240,7 +238,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWillAddSectionIfItDoesNotExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -275,7 +273,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWillAddToSectionIfItExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -308,7 +306,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWillOverrideValueIfKeyExists() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -340,7 +338,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
             var settings = new UserSettings(mockFileSystem.Object);
             
@@ -352,7 +349,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWithNullValuesThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentNullException>(() => settings.SetValues("Section", null));
@@ -362,7 +358,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("", "value") };
             var settings = new UserSettings(mockFileSystem.Object);
             
@@ -374,7 +369,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuseWillAddSectionIfItDoesNotExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -410,7 +405,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWillAddToSectionIfItExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -444,7 +439,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWillOverrideValueIfKeyExists() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -477,7 +472,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWilladdValuesInOrder() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -513,7 +508,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("SomeSection", ""));
@@ -523,7 +517,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("", "SomeKey"));
@@ -533,7 +526,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWhenSectionNameDoesntExistReturnsFalse() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -551,7 +544,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWhenKeyDoesntExistThrowsException() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -569,7 +562,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWithValidSectionAndKeyDeletesTheEntryAndReturnsTrue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -608,7 +601,6 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteSectionWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteSection(""));
@@ -618,7 +610,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteSectionWhenSectionNameDoesntExistReturnsFalse() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -636,7 +628,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteSectionWithValidSectionDeletesTheSectionAndReturnsTrue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -672,7 +664,7 @@ namespace NuGet.Test {
         public void UserSettingsExtentions_SetEncryptedValue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -699,7 +691,7 @@ namespace NuGet.Test {
         public void UserSettingsExtentions_GetEncryptedValue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(@"c:\users\bob\appdata\roaming\NuGet\Nuget.Config")).Returns(false);
             var ms = new MemoryStream();
             mockFileSystem.Setup(m => m.AddFile(nugetConfigPath, It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
@@ -720,7 +712,7 @@ namespace NuGet.Test {
         public void UserSettingsExtentions_GetDecryptedValueWithEmptyValueReturnsEmptyString() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -742,7 +734,7 @@ namespace NuGet.Test {
         public void UserSettingsExtentions_GetDecryptedValueWithNoKeyReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
+            var nugetConfigPath = "NuGet.Config";
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>

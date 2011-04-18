@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
@@ -9,7 +8,7 @@ using NuGet.Resources;
 namespace NuGet {
     public class UserSettings : ISettings {
         private XDocument _config;
-        private string _configLocation;
+        private string _configFileName;
         private readonly IFileSystem _fileSystem;
 
         public UserSettings(IFileSystem fileSystem) {
@@ -17,8 +16,8 @@ namespace NuGet {
                 throw new ArgumentNullException("fileSystem");
             }
             _fileSystem = fileSystem;
-            _configLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.Config");
-            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configLocation);
+            _configFileName = "NuGet.Config";
+            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configFileName);
         }
 
         public string GetValue(string section, string key) {
@@ -176,7 +175,7 @@ namespace NuGet {
         }
 
         private void Save(XDocument document) {
-            _fileSystem.AddFile(_configLocation, document.Save);
+            _fileSystem.AddFile(_configFileName, document.Save);
         }
 
     }
