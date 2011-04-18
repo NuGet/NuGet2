@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using PackageExplorerViewModel.Types;
-using System;
 
 namespace PackageExplorerViewModel {
 

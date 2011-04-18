@@ -142,12 +142,17 @@
             </MenuItem>
 
             <MenuItem Header="_Content" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
-                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=file, FallbackValue=False}" Header="View File _Content" Command="{Binding ViewContentCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
-                <MenuItem IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=file, FallbackValue=False}" Header="Open File in Window_s shell..." Command="{Binding OpenContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                <MenuItem Header="View File _Content" Command="{Binding ViewContentCommand}" />
+                <MenuItem Header="Open File in Window_s shell..." Command="{Binding OpenContentFileCommand}" />
                 <Separator />
                 <MenuItem Header="_Add">
-                    <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
-                    <self:GrayscaleMenuItem Header="_New Folder" IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=folder, FallbackValue=False, TargetNullValue=true}">
+                    <MenuItem 
+                        Header="_Existing File..." 
+                        Command="{Binding AddContentFileCommand}" 
+                        CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                    <self:GrayscaleMenuItem 
+                        Header="_New Folder" 
+                        IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=folder, FallbackValue=False, TargetNullValue=true}">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="Images/NewFolderHS.png" />
                         </self:GrayscaleMenuItem.Icon>
@@ -168,10 +173,9 @@
                             <self:GrayscaleImage Source="Images/Tools.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
-                </MenuItem>
-
-                <MenuItem Header="_Rename..." IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, FallbackValue=False, TargetNullValue=False}" />
-                <MenuItem Header="_Delete..." Command="{Binding DeleteContentCommand}" CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
+                </MenuItem>                
+                <MenuItem Header="_Rename..." />
+                <MenuItem Header="_Delete..." Command="{Binding DeleteContentCommand}" />
             </MenuItem>
 
             <self:GrayscaleMenuItem Header="_Help">
@@ -198,6 +202,5 @@
                 </StatusBarItem.Content>
             </StatusBarItem>
         </StatusBar>
-              
     </DockPanel>
 </Window>

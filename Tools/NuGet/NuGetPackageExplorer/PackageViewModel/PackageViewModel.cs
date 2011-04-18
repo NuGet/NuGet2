@@ -14,8 +14,9 @@ namespace PackageExplorerViewModel {
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
         private PackageFolder _packageRoot;
-        private ICommand _saveCommand, _editCommand, _cancelEditCommand, _applyEditCommand, _viewContentCommand, _saveContentCommand, _openContentFileCommand, _openWithContentFileCommand;
-        private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _deleteContentCommand;
+        private ICommand _saveCommand, _editCommand, _cancelEditCommand, _applyEditCommand, _viewContentCommand, _saveContentCommand;
+        private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _openWithContentFileCommand;
+        private RelayCommand<object> _openContentFileCommand, _deleteContentCommand;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
         private readonly IPackageEditorService _editorService;
@@ -124,6 +125,9 @@ namespace PackageExplorerViewModel {
                 if (_selectedItem != value) {
                     _selectedItem = value;
                     OnPropertyChanged("SelectedItem");
+                    ((ViewContentCommand)ViewContentCommand).RaiseCanExecuteChanged();
+                    OpenContentFileCommand.RaiseCanExecuteChanged();
+                    DeleteContentCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -429,7 +433,7 @@ namespace PackageExplorerViewModel {
 
         #region DeleteContentCommand
 
-        public ICommand DeleteContentCommand {
+        public RelayCommand<object> DeleteContentCommand {
             get {
                 if (_deleteContentCommand == null) {
                     _deleteContentCommand = new RelayCommand<object>(DeleteContentExecute, DeleteContentCanExecute);
@@ -440,11 +444,11 @@ namespace PackageExplorerViewModel {
         }
 
         private bool DeleteContentCanExecute(object parameter) {
-            return parameter is PackagePart;
+            return (parameter ?? SelectedItem) is PackagePart;
         }
 
         private void DeleteContentExecute(object parameter) {
-            var file = parameter as PackagePart;
+            var file = (parameter ?? SelectedItem) as PackagePart;
             if (file != null) {
                 file.Delete();
             }
@@ -454,17 +458,26 @@ namespace PackageExplorerViewModel {
 
         #region OpenContentFileCommand
 
-        public ICommand OpenContentFileCommand {
+        public RelayCommand<object> OpenContentFileCommand {
             get {
                 if (_openContentFileCommand == null) {
-                    _openContentFileCommand = new RelayCommand<PackageFile>(OpenContentFileExecute);
+                    _openContentFileCommand = new RelayCommand<object>(OpenContentFileExecute, OpenContentFileCanExecute);
                 }
                 return _openContentFileCommand;
             }
         }
 
-        private void OpenContentFileExecute(PackageFile file) {
-            FileHelper.OpenFileInShell(file, UIServices);
+        private bool OpenContentFileCanExecute(object parameter) {
+            parameter = parameter ?? SelectedItem;
+            return parameter is PackageFile;
+        }
+
+        private void OpenContentFileExecute(object parameter) {
+            parameter = parameter ?? SelectedItem;
+            PackageFile file = parameter as PackageFile;
+            if (file != null) {
+                FileHelper.OpenFileInShell(file, UIServices);
+            }
         }
 
         #endregion

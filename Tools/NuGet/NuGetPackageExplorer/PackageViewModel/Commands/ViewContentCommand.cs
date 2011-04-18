@@ -13,13 +13,14 @@ namespace PackageExplorerViewModel {
             : base(packageViewModel) {
         }
 
+        public event EventHandler CanExecuteChanged = delegate { };
+
         public bool CanExecute(object parameter) {
-            return true;
+            return ViewModel.SelectedItem is PackageFile;
         }
 
-        event EventHandler ICommand.CanExecuteChanged {
-            add { }
-            remove { }
+        public void RaiseCanExecuteChanged() {
+            CanExecuteChanged(this, EventArgs.Empty);
         }
 
         public void Execute(object parameter) {
@@ -27,7 +28,7 @@ namespace PackageExplorerViewModel {
                 ViewModel.ShowContentViewer = false;
             }
             else {
-                var file = parameter as PackageFile;
+                var file = (parameter ?? ViewModel.SelectedItem) as PackageFile;
                 if (file != null) {
                     ShowFile(file);
                 }
