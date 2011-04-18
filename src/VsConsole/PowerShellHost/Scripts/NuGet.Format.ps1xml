@@ -148,36 +148,13 @@
                     <TableRowEntry>
                         <TableColumnItems>
                             <TableColumnItem>
-                              <ScriptBlock>
-                                # only perform special formatting for web site projects
-                                if ($_.kind -ne "{E24C65DC-7377-472B-9ABA-BC803B73C61A}") {
-                                    return $_.name
+                              <ScriptBlock><![CDATA[
+                                $parameters = @{
+                                  Project = $_;
+                                  ColWidth = 40
                                 }
-
-                                # NOTE: if the column header width changes, change this too.
-                                $colWidth = 40
-
-                                # less than column width, do nothing
-                                if ($_.name.length -le $colWidth) {
-                                    return $_.name
-                                }
-
-                                $folder = "\{0}\" -f (split-path -leaf $_.name)
-                                $root = [io.path]::GetPathRoot($_.name)
-                                $maxwidth = $colwidth - 6 # len(root + ellipsis)
-
-                                # is the directory name too big?
-                                if ($folder.length -ge $maxwidth) {
-                                    # yes, drop leading backslash and eat into name
-                                    $abbreviated = "{0}...{1}" -f $root, `
-                                        $folder.substring($folder.length - $maxwidth)
-                                }
-                                else {
-                                    # no, show like VS solution explorer (drive+ellipsis+end)
-                                    $abbreviated = "{0}...{1}" -f $root, $folder
-                                }
-                                return $abbreviated
-                              </ScriptBlock>
+                                & (Get-Module NuGet) Format-ProjectName @parameters
+                              ]]></ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>Type</PropertyName>

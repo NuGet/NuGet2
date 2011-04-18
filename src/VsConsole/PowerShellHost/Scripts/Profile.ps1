@@ -161,9 +161,9 @@ function TabExpansion($line, $lastWord) {
 
 # default prompt
 function prompt {
-	$default = get-project | select -expand name
+	$default = get-project
     if ($default) {
-		"PM {0}>" -f $default
+		"PM {0}>" -f (& (gmo nuget) Format-ProjectName $default 20)
 	} else {	
 		"PM>"
 	}
