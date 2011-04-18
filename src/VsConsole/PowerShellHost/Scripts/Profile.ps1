@@ -161,15 +161,5 @@ function TabExpansion($line, $lastWord) {
 
 # default prompt
 function prompt {
-    $default = get-project
-    if ($default) {
-        $parameters = @{
-            Project = $default;
-            ColWidth = 20
-        }
-        "PM {0}>" -f (& (Get-Module NuGet) Format-ProjectName @parameters)
-    } 
-    else {
-        "PM>"
-    }
+    "PM>"
 }
