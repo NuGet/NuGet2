@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 
@@ -6,7 +8,21 @@ namespace NuGet.Repositories
 {
     public class ProxyService : IProxyService
     {
-        ICredentialProvider _credentialProvider;
+
+        // This is kind of hackish because we are caching the proxy for the
+        // entire App domain for the specific Uri's because we don't have the same
+        // instances of the proxy service all of the time.
+        // Once we have some sort of a ServiceLocator pattern implemented
+        // then we can use a normal instance based approach and rely on
+        // the same instance of the proxy service to maintain the list of cached proxies
+        static Dictionary<Uri, WebProxy> _proxyCache;
+
+        readonly ICredentialProvider _credentialProvider;
+
+        static ProxyService()
+        {
+            _proxyCache = new Dictionary<Uri, WebProxy>();
+        }
 
         public ProxyService()
             : this(new DefaultCredentialProvider())
@@ -33,8 +49,14 @@ namespace NuGet.Repositories
 
         private IWebProxy GetProxyInternal(Uri uri)
         {
-            IWebProxy result = null;
+            WebProxy result = null;
             WebProxy systemProxy = GetSystemProxy(uri);
+
+            if (_proxyCache.ContainsKey(systemProxy.Address))
+            {
+                return _proxyCache[systemProxy.Address];
+            }
+
             // Try and see if we have credentials saved for the system proxy first so that we can
             // validate and see if we should use them.
             if (_credentialProvider.HasCredentials(systemProxy.Address))
@@ -50,7 +72,7 @@ namespace NuGet.Repositories
             // used for Integrated Authentication
             if (null == result)
             {
-                IWebProxy integratedAuthProxy = GetSystemProxy(uri);
+                WebProxy integratedAuthProxy = GetSystemProxy(uri);
                 integratedAuthProxy.Credentials = _credentialProvider.DefaultCredentials;
                 if (IsProxyValid(integratedAuthProxy, uri))
                 {
@@ -92,6 +114,14 @@ namespace NuGet.Repositories
                 }
                 result = noCredentialsProxy;
             }
+
+            Debug.Assert(null != result, "Proxy should not be null here.");
+
+            if (null != result)
+            {
+                _proxyCache.Add(systemProxy.Address, result);
+            }
+
             return result;
         }
 
@@ -115,6 +145,11 @@ namespace NuGet.Repositories
             request.Proxy = proxy ?? request.Proxy;
             try
             {
+                // During testing we have observed that some proxy setups will return a 200/OK response
+                // even though the subsequent calls are not going to be valid for the same proxy
+                // and the set of credentials thus giving the user a 407 error.
+                // However having to cache the proxy when this service first get's a call and using
+                // a cached proxy instance seemed to resolve this issue.
                 response = request.GetResponse();
             }
             catch (WebException webException)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Net.Cache;
 using System.Globalization;
 
 namespace NuGet {
