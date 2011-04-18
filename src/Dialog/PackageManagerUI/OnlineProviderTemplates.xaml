@@ -90,7 +90,7 @@
         </DataTemplate.Resources>
         
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">                
-            <StackPanel Margin="8">
+            <StackPanel Margin="8">                
                 <!-- Authors -->
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -104,7 +104,11 @@
                 <!-- Id -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding Id}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <self:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">
+                        <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                            <Run Text="{Binding Id, Mode=OneWay}" />
+                        </Hyperlink>
+                    </self:TextBlockControl>
                 </StackPanel>
 
                 <!-- Version -->
