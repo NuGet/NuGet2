@@ -34,6 +34,7 @@ namespace PackageExplorerViewModel
             _canExecute = canExecute;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate")]
         public void RaiseCanExecuteChanged() {
             CommandManager.InvalidateRequerySuggested();
         }
@@ -113,6 +114,7 @@ namespace PackageExplorerViewModel
 
         #endregion // Constructors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public void RaiseCanExecuteChanged() {
             CommandManager.InvalidateRequerySuggested();
         }
