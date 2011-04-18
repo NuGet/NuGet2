@@ -7,8 +7,8 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class UserSettings : ISettings {
+        private const string _configFileName = "NuGet.Config";
         private XDocument _config;
-        private string _configFileName;
         private readonly IFileSystem _fileSystem;
 
         public UserSettings(IFileSystem fileSystem) {
@@ -16,7 +16,6 @@ namespace NuGet {
                 throw new ArgumentNullException("fileSystem");
             }
             _fileSystem = fileSystem;
-            _configFileName = "NuGet.Config";
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configFileName);
         }
 
