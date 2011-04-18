@@ -164,7 +164,7 @@ function prompt {
     $default = get-project
     if ($default) {
         $parameters = @{
-            Project = $_;
+            Project = $default;
             ColWidth = 20
         }
         "PM {0}>" -f (& (Get-Module NuGet) Format-ProjectName @parameters)

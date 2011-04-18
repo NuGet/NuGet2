@@ -255,16 +255,16 @@ function GetArgumentName($command, $index) {
 }
 
 function Format-ProjectName {
-	param(
-		[parameter(position=0, mandatory=$true)]
-		[validatenotnull()]
-		$Project,
-		[parameter(position=1, mandatory=$true)]
-		[validaterange(6, 1000)]
-		[int]$ColWidth
-	)
+    param(
+        [parameter(position=0, mandatory=$true)]
+        [validatenotnull()]
+        $Project,
+        [parameter(position=1, mandatory=$true)]
+        [validaterange(6, 1000)]
+        [int]$ColWidth
+    )
 
-	# only perform special formatting for web site projects
+    # only perform special formatting for web site projects
     if ($project.kind -ne "{E24C65DC-7377-472B-9ABA-BC803B73C61A}") {
         return $project.name
     }
@@ -289,5 +289,5 @@ function Format-ProjectName {
         $abbreviated = "{0}...{1}" -f $root, $folder
     }
     
-	$abbreviated
+    $abbreviated
 }
