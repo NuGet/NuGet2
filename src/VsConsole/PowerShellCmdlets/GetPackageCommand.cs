@@ -140,6 +140,7 @@ namespace NuGet.PowerShell.Commands {
                 packages = GetPackages(repository);
             }
 
+            // Apply VersionCollapsing, Skip and Take, in that order.
             var result = FilterPackages(packages);
 
             WritePackages(result);
@@ -147,6 +148,14 @@ namespace NuGet.PowerShell.Commands {
 
         protected virtual PackageResult FilterPackages(IQueryable<IPackage> packages) {
             int packageCount = _firstValueSpecified ? First : packages.Count();
+
+            if (UseRemoteSourceOnly) {
+                if (_firstValueSpecified) {
+                    // Optimization: If First parameter is specified, we'll wrap the IQueryable in a BufferedEnumerable to prevent consuming the entire result set.
+
+                    packages = packages.AsBufferedEnumerable(First * 3).AsQueryable();
+                }
+            }
 
             IEnumerable<IPackage> packagesToDisplay = packages;
             // When querying a remote source, collapse versions unless AllVersions is specified.

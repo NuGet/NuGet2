@@ -5,12 +5,21 @@ using System.Management.Automation;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
-
+    /// <summary>
+    /// FindPackage is identical to GetPackage except that FindPackage filters packages only by Id and does not consider description or tags.
+    /// </summary>
     [SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     [OutputType(typeof(IPackage))]
     public class FindPackageCommand : GetPackageCommand {
         private const int MaxReturnedPackages = 30;
+
+        /// <summary>
+        /// Determines if an exact Id match would be performed with the Filter parameter. By default, FindPackage returns all packages that starts with the
+        /// Filter value.
+        /// </summary>
+        [Parameter]
+        public SwitchParameter ExactMatch { get; set; }
 
         public FindPackageCommand()
             : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
@@ -31,16 +40,9 @@ namespace NuGet.PowerShell.Commands {
 
         }
 
-        protected override bool CollapseVersions {
-            get {
-                return true;
-            }
-        }
-
         protected override void ProcessRecordCore() {
             // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
             // typing InstallPackage TAB would download the entire feed.
-            base.AllVersions = false;
             base.First = MaxReturnedPackages;
             base.ProcessRecordCore();
         }
@@ -48,7 +50,12 @@ namespace NuGet.PowerShell.Commands {
         protected override IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository) {
             var packages = sourceRepository.GetPackages();
             if (!String.IsNullOrEmpty(Filter)) {
-                packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
+                if (ExactMatch) {
+                    packages = packages.Where(p => p.Id.ToLower().Equals(Filter.ToLower()));
+                }
+                else {
+                    packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
+                }
             }
 
             return packages.OrderByDescending(p => p.DownloadCount)
@@ -64,6 +71,7 @@ namespace NuGet.PowerShell.Commands {
             if (!String.IsNullOrEmpty(Filter)) {
                 packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
+                
 
             return sourceRepository.GetUpdates(packagesToUpdate)
                                    .OrderByDescending(p => p.DownloadCount)
