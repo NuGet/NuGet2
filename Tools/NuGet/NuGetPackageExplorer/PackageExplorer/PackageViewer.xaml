@@ -26,14 +26,14 @@
                 <MenuItem Header="Open with..." Command="{Binding OpenWithCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Save As..." Command="{Binding SaveCommand}" CommandParameter="{Binding}" />
                 <Separator />
-                <MenuItem Header="_Rename..." Click="OnRenameItemClick" />
+                <MenuItem Header="_Rename..." Command="{Binding RenameCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 
             <ContextMenu x:Key="FolderSharedContextMenu">
                 <MenuItem Header="_Add Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="Add Ne_w Folder..." Click="OnAddNewFolderClick" />
-                <MenuItem Header="_Rename..." Click="OnRenameItemClick" />
+                <MenuItem Header="_Rename..." Command="{Binding RenameCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 

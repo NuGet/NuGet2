@@ -130,5 +130,22 @@ namespace PackageExplorer {
                 MessageBoxButton.OK,
                 image);
         }
+
+
+        public bool OpenRenameDialog(string currentName, out string newName) {
+            var dialog = new RenameWindow {
+                NewName = currentName,
+                Owner = Window.Value
+            };
+            bool? result = dialog.ShowDialog();
+            if (result ?? false) {
+                newName = dialog.NewName;
+                return true;
+            }
+            else {
+                newName = null;
+                return false;
+            }
+        }
     }
 }

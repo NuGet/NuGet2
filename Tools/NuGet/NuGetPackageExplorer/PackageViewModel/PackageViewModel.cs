@@ -16,7 +16,7 @@ namespace PackageExplorerViewModel {
         private PackageFolder _packageRoot;
         private ICommand _saveCommand, _editCommand, _cancelEditCommand, _applyEditCommand, _viewContentCommand, _saveContentCommand;
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _openWithContentFileCommand;
-        private RelayCommand<object> _openContentFileCommand, _deleteContentCommand;
+        private RelayCommand<object> _openContentFileCommand, _deleteContentCommand, _renameContentCommand;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
         private readonly IPackageEditorService _editorService;
@@ -128,6 +128,7 @@ namespace PackageExplorerViewModel {
                     ((ViewContentCommand)ViewContentCommand).RaiseCanExecuteChanged();
                     OpenContentFileCommand.RaiseCanExecuteChanged();
                     DeleteContentCommand.RaiseCanExecuteChanged();
+                    RenameContentCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -451,6 +452,34 @@ namespace PackageExplorerViewModel {
             var file = (parameter ?? SelectedItem) as PackagePart;
             if (file != null) {
                 file.Delete();
+            }
+        }
+
+        #endregion
+
+        #region RenameContentCommand
+
+        public RelayCommand<object> RenameContentCommand {
+            get {
+                if (_renameContentCommand == null) {
+                    _renameContentCommand = new RelayCommand<object>(RenameContentExecuted, RenameContentCanExecuted);
+                }
+                return _renameContentCommand;
+            }
+        }
+
+        private bool RenameContentCanExecuted(object parameter) {
+            return (parameter ?? SelectedItem) is PackagePart;
+        }
+
+        private void RenameContentExecuted(object parameter) {
+            var part = (parameter ?? SelectedItem) as PackagePart;
+            if (part != null) {
+                string newName;
+                bool result = UIServices.OpenRenameDialog(part.Name, out newName);
+                if (result) {
+                    part.Rename(newName);
+                }
             }
         }
 

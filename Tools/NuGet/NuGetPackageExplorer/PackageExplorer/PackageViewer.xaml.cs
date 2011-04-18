@@ -131,24 +131,24 @@ namespace PackageExplorer {
             }
         }
 
-        private void OnRenameItemClick(object sender, RoutedEventArgs e) {
-            MenuItem menuItem = (MenuItem)sender;
-            PackagePart part = menuItem.DataContext as PackagePart;
-            if (part == null) {
-                part = PackagesTreeView.SelectedItem as PackagePart;
-            }
+        //private void OnRenameItemClick(object sender, RoutedEventArgs e) {
+        //    MenuItem menuItem = (MenuItem)sender;
+        //    PackagePart part = menuItem.DataContext as PackagePart;
+        //    if (part == null) {
+        //        part = PackagesTreeView.SelectedItem as PackagePart;
+        //    }
 
-            if (part != null) {
-                var dialog = new RenameWindow {
-                    NewName = part.Name,
-                    Owner = Window.GetWindow(this)
-                };
-                bool? result = dialog.ShowDialog();
-                if (result ?? false) {
-                    part.Rename(dialog.NewName);
-                }
-            }
-        }
+        //    if (part != null) {
+        //        var dialog = new RenameWindow {
+        //            NewName = part.Name,
+        //            Owner = Window.GetWindow(this)
+        //        };
+        //        bool? result = dialog.ShowDialog();
+        //        if (result ?? false) {
+        //            part.Rename(dialog.NewName);
+        //        }
+        //    }
+        //}
 
         private void OnTreeViewItemDoubleClick(object sender, RoutedEventArgs args) {
             var item = (TreeViewItem)sender;
