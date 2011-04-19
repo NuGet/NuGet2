@@ -257,8 +257,8 @@ namespace PackageExplorerViewModel {
             CurrentFileInfo = null;
         }
 
-        public void AddDraggedAndDropedFiles(PackageFolder folder, string[] filenames) {
-            foreach (string file in filenames) {
+        public void AddDraggedAndDroppedFiles(PackageFolder folder, string[] fileNames) {
+            foreach (string file in fileNames) {
                 AddFileToFolder(folder, file);
             }
         }
@@ -267,7 +267,7 @@ namespace PackageExplorerViewModel {
             if (folder == null) {
                 string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
                 bool confirmed = UIServices.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, "Do you want to place the file '{0}' into '{1}' folder?", file, guessFolderName));
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToMoveFileIntoFolder, file, guessFolderName));
 
                 if (confirmed) {
                     if (RootFolder.ContainsFolder(guessFolderName)) {

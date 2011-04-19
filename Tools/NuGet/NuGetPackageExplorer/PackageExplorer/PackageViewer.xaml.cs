@@ -122,7 +122,7 @@ namespace PackageExplorer {
                 string[] filenames = value as string[];
                 if (filenames != null && filenames.Length > 0) {
                     var viewModel = DataContext as PackageViewModel;
-                    viewModel.AddDraggedAndDropedFiles(folder, filenames);
+                    viewModel.AddDraggedAndDroppedFiles(folder, filenames);
 
                     e.Handled = true;
                 }
