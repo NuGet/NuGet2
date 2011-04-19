@@ -126,9 +126,7 @@ namespace PackageExplorerViewModel {
                     _selectedItem = value;
                     OnPropertyChanged("SelectedItem");
                     ((ViewContentCommand)ViewContentCommand).RaiseCanExecuteChanged();
-                    OpenContentFileCommand.RaiseCanExecuteChanged();
-                    DeleteContentCommand.RaiseCanExecuteChanged();
-                    RenameContentCommand.RaiseCanExecuteChanged();
+                    CommandManager.InvalidateRequerySuggested();
                 }
             }
         }
@@ -259,6 +257,34 @@ namespace PackageExplorerViewModel {
             CurrentFileInfo = null;
         }
 
+        public void AddDraggedAndDropedFiles(PackageFolder folder, string[] filenames) {
+            foreach (string file in filenames) {
+                AddFileToFolder(folder, file);
+            }
+        }
+
+        private void AddFileToFolder(PackageFolder folder, string file) {
+            if (folder == null) {
+                string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
+                bool confirmed = UIServices.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, "Do you want to place the file '{0}' into '{1}' folder?", file, guessFolderName));
+
+                if (confirmed) {
+                    if (RootFolder.ContainsFolder(guessFolderName)) {
+                        folder = (PackageFolder)RootFolder[guessFolderName];
+                    }
+                    else {
+                        folder = RootFolder.AddFolder(guessFolderName);
+                    }
+                }
+                else {
+                    folder = RootFolder;
+                }
+            }
+
+            folder.AddFile(file);
+        }
+
         #region AddContentFileCommand
 
         public ICommand AddContentFileCommand {
@@ -272,11 +298,12 @@ namespace PackageExplorerViewModel {
         }
 
         private bool AddContentFileCanExecute(object parameter) {
+            parameter = parameter ?? SelectedItem;
             return parameter == null || parameter is PackageFolder;
         }
 
         private void AddContentFileExecute(object parameter) {
-            PackageFolder folder = parameter as PackageFolder;
+            PackageFolder folder = (parameter ?? SelectedItem) as PackageFolder;
             if (folder != null) {
                 AddExistingFileToFolder(folder);
             }
@@ -340,17 +367,16 @@ namespace PackageExplorerViewModel {
         }
 
         private bool AddNewFolderCanExecute(object parameter) {
-            return parameter == null || parameter is PackageFolder;
+            return (parameter ?? SelectedItem) is PackageFolder;
         }
 
         private void AddNewFolderExecute(object parameter) {
-            // this command do not apply to content file
-            if (parameter != null && parameter is PackageFile) {
-                return;
+            PackageFolder folder = (parameter ?? SelectedItem) as PackageFolder;
+            string folderName = "NewFolder";
+            bool result = UIServices.OpenRenameDialog(folderName, out folderName);
+            if (result) {
+                folder.AddFolder(folderName);
             }
-
-            var folder = (parameter as PackageFolder) ?? RootFolder;
-            folder.AddFolder("NewFolder");
         }
 
         #endregion
