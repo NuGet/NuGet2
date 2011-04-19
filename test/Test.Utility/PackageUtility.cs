@@ -18,14 +18,17 @@ namespace NuGet.Test {
                                               IEnumerable<string> assemblyReferences = null,
                                               IEnumerable<string> tools = null,
                                               IEnumerable<PackageDependency> dependencies = null,
-                                              double? rating = null) {
+                                              double? rating = null,
+                                              string description = null) {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
                                  content,
                                  CreateAssemblyReferences(assemblyReferences),
                                  tools,
-                                 dependencies, rating);
+                                 dependencies, 
+                                 rating, 
+                                 description);
         }
 
         public static IPackage CreatePackage(string id,
@@ -34,12 +37,13 @@ namespace NuGet.Test {
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
                                               IEnumerable<string> tools,
                                               IEnumerable<PackageDependency> dependencies,
-                                              double? rating) {
-
+                                              double? rating,
+                                              string description) {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
             tools = tools ?? Enumerable.Empty<string>();
+            description = description ?? "Mock package " + id;
 
             var allFiles = new List<IPackageFile>();
             allFiles.AddRange(CreateFiles(content, "content"));
@@ -52,7 +56,7 @@ namespace NuGet.Test {
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
             mockPackage.Setup(m => m.AssemblyReferences).Returns(assemblyReferences);
             mockPackage.Setup(m => m.Dependencies).Returns(dependencies);
-            mockPackage.Setup(m => m.Description).Returns("Mock package " + id);
+            mockPackage.Setup(m => m.Description).Returns(description);
             mockPackage.Setup(m => m.Language).Returns("en-US");
             mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
             mockPackage.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
@@ -82,7 +86,7 @@ namespace NuGet.Test {
             mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new[] { targetFramework });
             return mockAssemblyReference.Object;
         }
-        
+
         public static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "") {
             var files = new List<IPackageFile>();
             foreach (var fileName in fileNames) {

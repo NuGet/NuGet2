@@ -79,7 +79,8 @@ function Test-GetPackageCollapsesPackageVersionsForListAvailable {
     $packageWithMoreThanOne = $packages | group "Id" | Where { $_.count -gt 1 } 
     
     # Assert
-    Assert-True 1 -le $packages.Count # We have at least some packages
+    # Ensure we have at least some packages
+    Assert-True (1 -le $packages.Count)
     Assert-Null $packagesWithMoreThanOne
 }    
 
@@ -98,6 +99,7 @@ function Test-GetPackageCollapsesPackageVersionsForRecent {
     $packageWithMoreThanOne = $recentPackages | group "Id" | Where { $_.count -gt 1 } 
 
     # Assert
-    Assert-True 1 -le $packages.Count # We have at least some packages
+    # Ensure we have at least some packages
+    Assert-True (1 -le $packages.Count) 
     Assert-Null $packagesWithMoreThanOne
 }

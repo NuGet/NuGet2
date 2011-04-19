@@ -141,29 +141,21 @@ namespace NuGet.PowerShell.Commands {
             }
 
             // Apply VersionCollapsing, Skip and Take, in that order.
-            var result = FilterPackages(packages);
+            var packagesToDisplay = FilterPackages(packages);
 
-            WritePackages(result);
+            WritePackages(packagesToDisplay);
         }
 
-        protected virtual PackageResult FilterPackages(IQueryable<IPackage> packages) {
-            int packageCount = _firstValueSpecified ? First : packages.Count();
-
-            if (UseRemoteSourceOnly) {
-                if (_firstValueSpecified) {
-                    // Optimization: If First parameter is specified, we'll wrap the IQueryable in a BufferedEnumerable to prevent consuming the entire result set.
-
-                    packages = packages.AsBufferedEnumerable(First * 3).AsQueryable();
-                }
+        protected virtual IEnumerable<IPackage> FilterPackages(IQueryable<IPackage> packages) {
+            if (UseRemoteSourceOnly && _firstValueSpecified) {
+                // Optimization: If First parameter is specified, we'll wrap the IQueryable in a BufferedEnumerable to prevent consuming the entire result set.
+                packages = packages.AsBufferedEnumerable(First * 3).AsQueryable();
             }
 
             IEnumerable<IPackage> packagesToDisplay = packages;
             // When querying a remote source, collapse versions unless AllVersions is specified.
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions) {
-                // Since DistinctLast would need to consume the entire sequence before coming up with a count value, we'll settle for an approximation.
-                // The ratio of distinct : total packages is 1:2. So dividing by 2 should give us a good approximation of the number of packages to expect.
-                packageCount /= 2;
                 packagesToDisplay = packagesToDisplay.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
             }
 
@@ -173,7 +165,7 @@ namespace NuGet.PowerShell.Commands {
                 packagesToDisplay = packagesToDisplay.Take(First);
             }
 
-            return new PackageResult { Packages = packagesToDisplay, Count = packageCount };
+            return packagesToDisplay;
         }
 
         /// <summary>
@@ -238,32 +230,15 @@ namespace NuGet.PowerShell.Commands {
             return sourceRepository.GetUpdates(packagesToUpdate).AsQueryable();
         }
 
-        private void WritePackages(PackageResult result) {
-
-            int packagesSoFar = 0;
-            // don't show progress if we are in sync mode
-            bool showProgress = !IsSyncMode && ShouldShowProgress(result.Count);
-
+        private void WritePackages(IEnumerable<IPackage> packages) {
             bool hasPackage = false;
-            foreach (var package in result.Packages) {
+            foreach (var package in packages) {
                 // exit early if ctrl+c pressed
                 if (Stopping) {
                     break;
                 }
                 hasPackage = true;
                 WriteObject(package);
-
-                if (showProgress) {
-                    packagesSoFar++;
-
-                    // only update progress after every 20 packages 
-                    if (packagesSoFar % 20 == 0) {
-                        // Because our download stats are approximations, we could be undercounting.
-                        int percent = Math.Min(100, (packagesSoFar * 100) / result.Count);
-                        WriteProgress(
-                            ProgressActivityIds.GetPackageId, Resources.Cmdlet_GetPackageProgress, percent);
-                    }
-                }
             }
 
             if (!hasPackage) {
@@ -279,12 +254,6 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
-        protected virtual bool ShouldShowProgress(int total) {
-            const int ThresholdToShowProgress = 20;
-            return UseRemoteSource && (total > ThresholdToShowProgress);
-        }
-
         protected override void EndProcessing() {
             base.EndProcessing();
 
@@ -295,12 +264,6 @@ namespace NuGet.PowerShell.Commands {
             if (_productUpdateService != null && _hasConnectedToHttpSource) {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
-        }
-
-        protected class PackageResult {
-            public IEnumerable<IPackage> Packages { get; set; }
-
-            public int Count { get; set; }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,7 +12,6 @@ using NuGet.VisualStudio.Test;
 namespace NuGet.PowerShell.Commands.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.Collections.Generic;
 
     [TestClass]
     public class GetPackageCommandTest {
@@ -339,7 +339,7 @@ namespace NuGet.PowerShell.Commands.Test {
         public void GetPackagesReturnsLatestUpdateVersions() {
             // Arrange
             var source = "http://multi-source";
-            var cmdlet = BuildCmdlet(repositoryFactory: GetRepositoryFactoryWithMultiplePackageVersions(source), packageManagerFactory: GetPackageManagerForMultipleVersions(), 
+            var cmdlet = BuildCmdlet(repositoryFactory: GetRepositoryFactoryWithMultiplePackageVersions(source), packageManagerFactory: GetPackageManagerForMultipleVersions(),
                 activeSourceName: source);
             cmdlet.Source = source;
             cmdlet.Updates = new SwitchParameter(isPresent: true);
