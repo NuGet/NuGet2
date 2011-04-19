@@ -62,12 +62,9 @@ namespace NuGet.VisualStudio {
                                                               .AsEnumerable()
                                                               .FirstOrDefault();
                     // Get the current NuGet VSIX version
-#if DEBUG
-                    Version installedVersion = new Version("1.1");                    
-#else
                     IInstalledExtension installedNuGet = _extensionManager.GetInstalledExtension(NuGetVSIXId);
                     Version installedVersion = installedNuGet.Header.Version;
-#endif
+
                     // If we're running an older version then update
                     if (nugetVsix != null && nugetVsix.NonNullVsixVersion > installedVersion) {
                         RaiseUpdateEvent(new ProductUpdateAvailableEventArgs(installedVersion, nugetVsix.NonNullVsixVersion));
