@@ -31,13 +31,16 @@
         <CommandBinding Command="Close" Executed="CloseMenuItem_Click" CanExecute="CanExecuteCloseCommand" />
         <CommandBinding Command="GoToPage" Executed="OpenExternalLink" />
         <CommandBinding Command="{x:Static self:Commands.PublishToFeedCommand}" Executed="OnPublishButtonClick" CanExecute="CanPublishToFeedCommand" />
-        <!--<CommandBinding Command="{x:Static self:Commands.AddRootFolderCommand}" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute" />-->
     </Window.CommandBindings>
     
     <Window.InputBindings>
         <KeyBinding Key="K" Modifiers="Control" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" />
         <KeyBinding Key="G" Modifiers="Control" Command="Open" CommandParameter="Feed" />
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" />
+
+        <KeyBinding Key="F2" Command="{Binding RenameContentCommand}" />
+        <KeyBinding Key="Del" Command="{Binding DeleteContentCommand}" />
+
     </Window.InputBindings>
     
     <DockPanel x:Name="RootLayout" LastChildFill="False">
@@ -146,36 +149,31 @@
                 <MenuItem Header="Open File in Window_s shell..." Command="{Binding OpenContentFileCommand}" />
                 <Separator />
                 <MenuItem Header="_Add">
-                    <MenuItem 
-                        Header="_Existing File..." 
-                        Command="{Binding AddContentFileCommand}" 
-                        CommandParameter="{Binding SelectedItem, ElementName=PackagesTreeView}" />
-                    <self:GrayscaleMenuItem 
-                        Header="_New Folder" 
-                        IsEnabled="{Binding SelectedItem, ElementName=PackagesTreeView, Converter={StaticResource PackagePartConverter}, ConverterParameter=folder, FallbackValue=False, TargetNullValue=true}">
+                    <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
+                    <self:GrayscaleMenuItem Header="_New Folder" Command="{Binding AddNewFolderCommand}">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="Images/NewFolderHS.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                     <Separator />
-                    <self:GrayscaleMenuItem Header="_Content Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="content">
+                    <self:GrayscaleMenuItem Header="_Content Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="content">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="Images/NoteHS.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
-                    <self:GrayscaleMenuItem Header="_Lib Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="lib">
+                    <self:GrayscaleMenuItem Header="_Lib Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="lib">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="Images/Lib.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
-                    <self:GrayscaleMenuItem Header="_Tools Folder" Command="{x:Static self:Commands.AddRootFolderCommand}" CommandParameter="tools">
+                    <self:GrayscaleMenuItem Header="_Tools Folder" Command="{Binding AddContentFolderCommand}" CommandParameter="tools">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="Images/Tools.png" />
                         </self:GrayscaleMenuItem.Icon>
                     </self:GrayscaleMenuItem>
                 </MenuItem>                
-                <MenuItem Header="_Rename..." />
-                <MenuItem Header="_Delete..." Command="{Binding DeleteContentCommand}" />
+                <MenuItem Header="_Rename..." Command="{Binding RenameContentCommand}" InputGestureText="F2" />
+                <MenuItem Header="_Delete..." Command="{Binding DeleteContentCommand}" InputGestureText="Delete" />
             </MenuItem>
 
             <self:GrayscaleMenuItem Header="_Help">

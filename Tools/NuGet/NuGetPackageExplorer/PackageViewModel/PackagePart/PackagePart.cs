@@ -79,13 +79,15 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private ICommand _deleteCommand;
         public ICommand DeleteCommand {
             get {
-                if (_deleteCommand == null) {
-                    _deleteCommand = new RelayCommand(Delete);
-                }
-                return _deleteCommand;
+                return PackageViewModel.DeleteContentCommand;
+            }
+        }
+
+        public ICommand RenameCommand {
+            get {
+                return PackageViewModel.RenameContentCommand;
             }
         }
 
@@ -93,10 +95,8 @@ namespace PackageExplorerViewModel {
 
         public void Rename(string newName) {
             if (Name != newName) {
-                if (Parent != null)
-                {
-                    if (Parent.ContainsFile(newName) || Parent.ContainsFolder(newName))
-                    {
+                if (Parent != null) {
+                    if (Parent.ContainsFile(newName) || Parent.ContainsFolder(newName)) {
                         PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
                         return;
                     }
@@ -143,9 +143,9 @@ namespace PackageExplorerViewModel {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1024:UsePropertiesWhereAppropriate",
-            Justification="This method is potentially expensive.")]
+            Justification = "This method is potentially expensive.")]
         public abstract IEnumerable<IPackageFile> GetFiles();
 
         public event PropertyChangedEventHandler PropertyChanged;

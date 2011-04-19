@@ -16,7 +16,7 @@ namespace PackageExplorerViewModel {
         private PackageFolder _packageRoot;
         private ICommand _saveCommand, _editCommand, _cancelEditCommand, _applyEditCommand, _viewContentCommand, _saveContentCommand;
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _openWithContentFileCommand;
-        private RelayCommand<object> _openContentFileCommand, _deleteContentCommand;
+        private RelayCommand<object> _openContentFileCommand, _deleteContentCommand, _renameContentCommand;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
         private readonly IPackageEditorService _editorService;
@@ -126,8 +126,7 @@ namespace PackageExplorerViewModel {
                     _selectedItem = value;
                     OnPropertyChanged("SelectedItem");
                     ((ViewContentCommand)ViewContentCommand).RaiseCanExecuteChanged();
-                    OpenContentFileCommand.RaiseCanExecuteChanged();
-                    DeleteContentCommand.RaiseCanExecuteChanged();
+                    CommandManager.InvalidateRequerySuggested();
                 }
             }
         }
@@ -258,6 +257,34 @@ namespace PackageExplorerViewModel {
             CurrentFileInfo = null;
         }
 
+        public void AddDraggedAndDroppedFiles(PackageFolder folder, string[] fileNames) {
+            foreach (string file in fileNames) {
+                AddFileToFolder(folder, file);
+            }
+        }
+
+        private void AddFileToFolder(PackageFolder folder, string file) {
+            if (folder == null) {
+                string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
+                bool confirmed = UIServices.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToMoveFileIntoFolder, file, guessFolderName));
+
+                if (confirmed) {
+                    if (RootFolder.ContainsFolder(guessFolderName)) {
+                        folder = (PackageFolder)RootFolder[guessFolderName];
+                    }
+                    else {
+                        folder = RootFolder.AddFolder(guessFolderName);
+                    }
+                }
+                else {
+                    folder = RootFolder;
+                }
+            }
+
+            folder.AddFile(file);
+        }
+
         #region AddContentFileCommand
 
         public ICommand AddContentFileCommand {
@@ -271,11 +298,12 @@ namespace PackageExplorerViewModel {
         }
 
         private bool AddContentFileCanExecute(object parameter) {
+            parameter = parameter ?? SelectedItem;
             return parameter == null || parameter is PackageFolder;
         }
 
         private void AddContentFileExecute(object parameter) {
-            PackageFolder folder = parameter as PackageFolder;
+            PackageFolder folder = (parameter ?? SelectedItem) as PackageFolder;
             if (folder != null) {
                 AddExistingFileToFolder(folder);
             }
@@ -339,17 +367,16 @@ namespace PackageExplorerViewModel {
         }
 
         private bool AddNewFolderCanExecute(object parameter) {
-            return parameter == null || parameter is PackageFolder;
+            return (parameter ?? SelectedItem) is PackageFolder;
         }
 
         private void AddNewFolderExecute(object parameter) {
-            // this command do not apply to content file
-            if (parameter != null && parameter is PackageFile) {
-                return;
+            PackageFolder folder = (parameter ?? SelectedItem) as PackageFolder;
+            string folderName = "NewFolder";
+            bool result = UIServices.OpenRenameDialog(folderName, out folderName);
+            if (result) {
+                folder.AddFolder(folderName);
             }
-
-            var folder = (parameter as PackageFolder) ?? RootFolder;
-            folder.AddFolder("NewFolder");
         }
 
         #endregion
@@ -451,6 +478,34 @@ namespace PackageExplorerViewModel {
             var file = (parameter ?? SelectedItem) as PackagePart;
             if (file != null) {
                 file.Delete();
+            }
+        }
+
+        #endregion
+
+        #region RenameContentCommand
+
+        public RelayCommand<object> RenameContentCommand {
+            get {
+                if (_renameContentCommand == null) {
+                    _renameContentCommand = new RelayCommand<object>(RenameContentExecuted, RenameContentCanExecuted);
+                }
+                return _renameContentCommand;
+            }
+        }
+
+        private bool RenameContentCanExecuted(object parameter) {
+            return (parameter ?? SelectedItem) is PackagePart;
+        }
+
+        private void RenameContentExecuted(object parameter) {
+            var part = (parameter ?? SelectedItem) as PackagePart;
+            if (part != null) {
+                string newName;
+                bool result = UIServices.OpenRenameDialog(part.Name, out newName);
+                if (result) {
+                    part.Rename(newName);
+                }
             }
         }
 

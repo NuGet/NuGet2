@@ -56,5 +56,18 @@ namespace PackageExplorerViewModel {
                 Process.Start(info);
             }
         }
+
+        public static string GuessFolderNameFromFile(string file) {
+            string extension = System.IO.Path.GetExtension(file).ToUpperInvariant();
+            if (extension == ".DLL" || extension == ".PDB") {
+                return "lib";
+            }
+            else if (extension == ".PS1" || extension == ".PSM1" || extension == ".PSD1") {
+                return "tools";
+            }
+            else {
+                return "content";
+            }
+        }
     }
 }

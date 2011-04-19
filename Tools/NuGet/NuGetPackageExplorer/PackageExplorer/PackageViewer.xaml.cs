@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,50 +11,11 @@ namespace PackageExplorer {
     /// Interaction logic for PackageViewer.xaml
     /// </summary>
     public partial class PackageViewer : UserControl {
-
-        private readonly IUIServices _messageBoxServices;
-
         public PackageViewer(IUIServices messageBoxServices, IPackageViewModelFactory packageViewModelFactory) {
-
             InitializeComponent();
 
-            _messageBoxServices = messageBoxServices;
             PackageMetadataEditor.UIServices = messageBoxServices;
             PackageMetadataEditor.PackageViewModelFactory = packageViewModelFactory;
-        }
-
-        private void AddRootFolderExecuted(object sender, ExecutedRoutedEventArgs e) {
-            if (DataContext == null) {
-                return;
-            }
-
-            var rootFolder = (DataContext as PackageViewModel).RootFolder;
-            string subFolder = (string)e.Parameter;
-            rootFolder.AddFolder(subFolder);
-            e.Handled = true;
-        }
-
-        private void AddRootFolderCanExecute(object sender, CanExecuteRoutedEventArgs e) {
-            if (DataContext == null) {
-                e.CanExecute = false;
-                e.Handled = true;
-                return;
-            }
-
-            var rootFolder = (DataContext as PackageViewModel).RootFolder;
-            string subFolder = (string)e.Parameter;
-            e.CanExecute = !rootFolder.ContainsFolder(subFolder);
-            e.Handled = true;
-        }
-
-        private void PackagesTreeView_KeyDown(object sender, KeyEventArgs e) {
-            if (e.Key == Key.Delete) {
-                var selectedPart = PackagesTreeView.SelectedItem as PackagePart;
-                if (selectedPart != null) {
-                    selectedPart.Delete();
-                }
-                e.Handled = true;
-            }
         }
 
         private void FileContentContainer_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -84,69 +43,10 @@ namespace PackageExplorer {
             return content;
         }
 
-        private void OnAddNewFolder2Click(object sender, RoutedEventArgs e) {
-            var folder = (DataContext as PackageViewModel).RootFolder;
-            if (folder != null) {
-                var dialog = new RenameWindow {
-                    NewName = "NewFolder",
-                    Owner = Window.GetWindow(this)
-                };
-                bool? result = dialog.ShowDialog();
-                if (result ?? false) {
-                    string newName = dialog.NewName;
-                    folder.AddFolder(newName);
-                }
-            }
-        }
-
         private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
             var model = DataContext as PackageViewModel;
             if (model != null) {
                 model.SelectedItem = PackagesTreeView.SelectedItem;
-            }
-        }
-
-        private void OnAddNewFolderClick(object sender, RoutedEventArgs e) {
-            MenuItem menuItem = (MenuItem)sender;
-            PackageFolder folder = menuItem.DataContext as PackageFolder;
-
-            if (folder == null) {
-                folder = PackagesTreeView.SelectedItem as PackageFolder;
-            }
-
-            if (folder == null) {
-                folder = (DataContext as PackageViewModel).RootFolder;
-            }
-
-            if (folder != null) {
-                var dialog = new RenameWindow {
-                    NewName = "NewFolder",
-                    Owner = Window.GetWindow(this)
-                };
-                bool? result = dialog.ShowDialog();
-                if (result ?? false) {
-                    string newName = dialog.NewName;
-                    folder.AddFolder(newName);
-                }
-            }
-        }
-
-        private void OnRenameItemClick(object sender, RoutedEventArgs e) {
-            MenuItem menuItem = (MenuItem)sender;
-            PackagePart part = menuItem.DataContext as PackagePart;
-            if (part == null) {
-                part = PackagesTreeView.SelectedItem as PackagePart;
-            }
-
-            if (part != null) {
-                var dialog = new RenameWindow {
-                    NewName = part.Name,
-                    Owner = Window.GetWindow(this)
-                };
-                bool? result = dialog.ShowDialog();
-                if (result ?? false) {
-                    part.Rename(dialog.NewName);
-                }
             }
         }
 
@@ -171,6 +71,10 @@ namespace PackageExplorer {
                 if (element is FrameworkElement) {
                     FrameworkElement fe = (FrameworkElement)element;
                     element = (IInputElement)(fe.Parent ?? fe.TemplatedParent);
+                }
+                else if (element is FrameworkContentElement) {
+                    FrameworkContentElement fe = (FrameworkContentElement)element;
+                    element = (IInputElement)fe.Parent;
                 }
                 else
                     break;
@@ -217,49 +121,11 @@ namespace PackageExplorer {
                 object value = data.GetData(DataFormats.FileDrop);
                 string[] filenames = value as string[];
                 if (filenames != null && filenames.Length > 0) {
-                    foreach (string file in filenames) {
-                        AddFileToFolder(folder, file);
-                    }
+                    var viewModel = DataContext as PackageViewModel;
+                    viewModel.AddDraggedAndDroppedFiles(folder, filenames);
 
                     e.Handled = true;
                 }
-            }
-        }
-
-        private void AddFileToFolder(PackageFolder folder, string file) {
-            if (folder == null) {
-                string guessFolderName = GuessFolderNameFromFile(file);
-                bool confirmed = _messageBoxServices.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, "Do you want to place the file '{0}' into '{1}' folder?", file, guessFolderName));
-
-                var rootFolder = (DataContext as PackageViewModel).RootFolder;
-
-                if (confirmed) {
-                    if (rootFolder.ContainsFolder(guessFolderName)) {
-                        folder = (PackageFolder)rootFolder[guessFolderName];
-                    }
-                    else {
-                        folder = rootFolder.AddFolder(guessFolderName);
-                    }
-                }
-                else {
-                    folder = rootFolder;
-                }
-            }
-
-            folder.AddFile(file);
-        }
-
-        private static string GuessFolderNameFromFile(string file) {
-            string extension = System.IO.Path.GetExtension(file).ToUpperInvariant();
-            if (extension == ".DLL" || extension == ".PDB") {
-                return "lib";
-            }
-            else if (extension == ".PS1" || extension == ".PSM1" || extension == ".PSD1") {
-                return "tools";
-            }
-            else {
-                return "content";
             }
         }
     }

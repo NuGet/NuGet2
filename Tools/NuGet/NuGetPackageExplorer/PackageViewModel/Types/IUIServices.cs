@@ -15,6 +15,9 @@ namespace PackageExplorerViewModel.Types {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         bool OpenMultipleFilesDialog(string title, string filter, out string[] selectedFileNames);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
+        bool OpenRenameDialog(string currentName, out string newName);
+
         bool Confirm(string message);
         bool Confirm(string message, bool isWarning);
         bool? ConfirmWithCancel(string message);

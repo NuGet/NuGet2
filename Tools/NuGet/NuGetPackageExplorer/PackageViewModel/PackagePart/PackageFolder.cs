@@ -12,7 +12,8 @@ namespace PackageExplorerViewModel {
 
         public ICollection<PackagePart> Children { get; private set; }
 
-        public PackageFolder(string name, PackageFolder parent) : base(name, parent, parent.PackageViewModel) {
+        public PackageFolder(string name, PackageFolder parent)
+            : base(name, parent, parent.PackageViewModel) {
             this.Children = new SortedCollection<PackagePart>();
         }
 
@@ -72,10 +73,8 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public PackagePart this[string name]
-        {
-            get
-            {
+        public PackagePart this[string name] {
+            get {
                 return Children.SingleOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             }
         }
@@ -115,8 +114,7 @@ namespace PackageExplorerViewModel {
             }
 
             string newFileName = System.IO.Path.GetFileName(filePath);
-            if (ContainsFolder(newFileName))
-            {
+            if (ContainsFolder(newFileName)) {
                 PackageViewModel.UIServices.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
                 return null;
             }
@@ -124,8 +122,7 @@ namespace PackageExplorerViewModel {
             bool showingRemovedFile = false;
             if (ContainsFile(newFileName)) {
                 bool confirmed = PackageViewModel.UIServices.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
-                if (confirmed)
-                {
+                if (confirmed) {
                     // check if we are currently showing the content of the file to be removed.
                     // if we are, we'll need to show the new content after replacing the file.
                     if (PackageViewModel.ShowContentViewer) {
@@ -134,16 +131,15 @@ namespace PackageExplorerViewModel {
                             showingRemovedFile = true;
                         }
                     }
-                    
+
                     // remove the existing file before adding the new one
                     RemoveChildByName(newFileName);
                 }
-                else
-                {
+                else {
                     return null;
                 }
             }
-            
+
             var physicalFile = new PhysicalFile(filePath);
             var newFile = new PackageFile(physicalFile, newFileName, this);
             Children.Add(newFile);
@@ -159,12 +155,10 @@ namespace PackageExplorerViewModel {
             return newFile;
         }
 
-        private void RemoveChildByName(string name)
-        {
+        private void RemoveChildByName(string name) {
             int count = Children.RemoveAll(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             Debug.Assert(count <= 1);
-            if (count == 1)
-            {
+            if (count == 1) {
                 PackageViewModel.NotifyChanges();
             }
         }
@@ -174,7 +168,7 @@ namespace PackageExplorerViewModel {
             if (!Directory.Exists(fullPath)) {
                 Directory.CreateDirectory(fullPath);
             }
-             
+
             foreach (var part in Children) {
                 part.Export(rootPath);
             }
