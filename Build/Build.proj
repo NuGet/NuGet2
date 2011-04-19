@@ -12,6 +12,8 @@
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
         <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
+        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(Configuration)</BootStrapperBuildDirectory>
+        <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
         <PackageExplorerBuildDirectory>$(NuGetRoot)\Tools\NuGet\NuGetPackageExplorer\PackageExplorer\bin\$(Configuration)</PackageExplorerBuildDirectory>
         <PackageExplorerDropDirectory>$(NuGetDropDirectory)\PackageExplorer</PackageExplorerDropDirectory>
         <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
@@ -66,7 +68,7 @@
         </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyPackageExplorerOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyPackageExplorerOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
     </Target>
     
     <Target Name="CheckFxCop">
@@ -107,6 +109,7 @@
         <MakeDir Directories="$(ArtifactDropDirectory)" Condition="!Exists('$(ArtifactDropDirectory)')" />
         <MakeDir Directories="$(NuGetDropDirectory)" Condition="!Exists('$(NuGetDropDirectory)')" />
         <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
+        <MakeDir Directories="$(BootStrapperDropDirectory)" Condition="!Exists('$(BootStrapperDropDirectory)')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(MSBuildDropDirectory)" Condition="!Exists('$(MSBuildDropDirectory)')" />
@@ -121,7 +124,13 @@
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExeOutputItems)" DestinationFiles="@(ExeOutputItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
-
+    <Target Name="CopyBootStrapperOutputToDropDirectory">
+        <ItemGroup>
+            <BootStrapperOutputItems Exclude="$(BootStrapperBuildDirectory)\**\*.pdb" Include="$(BootStrapperBuildDirectory)\**\*.*" />
+        </ItemGroup>
+        <Message Text="Copying the NuGet BootStrapper output to $(BootStrapperDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(BootStrapperOutputItems)" DestinationFiles="@(BootStrapperOutputItems ->'$(BootStrapperDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>    
     <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
         <ItemGroup>
             <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
