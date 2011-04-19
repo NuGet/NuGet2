@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
+using System.Windows;
 using Microsoft.Win32;
 using PackageExplorerViewModel.Types;
-using System;
-using System.Windows;
 
 namespace PackageExplorer {
 
@@ -146,6 +146,15 @@ namespace PackageExplorer {
                 newName = null;
                 return false;
             }
+        }
+
+        public bool OpenPublishDialog(object viewModel) {
+            var dialog = new PublishPackageWindow { 
+                Owner = Window.Value,
+                DataContext = viewModel
+            };
+            var result = dialog.ShowDialog();
+            return result ?? false;
         }
     }
 }

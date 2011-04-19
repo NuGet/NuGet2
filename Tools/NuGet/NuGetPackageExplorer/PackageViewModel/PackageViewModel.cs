@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel.Types;
@@ -17,16 +18,19 @@ namespace PackageExplorerViewModel {
         private ICommand _saveCommand, _editCommand, _cancelEditCommand, _applyEditCommand, _viewContentCommand, _saveContentCommand;
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _openWithContentFileCommand;
         private RelayCommand<object> _openContentFileCommand, _deleteContentCommand, _renameContentCommand;
+        private RelayCommand _publishCommand;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
         private readonly IPackageEditorService _editorService;
+        private readonly ISettingsManager _settingsManager;
 
         internal PackageViewModel(
             IPackage package,
             string source,
             IMruManager mruManager,
             IUIServices uiServices,
-            IPackageEditorService editorService) {
+            IPackageEditorService editorService,
+            ISettingsManager settingsManager) {
 
             if (package == null) {
                 throw new ArgumentNullException("package");
@@ -40,7 +44,11 @@ namespace PackageExplorerViewModel {
             if (editorService == null) {
                 throw new ArgumentNullException("editorService");
             }
+            if (settingsManager == null) {
+                throw new ArgumentNullException("settingsManager");
+            }
 
+            _settingsManager = settingsManager;
             _editorService = editorService;
             _uiServices = uiServices;
             _mruManager = mruManager;
@@ -66,6 +74,7 @@ namespace PackageExplorerViewModel {
                 if (_isInEditMode != value) {
                     _isInEditMode = value;
                     OnPropertyChanged("IsInEditMode");
+                    PublishCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -583,6 +592,47 @@ namespace PackageExplorerViewModel {
                 }
                 return _viewContentCommand;
             }
+        }
+
+        #endregion
+
+        #region PublishCommand
+
+        public RelayCommand PublishCommand {
+            get {
+                if (_publishCommand == null) {
+                    _publishCommand = new RelayCommand(PublishExecute, PublishCanExecute);
+                }
+                return _publishCommand;
+            }
+        }
+
+        private void PublishExecute() {
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                UIServices.Show(Resources.NoNetworkConnection, MessageLevel.Warning);
+                return;
+            }
+
+            if (!this.IsValid) {
+                UIServices.Show(Resources.PackageHasNoFile, MessageLevel.Warning);
+                return;
+            }
+
+            string storedKey = _settingsManager.ReadApiKeyFromSettingFile();
+            var publishPackageViewModel = new PublishPackageViewModel(this) {
+                PublishKey = storedKey
+            };
+
+            _uiServices.OpenPublishDialog(publishPackageViewModel);
+
+            string newKey = publishPackageViewModel.PublishKey;
+            if (!String.IsNullOrEmpty(newKey)) {
+                _settingsManager.WriteApiKeyToSettingFile(newKey);
+            }
+        }
+
+        private bool PublishCanExecute() {
+            return !IsInEditMode;
         }
 
         #endregion

@@ -120,7 +120,6 @@
     <Compile Include="Converters\FileSizeConverter.cs" />
     <Compile Include="Converters\NormalizeTextConverter.cs" />
     <Compile Include="Interop\BrowseForFolder.cs" />
-    <Compile Include="Commands.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\BorderGapMaskConverter.cs" />

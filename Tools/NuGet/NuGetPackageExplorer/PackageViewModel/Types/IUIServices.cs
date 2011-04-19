@@ -18,6 +18,8 @@ namespace PackageExplorerViewModel.Types {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         bool OpenRenameDialog(string currentName, out string newName);
 
+        bool OpenPublishDialog(object viewModel);
+
         bool Confirm(string message);
         bool Confirm(string message, bool isWarning);
         bool? ConfirmWithCancel(string message);
