@@ -156,5 +156,15 @@ namespace PackageExplorer {
             var result = dialog.ShowDialog();
             return result ?? false;
         }
+
+
+        public bool OpenFolderDialog(string title, string initialPath, out string selectedPath) {
+            BrowseForFolder dialog = new BrowseForFolder();
+            selectedPath = dialog.SelectFolder(
+                title,
+                initialPath,
+                new System.Windows.Interop.WindowInteropHelper(Window.Value).Handle);
+            return !String.IsNullOrEmpty(selectedPath);
+        }
     }
 }
