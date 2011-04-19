@@ -156,9 +156,6 @@
   <data name="Dialog_OnlineProviderNoItem" xml:space="preserve">
     <value>No packages found in the current package source.</value>
   </data>
-  <data name="Dialog_OperationSucceeded" xml:space="preserve">
-    <value>Operation succeeded.</value>
-  </data>
   <data name="Dialog_PackageDisclaimer" xml:space="preserve">
     <value>Each item above may have sub-dependencies subject to additional license agreements.</value>
   </data>

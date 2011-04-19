@@ -132,9 +132,6 @@
   <data name="Cmdlet_PackageCreated" xml:space="preserve">
     <value>Package file successfully created...</value>
   </data>
-  <data name="Cmdlet_PackageForSolutionOnly" xml:space="preserve">
-    <value>The package '{0}' only applies to the solution and not to a project. Remove the -Project parameter.</value>
-  </data>
   <data name="Cmdlet_ProjectNotFound" xml:space="preserve">
     <value>Project '{0}' is not found.</value>
   </data>
@@ -167,9 +164,6 @@
   </data>
   <data name="Cmdlet_NoRecentPackages" xml:space="preserve">
     <value>There are no recently installed packages.</value>
-  </data>
-  <data name="Cmdlet_GetPackageProgress" xml:space="preserve">
-    <value>Retrieving packages...</value>
   </data>
   <data name="Cmdlet_InvalidProjectManagerInstance" xml:space="preserve">
     <value>The specified IProjectManager instance is not recognized.</value>

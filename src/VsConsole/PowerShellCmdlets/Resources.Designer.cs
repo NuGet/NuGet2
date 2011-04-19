@@ -79,15 +79,6 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Retrieving packages....
-        /// </summary>
-        internal static string Cmdlet_GetPackageProgress {
-            get {
-                return ResourceManager.GetString("Cmdlet_GetPackageProgress", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You are downloading {0} from {1}, the license agreement to which is available at {2}. Check the package for additional dependencies, which may come with their own license agreement(s). Your use of the package and dependencies constitutes your acceptance of their license agreements. If you do not accept the license agreement(s), then delete the relevant components from your device..
         /// </summary>
         internal static string Cmdlet_InstallSuccessDisclaimerText {
@@ -210,15 +201,6 @@ namespace NuGet.PowerShell.Commands {
         internal static string Cmdlet_PackageCreated {
             get {
                 return ResourceManager.GetString("Cmdlet_PackageCreated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The package &apos;{0}&apos; only applies to the solution and not to a project. Remove the -Project parameter..
-        /// </summary>
-        internal static string Cmdlet_PackageForSolutionOnly {
-            get {
-                return ResourceManager.GetString("Cmdlet_PackageForSolutionOnly", resourceCulture);
             }
         }
         
