@@ -30,17 +30,15 @@
         <CommandBinding Command="Open" Executed="OpenMenuItem_Click" />
         <CommandBinding Command="Close" Executed="CloseMenuItem_Click" CanExecute="CanExecuteCloseCommand" />
         <CommandBinding Command="GoToPage" Executed="OpenExternalLink" />
-        <CommandBinding Command="{x:Static self:Commands.PublishToFeedCommand}" Executed="OnPublishButtonClick" CanExecute="CanPublishToFeedCommand" />
     </Window.CommandBindings>
     
     <Window.InputBindings>
         <KeyBinding Key="K" Modifiers="Control" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" />
         <KeyBinding Key="G" Modifiers="Control" Command="Open" CommandParameter="Feed" />
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="Save" />
-
+        <KeyBinding Key="P" Modifiers="Control" Command="{Binding PublishCommand, FallbackValue={StaticResource DisabledCommand}}" />
         <KeyBinding Key="F2" Command="{Binding RenameContentCommand}" />
         <KeyBinding Key="Del" Command="{Binding DeleteContentCommand}" />
-
     </Window.InputBindings>
     
     <DockPanel x:Name="RootLayout" LastChildFill="False">
@@ -83,7 +81,7 @@
                         </Style>
                     </MenuItem.Style>
                 </MenuItem>
-                <self:GrayscaleMenuItem Command="{x:Static self:Commands.PublishToFeedCommand}" Header="_Publish...">
+                <self:GrayscaleMenuItem Command="{Binding PublishCommand, FallbackValue={StaticResource DisabledCommand}}" Header="_Publish..." InputGestureText="Ctrl+P">
                     <self:GrayscaleMenuItem.Icon>
                         <self:GrayscaleImage Source="Images/PublishToWebHS.png" />
                     </self:GrayscaleMenuItem.Icon>

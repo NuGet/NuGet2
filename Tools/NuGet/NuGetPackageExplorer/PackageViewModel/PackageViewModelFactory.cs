@@ -31,8 +31,14 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [Import]
+        public ISettingsManager SettingsManager {
+            get;
+            set;
+        }
+
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
-            return new PackageViewModel(package, packageSource, MruManager, UIServices, EditorService.Value);
+            return new PackageViewModel(package, packageSource, MruManager, UIServices, EditorService.Value, SettingsManager);
         }
 
         public PackageChooserViewModel CreatePackageChooserViewModel() {

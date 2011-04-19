@@ -138,6 +138,9 @@
   <data name="FileNameConflictWithExistingDirectory" xml:space="preserve">
     <value>The new file has the same name as another folder.</value>
   </data>
+  <data name="NoNetworkConnection" xml:space="preserve">
+    <value>Network connection is not detected.</value>
+  </data>
   <data name="OpenExecutableScriptWarning" xml:space="preserve">
     <value>Opening this file can potentially harm your computer. Do you want to continue?</value>
   </data>

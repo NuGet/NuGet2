@@ -24,10 +24,7 @@ namespace PackageExplorer {
         private readonly IPackageViewModelFactory _packageViewModelFactory;
 
         [Import]
-        public ISettingsManager SettingsManager {
-            get;
-            set;
-        }
+        public ISettingsManager SettingsManager { get; set; }
 
         [Import]
         public IMruPackageSourceManager PackageSourceManager { get; set; }
@@ -330,46 +327,6 @@ namespace PackageExplorer {
             if (uri != null) {
                 UriHelper.OpenExternalLink(uri);
             }
-        }
-
-        private void OnPublishButtonClick(object sender, RoutedEventArgs e) {
-            if (!NetworkInterface.GetIsNetworkAvailable()) {
-                UIServices.Show(
-                    PackageExplorer.Resources.Resources.NoNetworkConnection,
-                    MessageLevel.Warning);
-                return;
-            }
-
-            var viewModel = (PackageViewModel)DataContext;
-
-            if (!viewModel.IsValid) {
-                UIServices.Show(
-                    PackageExplorer.Resources.Resources.PackageHasNoFile,
-                    MessageLevel.Warning);
-                return;
-            }
-
-            string storedKey = SettingsManager.ReadApiKeyFromSettingFile();
-            var publishPackageViewModel = new PublishPackageViewModel(viewModel) {
-                PublishKey = storedKey
-            };
-
-            var dialog = new PublishPackageWindow { Owner = this };
-            dialog.DataContext = publishPackageViewModel;
-            dialog.ShowDialog();
-
-            string newKey = publishPackageViewModel.PublishKey;
-            if (!String.IsNullOrEmpty(newKey)) {
-                SettingsManager.WriteApiKeyToSettingFile(newKey);
-            }
-        }
-
-        private void CanPublishToFeedCommand(object sender, System.Windows.Input.CanExecuteRoutedEventArgs e) {
-            var model = DataContext as PackageViewModel;
-            bool canExecute = model == null ? false : !model.IsInEditMode;
-
-            e.CanExecute = canExecute;
-            e.Handled = true;
         }
 
         private void CloseMenuItem_Click(object sender, ExecutedRoutedEventArgs e) {
