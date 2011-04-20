@@ -85,9 +85,9 @@ namespace PackageExplorer {
             }
         }
 
-        public DataServicePackage SelectedPackage {
+        public PackageInfo SelectedPackage {
             get {
-                return PackageGrid.SelectedItem as DataServicePackage;
+                return PackageGrid.SelectedItem as PackageInfo;
             }
         }
 

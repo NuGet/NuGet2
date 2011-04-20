@@ -10,19 +10,20 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel.Types;
+using System.Globalization;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
         private const int PageSize = 15;
-        private IPackageRepository _packageRepository;
-        private IQueryable<IPackage> _currentQuery;
+        private DataServicePackageRepository _packageRepository;
+        private IQueryable<PackageInfo> _currentQuery;
         private string _currentSearch;
         private IMruPackageSourceManager _packageSourceManager;
         private IProxyService _proxyService;
         private ICredentialProvider _credentialProvider;
 
         public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager) {
-            Packages = new ObservableCollection<IPackage>();
+            Packages = new ObservableCollection<PackageInfo>();
             NavigationCommand = new NavigateCommand(this);
             SortCommand = new RelayCommand<string>(Sort, column => TotalPackageCount > 0);
             SearchCommand = new RelayCommand<string>(Search);
@@ -30,18 +31,16 @@ namespace PackageExplorerViewModel {
             ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
             _credentialProvider = new AutoDiscoverCredentialProvider();
             _proxyService = new ProxyService(_credentialProvider);
-           
+
             _packageSourceManager = packageSourceManager;
         }
 
         private string _sortColumn;
 
-        public string SortColumn
-        {
+        public string SortColumn {
             get { return _sortColumn; }
             set {
-                if (_sortColumn != value)
-                {
+                if (_sortColumn != value) {
                     _sortColumn = value;
                     OnPropertyChanged("SortColumn");
                 }
@@ -50,12 +49,10 @@ namespace PackageExplorerViewModel {
 
         private ListSortDirection _sortDirection;
 
-        public ListSortDirection SortDirection
-        {
+        public ListSortDirection SortDirection {
             get { return _sortDirection; }
             set {
-                if (_sortDirection != value)
-                {
+                if (_sortDirection != value) {
                     _sortDirection = value;
                     OnPropertyChanged("SortDirection");
                 }
@@ -64,12 +61,10 @@ namespace PackageExplorerViewModel {
 
         private int _sortCounter;
 
-        public int SortCounter
-        {
+        public int SortCounter {
             get { return _sortCounter; }
             set {
-                if (_sortCounter != value)
-                {
+                if (_sortCounter != value) {
                     _sortCounter = value;
                     OnPropertyChanged("SortCounter");
                 }
@@ -95,7 +90,7 @@ namespace PackageExplorerViewModel {
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private IPackageRepository GetPackageRepository() {
+        private DataServicePackageRepository GetPackageRepository() {
             if (_packageRepository == null || _packageRepository.Source != PackageSource) {
                 try {
                     Uri packageUri = new Uri(PackageSource);
@@ -110,14 +105,13 @@ namespace PackageExplorerViewModel {
             return _packageRepository;
         }
 
-        public ObservableCollection<string> PackageSources
-        {
+        public ObservableCollection<string> PackageSources {
             get { return _packageSourceManager.PackageSources; }
         }
 
         public string PackageSource {
             get {
-                return _packageSourceManager.ActivePackageSource; 
+                return _packageSourceManager.ActivePackageSource;
             }
             private set {
                 _packageSourceManager.ActivePackageSource = value;
@@ -163,12 +157,10 @@ namespace PackageExplorerViewModel {
 
         private string _statusContent;
 
-        public string StatusContent
-        {
+        public string StatusContent {
             get { return _statusContent; }
             set {
-                if (_statusContent != value)
-                {
+                if (_statusContent != value) {
                     _statusContent = value;
                     OnPropertyChanged("StatusContent");
                 }
@@ -193,7 +185,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public ObservableCollection<IPackage> Packages { get; private set; }
+        public ObservableCollection<PackageInfo> Packages { get; private set; }
 
         public NavigateCommand NavigationCommand { get; private set; }
         public ICommand SortCommand { get; private set; }
@@ -215,7 +207,7 @@ namespace PackageExplorerViewModel {
             StatusContent = "Loading...";
             IsEditable = false;
 
-            Task.Factory.StartNew<Tuple<IList<IPackage>, int>>(QueryPackages, subQuery).ContinueWith(
+            Task.Factory.StartNew<Tuple<IList<PackageInfo>, int>>(QueryPackages, subQuery).ContinueWith(
                 result => {
                     if (result.IsFaulted) {
                         AggregateException exception = result.Exception;
@@ -234,9 +226,20 @@ namespace PackageExplorerViewModel {
                 uiScheduler);
         }
 
-        private Tuple<IList<IPackage>, int> QueryPackages(object state) {
-            var subQuery = (IQueryable<IPackage>)state;
-            IList<IPackage> result = subQuery.ToList();
+        private Tuple<IList<PackageInfo>, int> QueryPackages(object state) {
+            var subQuery = (IQueryable<PackageInfo>)state;
+            IList<PackageInfo> result = subQuery.ToList();
+            foreach (PackageInfo entity in result) {
+                // HACK HACK: Have to hard code the download url here because I can't figure out
+                // how to get the download url when querying odata through projection operation.
+                string url = String.Format(
+                    CultureInfo.InvariantCulture,
+                    "http://packages.nuget.org/v1/Package/Download/{0}/{1}",
+                    entity.Id,
+                    entity.Version);
+
+                entity.DownloadUrl = new Uri(url, UriKind.Absolute);
+            }
 
             int totalPackageCount = _currentQuery.Count();
 
@@ -247,11 +250,10 @@ namespace PackageExplorerViewModel {
             StatusContent = "Connecting to package source...";
 
             TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            Task.Factory.StartNew<IPackageRepository>(GetPackageRepository).ContinueWith(
+            Task.Factory.StartNew<DataServicePackageRepository>(GetPackageRepository).ContinueWith(
                 task => {
-                    IPackageRepository repository = task.Result;
-                    if (repository == null)
-                    {
+                    DataServicePackageRepository repository = task.Result;
+                    if (repository == null) {
                         StatusContent = String.Empty;
                         ClearPackages();
                         return;
@@ -284,7 +286,14 @@ namespace PackageExplorerViewModel {
                             break;
                     }
 
-                    _currentQuery = query;
+                    _currentQuery = query.Select(p => new PackageInfo { 
+                        Id = p.Id, 
+                        Version = p.Version, 
+                        Authors = p.Authors, 
+                        VersionRating = p.VersionRating, 
+                        VersionDownloadCount = p.VersionDownloadCount,
+                        PackageHash = p.PackageHash
+                    });
 
                     // every time the search query changes, we reset to page 0
                     LoadPage(0);
@@ -344,10 +353,10 @@ namespace PackageExplorerViewModel {
         }
 
         private void ClearPackages() {
-            ShowPackages(Enumerable.Empty<IPackage>(), 0, 0);
+            ShowPackages(Enumerable.Empty<PackageInfo>(), 0, 0);
         }
 
-        private void ShowPackages(IEnumerable<IPackage> packages, int totalPackageCount, int page) {
+        private void ShowPackages(IEnumerable<PackageInfo> packages, int totalPackageCount, int page) {
             TotalPackageCount = totalPackageCount;
 
             CurrentPage = page;
