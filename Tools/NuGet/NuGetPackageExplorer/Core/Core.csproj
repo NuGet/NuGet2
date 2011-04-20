@@ -79,6 +79,7 @@
     <Compile Include="Packages\SimplePackage.cs" />
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
+    <Compile Include="Repositories\CredentialProviderExtensions.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
     <Compile Include="Repositories\DefaultCredentialProvider.cs" />
     <Compile Include="Repositories\ICredentialProvider.cs" />
