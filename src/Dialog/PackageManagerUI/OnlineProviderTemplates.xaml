@@ -92,14 +92,10 @@
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">                
             <StackPanel Margin="8">                
                 <!-- Authors -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Grid.Column="1" Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
-                </Grid>
+                <DockPanel>
+                    <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                </DockPanel>
 
                 <!-- Id -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
@@ -115,6 +111,12 @@
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                </StackPanel>
+
+                <!-- Last Updated -->
+                <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.LastUpdated, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastUpdatedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding PackageIdentity.LastUpdated, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- Download count -->
@@ -159,6 +161,12 @@
                         <Run Text="{x:Static resources:Resources.Dialog_ReportAbuse}" />
                     </Hyperlink>
                 </TextBlock>
+                
+                <!-- Tags -->
+                <DockPanel Margin="0,3,0,0" Visibility="{Binding PackageIdentity.Tags, Converter={StaticResource NullToVisibilityConverter}}">
+                    <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TagLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding PackageIdentity.Tags}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                </DockPanel>
 
                 <!-- Description -->
                 <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >

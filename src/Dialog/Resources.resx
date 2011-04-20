@@ -267,4 +267,10 @@
   <data name="Dialog_RateItLabel" xml:space="preserve">
     <value>Rate It</value>
   </data>
+  <data name="Dialog_TagLabel" xml:space="preserve">
+    <value>Tags:</value>
+  </data>
+  <data name="Dialog_LastUpdatedLabel" xml:space="preserve">
+    <value>Last Updated:</value>
+  </data>
 </root>
