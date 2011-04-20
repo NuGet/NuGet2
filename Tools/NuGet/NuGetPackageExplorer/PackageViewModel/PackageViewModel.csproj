@@ -39,6 +39,9 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Kerr.Credentials">
+      <HintPath>..\Kerr.Credentials.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -55,6 +58,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
+    <Compile Include="PackageChooser\AutoDiscoverCredentialProvider.cs" />
     <Compile Include="PackageHelper.cs" />
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />

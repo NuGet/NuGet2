@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <!--<RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>-->
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -80,12 +80,16 @@
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
+    <Compile Include="Repositories\DefaultCredentialProvider.cs" />
+    <Compile Include="Repositories\ICredentialProvider.cs" />
     <Compile Include="Repositories\IPackageRepository.cs" />
     <Compile Include="Repositories\MachineCache.cs" />
+    <Compile Include="Repositories\IProxyService.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
     <Compile Include="Repositories\PackageRepositoryFactory.cs" />
     <Compile Include="Extensions\AssemblyExtensions.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="Repositories\ProxyService.cs" />
     <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Utility\GalleryServer.cs" />
     <Compile Include="Utility\HttpClient.cs" />
@@ -110,6 +114,7 @@
     <Compile Include="Utility\PackageUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Utility\RedirectedHttpClient.cs" />
     <Compile Include="Utility\UriUtility.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\VersionUtility.cs" />

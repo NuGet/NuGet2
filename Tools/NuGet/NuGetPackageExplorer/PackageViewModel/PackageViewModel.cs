@@ -619,7 +619,7 @@ namespace PackageExplorerViewModel {
             }
 
             string storedKey = _settingsManager.ReadApiKeyFromSettingFile();
-            var publishPackageViewModel = new PublishPackageViewModel(this) {
+            var publishPackageViewModel = new PublishPackageViewModel(_settingsManager.PublishPackageLocation, this) {
                 PublishKey = storedKey
             };
 

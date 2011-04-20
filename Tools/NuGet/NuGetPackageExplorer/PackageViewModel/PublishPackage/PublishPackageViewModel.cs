@@ -1,23 +1,27 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using NuGet;
 
 namespace PackageExplorerViewModel {
-
     public class PublishPackageViewModel : ViewModelBase, IObserver<int> {
         private readonly IPackageMetadata _package;
         private readonly Lazy<Stream> _packageStream;
+        private readonly IProxyService _proxyService;
+        private readonly string _publishUrl;
 
-        public PublishPackageViewModel(PackageViewModel viewModel) {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#")]
+        public PublishPackageViewModel(string publishUrl, PackageViewModel viewModel) {
             if (viewModel == null) {
                 throw new ArgumentNullException("viewModel");
             }
-
+            _publishUrl = publishUrl;
             _package = viewModel.PackageMetadata;
             _packageStream = new Lazy<Stream>(viewModel.GetCurrentPackageStream);
+            _proxyService = new ProxyService(new AutoDiscoverCredentialProvider());
         }
 
-        private string _publishKey; 
+        private string _publishKey;
 
         public string PublishKey {
             get { return _publishKey; }
@@ -89,12 +93,10 @@ namespace PackageExplorerViewModel {
 
         private bool _canPublish = true;
 
-        public bool CanPublish
-        {
+        public bool CanPublish {
             get { return _canPublish; }
             set {
-                if (_canPublish != value)
-                {
+                if (_canPublish != value) {
                     _canPublish = value;
                     OnPropertyChanged("CanPublish");
                 }
@@ -106,7 +108,10 @@ namespace PackageExplorerViewModel {
         public GalleryServer GalleryServer {
             get {
                 if (_uploadHelper == null) {
-                    _uploadHelper = new GalleryServer(HttpUtility.CreateUserAgentString(Constants.UserAgentClient));
+                    _uploadHelper = new GalleryServer(
+                        HttpUtility.CreateUserAgentString(Constants.UserAgentClient), 
+                        _publishUrl, 
+                        _proxyService);
                 }
                 return _uploadHelper;
             }
@@ -134,7 +139,14 @@ namespace PackageExplorerViewModel {
             Stream fileStream = _packageStream.Value;
             fileStream.Seek(0, SeekOrigin.Begin);
 
-            GalleryServer.CreatePackage(PublishKey, fileStream, this, PushOnly == true? (IPackageMetadata)null : _package);
+            try {
+                GalleryServer.CreatePackage(PublishKey, fileStream, this, PushOnly == true ? (IPackageMetadata)null : _package);
+            }
+            catch (WebException e) {
+                if (WebExceptionStatus.Timeout == e.Status) {
+                    OnError(e);
+                }
+            }
         }
 
         public void OnCompleted() {

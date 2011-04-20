@@ -3,13 +3,11 @@ using System.Net;
 
 namespace NuGet {
     public interface IHttpClient {
-        string UserAgent {
-            get;
-            set;
-        }
+        string UserAgent { get; set; }
+        Uri Uri { get; set; }
+        IWebProxy Proxy { get; set; }
 
-        WebRequest CreateRequest(Uri uri);
-        void InitializeRequest(WebRequest request);
-        Uri GetRedirectedUri(Uri uri);
+        WebRequest CreateRequest();
+        void InitializeRequest(WebRequest webRequest);
     }
 }

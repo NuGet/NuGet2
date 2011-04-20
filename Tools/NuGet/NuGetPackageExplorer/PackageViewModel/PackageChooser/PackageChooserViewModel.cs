@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -17,6 +18,8 @@ namespace PackageExplorerViewModel {
         private IQueryable<IPackage> _currentQuery;
         private string _currentSearch;
         private IMruPackageSourceManager _packageSourceManager;
+        private IProxyService _proxyService;
+        private ICredentialProvider _credentialProvider;
 
         public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager) {
             Packages = new ObservableCollection<IPackage>();
@@ -25,6 +28,8 @@ namespace PackageExplorerViewModel {
             SearchCommand = new RelayCommand<string>(Search);
             LoadedCommand = new RelayCommand(() => Sort("VersionDownloadCount", ListSortDirection.Descending));
             ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
+            _credentialProvider = new AutoDiscoverCredentialProvider();
+            _proxyService = new ProxyService(_credentialProvider);
            
             _packageSourceManager = packageSourceManager;
         }
@@ -93,7 +98,10 @@ namespace PackageExplorerViewModel {
         private IPackageRepository GetPackageRepository() {
             if (_packageRepository == null || _packageRepository.Source != PackageSource) {
                 try {
-                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(PackageSource);
+                    Uri packageUri = new Uri(PackageSource);
+                    IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
+                    IHttpClient packageSourceClient = new RedirectedHttpClient(packageUri, packageSourceProxy);
+                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(packageSourceClient);
                 }
                 catch (Exception) {
                     _packageRepository = null;
