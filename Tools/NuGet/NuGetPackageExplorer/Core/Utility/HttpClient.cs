@@ -1,44 +1,46 @@
 ﻿using System;
 using System.Net;
-using System.Net.Cache;
+using System.Globalization;
 
 namespace NuGet {
     public class HttpClient : IHttpClient {
+        private Uri _uri;
 
-        public string UserAgent {
-            get;
-            set;
+        public HttpClient(Uri uri) : this(uri, null) { 
         }
 
-        public WebRequest CreateRequest(Uri uri) {
-            WebRequest request = WebRequest.Create(uri);
+        public HttpClient(Uri uri, IWebProxy proxy) {
+            if (uri == null) {
+                throw new ArgumentNullException("uri");
+            }
+            _uri = uri;
+            Proxy = proxy;
+            UserAgent = HttpUtility.CreateUserAgentString("NuGet Package Explorer");
+        }
+
+        public virtual WebRequest CreateRequest() {
+            WebRequest request = WebRequest.Create(Uri);
             InitializeRequest(request);
             return request;
         }
 
-        public void InitializeRequest(WebRequest request) {
-            var httpRequest = request as HttpWebRequest;
+        public void InitializeRequest(WebRequest webRequest) {
+            var httpRequest = webRequest as HttpWebRequest;
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
                 httpRequest.Headers[HttpRequestHeader.AcceptEncoding] = "gzip, deflate";
                 httpRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                // default Timeout period is 100 seconds
+                httpRequest.Timeout = 1000 * 200;
             }
-
-            request.UseDefaultCredentials = true;
-            if (request.Proxy != null) {
-                // If we are going through a proxy then just set the default credentials
-                request.Proxy.Credentials = CredentialCache.DefaultCredentials;
-            }
+            webRequest.Proxy = Proxy;
         }
 
-        public Uri GetRedirectedUri(Uri uri) {
-            WebRequest request = CreateRequest(uri);
-            using (WebResponse response = request.GetResponse()) {
-                if (response == null) {
-                    return null;
-                }
-                return response.ResponseUri;
-            }
+        public string UserAgent { get; set; }
+        public virtual Uri Uri {
+            get { return _uri; }
+            set { _uri = value; }
         }
+        public IWebProxy Proxy { get; set; }
     }
 }
