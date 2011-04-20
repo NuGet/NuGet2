@@ -37,7 +37,8 @@ Register-TabExpansion 'Install-Package' @{
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
 
-        $parameters.Remote = true
+        $parameters.Remote = $true
+        $parameters.AllVersions = $true
         GetPackageVersions $parameters $context 
     }
 }
@@ -80,7 +81,8 @@ Register-TabExpansion 'Update-Package' @{
         $parameters = @{}
         if ($context.id) { $parameters.filter = $context.id }
 
-        $parameters.Remote = true
+        $parameters.Remote = $true
+        $parameters.AllVersions = $true
         GetPackageVersions $parameters $context
     }
 }
@@ -98,7 +100,8 @@ Register-TabExpansion 'Open-PackagePage' @{
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
 
-        $parameters.Remote = true
+        $parameters.Remote = $true
+        $parameters.AllVersions = $true
         GetPackageVersions $parameters $context 
     }
 }
@@ -130,7 +133,7 @@ function GetPackageIds($packages) {
 }
 
 function GetPackageVersions($parameters, $context) {
-    Find-Package @parameters -ExactMatch -AllVersions -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
+    Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
         # Convert to version if the we're looking at the version as a string
         if($_ -is [string]) { 
             [Version]::Parse($_) 
