@@ -19,6 +19,8 @@ namespace PackageExplorerViewModel.Types {
         bool OpenRenameDialog(string currentName, out string newName);
 
         bool OpenPublishDialog(object viewModel);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        bool OpenFolderDialog(string title, string initialPath, out string selectedPath);
 
         bool Confirm(string message);
         bool Confirm(string message, bool isWarning);

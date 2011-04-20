@@ -18,7 +18,7 @@ namespace PackageExplorerViewModel {
         private ICommand _saveCommand, _editCommand, _cancelEditCommand, _applyEditCommand, _viewContentCommand, _saveContentCommand;
         private ICommand _addContentFolderCommand, _addContentFileCommand, _addNewFolderCommand, _openWithContentFileCommand;
         private RelayCommand<object> _openContentFileCommand, _deleteContentCommand, _renameContentCommand;
-        private RelayCommand _publishCommand;
+        private RelayCommand _publishCommand, _exportCommand;
         private readonly IMruManager _mruManager;
         private readonly IUIServices _uiServices;
         private readonly IPackageEditorService _editorService;
@@ -220,7 +220,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public void Export(string rootPath) {
+        private void Export(string rootPath) {
             if (rootPath == null) {
                 throw new ArgumentNullException("rootPath");
             }
@@ -632,6 +632,41 @@ namespace PackageExplorerViewModel {
         }
 
         private bool PublishCanExecute() {
+            return !IsInEditMode;
+        }
+
+        #endregion
+
+        #region ExportCommand
+
+        public RelayCommand ExportCommand {
+            get {
+                if (_exportCommand == null) {
+                    _exportCommand = new RelayCommand(ExportExecute, ExportCanExecute);
+                }
+                return _exportCommand;
+            }
+        }
+
+        private string _folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        private void ExportExecute() {
+            string rootPath;
+            if (_uiServices.OpenFolderDialog("Choose a folder to export package to:", _folderPath, out rootPath)) {
+                try {
+                    Export(rootPath);
+                    UIServices.Show(Resources.ExportPackageSuccess, MessageLevel.Information);
+                }
+                catch (Exception ex) {
+                    UIServices.Show(ex.Message, MessageLevel.Error);
+                }
+
+                _folderPath = rootPath;
+            }
+        }
+
+        private bool ExportCanExecute() {
             return !IsInEditMode;
         }
 

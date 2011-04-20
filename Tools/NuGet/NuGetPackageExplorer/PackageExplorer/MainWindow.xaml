@@ -70,17 +70,7 @@
                 <MenuItem Header="Save _As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveAs" />
                 <MenuItem Header="Save _Metadata As..." Command="{Binding SaveCommand, FallbackValue={StaticResource DisabledCommand}}" CommandParameter="SaveMetadataAs" />
                 <Separator />
-                <MenuItem Header="Expor_t..." Click="OnExportMenuItem_Click">
-                    <MenuItem.Style>
-                        <Style TargetType="{x:Type MenuItem}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsInEditMode, FallbackValue=True}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Style>
-                </MenuItem>
+                <MenuItem Header="Expor_t..." Command="{Binding ExportCommand, FallbackValue={StaticResource DisabledCommand}}" />
                 <self:GrayscaleMenuItem Command="{Binding PublishCommand, FallbackValue={StaticResource DisabledCommand}}" Header="_Publish..." InputGestureText="Ctrl+P">
                     <self:GrayscaleMenuItem.Icon>
                         <self:GrayscaleImage Source="Images/PublishToWebHS.png" />

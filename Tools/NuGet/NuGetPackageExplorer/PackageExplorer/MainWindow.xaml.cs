@@ -343,33 +343,6 @@ namespace PackageExplorer {
             e.Handled = true;
         }
 
-        private string _folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-        private void OnExportMenuItem_Click(object sender, RoutedEventArgs e) {
-            BrowseForFolder dialog = new BrowseForFolder();
-            string rootPath = dialog.SelectFolder(
-                "Choose a folder to export package to:",
-                _folderPath,
-                new System.Windows.Interop.WindowInteropHelper(this).Handle);
-
-            if (!String.IsNullOrEmpty(rootPath)) {
-                var model = (PackageViewModel)DataContext;
-                if (model != null) {
-                    try {
-                        model.Export(rootPath);
-                        UIServices.Show("The package has been exported successfully.", MessageLevel.Information);
-                    }
-                    catch (Exception ex) {
-                        UIServices.Show(ex.Message, MessageLevel.Error);
-                    }
-                }
-
-                _folderPath = rootPath;
-            }
-
-            e.Handled = true;
-        }
-
         private void RecentFileMenuItem_Click(object sender, RoutedEventArgs e) {
             bool canceled = AskToSaveCurrentFile();
             if (canceled) {

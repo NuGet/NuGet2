@@ -135,6 +135,9 @@
   <data name="EditFormHasInvalidInput" xml:space="preserve">
     <value>The operation cannot be completed because the edit form has some invalid input.</value>
   </data>
+  <data name="ExportPackageSuccess" xml:space="preserve">
+    <value>This package has been exported successfully.</value>
+  </data>
   <data name="FileNameConflictWithExistingDirectory" xml:space="preserve">
     <value>The new file has the same name as another folder.</value>
   </data>
