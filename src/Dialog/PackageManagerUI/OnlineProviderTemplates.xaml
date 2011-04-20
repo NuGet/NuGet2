@@ -161,16 +161,16 @@
                         <Run Text="{x:Static resources:Resources.Dialog_ReportAbuse}" />
                     </Hyperlink>
                 </TextBlock>
-                
+
+                <!-- Description -->
+                <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >
+                </self:TextBlockControl>
+
                 <!-- Tags -->
                 <DockPanel Margin="0,3,0,0" Visibility="{Binding PackageIdentity.Tags, Converter={StaticResource NullToVisibilityConverter}}">
                     <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TagLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl Text="{Binding PackageIdentity.Tags}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
                 </DockPanel>
-
-                <!-- Description -->
-                <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >
-                </self:TextBlockControl>
 
                 <!-- Dependencies list -->
                 <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DependenciesLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
