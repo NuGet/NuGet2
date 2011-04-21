@@ -131,7 +131,6 @@ namespace PackageExplorer {
                 image);
         }
 
-
         public bool OpenRenameDialog(string currentName, out string newName) {
             var dialog = new RenameWindow {
                 NewName = currentName,
@@ -156,7 +155,6 @@ namespace PackageExplorer {
             var result = dialog.ShowDialog();
             return result ?? false;
         }
-
 
         public bool OpenFolderDialog(string title, string initialPath, out string selectedPath) {
             BrowseForFolder dialog = new BrowseForFolder();
