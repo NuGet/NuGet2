@@ -33,6 +33,8 @@
                 </Hyperlink>
                 <Run Text=")" />
             </TextBlock>
+            <TextBlock Margin="0,10,0,0" Text="Contributors: iLya Lozovyy, Brian Hartung">
+            </TextBlock>
             <TextBlock Margin="0,10,0,0">
                 <Run Text="Syntax highlighting viewer powered by " />
                 <Hyperlink NavigateUri="http://colorcode.codeplex.com" Click="Hyperlink_Click">
