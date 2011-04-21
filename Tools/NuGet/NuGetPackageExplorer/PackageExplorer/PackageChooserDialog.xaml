@@ -158,9 +158,9 @@
 
         <TextBlock Grid.Row="3" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="1">
-            <Button IsDefault="True" IsEnabled="{Binding SelectedItem, ElementName=PackageGrid, Converter={StaticResource nullToBoolConverter}}" Content="_OK" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OkButton_Click" />
-            <Button x:Name="CancelButton" IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
-        </StackPanel>
+        <UniformGrid HorizontalAlignment="Right" Grid.Row="3" Grid.Column="1" Rows="1" Columns="2">
+            <Button IsDefault="True" IsEnabled="{Binding SelectedItem, ElementName=PackageGrid, Converter={StaticResource nullToBoolConverter}}" Content="_OK" Margin="5" Click="OkButton_Click" />
+            <Button IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
+        </UniformGrid>
     </Grid>
 </self:StandardDialog>  

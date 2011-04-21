@@ -81,7 +81,7 @@
         <!-- Status text -->
         <TextBlock x:Name="StatusText" Style="{StaticResource StatusTextStyle}" Text="{Binding Status}" Margin="0,5" Visibility="{Binding Status, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}" Grid.Row="5" TextWrapping="Wrap" />
 
-        <StackPanel Margin="0,5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="6">
+        <UniformGrid Margin="0,5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="6" Rows="1" Columns="2">
             <Button x:Name="PublishButton" IsDefault="True" Padding="14,0" Content="_Publish" Margin="5" Click="OnPublishButtonClick">
                 <Button.IsEnabled>
                     <MultiBinding Converter="{StaticResource andConverter}">
@@ -90,7 +90,7 @@
                     </MultiBinding>
                 </Button.IsEnabled>
             </Button>
-            <Button x:Name="CancelButton" IsCancel="True" Content="_Close" Margin="5,5,0,5" Click="CancelButton_Click" Width="{Binding ActualWidth, ElementName=PublishButton}" />
-        </StackPanel>
+            <Button IsCancel="True" Content="_Close" Margin="5,5,0,5" Click="CancelButton_Click" Width="{Binding ActualWidth, ElementName=PublishButton}" />
+        </UniformGrid>
     </Grid>
 </self:StandardDialog>
