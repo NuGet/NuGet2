@@ -10,9 +10,12 @@ namespace NuGet.PowerShell.Commands {
     /// which is used for tab expansion.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification="Will investiage this one.")]
-    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterSetByName)]
     [OutputType(typeof(Project))]
     public class GetProjectCommand : NuGetBaseCommand {
+        private const string ParameterSetByName = "ByName";
+        private const string ParameterSetAllProjects = "AllProjects";
+
         private readonly ISolutionManager _solutionManager;
 
         public GetProjectCommand()
@@ -25,12 +28,12 @@ namespace NuGet.PowerShell.Commands {
             _solutionManager = solutionManager;
         }
 
-        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ByName")]
+        [Parameter(Mandatory = false, Position = 0, ParameterSetName = ParameterSetByName)]
         [ValidateNotNullOrEmpty]
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "PowerShell API requirement")]
         public string[] Name { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = "All")]
+        [Parameter(Mandatory = true, ParameterSetName = ParameterSetAllProjects)]
         public SwitchParameter All { get; set; }
 
         protected override void ProcessRecordCore() {
