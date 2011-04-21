@@ -67,12 +67,6 @@ namespace NuGet {
             }
         }
 
-        //public Uri DownloadUrl {
-        //    get {
-        //        return Context.GetReadStreamUri(this);
-        //    }
-        //}
-
         public DateTimeOffset LastUpdated {
             get;
             set;
@@ -144,11 +138,6 @@ namespace NuGet {
             set;
         }
 
-        //internal DataServiceContext Context {
-        //    get;
-        //    set;
-        //}
-
         public IPackage CorePackage { 
             get; 
             set; 
@@ -192,32 +181,5 @@ namespace NuGet {
         public override string ToString() {
             return this.GetFullName();
         }
-
-        ///// <summary>
-        ///// Parses a dependency from the feed in the format:
-        ///// id:versionSpec or id
-        ///// </summary>
-        //private static PackageDependency ParseDependency(string value) {
-        //    if (String.IsNullOrWhiteSpace(value)) {
-        //        return null;
-        //    }
-
-        //    string[] tokens = value.Trim().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-        //    if (tokens.Length == 0) {
-        //        return null;
-        //    }
-
-        //    // Trim the id
-        //    string id = tokens[0].Trim();
-        //    IVersionSpec versionSpec = null;
-
-        //    if (tokens.Length > 1) {
-        //        // Attempt to parse the version
-        //        VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
-        //    }
-
-        //    return new PackageDependency(id, versionSpec);
-        //}
     }
 }

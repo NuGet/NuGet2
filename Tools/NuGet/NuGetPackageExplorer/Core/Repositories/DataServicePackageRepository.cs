@@ -20,7 +20,6 @@ namespace NuGet {
             _context = new DataServiceContext(client.Uri);
 
             _context.SendingRequest += OnSendingRequest;
-            _context.ReadingEntity += OnReadingEntity;
             _context.IgnoreMissingProperties = true;
         }
 
@@ -30,20 +29,16 @@ namespace NuGet {
             }
         }
 
-        private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {
-            //var package = (DataServicePackage)e.Entity;
-
-            // REVIEW: This is the only way (I know) to download the package on demand
-            // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
-            //package.Context = _context;
-        }
-
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             _client.InitializeRequest(e.Request);
         }
 
         IQueryable<IPackage> IPackageRepository.GetPackages() {
             return GetPackages();
+        }
+
+        public Uri GetReadStreamUri(object entity) {
+            return _context.GetReadStreamUri(entity);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]

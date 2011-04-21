@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using NuGet;
 using PackageExplorerViewModel.Types;
-using System.Globalization;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
@@ -18,6 +17,7 @@ namespace PackageExplorerViewModel {
         private DataServicePackageRepository _packageRepository;
         private IQueryable<PackageInfo> _currentQuery;
         private string _currentSearch;
+        private string _redirectedlPackageSource;
         private IMruPackageSourceManager _packageSourceManager;
         private IProxyService _proxyService;
         private ICredentialProvider _credentialProvider;
@@ -91,7 +91,7 @@ namespace PackageExplorerViewModel {
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private DataServicePackageRepository GetPackageRepository() {
-            if (_packageRepository == null || _packageRepository.Source != PackageSource) {
+            if (_packageRepository == null || _packageRepository.Source != _redirectedlPackageSource) {
                 try {
                     Uri packageUri = new Uri(PackageSource);
                     IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
@@ -115,6 +115,7 @@ namespace PackageExplorerViewModel {
             }
             private set {
                 _packageSourceManager.ActivePackageSource = value;
+                _redirectedlPackageSource = null;
                 OnPropertyChanged("PackageSource");
             }
         }
@@ -230,15 +231,7 @@ namespace PackageExplorerViewModel {
             var subQuery = (IQueryable<PackageInfo>)state;
             IList<PackageInfo> result = subQuery.ToList();
             foreach (PackageInfo entity in result) {
-                // HACK HACK: Have to hard code the download url here because I can't figure out
-                // how to get the download url when querying odata through projection operation.
-                string url = String.Format(
-                    CultureInfo.InvariantCulture,
-                    "http://packages.nuget.org/v1/Package/Download/{0}/{1}",
-                    entity.Id,
-                    entity.Version);
-
-                entity.DownloadUrl = new Uri(url, UriKind.Absolute);
+                entity.DownloadUrl = GetPackageRepository().GetReadStreamUri(entity);
             }
 
             int totalPackageCount = _currentQuery.Count();
