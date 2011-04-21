@@ -24,9 +24,9 @@
         <Label Content="_Name:" Margin="0,3,0,0" Target="{Binding ElementName=NameBox}" VerticalAlignment="Center" />
         <TextBox x:Name="NameBox" Grid.Column="1" VerticalAlignment="Center" />
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0">
-            <Button IsDefault="True" IsEnabled="{Binding Text, ElementName=NameBox, Converter={StaticResource nullToBoolConverter}}" Content="_OK" Margin="5" Width="{Binding ActualWidth, ElementName=CancelButton}" Click="OkButton_Click" />
-            <Button x:Name="CancelButton" IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
-        </StackPanel>
+        <UniformGrid HorizontalAlignment="Right" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0" Rows="1" Columns="2">
+            <Button IsDefault="True" IsEnabled="{Binding Text, ElementName=NameBox, Converter={StaticResource nullToBoolConverter}}" Content="_OK" Margin="5" Click="OkButton_Click" />
+            <Button IsCancel="True" Content="_Cancel" Margin="5,5,0,5" Padding="10,0" Click="CancelButton_Click" />
+        </UniformGrid>
     </Grid>
 </self:StandardDialog>

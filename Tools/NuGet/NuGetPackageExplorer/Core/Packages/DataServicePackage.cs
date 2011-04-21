@@ -14,7 +14,6 @@ namespace NuGet {
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     public class DataServicePackage : IPackage {
         public DataServicePackage() {
-            VersionDownloadCount = -1;
         }
 
         public string Id {
@@ -28,8 +27,9 @@ namespace NuGet {
         }
 
         public string Title {
-            get;
-            set;
+            get {
+                return CorePackage == null ? null : CorePackage.Title;
+            }
         }
 
         public string Authors {
@@ -37,46 +37,40 @@ namespace NuGet {
             set;
         }
 
-        public string Owners {
-            get;
-            set;
-        }
-
-        public Uri IconUrl {
-            get;
-            set;
-        }
-
-        public Uri LicenseUrl {
-            get;
-            set;
-        }
-
-        public Uri ProjectUrl {
-            get;
-            set;
-        }
-
-        public Uri ReportAbuseUrl {
-            get;
-            set;
-        }
-
-        public Uri DownloadUrl {
+        public IEnumerable<string> Owners {
             get {
-                return Context.GetReadStreamUri(this);
+                return CorePackage == null ? null : CorePackage.Owners;
             }
         }
 
-        public DateTimeOffset Published {
-            get;
-            set;
+        public Uri IconUrl {
+            get {
+                return CorePackage == null ? null : CorePackage.IconUrl;
+            }
+        }
+
+        public Uri LicenseUrl {
+            get {
+                return CorePackage == null ? null : CorePackage.LicenseUrl;
+            }
+        }
+
+        public Uri ProjectUrl {
+            get {
+                return CorePackage == null ? null : CorePackage.ProjectUrl;
+            }
+        }
+
+        public Uri ReportAbuseUrl {
+            get {
+                return CorePackage == null ? null : CorePackage.ReportAbuseUrl;
+            }
         }
 
         public DateTimeOffset LastUpdated {
             get;
             set;
-        }
+        }        
 
         public int DownloadCount {
             get;
@@ -104,33 +98,39 @@ namespace NuGet {
         }
 
         public bool RequireLicenseAcceptance {
-            get;
-            set;
+            get {
+                return CorePackage == null ? false : CorePackage.RequireLicenseAcceptance;
+            }
         }
 
         public string Description {
-            get;
-            set;
+            get {
+                return CorePackage == null ? null : CorePackage.Description;
+            }
         }
 
         public string Summary {
-            get;
-            set;
+            get {
+                return CorePackage == null ? null : CorePackage.Summary;
+            }
         }
 
         public string Language {
-            get;
-            set;
+            get {
+                return CorePackage == null ? null : CorePackage.Language;
+            }
         }
 
         public string Tags {
-            get;
-            set;
+            get {
+                return CorePackage == null ? null : CorePackage.Tags;
+            }
         }
 
-        public string Dependencies {
-            get;
-            set;
+        public IEnumerable<PackageDependency> Dependencies {
+            get {
+                return CorePackage == null ? Enumerable.Empty<PackageDependency>() : CorePackage.Dependencies;
+            }
         }
 
         public string PackageHash {
@@ -138,40 +138,14 @@ namespace NuGet {
             set;
         }
 
-        internal DataServiceContext Context {
-            get;
-            set;
+        public IPackage CorePackage { 
+            get; 
+            set; 
         }
-
-        public IPackage CorePackage { get; set; }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {
-                if (String.IsNullOrEmpty(Authors)) {
-                    return Enumerable.Empty<string>();
-                }
-                return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            }
-        }
-
-        IEnumerable<string> IPackageMetadata.Owners {
-            get {
-                if (String.IsNullOrEmpty(Owners)) {
-                    return Enumerable.Empty<string>();
-                }
-                return Owners.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            }
-        }
-
-        IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
-            get {
-                if (String.IsNullOrEmpty(Dependencies)) {
-                    return Enumerable.Empty<PackageDependency>();
-                }
-                return from d in Dependencies.Split('|')
-                       let dependency = ParseDependency(d)
-                       where dependency != null
-                       select dependency;
+                return CorePackage == null ? Enumerable.Empty<string>() : CorePackage.Authors;
             }
         }
 
@@ -206,33 +180,6 @@ namespace NuGet {
 
         public override string ToString() {
             return this.GetFullName();
-        }
-
-        /// <summary>
-        /// Parses a dependency from the feed in the format:
-        /// id:versionSpec or id
-        /// </summary>
-        private static PackageDependency ParseDependency(string value) {
-            if (String.IsNullOrWhiteSpace(value)) {
-                return null;
-            }
-
-            string[] tokens = value.Trim().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (tokens.Length == 0) {
-                return null;
-            }
-
-            // Trim the id
-            string id = tokens[0].Trim();
-            IVersionSpec versionSpec = null;
-
-            if (tokens.Length > 1) {
-                // Attempt to parse the version
-                VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
-            }
-
-            return new PackageDependency(id, versionSpec);
         }
     }
 }

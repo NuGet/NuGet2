@@ -18,7 +18,7 @@
         <StackPanel Orientation="Vertical" Grid.Column="1" Margin="20,0,0,0">
             <TextBlock x:Name="ProductTitle" Text="NuGet Package Explorer Beta 2" FontWeight="Bold" />
             
-            <TextBlock Text="Compatible with NuGet 1.2 and below." Margin="0,4,0,4"/>
+            <TextBlock Text="Compatible with NuGet 1.3 and below." Margin="0,4,0,4"/>
             
             <TextBlock>
                 <Hyperlink NavigateUri="http://nuget.codeplex.com" Click="Hyperlink_Click">
@@ -32,6 +32,8 @@
                     <Run Text="@dotnetjunky" />
                 </Hyperlink>
                 <Run Text=")" />
+            </TextBlock>
+            <TextBlock Margin="0,10,0,0" Text="Contributors: iLya Lozovyy, Brian Hartung">
             </TextBlock>
             <TextBlock Margin="0,10,0,0">
                 <Run Text="Syntax highlighting viewer powered by " />

@@ -5,7 +5,7 @@ using System.Net;
 using System.Globalization;
 
 namespace NuGet {
-    public class DataServicePackageRepository : PackageRepositoryBase {
+    public class DataServicePackageRepository : IPackageRepository {
         private readonly DataServiceContext _context;
         private DataServiceQuery<DataServicePackage> _query;
         private readonly IHttpClient _client;
@@ -20,29 +20,29 @@ namespace NuGet {
             _context = new DataServiceContext(client.Uri);
 
             _context.SendingRequest += OnSendingRequest;
-            _context.ReadingEntity += OnReadingEntity;
             _context.IgnoreMissingProperties = true;
         }
 
-        public override string Source {
+        public string Source {
             get {
                 return _context.BaseUri.OriginalString;
             }
-        }
-
-        private void OnReadingEntity(object sender, ReadingWritingEntityEventArgs e) {
-            var package = (DataServicePackage)e.Entity;
-
-            // REVIEW: This is the only way (I know) to download the package on demand
-            // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
-            package.Context = _context;
         }
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             _client.InitializeRequest(e.Request);
         }
 
-        public override IQueryable<IPackage> GetPackages() {
+        IQueryable<IPackage> IPackageRepository.GetPackages() {
+            return GetPackages();
+        }
+
+        public Uri GetReadStreamUri(object entity) {
+            return _context.GetReadStreamUri(entity);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        public IQueryable<DataServicePackage> GetPackages() {
             if (_query == null) {
                 _query = _context.CreateQuery<DataServicePackage>(Constants.PackageServiceEntitySetName);
             }

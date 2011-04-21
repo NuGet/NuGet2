@@ -10,11 +10,6 @@ namespace NuGet {
             get { return CredentialCache.DefaultCredentials; }
         }
 
-        public virtual bool HasCredentials(Uri uri) {
-            ICredentials[] credentials = GetCredentials(uri);
-            return credentials != null && credentials.Count() > 0;
-        }
-
         public virtual ICredentials[] GetCredentials(Uri uri) {
             return null;
         }

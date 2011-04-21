@@ -6,7 +6,7 @@ namespace NuGet {
     /// <summary>
     /// The machine cache represents a location on the machine where packages are cached. It is a specific implementation of a local repository and can be used as such.
     /// </summary>
-    public class MachineCache : PackageRepositoryBase {
+    public class MachineCache : IPackageRepository {
         private static readonly MachineCache _default = new MachineCache();
 
         private readonly string _cacheRoot;
@@ -22,54 +22,14 @@ namespace NuGet {
             }
         }
 
-        public override string Source {
+        public string Source {
             get {
                 return _cacheRoot;
             }
         }
 
-        public override void AddPackage(IPackage package) {
-            var existingPackage = FindPackage(package.Id, package.Version);
-            if (existingPackage == null) {
-                string path = GetPackageFilePath(package);
-
-                if (!Directory.Exists(path)) {
-                    Directory.CreateDirectory(path);
-                }
-
-                if (!Directory.Exists(path)) {
-                    using (Stream stream = File.Create(path)) {
-                        package.GetStream().CopyTo(stream);
-                    }
-                }
-            }
-        }
-
-        //public string AddPackage(string id, Version version, byte[] bytes) {
-        //    string path = GetPackageFilePath(id, version);
-
-        //    if (!Directory.Exists(path)) {
-        //        Directory.CreateDirectory(path);
-        //    }
-
-        //    if (!Directory.Exists(path)) {
-        //        using (Stream stream = File.Create(path)) {
-        //            stream.Write(bytes, 0, bytes.Length);
-        //        }
-        //    }
-
-        //    return path;
-        //}
-
-        public override IQueryable<IPackage> GetPackages() {
+        public IQueryable<IPackage> GetPackages() {
             throw new NotSupportedException();
-        }
-
-        public override void RemovePackage(IPackage package) {
-            string path = GetPackageFilePath(package);
-            if (File.Exists(path)) {
-                File.Delete(path);
-            }
         }
 
         public IPackage FindPackage(string packageId, Version version) {
@@ -81,10 +41,6 @@ namespace NuGet {
             else {
                 return null;
             }
-        }
-
-        private string GetPackageFilePath(IPackage package) {
-            return GetPackageFilePath(package.Id, package.Version);
         }
 
         private string GetPackageFilePath(string id, Version version) {

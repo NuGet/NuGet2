@@ -162,15 +162,16 @@ namespace PackageExplorer {
 
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
-                var selectedPackage = dialog.SelectedPackage;
+                PackageInfo selectedPackage = dialog.SelectedPackage;
                 if (selectedPackage != null) {
-                    IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackage.Id, ((IPackage)selectedPackage).Version); ;
+                    Version packageVersion = new Version(selectedPackage.Version);
+                    IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackage.Id, packageVersion); ;
                     if (cachePackage == null || cachePackage.GetHash() != selectedPackage.PackageHash) {
                         // if not in the cache, or if the cache package's hash is different from the feed hash, (re)download it
                         var progressWindow = new DownloadProgressWindow(
                             selectedPackage.DownloadUrl,
                             selectedPackage.Id,
-                            ((IPackage)selectedPackage).Version) {
+                            packageVersion) {
                                 Owner = this
                             };
 
@@ -181,8 +182,9 @@ namespace PackageExplorer {
                     }
 
                     if (cachePackage != null) {
-                        selectedPackage.CorePackage = cachePackage;
-                        LoadPackage(selectedPackage, selectedPackage.DownloadUrl.ToString(), PackageType.DataServicePackage);
+                        DataServicePackage servicePackage = selectedPackage.AsDataServicePackage();
+                        servicePackage.CorePackage = cachePackage;
+                        LoadPackage(servicePackage, selectedPackage.DownloadUrl.ToString(), PackageType.DataServicePackage);
                     }
                 }
             }

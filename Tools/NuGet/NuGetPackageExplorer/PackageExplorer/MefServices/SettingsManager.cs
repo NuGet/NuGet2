@@ -24,42 +24,36 @@ namespace PackageExplorer {
             Properties.Settings.Default.MruFiles = sc;
         }
 
-        public IList<string> GetMruPackageSources()
-        {
+        public IList<string> GetMruPackageSources() {
             var sources = Properties.Settings.Default.MruPackageSources;
             var packageSources = (sources == null) ? new List<string>() : sources.Cast<string>().ToList();
             return packageSources;
         }
 
-        public void SetMruPackageSources(IEnumerable<string> sources)
-        {
+        public void SetMruPackageSources(IEnumerable<string> sources) {
             StringCollection sc = new StringCollection();
             sc.AddRange(sources.ToArray());
             Properties.Settings.Default.MruPackageSources = sc;
         }
 
-        public string ActivePackageSource
-        {
-            get
-            {
+        public string ActivePackageSource {
+            get {
                 return Properties.Settings.Default.PackageSource;
             }
-            set
-            {
+            set {
                 Properties.Settings.Default.PackageSource = value;
             }
         }
-        public string PublishPackageLocation
-        {
-            get
-            {
+
+        public string PublishPackageLocation {
+            get {
                 return Properties.Settings.Default.PublishPackageLocation;
             }
-            set
-            {
+            set {
                 Properties.Settings.Default.PublishPackageLocation = value;
             }
         }
+
         public string ReadApiKeyFromSettingFile() {
             var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             string key = settings.GetDecryptedValue(ApiKeysSectionName, PublishPackageLocation);
