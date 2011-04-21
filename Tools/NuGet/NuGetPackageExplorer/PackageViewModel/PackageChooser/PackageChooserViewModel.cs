@@ -96,7 +96,8 @@ namespace PackageExplorerViewModel {
                     Uri packageUri = new Uri(PackageSource);
                     IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
                     IHttpClient packageSourceClient = new RedirectedHttpClient(packageUri, packageSourceProxy);
-                    _packageRepository = PackageRepositoryFactory.Default.CreateRepository(packageSourceClient);
+                    _packageRepository = new DataServicePackageRepository(packageSourceClient);
+                    _redirectedlPackageSource = _packageRepository.Source;
                 }
                 catch (Exception) {
                     _packageRepository = null;

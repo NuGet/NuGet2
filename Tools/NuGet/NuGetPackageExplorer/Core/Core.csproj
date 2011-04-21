@@ -87,7 +87,6 @@
     <Compile Include="Repositories\IPackageRepository.cs" />
     <Compile Include="Repositories\MachineCache.cs" />
     <Compile Include="Repositories\IProxyService.cs" />
-    <Compile Include="Repositories\PackageRepositoryFactory.cs" />
     <Compile Include="Extensions\AssemblyExtensions.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Repositories\ProxyService.cs" />
