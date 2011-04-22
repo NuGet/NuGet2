@@ -266,6 +266,7 @@
     </CodeAnalysisDictionary>
     <Resource Include="Images\NoteHS.png" />
     <Resource Include="Images\Folder.ico" />
+    <Resource Include="Images\EditHS.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>
