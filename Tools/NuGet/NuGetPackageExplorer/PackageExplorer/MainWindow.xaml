@@ -100,7 +100,11 @@
             </self:GrayscaleMenuItem>
 
             <self:GrayscaleMenuItem Header="_Edit" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
-                <self:GrayscaleMenuItem Header="Edit _Package Metadata" InputGestureText="Ctrl+K" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}" />
+                <self:GrayscaleMenuItem Header="Edit _Package Metadata" InputGestureText="Ctrl+K" Command="{Binding EditCommand, FallbackValue={StaticResource DisabledCommand}}">
+                    <self:GrayscaleMenuItem.Icon>
+                        <self:GrayscaleImage Source="Images/EditHS.png" />
+                    </self:GrayscaleMenuItem.Icon>
+                </self:GrayscaleMenuItem>
                 <Separator />
                 <self:GrayscaleMenuItem Command="Cut">
                     <self:GrayscaleMenuItem.Icon>
@@ -137,6 +141,9 @@
                 <MenuItem Header="Open File in Window_s shell..." Command="{Binding OpenContentFileCommand}" />
                 <Separator />
                 <MenuItem Header="_Add">
+                    <MenuItem.Icon>
+                        <Image Source="Images/Add.png" />
+                    </MenuItem.Icon>
                     <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
                     <self:GrayscaleMenuItem Header="_New Folder" Command="{Binding AddNewFolderCommand}">
                         <self:GrayscaleMenuItem.Icon>
