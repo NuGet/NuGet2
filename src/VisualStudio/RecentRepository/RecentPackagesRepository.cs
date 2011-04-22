@@ -83,7 +83,8 @@ namespace NuGet.VisualStudio {
                 if (package.Version > cachedPackage.Version) {
                     _packagesCache[index] = package;
                 }
-                _packagesCache[index].LastUsedDate = Max(package.LastUsedDate, cachedPackage.LastUsedDate);
+                _packagesCache[index].LastUsedDate = (package.LastUsedDate > cachedPackage.LastUsedDate) ?
+                    package.LastUsedDate : cachedPackage.LastUsedDate;
             }
             else {
                 _packagesCache.Add(package);
@@ -182,10 +183,6 @@ namespace NuGet.VisualStudio {
                 // write to activity log for troubleshoting.
                 ExceptionHelper.WriteToActivityLog(exception);
             }
-        }
-
-        private static TVal Max<TVal>(TVal a, TVal b) where TVal : IComparable<TVal> {
-            return a.CompareTo(b) >= 0 ? a : b;
         }
     }
 }
