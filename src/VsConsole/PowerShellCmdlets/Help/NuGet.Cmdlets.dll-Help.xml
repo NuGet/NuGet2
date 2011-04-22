@@ -78,7 +78,7 @@
       <command:parameter required="false" position="named">
         <maml:name>ProjectName</maml:name>
         <maml:description>
-          <maml:para>Specifies the project to install the package into. If ommitted, the active project is chosen.</maml:para>
+          <maml:para>Specifies the project to install the package into. If ommitted, the default project is chosen.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -631,7 +631,7 @@
         Get-Project
       </command:name>
       <maml:description>
-        <maml:para>Gets the active or specified project.</maml:para>
+        <maml:para>Gets the specified project. If none is specified, returns the default project.</maml:para>
       </maml:description>
       <maml:copyright>
         <maml:para></maml:para>
@@ -642,7 +642,7 @@
     </command:details>
 
     <maml:description>
-      <maml:para>Returns a reference to the DTE (Development Tools Environment) for the active or specified project.</maml:para>
+      <maml:para>Returns a reference to the DTE (Development Tools Environment) for the specified project. If none is specifed, returns the default project selected in the Package Manager Console.</maml:para>
     </maml:description>
 
     <!-- Cmdlet syntax section-->
@@ -665,7 +665,7 @@
       <command:parameter required="false" position="1">
         <maml:name>Name</maml:name>
         <maml:description>
-          <maml:para>Specifies the project to return. If ommitted, the active project is returned.</maml:para>
+          <maml:para>Specifies the project to return. If ommitted, the default project selected in the Package Manager Console is returned.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
