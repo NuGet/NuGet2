@@ -13,7 +13,10 @@ namespace NuGet.VisualStudio {
         private const string SourceValue = "(MRU)";
         private const int MaximumPackageCount = 20;
 
-        private readonly HashSet<RecentPackage> _packagesCache = new HashSet<RecentPackage>();
+        /// <remarks>
+        /// The cache would be small enough for us to not care about iterating over large lists.
+        /// </remarks>
+        private readonly List<RecentPackage> _packagesCache = new List<RecentPackage>(20);
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private readonly DTEEvents _dteEvents;
@@ -61,7 +64,7 @@ namespace NuGet.VisualStudio {
         }
 
         public void AddPackage(IPackage package) {
-            AddRecentPackage(ConvertToRecentPackage(package, GetUniqueTime()), true);
+            AddRecentPackage(ConvertToRecentPackage(package, GetUniqueTime()));
         }
 
         private DateTime GetUniqueTime() {
@@ -73,17 +76,18 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Add the specified package to the list.
         /// </summary>
-        private void AddRecentPackage(RecentPackage package, bool replaceExistingItem) {
-            if (_packagesCache.Contains(package)) {
-                if (replaceExistingItem) {
-                    _packagesCache.Remove(package);
+        private void AddRecentPackage(RecentPackage package) {
+            var index = _packagesCache.FindIndex(p => p.Id == package.Id);
+            if (index != -1) {
+                var cachedPackage = _packagesCache[index];
+                if (package.Version > cachedPackage.Version) {
+                    _packagesCache[index] = package;
                 }
-                else {
-                    return;
-                }
+                _packagesCache[index].LastUsedDate = Max(package.LastUsedDate, cachedPackage.LastUsedDate);
             }
-
-            _packagesCache.Add(package);
+            else {
+                _packagesCache.Add(package);
+            }
         }
 
         private static RecentPackage ConvertToRecentPackage(IPackage package, DateTime lastUsedDate) {
@@ -131,8 +135,8 @@ namespace NuGet.VisualStudio {
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             IEnumerable<RecentPackage> filterPackages = FilterPackages(packagesMetadata, newPackages);
-            foreach (var p in filterPackages) {
-                AddRecentPackage(p, false);
+            foreach (var package in filterPackages) {
+                AddRecentPackage(package);
             }
         }
 
@@ -178,6 +182,10 @@ namespace NuGet.VisualStudio {
                 // write to activity log for troubleshoting.
                 ExceptionHelper.WriteToActivityLog(exception);
             }
+        }
+
+        private static TVal Max<TVal>(TVal a, TVal b) where TVal : IComparable<TVal> {
+            return a.CompareTo(b) >= 0 ? a : b;
         }
     }
 }

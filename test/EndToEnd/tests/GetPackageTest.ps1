@@ -94,3 +94,23 @@ function Test-GetPackageAllVersionReturnsMultipleVersions {
     Assert-True (1 -le $packages.Count) 
     Assert-True ($packageWithMoreThanOneVersion.Count -gt 0)
 }
+
+
+function Test-GetPackageCollapsesPackageVersionsForRecent {
+    # Arrange
+    $p = New-ConsoleApplication
+    
+    # Act
+    Install-Package jQuery -Project $p.Name -Version 1.4.1
+    Install-Package jQuery -Project $p.Name -Version 1.4.2
+    Install-Package jQuery -Project $p.Name -Version 1.4.4
+    Install-Package Antlr -Project $p.Name
+        
+    $recentPackages = Get-Package -Recent
+    $packagesWithMoreThanOneVersions = $recentPackages | group "Id" | Where { $_.count -gt 1 } 
+ 
+    # Assert
+    # Ensure we have at least some packages
+    Assert-True (1 -le $recentPackages.Count) 
+    Assert-Null $packagesWithMoreThanOneVersions
+}
