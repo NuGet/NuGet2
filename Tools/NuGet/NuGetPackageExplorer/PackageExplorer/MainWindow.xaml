@@ -145,7 +145,7 @@
                         <Image Source="Images/Add.png" />
                     </MenuItem.Icon>
                     <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" />
-                    <self:GrayscaleMenuItem Header="_New Folder" Command="{Binding AddNewFolderCommand}">
+                    <self:GrayscaleMenuItem Header="_New Folder" Command="{Binding AddNewFolderCommand}" CommandParameter="{Binding RootFolder, Mode=OneWay}">
                         <self:GrayscaleMenuItem.Icon>
                             <self:GrayscaleImage Source="Images/NewFolderHS.png" />
                         </self:GrayscaleMenuItem.Icon>
