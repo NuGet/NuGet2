@@ -149,7 +149,7 @@ if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
 }
 
 function TabExpansion($line, $lastWord) {
-    $nugetSuggestions = NuGetTabExpansion $line $lastWord
+    $nugetSuggestions = & (Get-Module NuGet) NuGetTabExpansion $line $lastWord
 
     if ($nugetSuggestions.NoResult) {
         return DefaultTabExpansion $line $lastWord
