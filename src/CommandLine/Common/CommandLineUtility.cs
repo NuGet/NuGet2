@@ -73,9 +73,22 @@ namespace NuGet {
                     where t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType
                     select t).SingleOrDefault();
         }
+        public static Type GetComplexCollectionType(Type type) {
+            if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>)) {
+                return type;
+            }
+            return type.GetInterfaces()
+                .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof (IDictionary<,>))
+                .SingleOrDefault();
+        }
+
+        public static bool IsComplexMultiValueProperty(PropertyInfo property) {
+            return GetComplexCollectionType(property.PropertyType) != null;
+        }
 
         public static bool IsMultiValuedProperty(PropertyInfo property) {
-            return GetGenericCollectionType(property.PropertyType) != null;
+            return GetGenericCollectionType(property.PropertyType) != null
+                   || IsComplexMultiValueProperty(property);
         }
 
         public static string GetLocalizedString(Type resourceType, string resourceName) {

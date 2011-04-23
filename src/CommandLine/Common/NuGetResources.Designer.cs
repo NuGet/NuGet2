@@ -475,6 +475,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provides the ability to specify a semicolon &quot;;&quot; delimited list of build arguments to the Package Builder.
+        /// </summary>
+        internal static string PackageCommandBuildArgsDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandBuildArgsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Determines what configuration should be used when building a package from the specified project file..
         /// </summary>
         internal static string PackageCommandConfigurationDescription {
