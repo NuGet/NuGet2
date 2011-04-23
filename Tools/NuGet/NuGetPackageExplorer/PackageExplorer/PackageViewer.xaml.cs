@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,6 +12,8 @@ namespace PackageExplorer {
     /// Interaction logic for PackageViewer.xaml
     /// </summary>
     public partial class PackageViewer : UserControl {
+        private const string PackageFileDataFormat = "PackageFileContent";
+
         public PackageViewer(IUIServices messageBoxServices, IPackageViewModelFactory packageViewModelFactory) {
             InitializeComponent();
 
@@ -41,6 +44,12 @@ namespace PackageExplorer {
             var content = new ContentViewerPane();
             content.SetBinding(UserControl.DataContextProperty, new Binding("CurrentFileInfo"));
             return content;
+        }
+
+        private PackageFolder RootFolder {
+            get {
+                return (DataContext as PackageViewModel).RootFolder;
+            }
         }
 
         private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
@@ -93,18 +102,28 @@ namespace PackageExplorer {
                 folder = item.DataContext as PackageFolder;
             }
             else {
-                folder = (DataContext as PackageViewModel).RootFolder;
+                folder = RootFolder;
             }
+
+            DragDropEffects effects = DragDropEffects.None;
             if (folder != null) {
                 var data = e.Data;
                 if (data.GetDataPresent(DataFormats.FileDrop)) {
-                    e.Effects = DragDropEffects.Copy;
-                    e.Handled = true;
-                    return;
+                    effects = DragDropEffects.Copy;
+                }
+                else {
+                    PackageFile file = data.GetData(PackageFileDataFormat, false) as PackageFile;
+                    // makse sure we don't drag a file into the same folder
+                    if (file != null && 
+                        !folder.Contains(file) && 
+                        !folder.ContainsFile(file.Name) && 
+                        !folder.ContainsFolder(file.Name)) {
+                        effects = DragDropEffects.Move;
+                    }
                 }
             }
 
-            e.Effects = DragDropEffects.None;
+            e.Effects = effects;
             e.Handled = true;
         }
 
@@ -123,10 +142,70 @@ namespace PackageExplorer {
                 if (filenames != null && filenames.Length > 0) {
                     var viewModel = DataContext as PackageViewModel;
                     viewModel.AddDraggedAndDroppedFiles(folder, filenames);
-
                     e.Handled = true;
                 }
             }
+            else if (data.GetDataPresent(PackageFileDataFormat)) {
+                PackageFile file = data.GetData(PackageFileDataFormat) as PackageFile;
+                if (file != null) {
+                    folder = folder ?? RootFolder;
+                    folder.AddFile(file);
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private TreeViewItem _dragItem;
+        private System.Windows.Point _dragPoint;
+        private bool _isDragging;
+
+        private void PackagesTreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            if (_isDragging) {
+                return;
+            }
+
+            TreeViewItem item = sender as TreeViewItem;
+            if (item != null) {
+                // only allow dragging file
+                PackageFile file = item.DataContext as PackageFile;
+                if (file != null) {
+                    _dragItem = item;
+                    _dragPoint = e.GetPosition(null);
+                    _isDragging = true;
+                }
+            }
+        }
+
+        private void PackagesTreeViewItem_PreviewMouseMove(object sender, MouseEventArgs e) {
+            if (!_isDragging) {
+                return;
+            }
+
+            TreeViewItem item = sender as TreeViewItem;
+            if (item == _dragItem) {
+                System.Windows.Point newPoint = e.GetPosition(null);
+                if (Math.Abs(newPoint.X - _dragPoint.X) >= SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(newPoint.Y - _dragPoint.Y) >= SystemParameters.MinimumVerticalDragDistance) {
+                    // initiate a dragging
+                    PackageFile file = item.DataContext as PackageFile;
+                    if (file != null) {
+                        DataObject data = new DataObject(PackageFileDataFormat, file);
+                        DragDrop.DoDragDrop(item, data, DragDropEffects.Move);
+                        ResetDraggingState();
+                    }
+                }
+            }
+        }
+
+        private void PackagesTreeViewItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
+            if (_isDragging) {
+                ResetDraggingState();
+            }
+        }
+
+        private void ResetDraggingState() {
+            _isDragging = false;
+            _dragItem = null;
         }
     }
 }

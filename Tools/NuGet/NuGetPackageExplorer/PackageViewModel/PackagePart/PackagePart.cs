@@ -19,15 +19,21 @@ namespace PackageExplorerViewModel {
             }
 
             _viewModel = viewModel;
-            _parent = parent;
             _name = name;
-            RecalculatePath();
+            Parent = parent;
         }
 
-        private readonly PackageFolder _parent;
-
+        private PackageFolder _parent;
         public PackageFolder Parent {
-            get { return _parent; }
+            get {
+                return _parent;
+            }
+            internal set {
+                if (_parent != value) {
+                    _parent = value;
+                    RecalculatePath();
+                }
+            }
         }
 
         private readonly PackageViewModel _viewModel;

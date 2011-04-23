@@ -47,6 +47,20 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private void Attach(PackagePart child) {
+            Children.Add(child);
+            child.Parent = this;
+        }
+
+        /// <summary>
+        /// Detach() is different from Remove() in that it doesn't dispose the child.
+        /// </summary>
+        /// <param name="child"></param>
+        private void Detach(PackagePart child) {
+            Children.Remove(child);
+            child.Parent = null;
+        }
+
         public ICommand AddContentFileCommand {
             get {
                 return PackageViewModel.AddContentFileCommand;
@@ -93,6 +107,11 @@ namespace PackageExplorerViewModel {
             }
 
             return Children.Any(p => p is PackageFile && p.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool Contains(PackagePart child) {
+            // we can't call Children.Contains(child) here because that will only check by file name, not the actual instance
+            return Children != null && Children.Any(p => p == child);
         }
 
         public PackageFolder AddFolder(string folderName) {
@@ -149,6 +168,27 @@ namespace PackageExplorerViewModel {
             }
 
             return newFile;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+        public void AddFile(PackageFile file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
+            if (Contains(file)) {
+                return;
+            }
+
+            // detach from current parent
+            if (file.Parent != null) {
+                file.Parent.Detach(file);
+            }
+
+            Attach(file);
+            file.IsSelected = true;
+            this.IsExpanded = true;
+            PackageViewModel.NotifyChanges();
         }
 
         private void RemoveChildByName(string name) {
