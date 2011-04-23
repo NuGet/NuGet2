@@ -41,8 +41,13 @@ namespace PackageExplorerViewModel {
                 EnableRaisingEvents = true
             };
 
+            _watcher.Changed += new FileSystemEventHandler(OnFileChanged);
             _watcher.Deleted += new FileSystemEventHandler(OnFileDeleted);
             _watcher.Renamed += new RenamedEventHandler(OnFileDeleted);
+        }
+
+        private void OnFileChanged(object sender, FileSystemEventArgs e) {
+            PackageViewModel.UIServices.BeginInvoke(PackageViewModel.NotifyChanges);
         }
 
         /// <summary>
