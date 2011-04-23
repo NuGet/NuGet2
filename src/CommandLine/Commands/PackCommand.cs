@@ -18,7 +18,7 @@ namespace NuGet.Commands {
         };
 
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string,string> _buildArgs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string,string> _properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly HashSet<string> _allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
             Constants.ManifestExtension,
@@ -57,9 +57,9 @@ namespace NuGet.Commands {
         public bool NoDefaultExcludes { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandBuildArgsDescription")]
-        public Dictionary<string, string> BuildArgs {
+        public Dictionary<string, string> Properties {
             get {
-                return _buildArgs;
+                return _properties;
             }
         }
 
@@ -218,8 +218,8 @@ namespace NuGet.Commands {
             // Specify the configuration
             factory.Properties.Add("Configuration", Configuration ?? "Release");
 
-            // Add the additional BuildArgs to the properties of the Project Factory
-            BuildArgs
+            // Add the additional Properties to the properties of the Project Factory
+            Properties
                 .Where(arg => !factory.Properties.ContainsKey(arg.Key))
                 .ToList()
                 .ForEach(arg => factory.Properties.Add(arg.Key, arg.Value));
