@@ -388,11 +388,13 @@ namespace PackageExplorerViewModel {
         }
 
         private bool AddNewFolderCanExecute(object parameter) {
-            return (parameter ?? SelectedItem) is PackageFolder;
+            parameter = parameter ?? SelectedItem;
+            return parameter == null || parameter is PackageFolder;
         }
 
         private void AddNewFolderExecute(object parameter) {
-            PackageFolder folder = (parameter ?? SelectedItem) as PackageFolder;
+            parameter = parameter ?? SelectedItem ?? RootFolder;
+            PackageFolder folder = parameter as PackageFolder;
             string folderName = "NewFolder";
             bool result = UIServices.OpenRenameDialog(folderName, out folderName);
             if (result) {
