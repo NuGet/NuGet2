@@ -33,6 +33,8 @@ LONG DESCRIPTION
         Open-PackagePage        Open the browser pointing to ProjectUrl, LicenseUrl or ReportAbuseUrl of the
                                 specified package.
 
+		Register-TabExpansion	Registers a tab expansion for the parameters of a command.
+
 SEE ALSO
 	Online documentation: http://go.microsoft.com/fwlink/?LinkID=206619
 	Get-Package
@@ -40,3 +42,6 @@ SEE ALSO
 	Uninstall-Package
 	Update-Package
 	New-Package
+	Add-BindingRedirect
+	Get-Project
+	Open-PackagePage
