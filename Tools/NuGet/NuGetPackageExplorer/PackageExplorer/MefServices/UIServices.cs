@@ -164,5 +164,9 @@ namespace PackageExplorer {
                 new System.Windows.Interop.WindowInteropHelper(Window.Value).Handle);
             return !String.IsNullOrEmpty(selectedPath);
         }
+
+        public void BeginInvoke(Action action) {
+            Window.Value.Dispatcher.BeginInvoke(action);
+        }
     }
 }

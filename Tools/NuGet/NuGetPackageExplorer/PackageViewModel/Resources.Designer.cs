@@ -160,6 +160,15 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file &apos;{0}&apos; was either renamed or deleted from its physical location. It will now be removed from the package..
+        /// </summary>
+        internal static string PhysicalFileMissing {
+            get {
+                return ResourceManager.GetString("PhysicalFileMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is another file or folder with the same name..
         /// </summary>
         internal static string RenameCausesNameCollison {

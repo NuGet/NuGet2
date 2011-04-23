@@ -7,7 +7,7 @@ using NuGet;
 
 namespace PackageExplorerViewModel {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
-    public abstract class PackagePart : IComparable<PackagePart>, INotifyPropertyChanged {
+    public abstract class PackagePart : IComparable<PackagePart>, INotifyPropertyChanged, IDisposable {
 
         protected PackagePart(string name, PackageFolder parent, PackageViewModel viewModel) {
             if (name == null) {
@@ -107,16 +107,18 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public void Delete() {
-            bool confirm = PackageViewModel.UIServices.Confirm(
-                String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToDeleteContent, Name),
-                isWarning: true);
-            if (!confirm) {
-                return;
+        public void Delete(bool requireConfirmation = true) {
+            if (requireConfirmation) {
+                bool confirm = PackageViewModel.UIServices.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToDeleteContent, Name),
+                    isWarning: true);
+                if (!confirm) {
+                    return;
+                }
             }
 
             if (Parent != null) {
-                Parent.Children.Remove(this);
+                Parent.RemoveChild(this);
                 PackageViewModel.NotifyContentDeleted(this);
             }
         }
@@ -175,6 +177,18 @@ namespace PackageExplorerViewModel {
 
         public override int GetHashCode() {
             return Name.ToUpper(CultureInfo.InvariantCulture).GetHashCode();
+        }
+
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing) {
+        }
+
+        ~PackagePart() {
+            Dispose(false);
         }
     }
 }

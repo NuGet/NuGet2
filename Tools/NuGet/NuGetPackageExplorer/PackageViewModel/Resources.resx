@@ -150,6 +150,9 @@
   <data name="PackageHasNoFile" xml:space="preserve">
     <value>There are no contents or dependencies in the package.</value>
   </data>
+  <data name="PhysicalFileMissing" xml:space="preserve">
+    <value>The file '{0}' was either renamed or deleted from its physical location. It will now be removed from the package.</value>
+  </data>
   <data name="RenameCausesNameCollison" xml:space="preserve">
     <value>There is another file or folder with the same name.</value>
   </data>

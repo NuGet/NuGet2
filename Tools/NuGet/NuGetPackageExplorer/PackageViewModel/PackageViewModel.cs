@@ -10,7 +10,7 @@ using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
 
-    public class PackageViewModel : ViewModelBase {
+    public sealed class PackageViewModel : ViewModelBase, IDisposable {
 
         private readonly IPackage _package;
         private EditablePackageMetadata _packageMetadata;
@@ -292,6 +292,18 @@ namespace PackageExplorerViewModel {
             }
 
             folder.AddFile(file);
+        }
+
+        internal bool IsShowingFileContent(PackageFile file) {
+            return ShowContentViewer && CurrentFileInfo.File == file;
+        }
+
+        internal void ShowFileContent(PackageFile file) {
+            ViewContentCommand.Execute(file);
+        }
+
+        public void Dispose() {
+            RootFolder.Dispose();
         }
 
         #region AddContentFileCommand

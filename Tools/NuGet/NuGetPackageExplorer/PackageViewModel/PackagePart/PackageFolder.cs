@@ -7,7 +7,6 @@ using System.Windows.Input;
 using NuGet;
 
 namespace PackageExplorerViewModel {
-
     public class PackageFolder : PackagePart {
 
         public ICollection<PackagePart> Children { get; private set; }
@@ -43,6 +42,7 @@ namespace PackageExplorerViewModel {
 
             bool removed = Children.Remove(child);
             if (removed) {
+                child.Dispose();
                 PackageViewModel.NotifyChanges();
             }
         }
@@ -123,14 +123,8 @@ namespace PackageExplorerViewModel {
             if (ContainsFile(newFileName)) {
                 bool confirmed = PackageViewModel.UIServices.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
                 if (confirmed) {
-                    // check if we are currently showing the content of the file to be removed.
-                    // if we are, we'll need to show the new content after replacing the file.
-                    if (PackageViewModel.ShowContentViewer) {
-                        PackagePart part = this[newFileName];
-                        if (PackageViewModel.CurrentFileInfo.File == part) {
-                            showingRemovedFile = true;
-                        }
-                    }
+                    PackageFile part = this[newFileName] as PackageFile;
+                    showingRemovedFile = PackageViewModel.IsShowingFileContent(part);
 
                     // remove the existing file before adding the new one
                     RemoveChildByName(newFileName);
@@ -140,16 +134,18 @@ namespace PackageExplorerViewModel {
                 }
             }
 
-            var physicalFile = new PhysicalFile(filePath);
+            var physicalFile = new PhysicalPackageFile {
+                SourcePath = filePath
+            };
             var newFile = new PackageFile(physicalFile, newFileName, this);
+            physicalFile.TargetPath = newFile.Path;
             Children.Add(newFile);
             newFile.IsSelected = true;
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
 
             if (showingRemovedFile) {
-                ICommand command = PackageViewModel.ViewContentCommand;
-                command.Execute(newFile);
+                PackageViewModel.ShowFileContent(newFile);
             }
 
             return newFile;
@@ -172,6 +168,13 @@ namespace PackageExplorerViewModel {
             foreach (var part in Children) {
                 part.Export(rootPath);
             }
+        }
+
+        protected override void Dispose(bool disposing) {
+            foreach (var part in Children) {
+                part.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

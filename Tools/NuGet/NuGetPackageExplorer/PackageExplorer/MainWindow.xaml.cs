@@ -87,6 +87,8 @@ namespace PackageExplorer {
         }
 
         private void LoadPackage(IPackage package, string packagePath, PackageType packageType) {
+            DisposeViewModel();
+
             if (package != null) {
 
                 if (!RootLayout.LastChildFill) {
@@ -103,6 +105,14 @@ namespace PackageExplorer {
                 if (!String.IsNullOrEmpty(packagePath)) {
                     _mruManager.NotifyFileAdded(package, packagePath, packageType);
                 }
+            }
+        }
+
+        private void DisposeViewModel() {
+            // dispose the old view model before opening a new one.
+            var currentViewModel = DataContext as PackageViewModel;
+            if (currentViewModel != null) {
+                currentViewModel.Dispose();
             }
         }
 
@@ -250,6 +260,8 @@ namespace PackageExplorer {
                     SaveSettings();
                     _mruManager.OnApplicationExit();
                     PackageSourceManager.OnApplicationExit();
+
+                    DisposeViewModel();
                 }
                 catch (Exception) { }
             }
