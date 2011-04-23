@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NuGet {
     internal class AggregateQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
-        private const int QueryCacheSize = 30;
+        private const int QueryCacheSize = 90;
 
         private readonly IEnumerable<IQueryable<T>> _queryables;
         private readonly Expression _expression;
