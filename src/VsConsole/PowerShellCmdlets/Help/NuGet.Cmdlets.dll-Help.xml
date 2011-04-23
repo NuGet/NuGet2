@@ -15,9 +15,6 @@
       <maml:description>
         <maml:para>Installs a package.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Install</command:verb>
       <command:noun>Package</command:noun>
       <dev:version></dev:version>
@@ -63,10 +60,6 @@
         <command:parameterValue required="true">
           string
         </command:parameterValue>
-        <dev:type>
-          <maml:name></maml:name>
-          <maml:uri/>
-        </dev:type>
         <dev:defaultValue></dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" position="named">
@@ -102,11 +95,54 @@
           string
         </command:parameterValue>
       </command:parameter>
-
-
     </command:parameters>
 
-    <!-- Link section  -->
+    <!-- Examples section  -->
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1  ----------</maml:title>
+        <dev:code>PM&gt; Install-Package Elmah</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Installs the latest version of the Elmah package from the current 
+package source into the default project.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; Install-Package Glimpse -Version 1.0.0 -Project MvcApplication1 </dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Installs version 1.0.0 of Glimpse into the project named MvcApplication1
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 3  ----------</maml:title>
+        <dev:code>PM&gt; Install-Package Ninject.Mvc3 -IgnoreDependencies -Source c:\temp\packages </dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Installs the package, Ninject.Mvc3, but not its dependencies. It looks in the directory, 
+c:\temp\packages to find the package.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+
+      <!-- Link section  -->
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
@@ -132,9 +168,6 @@
       <maml:description>
         <maml:para>Gets the set of packages available from the package source. Use the -ListAvailable flag to list packages available from the package source.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Get</command:verb>
       <command:noun>Package</command:noun>
       <dev:version></dev:version>
@@ -233,6 +266,73 @@
         </maml:description>
       </command:parameter>
     </command:parameters>
+    
+    <!-- Examples section  -->
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1  ----------</maml:title>
+        <dev:code>PM&gt; Get-Package</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns the packages installed in the default project.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; Get-Package -ListAvailable</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a list of packages available online in the current package source.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 3  ----------</maml:title>
+        <dev:code>PM&gt; Get-Package -ListAvailable -Filter Ninject</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a list of packages available online using "Ninject" as a search term.
+          </maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 4  ----------</maml:title>
+        <dev:code>PS&gt; Get-Package -Updates</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a list of packages installed in the default project that have updates available in the current package source.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 5  ----------</maml:title>
+        <dev:code>PM&gt; Get-Package -Recent</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a list of recently installed packages.
+          </maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
 
     <!-- Link section  -->
     <maml:relatedLinks>
@@ -260,9 +360,6 @@
       <maml:description>
         <maml:para>Uninstalls a package.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Uninstall</command:verb>
       <command:noun>Package</command:noun>
       <dev:version></dev:version>
@@ -291,7 +388,6 @@
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
       </command:syntaxItem>
-
     </command:syntax>
 
     <!-- Cmdlet parameter section  -->
@@ -304,10 +400,6 @@
         <command:parameterValue required="true">
           string
         </command:parameterValue>
-        <dev:type>
-          <maml:name></maml:name>
-          <maml:uri/>
-        </dev:type>
         <dev:defaultValue></dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" position="named">
@@ -334,8 +426,50 @@
           string
         </command:parameterValue>
       </command:parameter>
-
     </command:parameters>
+
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1  ----------</maml:title>
+        <dev:code>PM&gt; Uninstall-Package Elmah</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Uninstalls the Elmah package from the default project.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; Uninstall-Package Elmah -RemoveDependencies</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Uninstalls the Elmah package as well as all its dependencies. If any dependency has another package that depends on it, 
+it is skipped.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 3  ----------</maml:title>
+        <dev:code>PM&gt; Uninstall-Package Elmah -Force</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Uninstalls the Elmah package even if another package depends on it.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
 
     <!-- Link section  -->
     <maml:relatedLinks>
@@ -363,9 +497,6 @@
       <maml:description>
         <maml:para>Updates a package.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Update</command:verb>
       <command:noun>Package</command:noun>
       <dev:version></dev:version>
@@ -411,10 +542,6 @@
         <command:parameterValue required="true">
           string
         </command:parameterValue>
-        <dev:type>
-          <maml:name></maml:name>
-          <maml:uri/>
-        </dev:type>
         <dev:defaultValue></dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" position="named">
@@ -450,8 +577,36 @@
           string
         </command:parameterValue>
       </command:parameter>
-
     </command:parameters>
+
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1  ----------</maml:title>
+        <dev:code>PM&gt; Update-Package Elmah</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Updates the Elmah package installed in the default project to the latest version.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; Update-Package Elmah -Version 1.1.0</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Updates the Elmah package to a specific version.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
 
     <!-- Link section  -->
     <maml:relatedLinks>
@@ -479,9 +634,6 @@
       <maml:description>
         <maml:para>Creates a package.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>New</command:verb>
       <command:noun>Package</command:noun>
       <dev:version></dev:version>
@@ -544,6 +696,36 @@
       </command:parameter>
     </command:parameters>
 
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1 ----------</maml:title>
+        <dev:code>PM&gt; New-Package</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Creates a new package based on the current project using a Nuspec file within the project if only one such file is found.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+
+      <command:example>
+        <maml:title>----------  EXAMPLE 2  ----------</maml:title>
+        <dev:code>PM&gt; New-Package -Project MyProjectName -SpecFileName MyPackage.nuspec</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Creates a new package from the specified project, MyProjectName using the specified Nuspec file, MyPackage.nuspec.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    
     <!-- Link section  -->
     <maml:relatedLinks>
       <maml:navigationLink>
@@ -570,16 +752,17 @@
       <maml:description>
         <maml:para>Adds binding redirects to the config file.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Add</command:verb>
       <command:noun>BindingRedirect</command:noun>
       <dev:version></dev:version>
     </command:details>
 
     <maml:description>
-      <maml:para>Examines all assemblies within the output path for a project and adds binding redirects to the application (or web) configuration file where necessary.</maml:para>
+      <maml:para>
+Examines all assemblies within the output path for a project and adds binding redirects to the 
+application (or web) configuration file where necessary. NOTE: As of NuGet 1.2, NuGet automatically 
+runs this command when installing a package.
+      </maml:para>
     </maml:description>
 
     <!-- Cmdlet syntax section-->
@@ -591,7 +774,6 @@
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
       </command:syntaxItem>
-
     </command:syntax>
 
     <!-- Cmdlet parameter section  -->
@@ -606,6 +788,22 @@
         </command:parameterValue>
       </command:parameter>
     </command:parameters>
+
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1 ----------</maml:title>
+        <dev:code>PM&gt; Add-BindingRedirect MyProjectName</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Adds binding redirects to the specified project, MyProjectName.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
 
     <!-- Link section  -->
     <maml:relatedLinks>
@@ -633,9 +831,6 @@
       <maml:description>
         <maml:para>Gets the specified project. If none is specified, returns the default project.</maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Get</command:verb>
       <command:noun>Project</command:noun>
       <dev:version></dev:version>
@@ -657,7 +852,6 @@
           <maml:name>All</maml:name>
         </command:parameter>
       </command:syntaxItem>
-
     </command:syntax>
 
     <!-- Cmdlet parameter section  -->
@@ -678,6 +872,48 @@
         </maml:description>
       </command:parameter>
     </command:parameters>
+
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1 ----------</maml:title>
+        <dev:code>PM&gt; Get-Project</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a reference to the default project.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2 ----------</maml:title>
+        <dev:code>PM&gt; Get-Project MyProjectName</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a reference to the specifed project, MyProjectName.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 3 ----------</maml:title>
+        <dev:code>PM&gt; Get-Project -All</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Returns a reference to every project in the solution.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
 
     <!-- Link section  -->
     <maml:relatedLinks>
@@ -707,9 +943,6 @@
           Open the browser pointing to ProjectUrl, LicenseUrl or ReportAbuseUrl of the specified package.
         </maml:para>
       </maml:description>
-      <maml:copyright>
-        <maml:para></maml:para>
-      </maml:copyright>
       <command:verb>Open</command:verb>
       <command:noun>PackagePage</command:noun>
       <dev:version></dev:version>
@@ -787,6 +1020,61 @@
       </command:parameter>
     </command:parameters>
 
+    <command:examples>
+      <command:example>
+        <maml:title>----------  EXAMPLE 1 ----------</maml:title>
+        <dev:code>PM&gt; Open-PackagePage Ninject</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Opens a browser to the project URL specified in the Ninject package.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 2 ----------</maml:title>
+        <dev:code>PM&gt; Open-PackagePage Ninject -License</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Opens a browser to the license URL specified in the Ninject package.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 3 ----------</maml:title>
+        <dev:code>PM&gt; Open-PackagePage Ninject -ReportAbuse</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Opens a browser to the URL at the current package source used to report abuse for the specified package.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------  EXAMPLE 4 ----------</maml:title>
+        <dev:code>PM&gt; $url = Open-PackagePage Ninject -License -WhatIf -PassThru</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Assigns the license URL to the variable, $url, without opening the URL in a browser.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    
     <!-- Link section  -->
     <maml:relatedLinks>
       <maml:navigationLink>
