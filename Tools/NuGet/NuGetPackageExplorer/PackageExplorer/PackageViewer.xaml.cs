@@ -172,7 +172,7 @@ namespace PackageExplorer {
                 PackageFile file = item.DataContext as PackageFile;
                 if (file != null) {
                     _dragItem = item;
-                    _dragPoint = e.GetPosition(null);
+                    _dragPoint = e.GetPosition(item);
                     _isDragging = true;
                 }
             }
@@ -185,7 +185,7 @@ namespace PackageExplorer {
 
             TreeViewItem item = sender as TreeViewItem;
             if (item == _dragItem) {
-                System.Windows.Point newPoint = e.GetPosition(null);
+                System.Windows.Point newPoint = e.GetPosition(item);
                 if (Math.Abs(newPoint.X - _dragPoint.X) >= SystemParameters.MinimumHorizontalDragDistance ||
                     Math.Abs(newPoint.Y - _dragPoint.Y) >= SystemParameters.MinimumVerticalDragDistance) {
                     // initiate a dragging
