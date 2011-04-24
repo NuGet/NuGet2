@@ -244,6 +244,12 @@
             </Grid>
         </GroupBox>
 
+        <TextBlock Visibility="{Binding IsInEditMode, Converter={StaticResource invertedBoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,15,0" Padding="2,0" Background="White" ToolTip="Edit metadata">
+            <Hyperlink Command="{Binding EditCommand}">
+                <Run Text="edit" />
+            </Hyperlink>
+        </TextBlock>
+
         <!-- package content tree view -->
         <GroupBox BorderBrush="DarkGray" Background="Transparent" BorderThickness="1" Grid.Column="1" Margin="3" Header="Package contents">
             <TreeView 
