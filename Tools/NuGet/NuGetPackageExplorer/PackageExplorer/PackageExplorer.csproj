@@ -118,6 +118,7 @@
     </Compile>
     <Compile Include="Converters\FileSizeConverter.cs" />
     <Compile Include="Converters\NormalizeTextConverter.cs" />
+    <Compile Include="Converters\StringToVisibilityConverter.cs" />
     <Compile Include="Interop\BrowseForFolder.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />

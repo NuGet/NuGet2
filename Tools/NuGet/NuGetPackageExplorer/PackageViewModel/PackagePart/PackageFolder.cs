@@ -73,6 +73,29 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private ICommand _addContentFolderCommand = null;
+        public ICommand AddContentFolderCommand {
+            get {
+                if (_addContentFolderCommand == null) {
+                    _addContentFolderCommand = new RelayCommand<string>(AddContentFolderExecute, AddContentFolderCanExecute);
+                }
+
+                return _addContentFolderCommand;
+            }
+        }
+
+        private bool AddContentFolderCanExecute(string folderName) {
+            if (folderName == null) {
+                return false;
+            }
+
+            return !ContainsFolder(folderName) && !ContainsFile(folderName);
+        }
+
+        private void AddContentFolderExecute(string folderName) {
+            AddFolder(folderName);
+        }
+
         private bool _isExpanded;
 
         public bool IsExpanded {
