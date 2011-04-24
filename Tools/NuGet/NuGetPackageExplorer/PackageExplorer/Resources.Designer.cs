@@ -115,7 +115,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to More Information.
+        ///   Looks up a localized string similar to Package Information.
         /// </summary>
         public static string Dialog_MoreInfo {
             get {
