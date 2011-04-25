@@ -349,6 +349,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List all versions of a package. By default, only the latest package version is displayed..
+        /// </summary>
+        internal static string ListCommandAllVersionsDescription {
+            get {
+                return ResourceManager.GetString("ListCommandAllVersionsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is specified the default feed is used..
         /// </summary>
         internal static string ListCommandDescription {
@@ -475,15 +484,6 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Provides the ability to specify a semicolon &quot;;&quot; delimited list of build arguments to the Package Builder.
-        /// </summary>
-        internal static string PackageCommandBuildArgsDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandBuildArgsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Determines what configuration should be used when building a package from the specified project file..
         /// </summary>
         internal static string PackageCommandConfigurationDescription {
@@ -525,6 +525,15 @@ namespace NuGet.Common {
         internal static string PackageCommandOutputDirDescription {
             get {
                 return ResourceManager.GetString("PackageCommandOutputDirDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provides the ability to specify a semicolon &quot;;&quot; delimited list of properties when creating a package..
+        /// </summary>
+        internal static string PackageCommandPropertiesDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandPropertiesDescription", resourceCulture);
             }
         }
         

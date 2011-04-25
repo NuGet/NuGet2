@@ -95,12 +95,9 @@ namespace NuGet {
                     // Example of a complex value: nuget pack -option "foo=bar;baz=false"
                     foreach (var item in stringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
                         if(CommandLineUtility.IsComplexMultiValueProperty(property)) {
-                            if(item.IndexOf("=", StringComparison.OrdinalIgnoreCase) > -1) {
-                                int valueSeparator = item.IndexOf("=", StringComparison.OrdinalIgnoreCase);
-                                list.Add(item.Substring(0, valueSeparator), item.Substring(valueSeparator + 1));
-                            }
-                            else {
-                                list.Add(item, null);
+                            int eqIndex = item.IndexOf("=", StringComparison.OrdinalIgnoreCase);
+                            if(eqIndex > -1) {
+                                list.Add(item.Substring(0, eqIndex), item.Substring(eqIndex + 1));
                             }
                         }
                         else {

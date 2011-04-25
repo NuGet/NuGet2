@@ -441,7 +441,7 @@
   <data name="SetApiKeyCommandDefaultApiKeysSaved" xml:space="preserve">
     <value>The API Key '{0}' was saved for {1} and {2}.</value>
   </data>
-  <data name="PackageCommandBuildArgsDescription" xml:space="preserve">
-    <value>Provides the ability to specify a semicolon ";" delimited list of build arguments to the Package Builder</value>
+  <data name="PackageCommandPropertiesDescription" xml:space="preserve">
+    <value>Provides the ability to specify a semicolon ";" delimited list of properties when creating a package.</value>
   </data>
 </root>

@@ -56,7 +56,7 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
         public bool NoDefaultExcludes { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandBuildArgsDescription")]
+        [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties {
             get {
                 return _properties;
