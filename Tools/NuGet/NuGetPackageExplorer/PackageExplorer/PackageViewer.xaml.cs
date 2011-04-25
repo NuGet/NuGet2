@@ -220,8 +220,8 @@ namespace PackageExplorer {
         private static readonly Dictionary<string, Tuple<string, string>[]> _frameworkFolders =
            new Dictionary<string, Tuple<string, string>[]>() {
                { "Windows Phone", new[] { Tuple.Create("v7.0", "sl3-wp") } },
-               { "Siverlight", new[] { Tuple.Create("No version", "sl"), Tuple.Create("v3.0", "sl30"), Tuple.Create("v4.0", "sl40") } },
-               { ".NET", new[] { Tuple.Create("No version", "net"), Tuple.Create("v1.0", "net10"), Tuple.Create("v1.1", "net11"), Tuple.Create("v2.0", "net20"),Tuple.Create("v3.0", "net30"),Tuple.Create("v3.5", "net35"), Tuple.Create("v4.0", "net40") }},
+               { "Siverlight", new[] { Tuple.Create("v3.0", "sl30"), Tuple.Create("v4.0", "sl40"), Tuple.Create("v5.0", "sl50") } },
+               { ".NET", new[] { Tuple.Create("v1.0", "net10"), Tuple.Create("v1.1", "net11"), Tuple.Create("v2.0", "net20"),Tuple.Create("v3.0", "net30"),Tuple.Create("v3.5", "net35"), Tuple.Create("v4.0", "net40") }},
            };
 
         private void AddFrameworkFoldersToContextMenu(ContextMenu menu) {
