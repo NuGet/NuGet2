@@ -3,14 +3,15 @@ using System.Runtime.InteropServices;
 
 namespace NuGet.Dialog {
     internal static class NativeMethods {
+        public const int MF_BYPOSITION = 0x400;
 
-        public const int GWL_STYLE = -16;
-        public const int WS_SYSMENU = 0x80000;
+        [DllImport("User32")]
+        public static extern int RemoveMenu(IntPtr hMenu, int nPosition, int wFlags);
 
-        [DllImport("user32.dll")]
-        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        [DllImport("User32")]
+        public static extern IntPtr GetSystemMenu(IntPtr hWnd, [param:MarshalAs(UnmanagedType.Bool)] bool bRevert);
 
-        [DllImport("user32.dll")]
-        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        [DllImport("User32")]
+        public static extern int GetMenuItemCount(IntPtr hWnd);
     }
 }

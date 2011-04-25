@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -17,11 +18,9 @@ namespace NuGet.Dialog.PackageManagerUI {
         protected override void OnSourceInitialized(System.EventArgs e) {
             base.OnSourceInitialized(e);
 
-            var hwnd = new WindowInteropHelper(this).Handle;
-            NativeMethods.SetWindowLong(
-                hwnd, 
-                NativeMethods.GWL_STYLE,
-                NativeMethods.GetWindowLong(hwnd, NativeMethods.GWL_STYLE) & ~NativeMethods.WS_SYSMENU);
+            IntPtr hMenu = NativeMethods.GetSystemMenu(new WindowInteropHelper(this).Handle, false);
+            int menuItemCount = NativeMethods.GetMenuItemCount(hMenu);
+            NativeMethods.RemoveMenu(hMenu, menuItemCount - 1, NativeMethods.MF_BYPOSITION);
         }
 
         internal void SetCompleted(bool successful) {
