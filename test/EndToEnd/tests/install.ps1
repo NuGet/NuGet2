@@ -984,3 +984,19 @@ function Test-WebSiteInstallPackageWithFileNamedAppCode {
     Assert-SolutionPackage PackageWithFileNamedAppCode
     Assert-NotNull (Get-ProjectItem $p App_Code\App_Code.cs)
 }
+
+function Test-PackageInstallAcceptsSourceName {
+    # Arrange
+    $project = New-ConsoleApplication
+    
+    # Act
+    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source'
+    
+    # Assert
+    Assert-Reference $project Castle.Core
+    Assert-Reference $project FakeItEasy
+    Assert-Package $project FakeItEasy
+    Assert-Package $project Castle.Core
+    Assert-SolutionPackage FakeItEasy
+    Assert-SolutionPackage Castle.Core
+}

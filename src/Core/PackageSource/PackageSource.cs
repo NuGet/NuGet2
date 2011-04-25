@@ -32,10 +32,6 @@ namespace NuGet {
             Source = source;
         }
 
-        public static implicit operator PackageSource(string source) {
-            return new PackageSource(source);
-        }
-
         public bool Equals(PackageSource other) {
             if (other == null) {
                 return false;

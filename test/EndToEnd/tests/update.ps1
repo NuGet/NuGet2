@@ -292,3 +292,17 @@ function Test-UpdatePackageWithOlderVersionOfSharedDependencyInUse {
     Assert-Null (Get-SolutionPackage C 1.0)
     Assert-Null (Get-SolutionPackage A 1.0)
 }
+
+function Test-UpdatePackageAcceptsSourceName {
+    # Arrange
+    $p = New-ConsoleApplication
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+
+    Assert-Package $p Antlr 3.1.1
+
+    # Act
+    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'NuGet official Package Source'
+
+    # Assert
+    Assert-Package $p Antlr 3.1.3.42154
+}

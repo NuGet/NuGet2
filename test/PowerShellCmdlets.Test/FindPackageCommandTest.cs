@@ -118,6 +118,30 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
+        public void FindPackageReturnsAllVersionsForSpecificPackageWhenSourceNameisUsed() {
+            // Arrange 
+            var packages = new[] { 
+                PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
+                PackageUtility.CreatePackage("Awesome", "0.4", description: "some desc"),
+                PackageUtility.CreatePackage("Foobar", "0.4", description: "Awesome"),
+                PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
+            };
+
+
+            var cmdlet = BuildCmdlet(packages: packages);
+            cmdlet.Filter = "Awesome";
+            cmdlet.Source = "foosource";
+
+            // Act
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
+        }
+
+        [TestMethod]
         public void FindPackageReturnsPerformsPartialSearchesByDefault() {
             // Arrange 
             var packages = new[] { 
@@ -132,6 +156,32 @@ namespace NuGet.PowerShell.Commands.Test {
             var cmdlet = BuildCmdlet(packages: packages);
             cmdlet.Filter = "Awe";
             cmdlet.Source = "foo";
+
+            // Act
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(3, result.Count());
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new Version("0.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new Version("0.4") });
+        }
+
+        [TestMethod]
+        public void FindPackageReturnsPerformsPartialSearchesByDefaultAndSourceNameIsUsed() {
+            // Arrange 
+            var packages = new[] { 
+                PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
+                PackageUtility.CreatePackage("Awesome", "0.4", description: "some desc"),
+                PackageUtility.CreatePackage("AwesomeToo", "0.4", description: "Awesome Too desc"),
+                PackageUtility.CreatePackage("Foobar", "0.4", description: "Awesome"),
+                PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
+            };
+
+
+            var cmdlet = BuildCmdlet(packages: packages);
+            cmdlet.Filter = "Awe";
+            cmdlet.Source = "foosource";
 
             // Act
             var result = cmdlet.GetResults<dynamic>();
@@ -169,6 +219,31 @@ namespace NuGet.PowerShell.Commands.Test {
             AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
         }
 
+        [TestMethod]
+        public void FindPackagePerformsExactMatchesIfExactMatchIsSpecifiedAndSourceNameIsUsed() {
+            // Arrange 
+            var packages = new[] { 
+                PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
+                PackageUtility.CreatePackage("Awesome", "0.4", description: "some desc"),
+                PackageUtility.CreatePackage("AwesomeToo", "0.4", description: "Awesome Too desc"),
+                PackageUtility.CreatePackage("Foobar", "0.4", description: "Awesome"),
+                PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
+            };
+
+            var cmdlet = BuildCmdlet(packages: packages);
+            cmdlet.ExactMatch = true;
+            cmdlet.Filter = "Awesome";
+            cmdlet.Source = "foosource";
+
+            // Act
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
+        }
+
 
         private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
             Assert.AreEqual(a.Id, b.Id);
@@ -187,13 +262,15 @@ namespace NuGet.PowerShell.Commands.Test {
                 null);
         }
 
-        private static IPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null) {
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+        private static IVsPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null) {
+            var repositoryFactory = new Mock<IVsPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
             packages = packages ?? new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
-            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foo"))).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foosource"))).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository("foosource")).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
 
             return repositoryFactory.Object;
         }
@@ -213,7 +290,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
         private static IPackageSourceProvider GetSourceProvider() {
             Mock<IPackageSourceProvider> sourceProvider = new Mock<IPackageSourceProvider>();
-            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("foo", "foo"));
+            sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("foo", "foosource"));
             return sourceProvider.Object;
         }
     }

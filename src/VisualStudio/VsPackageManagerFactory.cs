@@ -5,7 +5,7 @@ namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IVsPackageManagerFactory))]
     public class VsPackageManagerFactory : IVsPackageManagerFactory {
-        private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IVsPackageRepositoryFactory _repositoryFactory;
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IRepositorySettings _repositorySettings;
@@ -15,7 +15,7 @@ namespace NuGet.VisualStudio {
 
         [ImportingConstructor]
         public VsPackageManagerFactory(ISolutionManager solutionManager,
-                                       IPackageRepositoryFactory repositoryFactory,
+                                       IVsPackageRepositoryFactory repositoryFactory,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
                                        IRecentPackageRepository recentPackagesRepository) {
@@ -41,7 +41,6 @@ namespace NuGet.VisualStudio {
             _solutionManager.SolutionClosing += (sender, e) => {
                 _repositoryInfo = null;
             };
-
         }
 
         public IVsPackageManager CreatePackageManager() {

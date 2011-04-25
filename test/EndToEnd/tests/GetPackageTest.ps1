@@ -114,3 +114,31 @@ function Test-GetPackageCollapsesPackageVersionsForRecent {
     Assert-True (1 -le $recentPackages.Count) 
     Assert-Null $packagesWithMoreThanOneVersions
 }
+
+function Test-GetPackageAcceptsSourceName {
+    # Act
+    $p = @(Get-Package -Filter elmah -ListAvailable -Source 'NuGet official package source')
+
+    # Assert
+    Assert-True (1 -le $p.Count)
+}
+
+function Test-GetPackageWithUpdatesAcceptsSourceName {
+    # Arrange
+    $p = New-WebApplication
+    
+    # Act
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    Install-Package jQuery -Version 1.4.1 -Project $p.Name -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    $packages = Get-Package -Updates -Source 'NUGET OFFICIAL PACKAGE SOURCE'
+    
+    # Assert
+    Assert-AreEqual 2 $packages.Count
+}
+
+function Test-GetPackageThrowsWithInvalidSourceName {
+    # Act
+    Assert-Throws { 
+        Get-Package -ListAvailable -Source 'nonexistent package source'
+    } 'Invalid URI: The format of the URI could not be determined.'
+}

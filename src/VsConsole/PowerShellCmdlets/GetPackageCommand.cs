@@ -13,7 +13,7 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetBaseCommand {
-        private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IVsPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepository _recentPackagesRepository;
         private readonly IProductUpdateService _productUpdateService;
@@ -22,7 +22,7 @@ namespace NuGet.PowerShell.Commands {
         private bool _hasConnectedToHttpSource;
 
         public GetPackageCommand()
-            : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+            : this(ServiceLocator.GetInstance<IVsPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
@@ -31,7 +31,7 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
-        public GetPackageCommand(IPackageRepositoryFactory repositoryFactory,
+        public GetPackageCommand(IVsPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,

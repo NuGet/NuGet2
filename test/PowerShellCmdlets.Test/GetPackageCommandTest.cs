@@ -124,6 +124,22 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
+        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndSourceNameIsUsed() {
+            // Arrange 
+            var cmdlet = BuildCmdlet();
+            cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
+            cmdlet.Source = "foosource";
+
+            // Act 
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
+        }
+
+        [TestMethod]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndRemoteIsNotSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -185,7 +201,7 @@ namespace NuGet.PowerShell.Commands.Test {
         public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndSourceIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
-            cmdlet.Source = "foo";
+            cmdlet.Source = "bing";
 
             // Act 
             var result = cmdlet.GetResults<dynamic>();
@@ -556,7 +572,7 @@ namespace NuGet.PowerShell.Commands.Test {
             bool isSolutionOpen = true,
             IPackageRepository recentPackageRepository = null,
             IProductUpdateService productUpdateService = null,
-            IPackageRepositoryFactory repositoryFactory = null,
+            IVsPackageRepositoryFactory repositoryFactory = null,
             IVsPackageManagerFactory packageManagerFactory = null,
             string activeSourceName = "ActiveRepo") {
 
@@ -581,22 +597,27 @@ namespace NuGet.PowerShell.Commands.Test {
                 productUpdateService);
         }
 
-        private static IPackageRepositoryFactory GetDefaultRepositoryFactory(string activeSourceName = "ActiveRepo") {
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+        private static IVsPackageRepositoryFactory GetDefaultRepositoryFactory(string activeSourceName = "ActiveRepo") {
+            var repositoryFactory = new Mock<IVsPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
             var packages = new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
-            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("http://bing.com", "http://bing.com"))).Returns(repository.Object);
-            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foo"))).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("http://bing.com", "bing"))).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foosource"))).Returns(repository.Object);
             repositoryFactory.Setup(c => c.CreateRepository(new PackageSource(activeSourceName, activeSourceName))).Returns(GetActiveRepository());
+            repositoryFactory.Setup(c => c.CreateRepository("http://bing.com")).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository("bing")).Returns(repository.Object);
+            repositoryFactory.Setup(c => c.CreateRepository("foosource")).Returns(repository.Object);
 
             return repositoryFactory.Object;
         }
 
-        private static IPackageRepositoryFactory GetRepositoryFactoryWithMultiplePackageVersions(string sourceName = "MultiSource") {
-            var factory = new Mock<IPackageRepositoryFactory>();
+        private static IVsPackageRepositoryFactory GetRepositoryFactoryWithMultiplePackageVersions(string sourceName = "MultiSource") {
+            var factory = new Mock<IVsPackageRepositoryFactory>();
             factory.Setup(c => c.CreateRepository(new PackageSource(sourceName, sourceName))).Returns(GetRepositoryWithMultiplePackageVersions());
+            factory.Setup(c => c.CreateRepository(sourceName)).Returns(GetRepositoryWithMultiplePackageVersions());
 
             return factory.Object;
         }
@@ -614,13 +635,6 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryWithMultiplePackageVersions.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
             return repositoryWithMultiplePackageVersions.Object;
-        }
-
-        private static IPackageRepositoryFactory GetRepositoryFactory(IDictionary<string, IPackageRepository> repository) {
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
-            repositoryFactory.Setup(c => c.CreateRepository(It.IsAny<PackageSource>())).Returns<PackageSource>(p => repository[p.Name]);
-
-            return repositoryFactory.Object;
         }
 
         private static IVsPackageManager GetPackageManager() {

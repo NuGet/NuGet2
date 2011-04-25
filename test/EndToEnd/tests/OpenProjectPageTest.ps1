@@ -1,5 +1,3 @@
-
-
 function Test-OpenProjectPageOpenProjectUrlByDefault {
     param(
         $context
@@ -90,4 +88,18 @@ function Test-OpenProjectPageFailsIfLicenseUrlIsNotAvailable {
     Assert-Throws { 
         Open-PackagePage 'PackageWithGacReferences' -License -Source $context.RepositoryRoot
     } "The package 'PackageWithGacReferences 1.0' does not provide the requested URL."
+}
+
+function Test-OpenProjectPageAcceptSourceName {
+    # Act
+    $p = Open-PackagePage 'elmah' -Source 'NuGET offiCial Package Source' -WhatIf -PassThru
+
+    # Assert
+    Assert-AreEqual 'http://elmah.googlecode.com/' $p.OriginalString
+
+    # Act
+    $p = Open-PackagePage 'elmah' -License -Source 'NuGET offiCial Package Source' -WhatIf -PassThru
+
+    # Assert
+    Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString
 }

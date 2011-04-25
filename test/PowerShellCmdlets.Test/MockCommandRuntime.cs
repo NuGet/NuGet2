@@ -112,6 +112,4 @@ namespace NuGet.PowerShell.Commands.Test {
             get { throw new NotImplementedException(); }
         }
     }
-
-
 }

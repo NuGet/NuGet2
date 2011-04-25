@@ -105,6 +105,30 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [TestMethod]
+        public void InstallPackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddressAndSourceNameIsSpecified() {
+            // Arrange
+            string source = "http://bing.com";
+
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var sourceRepository = new Mock<IPackageRepository>();
+            sourceRepository.Setup(p => p.Source).Returns(source);
+            var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager("bing")).Returns(vsPackageManager);
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
+            cmdlet.Object.Source = "bing";
+
+            // Act
+            cmdlet.Object.Execute();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
+        }
+
+        [TestMethod]
         public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress() {
             // Arrange
             string source = "ftp://bing.com";
@@ -120,6 +144,30 @@ namespace NuGet.PowerShell.Commands.Test {
             cmdlet.Object.Version = new Version("2.8");
             cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
             cmdlet.Object.Source = source;
+
+            // Act
+            cmdlet.Object.Execute();
+
+            // Assert
+            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
+        [TestMethod]
+        public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddressAndSourceNameIsSpecified() {
+            // Arrange
+            string source = "ftp://bing.com";
+
+            var productUpdateService = new Mock<IProductUpdateService>();
+            var sourceRepository = new Mock<IPackageRepository>();
+            sourceRepository.Setup(p => p.Source).Returns(source);
+            var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager("bing")).Returns(vsPackageManager);
+            var cmdlet = new Mock<InstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
+            cmdlet.Object.Id = "my-id";
+            cmdlet.Object.Version = new Version("2.8");
+            cmdlet.Object.IgnoreDependencies = new SwitchParameter(true);
+            cmdlet.Object.Source = "BING";
 
             // Act
             cmdlet.Object.Execute();

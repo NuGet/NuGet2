@@ -8,15 +8,15 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Open, "PackagePage", DefaultParameterSetName=ParameterAttribute.AllParameterSets, SupportsShouldProcess=true)]
     public class OpenPackagePageCommand : NuGetBaseCommand {
 
-        private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IVsPackageRepositoryFactory _repositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
 
         public OpenPackagePageCommand()
-            : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+            : this(ServiceLocator.GetInstance<IVsPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IPackageSourceProvider>()) {
         }
 
-        public OpenPackagePageCommand(IPackageRepositoryFactory repositoryFactory,
+        public OpenPackagePageCommand(IVsPackageRepositoryFactory repositoryFactory,
                                 IPackageSourceProvider packageSourceProvider) 
             : base(null, null, null) {
             if (repositoryFactory == null) {
