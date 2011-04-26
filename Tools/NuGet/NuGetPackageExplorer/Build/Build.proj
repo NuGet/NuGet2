@@ -134,7 +134,7 @@
         
         <!-- sign deployment manifest with mage.exe -->
         <Exec
-            Command="&quot;$(MageToolPath)&quot; -u &quot;$(DeploymentManifestFileName)&quot; -appc &quot;$(ManifestCodeBase)\$(AppManifestFileName)&quot; -appm &quot;$(AppManifestDirectory)\$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -pub &quot;$(PublisherName)&quot; -pu &quot;$(DeploymentUrl)/$(DeploymentManifestFileName)&quot;"
+            Command="&quot;$(MageToolPath)&quot; -u &quot;$(DeploymentManifestFileName)&quot; -appc &quot;$(ManifestCodeBase)\$(AppManifestFileName)&quot; -appm &quot;$(AppManifestDirectory)\$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -pub &quot;$(PublisherName)&quot; -pu &quot;$(DeploymentUrl)$(DeploymentManifestFileName)&quot;"
             WorkingDirectory="$(DeployDirectory)" />
 	</Target>
 	

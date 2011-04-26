@@ -115,7 +115,7 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to More Information.
+        ///   Looks up a localized string similar to Package Information.
         /// </summary>
         public static string Dialog_MoreInfo {
             get {
@@ -192,6 +192,15 @@ namespace PackageExplorer.Resources {
         public static string Dialog_Title {
             get {
                 return ResourceManager.GetString("Dialog_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title:.
+        /// </summary>
+        public static string Dialog_TitleLabel {
+            get {
+                return ResourceManager.GetString("Dialog_TitleLabel", resourceCulture);
             }
         }
         

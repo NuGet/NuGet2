@@ -30,8 +30,8 @@
                 <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 
-            <ContextMenu x:Key="FolderSharedContextMenu">
-                <MenuItem Header="_Add Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding}" />
+            <ContextMenu x:Key="FolderSharedContextMenu" Opened="PackageFolderContextMenu_Opened">
+                <MenuItem Header="_Add Existing File..." Command="{Binding   AddContentFileCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="Add Ne_w Folder..." Command="{Binding AddNewFolderCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Rename..." Command="{Binding RenameCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
@@ -63,6 +63,12 @@
                             <TextBlock Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                             <TextBlock Text="{Binding Id}" Style="{StaticResource DetailMetadataValueStyle}"  />
                         </StackPanel>
+
+                        <!-- Title -->
+                        <DockPanel Margin="0,3,0,0" Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TitleLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource DetailMetadataValueStyle}" TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
 
                         <!-- Version -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}">
@@ -218,9 +224,9 @@
     <!-- Main content -->
     <Grid x:Name="ContentGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="150" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="0*" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -260,6 +266,9 @@
                         <EventSetter Event="MouseDoubleClick" Handler="OnTreeViewItemDoubleClick" />
                         <EventSetter Event="DragOver" Handler="OnTreeViewItemDragOver" />
                         <EventSetter Event="Drop" Handler="OnTreeViewItemDrop" />
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="PackagesTreeViewItem_PreviewMouseLeftButtonDown" />
+                        <EventSetter Event="PreviewMouseMove" Handler="PackagesTreeViewItem_PreviewMouseMove" />
+                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="PackagesTreeViewItem_PreviewMouseLeftButtonUp" />
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, FallbackValue=False}" />
                         <Setter Property="IsSelected" Value="{Binding IsSelected}" />
                         <Setter Property="AllowDrop" Value="True" />

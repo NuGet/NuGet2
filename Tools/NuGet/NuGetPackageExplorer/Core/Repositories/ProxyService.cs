@@ -14,6 +14,7 @@ namespace NuGet {
         // then we can use a normal instance based approach and rely on
         // the same instance of the proxy service to maintain the list of cached proxies
         private static readonly Dictionary<Uri, WebProxy> _proxyCache = new Dictionary<Uri, WebProxy>();
+        private static object proxyLock = new object();
 
         private readonly ICredentialProvider _credentialProvider;
 
@@ -78,8 +79,10 @@ namespace NuGet {
                     // If the provider returned credentials that are null that means the user cancelled the prompt
                     // and we want to stop at this point and return nothing.
                     if (null == basicCredentials) {
-                        result = null;
-                        retryCredentials = false;
+                        // set the current proxy object to null so that the result variable is also set to 
+                        // null thus returning an invalid proxy this will force the code to not cache any 
+                        // proxy at all since the user probably clicked cancel and we don't want to cache it.
+                        noCredentialsProxy = null;
                         break;
                     }
                     noCredentialsProxy.Credentials = basicCredentials;
@@ -97,7 +100,11 @@ namespace NuGet {
             Debug.Assert(null != result, "Proxy should not be null here.");
 
             if (null != result) {
-                _proxyCache.Add(systemProxy.Address, result);
+                // lock this object before we add so that no one else can change the collection
+                // when we are adding a new proxy to the list if this is getting invoked in a multi-threaded scenario.
+                lock(proxyLock) {
+                    _proxyCache.Add(systemProxy.Address, result);
+                }
             }
 
             return result;
@@ -160,6 +167,9 @@ namespace NuGet {
             IWebProxy proxy = WebRequest.DefaultWebProxy;
             if (null != proxy) {
                 Uri proxyAddress = new Uri(proxy.GetProxy(uri).AbsoluteUri);
+                if(string.Equals(proxyAddress.AbsoluteUri, uri.AbsoluteUri)) {
+                    return false;
+                }
                 bool bypassUri = proxy.IsBypassed(uri);
                 if (bypassUri) {
                     return false;

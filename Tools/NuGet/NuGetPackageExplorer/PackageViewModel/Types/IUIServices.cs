@@ -1,4 +1,5 @@
 ﻿
+using System;
 namespace PackageExplorerViewModel.Types {
 
     public enum MessageLevel {
@@ -26,5 +27,7 @@ namespace PackageExplorerViewModel.Types {
         bool Confirm(string message, bool isWarning);
         bool? ConfirmWithCancel(string message);
         void Show(string message, MessageLevel messageLevel);
+
+        void BeginInvoke(Action action);
     }
 }

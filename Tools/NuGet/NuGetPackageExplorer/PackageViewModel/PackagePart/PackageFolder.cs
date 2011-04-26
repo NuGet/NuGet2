@@ -7,7 +7,6 @@ using System.Windows.Input;
 using NuGet;
 
 namespace PackageExplorerViewModel {
-
     public class PackageFolder : PackagePart {
 
         public ICollection<PackagePart> Children { get; private set; }
@@ -43,8 +42,23 @@ namespace PackageExplorerViewModel {
 
             bool removed = Children.Remove(child);
             if (removed) {
+                child.Dispose();
                 PackageViewModel.NotifyChanges();
             }
+        }
+
+        private void Attach(PackagePart child) {
+            Children.Add(child);
+            child.Parent = this;
+        }
+
+        /// <summary>
+        /// Detach() is different from Remove() in that it doesn't dispose the child.
+        /// </summary>
+        /// <param name="child"></param>
+        private void Detach(PackagePart child) {
+            Children.Remove(child);
+            child.Parent = null;
         }
 
         public ICommand AddContentFileCommand {
@@ -57,6 +71,29 @@ namespace PackageExplorerViewModel {
             get {
                 return PackageViewModel.AddNewFolderCommand;
             }
+        }
+
+        private ICommand _addContentFolderCommand = null;
+        public ICommand AddContentFolderCommand {
+            get {
+                if (_addContentFolderCommand == null) {
+                    _addContentFolderCommand = new RelayCommand<string>(AddContentFolderExecute, AddContentFolderCanExecute);
+                }
+
+                return _addContentFolderCommand;
+            }
+        }
+
+        private bool AddContentFolderCanExecute(string folderName) {
+            if (folderName == null) {
+                return false;
+            }
+
+            return !ContainsFolder(folderName) && !ContainsFile(folderName);
+        }
+
+        private void AddContentFolderExecute(string folderName) {
+            AddFolder(folderName);
         }
 
         private bool _isExpanded;
@@ -95,6 +132,11 @@ namespace PackageExplorerViewModel {
             return Children.Any(p => p is PackageFile && p.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
         }
 
+        public bool Contains(PackagePart child) {
+            // we can't call Children.Contains(child) here because that will only check by file name, not the actual instance
+            return Children != null && Children.Any(p => p == child);
+        }
+
         public PackageFolder AddFolder(string folderName) {
             if (ContainsFolder(folderName) || ContainsFile(folderName)) {
                 PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
@@ -123,14 +165,8 @@ namespace PackageExplorerViewModel {
             if (ContainsFile(newFileName)) {
                 bool confirmed = PackageViewModel.UIServices.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
                 if (confirmed) {
-                    // check if we are currently showing the content of the file to be removed.
-                    // if we are, we'll need to show the new content after replacing the file.
-                    if (PackageViewModel.ShowContentViewer) {
-                        PackagePart part = this[newFileName];
-                        if (PackageViewModel.CurrentFileInfo.File == part) {
-                            showingRemovedFile = true;
-                        }
-                    }
+                    PackageFile part = this[newFileName] as PackageFile;
+                    showingRemovedFile = PackageViewModel.IsShowingFileContent(part);
 
                     // remove the existing file before adding the new one
                     RemoveChildByName(newFileName);
@@ -140,19 +176,42 @@ namespace PackageExplorerViewModel {
                 }
             }
 
-            var physicalFile = new PhysicalFile(filePath);
+            var physicalFile = new PhysicalPackageFile {
+                SourcePath = filePath
+            };
             var newFile = new PackageFile(physicalFile, newFileName, this);
+            physicalFile.TargetPath = newFile.Path;
             Children.Add(newFile);
             newFile.IsSelected = true;
             this.IsExpanded = true;
             PackageViewModel.NotifyChanges();
 
             if (showingRemovedFile) {
-                ICommand command = PackageViewModel.ViewContentCommand;
-                command.Execute(newFile);
+                PackageViewModel.ShowFileContent(newFile);
             }
 
             return newFile;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+        public void AddFile(PackageFile file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
+            if (Contains(file)) {
+                return;
+            }
+
+            // detach from current parent
+            if (file.Parent != null) {
+                file.Parent.Detach(file);
+            }
+
+            Attach(file);
+            file.IsSelected = true;
+            this.IsExpanded = true;
+            PackageViewModel.NotifyChanges();
         }
 
         private void RemoveChildByName(string name) {
@@ -172,6 +231,13 @@ namespace PackageExplorerViewModel {
             foreach (var part in Children) {
                 part.Export(rootPath);
             }
+        }
+
+        protected override void Dispose(bool disposing) {
+            foreach (var part in Children) {
+                part.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

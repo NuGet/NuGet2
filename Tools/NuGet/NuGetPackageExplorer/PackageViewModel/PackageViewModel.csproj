@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>..\..\..\..\NuGet.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\NuGetPackageExplorer.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -69,7 +69,6 @@
     <Compile Include="PackagePart\PackageFolder.cs" />
     <Compile Include="PackagePart\PackagePart.cs" />
     <Compile Include="PackagePart\PathToTreeConverter.cs" />
-    <Compile Include="PackagePart\PhysicalFile.cs" />
     <Compile Include="PackagePart\SortedCollection.cs" />
     <Compile Include="PackageViewModel.cs" />
     <Compile Include="PackageViewModelFactory.cs" />

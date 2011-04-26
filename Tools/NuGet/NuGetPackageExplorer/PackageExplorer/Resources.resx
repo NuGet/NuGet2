@@ -136,7 +136,7 @@
     <value>Language:</value>
   </data>
   <data name="Dialog_MoreInfo" xml:space="preserve">
-    <value>More Information</value>
+    <value>Package Information</value>
   </data>
   <data name="Dialog_NoDependencyLabel" xml:space="preserve">
     <value>No Dependencies</value>
@@ -161,6 +161,9 @@
   </data>
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
+  </data>
+  <data name="Dialog_TitleLabel" xml:space="preserve">
+    <value>Title:</value>
   </data>
   <data name="Dialog_VersionLabel" xml:space="preserve">
     <value>Version:</value>
