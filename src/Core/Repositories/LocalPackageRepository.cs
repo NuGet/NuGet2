@@ -79,24 +79,24 @@ namespace NuGet {
         }
 
         public IPackage FindPackage(string packageId, Version version) {
-            var packageName = new PackageName(packageId, version);
-            string path;
-            if (!_packagePathLookup.TryGetValue(packageName, out path)) {
-                // Try to find the path based on id and version
-                path = GetPackageFilePath(packageName.PackageId, packageName.Version);
+            string path = GetPackagePaths(packageId, version).FirstOrDefault(FileSystem.FileExists);
 
-                // If this path doesn't exist try the other one
-                if (!FileSystem.FileExists(path)) {
-                    path = PathResolver.GetPackageFileName(packageId, version);
-                }
-            }
-
-            if (!FileSystem.FileExists(path)) {
+            if (String.IsNullOrEmpty(path)) {
                 return null;
             }
 
             // Get the package at this path
             return GetPackage(path);
+        }
+
+        private IEnumerable<string> GetPackagePaths(string packageId, Version version) {
+            var packageName = new PackageName(packageId, version);
+            string packagePath;
+            if (_packagePathLookup.TryGetValue(packageName, out packagePath)) {
+                yield return packagePath;
+            }
+            yield return GetPackageFilePath(packageId, version);
+            yield return PathResolver.GetPackageFileName(packageId, version);
         }
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage) {
@@ -124,7 +124,7 @@ namespace NuGet {
                 // Create the package
                 IPackage package = openPackage(packagePath);
 
-                
+
                 // create a cache entry with the last modified time
                 cacheEntry = new PackageCacheEntry(package, lastModified);
 
@@ -155,7 +155,10 @@ namespace NuGet {
         }
 
         protected virtual IPackage OpenPackage(string path) {
-            return new ZipPackage(() => FileSystem.OpenFile(path));
+            var package = new ZipPackage(() => FileSystem.OpenFile(path));
+            // Clear the cache whenever we open a new package file
+            ZipPackage.ClearCache(package);
+            return package;
         }
 
         protected virtual string GetPackageFilePath(IPackage package) {
