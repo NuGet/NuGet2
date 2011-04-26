@@ -196,6 +196,15 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Title:.
+        /// </summary>
+        public static string Dialog_TitleLabel {
+            get {
+                return ResourceManager.GetString("Dialog_TitleLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Version:.
         /// </summary>
         public static string Dialog_VersionLabel {

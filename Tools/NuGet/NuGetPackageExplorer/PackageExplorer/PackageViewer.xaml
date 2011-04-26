@@ -64,6 +64,12 @@
                             <TextBlock Text="{Binding Id}" Style="{StaticResource DetailMetadataValueStyle}"  />
                         </StackPanel>
 
+                        <!-- Title -->
+                        <DockPanel Margin="0,3,0,0" Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TitleLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource DetailMetadataValueStyle}" TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
+
                         <!-- Version -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}">
                             <TextBlock Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />

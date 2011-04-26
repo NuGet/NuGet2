@@ -162,6 +162,9 @@
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
   </data>
+  <data name="Dialog_TitleLabel" xml:space="preserve">
+    <value>Title:</value>
+  </data>
   <data name="Dialog_VersionLabel" xml:space="preserve">
     <value>Version:</value>
   </data>
