@@ -219,10 +219,11 @@ namespace NuGet.Commands {
             factory.Properties.Add("Configuration", Configuration ?? "Release");
 
             // Add the additional Properties to the properties of the Project Factory
-            Properties
-                .Where(arg => !factory.Properties.ContainsKey(arg.Key))
-                .ToList()
-                .ForEach(arg => factory.Properties.Add(arg.Key, arg.Value));
+            foreach (var property in Properties) {
+                if(!factory.Properties.ContainsKey(property.Key)) {
+                    factory.Properties.Add(property.Key, property.Value);
+                }
+            }
 
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder();
