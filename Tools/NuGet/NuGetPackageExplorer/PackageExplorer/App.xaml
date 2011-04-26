@@ -81,7 +81,7 @@
                                 Grid.RowSpan="2"
                                 Grid.Column="1"
                                 HorizontalAlignment="Center">
-                                
+
                                 <ContentControl
                                     FontWeight="SemiBold"
                                     Foreground="Navy"
@@ -126,9 +126,33 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style TargetType="{x:Type Window}">
             <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         </Style>
+
+        <Style  TargetType="{x:Type GridSplitter}">
+            <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />
+            <Setter Property="UIElement.Focusable" Value="False" />
+            <Setter Property="ShowsPreview" Value="True"/>
+            <Setter Property="Foreground" Value="{StaticResource ResourceKey={x:Static SystemColors.ControlDarkBrushKey}}" />
+
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border BorderThickness="{TemplateBinding Border.BorderThickness}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Rectangle Fill="{TemplateBinding Foreground}" Width="3" Height="2" Margin=".5" RadiusX="3" RadiusY="3" />
+                                <Rectangle Fill="{TemplateBinding Foreground}" Width="3" Height="2" Margin=".5" RadiusX="3" RadiusY="3" />
+                                <Rectangle Fill="{TemplateBinding Foreground}" Width="3" Height="2" Margin=".5" RadiusX="3" RadiusY="3" />
+                                <Rectangle Fill="{TemplateBinding Foreground}" Width="3" Height="2" Margin=".5" RadiusX="3" RadiusY="3" />
+                                <Rectangle Fill="{TemplateBinding Foreground}" Width="3" Height="2" Margin=".5" RadiusX="3" RadiusY="3" />
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Application.Resources>
 </Application>

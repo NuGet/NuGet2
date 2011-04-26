@@ -224,9 +224,9 @@
     <!-- Main content -->
     <Grid x:Name="ContentGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="150" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="0*" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>

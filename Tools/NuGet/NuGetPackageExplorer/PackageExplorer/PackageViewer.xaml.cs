@@ -27,7 +27,9 @@ namespace PackageExplorer {
             var settings = Properties.Settings.Default;
 
             if ((bool)e.NewValue) {
-                ContentGrid.RowDefinitions[2].Height = new GridLength(settings.ContentViewerPanelHeight, GridUnitType.Pixel);
+                ContentGrid.RowDefinitions[0].Height = new GridLength(settings.PackageContentHeight, GridUnitType.Star);
+                ContentGrid.RowDefinitions[2].Height = new GridLength(settings.ContentViewerHeight, GridUnitType.Star);
+                ContentGrid.RowDefinitions[2].MinHeight = 150;
 
                 if (FileContentContainer.Content == null) {
                     UserControl fileContent = CreateFileContentViewer();
@@ -35,8 +37,11 @@ namespace PackageExplorer {
                 }
             }
             else {
-                settings.ContentViewerPanelHeight = ContentGrid.RowDefinitions[2].Height.Value;
-                ContentGrid.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Auto);
+                settings.PackageContentHeight = ContentGrid.RowDefinitions[0].Height.Value;
+                settings.ContentViewerHeight = ContentGrid.RowDefinitions[2].Height.Value;
+
+                ContentGrid.RowDefinitions[2].Height = new GridLength(0, GridUnitType.Star);
+                ContentGrid.RowDefinitions[2].MinHeight = 0;
             }
         }
 
