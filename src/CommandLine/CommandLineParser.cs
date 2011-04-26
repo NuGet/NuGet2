@@ -91,13 +91,15 @@ namespace NuGet {
 
                     dynamic list = property.GetValue(command, null);
                     // The parameter value is one or more semi-colon separated items that might support values also
-                    // Example of a simple value : nuget pack -option "foo;bar;baz"
-                    // Example of a complex value: nuget pack -option "foo=bar;baz=false"
+                    // Example of a list value : nuget pack -option "foo;bar;baz"
+                    // Example of a keyvalue value: nuget pack -option "foo=bar;baz=false"
                     foreach (var item in stringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
-                        if(CommandLineUtility.IsComplexMultiValueProperty(property)) {
+                        if (CommandLineUtility.IsKeyValueProperty(property)) {
                             int eqIndex = item.IndexOf("=", StringComparison.OrdinalIgnoreCase);
-                            if(eqIndex > -1) {
-                                list.Add(item.Substring(0, eqIndex), item.Substring(eqIndex + 1));
+                            if (eqIndex > -1) {
+                                string propertyKey = item.Substring(0, eqIndex);
+                                string propertyValue = item.Substring(eqIndex + 1);
+                                list.Add(propertyKey, propertyValue);
                             }
                         }
                         else {
