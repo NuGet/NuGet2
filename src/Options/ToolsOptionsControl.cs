@@ -19,7 +19,7 @@ namespace NuGet.Options {
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
     public partial class ToolsOptionsControl : UserControl {
-        private IVsPackageSourceProvider _packageSourceProvider;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _aggregateSource;
         private PackageSource _activeSource;
         private BindingSource _allPackageSources;
@@ -83,11 +83,11 @@ namespace NuGet.Options {
             _initialized = true;
             // get packages sources
             IList<PackageSource> packageSources = _packageSourceProvider.LoadPackageSources().ToList();
-            _aggregateSource = packageSources.Where(ps => ps.IsAggregate()).Single();
+            _aggregateSource = AggregatePackageSource.Instance;
             _activeSource = _packageSourceProvider.ActivePackageSource;
 
             // bind to the package sources, excluding Aggregate
-            _allPackageSources = new BindingSource(packageSources.Where(ps => !ps.IsAggregate()).ToList(), null);
+            _allPackageSources = new BindingSource(packageSources.ToList(), null);
             PackageSourcesListBox.DataSource = _allPackageSources;
         }
 

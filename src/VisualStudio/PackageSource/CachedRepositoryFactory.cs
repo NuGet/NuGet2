@@ -43,6 +43,11 @@ namespace NuGet.VisualStudio {
                     "source");
             }
 
+            // aggregate source, return aggregate repository
+            if (AggregatePackageSource.Instance.Source.Equals(source)) {
+                return _packageSourceProvider.GetAggregate(_repositoryFactory);
+            }
+
             // try to look up a PackageSource with a matching name as 'source'
             string sourceFromName = _packageSourceProvider.ResolveSource(source);
             if (!String.IsNullOrEmpty(sourceFromName)) {

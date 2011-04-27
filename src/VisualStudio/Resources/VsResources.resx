@@ -234,4 +234,7 @@
   <data name="Warning_RollingBack" xml:space="preserve">
     <value>Install failed. Rolling back...</value>
   </data>
+  <data name="PackageSourceAggregateNotAllowed" xml:space="preserve">
+    <value>The specified package sources contain at least one aggregate source.</value>
+  </data>
 </root>

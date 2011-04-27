@@ -70,11 +70,13 @@ namespace NuGet.Dialog.Test {
             var extentionsTree = provider.ExtensionsTree;
 
             // Assert
-            Assert.AreEqual(2, extentionsTree.Nodes.Count);
+            Assert.AreEqual(3, extentionsTree.Nodes.Count);
             Assert.IsInstanceOfType(extentionsTree.Nodes[0], typeof(UpdatesTreeNode));
-            Assert.AreEqual("One", extentionsTree.Nodes[0].Name);
+            Assert.AreEqual("All", extentionsTree.Nodes[0].Name);
             Assert.IsInstanceOfType(extentionsTree.Nodes[1], typeof(UpdatesTreeNode));
-            Assert.AreEqual("Two", extentionsTree.Nodes[1].Name);
+            Assert.AreEqual("One", extentionsTree.Nodes[1].Name);
+            Assert.IsInstanceOfType(extentionsTree.Nodes[2], typeof(UpdatesTreeNode));
+            Assert.AreEqual("Two", extentionsTree.Nodes[2].Name);
         }
 
         [TestMethod]

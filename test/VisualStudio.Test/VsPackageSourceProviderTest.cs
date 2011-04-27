@@ -33,8 +33,8 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[1].Source);
+            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[0].Source);
         }
 
         [TestMethod]
@@ -50,10 +50,9 @@ namespace NuGet.VisualStudio.Test {
             // Act
             var sources = provider.LoadPackageSources().ToList();
 
-
             // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[1].Source);
+            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[0].Source);
         }
 
         [TestMethod]
@@ -69,8 +68,8 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(AggregatePackageSource.Instance, sources[0]);
+            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual("NuGet official package source", sources[0].Name);
         }
 
         [TestMethod]
@@ -88,7 +87,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(AggregatePackageSource.Instance, sources[0]);
+            Assert.AreEqual(new PackageSource(VsPackageSourceProvider.DefaultPackageSource, "NuGet official package source"), sources[0]);
             Assert.AreEqual(new PackageSource("a", "a"), sources[1]);
         }
 
@@ -106,8 +105,8 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(AggregatePackageSource.Instance, sources[0]);
+            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual("NuGet official package source", sources[0].Name);
         }
 
         [TestMethod]
@@ -123,10 +122,9 @@ namespace NuGet.VisualStudio.Test {
             // Act
             var sources = provider.LoadPackageSources().ToList();
 
-
             // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(AggregatePackageSource.Instance, sources[0]);
+            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual("NuGet official package source", sources[0].Name);
         }
 
         [TestMethod]
@@ -324,24 +322,7 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void AggregateSourceWithoutIsAggregateFlagSetFlagToTrue() {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var registrySettingsManager = new MockPackageSourceSettingsManager();
-            registrySettingsManager.PackageSourcesString = "<ArrayOfPackageSource xmlns=\"http://schemas.datacontract.org/2004/07/NuGet\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><PackageSource><Name>All</Name><Source>(Aggregate source)</Source></PackageSource><PackageSource><IsAggregate>false</IsAggregate><Name>NuGet official package source</Name><Source>https://go.microsoft.com/fwlink/?LinkID=206669</Source></PackageSource></ArrayOfPackageSource>";
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager, packageSourceProvider);
-
-            // Act
-            var sources = provider.LoadPackageSources().ToList();
-
-            // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.IsTrue(sources[0].IsAggregate());
-        }
-
-        [TestMethod]
-        public void SettingsWithMoreThanOneAggregateSourceAreModifiedToHaveOneOnly() {
+        public void SettingsWithMoreThanOneAggregateSourceAreModifiedToNotHaveOne() {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var registrySettingsManager = new MockPackageSourceSettingsManager();
@@ -353,13 +334,12 @@ namespace NuGet.VisualStudio.Test {
             var sources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.AreEqual(2, sources.Count);
-            Assert.IsTrue(sources[0].IsAggregate());
-            Assert.IsFalse(sources[1].IsAggregate());
+            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual("NuGet official package source", sources[0].Name);
         }
 
         [TestMethod]
-        public void SettingPackageSourcesWithAggregateWillNotAddAggregate() {
+        public void SettingPackageSourcesThrow() {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var registrySettingsManager = new MockPackageSourceSettingsManager();
@@ -371,14 +351,11 @@ namespace NuGet.VisualStudio.Test {
                                                              new PackageSource("source", "name")
                                                          };
 
-            // Act
-            provider.SavePackageSources(packageSources);
-
-            // Assert
-            var values = packageSourceProvider.LoadPackageSources().ToList();
-
-            Assert.AreEqual(1, values.Count);
-            AssertPackageSource(values[0], "name", "source");
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => provider.SavePackageSources(packageSources),
+                "sources",
+                Resources.VsResources.PackageSourceAggregateNotAllowed);
         }
 
         private void AssertPackageSource(PackageSource ps, string name, string source) {

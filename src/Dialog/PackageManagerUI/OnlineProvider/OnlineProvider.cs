@@ -61,7 +61,7 @@ namespace NuGet.Dialog.Providers {
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We want to suppress all errors to show an empty node.")]
         protected override void FillRootNodes() {
-            var packageSources = _packageSourceProvider.LoadPackageSources();
+            var packageSources = _packageSourceProvider.GetPackageSourcesWithAggregate();
 
             // create one tree node per package source
             foreach (var source in packageSources) {

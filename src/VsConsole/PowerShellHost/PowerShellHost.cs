@@ -336,13 +336,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 }
 
                 _packageSourceProvider.ActivePackageSource =
-                    _packageSourceProvider.LoadPackageSources().FirstOrDefault(
+                    _packageSourceProvider.GetPackageSourcesWithAggregate().FirstOrDefault(
                         ps => ps.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         public string[] GetPackageSources() {
-            return _packageSourceProvider.LoadPackageSources().Select(ps => ps.Name).ToArray();
+            return _packageSourceProvider.GetPackageSourcesWithAggregate().Select(ps => ps.Name).ToArray();
         }
 
         public string DefaultProject {

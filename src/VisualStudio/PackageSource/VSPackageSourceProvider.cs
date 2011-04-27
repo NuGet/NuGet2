@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using NuGet.VisualStudio.Resources;
 
@@ -53,7 +54,7 @@ namespace NuGet.VisualStudio {
                 return _activePackageSource;
             }
             set {
-                if (value != null && !_packageSources.Contains(value)) {
+                if (value != null && !IsAggregateSource(value) && !_packageSources.Contains(value)) {
                     throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
                 }
 
@@ -62,11 +63,9 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1024:UsePropertiesWhereAppropriate",
-            Justification = "This method is potentially expensive because we are retrieving data from VS settings store.")]
         public IEnumerable<PackageSource> LoadPackageSources() {
+            // assert that we are not returning aggregate source
+            Debug.Assert(_packageSources == null || !_packageSources.Any(p => IsAggregateSource(p)));
             return _packageSources;
         }
 
@@ -75,7 +74,7 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("source");
             }
 
-            if (!_packageSources.Contains(source)) {
+            if (!_packageSources.Contains(source) && !IsAggregateSource(source)) {
                 _packageSources.Add(source);
 
                 // if the package source that we just added is the only one, make it the default
@@ -104,25 +103,27 @@ namespace NuGet.VisualStudio {
         }
 
         public void SavePackageSources(IEnumerable<PackageSource> sources) {
-            _packageSources.Clear();
+            if (sources == null) {
+                throw new ArgumentNullException("sources");
+            }
+
+            if (sources.Any(p => IsAggregateSource(p))) {
+                throw new ArgumentException(Resources.VsResources.PackageSourceAggregateNotAllowed, "sources");
+            }
+
             ActivePackageSource = null;
-
-            if (sources != null) {
-                foreach (var s in sources) {
-                    _packageSources.Add(s);
-                }
-            }
-            if (!_packageSources.Contains(AggregatePackageSource.Instance)) {
-                _packageSources.Insert(0, AggregatePackageSource.Instance);
-            }
-
+            _packageSources.Clear();
+            _packageSources.AddRange(sources);
+            
             PersistPackageSources();
         }
 
         private void PersistPackageSources() {
             // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
-            // don't persist aggregate source
-            _packageSourceProvider.SavePackageSources(_packageSources.Where(p => !p.IsAggregate()));
+            
+            // assert that we are not saving aggregate source
+            Debug.Assert(!_packageSources.Any(p => IsAggregateSource(p.Name, p.Source)));
+            _packageSourceProvider.SavePackageSources(_packageSources);
         }
 
         private void PersistActivePackageSource() {
@@ -135,35 +136,6 @@ namespace NuGet.VisualStudio {
         }
 
         private void DeserializePackageSources() {
-            LoadAndMigratePackageSources();
-
-            if (_packageSources == null) {
-                _packageSources = new List<PackageSource>();
-                _packageSources.Add(AggregatePackageSource.Instance);
-            }
-            else if (!_packageSources.Any(AggregatePackageSource.IsAggregate)) {
-                // look for a package source with the Source value as "(Aggregate source)"
-                var index = _packageSources.FindIndex(ps => ps.Source.Equals(AggregatePackageSource.Instance.Source));
-                if (index > -1) {
-                    _packageSources[index] = AggregatePackageSource.Instance;
-                }
-                else {
-                    // only add the aggregate source if there is not already one
-                    _packageSources.Insert(0, AggregatePackageSource.Instance);
-                }
-            }
-            else {
-                for (int i = 0; i < _packageSources.Count; i++) {
-                    var source = _packageSources[i];
-                    // in 1.0, we didn't localize the All word. Fix it here opportunistically.
-                    if (source.Name.Equals("All", StringComparison.CurrentCultureIgnoreCase)) {
-                        _packageSources[i] = new PackageSource(source.Source, AggregatePackageSource.Instance.Name);
-                    }
-                }
-            }
-        }
-
-        private void LoadAndMigratePackageSources() {
             // read from nuget.config first
             List<PackageSource> packageSourcesFromUserSettings = _packageSourceProvider.LoadPackageSources().ToList();
             if (packageSourcesFromUserSettings.Count > 0) {
@@ -174,11 +146,20 @@ namespace NuGet.VisualStudio {
                 if (!String.IsNullOrEmpty(propertyString)) {
                     _packageSources = SerializationHelper.Deserialize<List<PackageSource>>(propertyString);
 
+                    // delete any package source with the Source value as "(Aggregate source)"
+                    // these can be persisted in v1.0
+                    _packageSources.RemoveAll(ps => IsAggregateSource(ps));
+
                     // if reading from VS registry, do the migration to nuget.config here
                     PersistPackageSources();
 
                     // delete the values in VS registry
                     _registrySettingsManager.PackageSourcesString = null;
+                }
+
+                // this can happen when the registry is corrupted or under unit tests
+                if (_packageSources == null) {
+                    _packageSources = new List<PackageSource>();
                 }
             }
         }
@@ -190,8 +171,7 @@ namespace NuGet.VisualStudio {
             PackageSource packageSource;
             if (settingValues != null && settingValues.Any()) {
                 KeyValuePair<string, string> setting = settingValues.First();
-                // if the active source is the Aggregate source, we persist it as <add key="All" value="(Aggregate source)" />
-                if (AggregatePackageSource.Instance.Name.Equals(setting.Key, StringComparison.CurrentCultureIgnoreCase)) {
+                if (IsAggregateSource(setting.Key, setting.Value)) {
                     packageSource = AggregatePackageSource.Instance;
                 }
                 else {
@@ -239,9 +219,9 @@ namespace NuGet.VisualStudio {
                 RemovePackageSource(officialFeed);
             }
 
-            // Insert it at position 1, so it is right after the aggregate
+            // Insert it at first position 
             officialFeed = new PackageSource(DefaultPackageSource, OfficialFeedName);
-            _packageSources.Insert(1, officialFeed);
+            _packageSources.Insert(0, officialFeed);
 
             // Only make it the active source if there isn't one already
             if (ActivePackageSource == null) {
@@ -249,6 +229,16 @@ namespace NuGet.VisualStudio {
             }
 
             PersistPackageSources();
+        }
+
+        private bool IsAggregateSource(string name, string source) {
+            PackageSource aggregate = AggregatePackageSource.Instance;
+            return aggregate.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase) ||
+                aggregate.Source.Equals(source, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private bool IsAggregateSource(PackageSource packageSource) {
+            return IsAggregateSource(packageSource.Name, packageSource.Source);
         }
     }
 }

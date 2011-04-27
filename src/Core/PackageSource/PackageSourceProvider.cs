@@ -21,7 +21,7 @@ namespace NuGet {
 
         public IEnumerable<PackageSource> LoadPackageSources() {
             IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(FileSettingsSectionName);
-            if (settingsValue != null && settingsValue.Count > 0) {
+            if (settingsValue != null && settingsValue.Any()) {
                 return settingsValue.Select(p => new PackageSource(p.Value, p.Key)).ToList();
             }
 
