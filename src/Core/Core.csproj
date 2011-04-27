@@ -54,6 +54,9 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
+    <Compile Include="PackageSource\IPackageSourceProvider.cs" />
+    <Compile Include="PackageSource\PackageSourceProvider.cs" />
+    <Compile Include="PackageSource\PackageSourceProviderExtensions.cs" />
     <Compile Include="Packages\FrameworkAssemblyReference.cs" />
     <Compile Include="Packages\IFrameworkTargetable.cs" />
     <Compile Include="Packages\IPackageMetadata.cs" />

@@ -13,7 +13,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         public void SelfUpdateNoCommandLinePackageOnServerThrows() {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
-            factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
+            factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
             var updateCmd = new UpdateCommand(factory.Object);
@@ -29,7 +29,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var factory = new Mock<IPackageRepositoryFactory>();
             var repository = new MockPackageRepository();
             repository.Add(PackageUtility.CreatePackage("NuGet.CommandLine", "1.0"));
-            factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(repository);
+            factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(repository);
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
             var updateCmd = new UpdateCommand(factory.Object);
@@ -48,7 +48,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var factory = new Mock<IPackageRepositoryFactory>();
             var repository = new MockPackageRepository();
             repository.Add(PackageUtility.CreatePackage("NuGet.CommandLine", "3.0"));
-            factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(repository);
+            factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(repository);
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
             var updateCmd = new UpdateCommand(factory.Object);
@@ -66,7 +66,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var repository = new MockPackageRepository();
             IPackage package = PackageUtility.CreatePackage("NuGet.CommandLine", "3.0", tools: new[] { "NuGet.exe" });
             repository.Add(package);
-            factory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(repository);
+            factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(repository);
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
             var updateCmd = new MockUpdateCommand(factory.Object);

@@ -13,7 +13,7 @@ namespace NuGet.Common {
             _repositoryFactory = repositoryFactory;
         }
 
-        public IPackageRepository CreateRepository(PackageSource packageSource) {
+        public IPackageRepository CreateRepository(string packageSource) {
             return new LazyRepository(_repositoryFactory, packageSource);
         }
 
@@ -21,11 +21,11 @@ namespace NuGet.Common {
             private const string UserAgentClient = "NuGet Command Line";
             private readonly Lazy<IPackageRepository> _repository;
 
-            public LazyRepository(IPackageRepositoryFactory repositoryFactory, PackageSource packageSource) {
+            public LazyRepository(IPackageRepositoryFactory repositoryFactory, string packageSource) {
                 _repository = new Lazy<IPackageRepository>(() => CreateRepository(repositoryFactory, packageSource));
             }
 
-            private static IPackageRepository CreateRepository(IPackageRepositoryFactory repositoryFactory, PackageSource packageSource) {
+            private static IPackageRepository CreateRepository(IPackageRepositoryFactory repositoryFactory, string packageSource) {
                 IPackageRepository packageRepository = repositoryFactory.CreateRepository(packageSource);
                 var httpClientEvents = packageRepository as IHttpClientEvents;
 

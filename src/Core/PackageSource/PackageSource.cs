@@ -5,10 +5,6 @@ namespace NuGet {
 
     [DataContract]
     public class PackageSource : IEquatable<PackageSource> {
-
-        [DataMember]
-        public bool IsAggregate { get; set; }
-
         [DataMember]
         public string Name { get; private set; }
 

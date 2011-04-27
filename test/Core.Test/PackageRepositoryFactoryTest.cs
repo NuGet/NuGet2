@@ -13,12 +13,6 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void CreateRepositoryThrowsIfAggregateRepository() {
-            // Act & Assert
-            ExceptionAssert.Throws<NotSupportedException>(() => PackageRepositoryFactory.Default.CreateRepository(new PackageSource("b", "a") { IsAggregate = true }));
-        }
-
-        [TestMethod]
         public void CreateRepositoryReturnsLocalRepositoryIfSourceIsPhysicalPath() {
             // Arrange
             var paths = new[] { @"C:\packages\", 
@@ -27,7 +21,7 @@ namespace NuGet.Test {
             var factory = PackageRepositoryFactory.Default;
 
             // Act and Assert
-            Assert.IsTrue(paths.Select(p => factory.CreateRepository(new PackageSource(p, p)))
+            Assert.IsTrue(paths.Select(p => factory.CreateRepository(p))
                                .All(p => p is LocalPackageRepository));
         }
 
@@ -40,7 +34,7 @@ namespace NuGet.Test {
             var factory = new PackageRepositoryFactory(httpClient.Object);
 
             // Act
-            IPackageRepository repository = factory.CreateRepository(new PackageSource("http://example.com/", "Test Source"));
+            IPackageRepository repository = factory.CreateRepository("http://example.com/");
 
             // Act and Assert
             Assert.IsInstanceOfType(repository, typeof(DataServicePackageRepository));

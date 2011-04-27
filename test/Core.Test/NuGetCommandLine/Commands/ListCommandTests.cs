@@ -161,8 +161,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             //Setup Factory
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            packageRepositoryFactory.Setup(p => p.CreateRepository(It.IsAny<PackageSource>())).Returns<PackageSource>(s => {
-                switch (s.Source) {
+            packageRepositoryFactory.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
+                switch (s) {
                     case NonDefaultRepoUrl1: return nondefaultPackageRepository;
                     case NonDefaultRepoUrl2: return multiVersionRepo;
                     default: return defaultPackageRepository;

@@ -41,7 +41,7 @@ namespace NuGet.Commands {
                 feedUrl = Source;
             }
 
-            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl));
+            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(feedUrl);
 
             // Use the passed in install path if any, and default to the current dir
             string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();

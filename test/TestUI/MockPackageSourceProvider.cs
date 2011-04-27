@@ -3,22 +3,15 @@ using System.Linq;
 using NuGet.VisualStudio;
 
 namespace NuGet.TestUI {
-    class MockPackageSourceProvider : IPackageSourceProvider {
+    class MockPackageSourceProvider : IVsPackageSourceProvider {
         private IList<PackageSource> _packageSources = new List<PackageSource>();
-        private static readonly PackageSource _aggregateSource = new PackageSource("All") { IsAggregate = true };
 
         public PackageSource ActivePackageSource {
             get;
             set;
         }
 
-        public PackageSource AggregateSource {
-            get {
-                return _aggregateSource;
-            }
-        }
-
-        public IEnumerable<PackageSource> GetPackageSources() {
+        public IEnumerable<PackageSource> LoadPackageSources() {
             return _packageSources;
         }
 
@@ -30,7 +23,7 @@ namespace NuGet.TestUI {
             return _packageSources.Remove(source);
         }
 
-        public void SetPackageSources(IEnumerable<PackageSource> sources) {
+        public void SavePackageSources(IEnumerable<PackageSource> sources) {
             _packageSources = sources.ToList();
         }
     }

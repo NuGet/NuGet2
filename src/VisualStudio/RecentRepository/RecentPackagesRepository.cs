@@ -20,14 +20,17 @@ namespace NuGet.VisualStudio {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
         private readonly DTEEvents _dteEvents;
-        private readonly PackageSource _aggregatePackageSource;
+        private readonly Lazy<IPackageRepository> _aggregateRepository;
         private bool _hasLoadedSettingsStore;
         private DateTime _latestTime = DateTime.UtcNow;
 
         [ImportingConstructor]
         public RecentPackagesRepository(IPackageRepositoryFactory repositoryFactory,
                                         IPersistencePackageSettingsManager settingsManager)
-            : this(ServiceLocator.GetInstance<DTE>(), repositoryFactory, ServiceLocator.GetInstance<IPackageSourceProvider>(), settingsManager) {
+            : this(ServiceLocator.GetInstance<DTE>(), 
+                   repositoryFactory, 
+                   ServiceLocator.GetInstance<IPackageSourceProvider>(), 
+                   settingsManager) {
         }
 
         public RecentPackagesRepository(
@@ -38,7 +41,7 @@ namespace NuGet.VisualStudio {
 
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
-            _aggregatePackageSource = packageSourceProvider.ActivePackageSource;
+            _aggregateRepository = new Lazy<IPackageRepository>(() => packageSourceProvider.GetAggregate(repositoryFactory));
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
@@ -125,14 +128,11 @@ namespace NuGet.VisualStudio {
         }
 
         private void LoadPackagesFromSettingsStore() {
-            // find recent packages from the Aggregate repository
-            IPackageRepository aggregateRepository = _repositoryFactory.CreateRepository(_aggregatePackageSource);
-
             // get the metadata of recent packages from registry
             IEnumerable<IPersistencePackageMetadata> packagesMetadata = LoadPackageMetadataFromSettingsStore();
 
             // find the packages based on metadata from the Aggregate repository based on Id only
-            IEnumerable<IPackage> newPackages = aggregateRepository.FindPackages(packagesMetadata.Select(p => p.Id));
+            IEnumerable<IPackage> newPackages = _aggregateRepository.Value.FindPackages(packagesMetadata.Select(p => p.Id));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             IEnumerable<RecentPackage> filterPackages = FilterPackages(packagesMetadata, newPackages);

@@ -13,7 +13,7 @@ namespace NuGet.Dialog.Providers {
         private readonly IPackageRepository _recentPackagesRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
-        private readonly PackageSource _aggregateSource;
+        private readonly IPackageSourceProvider _packageSourceProvider;
         private IVsPackageManager _recentPackageManager;
 
         public RecentProvider(
@@ -28,10 +28,10 @@ namespace NuGet.Dialog.Providers {
             IProgressProvider progressProvider)
             : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices, progressProvider) {
 
-            _aggregateSource = packageSourceProvider.AggregateSource;
             _recentPackagesRepository = recentPackagesRepository;
             _packageManagerFactory = packageManagerFactory;
             _packageRepositoryFactory = packageRepositoryFactory;
+            _packageSourceProvider = packageSourceProvider;
         }
 
         public override string Name {
@@ -54,7 +54,7 @@ namespace NuGet.Dialog.Providers {
 
         protected internal override IVsPackageManager GetActivePackageManager() {
             if (_recentPackageManager == null) {
-                var repository = _packageRepositoryFactory.CreateRepository(_aggregateSource);
+                var repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory);
                 _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository);
             }
 

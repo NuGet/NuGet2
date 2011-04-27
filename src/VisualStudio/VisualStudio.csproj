@@ -16,9 +16,10 @@
   <ItemGroup>
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
-    <Compile Include="IVsPackageRepositoryFactory.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
+    <Compile Include="PackageSource\AggregatePackageSource.cs" />
+    <Compile Include="PackageSource\IVsPackageSourceProvider.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
     <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
     <Compile Include="ProductUpdate\ProductUpdateAvailableEventArgs.cs" />
@@ -131,7 +132,6 @@
     <Compile Include="IVsPackageManager.cs" />
     <Compile Include="IVsPackageManagerFactory.cs" />
     <Compile Include="PackageSource\CachedRepositoryFactory.cs" />
-    <Compile Include="PackageSource\IPackageSourceProvider.cs" />
     <Compile Include="PackageSource\IPackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\VsPackageSourceSettingsManager.cs" />
     <Compile Include="PackageSource\SerializationHelper.cs" />

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.Test {
 
     using SectionValues = List<KeyValuePair<string, string>>;
 

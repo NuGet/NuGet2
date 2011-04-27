@@ -33,7 +33,7 @@ namespace NuGet.Commands {
             Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, DefaultFeedUrl);
 
             // Get the nuget command line package from the specified repository
-            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(new PackageSource(DefaultFeedUrl));
+            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(DefaultFeedUrl);
 
             IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
 

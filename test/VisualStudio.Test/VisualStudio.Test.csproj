@@ -30,8 +30,11 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Core.Test\Mocks\MockUserSettingsManager.cs">
+      <Link>Mocks\MockUserSettingsManager.cs</Link>
+    </Compile>
+    <Compile Include="Mocks\MockPackageSourceProvider.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />
-    <Compile Include="MockUserSettingsManager.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

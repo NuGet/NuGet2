@@ -13,8 +13,8 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetBaseCommand {
-        private readonly IVsPackageRepositoryFactory _repositoryFactory;
-        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepository _recentPackagesRepository;
         private readonly IProductUpdateService _productUpdateService;
         private int _firstValue;
@@ -22,8 +22,8 @@ namespace NuGet.PowerShell.Commands {
         private bool _hasConnectedToHttpSource;
 
         public GetPackageCommand()
-            : this(ServiceLocator.GetInstance<IVsPackageRepositoryFactory>(),
-                   ServiceLocator.GetInstance<IPackageSourceProvider>(),
+            : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                   ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IRecentPackageRepository>(),
@@ -31,8 +31,8 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
-        public GetPackageCommand(IVsPackageRepositoryFactory repositoryFactory,
-                                IPackageSourceProvider packageSourceProvider,
+        public GetPackageCommand(IPackageRepositoryFactory repositoryFactory,
+                                IVsPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,
                                 IPackageRepository recentPackagesRepository,
@@ -189,7 +189,7 @@ namespace NuGet.PowerShell.Commands {
             else if (_packageSourceProvider.ActivePackageSource != null) {
                 _hasConnectedToHttpSource |= IsHttpSource(_packageSourceProvider);
                 // No solution available. Use the repository Url to create a new repository
-                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource);
+                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
             }
             else {
                 // No active source has been specified. 
@@ -197,10 +197,10 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        private static bool IsHttpSource(IPackageSourceProvider packageSourceProvider) {
+        private static bool IsHttpSource(IVsPackageSourceProvider packageSourceProvider) {
             var activeSource = packageSourceProvider.ActivePackageSource;
-            if (activeSource.IsAggregate) {
-                return packageSourceProvider.GetPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
+            if (activeSource.IsAggregate()) {
+                return packageSourceProvider.LoadPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
             }
             else {
                 return UriHelper.IsHttpSource(activeSource.Source);

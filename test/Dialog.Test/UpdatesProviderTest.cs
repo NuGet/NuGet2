@@ -263,13 +263,13 @@ namespace NuGet.Dialog.Test {
 
             if (repositoryFactory == null) {
                 var repositoryFactoryMock = new Mock<IPackageRepositoryFactory>();
-                repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
+                repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
                 repositoryFactory = repositoryFactoryMock.Object;
             }
 
             if (packageSourceProvider == null) {
                 var packageSourceProviderMock = new Mock<IPackageSourceProvider>();
-                packageSourceProviderMock.Setup(p => p.GetPackageSources()).Returns(
+                packageSourceProviderMock.Setup(p => p.LoadPackageSources()).Returns(
                         new PackageSource[2] {
                             new PackageSource("Test1", "One"),
                             new PackageSource("Test2", "Two")

@@ -8,16 +8,16 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Open, "PackagePage", DefaultParameterSetName=ParameterAttribute.AllParameterSets, SupportsShouldProcess=true)]
     public class OpenPackagePageCommand : NuGetBaseCommand {
 
-        private readonly IVsPackageRepositoryFactory _repositoryFactory;
-        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
 
         public OpenPackagePageCommand()
-            : this(ServiceLocator.GetInstance<IVsPackageRepositoryFactory>(),
-                   ServiceLocator.GetInstance<IPackageSourceProvider>()) {
+            : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                   ServiceLocator.GetInstance<IVsPackageSourceProvider>()) {
         }
 
-        public OpenPackagePageCommand(IVsPackageRepositoryFactory repositoryFactory,
-                                IPackageSourceProvider packageSourceProvider) 
+        public OpenPackagePageCommand(IPackageRepositoryFactory repositoryFactory,
+                                IVsPackageSourceProvider packageSourceProvider) 
             : base(null, null, null) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
@@ -105,7 +105,7 @@ namespace NuGet.PowerShell.Commands {
             }
             else if (_packageSourceProvider.ActivePackageSource != null) {
                 // No Source available. Use the active package source to create a new repository
-                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource);
+                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
             }
             else {
                 // No active source has been specified. 

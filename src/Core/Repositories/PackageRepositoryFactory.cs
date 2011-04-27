@@ -21,16 +21,12 @@ namespace NuGet {
             }
         }
 
-        public virtual IPackageRepository CreateRepository(PackageSource packageSource) {
+        public virtual IPackageRepository CreateRepository(string packageSource) {
             if (packageSource == null) {
                 throw new ArgumentNullException("packageSource");
             }
 
-            if (packageSource.IsAggregate) {
-                throw new NotSupportedException();
-            }
-
-            Uri uri = new Uri(packageSource.Source);
+            Uri uri = new Uri(packageSource);
             if (uri.IsFile) {
                 return new LocalPackageRepository(uri.LocalPath);
             }

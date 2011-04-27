@@ -16,16 +16,16 @@ namespace NuGet.VisualStudio.Test {
         public void CtorNullSourceProviderOrRepositoryFactoryThrows() {
             // Assert
             ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(new Mock<IPackageRepositoryFactory>().Object, null), "packageSourceProvider");
-            ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(null, new Mock<IPackageSourceProvider>().Object), "repositoryFactory");
+            ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(null, new Mock<IVsPackageSourceProvider>().Object), "repositoryFactory");
         }
 
         [TestMethod]
         public void NullActivePackageSourceThrows() {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            var mockSourceProvider = new Mock<IPackageSourceProvider>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
             mockSourceProvider.Setup(m => m.ActivePackageSource).Returns((PackageSource)null);
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<PackageSource>())).Returns(new MockPackageRepository());
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
             var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
 
             // Act & Assert
@@ -38,12 +38,12 @@ namespace NuGet.VisualStudio.Test {
         public void GetPackagesReturnsPackagesFromActiveSource() {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            var mockSourceProvider = new Mock<IPackageSourceProvider>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
             var mockRepository = new MockPackageRepository();
             var source = new PackageSource("bar", "foo");
             mockRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
             mockSourceProvider.Setup(m => m.ActivePackageSource).Returns(source);
-            mockRepositoryFactory.Setup(m => m.CreateRepository(source)).Returns(mockRepository);
+            mockRepositoryFactory.Setup(m => m.CreateRepository(source.Source)).Returns(mockRepository);
             var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
 
             // Act

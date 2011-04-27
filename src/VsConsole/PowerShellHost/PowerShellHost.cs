@@ -16,7 +16,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private static readonly object _lockObject = new object();
         private readonly string _name;
         private readonly IRunspaceManager _runspaceManager;
-        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
 
@@ -36,7 +36,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             _runspaceManager = runspaceManager;
 
             // TODO: Take these as ctor arguments
-            _packageSourceProvider = ServiceLocator.GetInstance<IPackageSourceProvider>();
+            _packageSourceProvider = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
             _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
             _packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
 
@@ -336,13 +336,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 }
 
                 _packageSourceProvider.ActivePackageSource =
-                    _packageSourceProvider.GetPackageSources().FirstOrDefault(
+                    _packageSourceProvider.LoadPackageSources().FirstOrDefault(
                         ps => ps.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         public string[] GetPackageSources() {
-            return _packageSourceProvider.GetPackageSources().Select(ps => ps.Name).ToArray();
+            return _packageSourceProvider.LoadPackageSources().Select(ps => ps.Name).ToArray();
         }
 
         public string DefaultProject {

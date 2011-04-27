@@ -9,7 +9,6 @@ namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-
     [TestClass]
     public class RecentPackageRepositoryTest {
 
@@ -274,7 +273,7 @@ namespace NuGet.VisualStudio.Test {
             mockRepository.Setup(p => p.GetPackages()).Returns(packagesList.AsQueryable());
 
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            mockRepositoryFactory.Setup(f => f.CreateRepository(It.IsAny<PackageSource>())).Returns(mockRepository.Object);
+            mockRepositoryFactory.Setup(f => f.CreateRepository(It.IsAny<string>())).Returns(mockRepository.Object);
 
             var mockSettingsManager = new MockSettingsManager();
 
@@ -286,10 +285,9 @@ namespace NuGet.VisualStudio.Test {
 
             mockSettingsManager.SavePackageMetadata(settingsMetadata);
 
-            var mockPackageSourceProvider = new Mock<IPackageSourceProvider>();
-            mockPackageSourceProvider.Setup(p => p.AggregateSource).Returns(new PackageSource("All") { IsAggregate = true });
-
-            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider.Object, mockSettingsManager);
+            var mockPackageSourceProvider = new MockPackageSourceProvider();
+            mockPackageSourceProvider.SavePackageSources(new[] {new PackageSource("source")});
+            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider, mockSettingsManager);
         }
 
         private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {

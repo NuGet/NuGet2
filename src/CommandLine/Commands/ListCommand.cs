@@ -36,7 +36,7 @@ namespace NuGet.Commands {
                 feedUrl = Source;
             }
 
-            var packageRepository = RepositoryFactory.CreateRepository(new PackageSource(feedUrl, "feed"));
+            var packageRepository = RepositoryFactory.CreateRepository(feedUrl);
             
             IQueryable<IPackage> packages = packageRepository.GetPackages();
             if (Arguments != null && Arguments.Any()) {

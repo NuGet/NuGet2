@@ -24,7 +24,7 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
             }
 
-            IPackageRepository repository = _repositoryFactory.CreateRepository(new PackageSource(source));
+            IPackageRepository repository = _repositoryFactory.CreateRepository(source);
             InstallPackage(repository, project, packageId, version, ignoreDependencies);            
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using NuGet.Options;
+using NuGet.VisualStudio;
 
 namespace NuGet.TestUI {
     public partial class TestForm : Form {
@@ -14,7 +15,7 @@ namespace NuGet.TestUI {
             InitializeComponent();
 
             var list = new List<PackageSource> {
-                                                   new PackageSource("Aggregate source", "All") { IsAggregate = true },
+                                                   AggregatePackageSource.Instance,
                                                    new PackageSource("http://go.microsoft.com/fwlink/?LinkID=199193",
                                                                      "NuGet official package source"),
                                                    new PackageSource(@"C:\Path\To\My\Packages",
@@ -24,7 +25,7 @@ namespace NuGet.TestUI {
                                                    new PackageSource(@"C:\Test2", 
                                                                      "Test2")
                                                };
-            _packageSourceProvider.SetPackageSources(list);
+            _packageSourceProvider.SavePackageSources(list);
             _packageSourceProvider.ActivePackageSource = list[1];
             _optionsControl = new ToolsOptionsControl(_packageSourceProvider, null);
             _optionsControl.Dock = DockStyle.Fill;
@@ -42,7 +43,7 @@ namespace NuGet.TestUI {
                 return; // don't close
             }
             var sb = new StringBuilder();
-            _packageSourceProvider.GetPackageSources().ToList().ForEach(ps => sb.AppendFormat("Name={0}, Source={1}\n",
+            _packageSourceProvider.LoadPackageSources().ToList().ForEach(ps => sb.AppendFormat("Name={0}, Source={1}\n",
                                                                                               ps.Name, ps.Source));
             sb.AppendFormat("Default: {0}", _packageSourceProvider.ActivePackageSource.Name);
             MessageBox.Show(sb.ToString());

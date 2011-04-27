@@ -19,7 +19,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         public LazyRepository(IPackageRepositoryFactory factory, PackageSource source) {
-            _repository = new Lazy<IPackageRepository>(() => factory.CreateRepository(source));
+            _repository = new Lazy<IPackageRepository>(() => factory.CreateRepository(source.Source));
         }
 
         public IQueryable<IPackage> GetPackages() {

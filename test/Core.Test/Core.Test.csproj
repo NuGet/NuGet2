@@ -48,6 +48,7 @@
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="MachineCacheTest.cs" />
+    <Compile Include="Mocks\MockUserSettingsManager.cs" />
     <Compile Include="NuGetCommandLine\Commands\PackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
     <Compile Include="NuGetCommandLine\CommandTest.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="PackageIdValidatorTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageSorterTest.cs" />
+    <Compile Include="PackageSourceProviderTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />

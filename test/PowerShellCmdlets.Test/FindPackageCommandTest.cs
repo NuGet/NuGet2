@@ -262,13 +262,12 @@ namespace NuGet.PowerShell.Commands.Test {
                 null);
         }
 
-        private static IVsPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null) {
-            var repositoryFactory = new Mock<IVsPackageRepositoryFactory>();
+        private static IPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null) {
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
             packages = packages ?? new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
-            repositoryFactory.Setup(c => c.CreateRepository(new PackageSource("foo", "foosource"))).Returns(repository.Object);
             repositoryFactory.Setup(c => c.CreateRepository("foosource")).Returns(repository.Object);
             repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
 
@@ -288,8 +287,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object);
         }
 
-        private static IPackageSourceProvider GetSourceProvider() {
-            Mock<IPackageSourceProvider> sourceProvider = new Mock<IPackageSourceProvider>();
+        private static IVsPackageSourceProvider GetSourceProvider() {
+            Mock<IVsPackageSourceProvider> sourceProvider = new Mock<IVsPackageSourceProvider>();
             sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("foo", "foosource"));
             return sourceProvider.Object;
         }

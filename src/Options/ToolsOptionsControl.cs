@@ -19,7 +19,7 @@ namespace NuGet.Options {
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
     public partial class ToolsOptionsControl : UserControl {
-        private IPackageSourceProvider _packageSourceProvider;
+        private IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _aggregateSource;
         private PackageSource _activeSource;
         private BindingSource _allPackageSources;
@@ -27,10 +27,10 @@ namespace NuGet.Options {
         private bool _initialized;
 
         public ToolsOptionsControl(IServiceProvider serviceProvider)
-            : this(ServiceLocator.GetInstance<IPackageSourceProvider>(), serviceProvider) {
+            : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), serviceProvider) {
         }
 
-        public ToolsOptionsControl(IPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider) {
+        public ToolsOptionsControl(IVsPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider) {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
@@ -82,12 +82,12 @@ namespace NuGet.Options {
 
             _initialized = true;
             // get packages sources
-            IList<PackageSource> packageSources = _packageSourceProvider.GetPackageSources().ToList();
-            _aggregateSource = packageSources.Where(ps => ps.IsAggregate).Single();
+            IList<PackageSource> packageSources = _packageSourceProvider.LoadPackageSources().ToList();
+            _aggregateSource = packageSources.Where(ps => ps.IsAggregate()).Single();
             _activeSource = _packageSourceProvider.ActivePackageSource;
 
             // bind to the package sources, excluding Aggregate
-            _allPackageSources = new BindingSource(packageSources.Where(ps => !ps.IsAggregate).ToList(), null);
+            _allPackageSources = new BindingSource(packageSources.Where(ps => !ps.IsAggregate()).ToList(), null);
             PackageSourcesListBox.DataSource = _allPackageSources;
         }
 
@@ -106,7 +106,7 @@ namespace NuGet.Options {
 
             // get package sources as ordered list
             var packageSources = PackageSourcesListBox.Items.Cast<PackageSource>().ToList();
-            _packageSourceProvider.SetPackageSources(packageSources);
+            _packageSourceProvider.SavePackageSources(packageSources);
             // restore current active source if it still exists, or reset to aggregate source
             if (packageSources.Contains(_activeSource)) {
                 _packageSourceProvider.ActivePackageSource = _activeSource;

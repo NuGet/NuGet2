@@ -15,16 +15,16 @@ namespace NuGet.PowerShell.Commands {
         private const int MaxReturnedPackages = 30;
 
         public FindPackageCommand()
-            : this(ServiceLocator.GetInstance<IVsPackageRepositoryFactory>(),
-                   ServiceLocator.GetInstance<IPackageSourceProvider>(),
+            : this(ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                   ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IRecentPackageRepository>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>()) {
         }
 
-        public FindPackageCommand(IVsPackageRepositoryFactory repositoryFactory,
-                          IPackageSourceProvider packageSourceProvider,
+        public FindPackageCommand(IPackageRepositoryFactory repositoryFactory,
+                          IVsPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
                           IVsPackageManagerFactory packageManagerFactory,
                           IPackageRepository recentPackagesRepository,
