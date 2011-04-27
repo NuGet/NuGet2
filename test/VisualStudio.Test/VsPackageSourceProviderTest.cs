@@ -338,26 +338,6 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual("NuGet official package source", sources[0].Name);
         }
 
-        [TestMethod]
-        public void SettingPackageSourcesThrow() {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var registrySettingsManager = new MockPackageSourceSettingsManager();
-            registrySettingsManager.PackageSourcesString = "";
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(registrySettingsManager, userSettingsManager, packageSourceProvider);
-            var packageSources = new List<PackageSource> {
-                                                             AggregatePackageSource.Instance,
-                                                             new PackageSource("source", "name")
-                                                         };
-
-            // Act & Assert
-            ExceptionAssert.ThrowsArgumentException(
-                () => provider.SavePackageSources(packageSources),
-                "sources",
-                Resources.VsResources.PackageSourceAggregateNotAllowed);
-        }
-
         private void AssertPackageSource(PackageSource ps, string name, string source) {
             Assert.AreEqual(name, ps.Name);
             Assert.AreEqual(source, ps.Source);

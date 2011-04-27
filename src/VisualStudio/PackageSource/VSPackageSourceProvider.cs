@@ -107,13 +107,11 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("sources");
             }
 
-            if (sources.Any(p => IsAggregateSource(p))) {
-                throw new ArgumentException(Resources.VsResources.PackageSourceAggregateNotAllowed, "sources");
-            }
+            Debug.Assert(!sources.Any(p => IsAggregateSource(p)));
 
             ActivePackageSource = null;
             _packageSources.Clear();
-            _packageSources.AddRange(sources);
+            _packageSources.AddRange(sources.Where(p => !IsAggregateSource(p)));
             
             PersistPackageSources();
         }

@@ -322,15 +322,6 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The specified package sources contain at least one aggregate source..
-        /// </summary>
-        public static string PackageSourceAggregateNotAllowed {
-            get {
-                return ResourceManager.GetString("PackageSourceAggregateNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No project was specified..
         /// </summary>
         public static string ProjectNotSpecified {
