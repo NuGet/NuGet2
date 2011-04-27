@@ -268,7 +268,9 @@ namespace PackageExplorerViewModel {
 
         public void AddDraggedAndDroppedFiles(PackageFolder folder, string[] fileNames) {
             foreach (string file in fileNames) {
-                AddFileToFolder(folder, file);
+                if (File.Exists(file)) {
+                    AddFileToFolder(folder, file);
+                }
             }
         }
 

@@ -120,7 +120,7 @@ namespace PackageExplorer {
                 }
                 else {
                     PackageFile file = data.GetData(PackageFileDataFormat, false) as PackageFile;
-                    // makse sure we don't drag a file into the same folder
+                    // make sure we don't drag a file into the same folder
                     if (file != null &&
                         !folder.Contains(file) &&
                         !folder.ContainsFile(file.Name) &&
