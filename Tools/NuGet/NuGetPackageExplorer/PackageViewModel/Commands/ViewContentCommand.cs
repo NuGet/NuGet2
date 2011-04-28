@@ -160,6 +160,7 @@ namespace PackageExplorerViewModel {
                 case ".XSD":
                 case ".CONFIG":
                 case ".PS1XML":
+                case ".NUSPEC":
                     return SourceLanguageType.Xml;
 
                 default:
