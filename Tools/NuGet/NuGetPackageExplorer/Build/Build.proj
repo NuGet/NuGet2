@@ -28,21 +28,36 @@
                     Log.LogError("Didn't find any child directory under '{0}'.", SearchDirectory);
                     return false;
                 }
-            ]]> 
+            ]]>
             </Code>
         </Task>
     </UsingTask>
+    
+    <Choose>
+        <When Condition="'$(Password)'==''">
+            <PropertyGroup>
+                <CertificateFileName>buildcertificate.pfx</CertificateFileName>
+                <CertificatePassword>nugety</CertificatePassword>
+            </PropertyGroup>
+        </When>
+        <Otherwise>
+            <PropertyGroup>
+                <CertificateFileName>PackageExplorer_TemporaryKey.pfx</CertificateFileName>
+                <CertificatePassword>$(Password)</CertificatePassword>
+            </PropertyGroup>
+        </Otherwise>
+    </Choose>
 	
 	<PropertyGroup>
         <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
         <DeploymentUrl Condition="'$(DeploymentUrl)' == ''">http://nuget.codeplex.com/releases/clickonce/</DeploymentUrl>
         <ApplicationName>NuGetPackageExplorer</ApplicationName>
         <PackageExplorerRoot>$(MSBuildProjectDirectory)\..</PackageExplorerRoot>
-        <ClickOnceCertificateFile>$(PackageExplorerRoot)\PackageExplorer_TemporaryKey.pfx</ClickOnceCertificateFile>
         <ManifestFilePath>$(MSBuildProjectDirectory)\VisualStyleManifest.xml</ManifestFilePath>
         <ManifestToolPath>$(ProgramFiles)\Microsoft SDKs\Windows\v7.0A\Bin\mt.exe</ManifestToolPath>
         <MageToolPath>$(ProgramFiles)\Microsoft SDKs\Windows\v7.0A\bin\NETFX 4.0 Tools\mage.exe</MageToolPath>
-        <CertificateFilePath>$(PackageExplorerRoot)\PackageExplorer_TemporaryKey.pfx</CertificateFilePath>
+        <CertificateFilePath>$(PackageExplorerRoot)\$(CertificateFileName)</CertificateFilePath>
+        
         <PublisherName>Outercurve Foundation</PublisherName>
         <DropDirectory>$(PackageExplorerRoot)\bin</DropDirectory>
         <DeployDirectory>$(DropDirectory)\deploy</DeployDirectory>
@@ -125,7 +140,7 @@
             
         <!-- sign app manifest with mage.exe -->
         <Exec
-            Command="&quot;$(MageToolPath)&quot; -u &quot;$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -tr FullTrust"
+            Command="&quot;$(MageToolPath)&quot; -u &quot;$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -tr FullTrust -password &quot;$(CertificatePassword)&quot;"
             WorkingDirectory="$(AppManifestDirectory)" />
         
         <!-- Add the .deploy extension back --> 
@@ -134,7 +149,7 @@
         
         <!-- sign deployment manifest with mage.exe -->
         <Exec
-            Command="&quot;$(MageToolPath)&quot; -u &quot;$(DeploymentManifestFileName)&quot; -appc &quot;$(ManifestCodeBase)\$(AppManifestFileName)&quot; -appm &quot;$(AppManifestDirectory)\$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -pub &quot;$(PublisherName)&quot; -pu &quot;$(DeploymentUrl)$(DeploymentManifestFileName)&quot;"
+            Command="&quot;$(MageToolPath)&quot; -u &quot;$(DeploymentManifestFileName)&quot; -appc &quot;$(ManifestCodeBase)\$(AppManifestFileName)&quot; -appm &quot;$(AppManifestDirectory)\$(AppManifestFileName)&quot; -cf &quot;$(CertificateFilePath)&quot; -pub &quot;$(PublisherName)&quot; -pu &quot;$(DeploymentUrl)$(DeploymentManifestFileName)&quot; -password &quot;$(CertificatePassword)&quot;"
             WorkingDirectory="$(DeployDirectory)" />
 	</Target>
 	
