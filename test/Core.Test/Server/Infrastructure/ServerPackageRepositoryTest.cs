@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Test.Mocks;
-using Moq;
-using System.Linq;
+﻿using System;
 using System.IO;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using NuGet.Server.Infrastructure;
-using System;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test.Server.Infrastructure {
     [TestClass]
