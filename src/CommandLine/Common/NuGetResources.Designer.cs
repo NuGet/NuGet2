@@ -349,15 +349,6 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List all versions of a package. By default, only the latest package version is displayed..
-        /// </summary>
-        internal static string ListCommandAllVersionsDescription {
-            get {
-                return ResourceManager.GetString("ListCommandAllVersionsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is specified the default feed is used..
         /// </summary>
         internal static string ListCommandDescription {
