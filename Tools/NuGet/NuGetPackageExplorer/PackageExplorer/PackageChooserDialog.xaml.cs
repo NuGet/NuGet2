@@ -7,6 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using NuGet;
+using PackageExplorerViewModel;
 
 namespace PackageExplorer {
     /// <summary>
@@ -96,7 +97,10 @@ namespace PackageExplorer {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            DialogResult = true;
+            var viewModel = (PackageChooserViewModel)DataContext;
+            if (viewModel.IsEditable) {
+                DialogResult = true;
+            }
         }
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) {

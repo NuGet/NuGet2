@@ -17,7 +17,7 @@ namespace PackageExplorerViewModel {
         private DataServicePackageRepository _packageRepository;
         private IQueryable<PackageInfo> _currentQuery;
         private string _currentSearch;
-        private string _redirectedlPackageSource;
+        private string _redirectedPackageSource;
         private IMruPackageSourceManager _packageSourceManager;
         private IProxyService _proxyService;
         private ICredentialProvider _credentialProvider;
@@ -81,6 +81,7 @@ namespace PackageExplorerViewModel {
                 if (_isEditable != value) {
                     _isEditable = value;
                     OnPropertyChanged("IsEditable");
+                    NavigationCommand.OnCanExecuteChanged();
                 }
             }
         }
@@ -91,13 +92,13 @@ namespace PackageExplorerViewModel {
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private DataServicePackageRepository GetPackageRepository() {
-            if (_packageRepository == null || _packageRepository.Source != _redirectedlPackageSource) {
+            if (_packageRepository == null || _packageRepository.Source != _redirectedPackageSource) {
                 try {
                     Uri packageUri = new Uri(PackageSource);
                     IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
                     IHttpClient packageSourceClient = new RedirectedHttpClient(packageUri, packageSourceProxy);
                     _packageRepository = new DataServicePackageRepository(packageSourceClient);
-                    _redirectedlPackageSource = _packageRepository.Source;
+                    _redirectedPackageSource = _packageRepository.Source;
                 }
                 catch (Exception) {
                     _packageRepository = null;
@@ -116,7 +117,7 @@ namespace PackageExplorerViewModel {
             }
             private set {
                 _packageSourceManager.ActivePackageSource = value;
-                _redirectedlPackageSource = null;
+                _redirectedPackageSource = null;
                 OnPropertyChanged("PackageSource");
             }
         }
@@ -209,7 +210,8 @@ namespace PackageExplorerViewModel {
             StatusContent = "Loading...";
             IsEditable = false;
 
-            Task.Factory.StartNew<Tuple<IList<PackageInfo>, int>>(QueryPackages, subQuery).ContinueWith(
+            Task.Factory.StartNew<Tuple<IList<PackageInfo>, int>>(
+                QueryPackages, subQuery, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).ContinueWith(
                 result => {
                     if (result.IsFaulted) {
                         AggregateException exception = result.Exception;

@@ -13,6 +13,10 @@ namespace PackageExplorerViewModel {
         }
 
         public bool CanExecute(object parameter) {
+            if (!_viewModel.IsEditable) {
+                return false;
+            }
+
             string action = (string)parameter;
             switch (action) {
                 case "First":
