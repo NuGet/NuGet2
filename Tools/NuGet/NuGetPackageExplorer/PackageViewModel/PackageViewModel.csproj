@@ -58,7 +58,8 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
-    <Compile Include="PackageChooser\AutoDiscoverCredentialProvider.cs" />
+    <Compile Include="PackageChooser\WindowsCredentialProvider.cs" />
+    <Compile Include="PackageChooser\WindowsProxyService.cs" />
     <Compile Include="PackageHelper.cs" />
     <Compile Include="EditableFrameworkAssemblyReference.cs" />
     <Compile Include="EditablePackageDependency.cs" />

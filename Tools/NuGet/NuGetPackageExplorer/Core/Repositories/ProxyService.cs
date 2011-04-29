@@ -7,14 +7,8 @@ using System.Net;
 namespace NuGet {
     public class ProxyService : IProxyService {
 
-        // This is kind of hackish because we are caching the proxy for the
-        // entire App domain for the specific Uri's because we don't have the same
-        // instances of the proxy service all of the time.
-        // Once we have some sort of a ServiceLocator pattern implemented
-        // then we can use a normal instance based approach and rely on
-        // the same instance of the proxy service to maintain the list of cached proxies
-        private static readonly Dictionary<Uri, WebProxy> _proxyCache = new Dictionary<Uri, WebProxy>();
-        private static object proxyLock = new object();
+        private readonly Dictionary<Uri, WebProxy> _proxyCache = new Dictionary<Uri, WebProxy>();
+        private object proxyLock = new object();
 
         private readonly ICredentialProvider _credentialProvider;
 
@@ -155,7 +149,7 @@ namespace NuGet {
         }
 
         // Return true or false if connecting through a proxy server
-        public static bool IsSystemProxySet(Uri uri) {
+        private static bool IsSystemProxySet(Uri uri) {
             // The reason for not calling the GetSystemProxy is because the object
             // that will be returned is no longer going to be the proxy that is set by the settings
             // on the users machine only the Address is going to be the same.

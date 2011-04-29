@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using NuGet;
 using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
@@ -37,12 +38,18 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [Import(typeof(IProxyService))]
+        public Lazy<IProxyService> ProxyService {
+            get;
+            set;
+        }
+
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
-            return new PackageViewModel(package, packageSource, MruManager, UIServices, EditorService.Value, SettingsManager);
+            return new PackageViewModel(package, packageSource, MruManager, UIServices, EditorService.Value, SettingsManager, ProxyService.Value);
         }
 
         public PackageChooserViewModel CreatePackageChooserViewModel() {
-            return new PackageChooserViewModel(MruPackageSourceManager);
+            return new PackageChooserViewModel(MruPackageSourceManager, ProxyService.Value);
         }
     }
 }

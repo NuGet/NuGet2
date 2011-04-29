@@ -6,7 +6,7 @@ using Kerr;
 using NuGet;
 
 namespace PackageExplorerViewModel {
-    public class AutoDiscoverCredentialProvider : DefaultCredentialProvider {
+    public class WindowsCredentialProvider : DefaultCredentialProvider {
 
         public override ICredentials PromptUserForCredentials(Uri uri, bool retryCredentials) {
             return GetBasicCredentials(uri, retryCredentials);

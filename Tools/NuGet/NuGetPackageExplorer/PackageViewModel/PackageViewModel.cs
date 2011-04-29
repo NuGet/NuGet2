@@ -23,6 +23,7 @@ namespace PackageExplorerViewModel {
         private readonly IUIServices _uiServices;
         private readonly IPackageEditorService _editorService;
         private readonly ISettingsManager _settingsManager;
+        private readonly IProxyService _proxyService;
 
         internal PackageViewModel(
             IPackage package,
@@ -30,7 +31,8 @@ namespace PackageExplorerViewModel {
             IMruManager mruManager,
             IUIServices uiServices,
             IPackageEditorService editorService,
-            ISettingsManager settingsManager) {
+            ISettingsManager settingsManager,
+            IProxyService proxyService) {
 
             if (package == null) {
                 throw new ArgumentNullException("package");
@@ -47,12 +49,17 @@ namespace PackageExplorerViewModel {
             if (settingsManager == null) {
                 throw new ArgumentNullException("settingsManager");
             }
+            if(null == proxyService) {
+                throw new ArgumentNullException("proxyService");
+            }
 
             _settingsManager = settingsManager;
             _editorService = editorService;
             _uiServices = uiServices;
             _mruManager = mruManager;
             _package = package;
+            _proxyService = proxyService;
+
             _packageMetadata = new EditablePackageMetadata(_package);
             PackageSource = source;
 
@@ -62,6 +69,12 @@ namespace PackageExplorerViewModel {
         internal IUIServices UIServices {
             get {
                 return _uiServices;
+            }
+        }
+
+        internal IProxyService ProxyService {
+            get {
+                return _proxyService;
             }
         }
 

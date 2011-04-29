@@ -2,7 +2,6 @@
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Windows;
-using NuGet;
 using PackageExplorerViewModel;
 
 namespace PackageExplorer {

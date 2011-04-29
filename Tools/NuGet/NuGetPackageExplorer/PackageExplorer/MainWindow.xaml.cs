@@ -32,6 +32,9 @@ namespace PackageExplorer {
         [Import]
         public IUIServices UIServices { get; set; }
 
+        [Import(typeof(IProxyService))]
+        public Lazy<IProxyService> ProxyService { get; set; }
+
         [Export]
         public IPackageEditorService EditorService { get; set; }
 
@@ -181,7 +184,8 @@ namespace PackageExplorer {
                         var progressWindow = new DownloadProgressWindow(
                             selectedPackage.DownloadUrl,
                             selectedPackage.Id,
-                            packageVersion) {
+                            packageVersion,
+                            ProxyService.Value) {
                                 Owner = this
                             };
 
@@ -388,7 +392,7 @@ namespace PackageExplorer {
 
             Uri downloadUrl;
             if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
-                var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version) {
+                var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version, ProxyService.Value) {
                     Owner = this
                 };
                 var result = progressWindow.ShowDialog();

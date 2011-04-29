@@ -7,8 +7,8 @@ namespace PackageExplorerViewModel {
     public class PublishPackageViewModel : ViewModelBase, IObserver<int> {
         private readonly IPackageMetadata _package;
         private readonly Lazy<Stream> _packageStream;
-        private readonly IProxyService _proxyService;
         private readonly string _publishUrl;
+        private readonly IProxyService _proxyService;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#")]
         public PublishPackageViewModel(string publishUrl, PackageViewModel viewModel) {
@@ -18,7 +18,7 @@ namespace PackageExplorerViewModel {
             _publishUrl = publishUrl;
             _package = viewModel.PackageMetadata;
             _packageStream = new Lazy<Stream>(viewModel.GetCurrentPackageStream);
-            _proxyService = new ProxyService(new AutoDiscoverCredentialProvider());
+            _proxyService = viewModel.ProxyService;
         }
 
         private string _publishKey;

@@ -19,18 +19,23 @@ namespace PackageExplorerViewModel {
         private string _currentSearch;
         private string _redirectedPackageSource;
         private IMruPackageSourceManager _packageSourceManager;
-        private IProxyService _proxyService;
-        private ICredentialProvider _credentialProvider;
+        private readonly IProxyService _proxyService;
 
-        public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager) {
+        public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager, IProxyService proxyService) {
+            if(null == packageSourceManager) {
+                throw new ArgumentNullException("packageSourceManager");
+            }
+            if(null == proxyService) {
+                throw new ArgumentNullException("proxyService");
+            }
+
             Packages = new ObservableCollection<PackageInfo>();
             NavigationCommand = new NavigateCommand(this);
             SortCommand = new RelayCommand<string>(Sort, column => TotalPackageCount > 0);
             SearchCommand = new RelayCommand<string>(Search);
             LoadedCommand = new RelayCommand(() => Sort("VersionDownloadCount", ListSortDirection.Descending));
             ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
-            _credentialProvider = new AutoDiscoverCredentialProvider();
-            _proxyService = new ProxyService(_credentialProvider);
+            _proxyService = proxyService;
 
             _packageSourceManager = packageSourceManager;
         }

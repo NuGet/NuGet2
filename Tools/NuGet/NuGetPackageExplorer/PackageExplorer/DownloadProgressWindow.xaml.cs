@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NuGet;
-using PackageExplorerViewModel;
 
 namespace PackageExplorer {
     /// <summary>
@@ -14,19 +13,30 @@ namespace PackageExplorer {
     public partial class DownloadProgressWindow : StandardDialog {
         private readonly Uri _downloadUri;
         private WebClient _client;
-        private IProxyService _proxyService;
+        private readonly IProxyService _proxyService;
 
-        public DownloadProgressWindow(Uri downloadUri, string id, Version version) {
+        public IProxyService ProxyService {
+            get {
+                return _proxyService;
+            }
+        }
+
+        
+
+        public DownloadProgressWindow(Uri downloadUri, string id, Version version, IProxyService proxyService) {
             if (downloadUri == null) {
                 throw new ArgumentNullException("downloadUri");
+            }
+            if(null == proxyService) {
+                throw new ArgumentNullException("proxyService");
             }
 
             InitializeComponent();
 
-            _proxyService = new ProxyService(new AutoDiscoverCredentialProvider());
             Title = "Downloading package " + id + " " + version.ToString();
 
             _downloadUri = downloadUri;
+            _proxyService = proxyService;
         }
 
         public IPackage DownloadedPackage {
@@ -45,7 +55,7 @@ namespace PackageExplorer {
             // Set the WebClient proxy
             // Maybe we could refactor this code to use the HttpClient so that
             // it can utilize the already existing implementation of getting the proxy
-            _client.Proxy = _proxyService.GetProxy(uri);
+            _client.Proxy = ProxyService.GetProxy(uri);
             _client.DownloadDataCompleted += (sender, e) => {
                 if (!e.Cancelled) {
                     if (e.Error != null) {
