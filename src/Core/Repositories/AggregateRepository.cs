@@ -13,7 +13,7 @@ namespace NuGet {
             }
         }
 
-        public bool IgnoreInvalidRepositories { get; set; }
+        public bool IgnoreFailingRepositories { get; set; }
 
         public IEnumerable<IPackageRepository> Repositories {
             get { return _repositories; }
@@ -27,8 +27,8 @@ namespace NuGet {
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()), 
-                PackageEqualityComparer.IdAndVersion, IgnoreInvalidRepositories);
+            return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()),
+                PackageEqualityComparer.IdAndVersion, IgnoreFailingRepositories);
         }
     }
 }

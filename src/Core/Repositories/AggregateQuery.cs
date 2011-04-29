@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,14 +15,14 @@ namespace NuGet {
         private readonly Expression _expression;
         private readonly IEqualityComparer<TVal> _equalityComparer;
         private readonly IList<IEnumerable<TVal>> _subQueries;
-        private readonly bool _ignoreInvalidRepositories;
+        private readonly bool _ignoreFailures;
 
-        public AggregateQuery(IEnumerable<IQueryable<TVal>> queryables, IEqualityComparer<TVal> equalityComparer, bool ignoreInvalidRepositories) {
+        public AggregateQuery(IEnumerable<IQueryable<TVal>> queryables, IEqualityComparer<TVal> equalityComparer, bool ignoreFailures) {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
             _expression = Expression.Constant(this);
             _subQueries = GetSubQueries(_expression);
-            _ignoreInvalidRepositories = ignoreInvalidRepositories;
+            _ignoreFailures = ignoreFailures;
         }
 
         private AggregateQuery(IEnumerable<IQueryable<TVal>> queryables,
@@ -33,7 +34,7 @@ namespace NuGet {
             _equalityComparer = equalityComparer;
             _expression = expression;
             _subQueries = subQueries;
-            _ignoreInvalidRepositories = ignoreInvalidRepositories;
+            _ignoreFailures = ignoreInvalidRepositories;
         }
 
         public IEnumerator<TVal> GetEnumerator() {
@@ -119,7 +120,7 @@ namespace NuGet {
 
                 // Run tasks in parallel
                 var tasks = (from queue in lazyQueues
-                             select Task.Factory.StartNew(() => ReadQueue(queue))
+                             select Task.Factory.StartNew<TaskResult>(() => ReadQueue(queue))
                              ).ToArray();
 
                 // Wait for everything to complete
@@ -151,10 +152,11 @@ namespace NuGet {
             } while (lazyQueues.Any());
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="By definition we want to suppress all exceptions if the flag is set")]
         private TaskResult ReadQueue(LazyQueue<TVal> queue) {
             var result = new TaskResult { Queue = queue };
             TVal current;
-            if (_ignoreInvalidRepositories) {
+            if (_ignoreFailures) {
                 try {
                     result.HasValue = queue.TryPeek(out current);
                 }
@@ -186,7 +188,7 @@ namespace NuGet {
                 subQueries = GetSubQueries(expression);
             }
 
-            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression, _ignoreInvalidRepositories });
+            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression, _ignoreFailures });
         }
 
         private static IEnumerable<TVal> GetSubQuery(IQueryable queryable, Expression expression) {
@@ -209,8 +211,9 @@ namespace NuGet {
         }
 
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="By definition we want to suppress all exceptions if the flag is set")]
         private TResult TryExecute<TResult>(IQueryable queryable, Expression expression) {
-            if (_ignoreInvalidRepositories) {
+            if (_ignoreFailures) {
                 try {
                     return Execute<TResult>(queryable, expression);
                 }

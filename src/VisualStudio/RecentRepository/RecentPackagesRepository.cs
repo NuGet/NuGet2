@@ -41,7 +41,7 @@ namespace NuGet.VisualStudio {
 
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
-            _aggregateRepository = new Lazy<IPackageRepository>(() => packageSourceProvider.GetAggregate(repositoryFactory, ignoreInvalidRepositories: true));
+            _aggregateRepository = new Lazy<IPackageRepository>(() => packageSourceProvider.GetAggregate(repositoryFactory, ignoreFailingRepositories: true));
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
