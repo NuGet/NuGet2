@@ -351,6 +351,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public string DefaultProject {
             get {
                 Debug.Assert(_solutionManager != null);
+                if (_solutionManager.DefaultProject == null) {
+                    return null;
+                }
+
                 return _solutionManager.DefaultProject.GetDisplayName(_solutionManager);
             }
         }
