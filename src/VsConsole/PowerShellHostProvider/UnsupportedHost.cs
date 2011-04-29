@@ -48,8 +48,9 @@ namespace NuGetConsole.Host.PowerShellProvider {
             get {
                 return String.Empty;
             }
-            set {
-            }
+        }
+
+        public void SetDefaultProjectIndex(int index) {
         }
 
         public string[] GetAvailableProjects() {

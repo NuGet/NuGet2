@@ -10,6 +10,7 @@ using System.Management.Automation.Runspaces;
 using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
+using EnvDTE;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal abstract class PowerShellHost : IHost, IPathExpansion, IDisposable {
@@ -28,6 +29,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         // indicates whether this host has been initialized. 
         // null = not initilized, true = initialized successfully, false = initialized unsuccessfully
         private bool? _initialized;
+        // store the current (non-truncated) project names displayed in the project name combobox
+        private string[] _projectSafeNames;
 
         // store the current command typed so far
         private ComplexCommand _complexCommand;
@@ -348,19 +351,28 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public string DefaultProject {
             get {
                 Debug.Assert(_solutionManager != null);
-                return _solutionManager.DefaultProjectName;
+                return _solutionManager.DefaultProject.GetTruncatedDisplayName(_solutionManager);
             }
-            set {
-                Debug.Assert(_solutionManager != null);
-                _solutionManager.DefaultProjectName = value;
+        }
+
+        public void SetDefaultProjectIndex(int selectedIndex) {
+            Debug.Assert(_solutionManager != null);
+
+            if (_projectSafeNames != null && selectedIndex >= 0 && selectedIndex < _projectSafeNames.Length) {
+                _solutionManager.DefaultProjectName = _projectSafeNames[selectedIndex];
+            }
+            else {
+                _solutionManager.DefaultProjectName = null;
             }
         }
 
         public string[] GetAvailableProjects() {
             Debug.Assert(_solutionManager != null);
 
-            var projectSafeNames = (_solutionManager.GetProjects().Select(p => _solutionManager.GetProjectSafeName(p))).ToArray();
-            return projectSafeNames;
+            var allProjects = _solutionManager.GetProjects();
+            _projectSafeNames = allProjects.Select(_solutionManager.GetProjectSafeName).ToArray();
+            var displayNames = allProjects.Select(p => p.GetTruncatedDisplayName(_solutionManager)).ToArray();
+            return displayNames;
         }
 
         #region ITabExpansion

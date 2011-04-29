@@ -264,15 +264,14 @@ namespace NuGetConsole.Implementation {
         private void Projects_Exec(object sender, EventArgs e) {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
             if (args != null) {
-                if (args.InValue != null && args.InValue is int) // Selected a default projects
-                {
+                if (args.InValue != null && args.InValue is int) {
+                    // Selected a default projects
                     int index = (int)args.InValue;
                     if (index >= 0 && index < PowerConsoleWindow.AvailableProjects.Length) {
-                        PowerConsoleWindow.DefaultProject = PowerConsoleWindow.AvailableProjects[index];
+                        PowerConsoleWindow.SetDefaultProjectIndex(index);
                     }
                 }
-                else if (args.OutValue != IntPtr.Zero) // Query default project name
-                {
+                else if (args.OutValue != IntPtr.Zero) {
                     string displayName = PowerConsoleWindow.DefaultProject ?? string.Empty;
                     Marshal.GetNativeVariantForObject(displayName, args.OutValue);
                 }

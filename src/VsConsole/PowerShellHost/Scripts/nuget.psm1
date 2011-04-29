@@ -285,25 +285,5 @@ function Format-ProjectName {
         return $project.name
     }
 
-    # less than column width, do nothing
-    if ($project.name.length -le $colWidth) {
-        return $project.name
-    }
-
-    $folder = "\{0}\" -f (split-path -leaf $project.name)
-    $root = [io.path]::GetPathRoot($project.name)
-    $maxwidth = $colwidth - 6 # len(root + ellipsis)
-
-    # is the directory name too big?
-    if ($folder.length -ge $maxwidth) {
-        # yes, drop leading backslash and eat into name
-        $abbreviated = "{0}...{1}" -f $root, `
-            $folder.substring($folder.length - $maxwidth)
-    }
-    else {
-        # no, show like VS solution explorer (drive+ellipsis+end)
-        $abbreviated = "{0}...{1}" -f $root, $folder
-    }
-    
-    $abbreviated
+    [NuGet.VisualStudio.PathHelper]::SmartTruncate($project.name, $ColWidth)
 }

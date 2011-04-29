@@ -34,6 +34,7 @@
     <Compile Include="ProjectSystems\WixProjectSystem.cs" />
     <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackage.cs" />
+    <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">

@@ -48,7 +48,9 @@ namespace NuGetConsole {
 
         string[] GetPackageSources();
 
-        string DefaultProject { get; set; }
+        string DefaultProject { get; }
+
+        void SetDefaultProjectIndex(int index);
 
         string[] GetAvailableProjects();
     }

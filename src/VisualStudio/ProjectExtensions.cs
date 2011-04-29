@@ -426,6 +426,18 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        /// <summary>
+        /// This method truncates Website projects into the VS-format, e.g. C:\..\WebSite1
+        /// This is used for displaying in the projects combo box.
+        /// </summary>
+        public static string GetTruncatedDisplayName(this Project project, ISolutionManager solutionManager) {
+            string safeName = solutionManager.GetProjectSafeName(project);
+            if (project.IsWebSite()) {
+                safeName = PathHelper.SmartTruncate(safeName, 40);
+            }
+            return safeName;
+        }
+
         private class PathComparer : IEqualityComparer<string> {
             public static readonly PathComparer Default = new PathComparer();
             public bool Equals(string x, string y) {

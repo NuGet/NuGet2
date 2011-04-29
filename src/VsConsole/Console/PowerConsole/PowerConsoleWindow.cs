@@ -83,13 +83,14 @@ namespace NuGetConsole.Implementation.PowerConsole {
                 HostInfo hi = ActiveHostInfo;
                 return (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) ?
                     ActiveHostInfo.WpfConsole.Host.DefaultProject :
-                    null;
+                    String.Empty;
             }
-            set {
-                HostInfo hi = ActiveHostInfo;
-                if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
-                    hi.WpfConsole.Host.DefaultProject = value;
-                }
+        }
+
+        public void SetDefaultProjectIndex(int selectedIndex) {
+            HostInfo hi = ActiveHostInfo;
+            if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
+                hi.WpfConsole.Host.SetDefaultProjectIndex(selectedIndex);
             }
         }
 
