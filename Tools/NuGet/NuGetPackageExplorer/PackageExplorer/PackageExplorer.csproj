@@ -69,14 +69,12 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>EECD2F8E3D94BBF70C6E79EE77A773462ECE82A1</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>DF7E71F700D97ABF6044E4E154F0768C5011ABC1</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>

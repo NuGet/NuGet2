@@ -20,7 +20,7 @@
                 <ResourceDictionary Source="TemplateStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <ContextMenu x:Key="SharedContextMenu">
+            <ContextMenu x:Key="SharedContextMenu" DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                 <MenuItem Header="_View Content" Command="{Binding ViewCommand}" CommandParameter="{Binding}" FontWeight="SemiBold" />
                 <MenuItem Header="_Open in Windows shell..." Command="{Binding OpenCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="Open _with..." Command="{Binding OpenWithCommand}" CommandParameter="{Binding}" />
@@ -30,7 +30,7 @@
                 <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" />
             </ContextMenu>
 
-            <ContextMenu x:Key="FolderSharedContextMenu" Opened="PackageFolderContextMenu_Opened">
+            <ContextMenu x:Key="FolderSharedContextMenu" Opened="PackageFolderContextMenu_Opened" DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                 <MenuItem Header="_Add Existing File..." Command="{Binding   AddContentFileCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="Add Ne_w Folder..." Command="{Binding AddNewFolderCommand}" CommandParameter="{Binding}" />
                 <MenuItem Header="_Rename..." Command="{Binding RenameCommand}" CommandParameter="{Binding}" />
@@ -64,17 +64,17 @@
                             <TextBlock Text="{Binding Id}" Style="{StaticResource DetailMetadataValueStyle}"  />
                         </StackPanel>
 
-                        <!-- Title -->
-                        <DockPanel Margin="0,3,0,0" Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}">
-                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TitleLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                            <TextBlock Text="{Binding Title}" Style="{StaticResource DetailMetadataValueStyle}" TextTrimming="CharacterEllipsis" />
-                        </DockPanel>
-
                         <!-- Version -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}">
                             <TextBlock Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                             <TextBlock Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                         </StackPanel>
+
+                        <!-- Title -->
+                        <DockPanel Margin="0,3,0,0" Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TitleLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource DetailMetadataValueStyle}" TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
 
                         <!-- Authors -->
                         <DockPanel Margin="0,3,0,0">
@@ -276,7 +276,7 @@
                 </TreeView.ItemContainerStyle>
 
                 <TreeView.ContextMenu>
-                    <ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                         <MenuItem Header="_Existing File..." Command="{Binding AddContentFileCommand}" CommandParameter="{Binding RootFolder, Mode=OneWay}" />
                         <MenuItem Header="_New Folder" Command="{Binding AddNewFolderCommand}" CommandParameter="{Binding RootFolder, Mode=OneWay}">
                             <MenuItem.Icon>
