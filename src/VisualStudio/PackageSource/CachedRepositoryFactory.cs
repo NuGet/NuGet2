@@ -44,7 +44,8 @@ namespace NuGet.VisualStudio {
             }
 
             // aggregate source, return aggregate repository
-            if (AggregatePackageSource.Instance.Source.Equals(source)) {
+            if (AggregatePackageSource.Instance.Source.Equals(source, StringComparison.InvariantCultureIgnoreCase) ||
+                AggregatePackageSource.Instance.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase)) {
                 return _packageSourceProvider.GetAggregate(_repositoryFactory);
             }
 
