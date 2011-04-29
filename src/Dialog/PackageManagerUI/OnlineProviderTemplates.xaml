@@ -100,8 +100,8 @@
                 <!-- Id -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">
-                        <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                    <self:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">                            
+                        <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                             <Run Text="{Binding Id, Mode=OneWay}" />
                         </Hyperlink>
                     </self:TextBlockControl>
