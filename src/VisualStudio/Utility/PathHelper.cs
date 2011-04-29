@@ -2,13 +2,14 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.VisualStudio {
     public static class PathHelper {
-
         public static string SmartTruncate(string path, int maxWidth) {
             if (maxWidth < 6) {
-                throw new ArgumentOutOfRangeException("maxWidth");
+                string message = String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 6);
+                throw new ArgumentOutOfRangeException("maxWidth", message);
             }
 
             if (path == null) {
@@ -19,8 +20,12 @@ namespace NuGet.VisualStudio {
                 return path;
             }
 
+            // get the leaf folder name of this directory path
+            // e.g. if the path is C:\documents\projects\visualstudio\, we want to get the 'visualstudio' part.
             string folder = path.Split(new [] { Path.DirectorySeparatorChar}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? String.Empty;
+            // surround the folder name with the pair of \ characters.
             folder = Path.DirectorySeparatorChar + folder + Path.DirectorySeparatorChar;
+
             string root = Path.GetPathRoot(path);
             int remainingWidth = maxWidth - root.Length - 3;       // 3 = length(ellipsis)
 

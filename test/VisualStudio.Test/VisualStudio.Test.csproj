@@ -35,6 +35,7 @@
     </Compile>
     <Compile Include="Mocks\MockPackageSourceProvider.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />
+    <Compile Include="PathHelperTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -351,7 +351,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public string DefaultProject {
             get {
                 Debug.Assert(_solutionManager != null);
-                return _solutionManager.DefaultProject.GetTruncatedDisplayName(_solutionManager);
+                return _solutionManager.DefaultProject.GetDisplayName(_solutionManager);
             }
         }
 
@@ -371,7 +371,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
             var allProjects = _solutionManager.GetProjects();
             _projectSafeNames = allProjects.Select(_solutionManager.GetProjectSafeName).ToArray();
-            var displayNames = allProjects.Select(p => p.GetTruncatedDisplayName(_solutionManager)).ToArray();
+            var displayNames = allProjects.Select(p => p.GetDisplayName(_solutionManager)).ToArray();
             return displayNames;
         }
 
