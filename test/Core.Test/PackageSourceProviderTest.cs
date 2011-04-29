@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace NuGet.Test {
 
@@ -77,6 +79,83 @@ namespace NuGet.Test {
             Assert.AreEqual("one", values[0].Key);
             Assert.AreEqual("two", values[1].Key);
             Assert.AreEqual("three", values[2].Key);
+        }
+
+        [TestMethod]
+        public void GetAggregateReturnsAggregateRepositoryForAllSources() {
+            // Arrange
+            var repositoryA = new Mock<IPackageRepository>();
+            var repositoryB = new Mock<IPackageRepository>();
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("A")))).Returns(repositoryA.Object);
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("B")))).Returns(repositoryB.Object);
+            var sources = new Mock<IPackageSourceProvider>();
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B") });
+
+            // Act
+            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
+
+            // Assert
+            Assert.AreEqual(2, repo.Repositories.Count());
+            Assert.AreEqual(repositoryA.Object, repo.Repositories.First());
+            Assert.AreEqual(repositoryB.Object, repo.Repositories.Last());
+        }
+
+        [TestMethod]
+        public void GetAggregateSkipsInvalidSources() {
+            // Arrange
+            var repositoryA = new Mock<IPackageRepository>();
+            var repositoryC = new Mock<IPackageRepository>();
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("A")))).Returns(repositoryA.Object);
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("B")))).Throws(new InvalidOperationException());
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("C")))).Returns(repositoryC.Object);
+
+            var sources = new Mock<IPackageSourceProvider>();
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B"), new PackageSource("C") });
+
+            // Act
+            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreInvalidRepositories: true);
+
+            // Assert
+            Assert.AreEqual(2, repo.Repositories.Count());
+            Assert.AreEqual(repositoryA.Object, repo.Repositories.First());
+            Assert.AreEqual(repositoryC.Object, repo.Repositories.Last());
+        }
+
+        [TestMethod]
+        public void GetAggregateSetsIgnoreInvalidRepositoryProperty() {
+            // Arrange
+            var repositoryA = new Mock<IPackageRepository>();
+            var repositoryC = new Mock<IPackageRepository>();
+            var factory = new Mock<IPackageRepositoryFactory>();
+            bool ignoreRepository = true;
+
+            var sources = new Mock<IPackageSourceProvider>();
+            sources.Setup(c => c.LoadPackageSources()).Returns(Enumerable.Empty<PackageSource>());
+
+            // Act
+            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreInvalidRepositories: ignoreRepository);
+
+            // Assert
+            Assert.IsTrue(repo.IgnoreInvalidRepositories);
+        }
+
+        [TestMethod]
+        public void GetAggregateWithInvalidSourcesThrows() {
+            // Arrange
+            var repositoryA = new Mock<IPackageRepository>();
+            var repositoryC = new Mock<IPackageRepository>();
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("A")))).Returns(repositoryA.Object);
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("B")))).Throws(new InvalidOperationException());
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("C")))).Returns(repositoryC.Object);
+
+            var sources = new Mock<IPackageSourceProvider>();
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("A"), new PackageSource("B"), new PackageSource("C") });
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.GetAggregate(factory.Object, ignoreInvalidRepositories: false));
         }
 
         private void AssertPackageSource(PackageSource ps, string name, string source) {

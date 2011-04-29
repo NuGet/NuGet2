@@ -43,6 +43,7 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AggregateQueryTest.cs" />
     <Compile Include="AggregateRepositoryTest.cs" />
     <Compile Include="DataServicePackageTest.cs" />
     <Compile Include="DefaultPackagePathResolverTest.cs" />

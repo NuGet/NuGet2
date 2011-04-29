@@ -13,6 +13,12 @@ namespace NuGet {
             }
         }
 
+        public bool IgnoreInvalidRepositories { get; set; }
+
+        public IEnumerable<IPackageRepository> Repositories {
+            get { return _repositories; }
+        }
+
         public AggregateRepository(IEnumerable<IPackageRepository> repositories) {
             if (repositories == null) {
                 throw new ArgumentNullException("repositories");
@@ -21,7 +27,8 @@ namespace NuGet {
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()), PackageEqualityComparer.IdAndVersion);
+            return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()), 
+                PackageEqualityComparer.IdAndVersion, IgnoreInvalidRepositories);
         }
     }
 }

@@ -7,38 +7,42 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 namespace NuGet {
-    internal class AggregateQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T> {
+    internal class AggregateQuery<TVal> : IQueryable<TVal>, IQueryProvider, IOrderedQueryable<TVal> {
         private const int QueryCacheSize = 90;
 
-        private readonly IEnumerable<IQueryable<T>> _queryables;
+        private readonly IEnumerable<IQueryable<TVal>> _queryables;
         private readonly Expression _expression;
-        private readonly IEqualityComparer<T> _equalityComparer;
-        private readonly IList<IEnumerable<T>> _subQueries;
+        private readonly IEqualityComparer<TVal> _equalityComparer;
+        private readonly IList<IEnumerable<TVal>> _subQueries;
+        private readonly bool _ignoreInvalidRepositories;
 
-        public AggregateQuery(IEnumerable<IQueryable<T>> queryables, IEqualityComparer<T> equalityComparer) {
+        public AggregateQuery(IEnumerable<IQueryable<TVal>> queryables, IEqualityComparer<TVal> equalityComparer, bool ignoreInvalidRepositories) {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
             _expression = Expression.Constant(this);
             _subQueries = GetSubQueries(_expression);
+            _ignoreInvalidRepositories = ignoreInvalidRepositories;
         }
 
-        private AggregateQuery(IEnumerable<IQueryable<T>> queryables,
-                               IEqualityComparer<T> equalityComparer,
-                               IList<IEnumerable<T>> subQueries,
-                               Expression expression) {
+        private AggregateQuery(IEnumerable<IQueryable<TVal>> queryables,
+                               IEqualityComparer<TVal> equalityComparer,
+                               IList<IEnumerable<TVal>> subQueries,
+                               Expression expression,
+                               bool ignoreInvalidRepositories) {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
             _expression = expression;
             _subQueries = subQueries;
+            _ignoreInvalidRepositories = ignoreInvalidRepositories;
         }
 
-        public IEnumerator<T> GetEnumerator() {
+        public IEnumerator<TVal> GetEnumerator() {
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
             var aggregateQuery = GetAggregateEnumerable().AsSafeQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
-            return aggregateQuery.Provider.CreateQuery<T>(aggregateExpression).GetEnumerator();
+            return aggregateQuery.Provider.CreateQuery<TVal>(aggregateExpression).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -47,7 +51,7 @@ namespace NuGet {
 
         public Type ElementType {
             get {
-                return typeof(T);
+                return typeof(TVal);
             }
         }
 
@@ -84,7 +88,7 @@ namespace NuGet {
 
         public TResult Execute<TResult>(Expression expression) {
             var results = (from queryable in _queryables
-                           select Execute<TResult>(queryable, expression)).AsSafeQueryable();
+                           select TryExecute<TResult>(queryable, expression)).AsSafeQueryable();
 
             if (QueryableUtility.IsQueryableMethod(expression, "Count")) {
                 // HACK: This is in correct since we aren't removing duplicates but count is mostly for paging
@@ -92,44 +96,37 @@ namespace NuGet {
                 return (TResult)(object)results.Cast<int>().Sum();
             }
 
-            return Execute<TResult>(results, expression);
+            return TryExecute<TResult>(results, expression);
         }
 
         public object Execute(Expression expression) {
             return Execute<object>(expression);
         }
 
-        private IEnumerable<T> GetAggregateEnumerable() {
+        private IEnumerable<TVal> GetAggregateEnumerable() {
             // Used to pick the right element from each sub query in the right order
-            var comparer = new OrderingComparer<T>(Expression);
+            var comparer = new OrderingComparer<TVal>(Expression);
 
             // Create lazy queues over each sub query so we can lazily pull items from it
-            var lazyQueues = _subQueries.Select(query => new LazyQueue<T>(query.GetEnumerator())).ToList();
+            var lazyQueues = _subQueries.Select(query => new LazyQueue<TVal>(query.GetEnumerator())).ToList();
 
             // Used to keep track of everything we've seen so far (we never show duplicates)
-            var seen = new HashSet<T>(_equalityComparer);
+            var seen = new HashSet<TVal>(_equalityComparer);
 
-            do {                
-                T minElement = default(T);
-                LazyQueue<T> minQueue = null;
+            do {
+                TVal minElement = default(TVal);
+                LazyQueue<TVal> minQueue = null;
 
                 // Run tasks in parallel
                 var tasks = (from queue in lazyQueues
-                             select Task.Factory.StartNew(() => {
-                                 T current;
-                                 return new {
-                                     Empty = !queue.TryPeek(out current),
-                                     Value = current,
-                                     Queue = queue,
-                                 };
-
-                             })).ToArray();
+                             select Task.Factory.StartNew(() => ReadQueue(queue))
+                             ).ToArray();
 
                 // Wait for everything to complete
                 Task.WaitAll(tasks);
 
                 foreach (var task in tasks) {
-                    if (!task.Result.Empty) {
+                    if (task.Result.HasValue) {
                         // Keep track of the minimum element in the list
                         if (minElement == null || comparer.Compare(task.Result.Value, minElement) < 0) {
                             minElement = task.Result.Value;
@@ -154,7 +151,26 @@ namespace NuGet {
             } while (lazyQueues.Any());
         }
 
-        private IList<IEnumerable<T>> GetSubQueries(Expression expression) {
+        private TaskResult ReadQueue(LazyQueue<TVal> queue) {
+            var result = new TaskResult { Queue = queue };
+            TVal current;
+            if (_ignoreInvalidRepositories) {
+                try {
+                    result.HasValue = queue.TryPeek(out current);
+                }
+                catch {
+                    current = default(TVal);
+                }
+            }
+            else {
+                result.HasValue = queue.TryPeek(out current);
+            }
+            result.Value = current;
+
+            return result;
+        }
+
+        private IList<IEnumerable<TVal>> GetSubQueries(Expression expression) {
             return _queryables.Select(query => GetSubQuery(query, expression)).ToList();
         }
 
@@ -170,16 +186,16 @@ namespace NuGet {
                 subQueries = GetSubQueries(expression);
             }
 
-            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression });
+            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression, _ignoreInvalidRepositories });
         }
 
-        private static IEnumerable<T> GetSubQuery(IQueryable queryable, Expression expression) {
+        private static IEnumerable<TVal> GetSubQuery(IQueryable queryable, Expression expression) {
             expression = Rewrite(queryable, expression);
 
-            IQueryable<T> newQuery = queryable.Provider.CreateQuery<T>(expression);
+            IQueryable<TVal> newQuery = queryable.Provider.CreateQuery<TVal>(expression);
 
             // Create the query and only get up to the query cache size
-            return new BufferedEnumerable<T>(newQuery, QueryCacheSize);
+            return new BufferedEnumerable<TVal>(newQuery, QueryCacheSize);
         }
 
         private static TResult Execute<TResult>(IQueryable queryable, Expression expression) {
@@ -190,6 +206,19 @@ namespace NuGet {
         private static object Execute(IQueryable queryable, Expression expression) {
             return queryable.Provider
                             .Execute(Rewrite(queryable, expression));
+        }
+
+
+        private TResult TryExecute<TResult>(IQueryable queryable, Expression expression) {
+            if (_ignoreInvalidRepositories) {
+                try {
+                    return Execute<TResult>(queryable, expression);
+                }
+                catch {
+                    return default(TResult);
+                }
+            }
+            return Execute<TResult>(queryable, expression);
         }
 
         private static Expression RewriteForAggregation(IQueryable queryable, Expression expression) {
@@ -205,6 +234,14 @@ namespace NuGet {
             // Remove all take an skip andtake expression from individual linq providers
             return new ExpressionRewriter(queryable, new[] { "Skip", 
                                                              "Take" }).Visit(expression);
+        }
+
+        private class TaskResult {
+            public LazyQueue<TVal> Queue { get; set; }
+
+            public bool HasValue { get; set; }
+
+            public TVal Value { get; set; }
         }
     }
 }

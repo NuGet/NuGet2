@@ -261,7 +261,7 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(0, packages.Count);
         }
 
-        private RecentPackagesRepository CreateRecentPackageRepository(IEnumerable<IPackage> packagesList = null, IEnumerable<IPersistencePackageMetadata> settingsMetadata = null) {
+        private RecentPackageRepository CreateRecentPackageRepository(IEnumerable<IPackage> packagesList = null, IEnumerable<IPersistencePackageMetadata> settingsMetadata = null) {
             if (packagesList == null) {
                 var packageA = PackageUtility.CreatePackage("A", "1.0");
                 var packageC = PackageUtility.CreatePackage("C", "2.0");
@@ -287,7 +287,7 @@ namespace NuGet.VisualStudio.Test {
 
             var mockPackageSourceProvider = new MockPackageSourceProvider();
             mockPackageSourceProvider.SavePackageSources(new[] {new PackageSource("source")});
-            return new RecentPackagesRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider, mockSettingsManager);
+            return new RecentPackageRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider, mockSettingsManager);
         }
 
         private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {

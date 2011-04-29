@@ -8,7 +8,7 @@ namespace NuGet.VisualStudio {
 
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IRecentPackageRepository))]
-    public class RecentPackagesRepository : IPackageRepository, IRecentPackageRepository {
+    public class RecentPackageRepository : IPackageRepository, IRecentPackageRepository {
 
         private const string SourceValue = "(MRU)";
         private const int MaximumPackageCount = 20;
@@ -25,7 +25,7 @@ namespace NuGet.VisualStudio {
         private DateTime _latestTime = DateTime.UtcNow;
 
         [ImportingConstructor]
-        public RecentPackagesRepository(IPackageRepositoryFactory repositoryFactory,
+        public RecentPackageRepository(IPackageRepositoryFactory repositoryFactory,
                                         IPersistencePackageSettingsManager settingsManager)
             : this(ServiceLocator.GetInstance<DTE>(), 
                    repositoryFactory, 
@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio {
                    settingsManager) {
         }
 
-        public RecentPackagesRepository(
+        public RecentPackageRepository(
             DTE dte,
             IPackageRepositoryFactory repositoryFactory,
             IPackageSourceProvider packageSourceProvider,
@@ -41,7 +41,7 @@ namespace NuGet.VisualStudio {
 
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
-            _aggregateRepository = new Lazy<IPackageRepository>(() => packageSourceProvider.GetAggregate(repositoryFactory));
+            _aggregateRepository = new Lazy<IPackageRepository>(() => packageSourceProvider.GetAggregate(repositoryFactory, ignoreInvalidRepositories: true));
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
