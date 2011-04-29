@@ -13,15 +13,7 @@ namespace PackageExplorer {
     public partial class DownloadProgressWindow : StandardDialog {
         private readonly Uri _downloadUri;
         private WebClient _client;
-        private readonly IProxyService _proxyService;
-
-        public IProxyService ProxyService {
-            get {
-                return _proxyService;
-            }
-        }
-
-        
+        private readonly IProxyService _proxyService;    
 
         public DownloadProgressWindow(Uri downloadUri, string id, Version version, IProxyService proxyService) {
             if (downloadUri == null) {
@@ -55,7 +47,7 @@ namespace PackageExplorer {
             // Set the WebClient proxy
             // Maybe we could refactor this code to use the HttpClient so that
             // it can utilize the already existing implementation of getting the proxy
-            _client.Proxy = ProxyService.GetProxy(uri);
+            _client.Proxy = _proxyService.GetProxy(uri);
             _client.DownloadDataCompleted += (sender, e) => {
                 if (!e.Cancelled) {
                     if (e.Error != null) {
