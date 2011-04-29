@@ -103,7 +103,7 @@
                         <!-- Require License Acceptance -->
                         <StackPanel Style="{StaticResource DetailMetadataStyle}">
                             <TextBlock Text="{x:Static resources:Resources.Dialog_RequireLicenseLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                            <TextBlock Text="{Binding RequireLicenseAcceptance}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                            <TextBlock Text="{Binding RequireLicenseAcceptance, Converter={StaticResource BooleanConverter}}" Style="{StaticResource DetailMetadataValueStyle}" />
                         </StackPanel>
 
                         <!-- View License link -->

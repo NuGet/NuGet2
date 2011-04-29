@@ -114,6 +114,7 @@
     <Compile Include="ContentViewerPane.xaml.cs">
       <DependentUpon>ContentViewerPane.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BooleanToStringConverter.cs" />
     <Compile Include="Converters\FileSizeConverter.cs" />
     <Compile Include="Converters\NormalizeTextConverter.cs" />
     <Compile Include="Converters\StringToVisibilityConverter.cs" />
