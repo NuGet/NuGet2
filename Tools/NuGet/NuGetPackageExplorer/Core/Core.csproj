@@ -77,6 +77,7 @@
     <Compile Include="Packages\IPackagePathResolver.cs" />
     <Compile Include="Packages\IServerPackageMetadata.cs" />
     <Compile Include="Packages\PackageInfo.cs" />
+    <Compile Include="Packages\PackageInfoEqualityComparer.cs" />
     <Compile Include="Packages\SimplePackage.cs" />
     <Compile Include="ProjectSystem\IFileSystem.cs" />
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />

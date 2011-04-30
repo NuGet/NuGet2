@@ -13,26 +13,27 @@ using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
-        private const int PageSize = 15;
+        private const int PageSize = 7;
+        private const int PageBuffer = 30;
         private DataServicePackageRepository _packageRepository;
-        private IQueryable<PackageInfo> _currentQuery;
+        private QueryContext<PackageInfo> _currentQuery;
         private string _currentSearch;
         private string _redirectedPackageSource;
         private IMruPackageSourceManager _packageSourceManager;
         private readonly IProxyService _proxyService;
 
         public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager, IProxyService proxyService) {
-            if(null == packageSourceManager) {
+            if (null == packageSourceManager) {
                 throw new ArgumentNullException("packageSourceManager");
             }
-            if(null == proxyService) {
+            if (null == proxyService) {
                 throw new ArgumentNullException("proxyService");
             }
 
             Packages = new ObservableCollection<PackageInfo>();
-            NavigationCommand = new NavigateCommand(this);
             SortCommand = new RelayCommand<string>(Sort, column => TotalPackageCount > 0);
             SearchCommand = new RelayCommand<string>(Search);
+            NavigationCommand = new RelayCommand<string>(NavigationCommandExecute, NavigationCommandCanExecute);
             LoadedCommand = new RelayCommand(() => Sort("VersionDownloadCount", ListSortDirection.Descending));
             ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
             _proxyService = proxyService;
@@ -86,7 +87,7 @@ namespace PackageExplorerViewModel {
                 if (_isEditable != value) {
                     _isEditable = value;
                     OnPropertyChanged("IsEditable");
-                    NavigationCommand.OnCanExecuteChanged();
+                    NavigationCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -175,48 +176,42 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public int TotalPage {
-            get {
-                return Math.Max(1, (TotalPackageCount + PageSize - 1) / PageSize);
-            }
-        }
+        //public int TotalPage {
+        //    get {
+        //        return Math.Max(1, (TotalPackageCount + PageSize - 1) / PageSize);
+        //    }
+        //}
 
-        private int _currentPage;
+        //private int _currentPage;
 
-        public int CurrentPage {
-            get { return _currentPage; }
-            private set {
-                if (_currentPage != value) {
-                    _currentPage = value;
-                    OnPropertyChanged("CurrentPage");
-                }
-            }
-        }
+        //public int CurrentPage {
+        //    get { return _currentPage; }
+        //    private set {
+        //        if (_currentPage != value) {
+        //            _currentPage = value;
+        //            OnPropertyChanged("CurrentPage");
+        //        }
+        //    }
+        //}
 
         public ObservableCollection<PackageInfo> Packages { get; private set; }
 
-        public NavigateCommand NavigationCommand { get; private set; }
+        public RelayCommand<string> NavigationCommand { get; private set; }
         public ICommand SortCommand { get; private set; }
         public ICommand SearchCommand { get; private set; }
         public ICommand LoadedCommand { get; private set; }
         public ICommand ChangePackageSourceCommand { get; private set; }
 
-        internal void LoadPage(int page) {
+        internal void LoadPage() {
             Debug.Assert(_currentQuery != null);
-
-            page = Math.Max(page, 0);
-            page = Math.Min(page, TotalPage - 1);
-
-            // load package
-            var subQuery = _currentQuery.Skip(page * PageSize).Take(PageSize);
 
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             StatusContent = "Loading...";
             IsEditable = false;
 
-            Task.Factory.StartNew<Tuple<IList<PackageInfo>, int>>(
-                QueryPackages, subQuery, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).ContinueWith(
+            Task.Factory.StartNew<IList<PackageInfo>>(
+                QueryPackages, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).ContinueWith(
                 result => {
                     if (result.IsFaulted) {
                         AggregateException exception = result.Exception;
@@ -224,7 +219,7 @@ namespace PackageExplorerViewModel {
                         ClearPackages();
                     }
                     else if (!result.IsCanceled) {
-                        ShowPackages(result.Result.Item1, result.Result.Item2, page);
+                        ShowPackages(result.Result, _currentQuery.TotalItemCount, _currentQuery.BeginPackage, _currentQuery.EndPackage);
                         StatusContent = String.Empty;
                         // update sort column glyph
                         SortCounter++;
@@ -235,16 +230,12 @@ namespace PackageExplorerViewModel {
                 uiScheduler);
         }
 
-        private Tuple<IList<PackageInfo>, int> QueryPackages(object state) {
-            var subQuery = (IQueryable<PackageInfo>)state;
-            IList<PackageInfo> result = subQuery.ToList();
+        private IList<PackageInfo> QueryPackages() {
+            IList<PackageInfo> result = _currentQuery.GetItemsForCurrentPage().ToList();
             foreach (PackageInfo entity in result) {
                 entity.DownloadUrl = GetPackageRepository().GetReadStreamUri(entity);
             }
-
-            int totalPackageCount = _currentQuery.Count();
-
-            return Tuple.Create(result, totalPackageCount);
+            return result;
         }
 
         private void LoadPackages() {
@@ -271,33 +262,33 @@ namespace PackageExplorerViewModel {
                             break;
 
                         case "Authors":
-                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Authors) : query.OrderBy(p => p.Authors);
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Authors).ThenBy(p => p.Id) : query.OrderBy(p => p.Authors).ThenBy(p => p.Id);
                             break;
 
                         case "VersionDownloadCount":
-                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.VersionDownloadCount) : query.OrderBy(p => p.VersionDownloadCount);
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id) : query.OrderBy(p => p.DownloadCount).ThenBy(p => p.Id);
                             break;
 
                         case "Rating":
-                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.VersionRating) : query.OrderBy(p => p.VersionRating);
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Rating).ThenBy(p => p.Id) : query.OrderBy(p => p.VersionRating).ThenBy(p => p.Id);
                             break;
 
                         default:
-                            query = query.OrderByDescending(p => p.VersionDownloadCount);
+                            query = query.OrderByDescending(p => p.DownloadCount).ThenBy(p => p.Id);
                             break;
                     }
 
-                    _currentQuery = query.Select(p => new PackageInfo { 
-                        Id = p.Id, 
-                        Version = p.Version, 
-                        Authors = p.Authors, 
-                        VersionRating = p.VersionRating, 
+                    var filteredQuery = query.Select(p => new PackageInfo {
+                        Id = p.Id,
+                        Version = p.Version,
+                        Authors = p.Authors,
+                        VersionRating = p.VersionRating,
                         VersionDownloadCount = p.VersionDownloadCount,
                         PackageHash = p.PackageHash
                     });
 
-                    // every time the search query changes, we reset to page 0
-                    LoadPage(0);
+                    _currentQuery = new QueryContext<PackageInfo>(filteredQuery, PageSize, PageBuffer, PackageInfoEqualityComparer.Instance);
+                    LoadPage();
                 },
                 CancellationToken.None,
                 TaskContinuationOptions.OnlyOnRanToCompletion,
@@ -354,20 +345,107 @@ namespace PackageExplorerViewModel {
         }
 
         private void ClearPackages() {
-            ShowPackages(Enumerable.Empty<PackageInfo>(), 0, 0);
+            ShowPackages(Enumerable.Empty<PackageInfo>(), 0, 0, 0);
         }
 
-        private void ShowPackages(IEnumerable<PackageInfo> packages, int totalPackageCount, int page) {
+        private void ShowPackages(IEnumerable<PackageInfo> packages, int totalPackageCount, int beginPackage, int endPackage) {
             TotalPackageCount = totalPackageCount;
-
-            CurrentPage = page;
-            BeginPackage = Math.Min(page * PageSize + 1, TotalPackageCount);
-            EndPackage = Math.Min((page + 1) * PageSize, TotalPackageCount);
+            BeginPackage = beginPackage;
+            EndPackage = endPackage;
 
             Packages.Clear();
             Packages.AddRange(packages);
 
-            NavigationCommand.OnCanExecuteChanged();
+            NavigationCommand.RaiseCanExecuteChanged();
         }
+
+        #region NavigationCommand
+
+        private bool NavigationCommandCanExecute(string action) {
+            if (!IsEditable) {
+                return false;
+            }
+
+            switch (action) {
+                case "First":
+                    return CanMoveFirst();
+
+                case "Previous":
+                    return CanMovePrevious();
+
+                case "Next":
+                    return CanMoveNext();
+
+                case "Last":
+                    return CanMoveLast();
+
+                default:
+                    throw new ArgumentOutOfRangeException("action");
+            }
+        }
+
+        private void NavigationCommandExecute(string action) {
+            switch (action) {
+                case "First":
+                    MoveFirst();
+                    break;
+
+                case "Previous":
+                    MovePrevious();
+                    break;
+
+                case "Next":
+                    MoveNext();
+                    break;
+
+                case "Last":
+                    MoveLast();
+                    break;
+            }
+        }
+
+        private void MoveLast() {
+            bool canMoveLast = _currentQuery.MoveLast();
+            if (canMoveLast) {
+                LoadPage();
+            }
+        }
+
+        private void MoveNext() {
+            bool canMoveNext = _currentQuery.MoveNext();
+            if (canMoveNext) {
+                LoadPage();
+            }
+        }
+
+        private void MovePrevious() {
+            bool canMovePrevious = _currentQuery.MovePrevious();
+            if (canMovePrevious) {
+                LoadPage();
+            }
+        }
+
+        private void MoveFirst() {
+            _currentQuery.MoveFirst();
+            LoadPage();
+        }
+
+        private bool CanMoveLast() {
+            return EndPackage < TotalPackageCount;
+        }
+
+        private bool CanMoveNext() {
+            return EndPackage < TotalPackageCount;
+        }
+
+        private bool CanMovePrevious() {
+            return BeginPackage > 1;
+        }
+
+        private bool CanMoveFirst() {
+            return BeginPackage > 1;
+        }
+
+        #endregion
     }
 }
