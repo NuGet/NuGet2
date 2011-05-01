@@ -155,5 +155,13 @@ namespace PackageExplorer {
                 e.Handled = true;
             }
         }
+
+        private void OnWindowSizeChanged(object sender, SizeChangedEventArgs e) {
+            if (!e.NewSize.IsEmpty) {
+                var settings = Properties.Settings.Default;
+                settings.PackageChooserDialogHeight = e.NewSize.Height;
+                settings.PackageChooserDialogWidth = e.NewSize.Width;
+            }
+        }
     }
 }

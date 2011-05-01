@@ -29,5 +29,11 @@
     <Setting Name="PackageContentHeight" Type="System.Double" Scope="User">
       <Value Profile="(Default)">400</Value>
     </Setting>
+    <Setting Name="PackageChooserDialogWidth" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">610</Value>
+    </Setting>
+    <Setting Name="PackageChooserDialogHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">450</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
