@@ -10,7 +10,7 @@ namespace NuGet.VisualStudio {
         }
 
         public static IEnumerable<PackageSource> GetPackageSourcesWithAggregate(this IPackageSourceProvider provider) {
-            return Enumerable.Repeat(Instance, 1).Concat(provider.LoadPackageSources());
+            return new[] { Instance }.Concat(provider.LoadPackageSources());
         }
 
         public static IEnumerable<PackageSource> GetPackageSourcesWithAggregate() {
