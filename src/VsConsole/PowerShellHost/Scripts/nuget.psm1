@@ -31,6 +31,12 @@ function Register-TabExpansion {
     $TabExpansionCommands[$Name] = $Definition 
 }
 
+Register-TabExpansion 'Get-Package' @{
+    'Source' = {
+        GetPackageSources
+    }
+}
+
 Register-TabExpansion 'Install-Package' @{
     'Id' = {
         param($context)
@@ -50,6 +56,9 @@ Register-TabExpansion 'Install-Package' @{
         $parameters.Remote = $true
         $parameters.AllVersions = $true
         GetPackageVersions $parameters $context 
+    }
+    'Source' = {
+        GetPackageSources
     }
 }
 
@@ -95,6 +104,9 @@ Register-TabExpansion 'Update-Package' @{
         $parameters.AllVersions = $true
         GetPackageVersions $parameters $context
     }
+    'Source' = {
+        GetPackageSources
+    }
 }
 
 Register-TabExpansion 'Open-PackagePage' @{
@@ -113,6 +125,9 @@ Register-TabExpansion 'Open-PackagePage' @{
         $parameters.Remote = $true
         $parameters.AllVersions = $true
         GetPackageVersions $parameters $context 
+    }
+    'Source' = {
+        GetPackageSources
     }
 }
 
@@ -140,6 +155,11 @@ function GetProjectNames {
 
 function GetPackageIds($packages) {
     $packages | Select -ExpandProperty Id
+}
+
+function GetPackageSources() {
+    $allSources = [NuGet.VisualStudio.AggregatePackageSource]::GetPackageSourcesWithAggregate()
+    $allSources | Select-Object -ExpandProperty Name
 }
 
 function GetPackageVersions($parameters, $context) {

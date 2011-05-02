@@ -1,4 +1,4 @@
-function Test-OpenProjectPageOpenProjectUrlByDefault {
+function Test-OpenPackagePageOpenProjectUrlByDefault {
     param(
         $context
     )
@@ -10,7 +10,7 @@ function Test-OpenProjectPageOpenProjectUrlByDefault {
     Assert-AreEqual 'http://codeplex.com' $p.OriginalString
 }
 
-function Test-OpenProjectPageOpenLicenseUrlIfLicenseParameterIsSet {
+function Test-OpenPackagePageOpenLicenseUrlIfLicenseParameterIsSet {
     param(
         $context
     )
@@ -22,7 +22,7 @@ function Test-OpenProjectPageOpenLicenseUrlIfLicenseParameterIsSet {
     Assert-AreEqual 'http://bing.com' $p.OriginalString
 }
 
-function Test-OpenProjectPageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
+function Test-OpenPackagePageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
     # Act
     $p = Open-PackagePage elmah -Report -WhatIf -PassThru
 
@@ -30,7 +30,7 @@ function Test-OpenProjectPageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
     Assert-AreEqual 'http://nuget.org/Package/ReportAbuse/elmah/1.1' $p.OriginalString
 }
 
-function Test-OpenProjectPageFailsIfIdIsSetToTheWrongValue {
+function Test-OpenPackagePageFailsIfIdIsSetToTheWrongValue {
     param(
         $context
     )
@@ -42,7 +42,7 @@ function Test-OpenProjectPageFailsIfIdIsSetToTheWrongValue {
     } "Package with the Id 'OpenPackagePageTestPackage_Wrong' is not found in the specified source."
 }
 
-function Test-OpenProjectPageFailsIfVersionIsSetToTheWrongValue {
+function Test-OpenPackagePageFailsIfVersionIsSetToTheWrongValue {
     param(
         $context
     )
@@ -54,7 +54,7 @@ function Test-OpenProjectPageFailsIfVersionIsSetToTheWrongValue {
     } "Package with the Id 'OpenPackagePageTestPackage' and version '4.2' is not found in the specified source."
 }
 
-function Test-OpenProjectPageFailsIfReportUrlIsNotAvailable {
+function Test-OpenPackagePageFailsIfReportUrlIsNotAvailable {
     param(
         $context
     )
@@ -66,7 +66,7 @@ function Test-OpenProjectPageFailsIfReportUrlIsNotAvailable {
     } "The package 'OpenPackagePageTestPackage 1.0' does not provide the requested URL."
 }
 
-function Test-OpenProjectPageFailsIfProjectUrlIsNotAvailable {
+function Test-OpenPackagePageFailsIfProjectUrlIsNotAvailable {
     param(
         $context
     )
@@ -78,7 +78,7 @@ function Test-OpenProjectPageFailsIfProjectUrlIsNotAvailable {
     } "The package 'PackageWithGacReferences 1.0' does not provide the requested URL."
 }
 
-function Test-OpenProjectPageFailsIfLicenseUrlIsNotAvailable {
+function Test-OpenPackagePageFailsIfLicenseUrlIsNotAvailable {
     param(
         $context
     )
@@ -90,7 +90,7 @@ function Test-OpenProjectPageFailsIfLicenseUrlIsNotAvailable {
     } "The package 'PackageWithGacReferences 1.0' does not provide the requested URL."
 }
 
-function Test-OpenProjectPageAcceptSourceName {
+function Test-OpenPackagePageAcceptSourceName {
     # Act
     $p = Open-PackagePage 'elmah' -Source 'NuGET offiCial Package Source' -WhatIf -PassThru
 
@@ -99,6 +99,20 @@ function Test-OpenProjectPageAcceptSourceName {
 
     # Act
     $p = Open-PackagePage 'elmah' -License -Source 'NuGET offiCial Package Source' -WhatIf -PassThru
+
+    # Assert
+    Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString
+}
+
+function Test-OpenPackagePageAcceptAllAsSourceName {
+    # Act
+    $p = Open-PackagePage 'elmah' -version 1.1 -Source 'All' -WhatIf -PassThru
+
+    # Assert
+    Assert-AreEqual 'http://elmah.googlecode.com/' $p.OriginalString
+
+    # Act
+    $p = Open-PackagePage 'elmah' -Version 1.1 -License -Source 'All' -WhatIf -PassThru
 
     # Assert
     Assert-AreEqual 'http://www.apache.org/licenses/LICENSE-2.0' $p.OriginalString

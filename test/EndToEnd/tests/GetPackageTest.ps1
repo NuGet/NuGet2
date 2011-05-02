@@ -142,3 +142,11 @@ function Test-GetPackageThrowsWithInvalidSourceName {
         Get-Package -ListAvailable -Source 'nonexistent package source'
     } 'Invalid URI: The format of the URI could not be determined.'
 }
+
+function Test-GetPackageAcceptsAllAsSourceName {
+     # Act
+    $p = @(Get-Package -Filter elmah -ListAvailable -Source 'All')
+
+    # Assert
+    Assert-True (1 -le $p.Count)
+}

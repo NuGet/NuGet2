@@ -264,3 +264,35 @@ function Test-TabExpansionWorksWithOneProject {
     Assert-AreEqual 1 $suggestion.Count
     Assert-AreEqual 'ProjectA' $suggestion[0]
 }
+
+function Test-GetPackageCommandShowTabExpansionForSourceParameter {
+    # Act
+    $suggestions = @(TabExpansion 'Get-Package -Source ')
+
+    # Assert
+    Assert-True ($suggestions.Count -gt 0)
+}
+
+function Test-OpenPackagePageCommandShowTabExpansionForSourceParameter {
+    # Act
+    $suggestions = @(TabExpansion 'Open-PackagePage -Source ')
+
+    # Assert
+    Assert-True ($suggestions.Count -gt 0)
+}
+
+function Test-InstallPackageCommandShowTabExpansionForSourceParameter {
+    # Act
+    $suggestions = @(TabExpansion 'Install-Package -Source ')
+
+    # Assert
+    Assert-True ($suggestions.Count -gt 0)
+}
+
+function Test-UpdatePackageCommandShowTabExpansionForSourceParameter {
+    # Act
+    $suggestions = @(TabExpansion 'Update-Package -Source ')
+
+    # Assert
+    Assert-True ($suggestions.Count -gt 0)
+}

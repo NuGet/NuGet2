@@ -12,5 +12,9 @@ namespace NuGet.VisualStudio {
         public static IEnumerable<PackageSource> GetPackageSourcesWithAggregate(this IPackageSourceProvider provider) {
             return Enumerable.Repeat(Instance, 1).Concat(provider.LoadPackageSources());
         }
+
+        public static IEnumerable<PackageSource> GetPackageSourcesWithAggregate() {
+            return GetPackageSourcesWithAggregate(ServiceLocator.GetInstance<IVsPackageSourceProvider>());
+        }
     }
 }

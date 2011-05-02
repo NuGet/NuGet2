@@ -306,3 +306,17 @@ function Test-UpdatePackageAcceptsSourceName {
     # Assert
     Assert-Package $p Antlr 3.1.3.42154
 }
+
+function Test-UpdatePackageAcceptsAllAsSourceName {
+    # Arrange
+    $p = New-ConsoleApplication
+    Install-Package Antlr -Version 3.1.1 -Project $p.Name -Source 'All'
+
+    Assert-Package $p Antlr 3.1.1
+
+    # Act
+    Update-Package Antlr -Version 3.1.3.42154 -Project $p.Name -Source 'All'
+
+    # Assert
+    Assert-Package $p Antlr 3.1.3.42154
+}
