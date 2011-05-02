@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Windows.Input;
 
 namespace NuGetConsole {
     /// <summary>
@@ -27,6 +29,12 @@ namespace NuGetConsole {
         /// </summary>
         bool IsExecutingCommand { get; }
 
+        bool IsExecutingReadKey { get; }
+
+        bool IsKeyAvailable { get; }
+
+        VsKeyInfo WaitKey();
+                
         /// <summary>
         /// Clear existing console content. This must be used if you want to clear the console
         /// content externally (not inside a host command execution). The console dispatcher manages

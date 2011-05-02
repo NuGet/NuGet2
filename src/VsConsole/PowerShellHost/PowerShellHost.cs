@@ -7,10 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+
 using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
-using EnvDTE;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal abstract class PowerShellHost : IHost, IPathExpansion, IDisposable {
@@ -106,7 +106,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private string EvaluatePrompt() {            
+        private string EvaluatePrompt() {
             string prompt = "PM>";
 
             try {
@@ -118,7 +118,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     }
                 }
             }
-            catch (Exception ex) {                
+            catch (Exception ex) {
                 ExceptionHelper.WriteToActivityLog(ex);
             }
             return prompt;

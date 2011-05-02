@@ -1,21 +1,32 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
+
 using Microsoft.VisualStudio.Text;
 
 namespace NuGetConsole.Implementation.Console {
-    internal interface IPrivateConsoleDispatcher : IConsoleDispatcher {
+
+    internal interface IPrivateConsoleDispatcher : IConsoleDispatcher, IDisposable {
         event EventHandler<EventArgs<Tuple<SnapshotSpan, bool>>> ExecuteInputLine;
         void PostInputLine(InputLine inputLine);
+        void PostKey(VsKeyInfo key);
+        void CancelWaitKey();
     }
+
 
     /// <summary>
     /// This class handles input line posting and command line dispatching/execution.
     /// </summary>
     internal class ConsoleDispatcher : IPrivateConsoleDispatcher {
+
+        private readonly BlockingCollection<VsKeyInfo> _keyBuffer = new BlockingCollection<VsKeyInfo>();
+        private CancellationTokenSource _cancelWaitKeySource;
+        private bool _isExecutingReadKey;
+
         /// <summary>
         /// The IPrivateWpfConsole instance this dispatcher works with.
         /// </summary>
@@ -27,18 +38,63 @@ namespace NuGetConsole.Implementation.Console {
         /// </summary>
         private Dispatcher _dispatcher;
 
+        public event EventHandler StartCompleted;
+
         public ConsoleDispatcher(IPrivateWpfConsole wpfConsole) {
             UtilityMethods.ThrowIfArgumentNull(wpfConsole);
+
             this.WpfConsole = wpfConsole;
         }
 
         public bool IsExecutingCommand {
             get {
-                return (_dispatcher == null) ? false : _dispatcher.IsExecuting;
+                return (_dispatcher != null) && _dispatcher.IsExecuting;
             }
         }
 
-        public event EventHandler StartCompleted;
+        public void PostKey(VsKeyInfo key) {
+            if (key == null) {
+                throw new ArgumentNullException("key");
+            }
+            _keyBuffer.Add(key);
+        }
+
+        public bool IsExecutingReadKey {
+            get { return _isExecutingReadKey; }
+        }
+
+        public bool IsKeyAvailable {
+            get {
+                // In our BlockingCollection<T> producer/consumer this is
+                // not critical so no need for locking. 
+                return _keyBuffer.Count > 0;
+            }
+        }
+
+        public void CancelWaitKey() {
+            if (_isExecutingReadKey && (_cancelWaitKeySource.IsCancellationRequested == false)) {
+                _cancelWaitKeySource.Cancel();
+            }
+        }
+
+        public VsKeyInfo WaitKey() {
+            try {
+                // set/reset the cancellation token
+                _cancelWaitKeySource = new CancellationTokenSource();
+                _isExecutingReadKey = true;
+
+                // blocking call
+                VsKeyInfo key = _keyBuffer.Take(_cancelWaitKeySource.Token);
+
+                return key;
+            }
+            catch (OperationCanceledException) {
+                return null;
+            }
+            finally {
+                _isExecutingReadKey = false;
+            }
+        }
 
         public bool IsStartCompleted { get; private set; }
 
@@ -59,10 +115,10 @@ namespace NuGetConsole.Implementation.Console {
                 else {
                     _dispatcher = new SyncHostConsoleDispatcher(this);
                 }
-                
+
                 Task.Factory.StartNew(
                     // gives the host a chance to do initialization works before the console starts accepting user inputs
-                    () => host.Initialize(WpfConsole)  
+                    () => host.Initialize(WpfConsole)
                 ).ContinueWith(
                     task => {
                         if (task.IsFaulted) {
@@ -297,6 +353,26 @@ namespace NuGetConsole.Implementation.Console {
                     Invoke(() => _impl.OnExecuteEnd());
                 }
             }
+        }
+
+        protected virtual void Dispose(bool disposing) {
+            if (disposing) {
+                _keyBuffer.Dispose();
+                _cancelWaitKeySource.Dispose();
+            }
+        }
+
+        void IDisposable.Dispose() {
+            try {
+                Dispose(true);
+            }
+            finally {
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        ~ConsoleDispatcher() {
+            Dispose(false);
         }
     }
 
