@@ -36,7 +36,7 @@ namespace NuGet.Options {
 
         private void OnClearPackageCacheClick(object sender, EventArgs e) {
             MachineCache.Default.Clear();
-            MessageHelper.ShowInfoMessage(Resources.ShowInfo_ClearRecentPackages, Resources.ShowWarning_Title);
+            MessageHelper.ShowInfoMessage(Resources.ShowInfo_ClearPackageCache, Resources.ShowWarning_Title);
         }
 
         private void OnBrowsePackageCacheClick(object sender, EventArgs e) {
