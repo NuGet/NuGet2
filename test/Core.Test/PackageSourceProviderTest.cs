@@ -158,6 +158,39 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: false));
         }
 
+        [TestMethod]
+        public void ResolveSourceLooksUpNameAndSource() {
+            // Arrange
+            var sources = new Mock<IPackageSourceProvider>();
+            PackageSource source1 = new PackageSource("Source", "SourceName"), source2 = new PackageSource("http://www.test.com", "Baz");
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] {  source1, source2 });
+
+            // Act
+            var result1 = sources.Object.ResolveSource("http://www.test.com");
+            var result2 = sources.Object.ResolveSource("Baz");
+            var result3 = sources.Object.ResolveSource("SourceName");
+
+            // Assert
+            Assert.AreEqual(source2.Source, result1);
+            Assert.AreEqual(source2.Source, result2);
+            Assert.AreEqual(source1.Source, result3);
+        }
+
+        [TestMethod]
+        public void ResolveSourceReturnsOriginalValueIfNotFoundInSources() {
+            // Arrange
+            var sources = new Mock<IPackageSourceProvider>();
+            PackageSource source1 = new PackageSource("Source", "SourceName"), source2 = new PackageSource("http://www.test.com", "Baz");
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { source1, source2 });
+            var source = "http://www.does-not-exist.com";
+
+            // Act
+            var result = sources.Object.ResolveSource(source);
+            
+            // Assert
+            Assert.AreEqual(source, result);
+        }
+
         private void AssertPackageSource(PackageSource ps, string name, string source) {
             Assert.AreEqual(name, ps.Name);
             Assert.AreEqual(source, ps.Source);

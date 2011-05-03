@@ -5,13 +5,15 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "list", "ListCommandDescription", 
+    [Command(typeof(NuGetResources), "list", "ListCommandDescription",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
     public class ListCommand : Command {
-        internal const string DefaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
+        private readonly List<string> _sources = new List<string>();
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription")]
-        public string Source { get; set; }
+        public List<string> Source {
+            get { return _sources; }
+        }
 
         [Option(typeof(NuGetResources), "ListCommandVerboseListDescription")]
         public bool Verbose { get; set; }
@@ -21,24 +23,26 @@ namespace NuGet.Commands {
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
+        public IPackageSourceProvider SourceProvider { get; private set; }
+
         [ImportingConstructor]
-        public ListCommand(IPackageRepositoryFactory packageRepositoryFactory) {
+        public ListCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider) {
             if (packageRepositoryFactory == null) {
                 throw new ArgumentNullException("packageRepositoryFactory");
             }
 
+            if (sourceProvider == null) {
+                throw new ArgumentNullException("sourceProvider");
+            }
+
             RepositoryFactory = packageRepositoryFactory;
+            SourceProvider = sourceProvider;
         }
 
         public IEnumerable<IPackage> GetPackages() {
-            var feedUrl = DefaultFeedUrl;
-            if (!String.IsNullOrEmpty(Source)) {
-                feedUrl = Source;
-            }
+            IPackageRepository packageRepository = GetRepository();
 
-            var packageRepository = RepositoryFactory.CreateRepository(feedUrl);
-            
-            IQueryable<IPackage> packages = packageRepository.GetPackages();
+            IQueryable<IPackage> packages = packageRepository.GetPackages().OrderBy(p => p.Id);
             if (Arguments != null && Arguments.Any()) {
                 packages = packages.Find(Arguments.ToArray());
             }
@@ -47,6 +51,13 @@ namespace NuGet.Commands {
                 return packages;
             }
             return packages.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+        }
+
+        private IPackageRepository GetRepository() {
+            if (Source.Any()) {
+                return new AggregateRepository(Source.Select(s => RepositoryFactory.CreateRepository(SourceProvider.ResolveSource(s))));
+            }
+            return SourceProvider.GetAggregate(RepositoryFactory);
         }
 
         public override void ExecuteCommand() {

@@ -49,14 +49,8 @@ namespace NuGet.VisualStudio {
                 return _packageSourceProvider.GetAggregate(_repositoryFactory);
             }
 
-            // try to look up a PackageSource with a matching name as 'source'
-            string sourceFromName = _packageSourceProvider.ResolveSource(source);
-            if (!String.IsNullOrEmpty(sourceFromName)) {
-                return GetPackageRepository(sourceFromName);
-            }
-
-            // if we didn't find it, revert back to using Source property
-            return GetPackageRepository(source);
+            // try to resolve the name or feed from the source 
+            return GetPackageRepository(_packageSourceProvider.ResolveSource(source));
         }
 
         private IPackageRepository GetPackageRepository(string source) {

@@ -1,19 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using NuGet.Common;
 using System.Linq;
 using System.Xml.Linq;
+using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "install", "InstallCommandDescription", 
+    [Command(typeof(NuGetResources), "install", "InstallCommandDescription",
         MinArgs = 1, MaxArgs = 1,
         UsageSummaryResourceName = "InstallCommandUsageSummary", UsageDescriptionResourceName = "InstallCommandUsageDescription")]
     public class InstallCommand : Command {
-        private const string DefaultFeedUrl = ListCommand.DefaultFeedUrl;
+        private readonly List<string> _sources = new List<string>();
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
-        public string Source { get; set; }
+        public List<string> Source {
+            get { return _sources; }
+        }
+
 
         [Option(typeof(NuGetResources), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
@@ -26,36 +30,37 @@ namespace NuGet.Commands {
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
+        public IPackageSourceProvider SourceProvider { get; private set; }
+
         [ImportingConstructor]
-        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory) {
+        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider) {
             if (packageRepositoryFactory == null) {
                 throw new ArgumentNullException("packageRepositoryFactory");
             }
 
+            if (sourceProvider == null) {
+                throw new ArgumentNullException("sourceProvider");
+            }
+
             RepositoryFactory = packageRepositoryFactory;
+            SourceProvider = sourceProvider;
         }
 
         public override void ExecuteCommand() {
-            var feedUrl = DefaultFeedUrl;
-            if (!String.IsNullOrEmpty(Source)) {
-                feedUrl = Source;
-            }
+            IPackageRepository packageRepository = GetRepository();
 
-            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(feedUrl);
-
-            // Use the passed in install path if any, and default to the current dir
-            string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
+            IFileSystem fileSystem = GetFileSystem();
 
             var packageManager = new PackageManager(packageRepository,
-                new DefaultPackagePathResolver(installPath, useSideBySidePaths: !ExcludeVersion), 
-                new PhysicalFileSystem(installPath));
+                new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: !ExcludeVersion),
+                fileSystem);
 
             packageManager.Logger = Console;
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
             if (Path.GetFileName(Arguments[0]).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
-                InstallPackagesFromConfigFile(packageManager, installPath);
+                InstallPackagesFromConfigFile(packageManager, fileSystem, Arguments[0]);
             }
             else {
                 string packageId = Arguments[0];
@@ -64,14 +69,20 @@ namespace NuGet.Commands {
             }
         }
 
-        private void InstallPackagesFromConfigFile(PackageManager packageManager, string path) {
-            // Read all the Id/Version pairs from the packages.config file
-            // REVIEW: would be nice to share some reading code with core
-            var packages = from packageTag in XElement.Load(Arguments[0]).Elements("package")
-                           select new { Id = packageTag.Attribute("id").Value, Version = new Version(packageTag.Attribute("version").Value) };
+        private IPackageRepository GetRepository() {
+            if (Source.Any()) {
+                return new AggregateRepository(from item in Source
+                                               select RepositoryFactory.CreateRepository(SourceProvider.ResolveSource(item)));
+            }
+            return SourceProvider.GetAggregate(RepositoryFactory);
+        }
+
+        private void InstallPackagesFromConfigFile(PackageManager packageManager, IFileSystem fileSystem, string packageReferenceFilePath) {
+            var packageReferences = new PackageReferenceFile(fileSystem, packageReferenceFilePath).GetPackageReferences();
+
             bool installedAny = false;
-            foreach (var package in packages) {
-                if (!IsPackageInstalled(package.Id, package.Version, packageManager, path)) {
+            foreach (var package in packageReferences) {
+                if (!IsPackageInstalled(package.Id, package.Version, packageManager, fileSystem)) {
                     // Note that we ignore dependencies here because packages.config already contains the full closure
                     packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true);
                     installedAny = true;
@@ -83,14 +94,21 @@ namespace NuGet.Commands {
             }
         }
 
+        protected virtual IFileSystem GetFileSystem() {
+            // Use the passed in install path if any, and default to the current dir
+            string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
+
+            return new PhysicalFileSystem(installPath);
+        }
+
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private bool IsPackageInstalled(string packageId, Version version, PackageManager packageManager, string path) {
+        private bool IsPackageInstalled(string packageId, Version version, PackageManager packageManager, IFileSystem fileSystem) {
             var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
             var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
 
-            string packagePath = Path.Combine(path, packageDir, packageFile);
+            string packagePath = Path.Combine(packageDir, packageFile);
 
-            return File.Exists(packagePath);
+            return fileSystem.FileExists(packagePath);
         }
     }
 }

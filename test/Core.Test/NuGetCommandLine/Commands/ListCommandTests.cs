@@ -19,33 +19,37 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory);
+            ListCommand cmd = new ListCommand(factory, GetSourceProvider());
             cmd.Console = console;
-            cmd.Source = NonDefaultRepoUrl1;
+            cmd.Source.Add(NonDefaultRepoUrl1);
 
             // Act
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual("CustomUrlUsed", packages.First().Id);
+            Assert.AreEqual("CustomUrlUsed", packages.Single().Id);
 
         }
 
         [TestMethod]
-        public void GetPackagesUsesDefaultSourceIfNoSourceDefined() {
+        public void GetPackagesUsesAggregateSourceIfNoSourceDefined() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory);
+            ListCommand cmd = new ListCommand(factory, GetSourceProvider());
             cmd.Console = console;
 
             // Act
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(3, packages.Count());
-            Assert.AreEqual("DefaultUrlUsed", packages.First().Id);
-
+            Assert.AreEqual(6, packages.Count());
+            AssertPackage(new { Id = "AnotherTerm", Ver = "1.0" }, packages.ElementAt(0));
+            AssertPackage(new { Id = "CustomUrlUsed", Ver = "1.0" }, packages.ElementAt(1));
+            AssertPackage(new { Id = "DefaultUrlUsed", Ver = "1.0" }, packages.ElementAt(2));
+            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(3));
+            AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(4));
+            AssertPackage(new { Id = "SearchPackage", Ver = "1.0" }, packages.ElementAt(5));
         }
 
         [TestMethod]
@@ -53,7 +57,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory);
+            ListCommand cmd = new ListCommand(factory, GetSourceProvider());
+            cmd.Source.Add(DefaultRepoUrl);
             cmd.Console = console;
             List<string> searchTerms = new List<string>();
             searchTerms.Add("SearchPackage");
@@ -65,9 +70,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.AreEqual(2, packages.Count());
-            Assert.AreEqual("SearchPackage", packages.First().Id);
-            Assert.AreEqual("AnotherTerm", packages.Last().Id);
-
+            Assert.AreEqual("AnotherTerm", packages.First().Id);
+            Assert.AreEqual("SearchPackage", packages.Last().Id);
         }
 
         [TestMethod]
@@ -75,8 +79,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
-            var cmd = new ListCommand(factory);
-            cmd.Source = NonDefaultRepoUrl2;
+            var cmd = new ListCommand(factory, GetSourceProvider());
+            cmd.Source.Add(NonDefaultRepoUrl2);
             cmd.Console = console;
 
             // Act
@@ -84,10 +88,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.AreEqual(2, packages.Count());
-            Assert.AreEqual("NHibernate", packages.First().Id);
-            Assert.AreEqual(new Version("1.2"), packages.First().Version);
-            Assert.AreEqual("jQuery", packages.Last().Id);
-            Assert.AreEqual(new Version("1.50"), packages.Last().Version);
+            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(0));
+            AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(1));
         }
 
         [TestMethod]
@@ -95,8 +97,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
-            var cmd = new ListCommand(factory);
-            cmd.Source = NonDefaultRepoUrl2;
+            var cmd = new ListCommand(factory, GetSourceProvider());
+            cmd.Source.Add(NonDefaultRepoUrl2);
             cmd.Console = console;
             cmd.Arguments.Add("NHibernate");
 
@@ -105,8 +107,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.AreEqual(1, packages.Count());
-            Assert.AreEqual("NHibernate", packages.First().Id);
-            Assert.AreEqual(new Version("1.2"), packages.First().Version);
+            AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(0));
         }
 
         [TestMethod]
@@ -114,8 +115,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
-            var cmd = new ListCommand(factory);
-            cmd.Source = NonDefaultRepoUrl2;
+            var cmd = new ListCommand(factory, GetSourceProvider());
+            cmd.Source.Add(NonDefaultRepoUrl2);
             cmd.Console = console;
             cmd.AllVersions = true;
 
@@ -124,19 +125,37 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.AreEqual(5, packages.Count());
-            Assert.AreEqual("NHibernate", packages.ElementAt(0).Id);
-            Assert.AreEqual(new Version("1.0"), packages.ElementAt(0).Version);
-            Assert.AreEqual("NHibernate", packages.ElementAt(1).Id);
-            Assert.AreEqual(new Version("1.1"), packages.ElementAt(1).Version);
-            Assert.AreEqual("NHibernate", packages.ElementAt(2).Id);
-            Assert.AreEqual(new Version("1.2"), packages.ElementAt(2).Version);
-            Assert.AreEqual("jQuery", packages.ElementAt(3).Id);
-            Assert.AreEqual(new Version("1.44"), packages.ElementAt(3).Version);
-            Assert.AreEqual("jQuery", packages.ElementAt(4).Id);
-            Assert.AreEqual(new Version("1.50"), packages.ElementAt(4).Version);
+            AssertPackage(new { Id = "jQuery", Ver = "1.44" }, packages.ElementAt(0));
+            AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(1));
+            AssertPackage(new { Id = "NHibernate", Ver = "1.0" }, packages.ElementAt(2));
+            AssertPackage(new { Id = "NHibernate", Ver = "1.1" }, packages.ElementAt(3));
+            AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(4));
         }
 
-        public IPackageRepositoryFactory CreatePackageRepositoryFactory() {
+        [TestMethod]
+        public void GetPackageResolvesSources() {
+            // Arrange
+            var factory = CreatePackageRepositoryFactory();
+            var console = new Mock<IConsole>().Object;
+            var provider = new Mock<IPackageSourceProvider>();
+            provider.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource(NonDefaultRepoUrl1, "Foo") });
+            var cmd = new ListCommand(factory, provider.Object);
+            cmd.Source.Add("Foo");
+            cmd.Console = console;
+
+            // Act
+            var packages = cmd.GetPackages();
+
+            // Assert
+            AssertPackage(new { Id = "CustomUrlUsed", Ver = "1.0" }, packages.Single());
+        }
+
+        private static void AssertPackage(dynamic expected, IPackage package) {
+            Assert.AreEqual(expected.Id, package.Id);
+            Assert.AreEqual(new Version(expected.Ver), package.Version);
+        }
+
+        private static IPackageRepositoryFactory CreatePackageRepositoryFactory() {
             //Default Repository
             MockPackageRepository defaultPackageRepository = new MockPackageRepository();
             var packageA = PackageUtility.CreatePackage("DefaultUrlUsed", "1.0");
@@ -171,6 +190,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             //Return the Factory
             return packageRepositoryFactory.Object;
+        }
+
+        private static IPackageSourceProvider GetSourceProvider(params string[] sources) {
+            var provider = new Mock<IPackageSourceProvider>();
+            if (sources == null || !sources.Any()) {
+                sources = new[] { DefaultRepoUrl, NonDefaultRepoUrl1, NonDefaultRepoUrl2 };
+            }
+            provider.Setup(c => c.LoadPackageSources()).Returns(sources.Select(c => new PackageSource(c)));
+
+            return provider.Object;
         }
     }
 }

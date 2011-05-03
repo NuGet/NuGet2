@@ -29,11 +29,16 @@ namespace NuGet {
             return new AggregateRepository(repositories) { IgnoreFailingRepositories = ignoreFailingRepositories };
         }
 
-        public static string ResolveSource(this IPackageSourceProvider provider, string name) {
-            return provider.LoadPackageSources()
-                           .Where(s => s.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                           .Select(s => s.Source)
-                           .FirstOrDefault();
+        /// <summary>
+        /// Resolves a package source by either Name or Source.
+        /// </summary>
+        public static string ResolveSource(this IPackageSourceProvider provider, string value) {
+            var resolvedSource = (from source in provider.LoadPackageSources()
+                                    where source.Name.Equals(value, StringComparison.CurrentCultureIgnoreCase) || source.Source.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                    select source.Source
+                                   ).FirstOrDefault();
+
+            return resolvedSource ?? value;
         }
     }
 }
