@@ -90,9 +90,21 @@ namespace NuGet {
                     Debug.Assert(stringValue != null);
 
                     dynamic list = property.GetValue(command, null);
-                    // The parameter value is one or more semi-colon separated values: nuget pack -option "foo;bar;baz"
+                    // The parameter value is one or more semi-colon separated items that might support values also
+                    // Example of a list value : nuget pack -option "foo;bar;baz"
+                    // Example of a keyvalue value: nuget pack -option "foo=bar;baz=false"
                     foreach (var item in stringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
-                        list.Add(item);
+                        if (CommandLineUtility.IsKeyValueProperty(property)) {
+                            int eqIndex = item.IndexOf("=", StringComparison.OrdinalIgnoreCase);
+                            if (eqIndex > -1) {
+                                string propertyKey = item.Substring(0, eqIndex);
+                                string propertyValue = item.Substring(eqIndex + 1);
+                                list.Add(propertyKey, propertyValue);
+                            }
+                        }
+                        else {
+                            list.Add(item);
+                        }
                     }
                 }
                 else {

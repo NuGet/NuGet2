@@ -62,16 +62,28 @@ namespace NuGet {
         }
 
         public static Type GetGenericCollectionType(Type type) {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>)) {
+            return GetInterfaceType(type, typeof(ICollection<>));
+        }
+
+        public static Type GetDictionaryType(Type type) {
+            return GetInterfaceType(type, typeof(IDictionary<,>));
+        }
+
+        private static Type GetInterfaceType(Type type, Type interfaceType) {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == interfaceType) {
                 return type;
             }
             return (from t in type.GetInterfaces()
-                    where t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ICollection<>)
+                    where t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType
                     select t).SingleOrDefault();
         }
 
+        public static bool IsKeyValueProperty(PropertyInfo property) {
+            return GetDictionaryType(property.PropertyType) != null;
+        }
+
         public static bool IsMultiValuedProperty(PropertyInfo property) {
-            return GetGenericCollectionType(property.PropertyType) != null;
+            return GetGenericCollectionType(property.PropertyType) != null || IsKeyValueProperty(property);
         }
 
         public static string GetLocalizedString(Type resourceType, string resourceName) {

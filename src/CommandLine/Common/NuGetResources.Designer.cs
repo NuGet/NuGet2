@@ -520,6 +520,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provides the ability to specify a semicolon &quot;;&quot; delimited list of properties when creating a package..
+        /// </summary>
+        internal static string PackageCommandPropertiesDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandPropertiesDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please specify a nuspec or project file to use..
         /// </summary>
         internal static string PackageCommandSpecifyInputFileError {

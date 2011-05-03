@@ -18,6 +18,7 @@ namespace NuGet.Commands {
         };
 
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly HashSet<string> _allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
             Constants.ManifestExtension,
@@ -54,6 +55,13 @@ namespace NuGet.Commands {
 
         [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
         public bool NoDefaultExcludes { get; set; }
+
+        [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
+        public Dictionary<string, string> Properties {
+            get {
+                return _properties;
+            }
+        }
 
         public override void ExecuteCommand() {
             // Get the input file
@@ -209,6 +217,13 @@ namespace NuGet.Commands {
 
             // Specify the configuration
             factory.Properties.Add("Configuration", Configuration ?? "Release");
+
+            // Add the additional Properties to the properties of the Project Factory
+            foreach (var property in Properties) {
+                if (!factory.Properties.ContainsKey(property.Key)) {
+                    factory.Properties.Add(property.Key, property.Value);
+                }
+            }
 
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder();
