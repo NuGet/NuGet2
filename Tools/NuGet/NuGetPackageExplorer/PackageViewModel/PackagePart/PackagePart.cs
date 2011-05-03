@@ -20,7 +20,13 @@ namespace PackageExplorerViewModel {
 
             _viewModel = viewModel;
             _name = name;
-            Parent = parent;
+            _parent = parent;
+            RecalculatePath();
+        }
+
+        private readonly PackageViewModel _viewModel;
+        public PackageViewModel PackageViewModel {
+            get { return _viewModel; }
         }
 
         private PackageFolder _parent;
@@ -31,19 +37,12 @@ namespace PackageExplorerViewModel {
             internal set {
                 if (_parent != value) {
                     _parent = value;
-                    RecalculatePath();
+                    UpdatePath();
                 }
             }
         }
 
-        private readonly PackageViewModel _viewModel;
-
-        public PackageViewModel PackageViewModel {
-            get { return _viewModel; }
-        }
-
         private string _name;
-
         public string Name {
             get {
                 return _name;
@@ -164,7 +163,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private void RecalculatePath() {
+        protected void RecalculatePath() {
             Path = (Parent == null || String.IsNullOrEmpty(Parent.Path)) ? Name : (Parent.Path + "\\" + Name);
         }
 
@@ -186,8 +185,12 @@ namespace PackageExplorerViewModel {
         }
 
         public void Dispose() {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            try {
+                Dispose(true);
+            }
+            finally {
+                GC.SuppressFinalize(this);
+            }
         }
 
         protected virtual void Dispose(bool disposing) {
