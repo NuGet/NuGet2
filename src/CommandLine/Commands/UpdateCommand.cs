@@ -8,7 +8,7 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "update", "UpdateCommandDescription")]
     public class UpdateCommand : Command {
-        private const string DefaultFeedUrl = ListCommand.DefaultFeedUrl;
+        private const string DefaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
 
