@@ -376,6 +376,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             var allProjects = _solutionManager.GetProjects();
             _projectSafeNames = allProjects.Select(_solutionManager.GetProjectSafeName).ToArray();
             var displayNames = allProjects.Select(p => p.GetDisplayName(_solutionManager)).ToArray();
+            Array.Sort(displayNames, StringComparer.CurrentCultureIgnoreCase);
             return displayNames;
         }
 
