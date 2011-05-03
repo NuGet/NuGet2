@@ -11,6 +11,7 @@ using System.Windows.Media;
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class NuGetHostUserInterface : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
+        private const int VkCodeReturn = 13;
         private readonly object _instanceLock = new object();
         private readonly NuGetPSHost _host;
 
@@ -66,7 +67,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 lock (_instanceLock) {
                     KeyInfo keyInfo;
-                    while ((keyInfo = _rawUI.ReadKey()).VirtualKeyCode != 13) { // {enter}
+                    while ((keyInfo = _rawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
                         builder.Append(keyInfo.Character);
                         Write(keyInfo.Character.ToString(CultureInfo.CurrentCulture)); // destined for output, so apply culture
                     }
@@ -87,7 +88,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 lock (_instanceLock) {
                     KeyInfo keyInfo;
-                    while ((keyInfo = _rawUI.ReadKey()).VirtualKeyCode != 13) { // {enter}
+                    while ((keyInfo = _rawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
                         secureString.AppendChar(keyInfo.Character); // culture is deferred until securestring is decrypted
                         Write("*");
                     }

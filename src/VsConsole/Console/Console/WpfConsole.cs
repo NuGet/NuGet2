@@ -570,8 +570,9 @@ namespace NuGetConsole.Implementation.Console {
 
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
-                if ((_dispatcher != null) && _dispatcher is IDisposable) {
-                    ((IDisposable) _dispatcher).Dispose();
+                var disposable = _dispatcher as IDisposable;
+                if (disposable != null) {
+                    disposable.Dispose();
                 }
             }
         }

@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.Text.Editor;
 namespace NuGetConsole.Implementation.Console {
 
     internal class WpfConsoleKeyProcessor : OleCommandFilter {
+        private readonly Lazy<IntPtr> _pKeybLayout = new Lazy<IntPtr>(() => NativeMethods.GetKeyboardLayout(0));
         private WpfConsole WpfConsole { get; set; }
         private IWpfTextView WpfTextView { get; set; }
 
@@ -96,8 +97,9 @@ namespace NuGetConsole.Implementation.Console {
                 return hr;
             }
 
-            // if the console is in the middle of executing a command, do not accept any key inputs
-            if (WpfConsole.Dispatcher.IsExecutingCommand && (!WpfConsole.Dispatcher.IsExecutingReadKey)) {
+            // if the console is in the middle of executing a command, do not accept any key inputs unless
+            // we are in the middle of a ReadKey call. 
+            if (WpfConsole.Dispatcher.IsExecutingCommand && !WpfConsole.Dispatcher.IsExecutingReadKey) {
                 return hr;
             }
 
@@ -118,10 +120,9 @@ namespace NuGetConsole.Implementation.Console {
             else if (pguidCmdGroup == VSConstants.VSStd2K) {
                 //Debug.Print("Exec: VSStd2K: {0}", (VSConstants.VSStd2KCmdID)nCmdID);
 
-                var commandID = (VSConstants.VSStd2KCmdID) nCmdID;
+                var commandID = (VSConstants.VSStd2KCmdID)nCmdID;
 
                 if (WpfConsole.Dispatcher.IsExecutingReadKey) {
-
                     switch (commandID) {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
                         case VSConstants.VSStd2KCmdID.RETURN:
@@ -142,7 +143,7 @@ namespace NuGetConsole.Implementation.Console {
                     switch (commandID) {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
                             if (IsCompletionSessionActive) {
-                                char ch = (char) (ushort) Marshal.GetObjectForNativeVariant(pvaIn);
+                                char ch = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
                                 if (IsCommitChar(ch)) {
                                     if (_completionSession.SelectedCompletionSet.SelectionStatus.IsSelected) {
                                         _completionSession.Commit();
@@ -187,11 +188,11 @@ namespace NuGetConsole.Implementation.Console {
                                 WpfTextView.Caret.MoveTo(WpfConsole.InputLineStart.Value);
                                 WpfTextView.Caret.EnsureVisible();
 
-                                if ((VSConstants.VSStd2KCmdID) nCmdID == VSConstants.VSStd2KCmdID.BOL) {
+                                if ((VSConstants.VSStd2KCmdID)nCmdID == VSConstants.VSStd2KCmdID.BOL) {
                                     WpfTextView.Selection.Clear();
                                 }
-                                else if ((VSConstants.VSStd2KCmdID) nCmdID != VSConstants.VSStd2KCmdID.BOL)
-                                    // extend selection
+                                else if ((VSConstants.VSStd2KCmdID)nCmdID != VSConstants.VSStd2KCmdID.BOL)
+                                // extend selection
                                 {
                                     VirtualSnapshotPoint anchorPoint = WpfTextView.Selection.IsEmpty
                                                                            ? oldCaretPoint.TranslateTo(
@@ -278,10 +279,7 @@ namespace NuGetConsole.Implementation.Console {
             return hr;
         }
 
-        private readonly Lazy<IntPtr> _pKeybLayout = new Lazy<IntPtr>(() => NativeMethods.GetKeyboardLayout(0));
-
         private VsKeyInfo GetVsKeyInfo(IntPtr pvaIn, VSConstants.VSStd2KCmdID commandID) {
-            
             // catch current modifiers as early as possible
             bool capsLockToggled = Keyboard.IsKeyToggled(Key.CapsLock);
             bool numLockToggled = Keyboard.IsKeyToggled(Key.NumLock);
@@ -290,34 +288,35 @@ namespace NuGetConsole.Implementation.Console {
             if ((commandID == VSConstants.VSStd2KCmdID.RETURN) && pvaIn == IntPtr.Zero) {
                 // <enter> pressed
                 keyChar = Environment.NewLine[0]; // [CR]LF
-            } else {                
+            }
+            else {
                 Debug.Assert(pvaIn != IntPtr.Zero);
 
                 // 1) deref pointer to char
-                keyChar = (char) (ushort) Marshal.GetObjectForNativeVariant(pvaIn);
+                keyChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
             }
-            
+
             // 2) convert from char to virtual key, using current thread's input locale
             short keyScan = NativeMethods.VkKeyScanEx(keyChar, _pKeybLayout.Value);
 
             // 3) virtual key is in LSB, shiftstate in MSB.
-            byte virtualKey = (byte) (keyScan & 0x00ff);
+            byte virtualKey = (byte)(keyScan & 0x00ff);
             keyScan = (short)(keyScan >> 8);
-            byte shiftState = (byte) (keyScan & 0x00ff);
+            byte shiftState = (byte)(keyScan & 0x00ff);
 
             // 4) convert from virtual key to wpf key.
             Key key = KeyInterop.KeyFromVirtualKey(virtualKey);
-            
+
             // 5) create nugetconsole.vskeyinfo to 
             var keyInfo = VsKeyInfo.Create(
                 key,
                 keyChar,
                 virtualKey,
-                keyStates:KeyStates.Down,
-                capsLockToggled:capsLockToggled,
-                numLockToggled:numLockToggled,
-                shiftPressed:((shiftState & 1) == 1), 
-                controlPressed:((shiftState & 2) == 4),
+                keyStates: KeyStates.Down,
+                capsLockToggled: capsLockToggled,
+                numLockToggled: numLockToggled,
+                shiftPressed: ((shiftState & 1) == 1),
+                controlPressed: ((shiftState & 2) == 4),
                 altPressed: ((shiftState & 4) == 2));
 
             return keyInfo;
@@ -379,7 +378,7 @@ namespace NuGetConsole.Implementation.Console {
             get { return WpfConsole.Factory.CompletionBroker; }
         }
 
-        ICompletionSession _completionSession;       
+        ICompletionSession _completionSession;
 
         bool IsCompletionSessionActive {
             get {

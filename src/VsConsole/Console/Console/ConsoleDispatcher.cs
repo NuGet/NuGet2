@@ -72,7 +72,7 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void CancelWaitKey() {
-            if (_isExecutingReadKey && (_cancelWaitKeySource.IsCancellationRequested == false)) {
+            if (_isExecutingReadKey && !_cancelWaitKeySource.IsCancellationRequested) {
                 _cancelWaitKeySource.Cancel();
             }
         }

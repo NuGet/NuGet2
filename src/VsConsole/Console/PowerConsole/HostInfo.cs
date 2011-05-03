@@ -45,8 +45,9 @@ namespace NuGetConsole.Implementation.PowerConsole {
 
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
-                if ((_wpfConsole != null) && _wpfConsole is IDisposable) {
-                    ((IDisposable) _wpfConsole).Dispose();
+                var disposable = _wpfConsole as IDisposable;
+                if (disposable != null) {
+                    disposable.Dispose();
                 }
             }
         }

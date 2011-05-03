@@ -121,9 +121,9 @@ namespace NuGetConsole.Implementation.PowerConsole {
 
         void IDisposable.Dispose() {
             if (_hostInfos != null) {
-                foreach (var hostInfo in _hostInfos.Values) {
+                foreach (IDisposable hostInfo in _hostInfos.Values) {
                     if (hostInfo != null) {
-                        ((IDisposable) hostInfo).Dispose();
+                        hostInfo.Dispose();
                     }
                 }
             }
