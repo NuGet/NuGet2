@@ -91,9 +91,9 @@
             x:Name="DisclaimerText"
             Grid.Row="1"
             Width="220"
+            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
-            Background="White"
             BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" 
             BorderThickness="0,2,0,0"
             Padding="8">

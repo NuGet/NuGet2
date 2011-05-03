@@ -163,8 +163,13 @@
                 </TextBlock>
 
                 <!-- Description -->
-                <self:TextBlockControl Style="{StaticResource DetailDescriptionTextBoxStyle}" Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" >
-                </self:TextBlockControl>
+                <TextBox 
+                    Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}, Mode=OneWay}"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    TextWrapping="Wrap"
+                    Margin="0,8">
+                </TextBox>
 
                 <!-- Tags -->
                 <DockPanel Margin="0,3,0,0" Visibility="{Binding PackageIdentity.Tags, Converter={StaticResource NullToVisibilityConverter}}">
