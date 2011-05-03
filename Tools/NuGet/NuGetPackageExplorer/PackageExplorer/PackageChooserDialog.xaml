@@ -23,7 +23,7 @@
             <Setter Property="Margin" Value="0,0,5,0" />
         </Style>
 
-        <CollectionViewSource x:Key='src' Source="{Binding Packages}">
+        <CollectionViewSource x:Key="PackageCollectionSource" Source="{Binding Packages}">
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="Id" />
             </CollectionViewSource.GroupDescriptions>
@@ -35,6 +35,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -82,9 +83,9 @@
                 <self:GrayscaleImage Source="Images/MoveNextHS.png" />
             </self:GrayscaleButton>
 
-            <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
+            <!--<self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
                 <self:GrayscaleImage Source="Images/MoveLastHS.png" />
-            </self:GrayscaleButton>
+            </self:GrayscaleButton>-->
         </StackPanel>
 
         <!-- search box -->
@@ -110,7 +111,7 @@
             Source="Images/search.png" />
 
         <!-- package list view -->
-        <ListView x:Name="PackageGrid" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Source={StaticResource src}}" SelectionMode="Single" IsTextSearchEnabled="False">
+        <ListView x:Name="PackageGrid" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Source={StaticResource PackageCollectionSource}}" SelectionMode="Single" IsTextSearchEnabled="False">            
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.ContainerStyle>
@@ -119,7 +120,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
-                                        <Expander IsExpanded="True" BorderBrush="#FFA4B97F" BorderThickness="0,0,0,1">
+                                        <Expander IsExpanded="false" BorderBrush="#FFA4B97F" BorderThickness="0,0,0,1">
                                             <Expander.Header>
                                                 <TextBlock Text="{Binding Name}" Foreground="Blue" />
                                             </Expander.Header>
@@ -187,9 +188,11 @@
             </ListView.View>
         </ListView>
 
-        <TextBlock Grid.Row="3" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
+        <CheckBox Grid.Row="3" IsEnabled="{Binding IsEditable}" Content="Only _show latest version of each package Id." IsChecked="{Binding ShowLatestVersion}" Checked="OnShowLatestVersionValueChanged" Unchecked="OnShowLatestVersionValueChanged" />
 
-        <UniformGrid HorizontalAlignment="Right" Grid.Row="3" Grid.Column="1" Rows="1" Columns="2">
+        <TextBlock Grid.Row="4" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
+
+        <UniformGrid HorizontalAlignment="Right" Grid.Row="4" Grid.Column="1" Rows="1" Columns="2">
             <Button IsDefault="True" Content="_OK" Margin="5" Click="OkButton_Click">
                 <Button.IsEnabled>
                     <MultiBinding Converter="{StaticResource andConverter}">

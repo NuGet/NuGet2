@@ -163,5 +163,20 @@ namespace PackageExplorer {
                 settings.PackageChooserDialogWidth = e.NewSize.Width;
             }
         }
+
+        //private IDisposable _collectionDeferRefresh;
+
+        private void OnShowLatestVersionValueChanged(object sender, RoutedEventArgs e) {
+            CollectionViewSource cvs = (CollectionViewSource)Resources["PackageCollectionSource"];
+            //_collectionDeferRefresh = cvs.DeferRefresh();
+            
+            cvs.GroupDescriptions.Clear();
+            CheckBox box = (CheckBox)sender;
+            if (box.IsChecked != true) {
+                cvs.GroupDescriptions.Add(new PropertyGroupDescription("Id"));
+            }
+
+            e.Handled = true;
+        }
     }
 }

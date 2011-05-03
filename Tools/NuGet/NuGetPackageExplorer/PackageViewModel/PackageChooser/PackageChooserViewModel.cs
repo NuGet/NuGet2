@@ -13,7 +13,8 @@ using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
-        private const int PageSize = 7;
+        private const int UncollapsedPageSize = 7;
+        private const int CollapsedPageSize = 10;
         private const int PageBuffer = 30;
         private DataServicePackageRepository _packageRepository;
         private QueryContext<PackageInfo> _currentQuery;
@@ -88,6 +89,23 @@ namespace PackageExplorerViewModel {
                     _isEditable = value;
                     OnPropertyChanged("IsEditable");
                     NavigationCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        private bool _showLatestVersion = false;
+
+        public bool ShowLatestVersion {
+            get {
+                return _showLatestVersion;
+            }
+            set {
+                if (_showLatestVersion != value) {
+                    _showLatestVersion = value;
+                    OnPropertyChanged("ShowLatestVersion");
+
+                    // trigger reloading packages
+                    LoadPackages();
                 }
             }
         }
@@ -175,24 +193,6 @@ namespace PackageExplorerViewModel {
                 }
             }
         }
-
-        //public int TotalPage {
-        //    get {
-        //        return Math.Max(1, (TotalPackageCount + PageSize - 1) / PageSize);
-        //    }
-        //}
-
-        //private int _currentPage;
-
-        //public int CurrentPage {
-        //    get { return _currentPage; }
-        //    private set {
-        //        if (_currentPage != value) {
-        //            _currentPage = value;
-        //            OnPropertyChanged("CurrentPage");
-        //        }
-        //    }
-        //}
 
         public ObservableCollection<PackageInfo> Packages { get; private set; }
 
@@ -287,7 +287,12 @@ namespace PackageExplorerViewModel {
                         PackageHash = p.PackageHash
                     });
 
-                    _currentQuery = new QueryContext<PackageInfo>(filteredQuery, PageSize, PageBuffer, PackageInfoEqualityComparer.Instance);
+                    _currentQuery = new QueryContext<PackageInfo>(
+                        filteredQuery, 
+                        ShowLatestVersion ? CollapsedPageSize : UncollapsedPageSize , 
+                        PageBuffer, 
+                        PackageInfoEqualityComparer.Instance, 
+                        ShowLatestVersion);
                     LoadPage();
                 },
                 CancellationToken.None,

@@ -1,8 +1,6 @@
 using System;
 using System.Data.Services.Client;
 using System.Linq;
-using System.Net;
-using System.Globalization;
 
 namespace NuGet {
     public class DataServicePackageRepository : IPackageRepository {

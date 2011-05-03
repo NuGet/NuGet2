@@ -13,6 +13,7 @@ namespace PackageExplorerViewModel {
         private int _skip, _nextSkip;
         private readonly Stack<int> _skipHistory = new Stack<int>();
         private readonly Lazy<int> _totalItemCount;
+        private readonly bool _showLatestVersion;
 
         public int PageIndex {
             get {
@@ -38,12 +39,19 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        public QueryContext(IQueryable<T> source, int pageSize, int bufferSize, IEqualityComparer<T> comparer) {
+        public bool ShowLatestVersion {
+            get {
+                return _showLatestVersion;
+            }
+        }
+
+        public QueryContext(IQueryable<T> source, int pageSize, int bufferSize, IEqualityComparer<T> comparer, bool showLatestVersion) {
             _source = source;
             _bufferSize = bufferSize;
             _comparer = comparer;
             _pageSize = pageSize;
             _totalItemCount = new Lazy<int>(_source.Count);
+            _showLatestVersion = showLatestVersion;
         }
 
         public IEnumerable<T> GetItemsForCurrentPage() {
@@ -67,13 +75,18 @@ namespace PackageExplorerViewModel {
                     }
 
                     if (firstItem || _comparer.Equals(buffer[head], lastItem)) {
-                        yield return buffer[head];
+                        if (!ShowLatestVersion) {
+                            yield return buffer[head];
+                        }
                         lastItem = buffer[head];
                         head++;
                         firstItem = false;
                         _nextSkip++;
                     }
                     else {
+                        if (!firstItem && ShowLatestVersion) {
+                            yield return lastItem;
+                        }
                         break;
                     }
                 }
