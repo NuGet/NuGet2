@@ -8,26 +8,20 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "update", "UpdateCommandDescription")]
     public class UpdateCommand : Command {
+        private const string DefaultFeedUrl = ListCommand.DefaultFeedUrl;
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
-        public IPackageSourceProvider SourceProvider { get; private set; }
-
         [ImportingConstructor]
-        public UpdateCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider) {
+        public UpdateCommand(IPackageRepositoryFactory packageRepositoryFactory) {
 
             if (packageRepositoryFactory == null) {
                 throw new ArgumentNullException("packageRepositoryFactory");
             }
 
-            if (sourceProvider == null) {
-                throw new ArgumentNullException("sourceProvider");
-            }
-
             RepositoryFactory = packageRepositoryFactory;
-            SourceProvider = sourceProvider;
         }
 
         public override void ExecuteCommand() {
@@ -36,8 +30,10 @@ namespace NuGet.Commands {
         }
 
         internal void SelfUpdate(string exePath, Version version) {
-            // Get the nuget command line package from the aggregate repository. Since we don't particularly care for repositories that may not be working, suppress errors.
-            IPackageRepository packageRepository = SourceProvider.GetAggregate(RepositoryFactory, ignoreFailingRepositories: true);
+            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, DefaultFeedUrl);
+
+            // Get the nuget command line package from the specified repository
+            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(DefaultFeedUrl);
 
             IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
 
