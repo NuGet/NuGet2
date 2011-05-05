@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Windows.Input;
 using System.Windows.Media;
 
 using Microsoft.VisualStudio.Shell.Interop;

@@ -307,7 +307,7 @@ namespace NuGetConsole.Implementation.Console {
             // 4) convert from virtual key to wpf key.
             Key key = KeyInterop.KeyFromVirtualKey(virtualKey);
 
-            // 5) create nugetconsole.vskeyinfo to 
+            // 5) create nugetconsole.vskeyinfo to marshal info to 
             var keyInfo = VsKeyInfo.Create(
                 key,
                 keyChar,

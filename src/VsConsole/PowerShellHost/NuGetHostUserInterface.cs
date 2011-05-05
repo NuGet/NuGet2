@@ -67,7 +67,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 lock (_instanceLock) {
                     KeyInfo keyInfo;
-                    while ((keyInfo = _rawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
+                    while ((keyInfo = RawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
                         builder.Append(keyInfo.Character);
                         Write(keyInfo.Character.ToString(CultureInfo.CurrentCulture)); // destined for output, so apply culture
                     }
@@ -88,7 +88,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 lock (_instanceLock) {
                     KeyInfo keyInfo;
-                    while ((keyInfo = _rawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
+                    while ((keyInfo = RawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
                         secureString.AppendChar(keyInfo.Character); // culture is deferred until securestring is decrypted
                         Write("*");
                     }

@@ -12,12 +12,12 @@ namespace NuGetConsole {
         public static VsKeyInfo Create(Key key,
             char keyChar,
             byte virtualKey,
-            KeyStates keyStates,
-            bool shiftPressed,
-            bool controlPressed,
-            bool altPressed,
-            bool capsLockToggled,
-            bool numLockToggled) {
+            KeyStates keyStates = default(KeyStates),
+            bool shiftPressed = false,
+            bool controlPressed = false,
+            bool altPressed = false,
+            bool capsLockToggled = false,
+            bool numLockToggled = false) {
 
             return new VsKeyInfo {
                                      Key = key,
