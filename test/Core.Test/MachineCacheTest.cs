@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Test.Mocks;
 
@@ -35,6 +37,36 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsFalse(cache.GetPackageFiles().Any());
+        }
+
+        [TestMethod]
+        public void MachineCacheUsesNullFileSystemIfItCannotAccessCachePath() {
+            // Arrange
+            Func<string> getCachePathDirectory = () => { throw new SecurityException("Boo"); };
+            var package = PackageUtility.CreatePackage("TestPackage");
+
+            // Act
+            MachineCache cache = MachineCache.CreateInstance(getCachePathDirectory);
+
+            // Assert
+            Assert.IsNotNull(cache);
+            Assert.IsFalse(cache.GetPackageFiles().Any());
+
+            // Ensure operations don't throw
+            cache.Clear();
+            cache.AddPackage(PackageUtility.CreatePackage("TestPackage"));
+            Assert.IsFalse(cache.Exists("TestPackage"));
+            Assert.IsFalse(cache.Exists(package));
+            Assert.IsFalse(cache.Exists("TestPackage", new Version("1.0")));
+            Assert.IsNull(cache.FindDependency(new PackageDependency("Bar")));
+            Assert.IsNull(cache.FindPackage("TestPackage"));
+            Assert.IsFalse(cache.FindPackages(new[] { "TestPackage", "B" }).Any());
+            Assert.IsFalse(cache.FindPackagesById("TestPackage").Any());
+            Assert.IsFalse(cache.GetPackages().Any());
+            Assert.IsFalse(cache.GetUpdates(new[] { package }).Any());
+            cache.RemovePackage(package);
+            Assert.AreEqual(0, cache.Source.Length);
+            Assert.IsFalse(cache.TryFindPackage("TestPackage", new Version("1.0"), out package));
         }
     }
 }
