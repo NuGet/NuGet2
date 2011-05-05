@@ -69,6 +69,7 @@
     <Compile Include="PackageWalker\PackageOperation.cs" />
     <Compile Include="PackageWalker\PackageTargets.cs" />
     <Compile Include="PackageWalker\PackageWalkInfo.cs" />
+    <Compile Include="ProjectSystem\NullFileSystem.cs" />
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />

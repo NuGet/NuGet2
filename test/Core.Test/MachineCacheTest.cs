@@ -46,7 +46,7 @@ namespace NuGet.Test {
             var package = PackageUtility.CreatePackage("TestPackage");
 
             // Act
-            MachineCache cache = MachineCache.CreateInstance(getCachePathDirectory);
+            MachineCache cache = MachineCache.CreateDefault(getCachePathDirectory);
 
             // Assert
             Assert.IsNotNull(cache);

@@ -53,6 +53,7 @@
     <Compile Include="NuGetCommandLine\Commands\PackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
     <Compile Include="NuGetCommandLine\CommandTest.cs" />
+    <Compile Include="NullFileSystemTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageHelperTest.cs" />
     <Compile Include="PackageIdValidatorTest.cs" />
