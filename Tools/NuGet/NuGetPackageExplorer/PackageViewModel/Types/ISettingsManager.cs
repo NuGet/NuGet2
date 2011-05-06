@@ -16,5 +16,7 @@ namespace PackageExplorerViewModel.Types {
 
         string ReadApiKeyFromSettingFile();
         void WriteApiKeyToSettingFile(string apiKey);
+
+        bool ShowLatestVersionOfPackage { get; set; }
     }
 }

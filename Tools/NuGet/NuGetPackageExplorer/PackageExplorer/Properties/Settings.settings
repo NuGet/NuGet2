@@ -35,5 +35,8 @@
     <Setting Name="PackageChooserDialogHeight" Type="System.Double" Scope="User">
       <Value Profile="(Default)">450</Value>
     </Setting>
+    <Setting Name="ShowLatestVersionOfPackage" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

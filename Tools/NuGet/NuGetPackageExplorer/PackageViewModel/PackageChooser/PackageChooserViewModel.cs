@@ -19,11 +19,10 @@ namespace PackageExplorerViewModel {
         private DataServicePackageRepository _packageRepository;
         private QueryContext<PackageInfo> _currentQuery;
         private string _currentSearch;
-        private string _redirectedPackageSource;
         private IMruPackageSourceManager _packageSourceManager;
-        private readonly IProxyService _proxyService;
+        private readonly DataServicePackageRepositoryFactory _packageRepositoryFactory;
 
-        public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager, IProxyService proxyService) {
+        public PackageChooserViewModel(IMruPackageSourceManager packageSourceManager, IProxyService proxyService, bool showLatestVersion) {
             if (null == packageSourceManager) {
                 throw new ArgumentNullException("packageSourceManager");
             }
@@ -31,21 +30,24 @@ namespace PackageExplorerViewModel {
                 throw new ArgumentNullException("proxyService");
             }
 
+            _showLatestVersion = showLatestVersion;
             Packages = new ObservableCollection<PackageInfo>();
             SortCommand = new RelayCommand<string>(Sort, column => TotalPackageCount > 0);
             SearchCommand = new RelayCommand<string>(Search);
             NavigationCommand = new RelayCommand<string>(NavigationCommandExecute, NavigationCommandCanExecute);
             LoadedCommand = new RelayCommand(() => Sort("VersionDownloadCount", ListSortDirection.Descending));
             ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
-            _proxyService = proxyService;
-
+            _packageRepositoryFactory = new DataServicePackageRepositoryFactory(proxyService);
             _packageSourceManager = packageSourceManager;
         }
+
+        public event EventHandler LoadPackagesCompleted = delegate { };
 
         private string _sortColumn;
 
         public string SortColumn {
             get { return _sortColumn; }
+
             set {
                 if (_sortColumn != value) {
                     _sortColumn = value;
@@ -66,18 +68,6 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private int _sortCounter;
-
-        public int SortCounter {
-            get { return _sortCounter; }
-            set {
-                if (_sortCounter != value) {
-                    _sortCounter = value;
-                    OnPropertyChanged("SortCounter");
-                }
-            }
-        }
-
         private bool _isEditable = true;
 
         public bool IsEditable {
@@ -93,7 +83,7 @@ namespace PackageExplorerViewModel {
             }
         }
 
-        private bool _showLatestVersion = false;
+        private bool _showLatestVersion;
 
         public bool ShowLatestVersion {
             get {
@@ -104,7 +94,7 @@ namespace PackageExplorerViewModel {
                     _showLatestVersion = value;
                     OnPropertyChanged("ShowLatestVersion");
 
-                    // trigger reloading packages
+                    ResetPackageRepository();
                     LoadPackages();
                 }
             }
@@ -116,19 +106,14 @@ namespace PackageExplorerViewModel {
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private DataServicePackageRepository GetPackageRepository() {
-            if (_packageRepository == null || _packageRepository.Source != _redirectedPackageSource) {
-                try {
-                    Uri packageUri = new Uri(PackageSource);
-                    IWebProxy packageSourceProxy = _proxyService.GetProxy(packageUri);
-                    IHttpClient packageSourceClient = new RedirectedHttpClient(packageUri, packageSourceProxy);
-                    _packageRepository = new DataServicePackageRepository(packageSourceClient);
-                    _redirectedPackageSource = _packageRepository.Source;
-                }
-                catch (Exception) {
-                    _packageRepository = null;
-                }
+            if (_packageRepository == null) {
+                _packageRepository = _packageRepositoryFactory.CreateRepository(PackageSource);
             }
             return _packageRepository;
+        }
+
+        private void ResetPackageRepository() {
+            _packageRepository = null;
         }
 
         public ObservableCollection<string> PackageSources {
@@ -141,7 +126,6 @@ namespace PackageExplorerViewModel {
             }
             private set {
                 _packageSourceManager.ActivePackageSource = value;
-                _redirectedPackageSource = null;
                 OnPropertyChanged("PackageSource");
             }
         }
@@ -221,19 +205,24 @@ namespace PackageExplorerViewModel {
                     else if (!result.IsCanceled) {
                         ShowPackages(result.Result, _currentQuery.TotalItemCount, _currentQuery.BeginPackage, _currentQuery.EndPackage);
                         StatusContent = String.Empty;
-                        // update sort column glyph
-                        SortCounter++;
                     }
 
                     IsEditable = true;
+
+                    RaiseLoadPackagesCompletedEvent();
                 },
                 uiScheduler);
         }
 
+        private void RaiseLoadPackagesCompletedEvent() {
+            LoadPackagesCompleted(this, EventArgs.Empty);
+        }
+
         private IList<PackageInfo> QueryPackages() {
             IList<PackageInfo> result = _currentQuery.GetItemsForCurrentPage().ToList();
+            var repository = GetPackageRepository();
             foreach (PackageInfo entity in result) {
-                entity.DownloadUrl = GetPackageRepository().GetReadStreamUri(entity);
+                entity.DownloadUrl = repository.GetReadStreamUri(entity);
             }
             return result;
         }
@@ -270,7 +259,7 @@ namespace PackageExplorerViewModel {
                             break;
 
                         case "Rating":
-                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Rating).ThenBy(p => p.Id) : query.OrderBy(p => p.VersionRating).ThenBy(p => p.Id);
+                            query = SortDirection == ListSortDirection.Descending ? query.OrderByDescending(p => p.Rating).ThenBy(p => p.Id) : query.OrderBy(p => p.Rating).ThenBy(p => p.Id);
                             break;
 
                         default:
@@ -278,14 +267,28 @@ namespace PackageExplorerViewModel {
                             break;
                     }
 
-                    var filteredQuery = query.Select(p => new PackageInfo {
-                        Id = p.Id,
-                        Version = p.Version,
-                        Authors = p.Authors,
-                        VersionRating = p.VersionRating,
-                        VersionDownloadCount = p.VersionDownloadCount,
-                        PackageHash = p.PackageHash
-                    });
+                    IQueryable<PackageInfo> filteredQuery;
+
+                    if (ShowLatestVersion) {
+                        filteredQuery = query.Select(p => new PackageInfo {
+                            Id = p.Id,
+                            Version = p.Version,
+                            Authors = p.Authors,
+                            Rating = p.Rating,
+                            DownloadCount = p.DownloadCount,
+                            PackageHash = p.PackageHash
+                        });
+                    }
+                    else {
+                        filteredQuery = query.Select(p => new PackageInfo {
+                            Id = p.Id,
+                            Version = p.Version,
+                            Authors = p.Authors,
+                            VersionRating = p.VersionRating,
+                            VersionDownloadCount = p.VersionDownloadCount,
+                            PackageHash = p.PackageHash
+                        });
+                    }
 
                     _currentQuery = new QueryContext<PackageInfo>(
                         filteredQuery, 
@@ -333,9 +336,6 @@ namespace PackageExplorerViewModel {
                 SortDirection = direction ?? ListSortDirection.Ascending;
             }
 
-            // trigger the dialog to update Sort glyph
-            SortCounter++;
-
             LoadPackages();
         }
 
@@ -345,6 +345,7 @@ namespace PackageExplorerViewModel {
                 // add the new source to MRU list
                 _packageSourceManager.NotifyPackageSourceAdded(source);
 
+                ResetPackageRepository();
                 LoadPackages();
             }
         }

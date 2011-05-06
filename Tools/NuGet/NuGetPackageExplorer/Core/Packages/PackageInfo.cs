@@ -10,8 +10,22 @@ namespace NuGet {
         public string Authors { get; set; }
         public double VersionRating { get; set; }
         public int VersionDownloadCount { get; set; }
+        public int DownloadCount { get; set; }
+        public double Rating { get; set; }
         public string PackageHash { get; set; }
         public Uri DownloadUrl { get; set; }
+
+        public int EffectiveDownloadCount {
+            get {
+                return Math.Max(DownloadCount, VersionDownloadCount);
+            }
+        }
+
+        public double EffectiveRating {
+            get {
+                return Math.Max(Rating, VersionRating);
+            }
+        }
 
         public DataServicePackage AsDataServicePackage() {
             return new DataServicePackage {
@@ -20,6 +34,8 @@ namespace NuGet {
                 Authors = Authors,
                 VersionRating = VersionRating,
                 VersionDownloadCount = VersionDownloadCount,
+                Rating = Rating,
+                DownloadCount = DownloadCount,
                 PackageHash = PackageHash
             };
         }

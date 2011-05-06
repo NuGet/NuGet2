@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace PackageExplorerViewModel {
     internal class QueryContext<T> {
@@ -58,10 +57,10 @@ namespace PackageExplorerViewModel {
             T[] buffer = null;
             int skipCursor = _nextSkip = _skip;
             int head = 0;
-            for (int i = 0; i < _pageSize; i++) {
+            for (int i = 0; i < _pageSize && _nextSkip < TotalItemCount; i++) {
                 bool firstItem = true;
                 T lastItem = default(T);
-                while (true) {
+                while (_nextSkip < TotalItemCount) {
                     if (buffer == null || head >= buffer.Length) {
                         // read the next batch
                         buffer = _source.Skip(skipCursor).Take(_bufferSize).ToArray();
@@ -84,11 +83,11 @@ namespace PackageExplorerViewModel {
                         _nextSkip++;
                     }
                     else {
-                        if (!firstItem && ShowLatestVersion) {
-                            yield return lastItem;
-                        }
                         break;
                     }
+                }
+                if (ShowLatestVersion) {
+                    yield return lastItem;
                 }
             }
         }

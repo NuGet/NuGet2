@@ -35,31 +35,28 @@ namespace PackageExplorer {
         public static readonly DependencyProperty SortDirectionProperty =
             DependencyProperty.Register("SortDirection", typeof(ListSortDirection), typeof(PackageChooserDialog), null);
 
-        public int SortCounter
-        {
-            get { return (int)GetValue(SortCounterProperty); }
-            set { SetValue(SortCounterProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for SortCounter.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty SortCounterProperty =
-            DependencyProperty.Register(
-                "SortCounter", 
-                typeof(int), 
-                typeof(PackageChooserDialog), 
-                new UIPropertyMetadata(0, new PropertyChangedCallback(OnSortCounterPropertyChanged)));
-
         private static void OnSortCounterPropertyChanged(object sender, DependencyPropertyChangedEventArgs args) {
             var dialog = (PackageChooserDialog)sender;
             dialog.RedrawSortGlyph();
         }
 
-        public PackageChooserDialog() {
+        public PackageChooserDialog(PackageChooserViewModel viewModel) {
             InitializeComponent();
 
             SetBinding(SortColumnProperty, new Binding("SortColumn") { Mode = BindingMode.OneWay });
             SetBinding(SortDirectionProperty, new Binding("SortDirection") { Mode = BindingMode.OneWay });
-            SetBinding(SortCounterProperty, new Binding("SortCounter") { Mode = BindingMode.OneWay });
+
+            viewModel.LoadPackagesCompleted += new EventHandler(OnLoadPackagesCompleted);
+
+            DataContext = viewModel;
+        }
+
+        private void OnLoadPackagesCompleted(object sender, EventArgs e) {
+            if (_collectionDeferRefresh != null) {
+                _collectionDeferRefresh.Dispose();
+            }
+
+            RedrawSortGlyph();
         }
 
         private void RedrawSortGlyph() {
@@ -97,10 +94,7 @@ namespace PackageExplorer {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            var viewModel = (PackageChooserViewModel)DataContext;
-            if (viewModel.IsEditable) {
-                DialogResult = true;
-            }
+            DialogResult = true;
         }
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
@@ -164,11 +158,11 @@ namespace PackageExplorer {
             }
         }
 
-        //private IDisposable _collectionDeferRefresh;
+        private IDisposable _collectionDeferRefresh;
 
         private void OnShowLatestVersionValueChanged(object sender, RoutedEventArgs e) {
             CollectionViewSource cvs = (CollectionViewSource)Resources["PackageCollectionSource"];
-            //_collectionDeferRefresh = cvs.DeferRefresh();
+            _collectionDeferRefresh = cvs.DeferRefresh();
             
             cvs.GroupDescriptions.Clear();
             CheckBox box = (CheckBox)sender;

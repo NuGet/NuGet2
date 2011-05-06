@@ -100,9 +100,8 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog() {
-                Owner = Window.GetWindow(this),
-                DataContext = PackageViewModelFactory.CreatePackageChooserViewModel()
+            var dialog = new PackageChooserDialog(PackageViewModelFactory.CreatePackageChooserViewModel()) {
+                Owner = Window.GetWindow(this)
             };
             var result = dialog.ShowDialog();
             if (result ?? false) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using NuGet;
 using PackageExplorerViewModel.Types;
@@ -49,7 +50,16 @@ namespace PackageExplorerViewModel {
         }
 
         public PackageChooserViewModel CreatePackageChooserViewModel() {
-            return new PackageChooserViewModel(MruPackageSourceManager, ProxyService.Value);
+            var model = new PackageChooserViewModel(MruPackageSourceManager, ProxyService.Value, SettingsManager.ShowLatestVersionOfPackage);
+            model.PropertyChanged += OnPackageChooserViewModelPropertyChanged;
+            return model;
+        }
+
+        private void OnPackageChooserViewModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+            if (e.PropertyName == "ShowLatestVersion") {
+                var model = (PackageChooserViewModel)sender;
+                SettingsManager.ShowLatestVersionOfPackage = model.ShowLatestVersion;
+            }
         }
     }
 }

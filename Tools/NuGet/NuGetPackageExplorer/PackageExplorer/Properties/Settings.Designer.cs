@@ -152,5 +152,17 @@ namespace PackageExplorer.Properties {
                 this["PackageChooserDialogHeight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowLatestVersionOfPackage {
+            get {
+                return ((bool)(this["ShowLatestVersionOfPackage"]));
+            }
+            set {
+                this["ShowLatestVersionOfPackage"] = value;
+            }
+        }
     }
 }

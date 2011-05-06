@@ -64,5 +64,15 @@ namespace PackageExplorer {
             var settings = new UserSettings(new PhysicalFileSystem(Environment.CurrentDirectory));
             settings.SetEncryptedValue(ApiKeysSectionName, PublishPackageLocation, apiKey);
         }
+
+
+        public bool ShowLatestVersionOfPackage {
+            get {
+                return Properties.Settings.Default.ShowLatestVersionOfPackage;
+            }
+            set {
+                Properties.Settings.Default.ShowLatestVersionOfPackage = value;
+            }
+        }
     }
 }

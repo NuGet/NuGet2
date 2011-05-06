@@ -168,9 +168,8 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog() {
-                Owner = this,
-                DataContext = _packageViewModelFactory.CreatePackageChooserViewModel()
+            var dialog = new PackageChooserDialog(_packageViewModelFactory.CreatePackageChooserViewModel()) {
+                Owner = this
             };
 
             bool? result = dialog.ShowDialog();

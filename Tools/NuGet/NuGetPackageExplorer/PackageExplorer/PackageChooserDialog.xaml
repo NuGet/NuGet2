@@ -111,7 +111,7 @@
             Source="Images/search.png" />
 
         <!-- package list view -->
-        <ListView x:Name="PackageGrid" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Source={StaticResource PackageCollectionSource}}" SelectionMode="Single" IsTextSearchEnabled="False">            
+        <ListView x:Name="PackageGrid" IsEnabled="{Binding IsEditable}" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Source={StaticResource PackageCollectionSource}}" SelectionMode="Single" IsTextSearchEnabled="False">            
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.ContainerStyle>
@@ -122,12 +122,18 @@
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
                                         <Expander IsExpanded="false" BorderBrush="#FFA4B97F" BorderThickness="0,0,0,1">
                                             <Expander.Header>
-                                                <TextBlock Text="{Binding Name}" Foreground="Blue" />
+                                                <TextBlock x:Name="GroupHeader" Text="{Binding Name}" Foreground="Blue" />
                                             </Expander.Header>
                                             <Expander.Content>
                                                 <ItemsPresenter />
                                             </Expander.Content>
                                         </Expander>
+                                        
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="GroupHeader" Property="Foreground" Value="DarkGray" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -142,6 +148,7 @@
                     <EventSetter Event="MouseDoubleClick" Handler="OkButton_Click" />
                 </Style>
             </ListView.ItemContainerStyle>
+            
             <ListView.View>
                 <GridView AllowsColumnReorder="False" x:Name="PackageGridView">
                     <GridViewColumn Width="150" DisplayMemberBinding="{Binding Id}">
@@ -169,7 +176,7 @@
                     <GridViewColumn Width="60">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding VersionRating, StringFormat={}{0:G2}}" TextAlignment="Center" />
+                                <TextBlock Text="{Binding EffectiveRating, StringFormat={}{0:G2}}" TextAlignment="Center" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                         <GridViewColumnHeader Content="Rating" Command="{Binding SortCommand}" CommandParameter="Rating" Padding="0,3">
@@ -178,7 +185,7 @@
                     <GridViewColumn Width="80">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding VersionDownloadCount}" TextAlignment="Center" />
+                                <TextBlock Text="{Binding EffectiveDownloadCount}" TextAlignment="Center" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                         <GridViewColumnHeader Content="Downloads" Command="{Binding SortCommand}" CommandParameter="VersionDownloadCount" Padding="0,3">
@@ -188,7 +195,7 @@
             </ListView.View>
         </ListView>
 
-        <CheckBox Grid.Row="3" IsEnabled="{Binding IsEditable}" Content="Only _show latest version of each package Id." IsChecked="{Binding ShowLatestVersion}" Checked="OnShowLatestVersionValueChanged" Unchecked="OnShowLatestVersionValueChanged" />
+        <CheckBox Grid.Row="3" IsEnabled="{Binding IsEditable}" HorizontalAlignment="Left" Content="Only _show latest version of each package Id." IsChecked="{Binding ShowLatestVersion}" Checked="OnShowLatestVersionValueChanged" Unchecked="OnShowLatestVersionValueChanged" />
 
         <TextBlock Grid.Row="4" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
 

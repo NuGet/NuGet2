@@ -58,6 +58,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
+    <Compile Include="PackageChooser\DataServicePackageRepositoryFactory.cs" />
     <Compile Include="PackageChooser\QueryContext.cs" />
     <Compile Include="WindowsCredentialProvider.cs" />
     <Compile Include="WindowsProxyService.cs" />
