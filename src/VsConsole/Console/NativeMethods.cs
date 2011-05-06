@@ -9,5 +9,11 @@ namespace NuGetConsole {
 
         [DllImport("Oleaut32.dll", PreserveSig = false)]
         public static extern void VariantClear(IntPtr var);
+
+        [DllImport("user32.dll")]
+        public static extern short VkKeyScanEx(char ch, IntPtr dwhkl);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr GetKeyboardLayout(int dwLayout);
     }
 }

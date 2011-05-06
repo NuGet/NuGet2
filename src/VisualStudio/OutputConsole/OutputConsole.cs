@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Windows.Input;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGetConsole;
@@ -21,7 +23,7 @@ namespace NuGet.VisualStudio {
             if (outputWindow == null) {
                 throw new ArgumentNullException("outputWindow");
             }
-            
+
             _outputWindow = outputWindow;
         }
 
@@ -78,7 +80,19 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public bool IsExecutingReadKey {
+            get { throw new NotSupportedException(); }
+        }
+
+        public bool IsKeyAvailable {
+            get { throw new NotSupportedException(); }
+        }
+
         public void WriteProgress(string operation, int percentComplete) {
+        }
+
+        public VsKeyInfo WaitKey() {
+            throw new NotSupportedException();
         }
 
         public void Clear() {
@@ -93,7 +107,7 @@ namespace NuGet.VisualStudio {
                 if (result == VSConstants.S_OK) {
                     result = _outputWindow.GetPane(ref _outputWindowPaneGuid, out _outputWindowPane);
 
-                    System.Diagnostics.Debug.Assert(result ==  VSConstants.S_OK);
+                    System.Diagnostics.Debug.Assert(result == VSConstants.S_OK);
                     System.Diagnostics.Debug.Assert(_outputWindowPane != null);
                 }
             }
@@ -107,6 +121,6 @@ namespace NuGet.VisualStudio {
 
         public void ClearConsole() {
             Clear();
-        }        
+        }
     }
 }

@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Security;
+using System.Text;
 using System.Windows.Media;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class NuGetHostUserInterface : PSHostUserInterface {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
-        
-        private NuGetPSHost _host;
+        private const int VkCodeReturn = 13;
+        private readonly object _instanceLock = new object();
+        private readonly NuGetPSHost _host;
 
         private IConsole Console {
             get {
@@ -25,27 +28,27 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         public override Dictionary<string, PSObject> Prompt(
             string caption, string message, Collection<FieldDescription> descriptions) {
+            WriteErrorLine("Prompt not implemented.");
             return null;
-            //throw new NotImplementedException();
         }
 
         public override int PromptForChoice(
             string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice) {
+            WriteErrorLine("PromptForChoice not implemented.");
             return -1;
-            //throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(
             string caption, string message, string userName, string targetName,
             PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options) {
+            WriteErrorLine("PromptForCredential not implemented.");
             return null;
-            //throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(
             string caption, string message, string userName, string targetName) {
+            WriteErrorLine("PromptForCredential not implemented.");
             return null;
-            //throw new NotImplementedException();
         }
 
         PSHostRawUserInterface _rawUI;
@@ -59,13 +62,43 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         public override string ReadLine() {
-            return null;
-            //throw new NotImplementedException();
+            try {
+                var builder = new StringBuilder();
+
+                lock (_instanceLock) {
+                    KeyInfo keyInfo;
+                    while ((keyInfo = RawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
+                        builder.Append(keyInfo.Character);
+                        Write(keyInfo.Character.ToString(CultureInfo.CurrentCulture)); // destined for output, so apply culture
+                    }
+                }
+                return builder.ToString();
+            } finally {
+                WriteLine(String.Empty);
+            }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = "Caller's responsibility to dispose.")]
         public override SecureString ReadLineAsSecureString() {
-            return null;
-            //throw new NotImplementedException();
+            try {
+                var secureString = new SecureString();
+
+                lock (_instanceLock) {
+                    KeyInfo keyInfo;
+                    while ((keyInfo = RawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) { // {enter}
+                        secureString.AppendChar(keyInfo.Character); // culture is deferred until securestring is decrypted
+                        Write("*");
+                    }
+                    secureString.MakeReadOnly();
+                }
+                return secureString;
+            }
+            finally {
+                WriteLine(String.Empty);
+            }
         }
 
         static Color[] _consoleColors;

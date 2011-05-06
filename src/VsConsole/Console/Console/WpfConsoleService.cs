@@ -59,6 +59,10 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         #region IWpfConsoleService
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = "Caller's responsibility to dispose.")]
         public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName) {
             return new WpfConsole(this, sp, _privateConsoleStatus, contentTypeName, hostName).MarshaledConsole;
         }

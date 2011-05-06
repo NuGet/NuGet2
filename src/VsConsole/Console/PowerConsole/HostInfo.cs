@@ -5,7 +5,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
     /// <summary>
     /// Represents a host with extra info.
     /// </summary>
-    class HostInfo : ObjectWithFactory<PowerConsoleWindow> {
+    class HostInfo : ObjectWithFactory<PowerConsoleWindow>, IDisposable {
         Lazy<IHostProvider, IHostMetadata> HostProvider { get; set; }
 
         public HostInfo(PowerConsoleWindow factory, Lazy<IHostProvider, IHostMetadata> hostProvider)
@@ -42,5 +42,28 @@ namespace NuGetConsole.Implementation.PowerConsole {
                 return _wpfConsole;
             }
         }
+
+        protected virtual void Dispose(bool disposing) {
+            if (disposing) {
+                var disposable = _wpfConsole as IDisposable;
+                if (disposable != null) {
+                    disposable.Dispose();
+                }
+            }
+        }
+
+        void IDisposable.Dispose() {
+            try {
+                Dispose(true);
+            }
+            finally {
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        ~HostInfo() {
+            Dispose(false);
+        }
+
     }
 }

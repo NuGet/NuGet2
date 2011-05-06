@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace NuGetConsole.Implementation.PowerConsole {
     [Export(typeof(IPowerConsoleWindow))]
     [Export(typeof(IHostInitializer))]
-    internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer {
+    internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer, IDisposable {
         public const string ContentType = "PackageConsole";
         
         private Dictionary<string, HostInfo> _hostInfos;
@@ -27,6 +27,8 @@ namespace NuGetConsole.Implementation.PowerConsole {
         [ImportMany]
         internal IEnumerable<Lazy<IHostProvider, IHostMetadata>> HostProviders { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "_hostInfo collection is disposed.")]
         Dictionary<string, HostInfo> HostInfos {
             get {
                 if (_hostInfos == null) {
@@ -44,7 +46,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
             get {
                 if (_activeHostInfo == null) {
                     // we only have exactly one host, the PowerShellHost. So always choose the first and only one.
-                    _activeHostInfo = HostInfos.Values.FirstOrDefault();                    
+                    _activeHostInfo = HostInfos.Values.FirstOrDefault();
                 }
                 return _activeHostInfo;
             }
@@ -115,6 +117,16 @@ namespace NuGetConsole.Implementation.PowerConsole {
 
         public void SetDefaultRunspace() {
             ActiveHostInfo.WpfConsole.Host.SetDefaultRunspace();
+        }
+
+        void IDisposable.Dispose() {
+            if (_hostInfos != null) {
+                foreach (IDisposable hostInfo in _hostInfos.Values) {
+                    if (hostInfo != null) {
+                        hostInfo.Dispose();
+                    }
+                }
+            }
         }
     }
 }

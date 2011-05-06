@@ -2,40 +2,42 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Media;
-using Microsoft.VisualStudio.Shell;
+
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
+
 using EditorDefGuidList = Microsoft.VisualStudio.Editor.DefGuidList;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using IServiceProvider = System.IServiceProvider;
 
 namespace NuGetConsole.Implementation.Console {
     internal interface IPrivateWpfConsole : IWpfConsole {
-        SnapshotPoint? InputLineStart { get; }
         void BeginInputLine();
+        SnapshotPoint? InputLineStart { get; }
         SnapshotSpan? EndInputLine(bool isEcho);
         InputHistory InputHistory { get; }
+
     }
 
-    internal class WpfConsole : ObjectWithFactory<WpfConsoleService> {
+    internal class WpfConsole : ObjectWithFactory<WpfConsoleService>, IDisposable {
         private IServiceProvider ServiceProvider { get; set; }
         public string ContentTypeName { get; private set; }
         public string HostName { get; private set; }
         private IVsStatusbar _vsStatusBar;
         private uint _pdwCookieForStatusBar;
-        private IPrivateConsoleStatus _consoleStatus;
+        private readonly IPrivateConsoleStatus _consoleStatus;
 
         public event EventHandler<EventArgs<Tuple<SnapshotSpan, Color?, Color?>>> NewColorSpan;
         public event EventHandler ConsoleCleared;
 
         public WpfConsole(
-            WpfConsoleService factory, 
-            IServiceProvider sp, 
-            IPrivateConsoleStatus consoleStatus, 
-            string contentTypeName, 
+            WpfConsoleService factory,
+            IServiceProvider sp,
+            IPrivateConsoleStatus consoleStatus,
+            string contentTypeName,
             string hostName)
             : base(factory) {
             UtilityMethods.ThrowIfArgumentNull(sp);
@@ -306,13 +308,13 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public void WriteProgress(string operation, int percentComplete) {
-                Invoke(()=>_impl.WriteProgress(operation, percentComplete));
+                Invoke(() => _impl.WriteProgress(operation, percentComplete));
             }
 
             public object VsTextView {
                 get { return Invoke(() => _impl.VsTextView); }
             }
-            
+
             public SnapshotPoint? InputLineStart {
                 get { return Invoke(() => _impl.InputLineStart); }
             }
@@ -422,7 +424,7 @@ namespace NuGetConsole.Implementation.Console {
 
         private IList<string> _historyInputs;
         private int _currentHistoryInputIndex;
-        
+
         private void ResetNavigateHistory() {
             _historyInputs = null;
             _currentHistoryInputIndex = -1;
@@ -506,7 +508,7 @@ namespace NuGetConsole.Implementation.Console {
             // Raise event
             ConsoleCleared.Raise(this);
         }
-        
+
         public void ClearConsole() {
             if (_inputLineStart != null) {
                 Dispatcher.ClearConsole();
@@ -564,5 +566,28 @@ namespace NuGetConsole.Implementation.Console {
                 return WpfTextViewHost.HostControl;
             }
         }
+
+        protected virtual void Dispose(bool disposing) {
+            if (disposing) {
+                var disposable = _dispatcher as IDisposable;
+                if (disposable != null) {
+                    disposable.Dispose();
+                }
+            }
+        }
+
+        void IDisposable.Dispose() {
+            try {
+                Dispose(true);
+            }
+            finally {
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        ~WpfConsole() {
+            Dispose(false);
+        }
+
     }
 }

@@ -81,7 +81,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         private class Commander {
-            private NuGetPSHost _host;
+            private readonly NuGetPSHost _host;
 
             public Commander(NuGetPSHost host) {
                 _host = host;
