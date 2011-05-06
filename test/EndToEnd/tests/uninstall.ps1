@@ -352,6 +352,48 @@ function Test-UninstallDoesNotRemoveFolderIfNotEmpty {
     Assert-PathExists $fooPath
 }
 
+function Test-WebSiteUninstallPackageWithPPCSSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithPPCSSourceFiles -Source $context.RepositoryRoot    
+    Assert-Package $p PackageWithPPCSSourceFiles
+    Assert-SolutionPackage PackageWithPPCSSourceFiles
+    Assert-NotNull (Get-ProjectItem $p App_Code\Foo.cs)
+    Assert-NotNull (Get-ProjectItem $p App_Code\Bar.cs)
+
+    # Assert
+    $p | Uninstall-Package PackageWithPPCSSourceFiles
+    Assert-Null (Get-ProjectItem $p App_Code\Foo.cs)
+    Assert-Null (Get-ProjectItem $p App_Code\Bar.cs)
+    Assert-Null (Get-ProjectItem $p App_Code)
+}
+
+function Test-WebSiteUninstallPackageWithPPVBSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithPPVBSourceFiles -Source $context.RepositoryRoot    
+    Assert-Package $p PackageWithPPVBSourceFiles
+    Assert-SolutionPackage PackageWithPPVBSourceFiles
+    Assert-NotNull (Get-ProjectItem $p App_Code\Foo.vb)
+    Assert-NotNull (Get-ProjectItem $p App_Code\Bar.vb)
+
+    # Assert
+    $p | Uninstall-Package PackageWithPPVBSourceFiles
+    Assert-Null (Get-ProjectItem $p App_Code\Foo.vb)
+    Assert-Null (Get-ProjectItem $p App_Code\Bar.vb)
+    Assert-Null (Get-ProjectItem $p App_Code)
+}
+
 function Test-WebSiteUninstallPackageWithNestedSourceFiles {
     param(
         $context

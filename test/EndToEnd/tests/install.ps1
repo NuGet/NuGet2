@@ -225,7 +225,7 @@ function Test-FSharpSimpleWithAssemblyReference {
     Assert-Reference $p Antlr3.Runtime
 }
 
-function Test-WebsiteInstallPackageWithRootNamespae {
+function Test-WebsiteInstallPackageWithRootNamespace {
     param(
         $context
     )
@@ -237,8 +237,8 @@ function Test-WebsiteInstallPackageWithRootNamespae {
     $p | Install-Package PackageWithRootNamespaceFileTransform -Source $context.RepositoryRoot
     
     # Assert
-    Assert-NotNull (Get-ProjectItem $p foo.cs)
-    $path = (Get-ProjectItemPath $p foo.cs)
+    Assert-NotNull (Get-ProjectItem $p App_Code\foo.cs)
+    $path = (Get-ProjectItemPath $p App_Code\foo.cs)
     $content = [System.IO.File]::ReadAllText($path)
     Assert-True ($content.Contains("namespace ASP"))
 }
@@ -901,6 +901,40 @@ function Test-InstallingPackageWithDependencyThatFailsShouldRollbackSuccessfully
     Assert-Null (Get-SolutionPackage PackageWithBadDependency)
     Assert-Null (Get-ProjectPackage $p PackageWithBadInstallScript)
     Assert-Null (Get-SolutionPackage PackageWithBadInstallScript)
+}
+
+function Test-WebsiteInstallPackageWithPPCSSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithPPCSSourceFiles -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithPPCSSourceFiles
+    Assert-SolutionPackage PackageWithPPCSSourceFiles
+    Assert-NotNull (Get-ProjectItem $p App_Code\Foo.cs)
+    Assert-NotNull (Get-ProjectItem $p App_Code\Bar.cs)
+}
+
+function Test-WebsiteInstallPackageWithPPVBSourceFiles {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    # Act
+    $p | Install-Package PackageWithPPVBSourceFiles -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithPPVBSourceFiles
+    Assert-SolutionPackage PackageWithPPVBSourceFiles
+    Assert-NotNull (Get-ProjectItem $p App_Code\Foo.vb)
+    Assert-NotNull (Get-ProjectItem $p App_Code\Bar.vb)
 }
 
 function Test-WebsiteInstallPackageWithCSSourceFiles {

@@ -16,16 +16,15 @@ namespace NuGet {
             // BUG 636: We add the files with the longest path first so that vs picks up code behind files.
             // This shouldn't matter for any other scenario.
             foreach (IPackageFile file in files.OrderByDescending(p => p.Path)) {
-                // Remove the redundant folder from the path
-                string path = ResolvePath(project, file.Path);
-
-                // Try to get the package file modifier for the extension
-                string extension = Path.GetExtension(file.Path);
                 IPackageFileTransformer transformer;
-                if (fileTransformers.TryGetValue(extension, out transformer)) {
-                    // Remove the extension to get the target path
-                    path = RemoveExtension(path);
+                // Resolve the target path
+                string path = ResolvePath(project,
+                                          fileTransformers,
+                                          file.Path,
+                                          out transformer);
 
+                // Try to get the package file modifier for the extension                
+                if (transformer != null) {
                     if (project.IsSupportedFile(path)) {
                         // If the transform was done then continue
                         transformer.TransformFile(file, path, project);
@@ -44,8 +43,9 @@ namespace NuGet {
                                        IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers) {
 
+            IPackageFileTransformer transformer;
             // First get all directories that contain files
-            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolvePath(project, p.Path)));
+            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolvePath(project, fileTransformers, p.Path, out transformer)));
 
 
             // Get all directories that this package may have added
@@ -63,18 +63,14 @@ namespace NuGet {
                 }
 
                 foreach (var file in directoryFiles) {
-                    // Remove the content folder from the path
-                    string path = ResolvePath(project, file.Path);
+                    // Resolve the path
+                    string path = ResolvePath(project,
+                                              fileTransformers,
+                                              file.Path,
+                                              out transformer);
 
-                    // Try to get the package file modifier for the extension
-                    string extension = Path.GetExtension(file.Path);
-                    IPackageFileTransformer transformer;
-                    if (fileTransformers.TryGetValue(extension, out transformer)) {
-                        // Remove the extension to get the target path
-                        path = RemoveExtension(path);
-
+                    if (transformer != null) {
                         if (project.IsSupportedFile(path)) {
-
                             var matchingFiles = from p in otherPackages
                                                 from otherFile in p.GetContentFiles()
                                                 where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
@@ -136,8 +132,21 @@ namespace NuGet {
             return Enumerable.Empty<T>();
         }
 
-        private static string ResolvePath(IProjectSystem projectSystem, string path) {
-            return projectSystem.ResolvePath(RemoveContentDirectory(path));
+        private static string ResolvePath(IProjectSystem projectSystem,
+                                          IDictionary<string, IPackageFileTransformer> fileTransformers,
+                                          string path,
+                                          out IPackageFileTransformer transformer) {
+            // Remove the content folder
+            path = RemoveContentDirectory(path);
+
+            // Try to get the package file modifier for the extension
+            string extension = Path.GetExtension(path);
+            if (fileTransformers.TryGetValue(extension, out transformer)) {
+                // Remove the transformer extension (e.g. .pp, .transform)
+                path = RemoveExtension(path);
+            }
+
+            return projectSystem.ResolvePath(path);
         }
 
         private static string RemoveContentDirectory(string path) {
