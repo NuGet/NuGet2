@@ -1,16 +1,16 @@
-namespace NuGet {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Runtime.Versioning;
-    using System.Xml.Linq;
-    using Microsoft.Internal.Web.Utils;
-    using NuGet.Resources;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
+using Microsoft.Internal.Web.Utils;
+using NuGet.Resources;
 
+namespace NuGet {
     public class ProjectManager : IProjectManager {
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdded;
@@ -395,7 +395,8 @@ namespace NuGet {
         }
 
         // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
-        // within this class
+        // within this class. The attributes are necessary to prevent this method from being inlined into ClosureEvaluator 
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         internal static object Eval(FieldInfo fieldInfo, object obj) {
             return fieldInfo.GetValue(obj);
         }

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace NuGet {
     public static class PackageRepositoryExtensions {
@@ -228,7 +229,8 @@ namespace NuGet {
         }
 
         // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
-        // within this class
+        // within this class. The attributes are necessary to prevent this method from being inlined into ClosureEvaluator 
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         internal static object Eval(FieldInfo fieldInfo, object obj) {
             return fieldInfo.GetValue(obj);
         }
