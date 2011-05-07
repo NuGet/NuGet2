@@ -13,11 +13,11 @@ using PackageExplorerViewModel.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
-        private const int UncollapsedPageSize = 7;
-        private const int CollapsedPageSize = 10;
+        private const int ShowAllVersionsPageSize = 7;
+        private const int ShowLatestVersionPageSize = 10;
         private const int PageBuffer = 30;
         private DataServicePackageRepository _packageRepository;
-        private QueryContext<PackageInfo> _currentQuery;
+        private IQueryContext<PackageInfo> _currentQuery;
         private string _currentSearch;
         private IMruPackageSourceManager _packageSourceManager;
         private readonly DataServicePackageRepositoryFactory _packageRepositoryFactory;
@@ -270,16 +270,23 @@ namespace PackageExplorerViewModel {
                     IQueryable<PackageInfo> filteredQuery;
 
                     if (ShowLatestVersion) {
-                        filteredQuery = query.Select(p => new PackageInfo {
-                            Id = p.Id,
-                            Version = p.Version,
-                            Authors = p.Authors,
-                            Rating = p.Rating,
-                            DownloadCount = p.DownloadCount,
-                            PackageHash = p.PackageHash
-                        });
+                        filteredQuery = query.
+                            Where(p => p.IsLatestVersion).
+                            Select(p => new PackageInfo {
+                                Id = p.Id,
+                                Version = p.Version,
+                                Authors = p.Authors,
+                                Rating = p.Rating,
+                                DownloadCount = p.DownloadCount,
+                                PackageHash = p.PackageHash
+                            });
+
+                        _currentQuery = new ShowLatestVersionQueryContext<PackageInfo>(
+                            filteredQuery, 
+                            ShowLatestVersionPageSize);
                     }
                     else {
+                        /* show all versions */
                         filteredQuery = query.Select(p => new PackageInfo {
                             Id = p.Id,
                             Version = p.Version,
@@ -288,14 +295,14 @@ namespace PackageExplorerViewModel {
                             VersionDownloadCount = p.VersionDownloadCount,
                             PackageHash = p.PackageHash
                         });
-                    }
 
-                    _currentQuery = new QueryContext<PackageInfo>(
-                        filteredQuery, 
-                        ShowLatestVersion ? CollapsedPageSize : UncollapsedPageSize , 
-                        PageBuffer, 
-                        PackageInfoEqualityComparer.Instance, 
-                        ShowLatestVersion);
+                        _currentQuery = new ShowAllVersionsQueryContext<PackageInfo>(
+                            filteredQuery,
+                            ShowAllVersionsPageSize,
+                            PageBuffer,
+                            PackageInfoEqualityComparer.Instance);
+                    }
+                    
                     LoadPage();
                 },
                 CancellationToken.None,
@@ -437,7 +444,7 @@ namespace PackageExplorerViewModel {
         }
 
         private bool CanMoveLast() {
-            return EndPackage < TotalPackageCount;
+            return EndPackage < TotalPackageCount && ShowLatestVersion;
         }
 
         private bool CanMoveNext() {

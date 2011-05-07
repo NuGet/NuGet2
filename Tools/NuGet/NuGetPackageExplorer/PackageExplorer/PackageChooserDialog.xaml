@@ -22,7 +22,11 @@
         <Style TargetType="{x:Type Button}" x:Key="NavigationButtonStyle">
             <Setter Property="Margin" Value="0,0,5,0" />
         </Style>
+        
+        <self:PackageInfoDownloadCountConverter x:Key="DownloadCountConverter" />
 
+        <self:SubtracterConverter x:Key="SubtracterConverter" />
+        
         <CollectionViewSource x:Key="PackageCollectionSource" Source="{Binding Packages}">
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="Id" />
@@ -83,9 +87,9 @@
                 <self:GrayscaleImage Source="Images/MoveNextHS.png" />
             </self:GrayscaleButton>
 
-            <!--<self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
+            <self:GrayscaleButton Style="{StaticResource NavigationButtonStyle}" Command="{Binding NavigationCommand}" CommandParameter="Last">
                 <self:GrayscaleImage Source="Images/MoveLastHS.png" />
-            </self:GrayscaleButton>-->
+            </self:GrayscaleButton>
         </StackPanel>
 
         <!-- search box -->
@@ -122,7 +126,18 @@
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
                                         <Expander IsExpanded="false" BorderBrush="#FFA4B97F" BorderThickness="0,0,0,1">
                                             <Expander.Header>
-                                                <TextBlock x:Name="GroupHeader" Text="{Binding Name}" Foreground="Blue" />
+                                                <DockPanel LastChildFill="False" HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource SubtracterConverter}, ConverterParameter=50}">
+                                                    <TextBlock x:Name="GroupHeader" DockPanel.Dock="Left" Foreground="Blue">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{0} ({1} versions)">
+                                                                <Binding Path="Name" Mode="OneTime" />
+                                                                <Binding Path="ItemCount" Mode="OneTime" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+
+                                                    <TextBlock x:Name="GroupTotalDownload" Foreground="Blue" DockPanel.Dock="Right" Text="{Binding Items, Converter={StaticResource DownloadCountConverter}}" />
+                                                </DockPanel>
                                             </Expander.Header>
                                             <Expander.Content>
                                                 <ItemsPresenter />
@@ -132,7 +147,19 @@
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter TargetName="GroupHeader" Property="Foreground" Value="DarkGray" />
+                                                <Setter TargetName="GroupTotalDownload" Property="Foreground" Value="DarkGray" />
                                             </Trigger>
+                                            
+                                            <DataTrigger Binding="{Binding ItemCount}" Value="1">
+                                                <Setter TargetName="GroupHeader" Property="Text">
+                                                    <Setter.Value>
+                                                        <MultiBinding StringFormat="{}{0} ({1} version)">
+                                                            <Binding Path="Name" Mode="OneTime" />
+                                                            <Binding Path="ItemCount" Mode="OneTime" />
+                                                        </MultiBinding>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>

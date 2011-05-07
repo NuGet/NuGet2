@@ -37,6 +37,11 @@ namespace NuGet {
             set;
         }
 
+        public bool IsLatestVersion {
+            get;
+            set;
+        }
+
         public IEnumerable<string> Owners {
             get {
                 return CorePackage == null ? null : CorePackage.Owners;

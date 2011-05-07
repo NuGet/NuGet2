@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace PackageExplorerViewModel {
-    internal class QueryContext<T> {
+    internal class ShowAllVersionsQueryContext<T> : IQueryContext<T> {
 
         private readonly IQueryable<T> _source;
         private readonly int _bufferSize;
@@ -12,9 +12,16 @@ namespace PackageExplorerViewModel {
         private int _skip, _nextSkip;
         private readonly Stack<int> _skipHistory = new Stack<int>();
         private readonly Lazy<int> _totalItemCount;
-        private readonly bool _showLatestVersion;
 
-        public int PageIndex {
+        public ShowAllVersionsQueryContext(IQueryable<T> source, int pageSize, int bufferSize, IEqualityComparer<T> comparer) {
+            _source = source;
+            _bufferSize = bufferSize;
+            _comparer = comparer;
+            _pageSize = pageSize;
+            _totalItemCount = new Lazy<int>(_source.Count);
+        }
+
+        private int PageIndex {
             get {
                 return _skipHistory.Count;
             }
@@ -22,7 +29,7 @@ namespace PackageExplorerViewModel {
 
         public int BeginPackage {
             get {
-                return _skip+1;
+                return _skip + 1;
             }
         }
 
@@ -36,21 +43,6 @@ namespace PackageExplorerViewModel {
             get {
                 return _totalItemCount.Value;
             }
-        }
-
-        public bool ShowLatestVersion {
-            get {
-                return _showLatestVersion;
-            }
-        }
-
-        public QueryContext(IQueryable<T> source, int pageSize, int bufferSize, IEqualityComparer<T> comparer, bool showLatestVersion) {
-            _source = source;
-            _bufferSize = bufferSize;
-            _comparer = comparer;
-            _pageSize = pageSize;
-            _totalItemCount = new Lazy<int>(_source.Count);
-            _showLatestVersion = showLatestVersion;
         }
 
         public IEnumerable<T> GetItemsForCurrentPage() {
@@ -74,9 +66,7 @@ namespace PackageExplorerViewModel {
                     }
 
                     if (firstItem || _comparer.Equals(buffer[head], lastItem)) {
-                        if (!ShowLatestVersion) {
-                            yield return buffer[head];
-                        }
+                        yield return buffer[head];
                         lastItem = buffer[head];
                         head++;
                         firstItem = false;
@@ -85,9 +75,6 @@ namespace PackageExplorerViewModel {
                     else {
                         break;
                     }
-                }
-                if (ShowLatestVersion) {
-                    yield return lastItem;
                 }
             }
         }
@@ -118,7 +105,7 @@ namespace PackageExplorerViewModel {
         }
 
         public bool MoveLast() {
-            return MovePrevious();
+            return false;
         }
     }
 }

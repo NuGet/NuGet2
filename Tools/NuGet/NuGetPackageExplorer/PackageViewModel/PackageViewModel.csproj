@@ -59,7 +59,9 @@
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
     <Compile Include="PackageChooser\DataServicePackageRepositoryFactory.cs" />
-    <Compile Include="PackageChooser\QueryContext.cs" />
+    <Compile Include="PackageChooser\IQueryContext.cs" />
+    <Compile Include="PackageChooser\ShowLatestVersionQueryContext.cs" />
+    <Compile Include="PackageChooser\ShowAllVersionsQueryContext.cs" />
     <Compile Include="WindowsCredentialProvider.cs" />
     <Compile Include="WindowsProxyService.cs" />
     <Compile Include="PackageHelper.cs" />
