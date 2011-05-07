@@ -23,15 +23,15 @@ namespace NuGet {
                                           file.Path,
                                           out transformer);
 
-                // Try to get the package file modifier for the extension                
-                if (transformer != null) {
-                    if (project.IsSupportedFile(path)) {
+                if (project.IsSupportedFile(path)) {
+                    // Try to get the package file modifier for the extension                
+                    if (transformer != null) {
                         // If the transform was done then continue
                         transformer.TransformFile(file, path, project);
                     }
-                }
-                else if (project.IsSupportedFile(path)) {
-                    project.AddFileWithCheck(path, file.GetStream);
+                    else {
+                        project.AddFileWithCheck(path, file.GetStream);
+                    }
                 }
             }
         }
@@ -69,8 +69,8 @@ namespace NuGet {
                                               file.Path,
                                               out transformer);
 
-                    if (transformer != null) {
-                        if (project.IsSupportedFile(path)) {
+                    if (project.IsSupportedFile(path)) {
+                        if (transformer != null) {
                             var matchingFiles = from p in otherPackages
                                                 from otherFile in p.GetContentFiles()
                                                 where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
@@ -84,9 +84,9 @@ namespace NuGet {
                                 project.Logger.Log(MessageLevel.Warning, e.Message);
                             }
                         }
-                    }
-                    else if (project.IsSupportedFile(path)) {
-                        project.DeleteFileSafe(path, file.GetStream);
+                        else {
+                            project.DeleteFileSafe(path, file.GetStream);
+                        }
                     }
                 }
 
