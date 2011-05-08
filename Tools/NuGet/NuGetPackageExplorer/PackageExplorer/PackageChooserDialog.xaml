@@ -127,7 +127,7 @@
                                         <Expander IsExpanded="false" BorderBrush="#FFA4B97F" BorderThickness="0,0,0,1">
                                             <Expander.Header>
                                                 <DockPanel LastChildFill="False" HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource SubtracterConverter}, ConverterParameter=50}">
-                                                    <TextBlock x:Name="GroupHeader" DockPanel.Dock="Left" Foreground="Blue">
+                                                    <TextBlock x:Name="GroupHeader" DockPanel.Dock="Left" Foreground="{DynamicResource ResourceKey={x:Static SystemColors.HotTrackBrushKey}}">
                                                         <TextBlock.Text>
                                                             <MultiBinding StringFormat="{}{0} ({1} versions)">
                                                                 <Binding Path="Name" Mode="OneTime" />
@@ -136,7 +136,7 @@
                                                         </TextBlock.Text>
                                                     </TextBlock>
 
-                                                    <TextBlock x:Name="GroupTotalDownload" Foreground="Blue" DockPanel.Dock="Right" Text="{Binding Items, Converter={StaticResource DownloadCountConverter}}" />
+                                                    <TextBlock x:Name="GroupTotalDownload" Foreground="{DynamicResource ResourceKey={x:Static SystemColors.HotTrackBrushKey}}" DockPanel.Dock="Right" Text="{Binding Items, Converter={StaticResource DownloadCountConverter}}" />
                                                 </DockPanel>
                                             </Expander.Header>
                                             <Expander.Content>
@@ -146,8 +146,8 @@
                                         
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="GroupHeader" Property="Foreground" Value="DarkGray" />
-                                                <Setter TargetName="GroupTotalDownload" Property="Foreground" Value="DarkGray" />
+                                                <Setter TargetName="GroupHeader" Property="Foreground" Value="{DynamicResource ResourceKey={x:Static SystemColors.GrayTextBrushKey}}" />
+                                                <Setter TargetName="GroupTotalDownload" Property="Foreground" Value="{DynamicResource ResourceKey={x:Static SystemColors.GrayTextBrushKey}}" />
                                             </Trigger>
                                             
                                             <DataTrigger Binding="{Binding ItemCount}" Value="1">

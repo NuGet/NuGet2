@@ -18,27 +18,35 @@
         <StackPanel Orientation="Vertical" Grid.Column="1" Margin="20,0,0,0">
             <TextBlock x:Name="ProductTitle" Text="NuGet Package Explorer Beta 2" FontWeight="Bold" />
             
-            <TextBlock Text="Compatible with NuGet 1.3 and below." Margin="0,4,0,4"/>
-            
-            <TextBlock>
+            <TextBlock Text="Compatible with NuGet 1.3 and below." Margin="0,5,0,0"/>
+
+            <TextBlock Margin="0,5,0,0">
                 <Hyperlink NavigateUri="http://nuget.codeplex.com" Click="Hyperlink_Click">
                     <Run Text="http://nuget.codeplex.com" />
                 </Hyperlink>
             </TextBlock>
 
-            <TextBlock Margin="0,10,0,0">
+            <TextBlock Margin="0,5,0,0">
                 <Run Text="Author: Luan Nguyen (" />
                 <Hyperlink NavigateUri="http://twitter.com/dotnetjunky/" Click="Hyperlink_Click">
                     <Run Text="@dotnetjunky" />
                 </Hyperlink>
                 <Run Text=")" />
             </TextBlock>
-            <TextBlock Margin="0,10,0,0" Text="Contributors: iLya Lozovyy, Brian Hartung">
+            <TextBlock Margin="0,5,0,0" Text="Contributors: iLya Lozovyy, Brian Hartung">
             </TextBlock>
-            <TextBlock Margin="0,10,0,0">
+            <TextBlock Margin="0,5,0,0">
                 <Run Text="Syntax highlighting viewer powered by " />
                 <Hyperlink NavigateUri="http://colorcode.codeplex.com" Click="Hyperlink_Click">
                     <Run Text="ColorCode" />
+                </Hyperlink>
+                <Run Text="." />
+            </TextBlock>
+            
+            <TextBlock Margin="0,5,0,0">
+                <Run Text="Some dialogs are provided by " />
+                <Hyperlink NavigateUri="http://www.ookii.org/software/dialogs/" Click="Hyperlink_Click">
+                    <Run Text="Ookii.Dialogs" />
                 </Hyperlink>
                 <Run Text="." />
             </TextBlock>

@@ -197,7 +197,7 @@
 
             <HierarchicalDataTemplate DataType="{x:Type viewmodel:PackageFolder}" ItemsSource="{Binding Children}">
                 <StackPanel Background="Transparent" Orientation="Horizontal" ContextMenu="{StaticResource FolderSharedContextMenu}">
-                    <Image x:Name="ItemIcon" Margin="0,0,2,0" Source="Images/Folder.ico" />
+                    <Image x:Name="ItemIcon" Margin="0,0,2,0" Source="Images/Folder.png" />
                     <TextBlock x:Name="Header" FontWeight="SemiBold">
                         <Run Text="{Binding Name}" />
                         <Run Text="{Binding Path, Converter={StaticResource frameworkConverter}}" Foreground="Salmon" />

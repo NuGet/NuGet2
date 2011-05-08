@@ -268,8 +268,8 @@
       <Link>CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
     <Resource Include="Images\NoteHS.png" />
-    <Resource Include="Images\Folder.ico" />
     <Resource Include="Images\EditHS.png" />
+    <Resource Include="Images\folder.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>
