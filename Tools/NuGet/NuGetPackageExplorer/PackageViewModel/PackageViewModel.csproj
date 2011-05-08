@@ -42,9 +42,6 @@
     <Reference Include="Kerr.Credentials">
       <HintPath>..\lib\Kerr.Credentials.dll</HintPath>
     </Reference>
-    <Reference Include="Ookii.Dialogs.Wpf">
-      <HintPath>..\lib\Ookii.Dialogs.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -52,6 +49,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\DisabledCommand.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
@@ -113,7 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\..\..\CodeAnalysisDictionary.xml">
-      <Link>CodeAnalysisDictionary.xml</Link>
+      <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

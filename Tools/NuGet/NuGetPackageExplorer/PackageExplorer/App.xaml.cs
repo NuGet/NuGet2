@@ -27,6 +27,8 @@ namespace PackageExplorer {
         }
 
         private void Application_Startup(object sender, StartupEventArgs e) {
+            MigrateSettings();
+
             MainWindow window = Container.GetExportedValue<MainWindow>();
             window.Show();
 
@@ -46,6 +48,15 @@ namespace PackageExplorer {
                     string file = activationData[0];
                     LoadFile(window, file);
                 }
+            }
+        }
+
+        private void MigrateSettings() {
+            var settings = PackageExplorer.Properties.Settings.Default;
+            if (settings.IsFirstTime) {
+                settings.Upgrade();
+                settings.IsFirstTime = false;
+                settings.Save();
             }
         }
 
