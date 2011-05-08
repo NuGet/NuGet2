@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Windows;
 using Microsoft.Win32;
 using PackageExplorerViewModel.Types;
+using Ookii.Dialogs.Wpf;
 
 namespace PackageExplorer {
 
@@ -157,12 +158,22 @@ namespace PackageExplorer {
         }
 
         public bool OpenFolderDialog(string title, string initialPath, out string selectedPath) {
-            BrowseForFolder dialog = new BrowseForFolder();
-            selectedPath = dialog.SelectFolder(
-                title,
-                initialPath,
-                new System.Windows.Interop.WindowInteropHelper(Window.Value).Handle);
-            return !String.IsNullOrEmpty(selectedPath);
+            var dialog = new VistaFolderBrowserDialog() {
+                ShowNewFolderButton = true,
+                SelectedPath = initialPath,
+                Description = title,
+                UseDescriptionForTitle = true
+            };
+
+            bool? result = dialog.ShowDialog(Window.Value);
+            if (result ?? false) {
+                selectedPath = dialog.SelectedPath;
+                return true;
+            }
+            else {
+                selectedPath = null;
+                return false;
+            }
         }
 
         public void BeginInvoke(Action action) {

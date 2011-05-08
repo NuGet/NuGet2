@@ -86,11 +86,14 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GrayscaleEffect">
-      <HintPath>..\GrayscaleEffect.dll</HintPath>
+    <Reference Include="GrayscaleEffect, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7f238d79773caa06, processorArchitecture=MSIL">
+      <HintPath>..\lib\GrayscaleEffect.dll</HintPath>
+    </Reference>
+    <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
+      <HintPath>..\lib\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="SyntaxHighlighting, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7f238d79773caa06, processorArchitecture=MSIL">
-      <HintPath>..\SyntaxHighlighting.dll</HintPath>
+      <HintPath>..\lib\SyntaxHighlighting.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -120,7 +123,6 @@
     <Compile Include="Converters\PackageInfoDownloadCountConverter.cs" />
     <Compile Include="Converters\StringToVisibilityConverter.cs" />
     <Compile Include="Converters\SubtracterConverter.cs" />
-    <Compile Include="Interop\BrowseForFolder.cs" />
     <Compile Include="Converters\AndLogicConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\BorderGapMaskConverter.cs" />

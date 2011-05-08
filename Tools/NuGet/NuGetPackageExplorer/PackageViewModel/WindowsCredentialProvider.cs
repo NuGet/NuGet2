@@ -16,8 +16,9 @@ namespace PackageExplorerViewModel {
             if (null == uri) {
                 throw new ArgumentNullException("uri");
             }
+
             using (CredentialSet set = new CredentialSet(uri.Host)) {
-                if (null == set || set.Count < 1) {
+                if (set.Count < 1) {
                     return new ICredentials[0] { };
                 }
                 return set

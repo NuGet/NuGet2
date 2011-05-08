@@ -67,31 +67,10 @@ namespace PackageExplorer {
         public const uint BIF_SHAREABLE = 0x8000;  // sharable resources displayed (remote shares, requires BIF_USENEWUI)
         public const uint WM_SETICON = 0x0080;
 
-        [DllImport("shell32.dll")]
-        public static extern IntPtr SHBrowseForFolder(ref BROWSEINFO lpbi);
-
-        // Note that the BROWSEINFO object's pszDisplayName only gives you the name of the folder.
-        // To get the actual path, you need to parse the returned PIDL
-        [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
-        public static extern uint SHGetPathFromIDList(IntPtr pidl, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszPath);
-
         [DllImport("user32.dll", PreserveSig = true)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, long wParam, IntPtr lParam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, int wParam, string lParam);
     }
-
-    internal struct BROWSEINFO {
-        public IntPtr hwndOwner;
-        public IntPtr pidlRoot;
-        public string pszDisplayName;
-        public string lpszTitle;
-        public uint ulFlags;
-        public BrowseCallBackProc lpfn;
-        public IntPtr lParam;
-        public int iImage;
-    }
-
-    internal delegate int BrowseCallBackProc(IntPtr hwnd, int msg, IntPtr lp, IntPtr wp);
 }

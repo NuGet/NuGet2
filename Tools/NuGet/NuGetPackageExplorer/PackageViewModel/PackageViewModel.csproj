@@ -40,7 +40,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Kerr.Credentials">
-      <HintPath>..\Kerr.Credentials.dll</HintPath>
+      <HintPath>..\lib\Kerr.Credentials.dll</HintPath>
+    </Reference>
+    <Reference Include="Ookii.Dialogs.Wpf">
+      <HintPath>..\lib\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
