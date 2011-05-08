@@ -126,18 +126,43 @@
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
                                         <Expander IsExpanded="false" BorderBrush="#FFA4B97F" BorderThickness="0,0,0,1">
                                             <Expander.Header>
-                                                <DockPanel LastChildFill="False" HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource SubtracterConverter}, ConverterParameter=50}">
-                                                    <TextBlock x:Name="GroupHeader" DockPanel.Dock="Left" Foreground="{DynamicResource ResourceKey={x:Static SystemColors.HotTrackBrushKey}}">
-                                                        <TextBlock.Text>
-                                                            <MultiBinding StringFormat="{}{0} ({1} versions)">
-                                                                <Binding Path="Name" Mode="OneTime" />
-                                                                <Binding Path="ItemCount" Mode="OneTime" />
-                                                            </MultiBinding>
-                                                        </TextBlock.Text>
-                                                    </TextBlock>
+                                                <Grid x:Name="PackageItemHeader" TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="{Binding View.Columns[0].ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}, Converter={StaticResource SubtracterConverter}, ConverterParameter=22}" />
+                                                        <ColumnDefinition Width="{Binding View.Columns[1].ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}}" />
+                                                        <ColumnDefinition Width="{Binding View.Columns[2].ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}}" />
+                                                        <ColumnDefinition Width="{Binding View.Columns[3].ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}}" />
+                                                        <ColumnDefinition Width="{Binding View.Columns[4].ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}}" />
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <!-- Id column -->
+                                                    <TextBlock 
+                                                        Grid.Column="0"
+                                                        Margin="0,0,3,0"
+                                                        HorizontalAlignment="Left"
+                                                        Text="{Binding Name, Mode=OneTime}" />
 
-                                                    <TextBlock x:Name="GroupTotalDownload" Foreground="{DynamicResource ResourceKey={x:Static SystemColors.HotTrackBrushKey}}" DockPanel.Dock="Right" Text="{Binding Items, Converter={StaticResource DownloadCountConverter}}" />
-                                                </DockPanel>
+                                                    <!-- Version column -->
+                                                    <TextBlock 
+                                                        Grid.Column="1"
+                                                        HorizontalAlignment="Center"
+                                                        Text="{Binding ItemCount, Mode=OneTime, StringFormat=({0})}" />
+
+                                                    <!-- Authors column -->
+                                                    <TextBlock 
+                                                        Grid.Column="2"
+                                                        HorizontalAlignment="Left"
+                                                        Margin="5,0,4,0"
+                                                        TextTrimming="CharacterEllipsis" 
+                                                        ToolTip="{Binding Items[0].Authors, Mode=OneTime}"
+                                                        Text="{Binding Items[0].Authors, Mode=OneTime}" />
+
+                                                    <!-- Downloads column -->
+                                                    <TextBlock 
+                                                        Grid.Column="4"
+                                                        HorizontalAlignment="Center"
+                                                        Text="{Binding Items, Converter={StaticResource DownloadCountConverter}, Mode=OneTime}" />
+                                                </Grid>
                                             </Expander.Header>
                                             <Expander.Content>
                                                 <ItemsPresenter />
@@ -146,20 +171,8 @@
                                         
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="GroupHeader" Property="Foreground" Value="{DynamicResource ResourceKey={x:Static SystemColors.GrayTextBrushKey}}" />
-                                                <Setter TargetName="GroupTotalDownload" Property="Foreground" Value="{DynamicResource ResourceKey={x:Static SystemColors.GrayTextBrushKey}}" />
+                                                <Setter TargetName="PackageItemHeader" Property="TextElement.Foreground" Value="{DynamicResource ResourceKey={x:Static SystemColors.GrayTextBrushKey}}" />
                                             </Trigger>
-                                            
-                                            <DataTrigger Binding="{Binding ItemCount}" Value="1">
-                                                <Setter TargetName="GroupHeader" Property="Text">
-                                                    <Setter.Value>
-                                                        <MultiBinding StringFormat="{}{0} ({1} version)">
-                                                            <Binding Path="Name" Mode="OneTime" />
-                                                            <Binding Path="ItemCount" Mode="OneTime" />
-                                                        </MultiBinding>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
