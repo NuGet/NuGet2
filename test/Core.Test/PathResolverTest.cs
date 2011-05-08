@@ -155,6 +155,34 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void NetworkPathWithWildCardExtension() {
+            // Arrange
+            var path = @"\\network-path\bar\foo\*.baz";
+            var expectedFilter = new PathSearchFilter { SearchDirectory = @"\\network-path\bar\foo", SearchPattern = "*.baz", SearchOption = SearchOption.TopDirectoryOnly };
+
+            // Act
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
+
+            // Assert
+            AssertEqual(expectedFilter, searchFilter);
+        }
+
+        [TestMethod]
+        public void NetworkPathWithWildCardInPath() {
+            // Arrange
+            var path = @"\\network-path\bar\**\*.dll";
+            var expectedFilter = new PathSearchFilter { SearchDirectory = @"\\network-path\bar", SearchPattern = "*.dll", SearchOption = SearchOption.AllDirectories };
+
+            // Act
+            var searchFilter = PathResolver.ResolveSearchFilter(_basePath, path);
+
+            // Assert
+            AssertEqual(expectedFilter, searchFilter);
+        }
+
+
+
+        [TestMethod]
         public void RelativePathWildCardExtension() {
             // Arrange
             var path = "..\\..\\bar\\baz\\*.foo";

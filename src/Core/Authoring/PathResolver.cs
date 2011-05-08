@@ -39,7 +39,13 @@ namespace NuGet {
 
         internal static PathSearchFilter ResolveSearchFilter(string basePath, string source) {
             basePath = basePath ?? String.Empty;
-            string pathFromBase = Path.Combine(basePath, source.TrimStart(Path.DirectorySeparatorChar));
+
+            // If there's a single leading slash, then trim it. Two slashes would mean network paths and we should leave those untouched.
+            if (!source.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase)) {
+                source = source.TrimStart('\\');
+            }
+                
+            string pathFromBase = Path.Combine(basePath, source);
 
             if (IsWildCardSearch(pathFromBase)) {
                 return GetPathSearchFilter(pathFromBase);
