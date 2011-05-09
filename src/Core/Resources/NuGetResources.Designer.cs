@@ -214,6 +214,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate IProxyFinderStrategy cannot be registered..
+        /// </summary>
+        internal static string DuplicateProxyFinderStrategy {
+            get {
+                return ResourceManager.GetString("DuplicateProxyFinderStrategy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
         /// </summary>
         internal static string ErrorReadingFile {

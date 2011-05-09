@@ -19,7 +19,7 @@ namespace NuGet.VisualStudio {
 
         [ImportingConstructor]
         public CachedRepositoryFactory(IPackageSourceProvider packageSourceProvider)
-            : this(PackageRepositoryFactory.Default, packageSourceProvider) {
+            : this(new PackageRepositoryFactory(), packageSourceProvider) {
         }
 
         internal CachedRepositoryFactory(IPackageRepositoryFactory repositoryFactory,

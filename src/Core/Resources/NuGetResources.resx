@@ -297,4 +297,7 @@
   <data name="UnknownPackageSpecificVersion" xml:space="preserve">
     <value>Unable to find version '{1}' of package '{0}'.</value>
   </data>
+  <data name="DuplicateProxyFinderStrategy" xml:space="preserve">
+    <value>Duplicate IProxyFinderStrategy cannot be registered.</value>
+  </data>
 </root>

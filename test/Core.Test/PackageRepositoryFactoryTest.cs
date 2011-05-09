@@ -9,7 +9,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void CreateRepositoryThrowsIfNullSource() {
             // Act & Assert
-            ExceptionAssert.ThrowsArgNull(() => PackageRepositoryFactory.Default.CreateRepository(null), "packageSource");
+            ExceptionAssert.ThrowsArgNull(() => new PackageRepositoryFactory().CreateRepository(null), "packageSource");
         }
 
         [TestMethod]
@@ -18,10 +18,10 @@ namespace NuGet.Test {
             var paths = new[] { @"C:\packages\", 
                                  @"\\folder\sub-folder",
                                  "file://some-folder/some-dir"};
-            var factory = PackageRepositoryFactory.Default;
+            var factory = new PackageRepositoryFactory();
 
             // Act and Assert
-            Assert.IsTrue(paths.Select(p => factory.CreateRepository(p))
+            Assert.IsTrue(paths.Select(factory.CreateRepository)
                                .All(p => p is LocalPackageRepository));
         }
 
@@ -30,8 +30,7 @@ namespace NuGet.Test {
             // Arrange
             var httpClient = new Mock<IHttpClient>();
             httpClient.SetupAllProperties();
-            httpClient.Setup(c => c.GetRedirectedUri(It.IsAny<Uri>())).Returns(new Uri("http://example.com"));
-            var factory = new PackageRepositoryFactory(httpClient.Object);
+            var factory = new PackageRepositoryFactory();
 
             // Act
             IPackageRepository repository = factory.CreateRepository("http://example.com/");
