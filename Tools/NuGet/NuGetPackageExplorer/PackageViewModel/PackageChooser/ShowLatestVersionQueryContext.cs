@@ -17,7 +17,6 @@ namespace PackageExplorerViewModel {
 
         public int TotalItemCount {
             get {
-                //return _totalItemCount.IsValueCreated ? _totalItemCount.Value : 0;
                 return _totalItemCount.Value;
             }
         }

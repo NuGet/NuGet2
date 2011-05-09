@@ -97,6 +97,15 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connecting to package source....
+        /// </summary>
+        internal static string ConnectingMessage {
+            get {
+                return ResourceManager.GetString("ConnectingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NuGet Package Explorer.
         /// </summary>
         internal static string Dialog_Title {
@@ -129,6 +138,15 @@ namespace PackageExplorerViewModel {
         internal static string FileNameConflictWithExistingDirectory {
             get {
                 return ResourceManager.GetString("FileNameConflictWithExistingDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading....
+        /// </summary>
+        internal static string LoadingMessage {
+            get {
+                return ResourceManager.GetString("LoadingMessage", resourceCulture);
             }
         }
         

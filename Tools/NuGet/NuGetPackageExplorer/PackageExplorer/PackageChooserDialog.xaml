@@ -157,6 +157,12 @@
                                                         ToolTip="{Binding Items[0].Authors, Mode=OneTime}"
                                                         Text="{Binding Items[0].Authors, Mode=OneTime}" />
 
+                                                    <!-- Rating column -->
+                                                    <TextBlock 
+                                                        Grid.Column="3"
+                                                        HorizontalAlignment="Center"
+                                                        Text="{Binding Items[0].Rating, Mode=OneTime, StringFormat={}{0:G2}}" />
+
                                                     <!-- Downloads column -->
                                                     <TextBlock 
                                                         Grid.Column="4"
@@ -237,7 +243,21 @@
 
         <CheckBox Grid.Row="3" IsEnabled="{Binding IsEditable}" HorizontalAlignment="Left" Content="Only _show latest version of each package Id." IsChecked="{Binding ShowLatestVersion}" Checked="OnShowLatestVersionValueChanged" Unchecked="OnShowLatestVersionValueChanged" />
 
-        <TextBlock Grid.Row="4" Text="{Binding StatusContent}" x:Name="StatusText" VerticalAlignment="Center" TextTrimming="WordEllipsis" />
+        <TextBlock 
+            Grid.Row="4" 
+            Text="{Binding StatusContent}" 
+            VerticalAlignment="Center" 
+            TextTrimming="WordEllipsis">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
 
         <UniformGrid HorizontalAlignment="Right" Grid.Row="4" Grid.Column="1" Rows="1" Columns="2">
             <Button IsDefault="True" Content="_OK" Margin="5" Click="OkButton_Click">

@@ -129,6 +129,9 @@
   <data name="ConfirmToReplaceFile" xml:space="preserve">
     <value>Do you want to replace existing file '{0}' on disk?</value>
   </data>
+  <data name="ConnectingMessage" xml:space="preserve">
+    <value>Connecting to package source...</value>
+  </data>
   <data name="Dialog_Title" xml:space="preserve">
     <value>NuGet Package Explorer</value>
   </data>
@@ -140,6 +143,9 @@
   </data>
   <data name="FileNameConflictWithExistingDirectory" xml:space="preserve">
     <value>The new file has the same name as another folder.</value>
+  </data>
+  <data name="LoadingMessage" xml:space="preserve">
+    <value>Loading...</value>
   </data>
   <data name="NoNetworkConnection" xml:space="preserve">
     <value>Network connection is not detected.</value>

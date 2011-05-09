@@ -23,7 +23,7 @@ namespace NuGet {
 
         public double EffectiveRating {
             get {
-                return Math.Max(Rating, VersionRating);
+                return VersionRating > 0 ? VersionRating : Rating;
             }
         }
 

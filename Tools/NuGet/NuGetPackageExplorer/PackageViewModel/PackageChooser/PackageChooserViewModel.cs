@@ -14,7 +14,7 @@ using PackageExplorerViewModel.Types;
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {
         private const int ShowAllVersionsPageSize = 7;
-        private const int ShowLatestVersionPageSize = 10;
+        private const int ShowLatestVersionPageSize = 15;
         private const int PageBuffer = 30;
         private DataServicePackageRepository _packageRepository;
         private IQueryContext<PackageInfo> _currentQuery;
@@ -178,6 +178,20 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        private bool _hasError;
+
+        public bool HasError {
+            get {
+                return _hasError;
+            }
+            set {
+                if (_hasError != value) {
+                    _hasError = value;
+                    OnPropertyChanged("HasError");
+                }
+            }
+        }
+
         public ObservableCollection<PackageInfo> Packages { get; private set; }
 
         public RelayCommand<string> NavigationCommand { get; private set; }
@@ -191,7 +205,7 @@ namespace PackageExplorerViewModel {
 
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
-            StatusContent = "Loading...";
+            ShowMessage(Resources.LoadingMessage, false);
             IsEditable = false;
 
             Task.Factory.StartNew<IList<PackageInfo>>(
@@ -199,12 +213,12 @@ namespace PackageExplorerViewModel {
                 result => {
                     if (result.IsFaulted) {
                         AggregateException exception = result.Exception;
-                        StatusContent = (exception.InnerException ?? exception).Message;
+                        ShowMessage((exception.InnerException ?? exception).Message, true);
                         ClearPackages();
                     }
                     else if (!result.IsCanceled) {
                         ShowPackages(result.Result, _currentQuery.TotalItemCount, _currentQuery.BeginPackage, _currentQuery.EndPackage);
-                        StatusContent = String.Empty;
+                        ShowMessage(String.Empty, false);
                     }
 
                     IsEditable = true;
@@ -228,14 +242,14 @@ namespace PackageExplorerViewModel {
         }
 
         private void LoadPackages() {
-            StatusContent = "Connecting to package source...";
+            ShowMessage(Resources.ConnectingMessage, false);
 
             TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
             Task.Factory.StartNew<DataServicePackageRepository>(GetPackageRepository).ContinueWith(
                 task => {
                     DataServicePackageRepository repository = task.Result;
                     if (repository == null) {
-                        StatusContent = String.Empty;
+                        ShowMessage(String.Empty, false);
                         ClearPackages();
                         return;
                     }
@@ -291,6 +305,7 @@ namespace PackageExplorerViewModel {
                             Id = p.Id,
                             Version = p.Version,
                             Authors = p.Authors,
+                            Rating = p.Rating,
                             VersionRating = p.VersionRating,
                             VersionDownloadCount = p.VersionDownloadCount,
                             PackageHash = p.PackageHash
@@ -370,6 +385,11 @@ namespace PackageExplorerViewModel {
             Packages.AddRange(packages);
 
             NavigationCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ShowMessage(string message, bool hasError) {
+            StatusContent = message;
+            HasError = hasError;
         }
 
         #region NavigationCommand
