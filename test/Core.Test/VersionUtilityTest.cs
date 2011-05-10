@@ -60,10 +60,14 @@ namespace NuGet.Test {
             Version version20 = new Version("2.0");
 
             // Act
-            var frameworkName = VersionUtility.ParseFrameworkName("NETCF20");
+            var frameworkName1 = VersionUtility.ParseFrameworkName("NETCF20");
+            var frameworkName2 = VersionUtility.ParseFrameworkName("NET40ClientProfile");
+            var frameworkName3 = VersionUtility.ParseFrameworkName("NET40Foo");
 
             // Assert
-            Assert.AreEqual("Unsupported", frameworkName.Identifier);
+            Assert.AreEqual("Unsupported", frameworkName1.Identifier);
+            Assert.AreEqual("Unsupported", frameworkName2.Identifier);
+            Assert.AreEqual("Unsupported", frameworkName3.Identifier);
         }
 
         [TestMethod]
@@ -111,8 +115,7 @@ namespace NuGet.Test {
             var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(new Version(), frameworkName.Version);
+            Assert.AreEqual("Unsupported", frameworkName.Identifier);
         }
 
         [TestMethod]

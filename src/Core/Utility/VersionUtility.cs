@@ -93,11 +93,11 @@ namespace NuGet {
             }
 
             // If we find a version then we try to split the framework name into 2 parts
-            var match = Regex.Match(frameworkNameAndVersion, @"\d+");
+            var versionMatch = Regex.Match(frameworkNameAndVersion, @"\d+");
 
-            if (match.Success) {
-                identifierPart = frameworkNameAndVersion.Substring(0, match.Index).Trim();
-                versionPart = frameworkNameAndVersion.Substring(match.Index).Trim();
+            if (versionMatch.Success) {
+                identifierPart = frameworkNameAndVersion.Substring(0, versionMatch.Index).Trim();
+                versionPart = frameworkNameAndVersion.Substring(versionMatch.Index).Trim();
             }
             else {
                 // Otherwise we take the whole name as an identifier
@@ -134,7 +134,11 @@ namespace NuGet {
 
             // If we can't parse the version then use the default
             if (!Version.TryParse(versionPart, out version)) {
-                if (String.IsNullOrEmpty(identifierPart)) {
+                // We failed to parse the version string once more. So we need to decide if this is unsupported or if we use the default version.
+                // This framework is unsupported if:
+                // 1. The identifier part of the framework name is null.
+                // 2. The version part is not null.
+                if (String.IsNullOrEmpty(identifierPart) || !String.IsNullOrEmpty(versionPart)) {
                     return UnsupportedFrameworkName;
                 }
 
