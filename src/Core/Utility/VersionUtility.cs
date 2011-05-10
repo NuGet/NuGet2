@@ -42,7 +42,7 @@ namespace NuGet {
             { "CompactFramework", "cf" }
         };
 
-        private static Version DefaultTargetFrameworkVersion {
+        public static Version DefaultTargetFrameworkVersion {
             get {
                 // We need to parse the version name out from the mscorlib's assembly name since
                 // we can't call GetName() in medium trust
