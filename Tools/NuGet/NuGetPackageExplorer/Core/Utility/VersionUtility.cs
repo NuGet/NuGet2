@@ -12,6 +12,7 @@ namespace NuGet {
         private const string NetFrameworkIdentifier = ".NETFramework";
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
+        private static readonly Version _emptyVersion = new Version();
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "NET", NetFrameworkIdentifier },
@@ -31,7 +32,7 @@ namespace NuGet {
             { "Full", String.Empty }
         };
 
-        public static Version DefaultTargetFrameworkVersion {
+        private static Version DefaultTargetFrameworkVersion {
             get {
                 // We need to parse the version name out from the mscorlib's assembly name since
                 // we can't call GetName() in medium trust
@@ -127,7 +128,7 @@ namespace NuGet {
                     return UnsupportedFrameworkName;
                 }
 
-                version = DefaultTargetFrameworkVersion;
+                version = _emptyVersion;
             }
 
             if (String.IsNullOrEmpty(identifierPart)) {
