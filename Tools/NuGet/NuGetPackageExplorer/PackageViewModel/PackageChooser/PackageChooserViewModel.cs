@@ -244,11 +244,13 @@ namespace PackageExplorerViewModel {
         private void LoadPackages() {
             ShowMessage(Resources.ConnectingMessage, false);
 
+            IsEditable = false;
             TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
             Task.Factory.StartNew<DataServicePackageRepository>(GetPackageRepository).ContinueWith(
                 task => {
                     DataServicePackageRepository repository = task.Result;
                     if (repository == null) {
+                        IsEditable = true;
                         ShowMessage(String.Empty, false);
                         ClearPackages();
                         return;
