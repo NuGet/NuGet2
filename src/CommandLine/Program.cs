@@ -19,7 +19,7 @@ namespace NuGet {
         public void Initialize() {
             using (AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(this.GetType().Assembly))) {
                 using (var container = new CompositionContainer(catalog)) {
-                    container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
+                    container.ComposeExportedValue<IPackageRepositoryFactory>(new PackageRepositoryFactory());
                     container.ComposeExportedValue<IPackageSourceProvider>(PackageSourceProvider.Default);
                     container.ComposeParts(this);
                 }

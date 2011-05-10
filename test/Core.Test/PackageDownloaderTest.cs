@@ -28,7 +28,7 @@ namespace NuGet.Test {
             var request = new Mock<WebRequest>();
             request.Setup(r => r.GetResponse()).Returns(response.Object);
             var httpClient = new Mock<IHttpClient>();
-            httpClient.Setup(c => c.CreateRequest(It.IsAny<Uri>(), It.IsAny<bool>())).Returns(request.Object);
+            httpClient.Setup(c => c.CreateRequest()).Returns(request.Object);
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(h => h.VerifyHash(It.IsAny<byte[]>(), It.IsAny<byte[]>())).Returns(false);
             var packageFactory = new Mock<IPackageFactory>();

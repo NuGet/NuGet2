@@ -14,10 +14,6 @@ namespace NuGet {
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
-        public PackageDownloader()
-            : this(new HttpClient()) {
-        }
-
         public PackageDownloader(IHttpClient httpClient)
             : this(httpClient, new ZipPackageFactory(), new CryptoHashProvider()) {
         }
@@ -70,7 +66,7 @@ namespace NuGet {
                 _httpClient.SendingRequest += beforeSendingRequesthandler;
 
                 // TODO: This gets held onto in memory which we want to get rid of eventually
-                byte[] buffer = _httpClient.DownloadData(uri);
+                byte[] buffer = _httpClient.DownloadData();
 
                 if (!_hashProvider.VerifyHash(buffer, packageHash)) {
                     throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);

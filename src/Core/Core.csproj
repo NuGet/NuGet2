@@ -77,6 +77,7 @@
     <Compile Include="Repositories\MachineCache.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
+    <Compile Include="Utility\BaseProxyFinderStrategy.cs" />
     <Compile Include="Utility\HttpUtility.cs" />
     <Compile Include="Utility\IHttpClientEvents.cs" />
     <Compile Include="Repositories\LazyQueue.cs" />
@@ -104,12 +105,17 @@
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Compile Include="Utility\IHttpClient.cs" />
+    <Compile Include="Utility\IntegratedCredentialsStrategy.cs" />
     <Compile Include="Utility\IProgressProvider.cs" />
+    <Compile Include="Utility\IProxyFinder.cs" />
+    <Compile Include="Utility\IProxyFinderStrategy.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="Utility\PackageHelper.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PathValidator.cs" />
+    <Compile Include="Utility\ProxyFinder.cs" />
+    <Compile Include="Utility\RedirectedHttpClient.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
     <Compile Include="Utility\ZipPackageFactory.cs" />

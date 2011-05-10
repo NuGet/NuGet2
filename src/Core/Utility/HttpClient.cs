@@ -7,54 +7,70 @@ namespace NuGet {
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
-        public string UserAgent {
-            get;
-            set;
+        private static IProxyFinder _defaultProxyFinder = new ProxyFinder();
+
+        private Uri _uri;
+
+        /// <summary>
+        /// Static constructor to create a defaulted ProxyFinder instance that will be used
+        /// by default for all web requests so that we don't have to do the same thing for each
+        /// instance of HttpClient and its derived types.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:Initialize reference type static fields inline"
+            , Justification = "Default strategy registration so that we don't have to register it for every single instance.")]
+        static HttpClient() {
+            DefaultProxyFinder.RegisterProxyStrategy(new IntegratedCredentialsStrategy());
         }
 
-        public WebRequest CreateRequest(Uri uri, bool acceptCompression) {
-            WebRequest request = WebRequest.Create(uri);
-            InitializeRequest(request, acceptCompression);
+        private HttpClient() {
+            ProxyFinder = DefaultProxyFinder;
+        }
+
+        public HttpClient(Uri uri)
+            : this() {
+            if(uri == null) {
+                throw new ArgumentNullException("uri");
+            }
+
+            _uri = uri;
+        }
+
+        public virtual WebRequest CreateRequest() {
+            WebRequest request = WebRequest.Create(Uri);
+            InitializeRequest(request);
             return request;
         }
 
-        public void InitializeRequest(WebRequest request, bool acceptCompression) {
+        public void InitializeRequest(WebRequest request) {
             var httpRequest = request as HttpWebRequest;
-            if (httpRequest != null) {
+            if(httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
-                if (acceptCompression) {
+                if(AcceptCompression) {
                     httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 }
             }
-
-            request.UseDefaultCredentials = true;
-            if (request.Proxy != null) {
-                // If we are going through a proxy then just set the default credentials
-                request.Proxy.Credentials = CredentialCache.DefaultCredentials;
+            // Let's try and see if the given proxy is set to null and if it is then we'll try to ask
+            // The ProxyFinder to try and auto detect the proxy for us.
+            // By default if the user has not set the proxy then the proxy should be set to the WebRequest.DefaultWebProxy
+            // If the user has manually set or passed in a proxy as Null then we probably don't want to auto detect.
+            if(ProxyFinder != null) {
+                Proxy = ProxyFinder.GetProxy(Uri);
             }
-
+            // Set the request proxy to the set Proxy property instance.
+            request.Proxy = Proxy;
             // giving clients a chance to examine/modify the request object before the request actually goes out.
             RaiseSendingRequest(request);
         }
 
-        public Uri GetRedirectedUri(Uri uri) {
-            WebRequest request = CreateRequest(uri, acceptCompression: false);
-            using (WebResponse response = request.GetResponse()) {
-                if (response == null) {
-                    return null;
-                }
-                return response.ResponseUri;
-            }
-        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public byte[] DownloadData(Uri uri) {
+        public byte[] DownloadData() {
             const int ChunkSize = 1024 * 4; // 4KB
 
             byte[] buffer = null;
 
             // we don't want to enable compression when downloading packages
-            WebRequest request = CreateRequest(uri, acceptCompression: false);
+            WebRequest request = CreateRequest();
             using (var response = request.GetResponse()) {
 
                 // total response length
@@ -88,5 +104,45 @@ namespace NuGet {
         private void RaiseSendingRequest(WebRequest webRequest) {
             SendingRequest(this, new WebRequestEventArgs(webRequest));
         }
+
+
+        public string UserAgent {
+            get;
+            set;
+        }
+
+        public virtual Uri Uri {
+            get {
+                return _uri;
+            }
+            set {
+                _uri = value;
+            }
+        }
+
+        public IWebProxy Proxy {
+            get;
+            set;
+        }
+
+        public IProxyFinder ProxyFinder {
+            get;
+            set;
+        }
+
+        public bool AcceptCompression {
+            get;
+            set;
+        }
+
+        public static IProxyFinder DefaultProxyFinder {
+            get {
+                return _defaultProxyFinder;
+            }
+            set {
+                _defaultProxyFinder = value;
+            }
+        }
+
     }
 }
