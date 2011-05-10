@@ -11,6 +11,7 @@ namespace NuGet {
     public static class VersionUtility {
         private const string NetFrameworkIdentifier = ".NETFramework";
         private static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
+        private static readonly Version _emptyVersion = new Version();
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "NET", NetFrameworkIdentifier },
@@ -41,7 +42,7 @@ namespace NuGet {
             { "CompactFramework", "cf" }
         };
 
-        public static Version DefaultTargetFrameworkVersion {
+        private static Version DefaultTargetFrameworkVersion {
             get {
                 // We need to parse the version name out from the mscorlib's assembly name since
                 // we can't call GetName() in medium trust
@@ -137,7 +138,7 @@ namespace NuGet {
                     return UnsupportedFrameworkName;
                 }
 
-                version = DefaultTargetFrameworkVersion;
+                version = _emptyVersion;
             }
 
             if (String.IsNullOrEmpty(identifierPart)) {

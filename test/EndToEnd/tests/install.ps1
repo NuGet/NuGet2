@@ -1050,3 +1050,19 @@ function Test-PackageInstallAcceptsAllAsSourceName {
     Assert-SolutionPackage FakeItEasy
     Assert-SolutionPackage Castle.Core
 }
+
+function Test-PackageWithNoVersionInFolderName {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package PackageWithNoVersionInFolderName -Source $context.RepositoryRoot
+    
+    # Assert
+    Assert-Package $p PackageWithNoVersionInFolderName
+    Assert-SolutionPackage PackageWithNoVersionInFolderName
+    Assert-Reference $p A
+}

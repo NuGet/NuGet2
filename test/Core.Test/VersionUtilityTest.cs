@@ -10,7 +10,7 @@ namespace NuGet.Test {
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames() {
             // Arrange
             var knownNameFormats = new[] { ".net", ".netframework", "net", "netframework" };
-            Version version40 = new Version("4.0.0.0");
+            Version defaultVersion = new Version("0.0");
 
             // Act
             var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
@@ -18,7 +18,7 @@ namespace NuGet.Test {
             // Assert
             foreach (var frameworkName in frameworkNames) {
                 Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-                Assert.AreEqual(version40, frameworkName.Version);
+                Assert.AreEqual(defaultVersion, frameworkName.Version);
             }
         }
 
@@ -42,7 +42,7 @@ namespace NuGet.Test {
         public void ParseFrameworkNameNormalizesSupportedSilverlightNames() {
             // Arrange
             var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight", "Silverlight " };
-            Version version40 = new Version("4.0.0.0");
+            Version defaultVersion = new Version("0.0");
 
             // Act
             var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
@@ -50,7 +50,7 @@ namespace NuGet.Test {
             // Assert
             foreach (var frameworkName in frameworkNames) {
                 Assert.AreEqual("Silverlight", frameworkName.Identifier);
-                Assert.AreEqual(version40, frameworkName.Version);
+                Assert.AreEqual(defaultVersion, frameworkName.Version);
             }
         }
 
@@ -112,7 +112,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(VersionUtility.DefaultTargetFrameworkVersion, frameworkName.Version);
+            Assert.AreEqual(new Version(), frameworkName.Version);
         }
 
         [TestMethod]
@@ -213,7 +213,7 @@ namespace NuGet.Test {
             Assert.AreEqual("Silverlight", f5.Identifier);
             Assert.AreEqual(new Version("2.0"), f5.Version);
             Assert.AreEqual(".NETFramework", f6.Identifier);
-            Assert.AreEqual(VersionUtility.DefaultTargetFrameworkVersion, f6.Version);
+            Assert.AreEqual(new Version(), f6.Version);
         }
 
         [TestMethod]
