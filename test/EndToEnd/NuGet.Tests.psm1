@@ -107,8 +107,10 @@ function global:Run-Test {
             "Running Test $name..." >> $testLogFile
             
             $repositoryPath = Join-Path $testRepositoryPath $name
+
             $values = @{
                 RepositoryRoot = $testRepositoryPath
+                TestRoot = $repositoryPath
                 RepositoryPath = Join-Path $repositoryPath Packages
             }
             

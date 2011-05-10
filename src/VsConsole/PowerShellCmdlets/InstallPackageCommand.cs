@@ -46,7 +46,7 @@ namespace NuGet.PowerShell.Commands {
             }
 
             if (!String.IsNullOrEmpty(Source)) {
-                return PackageManagerFactory.CreatePackageManager(Source);
+                return CreateObjectFromSource(PackageManagerFactory.CreatePackageManager, Source);
             }
 
             return base.CreatePackageManager();

@@ -34,6 +34,11 @@ namespace NuGet.PowerShell.Commands {
             exists = null;
             errorMessage = null;
 
+            // session is null during unit tests
+            if (session == null) {
+                return false;
+            }
+
             if (!session.Path.IsValid(psPath)) {
                 errorMessage = String.Format(
                     CultureInfo.CurrentCulture,

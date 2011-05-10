@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
-using System.Net;
 using System.Reflection;
 using EnvDTE;
 using NuGet.VisualStudio;
@@ -223,6 +222,39 @@ namespace NuGet.PowerShell.Commands {
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "ps is a common powershell prefix")]
         protected bool TryTranslatePSPath(string psPath, out string path, out bool? exists, out string errorMessage) {
             return PSPathUtility.TryTranslatePSPath(SessionState, psPath, out path, out exists, out errorMessage);
+        }
+
+        protected T CreateObjectFromSource<T>(Func<string, T> factory, string source) {
+            if (source == null) {
+                throw new ArgumentNullException("source");
+            }
+
+            try {
+                T item = factory(source);
+                if (item != null) {
+                    return item;
+                }
+            }
+            catch (UriFormatException) {
+                // if the source is relative path, it can result in invalid uri exception
+            }
+
+            Uri uri;
+            // if it's not an absolute path, treat it as relative path
+            if (Uri.TryCreate(source, UriKind.Relative, out uri)) {
+                string outputPath;
+                bool? exists;
+                string errorMessage;
+                // translate relative path to absolute path
+                if (TryTranslatePSPath(source, out outputPath, out exists, out errorMessage)) {
+                    return factory.Invoke(outputPath);
+                }
+                else {
+                    return factory.Invoke(source);
+                }
+            }
+
+            return default(T);
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]

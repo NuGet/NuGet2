@@ -136,17 +136,49 @@ function Test-GetPackageWithUpdatesAcceptsSourceName {
     Assert-AreEqual 2 $packages.Count
 }
 
-function Test-GetPackageThrowsWithInvalidSourceName {
-    # Act
-    Assert-Throws { 
-        Get-Package -ListAvailable -Source 'nonexistent package source'
-    } 'Invalid URI: The format of the URI could not be determined.'
-}
-
 function Test-GetPackageAcceptsAllAsSourceName {
      # Act
     $p = @(Get-Package -Filter elmah -ListAvailable -Source 'All')
 
     # Assert
     Assert-True (1 -le $p.Count)
+}
+
+function Test-GetPackageAcceptsRelativePathSource {
+    param(
+        $context
+    )
+
+    pushd
+
+    # Act
+    cd $context.TestRoot
+    $p = @(Get-Package -ListAvailable -Source '..\')
+
+    # Assert
+    Assert-True (1 -le $p.Count)
+
+    popd
+}
+
+function Test-GetPackageAcceptsRelativePathSource2 {
+    param(
+        $context
+    )
+
+    pushd
+
+    # Arrange
+    $repositoryRoot = $context.RepositoryRoot
+    $parentOfRoot = Split-Path $repositoryRoot
+    $relativePath = Split-Path $repositoryRoot -Leaf
+
+    # Act
+    cd $parentOfRoot
+    $p = @(Get-Package -ListAvailable -Source $relativePath)
+
+    # Assert
+    Assert-True (1 -le $p.Count)
+
+    popd
 }

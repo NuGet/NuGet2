@@ -1066,3 +1066,53 @@ function Test-PackageWithNoVersionInFolderName {
     Assert-SolutionPackage PackageWithNoVersionInFolderName
     Assert-Reference $p A
 }
+
+function Test-PackageInstallAcceptsRelativePathSource {
+    param(
+        $context
+    )
+
+    pushd
+
+    # Arrange
+    $project = New-ConsoleApplication
+    
+    # Act
+    cd $context.TestRoot
+    Assert-AreEqual $context.TestRoot $pwd
+     
+    Install-Package PackageWithExeReference -Project $project.Name -Source '..\'
+    
+    # Assert
+    Assert-Reference $project NuGet
+    Assert-Package $project PackageWithExeReference
+
+    popd
+}
+
+function Test-PackageInstallAcceptsRelativePathSource2 {
+    param(
+        $context
+    )
+
+    pushd
+
+    # Arrange
+    $repositoryRoot = $context.RepositoryRoot
+    $parentOfRoot = Split-Path $repositoryRoot
+    $relativePath = Split-Path $repositoryRoot -Leaf
+
+    $project = New-ConsoleApplication
+    
+    # Act
+    cd $parentOfRoot
+    Assert-AreEqual $parentOfRoot $pwd
+    Install-Package PackageWithExeReference -Project $project.Name -Source $relativePath
+    
+    # Assert
+    Assert-Reference $project NuGet
+ 
+    Assert-Package $project PackageWithExeReference
+
+    popd
+}

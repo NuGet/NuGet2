@@ -80,7 +80,7 @@
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the URL or directory path for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. When set to a local file system path, Source can be either absolute or relative to the current directory. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -217,7 +217,7 @@ c:\temp\packages to find the package.
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the URL or directory path for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to install. When set to a local file system path, Source can be either absolute or relative to the current directory. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -562,7 +562,7 @@ Uninstalls the Elmah package even if another package depends on it.
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
         <maml:description>
-          <maml:para>Specifies the URL or directory path for the package source containing the package to install. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
+          <maml:para>Specifies the URL or directory path for the package source containing the package to update. When set to a local file system path, Source can be either absolute or relative to the current directory. If omitted, looks in the currently selected package source to find the corresponding package URL.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string

@@ -41,7 +41,7 @@ namespace NuGet.PowerShell.Commands {
 
         protected override IVsPackageManager CreatePackageManager() {
             if (!String.IsNullOrEmpty(Source)) {
-                return PackageManagerFactory.CreatePackageManager(Source);
+                return CreateObjectFromSource(PackageManagerFactory.CreatePackageManager, Source);
             }
             return base.CreatePackageManager();
         }

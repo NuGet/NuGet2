@@ -176,7 +176,7 @@ namespace NuGet.PowerShell.Commands {
 
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
                 // If a Source parameter is explicitly specified, use it
-                return _repositoryFactory.CreateRepository(Source);
+                return CreateObjectFromSource(_repositoryFactory.CreateRepository, Source);
             }
             else if (Recent.IsPresent) {
                 return _recentPackagesRepository;

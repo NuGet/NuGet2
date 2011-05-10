@@ -320,3 +320,53 @@ function Test-UpdatePackageAcceptsAllAsSourceName {
     # Assert
     Assert-Package $p Antlr 3.1.3.42154
 }
+
+function Test-UpdatePackageAcceptsRelativePathSource {
+    param(
+        $context
+    )
+    
+    pushd
+
+    # Arrange
+    $p = New-ConsoleApplication
+    Install-Package SkypePackage -Version 1.0 -Project $p.Name -Source $context.RepositoryRoot
+    Assert-Package $p SkypePackage 1.0
+
+    $testPathName = Split-Path $context.TestRoot -Leaf
+
+    cd $context.RepositoryRoot
+    Assert-AreEqual $context.RepositoryRoot $pwd
+
+    # Act
+    Update-Package SkypePackage -Version 2.0 -Project $p.Name -Source $testPathName
+
+    # Assert
+    Assert-Package $p SkypePackage 2.0
+
+    popd
+}
+
+function Test-UpdatePackageAcceptsRelativePathSource2 {
+    param(
+        $context
+    )
+    
+    pushd
+
+    # Arrange
+    $p = New-ConsoleApplication
+    Install-Package SkypePackage -Version 1.0 -Project $p.Name -Source $context.RepositoryRoot
+    Assert-Package $p SkypePackage 1.0
+
+    cd $context.TestRoot
+    Assert-AreEqual $context.TestRoot $pwd
+
+    # Act
+    Update-Package SkypePackage -Version 3.0 -Project $p.Name -Source '..\'
+
+    # Assert
+    Assert-Package $p SkypePackage 3.0
+
+    popd
+}
