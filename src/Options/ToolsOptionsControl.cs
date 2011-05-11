@@ -381,20 +381,27 @@ namespace NuGet.Options {
         private string DetermineInitialDirectory() {
             // determine the inital directory to show in the folder dialog
             string initialDir = NewPackageSource.Text;
-            if (Path.IsPathRooted(initialDir) && Directory.Exists(initialDir)) {
+            
+            if (IsPathRootedSafe(initialDir) && Directory.Exists(initialDir)) {
                 return initialDir;
             }
 
             var selectedItem = (PackageSource)PackageSourcesListBox.SelectedItem;
             if (selectedItem != null) {
                 initialDir = selectedItem.Source;
-                if (Path.IsPathRooted(initialDir)) {
+                if (IsPathRootedSafe(initialDir)) {
                     return initialDir;
                 }
             }
 
             // fallback to MyDocuments folder
             return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
+
+        private static bool IsPathRootedSafe(string path) {
+            // Check to make sure path does not contain any invalid chars.
+            // Otherwise, Path.IsPathRooted() will throw an ArgumentException.
+            return path.IndexOfAny(Path.GetInvalidPathChars()) == -1 && Path.IsPathRooted(path);
         }
     }
 
