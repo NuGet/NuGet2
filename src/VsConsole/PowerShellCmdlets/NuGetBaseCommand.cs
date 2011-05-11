@@ -246,7 +246,7 @@ namespace NuGet.PowerShell.Commands {
                 bool? exists;
                 string errorMessage;
                 // translate relative path to absolute path
-                if (TryTranslatePSPath(source, out outputPath, out exists, out errorMessage)) {
+                if (TryTranslatePSPath(source, out outputPath, out exists, out errorMessage) && exists == true) {
                     return factory.Invoke(outputPath);
                 }
                 else {
