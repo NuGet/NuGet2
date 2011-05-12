@@ -29,8 +29,11 @@ namespace NuGet {
             }
         }
 
-        public DataServicePackageRepository(IHttpClient client){
+        public DataServicePackageRepository(Uri serviceRoot)
+            : this(new HttpClient(serviceRoot)) {
+        }
 
+        public DataServicePackageRepository(IHttpClient client){
             if(client == null) {
                 throw new ArgumentNullException("client");
             }
@@ -38,7 +41,7 @@ namespace NuGet {
             _httpClient = client;
             _httpClient.AcceptCompression = true;
 
-            _packageDownloader = new PackageDownloader(_httpClient);
+            _packageDownloader = new PackageDownloader();
         }
 
         public override string Source {
@@ -49,8 +52,8 @@ namespace NuGet {
 
         // Don't initialize the Context at the constructor time so that
         // we don't make a web request if we are not gonig to actually use it
-        // since gettint the Uri property of th RedirectedHttpClient will
-        // trigget that functionality.
+        // since getting the Uri property of the RedirectedHttpClient will
+        // trigger that functionality.
         private IDataServiceContext Context {
             get {
                 if(_context == null) {

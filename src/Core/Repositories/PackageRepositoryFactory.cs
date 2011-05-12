@@ -5,6 +5,14 @@ using NuGet.Resources;
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
 
+        private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
+
+        public static PackageRepositoryFactory Default {
+            get {
+                return _default;
+            }
+        }
+
         public virtual IPackageRepository CreateRepository(string packageSource) {
             if (packageSource == null) {
                 throw new ArgumentNullException("packageSource");

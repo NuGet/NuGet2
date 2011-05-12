@@ -10,45 +10,36 @@ namespace NuGet {
     /// that is configured as a default location for nuget packages.
     /// </summary>
     public class RedirectedHttpClient : HttpClient {
-        private IHttpClient _cachedRedirectClient = null;
+        private Lazy<IHttpClient> _cachedClient = null;
         private Uri _originalUri = null;
 
         public RedirectedHttpClient(Uri uri)
             : base(uri) {
             _originalUri = uri;
+            _cachedClient = new Lazy<IHttpClient>(EnsureClient);
         }
 
         public override WebRequest CreateRequest() {
-            return CachedRedirectedClient.CreateRequest();
+            return _cachedClient.Value.CreateRequest();
         }
 
         public override Uri Uri {
             get {
-                return CachedRedirectedClient.Uri;
+                return _cachedClient.Value.Uri;
             }
         }
 
-        private IHttpClient CachedRedirectedClient {
-            get {
-                // Cache an internal HttpClient object so that
-                // we don't have to go through the forwarding link
-                // every single time thus slowing down the connection to the
-                // original source.
-                if(_cachedRedirectClient == null) {
-                    IHttpClient originalClient = new HttpClient(_originalUri);
-                    WebRequest request = originalClient.CreateRequest();
-                    using(WebResponse response = request.GetResponse()) {
-                        if(null == response) {
-                            throw new InvalidOperationException(
-                                string.Format(
-                                    CultureInfo.CurrentCulture,
-                                    "Unable to get a valid response for link: {0}",
-                                    Uri.OriginalString));
-                        }
-                        _cachedRedirectClient = new HttpClient(response.ResponseUri);
-                    }                    
+        private IHttpClient EnsureClient() {
+            IHttpClient originalClient = new HttpClient(_originalUri);
+            WebRequest request = originalClient.CreateRequest();
+            using(WebResponse response = request.GetResponse()) {
+                if(response == null) {
+                    throw new InvalidOperationException(
+                        string.Format(CultureInfo.CurrentCulture,
+                                      "Unable to get a valid response for link: {0}",
+                                      Uri.OriginalString));
                 }
-                return _cachedRedirectClient;
+                return new HttpClient(response.ResponseUri);
             }
         }
     }

@@ -7,20 +7,9 @@ namespace NuGet {
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
-        private static IProxyFinder _defaultProxyFinder = new ProxyFinder();
+        private static IProxyFinder _defaultProxyFinder = CreateFinder();
 
         private Uri _uri;
-
-        /// <summary>
-        /// Static constructor to create a defaulted ProxyFinder instance that will be used
-        /// by default for all web requests so that we don't have to do the same thing for each
-        /// instance of HttpClient and its derived types.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:Initialize reference type static fields inline"
-            , Justification = "Default strategy registration so that we don't have to register it for every single instance.")]
-        static HttpClient() {
-            DefaultProxyFinder.RegisterProxyStrategy(new IntegratedCredentialsStrategy());
-        }
 
         private HttpClient() {
             ProxyFinder = DefaultProxyFinder;
@@ -33,6 +22,44 @@ namespace NuGet {
             }
 
             _uri = uri;
+        }
+
+        public string UserAgent {
+            get;
+            set;
+        }
+
+        public virtual Uri Uri {
+            get {
+                return _uri;
+            }
+            set {
+                _uri = value;
+            }
+        }
+
+        public IWebProxy Proxy {
+            get;
+            set;
+        }
+
+        public IProxyFinder ProxyFinder {
+            get;
+            set;
+        }
+
+        public bool AcceptCompression {
+            get;
+            set;
+        }
+
+        public static IProxyFinder DefaultProxyFinder {
+            get {
+                return _defaultProxyFinder;
+            }
+            set {
+                _defaultProxyFinder = value;
+            }
         }
 
         public virtual WebRequest CreateRequest() {
@@ -105,44 +132,15 @@ namespace NuGet {
             SendingRequest(this, new WebRequestEventArgs(webRequest));
         }
 
-
-        public string UserAgent {
-            get;
-            set;
+        /// <summary>
+        /// Initialize the static instance of the IProxyFinder that is going to be
+        /// used as the default instance for most of the HttpClient instances.
+        /// </summary>
+        /// <returns></returns>
+        private static IProxyFinder CreateFinder() {
+            var proxyFinder = new ProxyFinder();
+            proxyFinder.RegisterProvider(new IntegratedCredentialProvider());
+            return proxyFinder;
         }
-
-        public virtual Uri Uri {
-            get {
-                return _uri;
-            }
-            set {
-                _uri = value;
-            }
-        }
-
-        public IWebProxy Proxy {
-            get;
-            set;
-        }
-
-        public IProxyFinder ProxyFinder {
-            get;
-            set;
-        }
-
-        public bool AcceptCompression {
-            get;
-            set;
-        }
-
-        public static IProxyFinder DefaultProxyFinder {
-            get {
-                return _defaultProxyFinder;
-            }
-            set {
-                _defaultProxyFinder = value;
-            }
-        }
-
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Net;
-using System.Net.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Collections.Generic;
 
 namespace NuGet.Test {
     [TestClass]
@@ -14,8 +12,23 @@ namespace NuGet.Test {
             var httpClient = new HttpClient(new Uri("http://example.com"));
 
             // Act
+
             // Assert
             Assert.IsNotNull(httpClient.ProxyFinder,"HttpClient.ProxyFinder is not initialized by default.");
+            Assert.AreEqual(HttpClient.DefaultProxyFinder, httpClient.ProxyFinder);
+        }
+
+        [TestMethod]
+        public void ChangingDefaultProxyFinderShouldSetNewInstanceOnNewHttpClients() {
+            // Arrange
+            var mockProxyFinder = new Mock<IProxyFinder>();
+            HttpClient.DefaultProxyFinder = mockProxyFinder.Object;
+            var httpClient = new HttpClient(new Uri("http://example.com"));
+
+            // Act
+
+            // Assert
+            Assert.AreEqual(mockProxyFinder.Object, httpClient.ProxyFinder);
         }
 
         [TestMethod]
@@ -35,7 +48,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void EmptyStrategyListReturnsNullProxy() {
+        public void EmptyProviderListReturnsNullProxy() {
             // Arrange
             var httpClient = new HttpClient(new Uri("http://example.com"));
             

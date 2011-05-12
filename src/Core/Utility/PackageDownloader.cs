@@ -7,22 +7,17 @@ using NuGet.Resources;
 namespace NuGet {
     public class PackageDownloader : IHttpClientEvents {
         private const string DefaultUserAgentClient = "NuGet Visual Studio Extension";
-        private readonly IHttpClient _httpClient;
         private readonly IPackageFactory _packageFactory;
         private readonly IHashProvider _hashProvider;
 
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
-        public PackageDownloader(IHttpClient httpClient)
-            : this(httpClient, new ZipPackageFactory(), new CryptoHashProvider()) {
+        public PackageDownloader()
+            : this(new ZipPackageFactory(), new CryptoHashProvider()) {
         }
 
-        public PackageDownloader(IHttpClient httpClient, IPackageFactory packageFactory, IHashProvider hashProvider) {
-            if (httpClient == null) {
-                throw new ArgumentNullException("httpClient");
-            }
-
+        public PackageDownloader(IPackageFactory packageFactory, IHashProvider hashProvider) {
             if (packageFactory == null) {
                 throw new ArgumentNullException("packageFactory");
             }
@@ -31,10 +26,8 @@ namespace NuGet {
                 throw new ArgumentNullException("hashProvider");
             }
 
-            _httpClient = httpClient;
             _packageFactory = packageFactory;
             _hashProvider = hashProvider;
-            _httpClient.UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient);
         }
 
         public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package) {
@@ -61,12 +54,16 @@ namespace NuGet {
                 OnSendingRequest(e.Request);
             };
 
+            IHttpClient downloadClient = null;
+
             try {
-                _httpClient.ProgressAvailable += progressAvailableHandler;
-                _httpClient.SendingRequest += beforeSendingRequesthandler;
+                downloadClient = new HttpClient(uri);
+                downloadClient.UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient);
+                downloadClient.ProgressAvailable += progressAvailableHandler;
+                downloadClient.SendingRequest += beforeSendingRequesthandler;
 
                 // TODO: This gets held onto in memory which we want to get rid of eventually
-                byte[] buffer = _httpClient.DownloadData();
+                byte[] buffer = downloadClient.DownloadData();
 
                 if (!_hashProvider.VerifyHash(buffer, packageHash)) {
                     throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
@@ -77,8 +74,8 @@ namespace NuGet {
                 });
             }
             finally {
-                _httpClient.ProgressAvailable -= progressAvailableHandler;
-                _httpClient.SendingRequest -= beforeSendingRequesthandler;
+                downloadClient.ProgressAvailable -= progressAvailableHandler;
+                downloadClient.SendingRequest -= beforeSendingRequesthandler;
             }
         }
 

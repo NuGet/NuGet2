@@ -2,7 +2,7 @@
 using System.Net;
 
 namespace NuGet {
-    public interface IProxyFinderStrategy {
+    public interface IProxyProvider {
         IWebProxy GetProxy(Uri uri);
     }
 }

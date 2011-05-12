@@ -16,20 +16,20 @@ namespace NuGet {
         /// <returns></returns>
         IWebProxy GetProxy(Uri uri);
         /// <summary>
-        /// Allows the consumer to provide a list of proxy finding strategies to use
+        /// Allows the consumer to provide a list of proxy providers to use
         /// for locating of different IWebProxy instances.
         /// </summary>
-        /// <param name="strategy"></param>
-        void RegisterProxyStrategy(IProxyFinderStrategy strategy);
+        /// <param name="provider"></param>
+        void RegisterProvider(IProxyProvider provider);
         /// <summary>
-        /// Unregisters the specified proxy finding strategy from the proxy finder.
+        /// Unregisters the specified proxy provider from the proxy finder.
         /// </summary>
-        /// <param name="strategy"></param>
-        void UnregisterProxyStrategy(IProxyFinderStrategy strategy);
+        /// <param name="provider"></param>
+        void UnregisterProvider(IProxyProvider provider);
         /// <summary>
-        /// Returns a list of already registered IProxyFinderStrategy instances that one can enumerate
+        /// Returns a list of already registered IProxyProvider instances that one can enumerate
         /// </summary>
-        ICollection<IProxyFinderStrategy> RegisteredStrategies {
+        ICollection<IProxyProvider> RegisteredProviders {
             get;
         }
     }

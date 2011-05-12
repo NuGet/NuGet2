@@ -13,12 +13,12 @@ namespace NuGet {
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
         /// for the same Uri again.
         /// </summary>
-        readonly ConcurrentDictionary<Uri, IWebProxy> _proxyCache = new ConcurrentDictionary<Uri, IWebProxy>();
+        private readonly ConcurrentDictionary<Uri, IWebProxy> _proxyCache = new ConcurrentDictionary<Uri, IWebProxy>();
         /// <summary>
-        /// Local cache of registered proxy finding strategies to use when locating a valid proxy
+        /// Local cache of registered proxy providers to use when locating a valid proxy
         /// to use for the given Uri.
         /// </summary>
-        readonly List<IProxyFinderStrategy> _strategyCache = new List<IProxyFinderStrategy>();
+        private readonly ISet<IProxyProvider> _providerCache = new HashSet<IProxyProvider>();
         /// <summary>
         /// Returns an instance of a IWebProxy interface that is to be used for creating requests to the given Uri
         /// </summary>
@@ -34,41 +34,37 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Allows the consumer to provide a list of proxy finding strategies to use
+        /// Allows the consumer to provide a list of proxy providers to use
         /// for locating of different IWebProxy instances.
         /// </summary>
-        /// <param name="strategy"></param>
-        public void RegisterProxyStrategy(IProxyFinderStrategy strategy) {
-            if(strategy == null) {
-                throw new ArgumentNullException("strategy");
+        /// <param name="provider"></param>
+        public void RegisterProvider(IProxyProvider provider) {
+            if(provider == null) {
+                throw new ArgumentNullException("provider");
             }
-            if(_strategyCache.Contains(strategy)) {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                                                                  NuGetResources.DuplicateProxyFinderStrategy));
-            }
-            _strategyCache.Add(strategy);
+            _providerCache.Add(provider);
         }
 
         /// <summary>
-        /// Unregisters the specified proxy finding strategy from the proxy finder.
+        /// Unregisters the specified proxy provider from the proxy finder.
         /// </summary>
-        /// <param name="strategy"></param>
-        public void UnregisterProxyStrategy(IProxyFinderStrategy strategy) {
-            if(strategy == null) {
-                throw new ArgumentNullException("strategy");
+        /// <param name="provider"></param>
+        public void UnregisterProvider(IProxyProvider provider) {
+            if(provider == null) {
+                throw new ArgumentNullException("provider");
             }
-            if(!_strategyCache.Contains(strategy)) {
+            if(!_providerCache.Contains(provider)) {
                 return;
             }
-            _strategyCache.Remove(strategy);
+            _providerCache.Remove(provider);
         }
 
         /// <summary>
-        /// Returns a list of already registered IProxyFinderStrategy instances that one can enumerate
+        /// Returns a list of already registered IProxyProvider instances that one can enumerate
         /// </summary>
-        public ICollection<IProxyFinderStrategy> RegisteredStrategies {
+        public ICollection<IProxyProvider> RegisteredProviders {
             get {
-                return _strategyCache;
+                return _providerCache;
             }
         }
 
@@ -87,8 +83,8 @@ namespace NuGet {
                 return cachedProxy;
             }
 
-            foreach(var proxyStrategy in _strategyCache) {
-                var proxy = ExecuteProxyStrategy(proxyStrategy, uri);
+            foreach(var provider in _providerCache) {
+                var proxy = ExecuteProvider(provider, uri);
                 if(proxy != null) {
                     result = proxy;
                     break;
@@ -96,7 +92,7 @@ namespace NuGet {
             }
            
             // TODO: If the proxy that is returned is null do we really want to cache this?
-            // PRO: Subsequent requests for the given Uri should automatically reutrn a null
+            // PRO: Subsequent requests for the given Uri should automatically return a null
             //      proxy instance without going through the proxy detection logic.
             // CON: If the user incorrectly types the password or an invalid proxy instance
             //      is cached then the user has to re-start the "Client" to be able to re-try
@@ -106,8 +102,8 @@ namespace NuGet {
             return result;
         }
 
-        protected virtual IWebProxy ExecuteProxyStrategy(IProxyFinderStrategy strategy, Uri uri) {
-            var proxy = strategy.GetProxy(uri);
+        protected virtual IWebProxy ExecuteProvider(IProxyProvider provider, Uri uri) {
+            var proxy = provider.GetProxy(uri);
             if(IsProxyValid(proxy, uri)) {
                 return proxy;
             }
@@ -123,7 +119,7 @@ namespace NuGet {
             // WebRequest.DefaultWebProxy seems to be more capable in terms of getting the default
             // proxy settings instead of the WebRequest.GetSystemProxy()
             IWebProxy proxy = WebRequest.DefaultWebProxy;
-            string proxyUrl = proxy.GetProxy(uri).AbsoluteUri;
+            string proxyUrl = proxy.GetProxy(uri).OriginalString;
             return new WebProxy(proxyUrl);
         }
 
@@ -153,7 +149,7 @@ namespace NuGet {
             }
             catch(WebException webException) {
                 HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if(null == webResponse || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
+                if(webResponse == null || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
                     result = false;
                 }
             }
