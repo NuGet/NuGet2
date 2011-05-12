@@ -12,6 +12,6 @@ namespace PackageExplorerViewModel {
         bool MoveFirst();
         bool MoveLast();
         bool MoveNext();
-        bool MovePrevious();       
+        bool MovePrevious();
     }
 }

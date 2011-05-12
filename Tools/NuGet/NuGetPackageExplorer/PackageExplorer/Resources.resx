@@ -183,4 +183,7 @@
   <data name="ProductRelease" xml:space="preserve">
     <value>RTM</value>
   </data>
+  <data name="ProxyConnectToMessage" xml:space="preserve">
+    <value>Connect to {0}</value>
+  </data>
 </root>

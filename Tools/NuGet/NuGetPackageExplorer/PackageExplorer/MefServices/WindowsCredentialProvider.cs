@@ -4,7 +4,7 @@ using System.Net;
 using NuGet;
 using Ookii.Dialogs.Wpf;
 
-namespace PackageExplorerViewModel {
+namespace PackageExplorer {
     public class WindowsCredentialProvider : DefaultCredentialProvider {
 
         public override ICredentials PromptUserForCredentials(Uri uri, bool retryCredentials) {
@@ -30,7 +30,7 @@ namespace PackageExplorerViewModel {
 
             using(var dialog = new CredentialDialog()) {
                 dialog.Target = credentialsTarget;
-                dialog.WindowTitle = string.Format(CultureInfo.CurrentCulture, Resources.ProxyConnectToMessage, proxyHost);
+                dialog.WindowTitle = string.Format(CultureInfo.CurrentCulture, Resources.Resources.ProxyConnectToMessage, proxyHost);
                 dialog.MainInstruction = dialog.WindowTitle;
                 dialog.ShowUIForSavedCredentials = forcePrompt;
                 dialog.ShowSaveCheckBox = true;
