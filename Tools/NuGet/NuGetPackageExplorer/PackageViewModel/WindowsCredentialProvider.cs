@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using Kerr;
 using NuGet;
+using Ookii.Dialogs.Wpf;
 
 namespace PackageExplorerViewModel {
     public class WindowsCredentialProvider : DefaultCredentialProvider {
@@ -17,33 +16,31 @@ namespace PackageExplorerViewModel {
                 throw new ArgumentNullException("uri");
             }
 
-            using (CredentialSet set = new CredentialSet(uri.Host)) {
-                if (set.Count < 1) {
-                    return new ICredentials[0] { };
-                }
-                return set
-                    .Select(cred => new NetworkCredential(cred.UserName, cred.Password))
-                    .ToArray();
-            }
+            var savedCredentials = CredentialDialog.RetrieveCredential(uri.Host);
+
+            return savedCredentials == null ? null : new ICredentials[] {savedCredentials};
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
         private static ICredentials GetBasicCredentials(Uri uri, bool forcePrompt) {
             string proxyHost = uri.Host;
+            string credentialsTarget = string.Format(CultureInfo.InvariantCulture, "PackageExplorer_{0}", proxyHost);
 
             ICredentials basicCredentials = null;
 
-            using (PromptForCredential dialog = new PromptForCredential()) {
-                dialog.TargetName = string.Format(CultureInfo.InvariantCulture, "PackageExplorer_{0}", proxyHost);
-                dialog.Title = string.Format(CultureInfo.CurrentCulture, "Connect to {0}", proxyHost);
-                dialog.Message = dialog.Title;
-                dialog.GenericCredentials = true;
-                dialog.AlwaysShowUI = forcePrompt;
-                if (dialog.ShowDialog()) {
-                    basicCredentials = new NetworkCredential(dialog.UserName, dialog.Password);
+            using(var dialog = new CredentialDialog()) {
+                dialog.Target = credentialsTarget;
+                dialog.WindowTitle = string.Format(CultureInfo.CurrentCulture, Resources.ProxyConnectToMessage, proxyHost);
+                dialog.MainInstruction = dialog.WindowTitle;
+                dialog.ShowUIForSavedCredentials = forcePrompt;
+                dialog.ShowSaveCheckBox = true;
+                if(dialog.ShowDialog()) {
+                    basicCredentials = dialog.Credentials;
+                    if(dialog.IsSaveChecked) {
+                        CredentialDialog.StoreCredential(credentialsTarget, dialog.Credentials);
+                    }
                 }
             }
-
             return basicCredentials;
         }
     }

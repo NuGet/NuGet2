@@ -232,6 +232,15 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect to {0}.
+        /// </summary>
+        internal static string ProxyConnectToMessage {
+            get {
+                return ResourceManager.GetString("ProxyConnectToMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is another file or folder with the same name..
         /// </summary>
         internal static string RenameCausesNameCollison {
