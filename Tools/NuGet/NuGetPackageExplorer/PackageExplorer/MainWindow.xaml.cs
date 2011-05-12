@@ -278,7 +278,7 @@ namespace PackageExplorer {
             if (HasUnsavedChanges) {
 
                 // if there is unsaved changes, ask user for confirmation
-                var result = UIServices.ConfirmWithCancel(StringResources.Dialog_SaveQuestion);
+                var result = UIServices.ConfirmWithCancel(StringResources.Dialog_SaveQuestion, "You have unsaved changes in the current file.");
                 if (result == null) {
                     return true;
                 }

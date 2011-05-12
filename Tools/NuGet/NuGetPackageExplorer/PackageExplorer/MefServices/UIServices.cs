@@ -4,6 +4,7 @@ using System.Windows;
 using Microsoft.Win32;
 using PackageExplorerViewModel.Types;
 using Ookii.Dialogs.Wpf;
+using System.Runtime.CompilerServices;
 
 namespace PackageExplorer {
 
@@ -12,6 +13,12 @@ namespace PackageExplorer {
 
         [Import]
         public Lazy<MainWindow> Window { get; set; }
+
+        private static bool OSSupportsTaskDialogs {
+            get {
+                return NativeMethods.IsWindowsVistaOrLater;
+            }
+        }
 
         public bool OpenSaveFileDialog(string title, string defaultFileName, string filter, out string selectedFilePath) {
             var dialog = new SaveFileDialog() {
@@ -76,32 +83,86 @@ namespace PackageExplorer {
             }
         }
 
-        public bool Confirm(string message) {
-            return Confirm(message, false);
+        public bool Confirm(string title, string message) {
+            return Confirm(title, message, isWarning: false);
         }
 
-        public bool Confirm(string message, bool isWarning) {
-            MessageBoxResult result = MessageBox.Show(
-                Window.Value,
-                message,
-                Resources.Resources.Dialog_Title,
-                MessageBoxButton.YesNo,
-                isWarning ? MessageBoxImage.Warning : MessageBoxImage.Question);
-            return result == MessageBoxResult.Yes;
-        }
-
-        public bool? ConfirmWithCancel(string message) {
-            MessageBoxResult result = MessageBox.Show(
-                Window.Value,
-                message,
-                Resources.Resources.Dialog_Title,
-                MessageBoxButton.YesNoCancel,
-                MessageBoxImage.Question);
-            if (result == MessageBoxResult.Cancel) {
-                return null;
+        public bool Confirm(string title, string message, bool isWarning) {
+            if (OSSupportsTaskDialogs) {
+                return ConfirmUsingTaskDialog(message, title, isWarning);
             }
             else {
+                MessageBoxResult result = MessageBox.Show(
+                    Window.Value,
+                    message,
+                    Resources.Resources.Dialog_Title,
+                    MessageBoxButton.YesNo,
+                    isWarning ? MessageBoxImage.Warning : MessageBoxImage.Question);
                 return result == MessageBoxResult.Yes;
+            }
+        }
+
+        private bool ConfirmUsingTaskDialog(string message, string title, bool isWarning) {
+            using (TaskDialog dialog = new TaskDialog()) {
+                dialog.WindowTitle = Resources.Resources.Dialog_Title;
+                dialog.MainInstruction = title;
+                dialog.Content = message;
+                dialog.CenterParent = true;
+                if (isWarning) {
+                    dialog.MainIcon = TaskDialogIcon.Warning;
+                }
+
+                dialog.Buttons.Add(new TaskDialogButton(ButtonType.Yes));
+                dialog.Buttons.Add(new TaskDialogButton(ButtonType.No));
+
+                TaskDialogButton result = dialog.ShowDialog(Window.Value);
+                return result.ButtonType == ButtonType.Yes;
+            }
+        }
+
+        public bool? ConfirmWithCancel(string message, string title) {
+            if (OSSupportsTaskDialogs) {
+                return ConfirmWithCancelUsingTaskDialog(message, title);
+            }
+            else {
+                MessageBoxResult result = MessageBox.Show(
+                    Window.Value,
+                    message,
+                    Resources.Resources.Dialog_Title,
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question);
+                if (result == MessageBoxResult.Cancel) {
+                    return null;
+                }
+                else {
+                    return result == MessageBoxResult.Yes;
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private bool? ConfirmWithCancelUsingTaskDialog(string message, string title) {
+            using (TaskDialog dialog = new TaskDialog()) {
+                dialog.WindowTitle = Resources.Resources.Dialog_Title;
+                dialog.MainInstruction = title;
+                dialog.Content = message;
+                dialog.CenterParent = true;
+                dialog.MainIcon = TaskDialogIcon.Warning;
+
+                dialog.Buttons.Add(new TaskDialogButton(ButtonType.Yes));
+                dialog.Buttons.Add(new TaskDialogButton(ButtonType.No));
+                dialog.Buttons.Add(new TaskDialogButton(ButtonType.Cancel));
+
+                TaskDialogButton result = dialog.ShowDialog(Window.Value);
+                if (result.ButtonType == ButtonType.Yes) {
+                    return true;
+                }
+                else if (result.ButtonType == ButtonType.No) {
+                    return false;
+                }
+                else {
+                    return null;
+                }
             }
         }
 

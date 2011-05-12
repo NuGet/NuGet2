@@ -252,8 +252,8 @@ namespace PackageExplorerViewModel {
         internal void ExportManifest(string fullpath) {
             if (File.Exists(fullpath)) {
                 bool confirmed = UIServices.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullpath)
-                );
+                    Resources.ConfirmToReplaceFile_Title, 
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullpath));
                 if (!confirmed) {
                     return;
                 }
@@ -290,8 +290,7 @@ namespace PackageExplorerViewModel {
         private void AddFileToFolder(PackageFolder folder, string file) {
             if (folder == null) {
                 string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
-                bool confirmed = UIServices.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToMoveFileIntoFolder, file, guessFolderName));
+                bool confirmed = UIServices.Confirm(Resources.ConfirmToMoveFileIntoFolder_Title, String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToMoveFileIntoFolder, file, guessFolderName));
 
                 if (confirmed) {
                     if (RootFolder.ContainsFolder(guessFolderName)) {

@@ -92,8 +92,8 @@ namespace PackageExplorerViewModel {
             string fullPath = System.IO.Path.Combine(rootPath, Path);
             if (File.Exists(fullPath)) {
                 bool confirmed = PackageViewModel.UIServices.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullPath)
-                );
+                    Resources.ConfirmToReplaceFile_Title, 
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceFile, fullPath));
                 if (!confirmed) {
                     return;
                 }

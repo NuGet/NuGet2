@@ -5,6 +5,18 @@ using System.Text;
 namespace PackageExplorer {
     internal static class NativeMethods {
 
+        public static bool IsWindowsVistaOrLater {
+            get {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(6, 0, 6000);
+            }
+        }
+
+        public static bool IsWindowsXPOrLater {
+            get {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(5, 1, 2600);
+            }
+        }
+
         public const int SW_SHOWNORMAL = 1;
         public const int SW_SHOWMINIMIZED = 2;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using PackageExplorerViewModel.Types;
 
@@ -12,7 +13,10 @@ namespace PackageExplorerViewModel {
 
         public static void OpenFileInShell(PackageFile file, IUIServices uiServices) {
             if (IsExecutableScript(file.Name)) {
-                bool confirm = uiServices.Confirm(Resources.OpenExecutableScriptWarning, isWarning: true);
+                bool confirm = uiServices.Confirm(
+                    String.Format(CultureInfo.CurrentCulture, Resources.OpenExecutableScriptWarning_Title, file.Name), 
+                    Resources.OpenExecutableScriptWarning, 
+                    isWarning: true);
                 if (!confirm) {
                     return;
                 }

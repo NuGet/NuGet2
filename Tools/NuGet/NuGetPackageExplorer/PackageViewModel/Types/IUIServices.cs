@@ -23,9 +23,9 @@ namespace PackageExplorerViewModel.Types {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         bool OpenFolderDialog(string title, string initialPath, out string selectedPath);
 
-        bool Confirm(string message);
-        bool Confirm(string message, bool isWarning);
-        bool? ConfirmWithCancel(string message);
+        bool Confirm(string title, string message);
+        bool Confirm(string title, string message, bool isWarning);
+        bool? ConfirmWithCancel(string message, string title);
         void Show(string message, MessageLevel messageLevel);
 
         void BeginInvoke(Action action);

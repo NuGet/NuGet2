@@ -115,8 +115,10 @@ namespace PackageExplorerViewModel {
         public void Delete(bool requireConfirmation = true) {
             if (requireConfirmation) {
                 bool confirm = PackageViewModel.UIServices.Confirm(
-                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToDeleteContent, Name),
+                    Resources.ConfirmToDeleteContent_Title, 
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToDeleteContent, Name), 
                     isWarning: true);
+                
                 if (!confirm) {
                     return;
                 }

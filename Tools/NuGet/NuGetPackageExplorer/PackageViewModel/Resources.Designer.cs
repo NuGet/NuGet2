@@ -70,11 +70,29 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deleted file is not recoverable..
+        /// </summary>
+        internal static string ConfirmToDeleteContent_Title {
+            get {
+                return ResourceManager.GetString("ConfirmToDeleteContent_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Do you want to place the file &apos;{0}&apos; into &apos;{1}&apos; folder?.
         /// </summary>
         internal static string ConfirmToMoveFileIntoFolder {
             get {
                 return ResourceManager.GetString("ConfirmToMoveFileIntoFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files at the root location are ignored by NuGet..
+        /// </summary>
+        internal static string ConfirmToMoveFileIntoFolder_Title {
+            get {
+                return ResourceManager.GetString("ConfirmToMoveFileIntoFolder_Title", resourceCulture);
             }
         }
         
@@ -88,11 +106,29 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There is already a file with the same name in this folder..
+        /// </summary>
+        internal static string ConfirmToReplaceExsitingFile_Title {
+            get {
+                return ResourceManager.GetString("ConfirmToReplaceExsitingFile_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Do you want to replace existing file &apos;{0}&apos; on disk?.
         /// </summary>
         internal static string ConfirmToReplaceFile {
             get {
                 return ResourceManager.GetString("ConfirmToReplaceFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is already a file with the same name in this location..
+        /// </summary>
+        internal static string ConfirmToReplaceFile_Title {
+            get {
+                return ResourceManager.GetString("ConfirmToReplaceFile_Title", resourceCulture);
             }
         }
         
@@ -165,6 +201,15 @@ namespace PackageExplorerViewModel {
         internal static string OpenExecutableScriptWarning {
             get {
                 return ResourceManager.GetString("OpenExecutableScriptWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file &apos;{0}&apos; is executable..
+        /// </summary>
+        internal static string OpenExecutableScriptWarning_Title {
+            get {
+                return ResourceManager.GetString("OpenExecutableScriptWarning_Title", resourceCulture);
             }
         }
         

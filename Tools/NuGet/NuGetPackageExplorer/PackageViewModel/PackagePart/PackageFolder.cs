@@ -163,7 +163,11 @@ namespace PackageExplorerViewModel {
 
             bool showingRemovedFile = false;
             if (ContainsFile(newFileName)) {
-                bool confirmed = PackageViewModel.UIServices.Confirm(Resources.ConfirmToReplaceExsitingFile, true);
+                bool confirmed = PackageViewModel.UIServices.Confirm(
+                    Resources.ConfirmToDeleteContent_Title, 
+                    Resources.ConfirmToReplaceExsitingFile, 
+                    isWarning: true);
+
                 if (confirmed) {
                     PackageFile part = this[newFileName] as PackageFile;
                     showingRemovedFile = PackageViewModel.IsShowingFileContent(part);
