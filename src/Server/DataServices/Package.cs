@@ -38,8 +38,10 @@ namespace NuGet.Server.DataServices {
             Published = derivedData.Created.UtcDateTime;
             DownloadCount = -1;
             Rating = -1;
+            VersionRating = -1;
             VersionDownloadCount = -1;
             VersionRatingsCount = -1;
+            IsLatestVersion = true;
         }
 
         public string Id {
@@ -103,6 +105,11 @@ namespace NuGet.Server.DataServices {
         }
 
         public double Rating {
+            get;
+            set;
+        }
+
+        public double VersionRating {
             get;
             set;
         }
@@ -181,6 +188,12 @@ namespace NuGet.Server.DataServices {
             get;
             set;
         }
+
+        public bool IsLatestVersion {
+            get;
+            set;
+        }
+
 
         private string ConvertDependency(PackageDependency dependency) {
             return String.Format("{0}:{1}", dependency.Id, dependency.VersionSpec);
