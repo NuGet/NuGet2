@@ -29,7 +29,7 @@ namespace PackageExplorerViewModel {
 
         public int BeginPackage {
             get {
-                return _skip + 1;
+                return Math.Min(_skip + 1, EndPackage);
             }
         }
 
