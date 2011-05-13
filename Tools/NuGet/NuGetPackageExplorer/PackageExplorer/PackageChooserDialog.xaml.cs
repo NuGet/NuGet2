@@ -56,6 +56,11 @@ namespace PackageExplorer {
                 _collectionDeferRefresh.Dispose();
             }
 
+            // Ensure that the SearchBox is focused after the packages have loaded so that the user can search right
+            // away if they need to. Currently the default search behavior is not working most likely do to the
+            // controls being disabled when the packages are loading.
+            SearchBox.Focus();
+
             RedrawSortGlyph();
         }
 
