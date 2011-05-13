@@ -50,7 +50,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>..\NuGetPackageExplorer.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -141,13 +141,11 @@
     <Compile Include="Converters\VersionSpecConverter.cs" />
     <Compile Include="Converters\PackagePartToBoolConverter.cs" />
     <Compile Include="Controls\StandardDialog.cs" />
-    <Compile Include="DownloadProgressWindow.xaml.cs">
-      <DependentUpon>DownloadProgressWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="FileUtility.cs" />
     <Compile Include="Controls\GrayscaleButton.cs" />
     <Compile Include="Controls\GrayscaleImage.cs" />
     <Compile Include="Controls\GrayscaleMenuItem.cs" />
+    <Compile Include="MefServices\PackageDownloader.cs" />
     <Compile Include="MefServices\SettingsManager.cs" />
     <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="MefServices\UIServices.cs" />
@@ -189,10 +187,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ContentViewerPane.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="DownloadProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

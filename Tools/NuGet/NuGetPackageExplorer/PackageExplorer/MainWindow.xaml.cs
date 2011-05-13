@@ -35,6 +35,9 @@ namespace PackageExplorer {
         [Import(typeof(IProxyService))]
         public Lazy<IProxyService> ProxyService { get; set; }
 
+        [Import]
+        public IPackageDownloader PackageDownloader { get; set; }
+
         [Export]
         public IPackageEditorService EditorService { get; set; }
 
@@ -174,31 +177,35 @@ namespace PackageExplorer {
 
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
-                PackageInfo selectedPackage = dialog.SelectedPackage;
-                if (selectedPackage != null) {
-                    Version packageVersion = new Version(selectedPackage.Version);
-                    IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackage.Id, packageVersion); ;
-                    if (cachePackage == null || cachePackage.GetHash() != selectedPackage.PackageHash) {
-                        // if not in the cache, or if the cache package's hash is different from the feed hash, (re)download it
-                        var progressWindow = new DownloadProgressWindow(
-                            selectedPackage.DownloadUrl,
-                            selectedPackage.Id,
+                PackageInfo selectedPackageInfo = dialog.SelectedPackage;
+                if (selectedPackageInfo != null) {
+                    Version packageVersion = new Version(selectedPackageInfo.Version);
+                    IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackageInfo.Id, packageVersion); ;
+
+                    Action<IPackage> processPackageAction = (package) => {
+                        DataServicePackage servicePackage = selectedPackageInfo.AsDataServicePackage();
+                        servicePackage.CorePackage = package;
+                        LoadPackage(servicePackage, selectedPackageInfo.DownloadUrl.ToString(), PackageType.DataServicePackage);
+                    };
+
+                    if (cachePackage == null || cachePackage.GetHash() != selectedPackageInfo.PackageHash) {
+                        PackageDownloader.Download(
+                            selectedPackageInfo.DownloadUrl,
+                            selectedPackageInfo.Id,
                             packageVersion,
-                            ProxyService.Value) {
-                                Owner = this
-                            };
-
-                        result = progressWindow.ShowDialog();
-                        if (result ?? false) {
-                            cachePackage = progressWindow.DownloadedPackage;
-                        }
+                            ProxyService.Value,
+                            processPackageAction
+                        );
+                    }
+                    else {
+                        processPackageAction(cachePackage);
                     }
 
-                    if (cachePackage != null) {
-                        DataServicePackage servicePackage = selectedPackage.AsDataServicePackage();
-                        servicePackage.CorePackage = cachePackage;
-                        LoadPackage(servicePackage, selectedPackage.DownloadUrl.ToString(), PackageType.DataServicePackage);
-                    }
+                    //if (cachePackage != null) {
+                    //    DataServicePackage servicePackage = selectedPackageInfo.AsDataServicePackage();
+                    //    servicePackage.CorePackage = cachePackage;
+                    //    LoadPackage(servicePackage, selectedPackageInfo.DownloadUrl.ToString(), PackageType.DataServicePackage);
+                    //}
                 }
             }
         }
@@ -391,13 +398,13 @@ namespace PackageExplorer {
 
             Uri downloadUrl;
             if (Uri.TryCreate(item.Path, UriKind.Absolute, out downloadUrl)) {
-                var progressWindow = new DownloadProgressWindow(downloadUrl, item.Id, item.Version, ProxyService.Value) {
-                    Owner = this
-                };
-                var result = progressWindow.ShowDialog();
-                if (result ?? false) {
-                    LoadPackage(progressWindow.DownloadedPackage, item.Path, PackageType.DataServicePackage);
-                }
+                PackageDownloader.Download(
+                    downloadUrl,
+                    item.Id,
+                    item.Version,
+                    ProxyService.Value,
+                    package => LoadPackage(package, item.Path, PackageType.DataServicePackage)
+                );
             }
         }
     }
