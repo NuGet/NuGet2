@@ -55,7 +55,7 @@ namespace NuGet.VisualStudio {
             repository.RegisterIfNecessary();
 
             // Create the project manager with the shared repository
-            return new ProjectManager(_sharedRepository, PathResolver, projectSystem, repository);
+            return new ProjectManager(new AggregateRepository(new[] { _sharedRepository, SourceRepository }), PathResolver, projectSystem, repository);
         }
 
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
@@ -129,11 +129,7 @@ namespace NuGet.VisualStudio {
 
             if (newPackage != null && package.Version != newPackage.Version) {
                 if (appliesToProject) {
-                    RunSolutionAction(() => {
-                        InstallPackage(newPackage, !updateDependencies);
-                        UpdatePackageReference(projectManager, packageId, version, updateDependencies);
-                    });
-
+                    RunSolutionAction(() => UpdatePackageReference(projectManager, packageId, version, updateDependencies));
                 }
                 else {
                     // We might be updating a solution only package
@@ -234,6 +230,37 @@ namespace NuGet.VisualStudio {
             // Can't have a project level operation if no project was specified
             if (appliesToProject && projectManager == null) {
                 throw new InvalidOperationException(VsResources.ProjectNotSpecified);
+            }
+
+            return package;
+        }
+
+        private IPackage FindLocalPackage(string packageId, out bool appliesToProject) {
+            // It doesn't matter if there are multiple versions of the package installed at solution level, 
+            // we just want to know that one exists.
+            var packages = LocalRepository.FindPackagesById(packageId).ToList();
+
+            // Can't find the package in the solution.
+            if (!packages.Any()) {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.UnknownPackage, packageId));
+            }
+
+            IPackage package = packages.FirstOrDefault();
+            appliesToProject = IsProjectLevel(package);
+
+            if (!appliesToProject) {
+                if (packages.Count > 1) {
+                    throw CreateAmbiguousUpdateException(projectManager: null, packages: packages);
+                }
+            }
+            else if (!_sharedRepository.IsReferenced(package.Id, package.Version)) {
+                // If this package applies to a project but isn't installed in any project then 
+                // it's probably a borked install.
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture,
+                    VsResources.PackageNotInstalledInAnyProject, packageId));
             }
 
             return package;
@@ -414,9 +441,16 @@ namespace NuGet.VisualStudio {
                 packagesRemoved.Add(e.Package);
             };
 
-            EventHandler<PackageOperationEventArgs> addedHandler = (sender, e) => {
+            EventHandler<PackageOperationEventArgs> addingHandler = (sender, e) => {
                 packagesAdded.Push(e.Package);
+
+                // If this package doesn't exist at solution level (it might not because of leveling)
+                // then we need to install it.
+                if (!LocalRepository.Exists(e.Package)) {
+                    ExecuteInstall(e.Package);
+                }
             };
+
 
             // Try to get the project for this project manager
             Project project = GetProject(projectManager);
@@ -429,7 +463,7 @@ namespace NuGet.VisualStudio {
 
             // Add the handlers
             projectManager.PackageReferenceRemoved += removeHandler;
-            projectManager.PackageReferenceAdding += addedHandler;
+            projectManager.PackageReferenceAdding += addingHandler;
 
             try {
                 if (build != null) {
@@ -447,10 +481,13 @@ namespace NuGet.VisualStudio {
                 // We need to Remove the handlers here since we're going to attempt
                 // a rollback and we don't want modify the collections while rolling back.
                 projectManager.PackageReferenceRemoved -= removeHandler;
-                projectManager.PackageReferenceAdded -= addedHandler;
+                projectManager.PackageReferenceAdded -= addingHandler;
 
                 // When things fail attempt a rollback
                 RollbackProjectActions(projectManager, packagesAdded, packagesRemoved);
+
+                // Rollback solution packages
+                Uninstall(packagesAdded);
 
                 // Clear removed packages so we don't try to remove them again (small optimization)
                 packagesRemoved.Clear();
@@ -464,7 +501,7 @@ namespace NuGet.VisualStudio {
 
                 // Remove the handlers
                 projectManager.PackageReferenceRemoved -= removeHandler;
-                projectManager.PackageReferenceAdded -= addedHandler;
+                projectManager.PackageReferenceAdding -= addingHandler;
 
                 // Remove any packages that would be removed as a result of updating a dependency or the package itself
                 // We can execute the uninstall directly since we don't need to resolve dependencies again.
@@ -490,6 +527,55 @@ namespace NuGet.VisualStudio {
         private void Uninstall(IEnumerable<IPackage> packages) {
             foreach (var package in packages) {
                 ExecuteUninstall(package);
+            }
+        }
+
+        public void UpdatePackages(ILogger logger) {
+            var packageSorter = new PackageSorter();
+            // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
+            var packages = packageSorter.GetPackagesByDependencyOrder(LocalRepository).Reverse();
+            foreach (var package in packages) {
+                // While updating we might remove packages that were initially in the list. e.g.
+                // A 1.0 -> B 2.0, A 2.0 -> [], since updating to A 2.0 removes B, we end up skipping it.
+                if (LocalRepository.Exists(package.Id)) {
+                    UpdatePackage(package.Id, version: null, updateDependencies: true, logger: logger);
+                }
+            }
+        }
+
+        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger) {
+            bool appliesToProject;
+            IPackage package = FindLocalPackage(packageId, out appliesToProject);
+
+            if (appliesToProject) {
+                foreach (var project in _solutionManager.GetProjects()) {
+                    IProjectManager projectManager = GetProjectManager(project);
+                    InitializeLogger(logger, projectManager);
+
+                    if (projectManager.LocalRepository.Exists(packageId)) {
+                        try {
+                            RunSolutionAction(() => UpdatePackageReference(projectManager, packageId, version, updateDependencies));
+                        }
+                        catch (Exception e) {
+                            logger.Log(MessageLevel.Warning, e.Message);
+                        }
+                    }
+                }
+            }
+            else {
+                // Find the package we're going to update to
+                IPackage newPackage = SourceRepository.FindPackage(packageId, version);
+
+                if (newPackage != null && package.Version != newPackage.Version) {
+                    // We might be updating a solution only package
+                    UpdatePackage(package, newPackage, updateDependencies);
+
+                    // Add package to recent repository
+                    AddPackageToRecentRepository(newPackage);
+                }
+                else {
+                    Logger.Log(MessageLevel.Info, VsResources.NoUpdatesAvailable, packageId);
+                }
             }
         }
     }

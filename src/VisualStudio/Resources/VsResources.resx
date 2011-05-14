@@ -234,4 +234,10 @@
   <data name="Warning_RollingBack" xml:space="preserve">
     <value>Install failed. Rolling back...</value>
   </data>
+  <data name="PackageNotInstalledInAnyProject" xml:space="preserve">
+    <value>'{0}' was not installed in any project. Update failed.</value>
+  </data>
+  <data name="PackageUpdatedSuccessfully" xml:space="preserve">
+    <value>'{0}' updated successfully.</value>
+  </data>
 </root>

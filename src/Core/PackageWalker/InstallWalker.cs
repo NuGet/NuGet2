@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using NuGet.Resources;
@@ -87,38 +87,88 @@ namespace NuGet {
             //     B1 -> C >= 1
             //     C2 -> []
             // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
-            var dependents = from dependentPackage in GetDependents(conflictResult)
-                             where !IsDependencySatisfied(dependentPackage, package)
-                             select dependentPackage;
+            var incompatiblePackages = from dependentPackage in GetDependents(conflictResult)
+                                       let dependency = dependentPackage.FindDependency(package.Id)
+                                       where dependency != null && !dependency.VersionSpec.Satisfies(package.Version)
+                                       select dependentPackage;
 
-            if (dependents.Any()) {
-                throw CreatePackageConflictException(package, conflictResult.Package, dependents);
+            // If there were incompatible packages that we failed to update then we throw an exception
+            if (incompatiblePackages.Any() && !TryUpdate(incompatiblePackages, conflictResult, package, out incompatiblePackages)) {
+                throw CreatePackageConflictException(package, conflictResult.Package, incompatiblePackages);
             }
             else if (package.Version < conflictResult.Package.Version) {
+                // REVIEW: Should we have a flag to allow downgrading?
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.NewerVersionAlreadyReferenced, package.Id));
             }
             else if (package.Version > conflictResult.Package.Version) {
-                // If this package isn't part of the current graph (i.e. hasn't been visited yet) and
-                // is marked for removal, then do nothing. This is so we don't get unnecessary duplicates.
-                if (!Marker.Contains(conflictResult.Package) &&
-                    _operations.Contains(conflictResult.Package, PackageAction.Uninstall)) {
-                    return;
+                Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
+            }
+        }
+
+        private void Uninstall(IPackage package, IDependentsResolver dependentsResolver, IPackageRepository repository) {
+            // If this package isn't part of the current graph (i.e. hasn't been visited yet) and
+            // is marked for removal, then do nothing. This is so we don't get unnecessary duplicates.
+            if (!Marker.Contains(package) && _operations.Contains(package, PackageAction.Uninstall)) {
+                return;
+            }
+
+            // Uninstall the conflicting package. We set throw on conflicts to false since we've
+            // already decided that there were no conflicts based on the above code.
+            var resolver = new UninstallWalker(repository,
+                                               dependentsResolver,
+                                               NullLogger.Instance,
+                                               removeDependencies: !IgnoreDependencies,
+                                               forceRemove: false) { ThrowOnConflicts = false };
+
+            foreach (var operation in resolver.ResolveOperations(package)) {
+                _operations.AddOperation(operation);
+            }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We re-throw a more specific exception later on")]
+        private bool TryUpdate(IEnumerable<IPackage> dependents, ConflictResult conflictResult, IPackage package, out IEnumerable<IPackage> incompatiblePackages) {
+            var compatiblePackages = new Dictionary<IPackage, IPackage>();
+
+            // Loop over each of the incompatible packages and find the highest compatible one in the 
+            // in the repository.
+            foreach (var dependent in dependents) {
+                compatiblePackages[dependent] = SourceRepository.FindCompatiblePackages(dependent.Id, package)
+                                                                .OrderByDescending(p => p.Version)
+                                                                .FirstOrDefault();
+            }
+
+            // Get all packages that have an incompatibility with the specified package i.e.
+            // We couldn't find a version in the repository that works with the specified package.
+            incompatiblePackages = compatiblePackages.Where(p => p.Value == null)
+                                                     .Select(p => p.Key);
+
+            if (incompatiblePackages.Any()) {
+                return false;
+            }
+
+            var failedPackages = new List<IPackage>();
+            // Update each of the exising packages to more compatible one
+            foreach (var pair in compatiblePackages) {
+                try {
+                    // Remove the old package
+                    Uninstall(pair.Key, conflictResult.DependentsResolver, conflictResult.Repository);
+
+                    // Install the new package
+                    Walk(pair.Value);
                 }
-
-                // Uninstall the conflicting package. We set throw on conflicts to false since we've
-                // already decided that there were no conflicts based on the above code.
-                var resolver = new UninstallWalker(conflictResult.Repository,
-                                                   conflictResult.DependentsResolver,
-                                                   NullLogger.Instance,
-                                                   removeDependencies: !IgnoreDependencies,
-                                                   forceRemove: false) { ThrowOnConflicts = false };
-
-                foreach (var operation in resolver.ResolveOperations(conflictResult.Package)) {
-                    _operations.AddOperation(operation);
+                catch {
+                    // If we failed to update this package (most likely because of a conflict further up the dependency chain)
+                    // we keep track of it so we can report an error about the top level package.
+                    failedPackages.Add(pair.Key);
                 }
             }
+
+            // Update the incompatible packages to the failed package list
+            incompatiblePackages = failedPackages;
+
+            return !incompatiblePackages.Any();
         }
 
         protected override void OnAfterPackageWalk(IPackage package) {
@@ -135,7 +185,7 @@ namespace NuGet {
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
             // See if we have a local copy
-            IPackage package = Repository.FindDependency(dependency);
+            IPackage package = Repository.ResolveDependency(dependency);
 
             if (package != null) {
                 // We have it installed locally
@@ -145,7 +195,7 @@ namespace NuGet {
                 // We didn't resolve the dependency so try to retrieve it from the source
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
-                package = SourceRepository.FindDependency(dependency);
+                package = SourceRepository.ResolveDependency(dependency);
 
                 if (package != null) {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageRetrieveSuccessfully);
@@ -181,38 +231,12 @@ namespace NuGet {
         private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents) {
             if (dependents.Count() == 1) {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                       NuGetResources.ConflictErrorWithDependent, package.GetFullName(), resolvedPackage.GetFullName(), dependents.Single().GetFullName()));
+                       NuGetResources.ConflictErrorWithDependent, package.GetFullName(), dependents.Single().Id, resolvedPackage.GetFullName()));
             }
 
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                        NuGetResources.ConflictErrorWithDependents, package.GetFullName(), resolvedPackage.GetFullName(), String.Join(", ",
-                        dependents.Select(d => d.GetFullName()))));
-
-        }
-
-        private static bool IsDependencySatisfied(IPackage package, IPackage targetPackage) {
-            PackageDependency dependency = (from d in package.Dependencies
-                                            where d.Id.Equals(targetPackage.Id, StringComparison.OrdinalIgnoreCase)
-                                            select d).FirstOrDefault();
-
-            Debug.Assert(dependency != null, "Package doesn't have this dependency");
-
-            // Given a package's dependencies and a target package we want to see if the target package
-            // satisfies the package's dependencies i.e:
-            // A 1.0 -> B 1.0
-            // A 2.0 -> B 2.0
-            // C 1.0 -> B (>= 1.0) (min version 1.0)
-            // Updating to A 2.0 from A 1.0 needs to know if there is a conflict with C
-            // Since C works with B (>= 1.0) it it should be ok to update A
-
-            if (dependency.VersionSpec == null) {
-                return true;
-            }
-
-            // Get the delegate for this version info and see if it returns true
-            Func<IPackage, bool> versionMatcher = dependency.VersionSpec.ToDelegate();
-
-            return versionMatcher(targetPackage);
+                        NuGetResources.ConflictErrorWithDependents, package.GetFullName(), String.Join(", ",
+                        dependents.Select(d => d.Id)), resolvedPackage.GetFullName()));
         }
 
         /// <summary>

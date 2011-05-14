@@ -207,7 +207,7 @@ namespace NuGet.Test {
             var dependency = new PackageDependency("B");
 
             // Act
-            IPackage package = repository.FindDependency(dependency);
+            IPackage package = repository.ResolveDependency(dependency);
 
             // Assert
             Assert.AreEqual("B", package.Id);
@@ -241,11 +241,11 @@ namespace NuGet.Test {
             PackageDependency dependency5 = PackageDependency.CreateDependency("B", "[1.0.0, 1.0.8]");
 
             // Act
-            IPackage package1 = repository.FindDependency(dependency1);
-            IPackage package2 = repository.FindDependency(dependency2);
-            IPackage package3 = repository.FindDependency(dependency3);
-            IPackage package4 = repository.FindDependency(dependency4);
-            IPackage package5 = repository.FindDependency(dependency5);
+            IPackage package1 = repository.ResolveDependency(dependency1);
+            IPackage package2 = repository.ResolveDependency(dependency2);
+            IPackage package3 = repository.ResolveDependency(dependency3);
+            IPackage package4 = repository.ResolveDependency(dependency4);
+            IPackage package5 = repository.ResolveDependency(dependency5);
 
             // Assert
             Assert.AreEqual("B", package1.Id);

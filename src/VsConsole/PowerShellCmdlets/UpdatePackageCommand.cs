@@ -3,13 +3,11 @@ using System.Management.Automation;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
-
     /// <summary>
     /// This project updates the specfied package to the specfied project.
     /// </summary>
     [Cmdlet(VerbsData.Update, "Package")]
     public class UpdatePackageCommand : ProcessPackageBaseCommand {
-
         private readonly IProductUpdateService _productUpdateService;
         private bool _hasConnectedToHttpSource;
 
@@ -20,12 +18,22 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
-        public UpdatePackageCommand(ISolutionManager solutionManager, 
-                                    IVsPackageManagerFactory packageManagerFactory, 
+        public UpdatePackageCommand(ISolutionManager solutionManager,
+                                    IVsPackageManagerFactory packageManagerFactory,
                                     IHttpClientEvents httpClientEvents,
                                     IProductUpdateService productUpdateService)
             : base(solutionManager, packageManagerFactory, httpClientEvents) {
             _productUpdateService = productUpdateService;
+        }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]
+        public override string Id {
+            get {
+                return base.Id;
+            }
+            set {
+                base.Id = value;
+            }
         }
 
         [Parameter(Position = 2)]
@@ -54,9 +62,22 @@ namespace NuGet.PowerShell.Commands {
 
             try {
                 SubscribeToProgressEvents();
-                IProjectManager projectManager = ProjectManager;
                 if (PackageManager != null) {
-                    PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                    IProjectManager projectManager = ProjectManager;
+                    if (!String.IsNullOrEmpty(Id)) {                        
+                        // If a package id was specified, but no project was specified, then update this package in all projects
+                        if (String.IsNullOrEmpty(ProjectName)) {
+                            PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, this);
+                        }
+                        else if(projectManager != null) {
+                            // If there was a project specified, then update the package in that project
+                            PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                        }
+                    }
+                    else {
+                        // if no id was specified then update all packges in the solution
+                        PackageManager.UpdatePackages(this);
+                    }
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }
             }

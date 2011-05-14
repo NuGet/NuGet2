@@ -31,5 +31,16 @@ namespace NuGet {
                 return condition;
             };
         }
+
+        /// <summary>
+        /// Determines if the specified version is within the version spec
+        /// </summary>
+        public static bool Satisfies(this IVersionSpec versionSpec, Version version) {
+            // The range is unbounded so return true
+            if (versionSpec == null) {
+                return true;
+            }
+            return versionSpec.ToDelegate<Version>(v => v)(version);
+        }
     }
 }

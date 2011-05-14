@@ -160,7 +160,7 @@ namespace NuGet {
             }
         }
 
-        private void ExecuteInstall(IPackage package) {
+        protected void ExecuteInstall(IPackage package) {
             PackageOperationEventArgs args = CreateOperation(package);
             OnInstalling(args);
 

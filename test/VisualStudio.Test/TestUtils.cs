@@ -50,6 +50,10 @@ namespace NuGet.VisualStudio.Test {
             return project.Object;
         }
 
+        public static ISolutionManager GetSolutionManagerWithProjects(params string[] projects) {
+            return GetSolutionManager(isSolutionOpen: true, defaultProjectName: null, projects: projects.Select(p => GetProject(p)));
+        }
+
         public static ISolutionManager GetSolutionManager(bool isSolutionOpen = true, string defaultProjectName = null, IEnumerable<Project> projects = null) {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.SetupGet(c => c.DefaultProjectName).Returns(defaultProjectName);

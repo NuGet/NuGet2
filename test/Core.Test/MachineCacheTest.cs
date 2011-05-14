@@ -58,7 +58,7 @@ namespace NuGet.Test {
             Assert.IsFalse(cache.Exists("TestPackage"));
             Assert.IsFalse(cache.Exists(package));
             Assert.IsFalse(cache.Exists("TestPackage", new Version("1.0")));
-            Assert.IsNull(cache.FindDependency(new PackageDependency("Bar")));
+            Assert.IsNull(cache.ResolveDependency(new PackageDependency("Bar")));
             Assert.IsNull(cache.FindPackage("TestPackage"));
             Assert.IsFalse(cache.FindPackages(new[] { "TestPackage", "B" }).Any());
             Assert.IsFalse(cache.FindPackagesById("TestPackage").Any());

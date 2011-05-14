@@ -208,7 +208,7 @@ function Test-SubTreeUpdateWithConflict {
     Assert-Package $p D 1.0
     Assert-Package $p G 1.0
 
-    Assert-Throws { $p | Update-Package C -Source $context.RepositoryPath } "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'."
+    Assert-Throws { $p | Update-Package C -Source $context.RepositoryPath } "Updating 'C 1.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'."
     Assert-Null (Get-ProjectPackage $p C 2.0)
     Assert-Null (Get-SolutionPackage C 2.0)
     Assert-Package $p A 1.0
@@ -369,4 +369,95 @@ function Test-UpdatePackageAcceptsRelativePathSource2 {
     Assert-Package $p SkypePackage 3.0
 
     popd
+}
+
+function Test-UpdateProjectLevelPackageNotInstalledInAnyProject {
+    # Arrange
+    $p1 = New-WebApplication
+
+    # Act
+    $p1 | Install-Package Ninject -Version 2.0.1.0
+    Remove-ProjectItem $p1 packages.config
+    
+
+    # Assert
+    Assert-Throws { Update-Package Ninject } "'Ninject' was not installed in any project. Update failed."
+}
+
+function Test-UpdatePackageInAllProjects {
+    # Arrange
+    $p1 = New-FSharpLibrary
+    $p2 = New-WebApplication
+    $p3 = New-ClassLibrary
+    $p4 = New-WebSite
+
+    # Act
+    $p1 | Install-Package Ninject -Version 2.0.1.0
+    $p2 | Install-Package Ninject -Version 2.1.0.76
+    $p3 | Install-Package Ninject -Version 2.2.0.0
+    $p4 | Install-Package Ninject -Version 2.2.1.0
+
+    Assert-SolutionPackage Ninject 2.0.1.0
+    Assert-SolutionPackage Ninject 2.1.0.76
+    Assert-SolutionPackage Ninject 2.2.0.0
+    Assert-SolutionPackage Ninject 2.2.1.0
+    Assert-Package $p1 Ninject 2.0.1.0
+    Assert-Package $p2 Ninject 2.1.0.76
+    Assert-Package $p3 Ninject 2.2.0.0
+    Assert-Package $p4 Ninject 2.2.1.0
+
+    Update-Package Ninject
+
+    # Assert
+    Assert-SolutionPackage Ninject 2.2.1.4
+    Assert-Package $p1 Ninject 2.2.1.4
+    Assert-Package $p2 Ninject 2.2.1.4
+    Assert-Package $p3 Ninject 2.2.1.4
+    Assert-Package $p4 Ninject 2.2.1.4
+    Assert-Null (Get-SolutionPackage Ninject 2.0.1.0)
+    Assert-Null (Get-SolutionPackage Ninject 2.1.0.76)
+    Assert-Null (Get-SolutionPackage Ninject 2.2.0.0)
+    Assert-Null (Get-SolutionPackage Ninject 2.2.1.0)
+}
+
+function Test-UpdateAllPackagesInSolution {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-WebApplication
+    $p2 = New-ClassLibrary
+    
+    # Act
+    $p1 | Install-Package A -Version 1.0 -Source $context.RepositoryPath
+    $p2 | Install-Package C -Version 1.0 -Source $context.RepositoryPath
+    
+    Assert-SolutionPackage A 1.0
+    Assert-SolutionPackage B 1.0
+    Assert-SolutionPackage C 1.0
+    Assert-SolutionPackage D 2.0
+    Assert-Package $p1 A 1.0
+    Assert-Package $p1 B 1.0
+    Assert-Package $p2 C 1.0
+    Assert-Package $p2 D 2.0
+
+    Update-Package -Source $context.RepositoryPath
+    # Assert
+    Assert-Null (Get-SolutionPackage A 1.0)
+    Assert-Null (Get-SolutionPackage B 1.0)
+    Assert-Null (Get-SolutionPackage D 2.0)
+    Assert-Null (Get-ProjectPackage $p1 A 1.0)
+    Assert-Null (Get-ProjectPackage $p1 B 1.0)
+    Assert-Null (Get-ProjectPackage $p2 D 2.0)
+    Assert-SolutionPackage A 2.0
+    Assert-SolutionPackage B 2.0
+    Assert-SolutionPackage C 1.0
+    Assert-SolutionPackage D 4.0
+    Assert-SolutionPackage E 3.0
+    Assert-Package $p1 A 2.0
+    Assert-Package $p1 B 2.0
+    Assert-Package $p2 C 1.0
+    Assert-Package $p2 D 4.0
+    Assert-Package $p2 E 3.0
 }

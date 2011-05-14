@@ -121,10 +121,10 @@
     <value>Circular dependency detected '{0}'.</value>
   </data>
   <data name="ConflictErrorWithDependent" xml:space="preserve">
-    <value>Conflict occurred. '{0}' referenced but requested '{1}'. '{2}' depends on '{0}'.</value>
+    <value>Updating '{0}' failed. Unable to find a version of '{1}' that is compatible with '{2}'.</value>
   </data>
   <data name="ConflictErrorWithDependents" xml:space="preserve">
-    <value>Conflict occurred. '{0}' referenced but requested '{1}'. '{2}' depend on '{0}'.</value>
+    <value>Updating '{0}' failed. Unable to find versions of '{1}' that are compatible with '{2}'.</value>
   </data>
   <data name="Debug_AddedFile" xml:space="preserve">
     <value>Added file '{0}'.</value>
@@ -296,5 +296,11 @@
   </data>
   <data name="UnknownPackageSpecificVersion" xml:space="preserve">
     <value>Unable to find version '{1}' of package '{0}'.</value>
+  </data>
+  <data name="Log_NoUpdatesAvailableForProject" xml:space="preserve">
+    <value>No updates available for '{0}' in project '{1}'.</value>
+  </data>
+  <data name="Log_UpdatingPackages" xml:space="preserve">
+    <value>Updating '{0}' from version '{1}' to '{2}' in project '{3}'.</value>
   </data>
 </root>

@@ -97,7 +97,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Conflict occurred. &apos;{0}&apos; referenced but requested &apos;{1}&apos;. &apos;{2}&apos; depends on &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos; failed. Unable to find a version of &apos;{1}&apos; that is compatible with &apos;{2}&apos;..
         /// </summary>
         internal static string ConflictErrorWithDependent {
             get {
@@ -106,7 +106,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Conflict occurred. &apos;{0}&apos; referenced but requested &apos;{1}&apos;. &apos;{2}&apos; depend on &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos; failed. Unable to find versions of &apos;{1}&apos; that are compatible with &apos;{2}&apos;..
         /// </summary>
         internal static string ConflictErrorWithDependents {
             get {
@@ -313,6 +313,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No updates available for &apos;{0}&apos; in project &apos;{1}&apos;..
+        /// </summary>
+        internal static string Log_NoUpdatesAvailableForProject {
+            get {
+                return ResourceManager.GetString("Log_NoUpdatesAvailableForProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already installed..
         /// </summary>
         internal static string Log_PackageAlreadyInstalled {
@@ -372,6 +381,15 @@ namespace NuGet.Resources {
         internal static string Log_SuccessfullyUninstalledPackage {
             get {
                 return ResourceManager.GetString("Log_SuccessfullyUninstalledPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos; from version &apos;{1}&apos; to &apos;{2}&apos; in project &apos;{3}&apos;..
+        /// </summary>
+        internal static string Log_UpdatingPackages {
+            get {
+                return ResourceManager.GetString("Log_UpdatingPackages", resourceCulture);
             }
         }
         

@@ -25,7 +25,7 @@ namespace NuGet{
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return _repository.FindDependency(dependency);
+            return _repository.ResolveDependency(dependency);
         }
 
         protected override void OnDependencyResolveError(PackageDependency dependency) {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -874,15 +873,53 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageD10);
 
             // Act 
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Conflict occurred. 'C 1.0' referenced but requested 'C 2.0'. 'G 1.0' depends on 'C 1.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Updating 'C 1.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'.");
         }
 
         [TestMethod]
-        public void UpdatePackageReferenceFromRepositoryThrowsIfPackageHasDependents() {
+        public void UpdatePackageReferenceFromRepositorySuccesfullyUpdatesDependentsIfDependentsAreResolvable() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0]")
+                                                                    }, content: new[] { "afile" });
+
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0, 3.0]")
+                                                                    }, content: new[] { "a2file" });
+
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "bfile" });
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "b2file" });
+            IPackage packageB30 = PackageUtility.CreatePackage("B", "3.0", content: new[] { "b3file" });
+            projectManager.LocalRepository.AddPackage(packageA10);
+            projectManager.LocalRepository.AddPackage(packageB10);
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+            sourceRepository.AddPackage(packageB10);
+            sourceRepository.AddPackage(packageB20);
+            sourceRepository.AddPackage(packageB30);
+
+            // Act
+            projectManager.UpdatePackageReference("B");
+
+            // Assert
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB30));
+        }
+
+        [TestMethod]
+        public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasUnresolvableDependents() {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            // A -> B 1.0
             IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
                                                                 dependencies: new List<PackageDependency> { 
                                                                         PackageDependency.CreateDependency("B", "[1.0]")
@@ -896,7 +933,146 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageB20);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Conflict occurred. 'B 1.0' referenced but requested 'B 2.0'. 'A 1.0' depends on 'B 1.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'.");
+        }
+
+        [TestMethod]
+        public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasAnyUnresolvableDependents() {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            // A 1.0 -> B 1.0
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0]")
+                                                                    }, content: new[] { "afile" });
+
+            // A 2.0 -> B [2.0]
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[2.0]")
+                                                                    }, content: new[] { "afile" });
+
+            // B 1.0
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "bfile" });
+            // B 2.0
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "cfile" });
+            // C 1.0 -> B [1.0]
+            IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0]")
+                                                                    }, content: new[] { "bfile" });
+
+            projectManager.LocalRepository.AddPackage(packageA10);
+            projectManager.LocalRepository.AddPackage(packageB10);
+            projectManager.LocalRepository.AddPackage(packageC10);
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+            sourceRepository.AddPackage(packageB10);
+            sourceRepository.AddPackage(packageB20);
+            sourceRepository.AddPackage(packageC10);
+
+            // Act & Assert            
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' failed. Unable to find a version of 'C' that is compatible with 'B 2.0'.");
+        }
+
+        [TestMethod]
+        public void UpdatePackageReferenceFromRepositoryOverlappingDependencies() {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            // A 1.0 -> B 1.0
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0]")
+                                                                    }, content: new[] { "afile" });
+
+            // A 2.0 -> B [2.0]
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[2.0]")
+                                                                    }, content: new[] { "afile" });
+
+            // B 1.0
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "b1file" });
+
+            // B 2.0 -> C 2.0
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("C", "2.0")
+                                                                    }, content: new[] { "afile" });
+
+            // C 2.0
+            IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0", content: new[] { "c2file" });
+
+            projectManager.LocalRepository.AddPackage(packageA10);
+            projectManager.LocalRepository.AddPackage(packageB10);
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+            sourceRepository.AddPackage(packageB10);
+            sourceRepository.AddPackage(packageB20);
+            sourceRepository.AddPackage(packageC20);
+
+            // Act
+            projectManager.UpdatePackageReference("B");
+
+            // Assert
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB10));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB20));
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
+        }
+
+
+        [TestMethod]
+        public void UpdatePackageReferenceFromRepositoryChainedIncompatibleDependents() {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            // A 1.0 -> B [1.0]
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0]")
+                                                                    }, content: new[] { "afile" });
+            // B 1.0 -> C [1.0]
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("C", "[1.0]")
+                                                                    }, content: new[] { "bfile" });
+            // C 1.0
+            IPackage packageC10 = PackageUtility.CreatePackage("C", "1.0", content: new[] { "c1file" });
+
+            // A 2.0 -> B [1.0, 2.0)
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("B", "[1.0, 2.0)")
+                                                                    }, content: new[] { "afile" });
+
+            // B 2.0 -> C [2.0]
+            IPackage packageB20 = PackageUtility.CreatePackage("B", "2.0",
+                                                                dependencies: new List<PackageDependency> { 
+                                                                        PackageDependency.CreateDependency("C", "[2.0]")
+                                                                    }, content: new[] { "cfile" });
+
+            // C 2.0
+            IPackage packageC20 = PackageUtility.CreatePackage("C", "2.0", content: new[] { "c2file" });
+
+            projectManager.LocalRepository.AddPackage(packageA10);
+            projectManager.LocalRepository.AddPackage(packageB10);
+            projectManager.LocalRepository.AddPackage(packageC10);
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+            sourceRepository.AddPackage(packageB10);
+            sourceRepository.AddPackage(packageB20);
+            sourceRepository.AddPackage(packageC10);
+            sourceRepository.AddPackage(packageC20);
+
+            // Act & Assert            
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("C"), "Updating 'C 1.0' failed. Unable to find a version of 'B' that is compatible with 'C 2.0'.");
         }
 
         [TestMethod]

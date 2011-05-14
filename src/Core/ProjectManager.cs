@@ -328,10 +328,11 @@ namespace NuGet {
             IPackage package = SourceRepository.FindPackage(packageId, version: version);
 
             if (package != null && oldPackage.Version != package.Version) {
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies);
             }
             else {
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
+                Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailableForProject, packageId, Project.ProjectName);
             }
         }
 

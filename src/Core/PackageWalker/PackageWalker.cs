@@ -50,13 +50,25 @@ namespace NuGet {
 
             OnBeforePackageWalk(package);
 
+            // We have an extra check here for the install walker case.
+            // We might end up walking a the graph twice when trying to do an update since
+            // we update all dependents of a package for e.g.
+            // A 1.0 -> B [1.0]
+            // A 2.0 -> B [2.0]
+            // B 2.0 -> C [2.0]
+            // When updating from B1 to B2 we'll end up updating A1 to A2 which has the side effect
+            // of installing B2 which is currently being processed
+            if (Marker.IsVisited(package)) {
+                return;
+            }
+
             // Mark the package as processing
             Marker.MarkProcessing(package);
 
             if (!IgnoreDependencies) {
                 foreach (var dependency in package.Dependencies) {
                     // Try to resolve the dependency from the visited packages first
-                    IPackage resolvedDependency = Marker.FindDependency(dependency) ??
+                    IPackage resolvedDependency = Marker.ResolveDependency(dependency) ??
                                                   ResolveDependency(dependency);
 
                     if (resolvedDependency == null) {

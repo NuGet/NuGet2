@@ -119,7 +119,20 @@ namespace NuGet {
             return packages.FirstOrDefault();
         }
 
-        public static IPackage FindDependency(this IPackageRepository repository, PackageDependency dependency) {
+        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, string packageId, IPackage package) {
+            return (from p in repository.FindPackagesById(packageId).ToList()
+                    let dependency = p.FindDependency(package.Id)
+                    where dependency != null && dependency.VersionSpec.Satisfies(package.Version)
+                    select p);
+        }
+
+        public static PackageDependency FindDependency(this IPackageMetadata package, string packageId) {
+            return (from dependency in package.Dependencies
+                    where dependency.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
+                    select dependency).FirstOrDefault();
+        }
+
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
