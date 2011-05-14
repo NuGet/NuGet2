@@ -151,6 +151,10 @@ function global:Run-Test {
                     Write-Warning "$name was Skipped: $message"
                 }
                 else {
+                    if($tests.Count -gt 1) {
+                        $dte.Solution.Close()
+                    }
+
                     $results += New-Object PSObject -Property @{ 
                         Test = $name
                         Error = $_
