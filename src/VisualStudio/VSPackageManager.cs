@@ -69,7 +69,7 @@ namespace NuGet.VisualStudio {
 
             RunSolutionAction(() => {
                 InstallPackage(package, ignoreDependencies);
-                AddPackageReference(projectManager, packageId, version, ignoreDependencies);
+                AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies);
             });
 
             // Add package to recent repository

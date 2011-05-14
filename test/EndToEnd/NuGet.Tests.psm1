@@ -130,10 +130,6 @@ function global:Run-Test {
                 
                 Write-Host -ForegroundColor DarkGreen "Test $name Passed"
                 
-                if($tests.Count -gt 1) {
-                    $dte.Solution.Close()
-                }
-                
                 $results += New-Object PSObject -Property @{ 
                     Test = $name
                     Error = $null
@@ -150,11 +146,7 @@ function global:Run-Test {
 
                     Write-Warning "$name was Skipped: $message"
                 }
-                else {
-                    if($tests.Count -gt 1) {
-                        $dte.Solution.Close()
-                    }
-
+                else {                    
                     $results += New-Object PSObject -Property @{ 
                         Test = $name
                         Error = $_
@@ -170,6 +162,10 @@ function global:Run-Test {
                 }
                 catch {
                     # The type might not be loaded so don't fail if it isn't
+                }
+
+                if($tests.Count -gt 1) {
+                    $dte.Solution.Close()
                 }
          
                 # Cleanup the output from running the generate packages tool
