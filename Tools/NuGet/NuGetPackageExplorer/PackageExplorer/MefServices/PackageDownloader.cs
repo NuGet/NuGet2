@@ -16,7 +16,7 @@ namespace PackageExplorer {
         public Lazy<MainWindow> MainWindow { get; set; }
 
         [Import]
-        public IUIServices UIServices { get; set;  }
+        public IUIServices UIServices { get; set; }
 
         public void Download(
             Uri downloadUri, 
@@ -33,14 +33,7 @@ namespace PackageExplorer {
             };
             progressDialog.ShowDialog(MainWindow.Value);
 
-            MainWindow.Value.Dispatcher.BeginInvoke(
-                new Action<Uri, IProxyService, ProgressDialog, Action<IPackage>>(DownloadData),
-                DispatcherPriority.Background,
-                downloadUri,
-                proxyService,
-                progressDialog,
-                callback
-            );
+            DownloadData(downloadUri, proxyService, progressDialog, callback);
         }
 
         private void DownloadData(Uri uri, IProxyService proxyService, ProgressDialog progressDialog, Action<IPackage> callback) {
@@ -52,13 +45,22 @@ namespace PackageExplorer {
             client.DownloadDataCompleted += (sender, e) => {
                 // close the progress dialog first thing
                 progressDialog.Close();
+                // when the progress dialog close, the main window loses focus unexpectedly. 
+                // call Activate() so that the main window retains focus
+                MainWindow.Value.Activate();
 
                 if (!e.Cancelled) {
-                    MainWindow.Value.Dispatcher.BeginInvoke(
-                        new Action<Action<IPackage>, DownloadDataCompletedEventArgs>(OnCompleted),
-                        DispatcherPriority.Background,
-                        callback,
-                        e);
+                    // the progress takes a while to disappear, wait for a bit 
+                    // before we load the package.
+                    DispatcherTimer timer = new DispatcherTimer() {
+                        Interval = TimeSpan.FromMilliseconds(500)
+                    };
+                    timer.Tick += (s, args) => {
+                        timer.Stop();
+                        OnCompleted(callback, e);
+                    };
+
+                    timer.Start();
                 }
             };
 
