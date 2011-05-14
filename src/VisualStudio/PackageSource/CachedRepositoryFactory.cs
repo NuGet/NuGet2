@@ -46,7 +46,7 @@ namespace NuGet.VisualStudio {
             // aggregate source, return aggregate repository
             if (AggregatePackageSource.Instance.Source.Equals(source, StringComparison.InvariantCultureIgnoreCase) ||
                 AggregatePackageSource.Instance.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase)) {
-                return _packageSourceProvider.GetAggregate(_repositoryFactory);
+                return _packageSourceProvider.GetAggregate(this);
             }
 
             // try to resolve the name or feed from the source 
@@ -74,7 +74,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void OnProgressAvailable(object sender, ProgressEventArgs e) {
-            ProgressAvailable(this, e);           
+            ProgressAvailable(this, e);
         }
 
         private void OnSendingRequest(object sender, WebRequestEventArgs e) {
