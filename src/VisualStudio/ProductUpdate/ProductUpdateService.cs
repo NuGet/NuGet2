@@ -3,8 +3,8 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.ExtensionManager;
 using Microsoft.VisualStudio.ExtensionManager.UI;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -15,39 +15,54 @@ namespace NuGet.VisualStudio {
 
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService {
-        private const string NuGetVSIXId = "NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5";
-
         private readonly IVsUIShell _vsUIShell;
-        private readonly IVsExtensionRepository _extensionRepository;
-        private readonly IVsExtensionManager _extensionManager;
         private readonly IProductUpdateSettings _productUpdateSettings;
-
+        private IUpdateWorker _updateWorker;
+        private DTE _dte;
+        
         private bool _updateDeclined;
         private bool _updateAccepted;
 
         public ProductUpdateService() :
-            this(ServiceLocator.GetGlobalService<SVsExtensionRepository, IVsExtensionRepository>(),
-                 ServiceLocator.GetGlobalService<SVsExtensionManager, IVsExtensionManager>(),
-                 ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
-                 ServiceLocator.GetInstance<IProductUpdateSettings>()) {
+            this(ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
+                 ServiceLocator.GetInstance<IProductUpdateSettings>(),
+                 ServiceLocator.GetInstance<DTE>()) {
         }
 
         public ProductUpdateService(
-            IVsExtensionRepository extensionRepository,
-            IVsExtensionManager extensionManager,
-            IVsUIShell vsUIShell,
-            IProductUpdateSettings productUpdateSettings) {
+            IVsUIShell vsUIShell, 
+            IProductUpdateSettings productUpdateSettings,
+            DTE dte) {
             if (productUpdateSettings == null) {
                 throw new ArgumentNullException("productUpdateSettings");
             }
 
+            _dte = dte;
             _vsUIShell = vsUIShell;
-            _extensionRepository = extensionRepository;
-            _extensionManager = extensionManager;
             _productUpdateSettings = productUpdateSettings;
         }
 
-        public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable;
+        public event EventHandler<ProductUpdateAvailableEventArgs> UpdateAvailable = delegate { };
+
+        private IUpdateWorker UpdateWorker {
+            get {
+                if (_updateWorker == null) {
+                    if (IsVisualStudio2010()) {
+                        _updateWorker = new VS2010UpdateWorker();
+                    }
+                    else {
+                        _updateWorker = new NullUpdateWorker();
+                    }
+                }
+
+                return _updateWorker;
+            }
+        }
+
+        private bool IsVisualStudio2010() {
+            string vsVersion = _dte.Version;
+            return vsVersion.StartsWith("10", StringComparison.InvariantCultureIgnoreCase);
+        }
 
         public void CheckForAvailableUpdateAsync() {
             if (_updateDeclined || _updateAccepted || !_productUpdateSettings.ShouldCheckForUpdate) {
@@ -56,18 +71,9 @@ namespace NuGet.VisualStudio {
 
             Task.Factory.StartNew(() => {
                 try {
-                    // Find the vsix on the vs gallery
-                    VSGalleryEntry nugetVsix = _extensionRepository.CreateQuery<VSGalleryEntry>()
-                                                              .Where(e => e.VsixID == NuGetVSIXId)
-                                                              .AsEnumerable()
-                                                              .FirstOrDefault();
-                    // Get the current NuGet VSIX version
-                    IInstalledExtension installedNuGet = _extensionManager.GetInstalledExtension(NuGetVSIXId);
-                    Version installedVersion = installedNuGet.Header.Version;
-
-                    // If we're running an older version then update
-                    if (nugetVsix != null && nugetVsix.NonNullVsixVersion > installedVersion) {
-                        RaiseUpdateEvent(new ProductUpdateAvailableEventArgs(installedVersion, nugetVsix.NonNullVsixVersion));
+                    Version installedVersion, newVersion;
+                    if (UpdateWorker.CheckForUpdate(out installedVersion, out newVersion)) {
+                        RaiseUpdateEvent(new ProductUpdateAvailableEventArgs(installedVersion, newVersion));
                     }
                 }
                 catch {
@@ -78,10 +84,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void RaiseUpdateEvent(ProductUpdateAvailableEventArgs args) {
-            EventHandler<ProductUpdateAvailableEventArgs> handler = UpdateAvailable;
-            if (handler != null) {
-                handler(this, args);
-            }
+            UpdateAvailable(this, args);
         }
 
         public void Update() {

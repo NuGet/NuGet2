@@ -22,11 +22,14 @@
     <Compile Include="PackageSource\IVsPackageSourceProvider.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
     <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
+    <Compile Include="ProductUpdate\IUpdateWorker.cs" />
+    <Compile Include="ProductUpdate\NullUpdateWorker.cs" />
     <Compile Include="ProductUpdate\ProductUpdateAvailableEventArgs.cs" />
     <Compile Include="ProductUpdate\ProductUpdateBar.xaml.cs">
       <DependentUpon>ProductUpdateBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="ProductUpdate\ProductUpdateService.cs" />
+    <Compile Include="ProductUpdate\VS2010UpdateWorker.cs" />
     <Compile Include="ProductUpdate\VsProductUpdateSettings.cs" />
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectName.cs" />
