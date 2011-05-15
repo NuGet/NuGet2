@@ -177,7 +177,6 @@ namespace NuGet {
                 }
             }
 
-            // Update the incompatible packages to the failed package list
             incompatiblePackages = failedPackages;
 
             return !incompatiblePackages.Any();

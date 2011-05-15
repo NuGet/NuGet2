@@ -29,7 +29,7 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public virtual string ProjectName { get; set; }
+        public string ProjectName { get; set; }
 
         protected IProjectManager ProjectManager {
             get {

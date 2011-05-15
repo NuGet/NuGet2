@@ -26,6 +26,8 @@ namespace NuGet.PowerShell.Commands {
             _productUpdateService = productUpdateService;
         }
 
+        // We need to override id since it's mandatory in the base class. We don't
+        // want it to be mandatory here.
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]
         public override string Id {
             get {
