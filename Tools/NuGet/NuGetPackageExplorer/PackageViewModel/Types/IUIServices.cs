@@ -1,5 +1,5 @@
-﻿
-using System;
+﻿using System;
+
 namespace PackageExplorerViewModel.Types {
 
     public enum MessageLevel {
@@ -16,8 +16,8 @@ namespace PackageExplorerViewModel.Types {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         bool OpenMultipleFilesDialog(string title, string filter, out string[] selectedFileNames);
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
-        bool OpenRenameDialog(string currentName, out string newName);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        bool OpenRenameDialog(string currentName, string description, out string newName);
 
         bool OpenPublishDialog(object viewModel);
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]

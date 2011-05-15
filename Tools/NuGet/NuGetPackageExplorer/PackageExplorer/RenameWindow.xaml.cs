@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System;
 
 namespace PackageExplorer {
     /// <summary>
@@ -15,6 +16,15 @@ namespace PackageExplorer {
             }
             set {
                 NameBox.Text = value;
+            }
+        }
+
+        public string Description {
+            get {
+                return DescriptionText.Text;
+            }
+            set {
+                DescriptionText.Text = value ?? String.Empty;
             }
         }
 

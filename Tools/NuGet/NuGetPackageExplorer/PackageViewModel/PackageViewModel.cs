@@ -410,7 +410,7 @@ namespace PackageExplorerViewModel {
             parameter = parameter ?? SelectedItem ?? RootFolder;
             PackageFolder folder = parameter as PackageFolder;
             string folderName = "NewFolder";
-            bool result = UIServices.OpenRenameDialog(folderName, out folderName);
+            bool result = UIServices.OpenRenameDialog(folderName, "Provide name for the new folder.", out folderName);
             if (result) {
                 folder.AddFolder(folderName);
             }
@@ -539,7 +539,7 @@ namespace PackageExplorerViewModel {
             var part = (parameter ?? SelectedItem) as PackagePart;
             if (part != null) {
                 string newName;
-                bool result = UIServices.OpenRenameDialog(part.Name, out newName);
+                bool result = UIServices.OpenRenameDialog(part.Name, "Provide new name for '" + part.Name + "'.", out newName);
                 if (result) {
                     part.Rename(newName);
                 }

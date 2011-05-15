@@ -193,11 +193,13 @@ namespace PackageExplorer {
                 image);
         }
 
-        public bool OpenRenameDialog(string currentName, out string newName) {
+        public bool OpenRenameDialog(string currentName, string description, out string newName) {
             var dialog = new RenameWindow {
                 NewName = currentName,
+                Description = description,
                 Owner = Window.Value
             };
+
             bool? result = dialog.ShowDialog();
             if (result ?? false) {
                 newName = dialog.NewName;
