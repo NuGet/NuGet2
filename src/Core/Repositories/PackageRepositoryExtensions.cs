@@ -119,8 +119,8 @@ namespace NuGet {
             return packages.FirstOrDefault();
         }
 
-        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, string packageId, IPackage package) {
-            return (from p in repository.FindPackagesById(packageId).ToList()
+        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, IEnumerable<string> packageIds, IPackage package) {
+            return (from p in repository.FindPackages(packageIds)
                     let dependency = p.FindDependency(package.Id)
                     where dependency != null && dependency.VersionSpec.Satisfies(package.Version)
                     select p);

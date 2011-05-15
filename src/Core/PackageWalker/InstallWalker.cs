@@ -129,14 +129,26 @@ namespace NuGet {
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We re-throw a more specific exception later on")]
         private bool TryUpdate(IEnumerable<IPackage> dependents, ConflictResult conflictResult, IPackage package, out IEnumerable<IPackage> incompatiblePackages) {
+            // Key dependents by id so we can look up the old package later
+            var dependentsLookup = dependents.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
             var compatiblePackages = new Dictionary<IPackage, IPackage>();
 
-            // Loop over each of the incompatible packages and find the highest compatible one in the 
-            // in the repository.
+            // Initialize each compatible package to null
             foreach (var dependent in dependents) {
-                compatiblePackages[dependent] = SourceRepository.FindCompatiblePackages(dependent.Id, package)
-                                                                .OrderByDescending(p => p.Version)
-                                                                .FirstOrDefault();
+                compatiblePackages[dependent] = null;
+            }
+
+            // Get compatible packages in one batch so we don't have to make requests for each one
+            var packages = from p in SourceRepository.FindCompatiblePackages(dependentsLookup.Keys, package)
+                           group p by p.Id into g
+                           select new {
+                               OldPackage = dependentsLookup[g.Key],
+                               NewPackage = g.OrderByDescending(p => p.Version)
+                                             .FirstOrDefault()
+                           };
+
+            foreach (var p in packages) {
+                compatiblePackages[p.OldPackage] = p.NewPackage;
             }
 
             // Get all packages that have an incompatibility with the specified package i.e.
