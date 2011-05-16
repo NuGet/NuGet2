@@ -65,10 +65,10 @@ function Test-WebsiteWillNotDuplicateConfigOnReInstall {
     $p = New-WebSite
     
     # Act
-    Install-Package elmah -Project $p.Name
+    Install-Package elmah -Project $p.Name -Version 1.1
     $item = Get-ProjectItem $p packages.config
     $item.Delete()
-    Install-Package elmah -Project $p.Name
+    Install-Package elmah -Project $p.Name -Version 1.1
     
     # Assert
     $config = [xml](Get-Content (Get-ProjectItemPath $p web.config))
@@ -80,7 +80,7 @@ function Test-WebsiteConfigElementsAreRemovedEvenIfReordered {
     $p = New-WebSite
     
     # Act
-    Install-Package elmah -Project $p.Name
+    Install-Package elmah -Project $p.Name -Version 1.1
     $configPath = Get-ProjectItemPath $p web.config
     $config = [xml](Get-Content $configPath)
     $sectionGroup = $config.configuration.configSections.sectionGroup

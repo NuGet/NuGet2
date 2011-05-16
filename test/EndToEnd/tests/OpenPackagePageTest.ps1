@@ -24,7 +24,7 @@ function Test-OpenPackagePageOpenLicenseUrlIfLicenseParameterIsSet {
 
 function Test-OpenPackagePageOpenReportAbuseUrlIfReportAbuseParameterIsSet {
     # Act
-    $p = Open-PackagePage elmah -Report -WhatIf -PassThru
+    $p = Open-PackagePage elmah -Report -WhatIf -PassThru -Version 1.1
 
     # Assert
     Assert-AreEqual 'http://nuget.org/Package/ReportAbuse/elmah/1.1' $p.OriginalString

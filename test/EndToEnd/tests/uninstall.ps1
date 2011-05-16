@@ -56,7 +56,7 @@ function Test-UninstallingPackageWithConfigTransformWhenConfigReadOnly {
     # Arrange
     $p1 = New-WebApplication
     
-    Install-Package elmah -Project $p1.Name    
+    Install-Package elmah -Project $p1.Name
     Assert-Reference $p1 elmah
     Assert-SolutionPackage elmah
     attrib +R (Get-ProjectItemPath $p1 web.config)
@@ -133,7 +133,7 @@ function Test-UninstallPackageThatIsInstalledInAnotherProjectThrows {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-ClassLibrary
-    $p1 | Install-Package elmah
+    $p1 | Install-Package elmah -Version 1.1
 
     # Act & Assert
     Assert-Throws { $p2 | Uninstall-Package elmah } "Unable to find package 'elmah 1.1' in '$($p2.Name)'."
