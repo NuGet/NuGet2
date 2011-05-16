@@ -7,13 +7,14 @@
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
     Loaded="DialogWithNoMinimizeAndMaximize_Loaded"
-    FontSize="{Binding FontSize, Source={x:Static settings:Settings.Default}}"
+    FontFamily="Segoe UI"
+    FontSize="9pt"
     ResizeMode="NoResize"
     Title="{x:Static resources:Resources.Dialog_Title}"
     SizeToContent="Height"
     Width="340">
     <DockPanel LastChildFill="False">
-        <TextBlock DockPanel.Dock="Top" Text="Enter a new name." FontSize="16" Margin="10,10,0,15" Foreground="{DynamicResource ResourceKey={x:Static SystemColors.HotTrackBrushKey}}" />
+        <TextBlock DockPanel.Dock="Top" Text="Enter a new name." FontSize="12pt" Margin="10,10,0,15" Foreground="{StaticResource TaskDialogMainInstructionBrush}" />
         <TextBlock x:Name="DescriptionText" DockPanel.Dock="Top" Margin="10,0" TextWrapping="Wrap" />
         <TextBox x:Name="NameBox" x:FieldModifier="private" DockPanel.Dock="Top" VerticalAlignment="Center" Margin="10,10,10,0" MaxLength="200" />
         <Border DockPanel.Dock="Top" Margin="0,20,0,0" BorderThickness="0,0.5,0,0" BorderBrush="{DynamicResource ResourceKey={x:Static SystemColors.ActiveBorderBrushKey}}" Background="{DynamicResource ResourceKey={x:Static SystemColors.ControlBrushKey}}">

@@ -150,9 +150,9 @@ namespace PackageExplorerViewModel {
         }
 
         public void OnCompleted() {
-            PercentComplete = 100;
+            ShowProgress = false;
             HasError = false;
-            Status = "Package published successfully .";
+            Status = (PushOnly == true) ? "Package pushed successfully." : "Package published successfully.";
         }
 
         public void OnError(Exception error) {
