@@ -65,7 +65,8 @@ namespace NuGet.Commands {
                 if (!UseSideBySidePaths) {
                     // If side-by-side is turned off, we need to try and update the package.
                     var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
-                    if (installedPackage != null) {
+                    var sourcePackage = packageManager.SourceRepository.FindPackage(packageId, version);
+                    if (installedPackage != null && installedPackage.Version != sourcePackage.Version) {
                         packageManager.UninstallPackage(installedPackage);
                     }
                 }

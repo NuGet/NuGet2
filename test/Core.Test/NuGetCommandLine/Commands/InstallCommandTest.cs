@@ -103,8 +103,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = new List<IPackage>();
             var repository = new Mock<IPackageRepository>();
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
-            repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c));
-            repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c));
+            repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
+            repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
             var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
@@ -127,6 +127,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Assert - 2
             Assert.AreEqual("Baz", packages.Single().Id);
             Assert.AreEqual(new Version("0.7"), packages.Single().Version);
+            repository.Verify();
         }
 
         private static IPackageRepositoryFactory GetFactory() {
