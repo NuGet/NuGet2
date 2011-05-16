@@ -280,33 +280,82 @@ namespace PackageExplorerViewModel {
         }
 
         public void AddDraggedAndDroppedFiles(PackageFolder folder, string[] fileNames) {
-            foreach (string file in fileNames) {
-                if (File.Exists(file)) {
-                    AddFileToFolder(folder, file);
-                }
-            }
-        }
-
-        private void AddFileToFolder(PackageFolder folder, string file) {
             if (folder == null) {
-                string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
-                bool confirmed = UIServices.Confirm(Resources.ConfirmToMoveFileIntoFolder_Title, String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToMoveFileIntoFolder, file, guessFolderName));
+                bool? rememberedAnswer = null;
 
-                if (confirmed) {
-                    if (RootFolder.ContainsFolder(guessFolderName)) {
-                        folder = (PackageFolder)RootFolder[guessFolderName];
+                for (int i = 0; i < fileNames.Length; i++) {
+                    string file = fileNames[i];
+                    if (File.Exists(file)) {
+                        bool movingFile = false;
+
+                        PackageFolder targetFolder;
+                        string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
+
+                        if (rememberedAnswer == null) {
+                            // ask user if he wants to move file
+                            Tuple<bool?, bool> answer = UIServices.ConfirmMoveFile(
+                                Path.GetFileName(file), 
+                                guessFolderName, fileNames.Length - i - 1);
+
+                            if (answer.Item1 == null) {
+                                // user presses Cancel
+                                break;
+                            }
+
+                            movingFile = (bool)answer.Item1;
+                            if (answer.Item2) {
+                                rememberedAnswer = answer.Item1;
+                            }
+                        }
+                        else {
+                            movingFile = (bool)rememberedAnswer;
+                        }
+
+                        if (movingFile) {
+                            if (RootFolder.ContainsFolder(guessFolderName)) {
+                                targetFolder = (PackageFolder)RootFolder[guessFolderName];
+                            }
+                            else {
+                                targetFolder = RootFolder.AddFolder(guessFolderName);
+                            }
+                        }
+                        else {
+                            targetFolder = RootFolder;
+                        }
+
+                        targetFolder.AddFile(file);
                     }
-                    else {
-                        folder = RootFolder.AddFolder(guessFolderName);
-                    }
-                }
-                else {
-                    folder = RootFolder;
                 }
             }
-
-            folder.AddFile(file);
+            else {
+                foreach (string file in fileNames) {
+                    if (File.Exists(file)) {
+                        folder.AddFile(file);
+                    }
+                }
+            }
         }
+
+        //private void AddFileToFolder(PackageFolder folder, string file) {
+        //    if (folder == null) {
+        //        string guessFolderName = FileHelper.GuessFolderNameFromFile(file);
+        //        bool confirmed = UIServices.Confirm(Resources.ConfirmToMoveFileIntoFolder_Title, String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToMoveFileIntoFolder, file, guessFolderName));
+
+        //        if (confirmed) {
+        //            if (RootFolder.ContainsFolder(guessFolderName)) {
+        //                folder = (PackageFolder)RootFolder[guessFolderName];
+        //            }
+        //            else {
+        //                folder = RootFolder.AddFolder(guessFolderName);
+        //            }
+        //        }
+        //        else {
+        //            folder = RootFolder;
+        //        }
+        //    }
+
+        //    folder.AddFile(file);
+        //}
 
         internal bool IsShowingFileContent(PackageFile file) {
             return ShowContentViewer && CurrentFileInfo.File == file;

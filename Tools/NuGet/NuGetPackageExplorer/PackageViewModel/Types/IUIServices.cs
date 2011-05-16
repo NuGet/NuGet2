@@ -28,6 +28,9 @@ namespace PackageExplorerViewModel.Types {
         bool? ConfirmWithCancel(string message, string title);
         void Show(string message, MessageLevel messageLevel);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        Tuple<bool?, bool> ConfirmMoveFile(string fileName, string targetFolder, int numberOfItemsLeft);
+
         void BeginInvoke(Action action);
     }
 }

@@ -223,6 +223,24 @@ namespace PackageExplorer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do you want to add the file &apos;{0}&apos; to &apos;{1}&apos; folder instead?.
+        /// </summary>
+        public static string MoveContentFileToFolder {
+            get {
+                return ResourceManager.GetString("MoveContentFileToFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NuGet does not do anything special with files at the package root. The extension of this file indicates that it is intended to be placed in the &apos;{0}&apos; folder. .
+        /// </summary>
+        public static string MoveContentFileToFolderExplanation {
+            get {
+                return ResourceManager.GetString("MoveContentFileToFolderExplanation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Network connection is not detected..
         /// </summary>
         public static string NoNetworkConnection {

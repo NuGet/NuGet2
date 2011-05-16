@@ -171,6 +171,12 @@
   <data name="Dialog_ViewLicense" xml:space="preserve">
     <value>View License Terms</value>
   </data>
+  <data name="MoveContentFileToFolder" xml:space="preserve">
+    <value>Do you want to add the file '{0}' to '{1}' folder instead?</value>
+  </data>
+  <data name="MoveContentFileToFolderExplanation" xml:space="preserve">
+    <value>NuGet does not do anything special with files at the package root. The extension of this file indicates that it is intended to be placed in the '{0}' folder. </value>
+  </data>
   <data name="NoNetworkConnection" xml:space="preserve">
     <value>Network connection is not detected.</value>
   </data>

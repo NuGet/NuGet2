@@ -70,7 +70,7 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deleted file is not recoverable..
+        ///   Looks up a localized string similar to Deleted file or folder is not recoverable..
         /// </summary>
         internal static string ConfirmToDeleteContent_Title {
             get {
@@ -79,25 +79,7 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you want to place the file &apos;{0}&apos; into &apos;{1}&apos; folder?.
-        /// </summary>
-        internal static string ConfirmToMoveFileIntoFolder {
-            get {
-                return ResourceManager.GetString("ConfirmToMoveFileIntoFolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Files at the root location are ignored by NuGet..
-        /// </summary>
-        internal static string ConfirmToMoveFileIntoFolder_Title {
-            get {
-                return ResourceManager.GetString("ConfirmToMoveFileIntoFolder_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Do you want to replace the existing file?.
+        ///   Looks up a localized string similar to Do you want to replace the existing file &apos;{0}&apos;?.
         /// </summary>
         internal static string ConfirmToReplaceExsitingFile {
             get {

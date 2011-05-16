@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.Win32;
-using PackageExplorerViewModel.Types;
 using Ookii.Dialogs.Wpf;
-using System.Runtime.CompilerServices;
+using PackageExplorerViewModel.Types;
+using System.Globalization;
 
 namespace PackageExplorer {
 
@@ -102,6 +103,7 @@ namespace PackageExplorer {
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private bool ConfirmUsingTaskDialog(string message, string title, bool isWarning) {
             using (TaskDialog dialog = new TaskDialog()) {
                 dialog.WindowTitle = Resources.Resources.Dialog_Title;
@@ -241,6 +243,76 @@ namespace PackageExplorer {
 
         public void BeginInvoke(Action action) {
             Window.Value.Dispatcher.BeginInvoke(action);
+        }
+
+        public Tuple<bool?, bool> ConfirmMoveFile(string fileName, string targetFolder, int numberOfItemsLeft) {
+            if (numberOfItemsLeft < 0) {
+                throw new ArgumentOutOfRangeException("numberofItemsLeft");
+            }
+            
+            string mainInstruction = String.Format(
+                CultureInfo.CurrentCulture,
+                Resources.Resources.MoveContentFileToFolder,
+                fileName,
+                targetFolder);
+
+            if (OSSupportsTaskDialogs) {
+                return ConfirmMoveFileUsingTaskDialog(fileName, targetFolder, numberOfItemsLeft, mainInstruction);
+            }
+            else {
+                bool? answer = ConfirmWithCancel(mainInstruction, Resources.Resources.Dialog_Title);
+                return Tuple.Create(answer, false); 
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private Tuple<bool?, bool> ConfirmMoveFileUsingTaskDialog(string fileName, string targetFolder, int numberOfItemsLeft, string mainInstruction) {
+            string content = String.Format(
+                CultureInfo.CurrentCulture,
+                Resources.Resources.MoveContentFileToFolderExplanation,
+                targetFolder);
+            
+            TaskDialog dialog = new TaskDialog {
+                MainInstruction = mainInstruction,
+                Content = content,
+                WindowTitle = Resources.Resources.Dialog_Title,
+                ButtonStyle = TaskDialogButtonStyle.CommandLinks
+            };
+
+            if (numberOfItemsLeft > 0) {
+                dialog.VerificationText = "Do this for the next " + numberOfItemsLeft + " file(s).";
+            }
+
+            TaskDialogButton moveButton = new TaskDialogButton {
+                Text = "Yes",
+                CommandLinkNote = "'" + fileName + "' will be added to '" + targetFolder + "' folder."
+            };
+
+            TaskDialogButton noMoveButton = new TaskDialogButton {
+                Text = "No",
+                CommandLinkNote = "'" + fileName + "' will be added to the package root."
+            };
+
+            dialog.Buttons.Add(moveButton);
+            dialog.Buttons.Add(noMoveButton);
+            dialog.Buttons.Add(new TaskDialogButton(ButtonType.Cancel));
+
+            TaskDialogButton result = dialog.ShowDialog(Window.Value);
+
+            bool? movingFile;
+            if (result == moveButton) {
+                movingFile = true;
+            }
+            else if (result == noMoveButton) {
+                movingFile = false;
+            }
+            else {
+                // Cancel button clicked
+                movingFile = null;
+            }
+
+            bool remember = dialog.IsVerificationChecked;
+            return Tuple.Create(movingFile, remember);
         }
     }
 }

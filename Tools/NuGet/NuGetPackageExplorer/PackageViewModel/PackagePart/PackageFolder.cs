@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using NuGet;
+using System.Globalization;
 
 namespace PackageExplorerViewModel {
     public class PackageFolder : PackagePart {
@@ -164,8 +165,8 @@ namespace PackageExplorerViewModel {
             bool showingRemovedFile = false;
             if (ContainsFile(newFileName)) {
                 bool confirmed = PackageViewModel.UIServices.Confirm(
-                    Resources.ConfirmToDeleteContent_Title, 
-                    Resources.ConfirmToReplaceExsitingFile, 
+                    Resources.ConfirmToReplaceExsitingFile_Title, 
+                    String.Format(CultureInfo.CurrentCulture, Resources.ConfirmToReplaceExsitingFile, newFileName),
                     isWarning: true);
 
                 if (confirmed) {

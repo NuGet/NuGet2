@@ -121,16 +121,10 @@
     <value>Are you sure you want to delete '{0}'?</value>
   </data>
   <data name="ConfirmToDeleteContent_Title" xml:space="preserve">
-    <value>Deleted file is not recoverable.</value>
-  </data>
-  <data name="ConfirmToMoveFileIntoFolder" xml:space="preserve">
-    <value>Do you want to place the file '{0}' into '{1}' folder?</value>
-  </data>
-  <data name="ConfirmToMoveFileIntoFolder_Title" xml:space="preserve">
-    <value>Files at the root location are ignored by NuGet.</value>
+    <value>Deleted file or folder is not recoverable.</value>
   </data>
   <data name="ConfirmToReplaceExsitingFile" xml:space="preserve">
-    <value>Do you want to replace the existing file?</value>
+    <value>Do you want to replace the existing file '{0}'?</value>
   </data>
   <data name="ConfirmToReplaceExsitingFile_Title" xml:space="preserve">
     <value>There is already a file with the same name in this folder.</value>
