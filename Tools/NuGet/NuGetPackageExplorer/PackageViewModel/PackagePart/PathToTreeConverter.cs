@@ -34,7 +34,13 @@ namespace PackageExplorerViewModel {
                 else {
                     // it's a folder
                     int j = i;
-                    while (j < end && level < parsedPaths[j].Item2.Length && parsedPaths[j].Item2[level] == s) j++;
+                    while (
+                        j < end &&
+                        level < parsedPaths[j].Item2.Length &&
+                        parsedPaths[j].Item2[level].Equals(s, StringComparison.OrdinalIgnoreCase)
+                    ) {
+                        j++;
+                    }
 
                     PackageFolder folder = new PackageFolder(s, root);
                     root.Children.Add(folder);
