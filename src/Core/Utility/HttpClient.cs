@@ -17,7 +17,7 @@ namespace NuGet {
 
         public HttpClient(Uri uri)
             : this() {
-            if(uri == null) {
+            if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
 
@@ -70,9 +70,9 @@ namespace NuGet {
 
         public void InitializeRequest(WebRequest request) {
             var httpRequest = request as HttpWebRequest;
-            if(httpRequest != null) {
+            if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
-                if(AcceptCompression) {
+                if (AcceptCompression) {
                     httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 }
             }
@@ -80,17 +80,17 @@ namespace NuGet {
             // The ProxyFinder to try and auto detect the proxy for us.
             // By default if the user has not set the proxy then the proxy should be set to the WebRequest.DefaultWebProxy
             // If the user has manually set or passed in a proxy as Null then we probably don't want to auto detect.
-            if(ProxyFinder != null) {
+            if (ProxyFinder != null) {
                 Proxy = ProxyFinder.GetProxy(Uri);
             }
+
             // Set the request proxy to the set Proxy property instance.
             request.Proxy = Proxy;
-            // giving clients a chance to examine/modify the request object before the request actually goes out.
+
+            // Give clients a chance to examine/modify the request object before the request actually goes out.
             RaiseSendingRequest(request);
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public byte[] DownloadData() {
             const int ChunkSize = 1024 * 4; // 4KB
 

@@ -547,6 +547,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to resolve &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnableToResolveUri {
+            get {
+                return ResourceManager.GetString("UnableToResolveUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The package source named &apos;{0}&apos; is either invalid or not available and thus is currently unreachable..
         /// </summary>
         internal static string UnavailablePackageSource {

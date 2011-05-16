@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Net;
+using NuGet.Resources;
 
 namespace NuGet {
     /// <summary>
@@ -32,12 +33,12 @@ namespace NuGet {
         private IHttpClient EnsureClient() {
             IHttpClient originalClient = new HttpClient(_originalUri);
             WebRequest request = originalClient.CreateRequest();
-            using(WebResponse response = request.GetResponse()) {
-                if(response == null) {
+            using (WebResponse response = request.GetResponse()) {
+                if (response == null) {
                     throw new InvalidOperationException(
-                        string.Format(CultureInfo.CurrentCulture,
-                                      "Unable to get a valid response for link: {0}",
-                                      Uri.OriginalString));
+                        String.Format(CultureInfo.CurrentCulture,
+                                      NuGetResources.UnableToResolveUri,
+                                      Uri));
                 }
                 return new HttpClient(response.ResponseUri);
             }

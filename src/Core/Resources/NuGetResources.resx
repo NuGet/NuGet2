@@ -303,4 +303,7 @@
   <data name="Log_UpdatingPackages" xml:space="preserve">
     <value>Updating '{0}' from version '{1}' to '{2}' in project '{3}'.</value>
   </data>
+  <data name="UnableToResolveUri" xml:space="preserve">
+    <value>Unable to resolve '{0}'.</value>
+  </data>
 </root>

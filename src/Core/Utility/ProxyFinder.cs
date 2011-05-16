@@ -7,7 +7,6 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class ProxyFinder : IProxyFinder {
-
         /// <summary>
         /// Local Cache of Proxy objects that will store the Proxy that was discovered during the session
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
@@ -25,7 +24,7 @@ namespace NuGet {
         /// <param name="uri">The Uri object that the proxy is to be used for.</param>
         /// <returns></returns>
         public virtual IWebProxy GetProxy(Uri uri) {
-            if(uri == null) {
+            if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
 
@@ -39,7 +38,7 @@ namespace NuGet {
         /// </summary>
         /// <param name="provider"></param>
         public void RegisterProvider(IProxyProvider provider) {
-            if(provider == null) {
+            if (provider == null) {
                 throw new ArgumentNullException("provider");
             }
             _providerCache.Add(provider);
@@ -50,10 +49,10 @@ namespace NuGet {
         /// </summary>
         /// <param name="provider"></param>
         public void UnregisterProvider(IProxyProvider provider) {
-            if(provider == null) {
+            if (provider == null) {
                 throw new ArgumentNullException("provider");
             }
-            if(!_providerCache.Contains(provider)) {
+            if (!_providerCache.Contains(provider)) {
                 return;
             }
             _providerCache.Remove(provider);
@@ -79,18 +78,18 @@ namespace NuGet {
             WebProxy systemProxy = GetSystemProxy(uri);
 
             IWebProxy cachedProxy;
-            if(_proxyCache.TryGetValue(systemProxy.Address, out cachedProxy)) {
+            if (_proxyCache.TryGetValue(systemProxy.Address, out cachedProxy)) {
                 return cachedProxy;
             }
 
-            foreach(var provider in _providerCache) {
+            foreach (var provider in _providerCache) {
                 var proxy = ExecuteProvider(provider, uri);
-                if(proxy != null) {
+                if (proxy != null) {
                     result = proxy;
                     break;
                 }
             }
-           
+
             // TODO: If the proxy that is returned is null do we really want to cache this?
             // PRO: Subsequent requests for the given Uri should automatically return a null
             //      proxy instance without going through the proxy detection logic.
@@ -104,7 +103,7 @@ namespace NuGet {
 
         protected virtual IWebProxy ExecuteProvider(IProxyProvider provider, Uri uri) {
             var proxy = provider.GetProxy(uri);
-            if(IsProxyValid(proxy, uri)) {
+            if (IsProxyValid(proxy, uri)) {
                 return proxy;
             }
             return null;
@@ -147,14 +146,14 @@ namespace NuGet {
                 // a cached proxy instance seemed to resolve this issue.
                 response = request.GetResponse();
             }
-            catch(WebException webException) {
+            catch (WebException webException) {
                 HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if(webResponse == null || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
+                if (webResponse == null || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
                     result = false;
                 }
             }
             finally {
-                if(response != null) {
+                if (response != null) {
                     ((IDisposable)response).Dispose();
                 }
             }
@@ -176,13 +175,13 @@ namespace NuGet {
             // getting the proxy for to should be bypassed or not. If it should be bypassed then
             // return that we don't need a proxy and we should try to connect directly.
             IWebProxy proxy = WebRequest.DefaultWebProxy;
-            if(proxy != null) {
+            if (proxy != null) {
                 Uri proxyAddress = new Uri(proxy.GetProxy(uri).AbsoluteUri);
-                if(String.Equals(proxyAddress.AbsoluteUri, uri.AbsoluteUri)) {
+                if (String.Equals(proxyAddress.AbsoluteUri, uri.AbsoluteUri)) {
                     return false;
                 }
                 bool bypassUri = proxy.IsBypassed(uri);
-                if(bypassUri) {
+                if (bypassUri) {
                     return false;
                 }
                 proxy = new WebProxy(proxyAddress);
