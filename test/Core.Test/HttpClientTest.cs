@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Net.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -8,31 +7,58 @@ namespace NuGet.Test {
     [TestClass]
     public class HttpClientTest {
         [TestMethod]
-        public void CreateRequestUsesDefaultCredentials() {
+        public void CreateRequestHasDefaultProxyFinder() {
             // Arrange
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(new Uri("http://example.com"));
 
             // Act
-            WebRequest request = httpClient.CreateRequest(new Uri("http://example.com/"), acceptCompression: false);
 
             // Assert
-            Assert.IsTrue(request.UseDefaultCredentials);
+            Assert.IsNotNull(httpClient.ProxyFinder,"HttpClient.ProxyFinder is not initialized by default.");
+            Assert.AreEqual(HttpClient.DefaultProxyFinder, httpClient.ProxyFinder);
         }
 
         [TestMethod]
-        public void InitializeRequestSetsProxyIfNull() {
+        public void ChangingDefaultProxyFinderShouldSetNewInstanceOnNewHttpClients() {
             // Arrange
-            var proxy = new Mock<IWebProxy>();
-            proxy.SetupAllProperties();
-            var request = new Mock<WebRequest>();
-            request.Setup(r => r.Proxy).Returns(proxy.Object);
-            var httpClient = new HttpClient();
+            var mockProxyFinder = new Mock<IProxyFinder>();
+            HttpClient.DefaultProxyFinder = mockProxyFinder.Object;
+            var httpClient = new HttpClient(new Uri("http://example.com"));
 
             // Act
-            httpClient.InitializeRequest(request.Object, acceptCompression: false);
 
             // Assert
-            Assert.AreEqual(CredentialCache.DefaultCredentials, request.Object.Proxy.Credentials);
+            Assert.AreEqual(mockProxyFinder.Object, httpClient.ProxyFinder);
         }
+
+        [TestMethod]
+        public void CreateRequestProxyFinderReturnsValidProxyForUri() {
+            // Arrange
+            var httpClient = new HttpClient(new Uri("http://example.com"));
+            var proxyFinderMock = new Mock<IProxyFinder>();
+            var validProxy = new WebProxy("http://someproxy");
+            proxyFinderMock.Setup(finder => finder.GetProxy(It.IsAny<Uri>())).Returns(validProxy);
+            httpClient.ProxyFinder = proxyFinderMock.Object;
+
+            // Act
+            var request = httpClient.CreateRequest();
+            
+            // Assert
+            Assert.AreEqual(request.Proxy,validProxy);
+        }
+
+        [TestMethod]
+        public void EmptyProviderListReturnsNullProxy() {
+            // Arrange
+            var httpClient = new HttpClient(new Uri("http://example.com"));
+            
+            // Act
+            httpClient.ProxyFinder = null;
+            var request = httpClient.CreateRequest();
+
+            // Assert
+            Assert.IsNull(request.Proxy);
+        }
+
     }
 }

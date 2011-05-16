@@ -4,10 +4,9 @@ using System.Linq;
 
 namespace NuGet {
     public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents {
-        private readonly IDataServiceContext _context;
+        private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
-        private readonly string _source;
-        private readonly PackageDownloader _packageDownloader = new PackageDownloader();
+        private readonly PackageDownloader _packageDownloader;
 
         // Just forward calls to the package downloader
         public event EventHandler<ProgressEventArgs> ProgressAvailable {
@@ -31,34 +30,39 @@ namespace NuGet {
         }
 
         public DataServicePackageRepository(Uri serviceRoot)
-            : this(serviceRoot, new HttpClient()) {
+            : this(new HttpClient(serviceRoot)) {
         }
 
-        public DataServicePackageRepository(Uri serviceRoot, IHttpClient client)
-            : this(new DataServiceContextWrapper(serviceRoot), client) {
-            _source = serviceRoot.OriginalString;
-        }
-
-        private DataServicePackageRepository(IDataServiceContext context, IHttpClient httpClient) {
-            if (context == null) {
-                throw new ArgumentNullException("context");
+        public DataServicePackageRepository(IHttpClient client){
+            if(client == null) {
+                throw new ArgumentNullException("client");
             }
 
-            if (httpClient == null) {
-                throw new ArgumentNullException("httpClient");
-            }
+            _httpClient = client;
+            _httpClient.AcceptCompression = true;
 
-            _context = context;
-            _httpClient = httpClient;
-
-            _context.SendingRequest += OnSendingRequest;
-            _context.ReadingEntity += OnReadingEntity;
-            _context.IgnoreMissingProperties = true;
+            _packageDownloader = new PackageDownloader();
         }
 
         public override string Source {
             get {
-                return _source;
+                return _httpClient.Uri.OriginalString;
+            }
+        }
+
+        // Don't initialize the Context at the constructor time so that
+        // we don't make a web request if we are not gonig to actually use it
+        // since getting the Uri property of the RedirectedHttpClient will
+        // trigger that functionality.
+        private IDataServiceContext Context {
+            get {
+                if(_context == null) {
+                    _context = new DataServiceContextWrapper(_httpClient.Uri);
+                    _context.SendingRequest += OnSendingRequest;
+                    _context.ReadingEntity += OnReadingEntity;
+                    _context.IgnoreMissingProperties = true;
+                }
+                return _context;
             }
         }
 
@@ -67,18 +71,18 @@ namespace NuGet {
 
             // REVIEW: This is the only way (I know) to download the package on demand
             // GetReadStreamUri cannot be evaluated inside of OnReadingEntity. Lazily evaluate it inside DownloadPackage
-            package.Context = _context;
+            package.Context = Context;
             package.Downloader = _packageDownloader;
         }
 
         private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
             // Initialize the request
-            _httpClient.InitializeRequest(e.Request, acceptCompression: true);
+            _httpClient.InitializeRequest(e.Request);
         }
 
         public override IQueryable<IPackage> GetPackages() {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return new SmartDataServiceQuery<DataServicePackage>(_context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
+            return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
         }
     }
 }

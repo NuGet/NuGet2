@@ -4,16 +4,8 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
+
         private static readonly PackageRepositoryFactory _default = new PackageRepositoryFactory();
-        private readonly IHttpClient _httpClient;
-
-        public PackageRepositoryFactory() :
-            this(new HttpClient()) {
-        }
-
-        public PackageRepositoryFactory(IHttpClient httpClient) {
-            _httpClient = httpClient;
-        }
 
         public static PackageRepositoryFactory Default {
             get {
@@ -31,8 +23,10 @@ namespace NuGet {
                 return new LocalPackageRepository(uri.LocalPath);
             }
 
+            IHttpClient client = null;
+
             try {
-                uri = _httpClient.GetRedirectedUri(uri);
+                client = new RedirectedHttpClient(uri);
             }
             catch (Exception exception) {
                 throw new InvalidOperationException(
@@ -42,7 +36,7 @@ namespace NuGet {
             }
 
             // Make sure we get resolve any fwlinks before creating the repository
-            return new DataServicePackageRepository(uri, _httpClient);
+            return new DataServicePackageRepository(client);
         }
     }
 }

@@ -62,6 +62,7 @@
     <Compile Include="PackageSourceProviderTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
+    <Compile Include="ProxyFinderTest.cs" />
     <Compile Include="Server\Infrastructure\HelpersTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />

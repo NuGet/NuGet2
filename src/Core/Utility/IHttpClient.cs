@@ -7,11 +7,27 @@ namespace NuGet {
             get;
             set;
         }
+        Uri Uri {
+            get;
+            set;
+        }
+        IWebProxy Proxy {
+            get;
+            set;
+        }
 
-        WebRequest CreateRequest(Uri uri, bool acceptCompression);
-        void InitializeRequest(WebRequest request, bool acceptCompression);
-        Uri GetRedirectedUri(Uri uri);
+        IProxyFinder ProxyFinder {
+            get;
+            set;
+        }
 
-        byte[] DownloadData(Uri uri);
+        bool AcceptCompression {
+            get;
+            set;
+        }
+
+        WebRequest CreateRequest();
+        void InitializeRequest(WebRequest request);
+        byte[] DownloadData();
     }
 }
