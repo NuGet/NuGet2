@@ -12,6 +12,7 @@ using NuGet.Resources;
 namespace NuGet {
     public class PackageReferenceFile {
         private readonly string _path;
+        private readonly Dictionary<string, string> _constraints = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public PackageReferenceFile(string path) :
             this(new PhysicalFileSystem(Path.GetDirectoryName(path)),
@@ -43,9 +44,16 @@ namespace NuGet {
             foreach (var e in document.Root.Elements("package")) {
                 string id = e.GetOptionalAttributeValue("id");
                 string versionString = e.GetOptionalAttributeValue("version");
+                string versionConstaintString = e.GetOptionalAttributeValue("allowedVersions");
                 Version version = VersionUtility.ParseOptionalVersion(versionString);
 
-                yield return new PackageReference(id, version);
+                IVersionSpec versionConstaint = null;
+                if (!String.IsNullOrEmpty(versionConstaintString)) {
+                    versionConstaint = VersionUtility.ParseVersionSpec(versionConstaintString);
+                    _constraints[id] = versionConstaintString;
+                }
+
+                yield return new PackageReference(id, version, versionConstaint);
             }
         }
 
@@ -84,9 +92,17 @@ namespace NuGet {
                 element.Remove();
             }
 
-            document.Root.Add(new XElement("package",
+            var newElement = new XElement("package",
                                   new XAttribute("id", id),
-                                  new XAttribute("version", version)));
+                                  new XAttribute("version", version));
+
+            // Restore the version constraint
+            string versionConstraint;
+            if (_constraints.TryGetValue(id, out versionConstraint)) {
+                newElement.Add(new XAttribute("allowedVersions", versionConstraint));
+            }
+
+            document.Root.Add(newElement);
 
             SaveDocument(document);
         }
@@ -109,6 +125,13 @@ namespace NuGet {
             XElement element = FindEntry(document, id, version);
 
             if (element != null) {
+                // Preserve the allowedVersions attribute for this package id (if any defined)
+                var versionConstraint = element.GetOptionalAttributeValue("allowedVersions");
+
+                if (!String.IsNullOrEmpty(versionConstraint)) {
+                    _constraints[id] = versionConstraint;
+                }
+
                 // Remove the element from the xml dom
                 element.Remove();
 

@@ -4,12 +4,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
 
 namespace NuGet {
     public static class VersionUtility {
         private const string NetFrameworkIdentifier = ".NETFramework";
+        private const string LessThanOrEqualTo = "\u2264";
+        private const string GreaterThanOrEqualTo = "\u2265";
+
         private static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
         private static readonly Version _emptyVersion = new Version();
 
@@ -277,6 +281,50 @@ namespace NuGet {
             // Successful parse!
             result = versionSpec;
             return true;
+        }
+
+        public static string PrettyPrint(IVersionSpec versionSpec) {
+            if (versionSpec.MinVersion != null && versionSpec.IsMinInclusive && versionSpec.MaxVersion == null && !versionSpec.IsMaxInclusive) {
+                return String.Format(CultureInfo.InvariantCulture, "({0} {1})", GreaterThanOrEqualTo, versionSpec.MinVersion);
+            }
+
+            if (versionSpec.MinVersion != null && versionSpec.MaxVersion != null && versionSpec.MinVersion == versionSpec.MaxVersion && versionSpec.IsMinInclusive && versionSpec.IsMaxInclusive) {
+                return String.Format(CultureInfo.InvariantCulture, "(= {0})", versionSpec.MinVersion);
+            }
+
+            var versionBuilder = new StringBuilder();
+            if (versionSpec.MinVersion != null) {
+                if (versionSpec.IsMinInclusive) {
+                    versionBuilder.AppendFormat(CultureInfo.InvariantCulture, "({0} ", GreaterThanOrEqualTo);
+                }
+                else {
+                    versionBuilder.Append("(> ");
+                }
+                versionBuilder.Append(versionSpec.MinVersion);
+            }
+
+            if (versionSpec.MaxVersion != null) {
+                if (versionBuilder.Length == 0) {
+                    versionBuilder.Append("(");
+                }
+                else {
+                    versionBuilder.Append(" && ");
+                }
+
+                if (versionSpec.IsMaxInclusive) {
+                    versionBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0} ", LessThanOrEqualTo);
+                }
+                else {
+                    versionBuilder.Append("< ");
+                }
+                versionBuilder.Append(versionSpec.MaxVersion);
+            }
+
+            if (versionBuilder.Length > 0) {
+                versionBuilder.Append(")");
+            }
+
+            return versionBuilder.ToString();
         }
 
         public static string GetFrameworkString(FrameworkName frameworkName) {

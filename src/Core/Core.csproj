@@ -73,8 +73,10 @@
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
+    <Compile Include="Repositories\IPackageConstraintProvider.cs" />
     <Compile Include="Repositories\IPackageLookup.cs" />
     <Compile Include="Repositories\MachineCache.cs" />
+    <Compile Include="Repositories\NullConstraintProvider.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
     <Compile Include="Utility\BaseProxyProvider.cs" />

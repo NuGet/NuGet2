@@ -13,6 +13,18 @@ namespace NuGet {
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
                              ILogger logger,
+                             bool ignoreDependencies) :
+            this(localRepository,
+                 sourceRepository,
+                 constraintProvider: NullConstraintProvider.Instance,
+                 logger: logger,
+                 ignoreDependencies: ignoreDependencies) {
+        }
+
+        public InstallWalker(IPackageRepository localRepository,
+                             IPackageRepository sourceRepository,
+                             IPackageConstraintProvider constraintProvider,
+                             ILogger logger,
                              bool ignoreDependencies) {
 
             if (sourceRepository == null) {
@@ -29,6 +41,7 @@ namespace NuGet {
             Logger = logger;
             SourceRepository = sourceRepository;
             _ignoreDependencies = ignoreDependencies;
+            ConstraintProvider = constraintProvider;
             _operations = new OperationLookup();
         }
 
@@ -52,6 +65,8 @@ namespace NuGet {
             get;
             private set;
         }
+
+        private IPackageConstraintProvider ConstraintProvider { get; set; }
 
         protected IList<PackageOperation> Operations {
             get {
@@ -139,7 +154,7 @@ namespace NuGet {
             }
 
             // Get compatible packages in one batch so we don't have to make requests for each one
-            var packages = from p in SourceRepository.FindCompatiblePackages(dependentsLookup.Keys, package)
+            var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package)
                            group p by p.Id into g
                            select new {
                                OldPackage = dependentsLookup[g.Key],
@@ -196,7 +211,7 @@ namespace NuGet {
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
             // See if we have a local copy
-            IPackage package = Repository.ResolveDependency(dependency);
+            IPackage package = Repository.ResolveDependency(ConstraintProvider, dependency);
 
             if (package != null) {
                 // We have it installed locally
@@ -206,7 +221,7 @@ namespace NuGet {
                 // We didn't resolve the dependency so try to retrieve it from the source
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
-                package = SourceRepository.ResolveDependency(dependency);
+                package = SourceRepository.ResolveDependency(ConstraintProvider, dependency);
 
                 if (package != null) {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageRetrieveSuccessfully);
@@ -217,9 +232,16 @@ namespace NuGet {
         }
 
         protected override void OnDependencyResolveError(PackageDependency dependency) {
+            IVersionSpec spec = ConstraintProvider.GetConstraint(dependency.Id);
+
+            string message = String.Empty;
+            if (spec != null) {
+                message = String.Format(CultureInfo.CurrentCulture, NuGetResources.AdditonalConstraintsDefined, dependency.Id, VersionUtility.PrettyPrint(spec), ConstraintProvider.Source);
+            }
+
             throw new InvalidOperationException(
                 String.Format(CultureInfo.CurrentCulture,
-                NuGetResources.UnableToResolveDependency, dependency));
+                NuGetResources.UnableToResolveDependency + message, dependency));
         }
 
         public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {

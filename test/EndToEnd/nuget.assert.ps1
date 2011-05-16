@@ -51,6 +51,23 @@ function Get-ProjectPackage {
     $packages
 }
 
+function Add-PackageConstraint {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true)]
+        [string]$Id,
+        [string]$Constraint
+    )
+
+   $path = (Get-ProjectItemPath $Project packages.config)
+   $packagesConfig = [xml](Get-Content $path)
+   $reference = $packagesConfig.packages.package | ?{ $_.Id -eq $Id } | Select -First 1
+   Assert-NotNull $reference "Unable to find package $Id"
+   $reference.SetAttribute("allowedVersions", $Constraint)
+   $packagesConfig.Save($path)
+}
+
 function Assert-Package {
     param(
         [parameter(Mandatory = $true)]

@@ -37,6 +37,10 @@ namespace NuGet {
         }
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version version) {
+            return ResolvePackage(repository, packageId, version);
+        }
+
+        internal static IPackage ResolvePackage(this IPackageRepository repository, string packageId, Version version, IPackageConstraintProvider constraintProvider = null) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -59,6 +63,9 @@ namespace NuGet {
 
             if (version != null) {
                 packages = packages.Where(p => p.Version == version);
+            }
+            else if (constraintProvider != null) {
+                packages = FilterPackagesByConstraints(constraintProvider, packages, packageId);
             }
 
             return packages.FirstOrDefault();
@@ -119,10 +126,13 @@ namespace NuGet {
             return packages.FirstOrDefault();
         }
 
-        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, IEnumerable<string> packageIds, IPackage package) {
+        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, IPackageConstraintProvider constraintProvider, IEnumerable<string> packageIds, IPackage package) {
             return (from p in repository.FindPackages(packageIds)
                     let dependency = p.FindDependency(package.Id)
-                    where dependency != null && dependency.VersionSpec.Satisfies(package.Version)
+                    let otherConstaint = constraintProvider.GetConstraint(p.Id)
+                    where dependency != null &&
+                          dependency.VersionSpec.Satisfies(package.Version) &&
+                          (otherConstaint == null || otherConstaint.Satisfies(package.Version))
                     select p);
         }
 
@@ -133,6 +143,10 @@ namespace NuGet {
         }
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency) {
+            return ResolveDependency(repository, constraintProvider: null, dependency: dependency);
+        }
+
+        public static IPackage ResolveDependency(this IPackageRepository repository, IPackageConstraintProvider constraintProvider, PackageDependency dependency) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -145,6 +159,9 @@ namespace NuGet {
             IEnumerable<IPackage> packages = repository.FindPackagesById(dependency.Id)
                                                        .ToList();
 
+            // Always filter by constraints when looking for dependencies
+            packages = FilterPackagesByConstraints(constraintProvider, packages, dependency.Id);
+
             // If version info was specified then use it
             if (dependency.VersionSpec != null) {
                 packages = packages.FindByVersion(dependency.VersionSpec);
@@ -156,20 +173,7 @@ namespace NuGet {
             }
 
             if (packages.Any()) {
-                // We want to take the biggest build and revision number for the smallest
-                // major and minor combination (we want to make some versioning assumptions that the 3rd number is a non-breaking bug fix). This is so that we get the closest version
-                // to the dependency, but also get bug fixes without requiring people to manually update the nuspec.
-                // For example, if A -> B 1.0.0 and the feed has B 1.0.0 and B 1.0.1 then the more correct choice is B 1.0.1. 
-                // If we don't do this, A will always end up getting the 'buggy' 1.0.0, 
-                // unless someone explicitly changes it to ask for 1.0.1, which is very painful if many packages are using B 1.0.0.
-                var groups = from p in packages
-                             group p by new { p.Version.Major, p.Version.Minor } into g
-                             orderby g.Key.Major, g.Key.Minor
-                             select g;
-
-                return (from p in groups.First()
-                        orderby p.Version descending
-                        select p).FirstOrDefault();
+                return ResolveSafeVersion(packages);
             }
 
             return null;
@@ -239,6 +243,37 @@ namespace NuGet {
             Expression toLowerExpression = Expression.Call(propertyExpression, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
             // == localPackage.Id
             return Expression.Equal(toLowerExpression, Expression.Constant(value));
+        }
+
+        private static IEnumerable<IPackage> FilterPackagesByConstraints(IPackageConstraintProvider constraintProvider, IEnumerable<IPackage> packages, string packageId) {
+            if (constraintProvider == null) {
+                return packages;
+            }
+
+            // Filter packages by this constraint
+            IVersionSpec constraint = constraintProvider.GetConstraint(packageId);
+            if (constraint != null) {
+                return packages.Where(p => constraint.Satisfies(p.Version));
+            }
+
+            return packages;
+        }
+
+        private static IPackage ResolveSafeVersion(IEnumerable<IPackage> packages) {
+            // We want to take the biggest build and revision number for the smallest
+            // major and minor combination (we want to make some versioning assumptions that the 3rd number is a non-breaking bug fix). This is so that we get the closest version
+            // to the dependency, but also get bug fixes without requiring people to manually update the nuspec.
+            // For example, if A -> B 1.0.0 and the feed has B 1.0.0 and B 1.0.1 then the more correct choice is B 1.0.1. 
+            // If we don't do this, A will always end up getting the 'buggy' 1.0.0, 
+            // unless someone explicitly changes it to ask for 1.0.1, which is very painful if many packages are using B 1.0.0.
+            var groups = from p in packages
+                         group p by new { p.Version.Major, p.Version.Minor } into g
+                         orderby g.Key.Major, g.Key.Minor
+                         select g;
+
+            return (from p in groups.First()
+                    orderby p.Version descending
+                    select p).FirstOrDefault();
         }
 
         // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures

@@ -18,6 +18,7 @@ namespace NuGet {
         private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoved;
 
         private ILogger _logger;
+        private IPackageConstraintProvider _constraintProvider;
 
         // REVIEW: These should be externally pluggable
         private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
@@ -58,6 +59,15 @@ namespace NuGet {
         public IPackageRepository SourceRepository {
             get;
             private set;
+        }
+
+        public IPackageConstraintProvider ConstraintProvider {
+            get {
+                return _constraintProvider ?? NullConstraintProvider.Instance;
+            }
+            set {
+                _constraintProvider = value;
+            }
         }
 
         public IProjectSystem Project {
@@ -128,6 +138,7 @@ namespace NuGet {
             Execute(package, new ProjectInstallWalker(LocalRepository,
                                                       SourceRepository,
                                                       new DependentsWalker(LocalRepository),
+                                                      ConstraintProvider,
                                                       NullLogger.Instance,
                                                       ignoreDependencies));
         }
@@ -325,13 +336,19 @@ namespace NuGet {
 
             Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
 
-            IPackage package = SourceRepository.FindPackage(packageId, version: version);
+            IPackage package = SourceRepository.ResolvePackage(packageId, version, ConstraintProvider);
 
             if (package != null && oldPackage.Version != package.Version) {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies);
             }
             else {
+
+                IVersionSpec constraint = ConstraintProvider.GetConstraint(packageId);
+                if (constraint != null) {
+                    Logger.Log(MessageLevel.Info, NuGetResources.Log_ApplyingConstraints, packageId, VersionUtility.PrettyPrint(constraint), ConstraintProvider.Source);
+                }
+
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailableForProject, packageId, Project.ProjectName);
             }
         }

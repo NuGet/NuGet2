@@ -306,4 +306,10 @@
   <data name="UnableToResolveUri" xml:space="preserve">
     <value>Unable to resolve '{0}'.</value>
   </data>
+  <data name="AdditonalConstraintsDefined" xml:space="preserve">
+    <value>'{0}' has an additional constraint {1} defined in {2}.</value>
+  </data>
+  <data name="Log_ApplyingConstraints" xml:space="preserve">
+    <value>Applying constraint '{0} {1}' defined in {2}.</value>
+  </data>
 </root>

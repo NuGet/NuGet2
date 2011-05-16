@@ -61,6 +61,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; has an additional constraint {1} defined in {2}..
+        /// </summary>
+        internal static string AdditonalConstraintsDefined {
+            get {
+                return ResourceManager.GetString("AdditonalConstraintsDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Aggregate queries require at least one OrderBy..
         /// </summary>
         internal static string AggregateQueriesRequireOrder {
@@ -282,6 +291,15 @@ namespace NuGet.Resources {
         internal static string InvalidVersionString {
             get {
                 return ResourceManager.GetString("InvalidVersionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Applying constraint &apos;{0} {1}&apos; defined in {2}..
+        /// </summary>
+        internal static string Log_ApplyingConstraints {
+            get {
+                return ResourceManager.GetString("Log_ApplyingConstraints", resourceCulture);
             }
         }
         

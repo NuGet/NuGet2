@@ -713,6 +713,31 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void UpdatePackageHasNoEffectIfConstaintsDefinedDontAllowForUpdates() {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            var constraintProvider = new Mock<IPackageConstraintProvider>();
+            constraintProvider.Setup(m => m.GetConstraint("A")).Returns(VersionUtility.ParseVersionSpec("[1.0, 2.0)"));
+            constraintProvider.Setup(m => m.Source).Returns("foo");
+            projectManager.ConstraintProvider = constraintProvider.Object;
+            IPackage packageA10 = PackageUtility.CreatePackage("A", "1.0");
+            IPackage packageA20 = PackageUtility.CreatePackage("A", "2.0");            
+
+            projectManager.LocalRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA10);
+            sourceRepository.AddPackage(packageA20);
+
+            // Act
+            projectManager.UpdatePackageReference("A");
+
+            // Assert
+            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA10));
+            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA20));
+        }
+
+        [TestMethod]
         public void UpdateDependencyDependentsHaveSatisfyableDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();

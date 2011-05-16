@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Test.Mocks;
+using Moq;
 
 namespace NuGet.Test {
     [TestClass]
@@ -358,6 +359,43 @@ namespace NuGet.Test {
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA10), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.5'.");
+        }
+
+        [TestMethod]
+        public void ResolvingDependencyForUpdateThatHasAnUnsatisfiedConstraint() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var constraintProvider = new Mock<IPackageConstraintProvider>();
+            constraintProvider.Setup(m => m.GetConstraint("B")).Returns(VersionUtility.ParseVersionSpec("[1.4]"));
+            constraintProvider.Setup(m => m.Source).Returns("foo");
+
+            IPackage A10 = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "1.5")
+                                                                });
+            IPackage A20 = PackageUtility.CreatePackage("A", "2.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "2.0")
+                                                                });
+
+            IPackage B15 = PackageUtility.CreatePackage("B", "1.5");
+            IPackage B20 = PackageUtility.CreatePackage("B", "2.0");
+            localRepository.Add(A10);
+            localRepository.Add(B15);
+            sourceRepository.AddPackage(A10);
+            sourceRepository.AddPackage(A20);
+            sourceRepository.AddPackage(B15);
+            sourceRepository.AddPackage(B20);
+
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
+                                                                   sourceRepository,
+                                                                   constraintProvider.Object,
+                                                                   NullLogger.Instance,
+                                                                   ignoreDependencies: false);
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(A20), "Unable to resolve dependency 'B (\u2265 2.0)'.'B' has an additional constraint (= 1.4) defined in foo.");
         }
 
         [TestMethod]

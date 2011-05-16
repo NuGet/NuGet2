@@ -461,3 +461,43 @@ function Test-UpdateAllPackagesInSolution {
     Assert-Package $p2 D 4.0
     Assert-Package $p2 E 3.0
 }
+
+function Test-UpdateScenariosWithConstaints {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-WebApplication
+    $p2 = New-ClassLibrary
+    $p3 = New-WebSite
+
+    $p1 | Install-Package A -Version 1.0 -Source $context.RepositoryPath
+    $p2 | Install-Package C -Version 1.0 -Source $context.RepositoryPath
+    $p3 | Install-Package E -Version 1.0 -Source $context.RepositoryPath
+
+    Add-PackageConstraint $p1 A "[1.0, 2.0)"
+    Add-PackageConstraint $p2 D "[1.0]"
+    Add-PackageConstraint $p3 E "[1.0]"
+     
+    # Act
+    Update-Package A -Source $context.RepositoryPath
+    Update-Package C -Source $context.RepositoryPath
+    Update-Package F -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p1 A 1.0
+    Assert-Package $p1 B 1.0
+    Assert-SolutionPackage A 1.0
+    Assert-SolutionPackage B 1.0
+
+    Assert-Package $p2 C 1.0
+    Assert-Package $p2 D 1.0
+    Assert-SolutionPackage C 1.0
+    Assert-SolutionPackage D 1.0
+
+    Assert-Package $p3 E 1.0
+    Assert-Package $p3 F 1.0
+    Assert-SolutionPackage E 1.0
+    Assert-SolutionPackage F 1.0
+}

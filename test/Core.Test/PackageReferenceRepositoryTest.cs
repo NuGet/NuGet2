@@ -91,6 +91,31 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void RemovingAndAddingPackageReferenceWithSameIdPreservesConstraint() {
+            // Arrange
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" allowedVersions=""[1.0, 5.0)"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var A10 = PackageUtility.CreatePackage("A");
+            var A20 = PackageUtility.CreatePackage("A", "2.0");
+
+            // Act
+            referenceRepository.RemovePackage(A10);
+            referenceRepository.AddPackage(A20);
+
+            // Assert
+            Assert.IsTrue(fileSystem.FileExists("packages.config"));
+            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""2.0"" allowedVersions=""[1.0, 5.0)"" />
+</packages>", fileSystem.ReadAllText("packages.config"));
+        }
+
+        [TestMethod]
         public void RemovePackageRemovesEntryFromPackagesConfig() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -159,6 +184,49 @@ namespace NuGet.Test {
             // Assert
             Assert.AreEqual(1, packages.Count);
             Assert.AreSame(packageA, packages[0]);
+        }
+
+        [TestMethod]
+        public void GetConstraintReturnsConstraintListedForPackageIdInPackagesConfig() {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" allowedVersions=""[1.0, 3.0)"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+
+
+            // Act
+            IVersionSpec constraint = referenceRepository.GetConstraint("A");
+
+            // Assert
+            Assert.IsNotNull(constraint);
+            Assert.IsTrue(constraint.IsMinInclusive);
+            Assert.IsFalse(constraint.IsMaxInclusive);
+            Assert.AreEqual(new Version("1.0"), constraint.MinVersion);
+            Assert.AreEqual(new Version("3.0"), constraint.MaxVersion);
+        }
+
+        [TestMethod]
+        public void GetConstraintThrowsIfConstrainInvalid() {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A");
+            repository.Object.AddPackage(packageA);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" allowedVersions=""[1, 3)"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
+
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(() => referenceRepository.GetConstraint("A"), "'[1, 3)' is not a valid version string.");
         }
 
         [TestMethod]

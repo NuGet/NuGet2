@@ -54,8 +54,15 @@ namespace NuGet.VisualStudio {
             // Ensure that this repository is registered with the shared repository if it needs to be
             repository.RegisterIfNecessary();
 
-            // Create the project manager with the shared repository
-            return new ProjectManager(new AggregateRepository(new[] { _sharedRepository, SourceRepository }), PathResolver, projectSystem, repository);
+            // The source repository of the project is an aggregate since it might need to look for all
+            // available packages to perform updates on dependent packages
+            var sourceRepository = new AggregateRepository(new[] { _sharedRepository, SourceRepository });
+
+            var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);
+
+            // The package reference repository also provides constraints for packages (via the allowedVersions attribute)
+            projectManager.ConstraintProvider = repository;
+            return projectManager;
         }
 
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {

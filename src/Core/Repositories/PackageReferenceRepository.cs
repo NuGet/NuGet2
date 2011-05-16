@@ -8,10 +8,10 @@ namespace NuGet {
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup {
+    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider {
         public static readonly string PackageReferenceFile = "packages.config";
         private readonly PackageReferenceFile _packageReferenceFile;
-        private readonly string _fullPath;
+        private readonly string _fullPath;        
 
         public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
             if (fileSystem == null) {
@@ -47,7 +47,7 @@ namespace NuGet {
         }
 
         private IEnumerable<IPackage> GetPackagesCore() {
-            foreach (var reference in _packageReferenceFile.GetPackageReferences()) {                
+            foreach (var reference in _packageReferenceFile.GetPackageReferences()) {
                 IPackage package = null;
 
                 if (String.IsNullOrEmpty(reference.Id) ||
@@ -62,7 +62,7 @@ namespace NuGet {
             }
         }
 
-        public override void AddPackage(IPackage package) {            
+        public override void AddPackage(IPackage package) {
             _packageReferenceFile.AddEntry(package.Id, package.Version);
 
             // Notify the source repository every time we add a new package to the repository.
@@ -71,8 +71,8 @@ namespace NuGet {
             // registered in the source then this will be ignored
             SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
         }
- 
-        public override void RemovePackage(IPackage package) {            
+
+        public override void RemovePackage(IPackage package) {
             if (_packageReferenceFile.DeleteEntry(package.Id, package.Version)) {
                 // Remove the repository from the source
                 SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
@@ -91,6 +91,15 @@ namespace NuGet {
             if (GetPackages().Any()) {
                 SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
             }
+        }
+
+        public IVersionSpec GetConstraint(string packageId) {
+            // Find the refernce entry for this package
+            PackageReference reference = _packageReferenceFile.GetPackageReferences().FirstOrDefault(p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
+            if (reference != null) {
+                return reference.VersionConstraint;
+            }
+            return null;
         }
     }
 }

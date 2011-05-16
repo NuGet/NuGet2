@@ -6,6 +6,10 @@ using NuGet.Resources;
 namespace NuGet {
     public static class PackageHelper {
         public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, string packageId, Version version) {
+            return ResolvePackage(sourceRepository, localRepository, constraintProvider: null, packageId: packageId, version: version);
+        }
+
+        public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, IPackageConstraintProvider constraintProvider, string packageId, Version version) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -19,7 +23,8 @@ namespace NuGet {
 
             if (package == null) {
                 // Try to find it in the source (regardless of version)
-                package = sourceRepository.FindPackage(packageId, version: version);
+                // We use resolve package here since we want to take any constaints into account
+                package = sourceRepository.ResolvePackage(packageId, version, constraintProvider);
 
                 // If we already have this package installed, use the local copy so we don't 
                 // end up using the one from the source repository

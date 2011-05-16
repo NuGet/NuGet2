@@ -7,7 +7,22 @@ namespace NuGet {
                                     IDependentsResolver dependentsResolver,
                                     ILogger logger,
                                     bool ignoreDependencies)
-            : base(localRepository, sourceRepository, logger, ignoreDependencies) {
+            : this(localRepository, 
+                   sourceRepository,
+                   dependentsResolver,
+                   constraintProvider: null, 
+                   logger: logger, 
+                   ignoreDependencies: ignoreDependencies) {
+            _dependentsResolver = dependentsResolver;
+        }
+
+        public ProjectInstallWalker(IPackageRepository localRepository,
+                                    IPackageRepository sourceRepository,
+                                    IDependentsResolver dependentsResolver,
+                                    IPackageConstraintProvider constraintProvider,
+                                    ILogger logger,
+                                    bool ignoreDependencies)
+            : base(localRepository, sourceRepository, constraintProvider, logger, ignoreDependencies) {
             _dependentsResolver = dependentsResolver;
         }
 
