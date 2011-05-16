@@ -538,7 +538,12 @@ namespace NuGet.VisualStudio {
                 // While updating we might remove packages that were initially in the list. e.g.
                 // A 1.0 -> B 2.0, A 2.0 -> [], since updating to A 2.0 removes B, we end up skipping it.
                 if (LocalRepository.Exists(package.Id)) {
-                    UpdatePackage(package.Id, version: null, updateDependencies: true, logger: logger);
+                    try {
+                        UpdatePackage(package.Id, version: null, updateDependencies: true, logger: logger);
+                    }
+                    catch (Exception e) {
+                        logger.Log(MessageLevel.Warning, e.Message);
+                    }
                 }
             }
         }
