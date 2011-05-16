@@ -87,6 +87,69 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void FindPackageMatchesExactVersionIfSideBySideIsDisabled() {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"A\A.nupkg");
+            
+            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem);
+            var searchedPaths = new List<string>();
+            Func<string, IPackage> openPackage = p => {
+                searchedPaths.Add(p);
+                string id = Path.GetFileNameWithoutExtension(p);
+                return PackageUtility.CreatePackage("A", "1.1");
+            };
+
+            // Act and Assert
+            IPackage result = repository.FindPackage(openPackage, "A", new Version("1.0"));
+            Assert.IsNull(result);
+            Assert.AreEqual(@"A\A.nupkg", searchedPaths.Single());
+
+            searchedPaths.Clear();
+            result = repository.FindPackage(openPackage, "A", new Version("0.8"));
+            Assert.IsNull(result);
+            Assert.AreEqual(@"A\A.nupkg", searchedPaths.Single());
+
+            searchedPaths.Clear();
+            result = repository.FindPackage(openPackage, "A", new Version("1.1"));
+            Assert.AreEqual("A", result.Id);
+            Assert.AreEqual(new Version("1.1"), result.Version);
+        }
+
+        [TestMethod]
+        public void FindPackageMatchesExactVersionIfSideBySideIsEnabled() {
+            // Arrange
+            var fileSystem = new Mock<MockProjectSystem> { CallBase = true };
+            fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.1.0\A.1.0.nupkg")))).Returns(false);
+            fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.0.8\A.0.8.nupkg")))).Returns(false);
+            fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.1.1\A.1.1.nupkg")))).Returns(true);
+
+            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem.Object, useSideBySidePaths: true), fileSystem.Object);
+            var searchedPaths = new List<string>();
+            Func<string, IPackage> openPackage = p => {
+                searchedPaths.Add(p);
+                string id = Path.GetFileNameWithoutExtension(p);
+                return PackageUtility.CreatePackage("A", "1.1");
+            };
+
+            // Act and Assert
+            IPackage result = repository.FindPackage(openPackage, "A", new Version("1.0"));
+            Assert.IsNull(result);
+            Assert.IsFalse(searchedPaths.Any());
+
+            result = repository.FindPackage(openPackage, "A", new Version("0.8"));
+            Assert.IsNull(result);
+            Assert.IsFalse(searchedPaths.Any());
+
+            result = repository.FindPackage(openPackage, "A", new Version("1.1"));
+            Assert.AreEqual(@"A.1.1\A.1.1.nupkg", searchedPaths.Single());
+            Assert.AreEqual("A", result.Id);
+            Assert.AreEqual(new Version("1.1"), result.Version);
+
+            fileSystem.Verify();
+        }
+
+        [TestMethod]
         public void AddPackageAddsFileToFileSystem() {
             // Arrange
             var mockFileSystem = new MockProjectSystem();

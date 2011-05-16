@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -18,7 +17,6 @@ namespace NuGet.Commands {
             get { return _sources; }
         }
 
-
         [Option(typeof(NuGetResources), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
@@ -31,6 +29,10 @@ namespace NuGet.Commands {
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
+
+        private bool UseSideBySidePaths {
+            get { return !ExcludeVersion; }
+        }
 
         [ImportingConstructor]
         public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider) {
@@ -47,15 +49,8 @@ namespace NuGet.Commands {
         }
 
         public override void ExecuteCommand() {
-            IPackageRepository packageRepository = GetRepository();
-
             IFileSystem fileSystem = GetFileSystem();
-
-            var packageManager = new PackageManager(packageRepository,
-                new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: !ExcludeVersion),
-                fileSystem);
-
-            packageManager.Logger = Console;
+            PackageManager packageManager = GetPackageManager(fileSystem);
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
@@ -64,7 +59,17 @@ namespace NuGet.Commands {
             }
             else {
                 string packageId = Arguments[0];
+
                 Version version = Version != null ? new Version(Version) : null;
+
+                if (!UseSideBySidePaths) {
+                    // If side-by-side is turned off, we need to try and update the package.
+                    var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
+                    if (installedPackage != null) {
+                        packageManager.UninstallPackage(installedPackage);
+                    }
+                }
+
                 packageManager.InstallPackage(packageId, version);
             }
         }
@@ -92,6 +97,15 @@ namespace NuGet.Commands {
             if (!installedAny) {
                 Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, PackageReferenceRepository.PackageReferenceFile);
             }
+        }
+
+        protected virtual PackageManager GetPackageManager(IFileSystem fileSystem) {
+            var repository = GetRepository();
+
+            var packageManager = new PackageManager(repository, new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: UseSideBySidePaths), fileSystem);
+            packageManager.Logger = Console;
+
+            return packageManager;
         }
 
         protected virtual IFileSystem GetFileSystem() {

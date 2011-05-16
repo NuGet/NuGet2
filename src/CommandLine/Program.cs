@@ -7,6 +7,8 @@ using NuGet.Commands;
 
 namespace NuGet {
     public class Program {
+        internal static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "CommandLineExtensions");
+        
         [Import]
         public HelpCommand HelpCommand { get; set; }
 
@@ -17,7 +19,8 @@ namespace NuGet {
         public ICommandManager Manager { get; set; }
 
         public void Initialize() {
-            using (AggregateCatalog catalog = new AggregateCatalog(new AssemblyCatalog(this.GetType().Assembly))) {
+            using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly))) {
+                AddExtensionsToCatalog(catalog);
                 using (var container = new CompositionContainer(catalog)) {
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
                     container.ComposeExportedValue<IPackageSourceProvider>(PackageSourceProvider.Default);
@@ -96,5 +99,18 @@ namespace NuGet {
                    command.Arguments.Count <= attribute.MaxArgs;
         }
 
+        private static void AddExtensionsToCatalog(AggregateCatalog catalog) {
+            if (!Directory.Exists(ExtensionsDirectoryRoot)) {
+                return;
+            }
+            foreach (var item in Directory.EnumerateFiles(ExtensionsDirectoryRoot, "*.dll", SearchOption.AllDirectories)) {
+                try {
+                    catalog.Catalogs.Add(new AssemblyCatalog(item));
+                }
+                catch (BadImageFormatException) {
+                    // Ignore if the dll wasn't a valid assembly
+                }
+            }
+        }
     }
 }

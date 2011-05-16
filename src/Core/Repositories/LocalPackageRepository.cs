@@ -79,14 +79,15 @@ namespace NuGet {
         }
 
         public IPackage FindPackage(string packageId, Version version) {
-            string path = GetPackagePaths(packageId, version).FirstOrDefault(FileSystem.FileExists);
+            return FindPackage(OpenPackage, packageId, version);
+        }
 
-            if (String.IsNullOrEmpty(path)) {
-                return null;
-            }
-
-            // Get the package at this path
-            return GetPackage(path);
+        internal IPackage FindPackage(Func<string, IPackage> openPackage, string packageId, Version version) {
+            return (from path in GetPackagePaths(packageId, version)
+                    where FileSystem.FileExists(path)
+                    let package = GetPackage(openPackage, path)
+                    where package.Version == version
+                    select package).FirstOrDefault();
         }
 
         private IEnumerable<string> GetPackagePaths(string packageId, Version version) {
@@ -105,10 +106,6 @@ namespace NuGet {
 
                 yield return package;
             }
-        }
-
-        private IPackage GetPackage(string path) {
-            return GetPackage(OpenPackage, path);
         }
 
         private IPackage GetPackage(Func<string, IPackage> openPackage, string path) {

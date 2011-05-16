@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -95,8 +96,41 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.AreEqual(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Single().Key);
         }
 
+        [TestMethod]
+        public void InstallCommandUpdatesPackageIfAlreadyPresentAndUsingSideBySide() {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var packages = new List<IPackage>();
+            var repository = new Mock<IPackageRepository>();
+            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c));
+            repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c));
+
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
+
+            installCommand.Version = "0.4";
+            installCommand.ExcludeVersion = true;
+            installCommand.Arguments = new List<string> { "Baz" };
+
+            // Act - 1
+            installCommand.ExecuteCommand();
+
+            // Assert - 1
+            Assert.AreEqual("Baz", packages.Single().Id);
+            Assert.AreEqual(new Version("0.4"), packages.Single().Version);
+
+            // Act - 2
+            installCommand.Version = null;
+            installCommand.Execute();
+
+            // Assert - 2
+            Assert.AreEqual("Baz", packages.Single().Id);
+            Assert.AreEqual(new Version("0.7"), packages.Single().Version);
+        }
+
         private static IPackageRepositoryFactory GetFactory() {
-            var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.7") };
+            var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
             var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5") };
 
             var factory = new Mock<IPackageRepositoryFactory>();
@@ -116,14 +150,20 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
         private class TestInstallCommand : InstallCommand {
             private readonly IFileSystem _fileSystem;
+            private readonly PackageManager _packageManager;
 
-            public TestInstallCommand(IPackageRepositoryFactory factory, IPackageSourceProvider sourceProvider, IFileSystem fileSystem)
+            public TestInstallCommand(IPackageRepositoryFactory factory, IPackageSourceProvider sourceProvider, IFileSystem fileSystem, PackageManager packageManager = null)
                 : base(factory, sourceProvider) {
                 _fileSystem = fileSystem;
+                _packageManager = packageManager;
             }
 
             protected override IFileSystem GetFileSystem() {
                 return _fileSystem;
+            }
+
+            protected override PackageManager GetPackageManager(IFileSystem fileSystem) {
+                return _packageManager ?? base.GetPackageManager(fileSystem);
             }
         }
     }
