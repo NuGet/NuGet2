@@ -11,7 +11,7 @@ using System.IO;
 
 namespace NuGet {
     internal static class CommandLineUtility {
-        private static Dictionary<string, string> _cachedResourceStrings;
+        private static Dictionary<Tuple<Type, string>, string> _cachedResourceStrings;
 
         private static readonly HashSet<string> _supportedProjectExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
             ".csproj",
@@ -96,10 +96,13 @@ namespace NuGet {
             }
 
             if (_cachedResourceStrings == null) {
-                _cachedResourceStrings = new Dictionary<string, string>();
+                _cachedResourceStrings = new Dictionary<Tuple<Type, string>, string>();
             }
 
-            if (!_cachedResourceStrings.ContainsKey(resourceName)) {
+            var key = Tuple.Create(resourceType, resourceName);
+            string resourceValue;
+
+            if (!_cachedResourceStrings.TryGetValue(key, out resourceValue)) {
                 PropertyInfo property = resourceType.GetProperty(resourceName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
                 if (property == null) {
@@ -117,11 +120,11 @@ namespace NuGet {
                     throw new InvalidOperationException(
                         String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, resourceName));
                 }
-
-                _cachedResourceStrings[resourceName] = (string)property.GetValue(null, null);
+                resourceValue = (string)property.GetValue(null, null);
+                _cachedResourceStrings[key] = resourceValue;
             }
 
-            return _cachedResourceStrings[resourceName];
+            return resourceValue;
         }
 
         public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true) {
