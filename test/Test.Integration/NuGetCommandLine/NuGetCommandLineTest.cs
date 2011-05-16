@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Text;
 
 namespace NuGet.Test.Integration.NuGetCommandLine {
     [TestClass]
@@ -21,6 +20,15 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private TextWriter originalErrorConsoleOutput;
         private string startingDirectory;
 
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context) {
+            Program.IgnoreExtensions = true;
+        }
+
+        [ClassCleanup]
+        public static void ClassCleanup() {
+            Program.IgnoreExtensions = false;
+        }
 
         [TestInitialize]
         public void Initialize() {

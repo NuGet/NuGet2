@@ -7,8 +7,8 @@ using NuGet.Commands;
 
 namespace NuGet {
     public class Program {
-        internal static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "CommandLineExtensions");
-        
+        private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "CommandLineExtensions");
+
         [Import]
         public HelpCommand HelpCommand { get; set; }
 
@@ -18,9 +18,16 @@ namespace NuGet {
         [Import]
         public ICommandManager Manager { get; set; }
 
+        /// <summary>
+        /// Flag meant for unit tests that prevents command line extensions from being loaded.
+        /// </summary>
+        public static bool IgnoreExtensions { get; set; }
+
         public void Initialize() {
             using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly))) {
-                AddExtensionsToCatalog(catalog);
+                if (!IgnoreExtensions) {
+                    AddExtensionsToCatalog(catalog);
+                }
                 using (var container = new CompositionContainer(catalog)) {
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
                     container.ComposeExportedValue<IPackageSourceProvider>(PackageSourceProvider.Default);
