@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Runtime.Versioning;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test {
     [TestClass]
@@ -404,6 +404,26 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(new Version("1.2.0.5"), version);
+        }
+
+        [TestMethod]
+        public void GetSafeVersions() {
+            // Act
+            IVersionSpec versionSpec1 = VersionUtility.GetSafeRange(new Version("1.3"));
+            IVersionSpec versionSpec2 = VersionUtility.GetSafeRange(new Version("0.9"));
+            IVersionSpec versionSpec3 = VersionUtility.GetSafeRange(new Version("2.9.45.6"));
+
+            // Assert
+            AssertSafeVersion(versionSpec1, new Version("1.3"), new Version("1.4"));
+            AssertSafeVersion(versionSpec2, new Version("0.9"), new Version("0.10"));
+            AssertSafeVersion(versionSpec3, new Version("2.9.45.6"), new Version("2.10"));
+        }
+
+        private void AssertSafeVersion(IVersionSpec versionSpec, Version minVer, Version maxVer) {
+            Assert.IsTrue(versionSpec.IsMinInclusive);
+            Assert.IsFalse(versionSpec.IsMaxInclusive);
+            Assert.AreEqual(versionSpec.MinVersion, minVer);
+            Assert.AreEqual(versionSpec.MaxVersion, maxVer);
         }
 
         [TestMethod]

@@ -49,6 +49,9 @@ namespace NuGet.PowerShell.Commands {
         [Parameter]
         public SwitchParameter IgnoreDependencies { get; set; }
 
+        [Parameter]
+        public SwitchParameter Safe { get; set; }
+
         protected override IVsPackageManager CreatePackageManager() {
             if (!String.IsNullOrEmpty(Source)) {
                 return CreateObjectFromSource(PackageManagerFactory.CreatePackageManager, Source);
@@ -66,19 +69,34 @@ namespace NuGet.PowerShell.Commands {
                 SubscribeToProgressEvents();
                 if (PackageManager != null) {
                     IProjectManager projectManager = ProjectManager;
-                    if (!String.IsNullOrEmpty(Id)) {                        
+                    if (!String.IsNullOrEmpty(Id)) {
                         // If a package id was specified, but no project was specified, then update this package in all projects
                         if (String.IsNullOrEmpty(ProjectName)) {
-                            PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, this);
+                            if (Safe.IsPresent) {
+                                PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, this);
+                            }
+                            else {
+                                PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, this);
+                            }
                         }
-                        else if(projectManager != null) {
+                        else if (projectManager != null) {
                             // If there was a project specified, then update the package in that project
-                            PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                            if (Safe.IsPresent) {
+                                PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, this);
+                            }
+                            else {
+                                PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                            }
                         }
                     }
                     else {
                         // if no id was specified then update all packges in the solution
-                        PackageManager.UpdatePackages(this);
+                        if (Safe.IsPresent) {
+                            PackageManager.SafeUpdatePackages(this);
+                        }
+                        else {
+                            PackageManager.UpdatePackages(this);
+                        }
                     }
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }

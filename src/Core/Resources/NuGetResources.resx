@@ -154,10 +154,7 @@
     <value>External packages cannot depend on packages that target projects.</value>
   </data>
   <data name="Log_AttemptingToRetrievePackageFromSource" xml:space="preserve">
-    <value>'{0}' not installed. Attempting to retrieve dependency from source...</value>
-  </data>
-  <data name="Log_AttemptingToRetrievePackageReferenceFromSource" xml:space="preserve">
-    <value>'{0}' not referenced. Retrieving dependency...</value>
+    <value>Attempting to resolve dependency '{0}'.</value>
   </data>
   <data name="Log_NoUpdatesAvailable" xml:space="preserve">
     <value>No updates available for '{0}'.</value>

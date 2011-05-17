@@ -304,20 +304,11 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; not installed. Attempting to retrieve dependency from source....
+        ///   Looks up a localized string similar to Attempting to resolve dependency &apos;{0}&apos;..
         /// </summary>
         internal static string Log_AttemptingToRetrievePackageFromSource {
             get {
                 return ResourceManager.GetString("Log_AttemptingToRetrievePackageFromSource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; not referenced. Retrieving dependency....
-        /// </summary>
-        internal static string Log_AttemptingToRetrievePackageReferenceFromSource {
-            get {
-                return ResourceManager.GetString("Log_AttemptingToRetrievePackageReferenceFromSource", resourceCulture);
             }
         }
         

@@ -175,26 +175,50 @@ namespace NuGet {
                 return false;
             }
 
-            var failedPackages = new List<IPackage>();
-            // Update each of the exising packages to more compatible one
-            foreach (var pair in compatiblePackages) {
-                try {
-                    // Remove the old package
-                    Uninstall(pair.Key, conflictResult.DependentsResolver, conflictResult.Repository);
+            IPackageConstraintProvider currentConstraintProvider = ConstraintProvider;
 
-                    // Install the new package
-                    Walk(pair.Value);
+            try {
+                // Add a constraint for the incoming package so we don't try to update it by mistake.
+                // Scenario:
+                // A 1.0 -> B [1.0]
+                // B 1.0.1, B 1.5, B 2.0
+                // A 2.0 -> B (any version)
+                // We have A 1.0 and B 1.0 installed. When trying to update to B 1.0.1, we'll end up trying
+                // to find a version of A that works with B 1.0.1. The version in the above case is A 2.0.
+                // When we go to install A 2.0 we need to make sure that when we resolve it's dependencies that we stay within bounds
+                // i.e. when we resolve B for A 2.0 we want to keep the B 1.0.1 we've already chosen instead of trying to grab
+                // B 1.5 or B 2.0. In order to achieve this, we add a contraint for version of B 1.0.1 so we stay within those bounds for B.
+
+                // Respect all existing constraints plus an additional one that we specify based on the incoming package
+                var constraintProvider = new DefaultConstraintProvider();
+                constraintProvider.AddConstraint(package.Id, new VersionSpec(package.Version));
+                ConstraintProvider = new AggregateConstraintProvider(ConstraintProvider, constraintProvider);
+
+                var failedPackages = new List<IPackage>();
+                // Update each of the exising packages to more compatible one
+                foreach (var pair in compatiblePackages) {
+                    try {
+                        // Remove the old package
+                        Uninstall(pair.Key, conflictResult.DependentsResolver, conflictResult.Repository);
+
+                        // Install the new package
+                        Walk(pair.Value);
+                    }
+                    catch {
+                        // If we failed to update this package (most likely because of a conflict further up the dependency chain)
+                        // we keep track of it so we can report an error about the top level package.
+                        failedPackages.Add(pair.Key);
+                    }
                 }
-                catch {
-                    // If we failed to update this package (most likely because of a conflict further up the dependency chain)
-                    // we keep track of it so we can report an error about the top level package.
-                    failedPackages.Add(pair.Key);
-                }
+
+                incompatiblePackages = failedPackages;
+
+                return !incompatiblePackages.Any();
             }
-
-            incompatiblePackages = failedPackages;
-
-            return !incompatiblePackages.Any();
+            finally {
+                // Restore the current constraint provider
+                ConstraintProvider = currentConstraintProvider;
+            }
         }
 
         protected override void OnAfterPackageWalk(IPackage package) {
@@ -210,22 +234,22 @@ namespace NuGet {
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            // See if we have a local copy
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
+
+            // First try to get a local copy of the package
             IPackage package = Repository.ResolveDependency(ConstraintProvider, dependency);
 
-            if (package != null) {
-                // We have it installed locally
-                Logger.Log(MessageLevel.Debug, NuGetResources.Debug_DependencyAlreadyInstalled, dependency);
+            // Next, query the source repo for the same dependency
+            IPackage sourcePackage = SourceRepository.ResolveDependency(ConstraintProvider, dependency);
+
+            // We found a copy in the local repository
+            if (package == null) {
+                return sourcePackage;
             }
-            else {
-                // We didn't resolve the dependency so try to retrieve it from the source
-                Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
-                package = SourceRepository.ResolveDependency(ConstraintProvider, dependency);
-
-                if (package != null) {
-                    Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageRetrieveSuccessfully);
-                }
+            // Only use the package from the source repository if it's a newer version (it'll only be newer in bug fixes)
+            if (sourcePackage != null && package.Version < sourcePackage.Version) {
+                return sourcePackage;
             }
 
             return package;

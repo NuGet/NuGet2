@@ -320,7 +320,15 @@ namespace NuGet {
             UpdatePackageReference(packageId, version: version, updateDependencies: true);
         }
 
+        public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies) {
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider), updateDependencies);            
+        }
+
         public virtual void UpdatePackageReference(string packageId, Version version, bool updateDependencies) {
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider), updateDependencies);
+        }
+
+        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -336,14 +344,13 @@ namespace NuGet {
 
             Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
 
-            IPackage package = SourceRepository.ResolvePackage(packageId, version, ConstraintProvider);
-
+            IPackage package = resolvePackage();
+            
             if (package != null && oldPackage.Version != package.Version) {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies);
             }
             else {
-
                 IVersionSpec constraint = ConstraintProvider.GetConstraint(packageId);
                 if (constraint != null) {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_ApplyingConstraints, packageId, VersionUtility.PrettyPrint(constraint), ConstraintProvider.Source);

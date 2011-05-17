@@ -71,9 +71,11 @@
     <Compile Include="PackageWalker\PackageWalkInfo.cs" />
     <Compile Include="ProjectSystem\NullFileSystem.cs" />
     <Compile Include="ProjectSystem\PhysicalFileSystem.cs" />
+    <Compile Include="ConstraintProviders\AggregateConstraintProvider.cs" />
     <Compile Include="Repositories\AggregateQuery.cs" />
     <Compile Include="Repositories\AggregateRepository.cs" />
-    <Compile Include="Repositories\IPackageConstraintProvider.cs" />
+    <Compile Include="ConstraintProviders\DefaultConstraintProvider.cs" />
+    <Compile Include="ConstraintProviders\IPackageConstraintProvider.cs" />
     <Compile Include="Repositories\IPackageLookup.cs" />
     <Compile Include="Repositories\MachineCache.cs" />
     <Compile Include="Repositories\NullConstraintProvider.cs" />

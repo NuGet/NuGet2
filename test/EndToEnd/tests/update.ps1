@@ -462,7 +462,7 @@ function Test-UpdateAllPackagesInSolution {
     Assert-Package $p2 E 3.0
 }
 
-function Test-UpdateScenariosWithConstaints {
+function Test-UpdateScenariosWithConstraints {
     param(
         $context
     )
@@ -500,4 +500,50 @@ function Test-UpdateScenariosWithConstaints {
     Assert-Package $p3 F 1.0
     Assert-SolutionPackage E 1.0
     Assert-SolutionPackage F 1.0
+}
+
+function Test-UpdateAllPackagesInSolutionWithSafeFlag {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-WebApplication
+    $p1 | Install-Package A -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+    $p1 | Install-Package B -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+    $p1 | Install-Package C -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+
+    # Act    
+    Update-Package -Source $context.RepositoryPath -Safe
+
+    # Assert
+    Assert-Package $p1 A 1.0.3
+    Assert-Package $p1 B 1.0.3
+    Assert-Package $p1 C 1.0.0.1
+    Assert-SolutionPackage A 1.0.3
+    Assert-SolutionPackage B 1.0.3
+    Assert-SolutionPackage C 1.0.0.1
+}
+
+function Test-UpdatePackageWithSafeFlag {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-WebApplication
+    $p1 | Install-Package A -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+    $p1 | Install-Package B -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+    $p1 | Install-Package C -Version 1.0 -Source $context.RepositoryPath -IgnoreDependencies
+
+    # Act    
+    Update-Package A -Source $context.RepositoryPath -Safe
+
+    # Assert
+    Assert-Package $p1 A 1.0.3
+    Assert-Package $p1 B 1.0.3
+    Assert-Package $p1 C 1.0.0.1
+    Assert-SolutionPackage A 1.0.3
+    Assert-SolutionPackage B 1.0.3
+    Assert-SolutionPackage C 1.0.0.1
 }

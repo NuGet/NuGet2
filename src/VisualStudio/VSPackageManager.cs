@@ -122,21 +122,26 @@ namespace NuGet.VisualStudio {
         }
 
         public virtual void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger) {
+            UpdatePackage(projectManager,
+                          packageId,
+                          () => UpdatePackageReference(projectManager, packageId, version, updateDependencies),
+                          () => SourceRepository.FindPackage(packageId, version),
+                          updateDependencies,
+                          logger);
+        }
+
+        private void UpdatePackage(IProjectManager projectManager, string packageId, Action projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
             bool appliesToProject;
-            IPackage package = FindLocalPackage(projectManager,
-                                                packageId,
-                                                null /* version */,
-                                                CreateAmbiguousUpdateException,
-                                                out appliesToProject);
+            IPackage package = FindLocalPackageForUpdate(projectManager, packageId, out appliesToProject);
 
             // Find the package we're going to update to
-            IPackage newPackage = SourceRepository.FindPackage(packageId, version);
+            IPackage newPackage = resolvePackage();
 
             if (newPackage != null && package.Version != newPackage.Version) {
                 if (appliesToProject) {
-                    RunSolutionAction(() => UpdatePackageReference(projectManager, packageId, version, updateDependencies));
+                    RunSolutionAction(projectAction);
                 }
                 else {
                     // We might be updating a solution only package
@@ -163,11 +168,56 @@ namespace NuGet.VisualStudio {
             ExecuteOperatonsWithPackage(projectManager, package, operations, () => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies), logger);
         }
 
+        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger) {
+            UpdatePackage(packageId,
+                          projectManager => UpdatePackageReference(projectManager, packageId, versionSpec, updateDependencies),
+                          () => SourceRepository.FindPackage(packageId, versionSpec),
+                          updateDependencies,
+                          logger);
+        }
+
+        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger) {
+            UpdatePackage(packageId,
+                          projectManager => UpdatePackageReference(projectManager, packageId, version, updateDependencies),
+                          () => SourceRepository.FindPackage(packageId, version),
+                          updateDependencies,
+                          logger);
+        }
+
+        public void UpdatePackages(ILogger logger) {
+            UpdatePackages(safeUpdate: false, logger: logger);
+        }
+
+        public void SafeUpdatePackage(string packageId, bool updateDependencies, ILogger logger) {
+            UpdatePackage(packageId,
+                          projectManager => UpdatePackageReference(projectManager, packageId, GetSafeRange(projectManager, packageId), updateDependencies),
+                          () => SourceRepository.FindPackage(packageId, GetSafeRange(packageId)),
+                          updateDependencies,
+                          logger);
+        }
+
+        public void SafeUpdatePackage(IProjectManager projectManager, string packageId, bool updateDependencies, ILogger logger) {
+            UpdatePackage(projectManager,
+                          packageId,
+                          () => UpdatePackageReference(projectManager, packageId, GetSafeRange(projectManager, packageId), updateDependencies),
+                          () => SourceRepository.FindPackage(packageId, GetSafeRange(packageId)),
+                          updateDependencies,
+                          logger);
+        }
+
+        public void SafeUpdatePackages(ILogger logger) {
+            UpdatePackages(safeUpdate: true, logger: logger);
+        }
+
         protected override void ExecuteUninstall(IPackage package) {
             // Check if the package is in use before removing it
             if (!_sharedRepository.IsReferenced(package.Id, package.Version)) {
                 base.ExecuteUninstall(package);
             }
+        }
+
+        private IPackage FindLocalPackageForUpdate(IProjectManager projectManager, string packageId, out bool appliesToProject) {
+            return FindLocalPackage(projectManager, packageId, null /* version */, CreateAmbiguousUpdateException, out appliesToProject);
         }
 
         private IPackage FindLocalPackage(IProjectManager projectManager,
@@ -323,6 +373,10 @@ namespace NuGet.VisualStudio {
 
         private void UpdatePackageReference(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {
             RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, version, updateDependencies));
+        }
+
+        private void UpdatePackageReference(IProjectManager projectManager, string packageId, IVersionSpec versionSpec, bool updateDependencies) {
+            RunProjectAction(projectManager, () => projectManager.UpdatePackageReference(packageId, versionSpec, updateDependencies));
         }
 
         private void AddPackageReference(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
@@ -537,25 +591,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public void UpdatePackages(ILogger logger) {
-            var packageSorter = new PackageSorter();
-            // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
-            var packages = packageSorter.GetPackagesByDependencyOrder(LocalRepository).Reverse();
-            foreach (var package in packages) {
-                // While updating we might remove packages that were initially in the list. e.g.
-                // A 1.0 -> B 2.0, A 2.0 -> [], since updating to A 2.0 removes B, we end up skipping it.
-                if (LocalRepository.Exists(package.Id)) {
-                    try {
-                        UpdatePackage(package.Id, version: null, updateDependencies: true, logger: logger);
-                    }
-                    catch (Exception e) {
-                        logger.Log(MessageLevel.Warning, e.Message);
-                    }
-                }
-            }
-        }
-
-        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger) {
+        private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger) {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
 
@@ -566,7 +602,7 @@ namespace NuGet.VisualStudio {
 
                     if (projectManager.LocalRepository.Exists(packageId)) {
                         try {
-                            RunSolutionAction(() => UpdatePackageReference(projectManager, packageId, version, updateDependencies));
+                            RunSolutionAction(() => projectAction(projectManager));
                         }
                         catch (Exception e) {
                             logger.Log(MessageLevel.Warning, e.Message);
@@ -576,7 +612,7 @@ namespace NuGet.VisualStudio {
             }
             else {
                 // Find the package we're going to update to
-                IPackage newPackage = SourceRepository.FindPackage(packageId, version);
+                IPackage newPackage = resolvePackage();
 
                 if (newPackage != null && package.Version != newPackage.Version) {
                     // We might be updating a solution only package
@@ -589,6 +625,41 @@ namespace NuGet.VisualStudio {
                     Logger.Log(MessageLevel.Info, VsResources.NoUpdatesAvailable, packageId);
                 }
             }
+        }
+
+        private void UpdatePackages(bool safeUpdate, ILogger logger) {
+            var packageSorter = new PackageSorter();
+            // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
+            var packages = packageSorter.GetPackagesByDependencyOrder(LocalRepository).Reverse();
+            foreach (var package in packages) {
+                // While updating we might remove packages that were initially in the list. e.g.
+                // A 1.0 -> B 2.0, A 2.0 -> [], since updating to A 2.0 removes B, we end up skipping it.
+                if (LocalRepository.Exists(package.Id)) {
+                    try {
+                        if (safeUpdate) {
+                            SafeUpdatePackage(package.Id, updateDependencies: true, logger: logger);
+                        }
+                        else {
+                            UpdatePackage(package.Id, version: null, updateDependencies: true, logger: logger);
+                        }
+                    }
+                    catch (Exception e) {
+                        logger.Log(MessageLevel.Warning, e.Message);
+                    }
+                }
+            }
+        }
+
+        private IVersionSpec GetSafeRange(string packageId) {
+            bool appliesToProject;
+            IPackage package = FindLocalPackage(packageId, out appliesToProject);
+            return VersionUtility.GetSafeRange(package.Version);
+        }
+
+        private IVersionSpec GetSafeRange(IProjectManager projectManager, string packageId) {
+            bool appliesToProject;
+            IPackage package = FindLocalPackageForUpdate(projectManager, packageId, out appliesToProject);
+            return VersionUtility.GetSafeRange(package.Version);
         }
     }
 }

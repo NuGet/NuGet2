@@ -362,6 +362,52 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ResolvingDependencyForUpdateWithConflictingDependents() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            
+            // A 1.0 -> B [1.0]
+            IPackage A10 = PackageUtility.CreatePackage("A", "1.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    PackageDependency.CreateDependency("B", "[1.0]")
+                                                                }, content: new[] { "a1" });
+
+            // A 2.0 -> B (any version)
+            IPackage A20 = PackageUtility.CreatePackage("A", "2.0",
+                                                            dependencies: new List<PackageDependency> {
+                                                                    new PackageDependency("B")
+                                                                }, content: new[] { "a2" });
+
+            IPackage B10 = PackageUtility.CreatePackage("B", "1.0", content: new[] { "b1" });
+            IPackage B101 = PackageUtility.CreatePackage("B", "1.0.1", content: new[] { "b101" });
+            IPackage B20 = PackageUtility.CreatePackage("B", "2.0", content: new[] { "a2" });
+            localRepository.Add(A10);
+            localRepository.Add(B10);
+            sourceRepository.AddPackage(A10);
+            sourceRepository.AddPackage(A20);
+            sourceRepository.AddPackage(B10);
+            sourceRepository.AddPackage(B101);
+            sourceRepository.AddPackage(B20);
+
+            IPackageOperationResolver resolver = new ProjectInstallWalker(localRepository,
+                                                                          sourceRepository,
+                                                                          new DependentsWalker(localRepository),
+                                                                          NullLogger.Instance,
+                                                                          ignoreDependencies: false);
+
+            // Act
+            var packages = resolver.ResolveOperations(B101).ToList();
+
+            // Assert
+            Assert.AreEqual(4, packages.Count);
+            AssertOperation("A", "1.0", PackageAction.Uninstall, packages[0]);
+            AssertOperation("B", "1.0", PackageAction.Uninstall, packages[1]);
+            AssertOperation("B", "1.0.1", PackageAction.Install, packages[2]);
+            AssertOperation("A", "2.0", PackageAction.Install, packages[3]);
+        }
+
+        [TestMethod]
         public void ResolvingDependencyForUpdateThatHasAnUnsatisfiedConstraint() {
             // Arrange
             var localRepository = new MockPackageRepository();

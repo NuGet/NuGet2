@@ -37,10 +37,10 @@ namespace NuGet {
         }
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version version) {
-            return ResolvePackage(repository, packageId, version);
+            return FindPackage(repository, packageId, version, constraintProvider: null);
         }
 
-        internal static IPackage ResolvePackage(this IPackageRepository repository, string packageId, Version version, IPackageConstraintProvider constraintProvider = null) {
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version version, IPackageConstraintProvider constraintProvider) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -65,6 +65,16 @@ namespace NuGet {
                 packages = packages.Where(p => p.Version == version);
             }
             else if (constraintProvider != null) {
+                packages = FilterPackagesByConstraints(constraintProvider, packages, packageId);
+            }
+
+            return packages.FirstOrDefault();
+        }
+
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec, IPackageConstraintProvider constraintProvider) {
+            var packages = repository.FindPackages(packageId, versionSpec);
+
+            if (constraintProvider != null) {
                 packages = FilterPackagesByConstraints(constraintProvider, packages, packageId);
             }
 
@@ -106,7 +116,7 @@ namespace NuGet {
             }
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionInfo) {
+        public static IEnumerable<IPackage> FindPackages(this IPackageRepository repository, string packageId, IVersionSpec versionSpec) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -119,11 +129,15 @@ namespace NuGet {
                                                        .ToList()
                                                        .OrderByDescending(p => p.Version);
 
-            if (versionInfo != null) {
-                packages = packages.FindByVersion(versionInfo);
+            if (versionSpec != null) {
+                packages = packages.FindByVersion(versionSpec);
             }
 
-            return packages.FirstOrDefault();
+            return packages;
+        }
+
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec) {
+            return repository.FindPackages(packageId, versionSpec).FirstOrDefault();
         }
 
         public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, IPackageConstraintProvider constraintProvider, IEnumerable<string> packageIds, IPackage package) {
@@ -253,7 +267,7 @@ namespace NuGet {
             // Filter packages by this constraint
             IVersionSpec constraint = constraintProvider.GetConstraint(packageId);
             if (constraint != null) {
-                return packages.Where(p => constraint.Satisfies(p.Version));
+                return packages.FindByVersion(constraint);
             }
 
             return packages;

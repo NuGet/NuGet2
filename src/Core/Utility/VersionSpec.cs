@@ -3,7 +3,17 @@ using System.Globalization;
 using System.Text;
 
 namespace NuGet {
-    public class VersionSpec : IVersionSpec {
+    public class VersionSpec : IVersionSpec {        
+        public VersionSpec() {
+        }
+
+        public VersionSpec(Version version) {
+            IsMinInclusive = true;
+            IsMaxInclusive = true;
+            MinVersion = version;
+            MaxVersion = version;
+        }
+
         public Version MinVersion { get; set; }
         public bool IsMinInclusive { get; set; }
         public Version MaxVersion { get; set; }

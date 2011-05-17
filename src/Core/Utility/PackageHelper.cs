@@ -24,7 +24,7 @@ namespace NuGet {
             if (package == null) {
                 // Try to find it in the source (regardless of version)
                 // We use resolve package here since we want to take any constaints into account
-                package = sourceRepository.ResolvePackage(packageId, version, constraintProvider);
+                package = sourceRepository.FindPackage(packageId, version, constraintProvider);
 
                 // If we already have this package installed, use the local copy so we don't 
                 // end up using the one from the source repository

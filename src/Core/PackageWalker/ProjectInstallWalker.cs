@@ -7,10 +7,8 @@ namespace NuGet {
                                     IDependentsResolver dependentsResolver,
                                     ILogger logger,
                                     bool ignoreDependencies)
-            : this(localRepository, 
+            : base(localRepository, 
                    sourceRepository,
-                   dependentsResolver,
-                   constraintProvider: null, 
                    logger: logger, 
                    ignoreDependencies: ignoreDependencies) {
             _dependentsResolver = dependentsResolver;

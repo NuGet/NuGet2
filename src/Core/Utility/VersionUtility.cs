@@ -283,6 +283,17 @@ namespace NuGet {
             return true;
         }
 
+        /// <summary>
+        /// The safe range is defined as the highest build and revision for a given major and minor version
+        /// </summary>
+        public static IVersionSpec GetSafeRange(Version version) {
+            return new VersionSpec {
+                IsMinInclusive = true,
+                MinVersion = version,
+                MaxVersion = new Version(version.Major, version.Minor + 1)
+            };
+        }
+
         public static string PrettyPrint(IVersionSpec versionSpec) {
             if (versionSpec.MinVersion != null && versionSpec.IsMinInclusive && versionSpec.MaxVersion == null && !versionSpec.IsMaxInclusive) {
                 return String.Format(CultureInfo.InvariantCulture, "({0} {1})", GreaterThanOrEqualTo, versionSpec.MinVersion);

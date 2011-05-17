@@ -12,6 +12,7 @@ glob:*.suo
 glob:*.vs10x
 glob:*.vsp
 glob:*.psess
+glob:*.docstates
 glob:TestResults
 glob:[Tt]humbs.db
 glob:src/Server/Packages/*.nupkg
