@@ -172,7 +172,7 @@ namespace NuGet.PowerShell.Commands {
 
                 string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
                 WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath));
-                InvokeCommand.InvokeScript(command, false, PipelineResultTypes.Output | PipelineResultTypes.Error, null, null);
+                InvokeCommand.InvokeScript(command, false, PipelineResultTypes.Error, null, null);
 
                 // clear temp variables
                 psVariable.Remove("__rootPath");
