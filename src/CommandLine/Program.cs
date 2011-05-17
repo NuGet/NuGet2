@@ -35,6 +35,9 @@ namespace NuGet {
                 var p = new Program();
                 p.Initialize();
 
+                // Register an additional provider for the console specific application so that the user
+                // will be prompted if a proxy is set and credentials are required
+                HttpClient.DefaultProxyFinder.RegisterProvider(new ConsoleCredentialProvider());
 
                 // Add commands to the manager
                 foreach (ICommand cmd in p.Commands) {

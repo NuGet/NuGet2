@@ -2,8 +2,7 @@
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Net;
-using NuGet.NuGetService;
+using NuGet;
 
 namespace Bootstrapper {
     public class Program {
@@ -14,21 +13,30 @@ namespace Bootstrapper {
         public static void Main(string[] args) {
             Console.WriteLine("NuGet bootstrapper {0}", typeof(Program).Assembly.GetName().Version);
 
+            // Setup the proxy for gallery requests
+            Uri galleryUri = new Uri(GalleryUrl);
+
+            // Register a console based credentials provider so that the user get's prompted if a password
+            // is required for the proxy
+            HttpClient.DefaultProxyFinder.RegisterProvider(new ConsoleCredentialProvider());
+
+            // Setup IHttpClient for the Gallery to locate packages
+            var httpClient = new HttpClient(galleryUri);
+
             // Get the package from the feed
-            var context = new GalleryFeedContext(new Uri(GalleryUrl));
-            var packageMetadata = context.Packages.Where(p => p.Id.ToLower() == NuGetCommandLinePackageId)
-                                         .AsEnumerable()
-                                         .OrderByDescending(p => Version.Parse(p.Version))
-                                         .FirstOrDefault();
+            var repository = new DataServicePackageRepository(httpClient);
+            var packageMetadata = repository.GetPackages().Where(p => p.Id.ToLower() == NuGetCommandLinePackageId)
+                .AsEnumerable()
+                .OrderByDescending(p => Version.Parse(p.Version))
+                .FirstOrDefault();
 
             if (packageMetadata != null) {
                 Console.WriteLine("Found NuGet.exe version {0}.", packageMetadata.Version);
                 Console.WriteLine("Downloading...");
 
-                Uri uri = context.GetReadStreamUri(packageMetadata);
-                // TODO: Handle proxys
-                WebClient client = new WebClient();
-                var packageStream = new MemoryStream(client.DownloadData(uri));
+                Uri uri = repository.GetReadStreamUri(packageMetadata);
+                var downloadClient = new HttpClient(uri);
+                var packageStream = new MemoryStream(downloadClient.DownloadData());
 
                 using (Package package = Package.Open(packageStream)) {
                     var fileUri = PackUriHelper.CreatePartUri(new Uri(NuGetExeFilePath, UriKind.Relative));
