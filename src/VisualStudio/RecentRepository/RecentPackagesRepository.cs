@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio {
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly DTEEvents _dteEvents;
         private bool _hasLoadedSettingsStore;
-        private List<PackageSource> _currentSources;
+        private HashSet<PackageSource> _currentSources;
         private DateTime _latestTime = DateTime.UtcNow;
 
         [ImportingConstructor]
@@ -142,6 +142,10 @@ namespace NuGet.VisualStudio {
             // get the metadata of recent packages from registry
             IEnumerable<IPersistencePackageMetadata> packagesMetadata = LoadPackageMetadataFromSettingsStore();
 
+            if (!packagesMetadata.Any()) {
+                return;
+            }
+
             // find the packages based on metadata from the Aggregate repository based on Id only
             IEnumerable<IPackage> newPackages = repository.FindPackages(packagesMetadata.Select(p => p.Id));
 
@@ -172,8 +176,9 @@ namespace NuGet.VisualStudio {
         /// Updates the package cache by ensuring all cached packages exist in the repository.
         /// </summary>
         private void UpdatePackageCache(IPackageRepository repository) {
-            var feedPackages = repository.FindPackages(_packagesCache.Select(p => p.Id)).ToLookup(p => p.Id, StringComparer.OrdinalIgnoreCase);
-            _packagesCache.RemoveAll(p => !feedPackages.Contains(p.Id));
+            var feedPackages = repository.FindPackages(_packagesCache.Select(p => p.Id));
+            var lookup = feedPackages.ToLookup(p => p.Id, StringComparer.OrdinalIgnoreCase);
+            _packagesCache.RemoveAll(p => !lookup.Contains(p.Id));
         }
 
 
@@ -209,7 +214,7 @@ namespace NuGet.VisualStudio {
         /// Determines if package sources have changed since the last time we queried.
         /// </summary>
         private bool PackageSourcesChanged() {
-            var sources = _packageSourceProvider.LoadPackageSources().ToList();
+            var sources = new HashSet<PackageSource>(_packageSourceProvider.LoadPackageSources());
 
             if (_currentSources == null) {
                 // The package cache has just been read from settings and is in sync with the sources. 
@@ -217,10 +222,7 @@ namespace NuGet.VisualStudio {
                 return false;
             }
 
-            var union = _currentSources.Union(sources);
-            var intersection = _currentSources.Intersect(sources);
-            // (A ∪ B) - (A ∩ B)
-            if (union.Except(intersection).Any()) {
+            if (!_currentSources.SetEquals(sources)) {
                 _currentSources = sources;
                 return true;
             }
