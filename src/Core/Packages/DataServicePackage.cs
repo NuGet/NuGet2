@@ -135,6 +135,11 @@ namespace NuGet {
             set;
         }
 
+        public bool IsLatestVersion {
+            get;
+            set;
+        }
+
         internal string OldHash {
             get;
             set;
