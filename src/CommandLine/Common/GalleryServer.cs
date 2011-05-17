@@ -14,20 +14,22 @@ namespace NuGet.Common {
         private const string PublichPackageService = "PublishedPackages/Publish";
 
         private const string _UserAgentClient = "NuGet Command Line";
-
-        private string _baseGalleryServerUrl;
+        private IHttpClient _galleryClient;
 
         public GalleryServer()
             : this(DefaultGalleryServerUrl) {
         }
 
         public GalleryServer(string galleryServerUrl) {
-            _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerUrl);
+            if (string.IsNullOrEmpty(galleryServerUrl)) {
+                throw new ArgumentNullException("galleryServerUrl");
+            }
+            _galleryClient = new RedirectedHttpClient(new Uri(galleryServerUrl));
         }
 
         public void CreatePackage(string apiKey, Stream package) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
-            var request = CreateRequest(url, "POST", "application/octet-stream");
+            var action = String.Format("{0}/{1}/nupkg", CreatePackageService, apiKey);
+            var request = CreateRequest(action, "POST", "application/octet-stream");
 
             byte[] file = package.ReadAllBytes();
             request.ContentLength = file.Length;
@@ -38,8 +40,8 @@ namespace NuGet.Common {
         }
 
         public void CreatePackage(string apiKey, string externalUrl) {
-            var url = new Uri(String.Format("{0}/{1}/CreateFromExternalUrl", _baseGalleryServerUrl, CreatePackageService));
-            var request = CreateRequest(url, "POST", "application/json");
+            var action = String.Format("{0}/CreateFromExternalUrl", CreatePackageService);
+            var request = CreateRequest(action, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new CreateFromExternalUrlData {
@@ -57,8 +59,7 @@ namespace NuGet.Common {
         }
 
         public void PublishPackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, PublichPackageService));
-            var request = CreateRequest(url, "POST", "application/json");
+            var request = CreateRequest(PublichPackageService, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new PublishData {
@@ -75,16 +76,16 @@ namespace NuGet.Common {
         }
 
         public void DeletePackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, PackageService, apiKey, packageID, packageVersion));
-            var request = CreateRequest(url, "DELETE", "text/html");
+            var action = String.Format("{0}/{1}/{2}/{3}", PackageService, apiKey, packageID, packageVersion);
+            var request = CreateRequest(action, "DELETE", "text/html");
             request.ContentLength = 0;
 
             GetResponse(request);
         }
 
         public void RatePackage(string packageID, string packageVersion, string rating) {
-            var url = new Uri(String.Format("{0}/{1}/{2}", _baseGalleryServerUrl, PackageService, "RatePackage"));
-            var request = CreateRequest(url, "POST", "application/json");
+            var action = String.Format("{0}/{1}", PackageService, "RatePackage");
+            var request = CreateRequest(action, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new RatePackageData {
@@ -100,8 +101,10 @@ namespace NuGet.Common {
             GetResponse(request);
         }
 
-        private HttpWebRequest CreateRequest(Uri url, string method, string contentType) {
-            var request = (HttpWebRequest)WebRequest.Create(url);
+        private HttpWebRequest CreateRequest(string action, string method, string contentType) {
+            var actionUrl = string.Format("{0}/{1}", _galleryClient.Uri, action);
+            var actionClient = new HttpClient(new Uri(actionUrl));
+            var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
             request.UserAgent = HttpUtility.CreateUserAgentString(_UserAgentClient);

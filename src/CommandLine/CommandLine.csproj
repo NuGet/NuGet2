@@ -62,6 +62,7 @@
     <Compile Include="Common\CommandLineRepositoryFactory.cs" />
     <Compile Include="Common\CommandLineUtility.cs" />
     <Compile Include="Common\Console.cs" />
+    <Compile Include="Common\ConsoleCredentialProvider.cs" />
     <Compile Include="Common\GalleryServer.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\NuGetResources.Designer.cs">
