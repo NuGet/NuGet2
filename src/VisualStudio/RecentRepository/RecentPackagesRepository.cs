@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using EnvDTE;
 
@@ -19,17 +20,18 @@ namespace NuGet.VisualStudio {
         private readonly List<RecentPackage> _packagesCache = new List<RecentPackage>(20);
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IPersistencePackageSettingsManager _settingsManager;
+        private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly DTEEvents _dteEvents;
-        private readonly Lazy<IPackageRepository> _aggregateRepository;
         private bool _hasLoadedSettingsStore;
+        private List<PackageSource> _currentSources;
         private DateTime _latestTime = DateTime.UtcNow;
 
         [ImportingConstructor]
         public RecentPackageRepository(IPackageRepositoryFactory repositoryFactory,
                                         IPersistencePackageSettingsManager settingsManager)
-            : this(ServiceLocator.GetInstance<DTE>(), 
-                   repositoryFactory, 
-                   ServiceLocator.GetInstance<IPackageSourceProvider>(), 
+            : this(ServiceLocator.GetInstance<DTE>(),
+                   repositoryFactory,
+                   ServiceLocator.GetInstance<IPackageSourceProvider>(),
                    settingsManager) {
         }
 
@@ -39,9 +41,9 @@ namespace NuGet.VisualStudio {
             IPackageSourceProvider packageSourceProvider,
             IPersistencePackageSettingsManager settingsManager) {
 
+            _packageSourceProvider = packageSourceProvider;
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
-            _aggregateRepository = new Lazy<IPackageRepository>(() => packageSourceProvider.GetAggregate(repositoryFactory, ignoreFailingRepositories: true));
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
@@ -56,14 +58,23 @@ namespace NuGet.VisualStudio {
         }
 
         public IQueryable<IPackage> GetPackages() {
-            LoadPackagesFromSettingsStore();
+            // Create an instance of the Aggregate repository
+            var repository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
+
+            LoadPackagesFromSettingsStore(repository);
+
+            if (PackageSourcesChanged()) {
+                // If package sources have changes since the last call, ensure that at least some version of it is available on a feed.
+                UpdatePackageCache(repository);
+            }
+
             // IMPORTANT: The Cast() operator is needed to return IQueryable<IPackage> instead of IQueryable<RecentPackage>.
             // Although the compiler accepts the latter, the DistinctLast() method chokes on it.
-            return _packagesCache.
-                OrderByDescending(p => p.LastUsedDate).
-                Take(MaximumPackageCount).
-                Cast<IPackage>().
-                AsQueryable();
+            return _packagesCache
+                    .OrderByDescending(p => p.LastUsedDate)
+                    .Take(MaximumPackageCount)
+                    .Cast<IPackage>()
+                    .AsQueryable();
         }
 
         public void AddPackage(IPackage package) {
@@ -127,12 +138,12 @@ namespace NuGet.VisualStudio {
             return _settingsManager.LoadPackageMetadata(MaximumPackageCount - _packagesCache.Count);
         }
 
-        private void LoadPackagesFromSettingsStore() {
+        private void LoadPackagesFromSettingsStore(IPackageRepository repository) {
             // get the metadata of recent packages from registry
             IEnumerable<IPersistencePackageMetadata> packagesMetadata = LoadPackageMetadataFromSettingsStore();
 
             // find the packages based on metadata from the Aggregate repository based on Id only
-            IEnumerable<IPackage> newPackages = _aggregateRepository.Value.FindPackages(packagesMetadata.Select(p => p.Id));
+            IEnumerable<IPackage> newPackages = repository.FindPackages(packagesMetadata.Select(p => p.Id));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
             IEnumerable<RecentPackage> filterPackages = FilterPackages(packagesMetadata, newPackages);
@@ -157,6 +168,15 @@ namespace NuGet.VisualStudio {
                    select ConvertToRecentPackage(p, m.LastUsedDate);
         }
 
+        /// <summary>
+        /// Updates the package cache by ensuring all cached packages exist in the repository.
+        /// </summary>
+        private void UpdatePackageCache(IPackageRepository repository) {
+            var feedPackages = repository.FindPackages(_packagesCache.Select(p => p.Id)).ToLookup(p => p.Id, StringComparer.OrdinalIgnoreCase);
+            _packagesCache.RemoveAll(p => !feedPackages.Contains(p.Id));
+        }
+
+
         private void SavePackagesToSettingsStore() {
             // only save if there are new package added
             if (_packagesCache.Count > 0) {
@@ -171,7 +191,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void OnBeginShutdown() {
             _dteEvents.OnBeginShutdown -= OnBeginShutdown;
 
@@ -183,6 +203,28 @@ namespace NuGet.VisualStudio {
                 // write to activity log for troubleshoting.
                 ExceptionHelper.WriteToActivityLog(exception);
             }
+        }
+
+        /// <summary>
+        /// Determines if package sources have changed since the last time we queried.
+        /// </summary>
+        private bool PackageSourcesChanged() {
+            var sources = _packageSourceProvider.LoadPackageSources().ToList();
+
+            if (_currentSources == null) {
+                // The package cache has just been read from settings and is in sync with the sources. 
+                _currentSources = sources;
+                return false;
+            }
+
+            var union = _currentSources.Union(sources);
+            var intersection = _currentSources.Intersect(sources);
+            // (A ∪ B) - (A ∩ B)
+            if (union.Except(intersection).Any()) {
+                _currentSources = sources;
+                return true;
+            }
+            return false;
         }
     }
 }

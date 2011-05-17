@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
+using NuGet.Test.Mocks;
 
 namespace NuGet.VisualStudio.Test {
 
@@ -261,6 +262,55 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual(0, packages.Count);
         }
 
+
+        [TestMethod]
+        public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreRemoved() {
+            // Arrange
+            var sources = new List<PackageSource> { new PackageSource("Source1"), new PackageSource("Source2") };
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository(It.IsAny<string>())).Returns<string>(c => {
+                switch (c) {
+                    case "Source1":
+                        var repo1 = new MockPackageRepository();
+                        repo1.AddRange(new[] { PackageUtility.CreatePackage("Pack1") });
+                        return repo1;
+                    case "Source2":
+                        var repo2 = new MockPackageRepository();
+                        repo2.AddRange(new[] { PackageUtility.CreatePackage("Pack2", "1.1") });
+                        return repo2;
+                }
+                return null;
+            });
+
+            var settingsManager = new MockSettingsManager();
+            settingsManager.SavePackageMetadata(new[] {
+                new PersistencePackageMetadata("Pack1", "1.0", new DateTime(2011, 01, 01)),
+                new PersistencePackageMetadata("Pack2", "1.1", new DateTime(2011, 01, 01)),
+                new PersistencePackageMetadata("Pack3", "1.0", new DateTime(2011, 01, 01)),
+            });
+
+            var sourceProvider = new Mock<IPackageSourceProvider>();
+            sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
+            var repository = new RecentPackageRepository(null, factory.Object, sourceProvider.Object, settingsManager);
+
+            // Act - 1, Scene - 1
+            var packages = repository.GetPackages();
+
+            // Assert 
+            Assert.AreEqual(2, packages.Count());
+            AssertPackage(packages.First(), "Pack1", "1.0");
+            AssertPackage(packages.Last(), "Pack2", "1.1");
+
+            // Act - 1, Scene - 2
+            sources.Remove(sources.Last());
+
+            packages = repository.GetPackages();
+            Assert.AreEqual(1, packages.Count());
+            AssertPackage(packages.First(), "Pack1", "1.0");
+
+            // Fin
+        }
+
         private RecentPackageRepository CreateRecentPackageRepository(IEnumerable<IPackage> packagesList = null, IEnumerable<IPersistencePackageMetadata> settingsMetadata = null) {
             if (packagesList == null) {
                 var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -286,7 +336,7 @@ namespace NuGet.VisualStudio.Test {
             mockSettingsManager.SavePackageMetadata(settingsMetadata);
 
             var mockPackageSourceProvider = new MockPackageSourceProvider();
-            mockPackageSourceProvider.SavePackageSources(new[] {new PackageSource("source")});
+            mockPackageSourceProvider.SavePackageSources(new[] { new PackageSource("source") });
             return new RecentPackageRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider, mockSettingsManager);
         }
 
