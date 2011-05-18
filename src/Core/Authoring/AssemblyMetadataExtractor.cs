@@ -6,24 +6,23 @@ using NuGet.Runtime;
 
 namespace NuGet {
     public static class AssemblyMetadataExtractor {
-        
+        public static AssemblyMetadata GetMetadata(string assemblyPath) {
+            var setup = new AppDomainSetup {
+                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory
+            };
 
-        public static AssemblyMetadata GetMetadata(Func<AppDomain> appDomainFactory, string assemblyPath) {
-            AppDomain appDomain = null;
+            AppDomain domain = AppDomain.CreateDomain("metadata", AppDomain.CurrentDomain.Evidence, setup);
             try {
-                appDomain = appDomainFactory();
-                var extractor = appDomain.CreateInstance<MetadataExtractor>();
+                var extractor = domain.CreateInstance<MetadataExtractor>();
                 return extractor.GetMetadata(assemblyPath);
             }
             finally {
-                if (appDomain != null) {
-                    AppDomain.Unload(appDomain);
-                }
+                AppDomain.Unload(domain);
             }
         }
 
-        public static void ExtractMetadata(Func<AppDomain> appDomainFactory, PackageBuilder builder, string assemblyPath) {
-            AssemblyMetadata assemblyMetadata = GetMetadata(appDomainFactory, assemblyPath);
+        public static void ExtractMetadata(PackageBuilder builder, string assemblyPath) {
+            AssemblyMetadata assemblyMetadata = GetMetadata(assemblyPath);
             builder.Id = assemblyMetadata.Name;
             builder.Version = assemblyMetadata.Version;
             builder.Title = assemblyMetadata.Title;
