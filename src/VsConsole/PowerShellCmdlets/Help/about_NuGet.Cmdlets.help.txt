@@ -1,4 +1,4 @@
-﻿TOPIC
+﻿\TOPIC
 	about_NuGet
 	
 SHORT DESCRIPTION
@@ -45,3 +45,4 @@ SEE ALSO
 	Add-BindingRedirect
 	Get-Project
 	Open-PackagePage
+	Register-TabExpansion
