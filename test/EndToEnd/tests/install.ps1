@@ -1116,3 +1116,22 @@ function Test-PackageInstallAcceptsRelativePathSource2 {
 
     popd
 }
+
+
+function Test-InstallPackageTargetingNetClientAndNet {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    $p | Install-Package PackageTargetingNetClientAndNet -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageTargetingNetClientAndNet
+    Assert-SolutionPackage PackageTargetingNetClientAndNet
+    $reference = Get-AssemblyReference $p ClassLibrary1
+    Assert-NotNull $reference    
+    Assert-True ($reference.Path.Contains("net40-client"))
+}

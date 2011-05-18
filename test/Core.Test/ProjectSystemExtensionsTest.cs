@@ -145,17 +145,17 @@ namespace NuGet.Test {
         [TestMethod]
         public void GetCompatibleReferencesMostSpecificFrameworkIfProfileNameSpecified() {
             // Arrange
-            var assemblyReference40client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "Client"));
+            var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "Client"));
             var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
             var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo.dll", null);
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference40client, assemblyReference40, assemblyReferenceNoVersion };
+            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference30client, assemblyReference40, assemblyReferenceNoVersion };
 
             // Act
             var compatibleAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("4.0"), "Client"), assemblyReferences).ToList();
 
             // Assert
             Assert.AreEqual(1, compatibleAssemblyReferences.Count);
-            Assert.AreEqual(assemblyReference40client, compatibleAssemblyReferences[0]);
+            Assert.AreEqual(assemblyReference40, compatibleAssemblyReferences[0]);
         }
 
         private IEnumerable<T> GetCompatibleItems<T>(FrameworkName frameworkName, IEnumerable<T> items) where T : IFrameworkTargetable {

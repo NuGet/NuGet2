@@ -411,31 +411,27 @@ namespace NuGet {
 
             // Try to find the best match
             compatibleItems = (from g in frameworkGroups
-                               where IsCompatible(g.Key, projectFramework)
-                               orderby GetProfileCompatibility(g.Key, projectFramework) descending,
+                               where IsCompatible(projectFramework, g.Key)
+                               orderby GetProfileCompatibility(projectFramework, g.Key) descending,
                                        g.Key.Version descending
                                select g).FirstOrDefault();
 
             return compatibleItems != null && compatibleItems.Any();
         }
 
-        private static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
+        internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
             if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase)) {
                 return false;
             }
 
-            if (frameworkName.Version > targetFrameworkName.Version) {
+            if (frameworkName.Version < targetFrameworkName.Version) {
                 return false;
-            }
-
-            // If there is no target framework then do nothing
-            if (String.IsNullOrEmpty(targetFrameworkName.Profile)) {
-                return true;
             }
 
             string targetProfile = frameworkName.Profile;
 
-            if (String.IsNullOrEmpty(targetProfile)) {
+            // BUG 938: Only do this fallback for the netframework, since we can't assume that different framworks are valid supersets
+            if (targetFrameworkName.Identifier.Equals(VersionUtility.NetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)) {
                 // We consider net40 to mean net40-full which is a superset of any specific profile.
                 // This means that a dll that is net40 will work for a project targeting net40-client.
                 targetProfile = targetFrameworkName.Profile;
@@ -449,15 +445,21 @@ namespace NuGet {
         /// the names are. The higher the number the more compatible the frameworks are.
         /// </summary>
         private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
+            int compatibility = 0;
+
+            if (frameworkName.Version == targetFrameworkName.Version) {
+                compatibility++;
+            }
+
             // Things with matching profiles are more compatible than things without.
             // This means that if we have net40 and net40-client assemblies and the target framework is
             // net40, both sets of assemblies are compatible but we prefer net40 since it matches
             // the profile exactly.
             if (targetFrameworkName.Profile.Equals(frameworkName.Profile, StringComparison.OrdinalIgnoreCase)) {
-                return 1;
+                compatibility++;
             }
 
-            return 0;
+            return compatibility;
         }
     }
 }

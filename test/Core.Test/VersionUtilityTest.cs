@@ -430,5 +430,50 @@ namespace NuGet.Test {
         public void TrimVersionThrowsIfVersionNull() {
             ExceptionAssert.ThrowsArgNull(() => VersionUtility.TrimVersion(null), "version");
         }
+
+        [TestMethod]
+        public void IsCompatibleReturnsFalseForSlAndWindowsPhoneFrameworks() {
+            // Arrange
+            FrameworkName sl3 = VersionUtility.ParseFrameworkName("sl3");
+            FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
+
+            // Act
+            bool slCompatibleWithWp7 = VersionUtility.IsCompatible(sl3, wp7);
+            bool wp7CompatibleWithSl = VersionUtility.IsCompatible(wp7, sl3);
+
+            // Assert
+            Assert.IsFalse(slCompatibleWithWp7);
+            Assert.IsFalse(wp7CompatibleWithSl);
+        }
+
+        [TestMethod]
+        public void NetFrameworkCompatibiilityIsCompatibleReturns() {
+            // Arrange
+            FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+
+            // Act
+            bool netCompatibleWithClient = VersionUtility.IsCompatible(net40, net40Client);
+            bool netClientCompatibleWithNet = VersionUtility.IsCompatible(net40Client, net40);
+
+            // Assert
+            Assert.IsTrue(netCompatibleWithClient);
+            Assert.IsTrue(netClientCompatibleWithNet);
+        }
+
+        [TestMethod]
+        public void LowerFrameworkVersionsAreNotCompatibleWithHigherFrameworkVersionsWithSameFrameworkName() {
+            // Arrange
+            FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
+            FrameworkName net20 = VersionUtility.ParseFrameworkName("net20");
+
+            // Act
+            bool net20CompatibleWithNet40 = VersionUtility.IsCompatible(net20, net40);
+            bool net40CompatibleWithNet20 = VersionUtility.IsCompatible(net40, net20);
+
+            // Assert
+            Assert.IsFalse(net20CompatibleWithNet40);
+            Assert.IsTrue(net40CompatibleWithNet20);
+        }
     }
 }
