@@ -82,7 +82,7 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +103,23 @@
     <None Include="Properties\NuGet.CommandLine.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="MergeExecutable">
+    <PropertyGroup>
+      <NuGetRoot>$(MsBuildProjectDirectory)\..\..</NuGetRoot>
+      <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
+      <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
+      <ILMergeOutputDir>$(OutputPath)ILMerge</ILMergeOutputDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <ILMergeItems Include="$(OutputPath)\*.dll;$(OutputPath)\*.exe" />
+    </ItemGroup>
+    <MakeDir Directories="$(ILMergeOutputDir)" Condition=" !Exists($(ILMergeOutputDir))" />
+    <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
+    <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:NuGet.merged.exe /log:&quot;$(ILMergeArtifactDirectory)\ilmerge.msbuild.log&quot; /ndebug /allowDup NuGet.exe NuGet.Core.dll" WorkingDirectory="$(OutputPath)" />
+  </Target>
+  <Target Name="AfterBuild">
+    <CallTarget Targets="MergeExecutable" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
