@@ -1,4 +1,4 @@
-﻿\TOPIC
+﻿TOPIC
 	about_NuGet
 	
 SHORT DESCRIPTION
