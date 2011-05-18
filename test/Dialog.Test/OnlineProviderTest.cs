@@ -363,7 +363,8 @@ namespace NuGet.Dialog.Test {
                 mockLicenseWindowOpener.Object,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IProjectSelectorService>().Object
             );
 
             return new OnlineProvider(

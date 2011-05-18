@@ -431,13 +431,24 @@ namespace NuGet.VisualStudio {
         /// This is used for displaying in the projects combo box.
         /// </summary>
         public static string GetDisplayName(this Project project, ISolutionManager solutionManager) {
-            string safeName = solutionManager.GetProjectSafeName(project);
-            if (project.IsWebSite()) {
-                safeName = PathHelper.SmartTruncate(safeName, 40);
-            }
-            return safeName;
+            return GetDisplayName(project, solutionManager.GetProjectSafeName);
         }
 
+        /// <summary>
+        /// This method truncates Website projects into the VS-format, e.g. C:\..\WebSite1, but it uses Name instead of SafeName from Solution Manager.
+        /// </summary>
+        public static string GetDisplayName(this Project project) {
+            return GetDisplayName(project, p => p.Name);
+        }
+
+        private static string GetDisplayName(this Project project, Func<Project, string> nameSelector) {
+            string name = nameSelector(project);
+            if (project.IsWebSite()) {
+                name = PathHelper.SmartTruncate(name, 40);
+            }
+            return name;
+        }
+        
         private class PathComparer : IEqualityComparer<string> {
             public static readonly PathComparer Default = new PathComparer();
             public bool Equals(string x, string y) {

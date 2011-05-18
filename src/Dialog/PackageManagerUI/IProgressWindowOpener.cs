@@ -6,14 +6,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         bool IsOpen { get; }
         bool Close();
         void SetCompleted(bool successful);
-        void AddMessage(LogMessageLevel level, string message);
+        void AddMessage(MessageLevel level, string message);
         void ShowProgress(string operation, int percentComplete);
-    }
-
-    public enum LogMessageLevel {
-        Info = (int)MessageLevel.Info,
-        Warning = (int)MessageLevel.Warning,
-        Debug = (int)MessageLevel.Debug,
-        Error
     }
 }

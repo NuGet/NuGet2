@@ -218,7 +218,8 @@ namespace NuGet.Dialog.Test {
                 null,
                 mockProgressWindowOpener.Object, 
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IProjectSelectorService>().Object
             );
 
             return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), services, new Mock<IProgressProvider>().Object);

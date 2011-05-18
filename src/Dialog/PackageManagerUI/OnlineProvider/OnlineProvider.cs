@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 using NuGetConsole.Host.PowerShellProvider;
 
@@ -15,26 +14,29 @@ namespace NuGet.Dialog.Providers {
     /// a list of packages from a package feed which will be shown in the Add NuGet dialog.
     /// </summary>
     internal class OnlineProvider : PackagesProviderBase {
-        private IPackageRepositoryFactory _packageRepositoryFactory;
-        private IPackageSourceProvider _packageSourceProvider;
-        private IVsPackageManagerFactory _packageManagerFactory;
-        private ILicenseWindowOpener _licenseWindowOpener;
+        private readonly IPackageRepositoryFactory _packageRepositoryFactory;
+        private readonly IPackageSourceProvider _packageSourceProvider;
+        private readonly IVsPackageManagerFactory _packageManagerFactory;
+        private readonly ProviderServices _providerServices;
+        private readonly Project _project;
 
         public OnlineProvider(
             Project project,
-            IProjectManager projectManager,
+            IPackageRepository localRepository,
             ResourceDictionary resources,
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
-            IProgressProvider progressProvider) :
-            base(project, projectManager, resources, providerServices, progressProvider) {
+            IProgressProvider progressProvider,
+            ISolutionManager solutionManager) :
+            base(localRepository, resources, providerServices, progressProvider, solutionManager) {
 
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _packageManagerFactory = packageManagerFactory;
-            _licenseWindowOpener = providerServices.LicenseWindow;
+            _providerServices = providerServices;
+            _project = project;
         }
 
         public override string Name {
@@ -99,12 +101,16 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "We don't want one failed project to affect the other projects.")]
         protected override bool ExecuteCore(PackageItem item) {
             var activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
             var walker = new InstallWalker(
-                ProjectManager.LocalRepository,
+                LocalRepository,
                 activePackageManager.SourceRepository,
                 this,
                 ignoreDependencies: false);
@@ -130,7 +136,7 @@ namespace NuGet.Dialog.Providers {
                 // hide the progress window if we are going to show license window
                 HideProgressWindow();
 
-                bool accepted = _licenseWindowOpener.ShowLicenseWindow(licensePackages);
+                bool accepted = _providerServices.LicenseWindow.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
                     return false;
                 }
@@ -138,24 +144,35 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            try {
-                RegisterPackageOperationEvents(activePackageManager);
-                ExecuteCommand(item, activePackageManager, operations);
-            }
-            finally {
-                UnregisterPackageOperationEvents(activePackageManager);
-            }
+            return ExecuteAfterLicenseAggrement(item, activePackageManager, operations);
+        }
 
+        protected virtual bool ExecuteAfterLicenseAggrement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+            ExecuteCommandOnProject(_project, item, activePackageManager, operations);
             return true;
         }
 
-        protected virtual void ExecuteCommand(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            activePackageManager.InstallPackage(ProjectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
+        protected void ExecuteCommandOnProject(Project activeProject, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+            IProjectManager projectManager = null;
+            try {
+                projectManager = activePackageManager.GetProjectManager(activeProject);
+                RegisterPackageOperationEvents(activePackageManager, projectManager);
+                ExecuteCommand(projectManager, item, activePackageManager, operations);
+            }
+            finally {
+                if (projectManager != null) {
+                    UnregisterPackageOperationEvents(activePackageManager, projectManager);
+                }
+            }
+        }
+
+        protected virtual void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+            activePackageManager.InstallPackage(projectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
         }
 
         public override bool CanExecute(PackageItem item) {
             // Only enable command on a Package in the Online provider if it is not installed yet
-            return !ProjectManager.IsInstalled(item.PackageIdentity);
+            return !LocalRepository.Exists(item.PackageIdentity);
         }
 
         public override IVsExtension CreateExtension(IPackage package) {

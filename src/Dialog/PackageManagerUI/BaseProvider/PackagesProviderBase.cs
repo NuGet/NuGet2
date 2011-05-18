@@ -7,7 +7,6 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 using NuGetConsole;
 
@@ -20,31 +19,24 @@ namespace NuGet.Dialog.Providers {
         private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
-        private readonly IProgressWindowOpener _progressWindowOpener;
-        private readonly IScriptExecutor _scriptExecutor;
         private readonly Lazy<IConsole> _outputConsole;
+        private readonly IPackageRepository _localRepository;
+        private readonly ProviderServices _providerServices;
+        private Dictionary<Project, Exception> _failedProjects;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
         private IList<IVsSortDescriptor> _sortDescriptors;
-        private Project _project;
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
+        private ISolutionManager _solutionManager;
 
         protected PackagesProviderBase(
-            Project project,
-            IProjectManager projectManager,
+            IPackageRepository localRepository,
             ResourceDictionary resources,
             ProviderServices providerServices,
-            IProgressProvider progressProvider) {
-
-            if (projectManager == null) {
-                throw new ArgumentNullException("projectManager");
-            }
-
-            if (project == null) {
-                throw new ArgumentNullException("project");
-            }
+            IProgressProvider progressProvider,
+            ISolutionManager solutionManager) {
 
             if (resources == null) {
                 throw new ArgumentNullException("resources");
@@ -54,24 +46,31 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("providerServices");
             }
 
+            if (solutionManager == null) {
+                throw new ArgumentNullException("solutionManager");
+            }
+
+            _localRepository = localRepository;
+            _providerServices = providerServices;
             _progressProvider = progressProvider;
+            _solutionManager = solutionManager;
             _resources = resources;
-            _scriptExecutor = providerServices.ScriptExecutor;
-            _progressWindowOpener = providerServices.ProgressWindow;
             _outputConsole = new Lazy<IConsole>(() => providerServices.OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false));
-            ProjectManager = projectManager;
-            _project = project;
+        }
+
+        /// <summary>
+        /// Returns either the solution repository or the active project repository, depending on wherether we are targeting solution.
+        /// </summary>
+        protected IPackageRepository LocalRepository {
+            get {
+                return _localRepository;
+            }
         }
 
         public virtual bool RefreshOnNodeSelection {
             get {
                 return false;
             }
-        }
-
-        protected IProjectManager ProjectManager {
-            get;
-            private set;
         }
 
         public PackagesTreeNodeBase SelectedNode {
@@ -242,6 +241,8 @@ namespace NuGet.Dialog.Providers {
             _uiCulture = System.Threading.Thread.CurrentThread.CurrentUICulture;
             _culture = System.Threading.Thread.CurrentThread.CurrentCulture;
 
+            _failedProjects = new Dictionary<Project, Exception>();
+
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
@@ -255,7 +256,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void OnProgressAvailable(object sender, ProgressEventArgs e) {
-            _progressWindowOpener.ShowProgress(e.Operation, e.PercentComplete);
+            _providerServices.ProgressWindow.ShowProgress(e.Operation, e.PercentComplete);
         }
 
         private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e) {
@@ -280,13 +281,17 @@ namespace NuGet.Dialog.Providers {
                 }
                 else {
                     OnExecuteCompleted((PackageItem)e.Result);
-                    _progressWindowOpener.SetCompleted(successful: true);
+                    _providerServices.ProgressWindow.SetCompleted(successful: true);
                 }
             }
             else {
                 // show error message in the progress window in case of error
-                LogCore(LogMessageLevel.Error, (e.Error.InnerException ?? e.Error).Message);
-                _progressWindowOpener.SetCompleted(successful: false);
+                LogCore(MessageLevel.Error, (e.Error.InnerException ?? e.Error).Message);
+                _providerServices.ProgressWindow.SetCompleted(successful: false);
+            }
+
+            if (_failedProjects != null && _failedProjects.Count > 0) {
+                _providerServices.ProjectSelector.ShowSummaryWindow(_failedProjects);
             }
 
             // write a blank line into the output window to separate entries from different operations
@@ -299,18 +304,30 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected void ShowProgressWindow() {
-            _progressWindowOpener.Show(ProgressWindowTitle);
+            _providerServices.ProgressWindow.Show(ProgressWindowTitle);
         }
 
         protected void HideProgressWindow() {
-            _progressWindowOpener.Hide();
+            _providerServices.ProgressWindow.Hide();
         }
 
         protected void CloseProgressWindow() {
-            _progressWindowOpener.Close();
+            _providerServices.ProgressWindow.Close();
         }
 
         protected virtual void FillRootNodes() {
+        }
+
+        protected void AddFailedProject(Project project, Exception exception) {
+            if (project == null) {
+                throw new ArgumentNullException("project");
+            }
+
+            if (exception == null) {
+                throw new ArgumentNullException("exception");
+            }
+
+            _failedProjects[project] = exception;
         }
 
         public abstract IVsExtension CreateExtension(IPackage package);
@@ -353,16 +370,16 @@ namespace NuGet.Dialog.Providers {
         }
 
         public void Log(MessageLevel level, string message, params object[] args) {
-            var logLevel = (LogMessageLevel)level;
+            var logLevel = (MessageLevel)level;
             LogCore(logLevel, message, args);
         }
 
-        private void LogCore(LogMessageLevel level, string message, params object[] args) {
+        private void LogCore(MessageLevel level, string message, params object[] args) {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
 
             // for the dialog we ignore debug messages
-            if (_progressWindowOpener.IsOpen && level != LogMessageLevel.Debug) {
-                _progressWindowOpener.AddMessage(level, formattedMessage);
+            if (_providerServices.ProgressWindow.IsOpen && level != MessageLevel.Debug) {
+                _providerServices.ProgressWindow.AddMessage(level, formattedMessage);
             }
 
             WriteLineToOutputWindow(formattedMessage);
@@ -373,33 +390,42 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected void ShowProgress(string operation, int percentComplete) {
-            if (_progressWindowOpener.IsOpen) {
-                _progressWindowOpener.ShowProgress(operation, percentComplete);
+            if (_providerServices.ProgressWindow.IsOpen) {
+                _providerServices.ProgressWindow.ShowProgress(operation, percentComplete);
             }
         }
 
-        protected void RegisterPackageOperationEvents(IPackageManager packageManager) {
+        protected void RegisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager) {
             packageManager.PackageInstalled += OnPackageInstalled;
-            ProjectManager.PackageReferenceAdded += OnPackageReferenceAdded;
-            ProjectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
+            projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
+            projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
         }
 
-        protected void UnregisterPackageOperationEvents(IPackageManager packageManager) {
+        protected void UnregisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager) {
             packageManager.PackageInstalled -= OnPackageInstalled;
-            ProjectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
-            ProjectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
+            projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
+            projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
         }
 
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {
-            _scriptExecutor.ExecuteInitScript(e.InstallPath, e.Package, this);
+            _providerServices.ScriptExecutor.ExecuteInitScript(e.InstallPath, e.Package, this);
         }
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
-            _scriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, _project, this);
+            Project project = FindProjectFromFileSystem(e.FileSystem);
+            Debug.Assert(project != null);
+            _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project, this);
         }
 
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
-            _scriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, _project, this);
+            Project project = FindProjectFromFileSystem(e.FileSystem);
+            Debug.Assert(project != null);
+            _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project, this);
+        }
+
+        private Project FindProjectFromFileSystem(IFileSystem fileSystem) {
+            var projectSystem = fileSystem as IVsProjectSystem;
+            return _solutionManager.GetProject(projectSystem.UniqueName);
         }
     }
 }

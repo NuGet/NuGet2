@@ -4,7 +4,7 @@ using EnvDTE;
 
 namespace NuGet.VisualStudio {
 
-    internal static class SolutionExtensions {
+    public static class SolutionExtensions {
 
         /// <summary>
         /// Get the list of all supported projects in the current solution. This method
@@ -36,6 +36,10 @@ namespace NuGet.VisualStudio {
                     }
                 }
             }
+        }
+
+        public static string GetName(this Solution solution) {
+            return solution.Properties.Item("Name").Value;
         }
     }
 }

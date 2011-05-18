@@ -15,18 +15,31 @@ namespace NuGet.Dialog.Providers {
     /// </summary>
     internal class InstalledProvider : PackagesProviderBase {
 
-        private IVsPackageManager _packageManager;
+        private readonly IVsPackageManager _packageManager;
+        private readonly Project _project;
 
         public InstalledProvider(
             IVsPackageManager packageManager, 
             Project project,
-            IProjectManager projectManager, 
+            IPackageRepository localRepository,
             ResourceDictionary resources,
             ProviderServices providerServices,
-            IProgressProvider progressProvider)
-            : base(project, projectManager, resources, providerServices, progressProvider) {
+            IProgressProvider progressProvider,
+            ISolutionManager solutionManager)
+            : base(localRepository, resources, providerServices, progressProvider, solutionManager) {
+
+            if (packageManager == null) {
+                throw new ArgumentNullException("packageManager");
+            }
 
             _packageManager = packageManager;
+            _project = project;
+        }
+
+        protected IVsPackageManager PackageManager {
+            get {
+                return _packageManager;
+            }
         }
 
         public override string Name {
@@ -55,32 +68,58 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override void FillRootNodes() {
-            var allNode = new SimpleTreeNode(this, Resources.Dialog_RootNodeAll, RootNode, ProjectManager.LocalRepository);
-
+            var allNode = new SimpleTreeNode(this, Resources.Dialog_RootNodeAll, RootNode, LocalRepository);
             RootNode.Nodes.Add(allNode);
         }
 
         public override bool CanExecute(PackageItem item) {
             // Enable command on a Package in the Installed provider if the package is installed.
-            return ProjectManager.IsInstalled(item.PackageIdentity);
+            return LocalRepository.Exists(item.PackageIdentity);
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-
             // because we are not removing dependencies, we don't need to walk the graph to search for script files
             bool hasScript = item.PackageIdentity.HasPowerShellScript(new string[] { "uninstall.ps1" });
             if (hasScript && !RegistryHelper.CheckIfPowerShell2Installed()) {
                 throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
+            UninstallPackageFromProject(_project, item.PackageIdentity);           
+            return true;
+        }
+
+        protected void InstallPackageToProject(Project project, IPackage item) {
+            IProjectManager projectManager = null;
             try {
-                RegisterPackageOperationEvents(_packageManager);
-                _packageManager.UninstallPackage(ProjectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
+                projectManager = PackageManager.GetProjectManager(project);
+                // make sure the package is not installed in this project before proceeding
+                if (!projectManager.IsInstalled(item)) {
+                    RegisterPackageOperationEvents(PackageManager, projectManager);
+                    PackageManager.InstallPackage(projectManager, item.Id, item.Version, ignoreDependencies: false, logger: this);
+                }
             }
             finally {
-                UnregisterPackageOperationEvents(_packageManager);
+                if (projectManager != null) {
+                    UnregisterPackageOperationEvents(PackageManager, projectManager);
+                }
             }
-            return true;
+        }
+
+        protected void UninstallPackageFromProject(Project project, IPackage item) {
+            IProjectManager projectManager = null;
+            try {
+                projectManager = PackageManager.GetProjectManager(project);
+                // make sure the package is installed in this project before proceeding
+                if (projectManager.IsInstalled(item)) {
+                    RegisterPackageOperationEvents(PackageManager, projectManager);
+                    PackageManager.UninstallPackage(projectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
+                }
+            }
+            finally {
+                if (projectManager != null) {
+                    UnregisterPackageOperationEvents(PackageManager, projectManager);
+                }
+            }
         }
 
         protected override void OnExecuteCompleted(PackageItem item) {

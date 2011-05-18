@@ -11,14 +11,24 @@ namespace NuGet.Dialog.Providers {
 
         public UpdatesProvider(
             Project project,
-            IProjectManager projectManager,
+            IPackageRepository localRepository,
             ResourceDictionary resources,
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
-            IProgressProvider progressProvider)
-            : base(project, projectManager, resources, packageRepositoryFactory, packageSourceProvider, packageManagerFactory, providerServices, progressProvider) {
+            IProgressProvider progressProvider,
+            ISolutionManager solutionManager) : 
+            base(
+                project,
+                localRepository, 
+                resources, 
+                packageRepositoryFactory, 
+                packageSourceProvider, 
+                packageManagerFactory, 
+                providerServices, 
+                progressProvider,
+                solutionManager) {
         }
 
         public override string Name {
@@ -39,8 +49,8 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected override PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository repository) {
-            return new UpdatesTreeNode(this, source.Name, RootNode, ProjectManager.LocalRepository, repository);
+        protected override PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository sourceRepository) {
+            return new UpdatesTreeNode(this, source.Name, RootNode, LocalRepository, sourceRepository);
         }
 
         public override bool CanExecute(PackageItem item) {
@@ -52,12 +62,12 @@ namespace NuGet.Dialog.Providers {
 
             // the specified package can be updated if the local repository contains a package 
             // with matching id and smaller version number.
-            return ProjectManager.LocalRepository.GetPackages().Any(
+            return LocalRepository.GetPackages().Any(
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        protected override void ExecuteCommand(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            activePackageManager.UpdatePackage(ProjectManager, item.PackageIdentity, operations, true, this);
+        protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+            activePackageManager.UpdatePackage(projectManager, item.PackageIdentity, operations, updateDependencies: true, logger: this);
         }
 
         public override IVsExtension CreateExtension(IPackage package) {

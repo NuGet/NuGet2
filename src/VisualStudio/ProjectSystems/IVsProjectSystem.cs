@@ -1,5 +1,5 @@
 ﻿namespace NuGet.VisualStudio {
-    internal interface IVsProjectSystem : IProjectSystem {
+    public interface IVsProjectSystem : IProjectSystem {
         string UniqueName { get; }
     }
 }

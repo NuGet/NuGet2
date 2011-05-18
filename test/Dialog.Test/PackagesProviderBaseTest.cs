@@ -171,7 +171,7 @@ namespace NuGet.Dialog.Test {
 
             public ConcretePackagesProvider(IProjectManager projectManager, ResourceDictionary resources) :
                 base(new Mock<Project>().Object, projectManager, resources,
-                    new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
+                    new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider(), new Mock<IProjectSelectorService>().Object),
                     new Mock<IProgressProvider>().Object) {
             }
 

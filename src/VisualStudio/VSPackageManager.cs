@@ -592,20 +592,35 @@ namespace NuGet.VisualStudio {
         }
 
         private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger) {
+            UpdatePackages(logger, NullPackageOperationEventListener.Instance);
+        }
+
+        public void UpdatePackages(ILogger logger, IPackageOperationEventListener eventListener) {
+            UpdatePackage(packageId, version, updateDependencies, logger, NullPackageOperationEventListener.Instance);
+        }
+
+        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
 
             if (appliesToProject) {
+                eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
+
                 foreach (var project in _solutionManager.GetProjects()) {
                     IProjectManager projectManager = GetProjectManager(project);
                     InitializeLogger(logger, projectManager);
 
                     if (projectManager.LocalRepository.Exists(packageId)) {
+                        eventListener.OnBeforeAddPackageReference(project);
                         try {
                             RunSolutionAction(() => projectAction(projectManager));
                         }
                         catch (Exception e) {
-                            logger.Log(MessageLevel.Warning, e.Message);
+                            logger.Log(MessageLevel.Error, e.Message);
+                            eventListener.OnAddPackageReferenceError(project, e);
+                        }
+                        finally {
+                            eventListener.OnAfterAddPackageReference(project);
                         }
                     }
                 }

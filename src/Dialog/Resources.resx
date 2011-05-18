@@ -273,4 +273,22 @@
   <data name="Dialog_LastUpdatedLabel" xml:space="preserve">
     <value>Last Updated:</value>
   </data>
+  <data name="Dialog_ProjectSelectorDescription" xml:space="preserve">
+    <value>Select the projects for this operation:</value>
+  </data>
+  <data name="Dialog_ProjectSelectorTitle" xml:space="preserve">
+    <value>Select Projects</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>_Cancel</value>
+  </data>
+  <data name="Dialog_OK" xml:space="preserve">
+    <value>_OK</value>
+  </data>
+  <data name="Dialog_SummaryWindowTitle" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="Dialog_SolutionManageButton" xml:space="preserve">
+    <value>_Manage</value>
+  </data>
 </root>

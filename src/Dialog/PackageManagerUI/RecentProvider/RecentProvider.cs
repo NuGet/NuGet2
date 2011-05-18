@@ -18,15 +18,25 @@ namespace NuGet.Dialog.Providers {
 
         public RecentProvider(
             Project project,
-            IProjectManager projectManager,
+            IPackageRepository localRepository,
             ResourceDictionary resources,
             IPackageRepositoryFactory packageRepositoryFactory,
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepository recentPackagesRepository,
             IPackageSourceProvider packageSourceProvider,
             ProviderServices providerServices,
-            IProgressProvider progressProvider)
-            : base(project, projectManager, resources, packageRepositoryFactory, null, packageManagerFactory, providerServices, progressProvider) {
+            IProgressProvider progressProvider,
+            ISolutionManager solutionManager) : 
+            base(
+                project, 
+                localRepository, 
+                resources, 
+                packageRepositoryFactory, 
+                null, 
+                packageManagerFactory, 
+                providerServices, 
+                progressProvider, 
+                solutionManager) {
 
             _recentPackagesRepository = recentPackagesRepository;
             _packageManagerFactory = packageManagerFactory;

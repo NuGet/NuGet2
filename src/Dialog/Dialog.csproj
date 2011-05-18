@@ -132,9 +132,11 @@
     <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
     <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\InstalledProvider\SolutionInstalledProvider.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
     <Compile Include="PackageManagerUI\LicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
+    <Compile Include="PackageManagerUI\OnlineProvider\SolutionOnlineProvider.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -159,7 +161,19 @@
     <Compile Include="PackageManagerUI\ProgressDialog.xaml.cs">
       <DependentUpon>ProgressDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PackageManagerUI\RecentProvider\SolutionRecentProvider.cs" />
+    <Compile Include="PackageManagerUI\SummaryWindow.xaml.cs">
+      <DependentUpon>SummaryWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PackageManagerUI\UpdatesProvider\SolutionUpdatesProvider.cs" />
+    <Compile Include="SolutionExplorer\ProjectSelectorService.cs" />
     <Compile Include="PackageManagerUI\RecentProvider\RecentProvider.cs" />
+    <Compile Include="SolutionExplorer\IProjectSelectorService.cs" />
+    <Compile Include="SolutionExplorer\ProjectToIconConverter.cs" />
+    <Compile Include="SolutionExplorer\ProjectUtilities.cs" />
+    <Compile Include="SolutionExplorer\SolutionExplorer.xaml.cs">
+      <DependentUpon>SolutionExplorer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
     <Compile Include="PackageManagerUI\ProgressWindowOpener.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -171,6 +185,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectedProviderSettingsManager.cs" />
     <Compile Include="Visualizer\Visualizer.cs" />
+    <Compile Include="SolutionExplorer\FolderNode.cs" />
+    <Compile Include="SolutionExplorer\ProjectNodeBase.cs" />
+    <Compile Include="SolutionExplorer\ProjectNode.cs" />
+    <Compile Include="SolutionExplorer\SolutionExplorerViewModel.cs" />
+    <Compile Include="SolutionExplorer\SolutionWalker.cs" />
     <Compile Include="WindowSizePersistenceHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +221,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PackageManagerUI\ProgressDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\SummaryWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SolutionExplorer\SolutionExplorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -238,6 +265,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PackageManagerUI\PackagesProvider.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="SolutionExplorer\Images\folderopen.png" />
+    <Resource Include="SolutionExplorer\Images\folderclose.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="SolutionExplorer\Images\solution.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

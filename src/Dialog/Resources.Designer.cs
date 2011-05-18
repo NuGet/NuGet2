@@ -61,6 +61,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Cancel.
+        /// </summary>
+        public static string Dialog_Cancel {
+            get {
+                return ResourceManager.GetString("Dialog_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Close.
         /// </summary>
         public static string Dialog_Close {
@@ -178,6 +187,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _OK.
+        /// </summary>
+        public static string Dialog_OK {
+            get {
+                return ResourceManager.GetString("Dialog_OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Online.
         /// </summary>
         public static string Dialog_OnlineProvider {
@@ -237,6 +255,24 @@ namespace NuGet.Dialog {
         public static string Dialog_PackageUpdatedTooltip {
             get {
                 return ResourceManager.GetString("Dialog_PackageUpdatedTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select the projects for this operation:.
+        /// </summary>
+        public static string Dialog_ProjectSelectorDescription {
+            get {
+                return ResourceManager.GetString("Dialog_ProjectSelectorDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Projects.
+        /// </summary>
+        public static string Dialog_ProjectSelectorTitle {
+            get {
+                return ResourceManager.GetString("Dialog_ProjectSelectorTitle", resourceCulture);
             }
         }
         
@@ -331,6 +367,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Manage.
+        /// </summary>
+        public static string Dialog_SolutionManageButton {
+            get {
+                return ResourceManager.GetString("Dialog_SolutionManageButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ascending.
         /// </summary>
         public static string Dialog_SortAscending {
@@ -372,6 +417,15 @@ namespace NuGet.Dialog {
         public static string Dialog_SortOption_Name {
             get {
                 return ResourceManager.GetString("Dialog_SortOption_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Summary.
+        /// </summary>
+        public static string Dialog_SummaryWindowTitle {
+            get {
+                return ResourceManager.GetString("Dialog_SummaryWindowTitle", resourceCulture);
             }
         }
         

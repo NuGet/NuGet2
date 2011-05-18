@@ -1,0 +1,50 @@
+﻿<pfui:DialogWindow 
+    x:Class="NuGet.Dialog.PackageManagerUI.SummaryWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
+    xmlns:local="clr-namespace:NuGet.Dialog"
+    xmlns:resources="clr-namespace:NuGet.Dialog"
+    xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
+    MinWidth="350"
+    MinHeight="300"
+    Width="350"
+    Height="329"
+    ShowInTaskbar="False"
+    WindowStyle="SingleBorderWindow"
+    WindowStartupLocation="CenterOwner"
+    Title="{x:Static resources:Resources.Dialog_SummaryWindowTitle}">
+    
+    <Window.Resources>
+        <local:ProjectToIconConverter x:Key="ProjectToIconConverter" />        
+    </Window.Resources>
+    
+    <DockPanel Margin="10">
+        <TextBlock DockPanel.Dock="Top" Text="NuGet failed to install the selected package into the following project(s)." TextWrapping="Wrap" />
+        <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Content="_OK" IsDefault="True" IsCancel="True" Margin="6,6,0,3" Padding="4,0" MinWidth="60" Click="OKButtonClicked" />
+
+        <Border 
+            Margin="0,5"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource ResourceKey={x:Static SystemColors.ActiveBorderBrushKey}}" 
+            Background="{DynamicResource ResourceKey={x:Static SystemColors.WindowBrushKey}}">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Expander>
+                                <Expander.Header>
+                                    <DockPanel>
+                                        <Image DockPanel.Dock="Left" Stretch="None" Source="{Binding Key, Converter={StaticResource ProjectToIconConverter}}" Margin="0,0,3,0" />
+                                        <TextBlock Text="{Binding Key.Name}" FontWeight="SemiBold" />
+                                    </DockPanel>
+                                </Expander.Header>
+                                <TextBlock Margin="10,0,0,0" Text="{Binding Value.Message, StringFormat='Error: {0}'}" TextWrapping="Wrap" Foreground="Red" />
+                            </Expander>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </DockPanel>
+</pfui:DialogWindow>

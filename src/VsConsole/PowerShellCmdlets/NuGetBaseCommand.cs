@@ -148,6 +148,10 @@ namespace NuGet.PowerShell.Commands {
                 case MessageLevel.Info:
                     WriteLine(formattedMessage);
                     break;
+
+                case MessageLevel.Error:
+                    WriteError(formattedMessage);
+                    break;
             }
         }
 

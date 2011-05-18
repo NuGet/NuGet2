@@ -19,6 +19,8 @@
     <Compile Include="FallbackRepository.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
+    <Compile Include="NullPackageOperationEventListener.cs" />
+    <Compile Include="IPackageOperationEventListener.cs" />
     <Compile Include="PackageSource\AggregatePackageSource.cs" />
     <Compile Include="PackageSource\IVsPackageSourceProvider.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />

@@ -244,7 +244,7 @@ namespace NuGet.Dialog.Test {
 
         private static UpdatesProvider CreateUpdatesProvider(
             IVsPackageManager packageManager = null,
-            IProjectManager projectManager = null,
+            IPackageRepository localRepository = null,
             IPackageRepositoryFactory repositoryFactory = null,
             IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
@@ -259,8 +259,8 @@ namespace NuGet.Dialog.Test {
                 packageManager = packageManagerMock.Object;
             }
 
-            if (projectManager == null) {
-                projectManager = new Mock<IProjectManager>().Object;
+            if (localRepository == null) {
+                localRepository = new Mock<IPackageRepository>().Object;
             }
 
             if (repositoryFactory == null) {
@@ -302,12 +302,13 @@ namespace NuGet.Dialog.Test {
                 licenseWindowOpener,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IProjectSelectorService>().Object
             );
 
             return new UpdatesProvider(
                 project,
-                projectManager,
+                localRepository,
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
                 packageSourceProvider,

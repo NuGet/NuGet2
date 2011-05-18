@@ -277,7 +277,7 @@ namespace NuGet {
         }
 
         private PackageOperationEventArgs CreateOperation(IPackage package) {
-            return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
+            return new PackageOperationEventArgs(package, FileSystem, PathResolver.GetInstallPath(package));
         }
 
         public void UpdatePackage(string packageId, bool updateDependencies) {

@@ -393,7 +393,7 @@ namespace NuGet {
         }
 
         private PackageOperationEventArgs CreateOperation(IPackage package) {
-            return new PackageOperationEventArgs(package, PathResolver.GetInstallPath(package));
+            return new PackageOperationEventArgs(package, Project, PathResolver.GetInstallPath(package));
         }
 
         private static IDictionary<XName, Action<XElement, XElement>> GetConfigMappings() {

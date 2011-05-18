@@ -26,8 +26,9 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly ISelectedProviderSettings _selectedProviderSettings;
         private readonly IProductUpdateService _productUpdateService;
 
-        public PackageManagerWindow() :
-            this(ServiceLocator.GetInstance<DTE>(),
+        public PackageManagerWindow(bool forSolution) :
+            this(forSolution,
+                 ServiceLocator.GetInstance<DTE>(),
                  ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
@@ -36,10 +37,12 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  ServiceLocator.GetInstance<ISelectedProviderSettings>(),
-                 ServiceLocator.GetInstance<IProductUpdateService>()) {
+                 ServiceLocator.GetInstance<IProductUpdateService>(),
+                 ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public PackageManagerWindow(DTE dte,
+        public PackageManagerWindow(bool forSolution,
+                                    DTE dte,
                                     IVsUIShell vsUIShell,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -48,7 +51,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IRecentPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
                                     ISelectedProviderSettings selectedProviderSettings,
-                                    IProductUpdateService productUpdateService)
+                                    IProductUpdateService productUpdateService,
+                                    ISolutionManager solutionManager)
             : base(F1Keyword) {
 
             InitializeComponent();
@@ -74,16 +78,19 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices.LicenseWindow,
                 providerServices.ProgressWindow,
                 providerServices.ScriptExecutor,
-                _smartOutputConsoleProvider);
+                _smartOutputConsoleProvider,
+                providerServices.ProjectSelector);
 
             SetupProviders(
+                forSolution,
                 dte,
                 packageManagerFactory,
                 repositoryFactory,
                 packageSourceProvider,
                 providerServices,
                 recentPackagesRepository,
-                httpClientEvents);
+                httpClientEvents,
+                solutionManager);
         }
 
         private void AddUpdateBar(IProductUpdateService productUpdateService) {
@@ -104,59 +111,118 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        private void SetupProviders(DTE dte,
+        private void SetupProviders(bool forSolution,
+                                    DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository,
-                                    IHttpClientEvents httpClientEvents) {
+                                    IHttpClientEvents httpClientEvents,
+                                    ISolutionManager solutionManager) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
-            Project activeProject = dte.GetActiveProject();
+            IPackageRepository localRepository;
 
-            // Create a cached project manager so that checking for installed packages is fast
-            IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
+            Project activeProject;
+            if (forSolution) {
+                activeProject = null;
+                localRepository = packageManager.LocalRepository;
+            }
+            else {
+                activeProject =  dte.GetActiveProject();;
+                IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
+                localRepository = projectManager.LocalRepository;
+            }
+          
+            OnlineProvider onlineProvider;
+            InstalledProvider installedProvider;
+            UpdatesProvider updatesProvider;
+            RecentProvider recentProvider;
 
-            var recentProvider = new RecentProvider(
-                activeProject,
-                projectManager,
-                Resources,
-                packageRepositoryFactory,
-                packageManagerFactory,
-                recentPackagesRepository,
-                packageSourceProvider,
-                providerServices,
-                httpClientEvents);
+            if (forSolution) {
+                onlineProvider = new SolutionOnlineProvider(
+                    localRepository,
+                    Resources,
+                    packageRepositoryFactory,
+                    packageSourceProvider,
+                    packageManagerFactory,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
+                installedProvider = new SolutionInstalledProvider(
+                    packageManager,
+                    localRepository,
+                    Resources,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
 
+                updatesProvider = new SolutionUpdatesProvider(
+                    localRepository,
+                    Resources,
+                    packageRepositoryFactory,
+                    packageSourceProvider,
+                    packageManagerFactory,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
 
-            var updatesProvider = new UpdatesProvider(
-                activeProject,
-                projectManager,
-                Resources,
-                packageRepositoryFactory,
-                packageSourceProvider,
-                packageManagerFactory,
-                providerServices,
-                httpClientEvents);
+                recentProvider = new SolutionRecentProvider(
+                    localRepository,
+                    Resources,
+                    packageRepositoryFactory,
+                    packageManagerFactory,
+                    recentPackagesRepository,
+                    packageSourceProvider,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
+            }
+            else {
+                onlineProvider = new OnlineProvider(
+                    activeProject,
+                    localRepository,
+                    Resources,
+                    packageRepositoryFactory,
+                    packageSourceProvider,
+                    packageManagerFactory,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
 
-            var onlineProvider = new OnlineProvider(
-                activeProject,
-                projectManager,
-                Resources,
-                packageRepositoryFactory,
-                packageSourceProvider,
-                packageManagerFactory,
-                providerServices,
-                httpClientEvents);
+                installedProvider = new InstalledProvider(
+                    packageManager,
+                    activeProject,
+                    localRepository,
+                    Resources,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
 
-            var installedProvider = new InstalledProvider(
-                packageManager,
-                activeProject,
-                projectManager,
-                Resources,
-                providerServices,
-                httpClientEvents);
+                updatesProvider = new UpdatesProvider(
+                    activeProject,
+                    localRepository,
+                    Resources,
+                    packageRepositoryFactory,
+                    packageSourceProvider,
+                    packageManagerFactory,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
+
+                recentProvider = new RecentProvider(
+                    activeProject,
+                    localRepository,
+                    Resources,
+                    packageRepositoryFactory,
+                    packageManagerFactory,
+                    recentPackagesRepository,
+                    packageSourceProvider,
+                    providerServices,
+                    httpClientEvents,
+                    solutionManager);
+            }
 
             explorer.Providers.Add(installedProvider);
             explorer.Providers.Add(onlineProvider);

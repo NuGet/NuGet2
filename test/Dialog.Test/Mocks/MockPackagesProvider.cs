@@ -16,7 +16,7 @@ namespace NuGet.Dialog.Test {
 
         public MockPackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager)
             : base(new Mock<Project>().Object, projectManager, new ResourceDictionary(),
-                new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
+                new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider(), new Mock<IProjectSelectorService>().Object),
                 new Mock<IProgressProvider>().Object) {
         }
 

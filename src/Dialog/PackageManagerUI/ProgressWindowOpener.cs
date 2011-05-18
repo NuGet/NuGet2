@@ -98,27 +98,27 @@ namespace NuGet.Dialog.PackageManagerUI {
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void AddMessage(LogMessageLevel level, string message) {
+        public void AddMessage(MessageLevel level, string message) {
             if (!_uiDispatcher.CheckAccess()) {
-                _uiDispatcher.BeginInvoke(new Action<LogMessageLevel, string>(AddMessage), level, message);
+                _uiDispatcher.BeginInvoke(new Action<MessageLevel, string>(AddMessage), level, message);
                 return;
             }
 
             if (IsOpen) {
                 Brush messageBrush;
 
-                // select message color based on LogMessageLevel value.
+                // select message color based on MessageLevel value.
                 // these colors match the colors in the console, which are set in MyHostUI.cs
                 switch (level) {
-                    case LogMessageLevel.Debug:
+                    case MessageLevel.Debug:
                         messageBrush = Brushes.DarkGray;
                         break;
 
-                    case LogMessageLevel.Error:
+                    case MessageLevel.Error:
                         messageBrush = Brushes.Red;
                         break;
 
-                    case LogMessageLevel.Warning:
+                    case MessageLevel.Warning:
                         messageBrush = Brushes.Magenta;
                         break;
 
