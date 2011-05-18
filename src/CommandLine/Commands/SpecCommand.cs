@@ -27,7 +27,7 @@ namespace NuGet.Commands {
             if (!String.IsNullOrEmpty(AssemblyPath)) {
                 // Extract metadata from the assembly
                 string path = Path.Combine(Directory.GetCurrentDirectory(), AssemblyPath);
-                AssemblyMetadata metadata = AssemblyMetadataExtractor.GetMetadata(path);
+                AssemblyMetadata metadata = AssemblyMetadataExtractor.GetMetadata(AppDomainUtils.CloneAppDomain, path);
                 manifest.Metadata.Id = metadata.Name;
                 manifest.Metadata.Version = metadata.Version.ToString();
                 manifest.Metadata.Authors = metadata.Company;

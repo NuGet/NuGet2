@@ -55,6 +55,7 @@
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="Common\AppDomainUtils.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
@@ -81,9 +82,13 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\Core\bin\$(Configuration)\NuGet.Core.dll">
+      <Visible>false</Visible>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>

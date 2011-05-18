@@ -25,9 +25,7 @@
         <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
-        <ILMergeFileFinalName>NuGet.exe</ILMergeFileFinalName>
         <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
-        <MergeDirectory>$(ExeDropDirectory)</MergeDirectory>
         <MSBuildBuildDirectory>$(NuGetSrcRoot)\MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
         <MSBuildDropDirectory>$(NuGetDropDirectory)\MSBuild</MSBuildDropDirectory>
         <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
@@ -68,7 +66,7 @@
         </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyPackageExplorerOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeTheExecutable; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyPackageExplorerOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
     </Target>
     
     <Target Name="CheckFxCop">
@@ -119,10 +117,10 @@
 
     <Target Name="CopyExecutableOutputToDropDirectory">
         <ItemGroup>
-            <ExeOutputItems Exclude="$(ExeBuildDirectory)\**\*.pdb" Include="$(ExeBuildDirectory)\**\*.*;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
+            <ExecuteableFiles Include="$(ExeBuildDirectory)\*.exe;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
-        <Copy ContinueOnError="false" SourceFiles="@(ExeOutputItems)" DestinationFiles="@(ExeOutputItems ->'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(ExecuteableFiles)" DestinationFolder="$(ExeDropDirectory)" />
     </Target>
     <Target Name="CopyBootStrapperOutputToDropDirectory">
         <ItemGroup>
@@ -180,17 +178,6 @@
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(PackageExplorerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    </Target>
-    <Target Name="ILMergeTheExecutable">
-        <Message Text="ILMerging the executable contents in $(ExeDropDirectory)" />
-        <ItemGroup>
-            <ILMergeItems Include="$(MergeDirectory)\*.dll" />
-        </ItemGroup>
-        <MakeDir Directories="$(ILMergeArtifactDirectory)" Condition="!Exists('$(ILMergeArtifactDirectory)')" />
-        <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
-        <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:$(ILMergeFileFinalName) /log:&quot;$(ILMergeArtifactDirectory)\ilmerge.log&quot; /ndebug /allowDup $(ILMergeFileFinalName) %(ILMergeItems.FileName)%(ILMergeItems.Extension)" WorkingDirectory="$(MergeDirectory)" />
-        <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
-        <Delete Files="@(ILMergeItems)" />
     </Target>
   
     <Target Name="ILMergeMSBuild">

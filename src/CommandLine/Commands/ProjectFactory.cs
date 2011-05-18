@@ -95,7 +95,7 @@ namespace NuGet.Commands {
 
             try {
                 // Populate the package builder with initial metadata from the assembly/exe
-                AssemblyMetadataExtractor.ExtractMetadata(builder, TargetPath);
+                AssemblyMetadataExtractor.ExtractMetadata(AppDomainUtils.CloneAppDomain, builder, TargetPath);
             }
             catch {
                 Logger.Log(MessageLevel.Warning, NuGetResources.UnableToExtractAssemblyMetadata, Path.GetFileName(TargetPath));

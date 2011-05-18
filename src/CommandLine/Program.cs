@@ -38,6 +38,9 @@ namespace NuGet {
 
         public static int Main(string[] args) {
             try {
+                // Setup assembly resolution to load NuGet.Core from resources.
+                AppDomain.CurrentDomain.AssemblyResolve += AppDomainUtils.AssemblyResolveEventHandler;
+
                 // Remove NuGet.exe.old
                 RemoveOldFile();
 
