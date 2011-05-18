@@ -34,8 +34,8 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>index.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>2</ApplicationRevision>
-    <ApplicationVersion>1.1.0.2</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.2.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -146,6 +146,7 @@
     <Compile Include="Controls\GrayscaleImage.cs" />
     <Compile Include="Controls\GrayscaleMenuItem.cs" />
     <Compile Include="MefServices\AssemblyFileViewer.cs" />
+    <Compile Include="MefServices\ImageFileViewer.cs" />
     <Compile Include="MefServices\PackageDownloader.cs" />
     <Compile Include="MefServices\SettingsManager.cs" />
     <Compile Include="Interop\NativeMethods.cs" />

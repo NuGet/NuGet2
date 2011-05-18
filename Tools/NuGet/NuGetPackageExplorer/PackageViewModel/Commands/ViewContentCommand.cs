@@ -35,6 +35,10 @@ namespace PackageExplorerViewModel {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We don't want plugin to crash the app.")]
         private void ShowFile(PackageFile file) {
             bool isBinary = IsBinaryFile(file.Name);
             long size;
@@ -46,14 +50,21 @@ namespace PackageExplorerViewModel {
 
                     var contentViewer = FindContentViewer(file);
                     if (contentViewer != null) {
-                        content = contentViewer.GetView(stream);
-                        if (content is string) {
-                            isBinary = false;
+                        try {
+                            content = contentViewer.GetView(stream);
+                        }
+                        catch (Exception) {
+                            // don't let plugin crash the app
+                            content = "*** Error: The plugin that registers to read this file type fails to read the content of this file. ***";
                         }
                     }
 
                     if (content == null) {
                         content = Resources.UnsupportedFormatMessage;
+                    }
+
+                    if (content is string) {
+                        isBinary = false;
                     }
                 }
             }
