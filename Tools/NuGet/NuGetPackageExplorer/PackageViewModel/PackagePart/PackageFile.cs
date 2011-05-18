@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows.Input;
 using NuGet;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageFile : PackagePart, IPackageFile {
@@ -60,7 +61,7 @@ namespace PackageExplorerViewModel {
         private void ShowMessageAndDeleteFile() {
             PackageViewModel.UIServices.Show(
                 String.Format(CultureInfo.CurrentCulture, Resources.PhysicalFileMissing, Path),
-                Types.MessageLevel.Warning);
+                MessageLevel.Warning);
             Delete(false);
         }
 

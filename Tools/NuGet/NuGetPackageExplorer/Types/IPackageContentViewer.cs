@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
     public interface IPackageContentViewer {
         object GetView(Stream stream);
     }

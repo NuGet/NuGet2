@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer
 {

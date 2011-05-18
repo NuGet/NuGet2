@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using NuGet;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageChooserViewModel : ViewModelBase {

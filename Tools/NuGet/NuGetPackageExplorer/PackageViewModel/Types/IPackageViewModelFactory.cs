@@ -1,6 +1,7 @@
 ﻿using NuGet;
+using PackageExplorerViewModel;
 
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
     public interface IPackageViewModelFactory {
         PackageViewModel CreateViewModel(IPackage package, string packageSource);
         PackageChooserViewModel CreatePackageChooserViewModel();

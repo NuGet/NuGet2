@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Input;
 using NuGet;
 using System.Globalization;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorerViewModel {
     public class PackageFolder : PackagePart {
@@ -140,7 +141,7 @@ namespace PackageExplorerViewModel {
 
         public PackageFolder AddFolder(string folderName) {
             if (ContainsFolder(folderName) || ContainsFile(folderName)) {
-                PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
+                PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, MessageLevel.Error);
                 return null;
             }
             var newFolder = new PackageFolder(folderName, this);
@@ -158,7 +159,7 @@ namespace PackageExplorerViewModel {
 
             string newFileName = System.IO.Path.GetFileName(filePath);
             if (ContainsFolder(newFileName)) {
-                PackageViewModel.UIServices.Show(Resources.FileNameConflictWithExistingDirectory, Types.MessageLevel.Error);
+                PackageViewModel.UIServices.Show(Resources.FileNameConflictWithExistingDirectory, MessageLevel.Error);
                 return null;
             }
 

@@ -1,5 +1,5 @@
 ﻿
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
     public interface IPackageEditorService {
         void BeginEdit();
         void CancelEdit();

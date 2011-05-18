@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer {
     [PackageContentViewerMetadata(0, ".dll", ".exe")]

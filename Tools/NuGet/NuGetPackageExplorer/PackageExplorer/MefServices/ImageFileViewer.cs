@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer {
     [PackageContentViewerMetadata(1, ".jpg", ".gif", ".png")]

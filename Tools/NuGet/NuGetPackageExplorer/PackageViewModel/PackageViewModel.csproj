@@ -85,12 +85,10 @@
     <Compile Include="Commands\SavePackageCommand.cs" />
     <Compile Include="Types\FileContentInfo.cs" />
     <Compile Include="Types\IMruPackageSourceManager.cs" />
-    <Compile Include="Types\IPackageContentViewer.cs" />
     <Compile Include="Types\IPackageContentViewerMetadata.cs" />
     <Compile Include="Types\IPackageDownloader.cs" />
     <Compile Include="Types\IPackageEditor.cs" />
     <Compile Include="Types\IUIServices.cs" />
-    <Compile Include="Types\PackageContentViewerMetadataAttribute.cs" />
     <Compile Include="Types\SourceLanguageType.cs" />
     <Compile Include="Types\IMruManager.cs" />
     <Compile Include="Types\IPackageViewModelFactory.cs" />
@@ -102,6 +100,10 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{57B4C84E-427E-4041-A4E0-14A3C00E6BA5}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Types\Types.csproj">
+      <Project>{E2EEEC5A-6A07-447E-9E95-C14307F57EDE}</Project>
+      <Name>Types</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

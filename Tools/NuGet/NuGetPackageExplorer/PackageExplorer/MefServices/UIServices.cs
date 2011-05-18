@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.Win32;
+using NuGetPackageExplorer.Types;
 using Ookii.Dialogs.Wpf;
-using PackageExplorerViewModel.Types;
-using System.Globalization;
 
 namespace PackageExplorer {
 

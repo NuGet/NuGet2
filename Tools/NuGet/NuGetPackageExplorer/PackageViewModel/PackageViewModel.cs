@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows.Input;
 using NuGet;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorerViewModel {
 

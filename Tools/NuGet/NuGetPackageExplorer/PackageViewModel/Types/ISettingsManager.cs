@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
 
     public interface ISettingsManager {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]

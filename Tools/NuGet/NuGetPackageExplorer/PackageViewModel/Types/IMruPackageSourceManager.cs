@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace PackageExplorerViewModel.Types
+namespace NuGetPackageExplorer.Types
 {
     public interface IMruPackageSourceManager
     {

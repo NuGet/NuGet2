@@ -4,7 +4,7 @@
 // All other rights reserved.
 
 
-namespace PackageExplorerViewModel.Types
+namespace NuGetPackageExplorer.Types
 {
     public enum SourceLanguageType
     {

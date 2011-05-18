@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
+using PackageExplorerViewModel;
 
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
     public sealed class FileContentInfo : INotifyPropertyChanged {
         public FileContentInfo(PackageFile file, string name, object content, bool isTextFile, long size, SourceLanguageType language) {
             File = file;

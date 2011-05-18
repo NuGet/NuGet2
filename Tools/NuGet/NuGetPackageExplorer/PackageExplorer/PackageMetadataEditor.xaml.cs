@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using NuGet;
 using PackageExplorerViewModel;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer {
     /// <summary>

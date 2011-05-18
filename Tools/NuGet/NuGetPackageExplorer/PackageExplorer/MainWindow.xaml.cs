@@ -10,7 +10,7 @@ using System.Windows.Threading;
 using NuGet;
 using PackageExplorer.Properties;
 using PackageExplorerViewModel;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 using StringResources = PackageExplorer.Resources.Resources;
 
 namespace PackageExplorer {

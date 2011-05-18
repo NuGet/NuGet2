@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
 
     public enum MessageLevel {
         Information,

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Input;
 using NuGet;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorerViewModel {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
@@ -102,7 +103,7 @@ namespace PackageExplorerViewModel {
             if (Name != newName) {
                 if (Parent != null) {
                     if (Parent.ContainsFile(newName) || Parent.ContainsFolder(newName)) {
-                        PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, Types.MessageLevel.Error);
+                        PackageViewModel.UIServices.Show(Resources.RenameCausesNameCollison, MessageLevel.Error);
                         return;
                     }
                 }

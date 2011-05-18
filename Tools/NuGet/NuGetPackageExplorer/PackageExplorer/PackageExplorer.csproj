@@ -331,6 +331,10 @@
       <Project>{A1E66420-E485-4719-A37F-5B49AAFB43AB}</Project>
       <Name>PackageViewModel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Types\Types.csproj">
+      <Project>{E2EEEC5A-6A07-447E-9E95-C14307F57EDE}</Project>
+      <Name>Types</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

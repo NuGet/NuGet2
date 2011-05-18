@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 
-namespace PackageExplorerViewModel.Types {
+namespace NuGetPackageExplorer.Types {
     [MetadataAttribute]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple=false)]
     public sealed class PackageContentViewerMetadataAttribute : ExportAttribute {

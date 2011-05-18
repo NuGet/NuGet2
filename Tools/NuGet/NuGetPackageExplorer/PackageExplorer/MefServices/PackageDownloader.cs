@@ -5,7 +5,7 @@ using System.Net;
 using System.Windows.Threading;
 using NuGet;
 using Ookii.Dialogs.Wpf;
-using PackageExplorerViewModel.Types;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer {
 
