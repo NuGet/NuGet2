@@ -8,6 +8,7 @@ $NoResultValue = New-Object PSObject -Property @{ NoResult = $true }
 # Hashtable that stores tab expansion definitions
 $TabExpansionCommands = @{}
 
+function Register-TabExpansion {
 <#
 .SYNOPSIS
     Registers a tab expansion for the parameters of the specified command.
@@ -17,9 +18,9 @@ $TabExpansionCommands = @{}
     Name of the command the expansion is for.
 .EXAMPLE
     PS> Register-TabExpansion 'Set-Color', @{'color' = {'blue', 'green', 'red'}}
-         This adds a tab expansion to the Set-Color command. Set-Color contains a single parameter, color, with three possible expansion values.
+         This adds a tab expansion to the Set-Color command. Set-Color contains a single 
+         parameter, color, with three possible expansion values.
 #>
-function Register-TabExpansion {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)]
