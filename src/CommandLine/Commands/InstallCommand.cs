@@ -30,7 +30,7 @@ namespace NuGet.Commands {
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
-        private bool UseSideBySidePaths {
+        private bool AllowMultipleVersions {
             get { return !ExcludeVersion; }
         }
 
@@ -62,11 +62,11 @@ namespace NuGet.Commands {
 
                 Version version = Version != null ? new Version(Version) : null;
 
-                if (!UseSideBySidePaths) {
+                if (!AllowMultipleVersions) {
                     // If side-by-side is turned off, we need to try and update the package.
                     var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
                     var sourcePackage = packageManager.SourceRepository.FindPackage(packageId, version);
-                    if (installedPackage != null && installedPackage.Version != sourcePackage.Version) {
+                    if (installedPackage != null && sourcePackage != null && installedPackage.Version != sourcePackage.Version) {
                         packageManager.UninstallPackage(installedPackage);
                     }
                 }
@@ -103,7 +103,7 @@ namespace NuGet.Commands {
         protected virtual PackageManager GetPackageManager(IFileSystem fileSystem) {
             var repository = GetRepository();
 
-            var packageManager = new PackageManager(repository, new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: UseSideBySidePaths), fileSystem);
+            var packageManager = new PackageManager(repository, new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions), fileSystem);
             packageManager.Logger = Console;
 
             return packageManager;

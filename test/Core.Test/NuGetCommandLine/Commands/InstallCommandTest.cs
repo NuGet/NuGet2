@@ -130,6 +130,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             repository.Verify();
         }
 
+        [TestMethod]
+        public void InstallCommandWorksIfExcludedVersionsAndPackageIsNotFoundInRemoteRepository() {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var packages = new List<IPackage> { PackageUtility.CreatePackage("A", "0.5") };
+            var repository = new Mock<IPackageRepository>();
+            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
+            repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
+
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
+
+            installCommand.ExcludeVersion = true;
+            installCommand.Arguments = new List<string> { "A" };
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => installCommand.ExecuteCommand(), "Unable to find package 'A'.");
+            // Ensure packages were not removed.
+            Assert.AreEqual(1, packages.Count);
+        }
+
         private static IPackageRepositoryFactory GetFactory() {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
             var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5") };
