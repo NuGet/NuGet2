@@ -38,12 +38,23 @@ namespace PackageExplorerViewModel {
         private void ShowFile(PackageFile file) {
             bool isBinary = IsBinaryFile(file.Name);
             long size;
-            string content;
+            object content = null;
 
             if (isBinary) {
-                content = Resources.UnsupportedFormatMessage;
                 using (Stream stream = file.GetStream()) {
                     size = stream.Length;
+
+                    var contentViewer = FindContentViewer(file);
+                    if (contentViewer != null) {
+                        content = contentViewer.GetView(stream);
+                        if (content is string) {
+                            isBinary = false;
+                        }
+                    }
+
+                    if (content == null) {
+                        content = Resources.UnsupportedFormatMessage;
+                    }
                 }
             }
             else {
@@ -59,6 +70,14 @@ namespace PackageExplorerViewModel {
                 DetermineLanguage(file.Name));
 
             ViewModel.ShowFile(fileInfo);
+        }
+
+        private IPackageContentViewer FindContentViewer(PackageFile file) {
+            string extension = Path.GetExtension(file.Name);
+            return (from p in ViewModel.ContentViewerMetadata
+                    where p.Metadata.SupportedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)
+                    orderby p.Metadata.Order
+                    select p.Value).FirstOrDefault();
         }
 
         private static string ReadFileContent(PackageFile file, out long size) {

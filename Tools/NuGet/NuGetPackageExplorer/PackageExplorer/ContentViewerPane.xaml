@@ -14,6 +14,11 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        
+        <ContentPresenter
+            Content="{Binding Content}"
+            Visibility="{Binding IsTextFile, Converter={StaticResource invertedBoolToVis}}"
+            />
 
         <self:SyntaxHighlightingTextBox
             x:Name="contentBox"
@@ -22,6 +27,7 @@
             AcceptsReturn="True"
             IsReadOnly="True"
             Background="#FCFEF0"
+            Visibility="{Binding IsTextFile, Converter={StaticResource boolToVis}}"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Auto"
             SourceCode="{Binding Content, Mode=OneWay}"

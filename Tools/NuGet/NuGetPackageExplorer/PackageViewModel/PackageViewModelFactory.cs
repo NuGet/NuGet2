@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Linq;
 using NuGet;
 using PackageExplorerViewModel.Types;
 
@@ -45,8 +47,20 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [ImportMany]
+        public IEnumerable<Lazy<IPackageContentViewer, IPackageContentViewerMetadata>> ContentViewerMetadata { get; set; }
+
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
-            return new PackageViewModel(package, packageSource, MruManager, UIServices, EditorService.Value, SettingsManager, ProxyService.Value);
+            return new PackageViewModel(
+                package, 
+                packageSource, 
+                MruManager, 
+                UIServices, 
+                EditorService.Value, 
+                SettingsManager, 
+                ProxyService.Value,
+                ContentViewerMetadata.ToList());
         }
 
         public PackageChooserViewModel CreatePackageChooserViewModel() {

@@ -2,7 +2,7 @@
 
 namespace PackageExplorerViewModel.Types {
     public sealed class FileContentInfo : INotifyPropertyChanged {
-        public FileContentInfo(PackageFile file, string name, string content, bool isTextFile, long size, SourceLanguageType language) {
+        public FileContentInfo(PackageFile file, string name, object content, bool isTextFile, long size, SourceLanguageType language) {
             File = file;
             Name = name;
             Content = content;
@@ -13,7 +13,7 @@ namespace PackageExplorerViewModel.Types {
 
         public PackageFile File { get; set; }
         public string Name { get; private set; }
-        public string Content { get; private set; }
+        public object Content { get; private set; }
         public bool IsTextFile { get; private set; }
         public long Size { get; private set; }
 

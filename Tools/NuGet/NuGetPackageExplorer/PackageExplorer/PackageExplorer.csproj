@@ -145,6 +145,7 @@
     <Compile Include="Controls\GrayscaleButton.cs" />
     <Compile Include="Controls\GrayscaleImage.cs" />
     <Compile Include="Controls\GrayscaleMenuItem.cs" />
+    <Compile Include="MefServices\AssemblyFileViewer.cs" />
     <Compile Include="MefServices\PackageDownloader.cs" />
     <Compile Include="MefServices\SettingsManager.cs" />
     <Compile Include="Interop\NativeMethods.cs" />

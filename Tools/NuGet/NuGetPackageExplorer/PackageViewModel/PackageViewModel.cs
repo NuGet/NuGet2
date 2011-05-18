@@ -24,6 +24,7 @@ namespace PackageExplorerViewModel {
         private readonly IPackageEditorService _editorService;
         private readonly ISettingsManager _settingsManager;
         private readonly IProxyService _proxyService;
+        private readonly IList<Lazy<IPackageContentViewer, IPackageContentViewerMetadata>> _contentViewerMetadata;
 
         internal PackageViewModel(
             IPackage package,
@@ -32,7 +33,8 @@ namespace PackageExplorerViewModel {
             IUIServices uiServices,
             IPackageEditorService editorService,
             ISettingsManager settingsManager,
-            IProxyService proxyService) {
+            IProxyService proxyService,
+            IList<Lazy<IPackageContentViewer, IPackageContentViewerMetadata>> contentViewerMetadata) {
 
             if (package == null) {
                 throw new ArgumentNullException("package");
@@ -59,11 +61,18 @@ namespace PackageExplorerViewModel {
             _mruManager = mruManager;
             _package = package;
             _proxyService = proxyService;
+            _contentViewerMetadata = contentViewerMetadata;
 
             _packageMetadata = new EditablePackageMetadata(_package);
             PackageSource = source;
 
             _packageRoot = PathToTreeConverter.Convert(_package.GetFiles().ToList(), this);
+        }
+
+        internal IList<Lazy<IPackageContentViewer, IPackageContentViewerMetadata>> ContentViewerMetadata {
+            get {
+                return _contentViewerMetadata;
+            }
         }
 
         internal IUIServices UIServices {
