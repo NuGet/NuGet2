@@ -92,7 +92,7 @@ namespace NuGet.Test {
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(@"A\A.nupkg");
             
-            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem);
+            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem, enableCaching: false);
             var searchedPaths = new List<string>();
             Func<string, IPackage> openPackage = p => {
                 searchedPaths.Add(p);
@@ -124,7 +124,7 @@ namespace NuGet.Test {
             fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.0.8\A.0.8.nupkg")))).Returns(false);
             fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.1.1\A.1.1.nupkg")))).Returns(true);
 
-            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem.Object, useSideBySidePaths: true), fileSystem.Object);
+            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem.Object, useSideBySidePaths: true), fileSystem.Object, enableCaching: false);
             var searchedPaths = new List<string>();
             Func<string, IPackage> openPackage = p => {
                 searchedPaths.Add(p);
