@@ -187,7 +187,7 @@ namespace NuGet {
             }
 
             if (packages.Any()) {
-                return ResolveSafeVersion(packages);
+                return packages.ResolveSafeVersion();
             }
 
             return null;
@@ -273,7 +273,7 @@ namespace NuGet {
             return packages;
         }
 
-        private static IPackage ResolveSafeVersion(IEnumerable<IPackage> packages) {
+        internal static IPackage ResolveSafeVersion(this IEnumerable<IPackage> packages) {
             // We want to take the biggest build and revision number for the smallest
             // major and minor combination (we want to make some versioning assumptions that the 3rd number is a non-breaking bug fix). This is so that we get the closest version
             // to the dependency, but also get bug fixes without requiring people to manually update the nuspec.

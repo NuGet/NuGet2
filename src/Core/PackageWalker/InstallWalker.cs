@@ -156,10 +156,12 @@ namespace NuGet {
             // Get compatible packages in one batch so we don't have to make requests for each one
             var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package)
                            group p by p.Id into g
+                           let oldPackage = dependentsLookup[g.Key]
                            select new {
-                               OldPackage = dependentsLookup[g.Key],
-                               NewPackage = g.OrderBy(p => p.Version)
-                                             .FirstOrDefault()
+                               OldPackage = oldPackage,
+                               NewPackage = g.Where(p => p.Version > oldPackage.Version)
+                                             .OrderBy(p => p.Version)
+                                             .ResolveSafeVersion()
                            };
 
             foreach (var p in packages) {
