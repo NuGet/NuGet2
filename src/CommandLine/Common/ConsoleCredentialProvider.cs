@@ -13,9 +13,9 @@ namespace NuGet {
         }
 
         private NetworkCredential GetCredentials() {
-            Console.Write("Username:");
+            Console.Write("Username: ");
             string username = Console.ReadLine();
-            Console.Write("Password:");
+            Console.Write("Password: ");
             SecureString password = ReadLineAsSecureString();
             return new NetworkCredential {
                 UserName = username,

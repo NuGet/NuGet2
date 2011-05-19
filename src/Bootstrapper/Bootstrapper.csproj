@@ -35,6 +35,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommandLine\Common\ConsoleCredentialProvider.cs">
+      <Link>ConsoleCredentialProvider.cs</Link>
+    </Compile>
     <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
       <Link>ProgressEventArgs.cs</Link>
     </Compile>
@@ -68,7 +71,6 @@
     <Compile Include="..\Core\Utility\WebRequestEventArgs.cs">
       <Link>WebRequestEventArgs.cs</Link>
     </Compile>
-    <Compile Include="ConsoleCredentialProvider.cs" />
     <Compile Include="DataServicePackage.cs" />
     <Compile Include="DataServicePackageRepository.cs" />
     <Compile Include="Program.cs" />
