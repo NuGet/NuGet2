@@ -45,22 +45,11 @@ namespace NuGet {
         public void Walk(IPackage package) {
             // Do nothing if we saw this package already
             if (Marker.IsVisited(package)) {
+                ProcessPackageTarget(package);
                 return;
             }
 
             OnBeforePackageWalk(package);
-
-            // We have an extra check here for the install walker case.
-            // We might end up walking a the graph twice when trying to do an update since
-            // we update all dependents of a package for e.g.
-            // A 1.0 -> B [1.0]
-            // A 2.0 -> B [2.0]
-            // B 2.0 -> C [2.0]
-            // When updating from B1 to B2 we'll end up updating A1 to A2 which has the side effect
-            // of installing B2 which is currently being processed
-            if (Marker.IsVisited(package)) {
-                return;
-            }
 
             // Mark the package as processing
             Marker.MarkProcessing(package);
@@ -116,34 +105,44 @@ namespace NuGet {
             // Mark the package as visited
             Marker.MarkVisited(package);
 
-            if (!IgnoreWalkInfo) {
-                PackageWalkInfo info = GetPackageInfo(package);
-
-                // If our parent is an unknown then we need to bubble up the type
-                if (info.Parent != null) {
-                    PackageWalkInfo parentInfo = GetPackageInfo(info.Parent);
-
-                    Debug.Assert(parentInfo != null);
-
-                    if (parentInfo.InitialTarget == PackageTargets.None) {
-                        // Update the parent target type
-                        parentInfo.Target |= info.Target;
-
-                        // If we ended up with both that means we found a dependency only packges
-                        // that has a mix of solution and project level packages
-                        if (parentInfo.Target == PackageTargets.Both) {
-                            throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);
-                        }
-                    }
-
-                    // Solution packages can't depend on project level packages
-                    if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
-                        throw new InvalidOperationException(NuGetResources.ExternalPackagesCannotDependOnProjectLevelPackages);
-                    }
-                }
-            }
+            
+            ProcessPackageTarget(package);
 
             OnAfterPackageWalk(package);
+        }
+
+        /// <summary>
+        /// Resolve the package target (i.e. if the parent package was a meta package then set the parent to the current project type)
+        /// </summary>
+        private void ProcessPackageTarget(IPackage package) {
+            if (IgnoreWalkInfo) {
+                return;
+            }
+
+            PackageWalkInfo info = GetPackageInfo(package);
+
+            // If our parent is an unknown then we need to bubble up the type
+            if (info.Parent != null) {
+                PackageWalkInfo parentInfo = GetPackageInfo(info.Parent);
+
+                Debug.Assert(parentInfo != null);
+
+                if (parentInfo.InitialTarget == PackageTargets.None) {
+                    // Update the parent target type
+                    parentInfo.Target |= info.Target;
+
+                    // If we ended up with both that means we found a dependency only packges
+                    // that has a mix of solution and project level packages
+                    if (parentInfo.Target == PackageTargets.Both) {
+                        throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);
+                    }
+                }
+
+                // Solution packages can't depend on project level packages
+                if (parentInfo.Target == PackageTargets.External && info.Target.HasFlag(PackageTargets.Project)) {
+                    throw new InvalidOperationException(NuGetResources.ExternalPackagesCannotDependOnProjectLevelPackages);
+                }
+            }
         }
 
         protected virtual bool OnAfterResolveDependency(IPackage package, IPackage dependency) {

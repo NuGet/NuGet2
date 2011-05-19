@@ -403,8 +403,8 @@ namespace NuGet.Test {
             Assert.AreEqual(4, packages.Count);
             AssertOperation("A", "1.0", PackageAction.Uninstall, packages[0]);
             AssertOperation("B", "1.0", PackageAction.Uninstall, packages[1]);
-            AssertOperation("B", "1.0.1", PackageAction.Install, packages[2]);
-            AssertOperation("A", "2.0", PackageAction.Install, packages[3]);
+            AssertOperation("A", "2.0", PackageAction.Install, packages[2]);
+            AssertOperation("B", "1.0.1", PackageAction.Install, packages[3]);
         }
 
         [TestMethod]

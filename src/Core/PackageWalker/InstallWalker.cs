@@ -194,6 +194,9 @@ namespace NuGet {
                 constraintProvider.AddConstraint(package.Id, new VersionSpec(package.Version));
                 ConstraintProvider = new AggregateConstraintProvider(ConstraintProvider, constraintProvider);
 
+                // Mark the incoming package as visited so that we don't try walking the graph again
+                Marker.MarkVisited(package);
+
                 var failedPackages = new List<IPackage>();
                 // Update each of the exising packages to more compatible one
                 foreach (var pair in compatiblePackages) {
@@ -218,6 +221,9 @@ namespace NuGet {
             finally {
                 // Restore the current constraint provider
                 ConstraintProvider = currentConstraintProvider;
+
+                // Mark the package as processing again
+                Marker.MarkProcessing(package);
             }
         }
 
@@ -322,9 +328,11 @@ namespace NuGet {
             }
 
             internal void AddOperation(PackageOperation operation) {
-                _operations.Add(operation);
                 Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(operation.Action, createIfNotExists: true);
-                dictionary.Add(operation.Package, operation);
+                if (!dictionary.ContainsKey(operation.Package)) {
+                    dictionary.Add(operation.Package, operation);
+                    _operations.Add(operation);
+                }
             }
 
             internal void RemoveOperation(IPackage package, PackageAction action) {
