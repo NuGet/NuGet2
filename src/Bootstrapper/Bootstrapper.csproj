@@ -35,18 +35,44 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseProxyProvider.cs" />
+    <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
+      <Link>ProgressEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\BaseProxyProvider.cs">
+      <Link>BaseProxyProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\HttpClient.cs">
+      <Link>HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IHttpClient.cs">
+      <Link>IHttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IHttpClientEvents.cs">
+      <Link>IHttpClientEvents.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IntegratedCredentialProvider.cs">
+      <Link>IntegratedCredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IProgressProvider.cs">
+      <Link>IProgressProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IProxyFinder.cs">
+      <Link>IProxyFinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IProxyProvider.cs">
+      <Link>IProxyProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\ProxyFinder.cs">
+      <Link>ProxyFinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\WebRequestEventArgs.cs">
+      <Link>WebRequestEventArgs.cs</Link>
+    </Compile>
     <Compile Include="ConsoleCredentialProvider.cs" />
     <Compile Include="DataServicePackage.cs" />
     <Compile Include="DataServicePackageRepository.cs" />
-    <Compile Include="HttpClient.cs" />
-    <Compile Include="IHttpClient.cs" />
-    <Compile Include="IntegratedCredentialProvider.cs" />
-    <Compile Include="IProxyFinder.cs" />
-    <Compile Include="IProxyProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProxyFinder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
