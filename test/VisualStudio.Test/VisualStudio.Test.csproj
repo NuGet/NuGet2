@@ -33,6 +33,7 @@
     <Compile Include="..\Core.Test\Mocks\MockUserSettingsManager.cs">
       <Link>Mocks\MockUserSettingsManager.cs</Link>
     </Compile>
+    <Compile Include="FallbackRepositoryTest.cs" />
     <Compile Include="Mocks\MockPackageSourceProvider.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />
     <Compile Include="PathHelperTest.cs" />

@@ -29,6 +29,9 @@ namespace NuGet.VisualStudio {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
             }
+            if (packageSourceProvider == null) {
+                throw new ArgumentNullException("packageSourceProvider");
+            }
             if (fileSystemProvider == null) {
                 throw new ArgumentNullException("fileSystemProvider");
             }
@@ -62,15 +65,15 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Creates a FallBackRepository with an aggregate repository that also constains the primaryRepository.
         /// </summary>
-        private IPackageRepository CreateFallBackRepository(IPackageRepository primaryRepository) {
-            if (primaryRepository.Source.Equals(AggregatePackageSource.Instance.Source)) {
+        internal IPackageRepository CreateFallBackRepository(IPackageRepository primaryRepository) {
+            if (AggregatePackageSource.Instance.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase)) {
                 // If we're using the aggregate repository, we don't need to create a fall back repo.
                 return primaryRepository;
             }
 
             var sources = _packageSourceProvider.LoadPackageSources().ToList();
             IEnumerable<IPackageRepository> repositories = sources.Select(c => _repositoryFactory.CreateRepository(c.Source));
-            
+
             // We need to ensure that the primary repository is part of the aggregate repository. This could happen if the user
             // explicitly specifies a source such as by using the -Source parameter.
             if (!sources.Any(s => s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))) {
@@ -84,7 +87,7 @@ namespace NuGet.VisualStudio {
             // Update the path if it needs updating
             string path = _repositorySettings.RepositoryPath;
 
-            if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path)) {                
+            if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path)) {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
                 ISharedPackageRepository repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
 
@@ -94,7 +97,7 @@ namespace NuGet.VisualStudio {
             return _repositoryInfo;
         }
 
-        private class RepositoryInfo {            
+        private class RepositoryInfo {
             public RepositoryInfo(string path, IFileSystem fileSystem, ISharedPackageRepository repository) {
                 Path = path;
                 FileSystem = fileSystem;

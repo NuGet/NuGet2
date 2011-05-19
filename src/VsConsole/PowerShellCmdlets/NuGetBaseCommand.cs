@@ -227,7 +227,7 @@ namespace NuGet.PowerShell.Commands {
         /// <summary>
         /// Create a package repository from the source by trying to resolve relative paths.
         /// </summary>
-        protected IPackageRepository CreateRepositoryFromSource(IPackageRepositoryFactory repositoryFactory, IVsPackageSourceProvider sourceProvider, string source) {
+        protected IPackageRepository CreateRepositoryFromSource(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider, string source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }

@@ -130,10 +130,11 @@ namespace NuGet.PowerShell.Commands.Test {
             sourceRepository.Setup(p => p.Source).Returns(source);
             var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(c => c.CreatePackageManager(sourceRepository.Object)).Returns(vsPackageManager);
             var mockPackageRepository = new MockPackageRepository();
             var sourceProvider = GetPackageSourceProvider(new PackageSource(source));
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
-            repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(mockPackageRepository);
+            repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
             cmdlet.Version = new Version("2.8");
