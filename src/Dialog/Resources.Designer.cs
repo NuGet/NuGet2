@@ -115,6 +115,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Installing and uninstalling....
+        /// </summary>
+        public static string Dialog_InstallAndUninstallProgress {
+            get {
+                return ResourceManager.GetString("Dialog_InstallAndUninstallProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Install.
         /// </summary>
         public static string Dialog_InstallButton {
@@ -376,6 +385,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Solution &apos;{0}&apos;.
+        /// </summary>
+        public static string Dialog_SolutionNode {
+            get {
+                return ResourceManager.GetString("Dialog_SolutionNode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ascending.
         /// </summary>
         public static string Dialog_SortAscending {
@@ -417,6 +435,15 @@ namespace NuGet.Dialog {
         public static string Dialog_SortOption_Name {
             get {
                 return ResourceManager.GetString("Dialog_SortOption_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NuGet failed to install the selected package into the following project(s)..
+        /// </summary>
+        public static string Dialog_SummaryErrorMessage {
+            get {
+                return ResourceManager.GetString("Dialog_SummaryErrorMessage", resourceCulture);
             }
         }
         
@@ -516,6 +543,15 @@ namespace NuGet.Dialog {
         public static string Dialog_VotesCount {
             get {
                 return ResourceManager.GetString("Dialog_VotesCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: {0}.
+        /// </summary>
+        public static string ErrorStringFormat {
+            get {
+                return ResourceManager.GetString("ErrorStringFormat", resourceCulture);
             }
         }
         

@@ -20,8 +20,8 @@
     </Window.Resources>
     
     <DockPanel Margin="10">
-        <TextBlock DockPanel.Dock="Top" Text="NuGet failed to install the selected package into the following project(s)." TextWrapping="Wrap" />
-        <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Content="_OK" IsDefault="True" IsCancel="True" Margin="6,6,0,3" Padding="4,0" MinWidth="60" Click="OKButtonClicked" />
+        <TextBlock DockPanel.Dock="Top" Text="{x:Static resources:Resources.Dialog_SummaryErrorMessage}" TextWrapping="Wrap" />
+        <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" IsCancel="True" Margin="6,6,0,3" Padding="4,0" MinWidth="60" Click="OKButtonClicked" />
 
         <Border 
             Margin="0,5"
@@ -39,7 +39,7 @@
                                         <TextBlock Text="{Binding Key.Name}" FontWeight="SemiBold" />
                                     </DockPanel>
                                 </Expander.Header>
-                                <TextBlock Margin="10,0,0,0" Text="{Binding Value.Message, StringFormat='Error: {0}'}" TextWrapping="Wrap" Foreground="Red" />
+                                <TextBlock Margin="10,0,0,0" Text="{Binding Value.Message, StringFormat={x:Static resources:Resources.ErrorStringFormat}}" TextWrapping="Wrap" Foreground="Red" />
                             </Expander>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

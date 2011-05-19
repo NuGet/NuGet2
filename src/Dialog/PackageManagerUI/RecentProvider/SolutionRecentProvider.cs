@@ -6,9 +6,6 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     internal class SolutionRecentProvider : RecentProvider {
-
-        private readonly IProjectSelectorService _projectSelector;
-
         public SolutionRecentProvider(
             IPackageRepository localRepository,
             ResourceDictionary resources,
@@ -30,40 +27,13 @@ namespace NuGet.Dialog.Providers {
                 providerServices,
                 progressProvider,
                 solutionManager) {
-            _projectSelector = providerServices.ProjectSelector;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want one project's failure to affect the entire operation.")]
         protected override bool ExecuteAfterLicenseAggrement(
             PackageItem item,
             IVsPackageManager activePackageManager,
             IList<PackageOperation> operations) {
-
-            // hide the progress window if we are going to show project selector window
-            HideProgressWindow();
-            IEnumerable<Project> selectedProjects = _projectSelector.ShowProjectSelectorWindow(null);
-
-            if (selectedProjects == null) {
-                // user presses Cancel button on the Solution dialog
-                return false;
-            }
-
-            ShowProgressWindow();
-
-            var selectedProjectsSet = new HashSet<Project>(selectedProjects);
-            foreach (Project project in selectedProjectsSet) {
-                try {
-                    ExecuteCommandOnProject(project, item, activePackageManager, operations);
-                }
-                catch (Exception ex) {
-                    AddFailedProject(project, ex);
-                }
-            }
-
-            return true;
+            return InstallPackageIntoSolution(item, activePackageManager, operations);
         }
     }
 }

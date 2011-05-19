@@ -23,9 +23,8 @@ namespace NuGet.Dialog {
             var children = CreateProjectNode(solution.Projects.OfType<Project>(), checkedStateSelector).ToArray();
             Array.Sort(children, ProjectNodeComparer.Default);
 
-            // TODO: localize this
             return new FolderNode(
-                String.Format(CultureInfo.CurrentCulture, "Solution '{0}'", solution.GetName()), 
+                String.Format(CultureInfo.CurrentCulture, Resources.Dialog_SolutionNode, solution.GetName()), 
                 children);
         }
 

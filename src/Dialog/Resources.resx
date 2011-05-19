@@ -291,4 +291,16 @@
   <data name="Dialog_SolutionManageButton" xml:space="preserve">
     <value>_Manage</value>
   </data>
+  <data name="Dialog_InstallAndUninstallProgress" xml:space="preserve">
+    <value>Installing and uninstalling...</value>
+  </data>
+  <data name="Dialog_SolutionNode" xml:space="preserve">
+    <value>Solution '{0}'</value>
+  </data>
+  <data name="Dialog_SummaryErrorMessage" xml:space="preserve">
+    <value>NuGet failed to install the selected package into the following project(s).</value>
+  </data>
+  <data name="ErrorStringFormat" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
 </root>

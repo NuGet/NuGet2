@@ -31,6 +31,7 @@ namespace NuGet.Dialog {
                 if (_parent != value) {
                     _parent = value;
                     OnPropertyChanged("Parent");
+                    OnIsSelectedChanged();
                 }
             }
         }
@@ -48,7 +49,7 @@ namespace NuGet.Dialog {
             }
         }
 
-        private bool? _isSelected = true;
+        private bool? _isSelected;
         public bool? IsSelected {
             get {
                 return _isSelected;
@@ -56,13 +57,13 @@ namespace NuGet.Dialog {
             set {
                 if (_isSelected != value) {
                     _isSelected = value;
-                    OnIsSelectedChanged(value);
+                    OnIsSelectedChanged();
                     OnPropertyChanged("IsSelected");
                 }
             }
         }
 
-        protected virtual void OnIsSelectedChanged(bool? isSelected) {
+        protected virtual void OnIsSelectedChanged() {
             if (_suppressNotifyParentOfIsSelectedChanged) {
                 return;
             }

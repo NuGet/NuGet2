@@ -397,14 +397,18 @@ namespace NuGet.Dialog.Providers {
 
         protected void RegisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager) {
             packageManager.PackageInstalled += OnPackageInstalled;
-            projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
-            projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
+            if (projectManager != null) {
+                projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
+                projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
+            }
         }
 
         protected void UnregisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager) {
             packageManager.PackageInstalled -= OnPackageInstalled;
-            projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
-            projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
+            if (projectManager != null) {
+                projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
+                projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
+            }
         }
 
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e) {

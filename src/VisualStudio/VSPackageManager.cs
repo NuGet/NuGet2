@@ -173,7 +173,17 @@ namespace NuGet.VisualStudio {
                           projectManager => UpdatePackageReference(projectManager, packageId, versionSpec, updateDependencies),
                           () => SourceRepository.FindPackage(packageId, versionSpec),
                           updateDependencies,
-                          logger);
+                          logger,
+                          NullPackageOperationEventListener.Instance);
+        }
+
+        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
+            UpdatePackage(packageId,
+                          projectManager => UpdatePackageReference(projectManager, packageId, version, updateDependencies),
+                          () => SourceRepository.FindPackage(packageId, version),
+                          updateDependencies,
+                          logger,
+                          eventListener);
         }
 
         public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger) {
@@ -181,7 +191,8 @@ namespace NuGet.VisualStudio {
                           projectManager => UpdatePackageReference(projectManager, packageId, version, updateDependencies),
                           () => SourceRepository.FindPackage(packageId, version),
                           updateDependencies,
-                          logger);
+                          logger,
+                          NullPackageOperationEventListener.Instance);
         }
 
         public void UpdatePackages(ILogger logger) {
@@ -193,7 +204,8 @@ namespace NuGet.VisualStudio {
                           projectManager => UpdatePackageReference(projectManager, packageId, GetSafeRange(projectManager, packageId), updateDependencies),
                           () => SourceRepository.FindPackage(packageId, GetSafeRange(packageId)),
                           updateDependencies,
-                          logger);
+                          logger,
+                          NullPackageOperationEventListener.Instance);
         }
 
         public void SafeUpdatePackage(IProjectManager projectManager, string packageId, bool updateDependencies, ILogger logger) {
@@ -333,7 +345,7 @@ namespace NuGet.VisualStudio {
         /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
         /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
         /// </summary>
-        private bool IsProjectLevel(IPackage package) {
+        public bool IsProjectLevel(IPackage package) {
             return package.HasProjectContent() || _sharedRepository.IsReferenced(package.Id, package.Version);
         }
 
@@ -591,15 +603,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger) {
-            UpdatePackages(logger, NullPackageOperationEventListener.Instance);
-        }
-
-        public void UpdatePackages(ILogger logger, IPackageOperationEventListener eventListener) {
-            UpdatePackage(packageId, version, updateDependencies, logger, NullPackageOperationEventListener.Instance);
-        }
-
-        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
+        private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
 
@@ -659,7 +663,7 @@ namespace NuGet.VisualStudio {
                         }
                     }
                     catch (Exception e) {
-                        logger.Log(MessageLevel.Warning, e.Message);
+                        logger.Log(MessageLevel.Error, e.Message);
                     }
                 }
             }

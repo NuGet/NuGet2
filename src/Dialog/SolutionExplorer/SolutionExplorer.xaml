@@ -68,10 +68,10 @@
         <Label DockPanel.Dock="Top" Content="{x:Static resources:Resources.Dialog_ProjectSelectorDescription}" />
         
         <UniformGrid DockPanel.Dock="Bottom" HorizontalAlignment="Right" Columns="2">
-            <Button Content="_OK" IsDefault="True" Click="OnOKButtonClicked" />
-            <Button Content="_Cancel" IsCancel="True" Click="OnCancelButtonClicked" />
+            <Button Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" Click="OnOKButtonClicked" />
+            <Button Content="{x:Static resources:Resources.Dialog_Cancel}" IsCancel="True" Click="OnCancelButtonClicked" />
         </UniformGrid>
-        
+
         <TreeView ItemsSource="{Binding ProjectNodes}">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">

@@ -46,13 +46,14 @@ namespace NuGet.Dialog {
             }
         }
 
-        protected override void OnIsSelectedChanged(bool? isSelected) {
-            base.OnIsSelectedChanged(isSelected);
+        protected override void OnIsSelectedChanged() {
+            base.OnIsSelectedChanged();
 
             if (_suppressPropagatingIsSelectedProperty) {
                 return;
             }
 
+            bool? isSelected = IsSelected;
             // propagate the IsSelected value down to all childrens, recursively
             foreach (ProjectNodeBase child in _children) {
                 child.OnParentIsSelectedChange(isSelected);

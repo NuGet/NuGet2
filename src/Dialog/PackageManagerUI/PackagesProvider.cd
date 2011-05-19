@@ -3,7 +3,7 @@
   <Class Name="NuGet.Dialog.Providers.PackagesProviderBase" Collapsed="true">
     <Position X="6.25" Y="0.5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>QEAaIAAMEskMAAwEEUQZTICAIUgkUoQFAQIgQQAgAAE=</HashCode>
+      <HashCode>QEAaIAAsEskMAAwEEUQYTICAIUgkUoQFAQIgQQAgAAE=</HashCode>
       <FileName>PackageManagerUI\BaseProvider\PackagesProviderBase.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -45,7 +45,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.OnlineProvider" Collapsed="true">
-    <Position X="7.75" Y="2" Width="1.5" />
+    <Position X="8.75" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AMAABAAAAAAAAgAAEGACBAQAAQgMQEQAAAAAADQAAAA=</HashCode>
       <FileName>PackageManagerUI\OnlineProvider\OnlineProvider.cs</FileName>
@@ -54,7 +54,7 @@
   <Class Name="NuGet.Dialog.Providers.UpdatesProvider" Collapsed="true">
     <Position X="8.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEAABAAAAAAAAAAAEGACAAQAAQgAQAAAAAAAABAAAAA=</HashCode>
+      <HashCode>AMAABAAAAAAAAAAAEEAAAAQAAQgAQAAAAAAAABAAAAA=</HashCode>
       <FileName>PackageManagerUI\UpdatesProvider\UpdatesProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -84,6 +84,21 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
       <FileName>PackageManagerUI\OnlineProvider\SolutionOnlineProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NuGet.Dialog.Providers.SolutionUpdatesProvider" Collapsed="true">
+    <Position X="8.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AoAAAAAAAAAAAAAAAAECAAAAAAAAABAAAAEAAAAAAAA=</HashCode>
+      <FileName>PackageManagerUI\UpdatesProvider\SolutionUpdatesProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NuGet.Dialog.Providers.SolutionRecentProvider" Collapsed="true">
+    <Position X="6.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>PackageManagerUI\RecentProvider\SolutionRecentProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

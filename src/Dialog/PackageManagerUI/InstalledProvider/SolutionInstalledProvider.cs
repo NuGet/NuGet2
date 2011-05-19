@@ -46,6 +46,24 @@ namespace NuGet.Dialog.Providers {
                 throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
+            // treat solution-level packages specially
+            if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
+                try {
+                    RegisterPackageOperationEvents(PackageManager, null);
+                    PackageManager.UninstallPackage(
+                        null,
+                        item.PackageIdentity.Id,
+                        item.PackageIdentity.Version,
+                        forceRemove: false,
+                        removeDependencies: false,
+                        logger: this);
+                }
+                finally {
+                    UnregisterPackageOperationEvents(PackageManager, null);
+                }
+                return true;
+            }
+
             // hide progress window before we show the solution explorer
             HideProgressWindow();
 
@@ -86,8 +104,12 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override IVsExtension CreateExtension(IPackage package) {
+            string commandText = PackageManager.IsProjectLevel(package) ?
+                Resources.Dialog_SolutionManageButton :
+                Resources.Dialog_UninstallButton;
+
             return new PackageItem(this, package, null) {
-                CommandName = Resources.Dialog_SolutionManageButton
+                CommandName = commandText
             };
         }
 
@@ -95,6 +117,16 @@ namespace NuGet.Dialog.Providers {
             // only remove the item if it is no longer installed into the solution
             if (!LocalRepository.Exists(item.PackageIdentity)) {
                 base.OnExecuteCompleted(item);
+            }
+        }
+
+        protected override string GetProgressMessage(IPackage package) {
+            return Resources.Dialog_InstallAndUninstallProgress + package.ToString();
+        }
+
+        public override string ProgressWindowTitle {
+            get {
+                return Resources.Dialog_InstallAndUninstallProgress;
             }
         }
     }

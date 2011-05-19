@@ -4,6 +4,8 @@ using EnvDTE;
 
 namespace NuGet.VisualStudio {
     public interface IVsPackageManager : IPackageManager {
+        bool IsProjectLevel(IPackage package);
+
         IProjectManager GetProjectManager(Project project);
 
         // Install
@@ -17,7 +19,6 @@ namespace NuGet.VisualStudio {
 
         // Update
         void UpdatePackages(ILogger logger);
-        void UpdatePackages(ILogger logger, IPackageOperationEventListener packageOperationEventListener);
         void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger);
         void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener packageOperationEventListener);
         void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger);
