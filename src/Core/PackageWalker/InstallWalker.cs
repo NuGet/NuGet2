@@ -158,7 +158,7 @@ namespace NuGet {
                            group p by p.Id into g
                            select new {
                                OldPackage = dependentsLookup[g.Key],
-                               NewPackage = g.OrderByDescending(p => p.Version)
+                               NewPackage = g.OrderBy(p => p.Version)
                                              .FirstOrDefault()
                            };
 

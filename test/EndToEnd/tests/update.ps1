@@ -579,3 +579,22 @@ function Test-UpdatePackageDiamondDependenciesBottomNodeConflictingPackages {
     Assert-Null (Get-SolutionPackage C 1.0)
     Assert-Null (Get-SolutionPackage D 1.0)
 }
+
+function Test-UpdatingDependentPackagesPicksLowestCompatiblePackages {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebApplication
+    $p | Install-Package A -Version 1.0 -Source $context.RepositoryPath
+
+    # Act
+    Update-Package B -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p A 1.5
+    Assert-Package $p B 2.0
+    Assert-SolutionPackage A 1.5
+    Assert-SolutionPackage B 2.0
+}
