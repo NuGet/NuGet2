@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.Composition;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -10,12 +12,14 @@ namespace NuGet.VisualStudio {
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IRepositorySettings _repositorySettings;
         private readonly IRecentPackageRepository _recentPackageRepository;
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
 
         private RepositoryInfo _repositoryInfo;
 
         [ImportingConstructor]
         public VsPackageManagerFactory(ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,
+                                       IVsPackageSourceProvider packageSourceProvider,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
                                        IRecentPackageRepository recentPackagesRepository) {
@@ -37,6 +41,7 @@ namespace NuGet.VisualStudio {
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
             _recentPackageRepository = recentPackagesRepository;
+            _packageSourceProvider = packageSourceProvider;
 
             _solutionManager.SolutionClosing += (sender, e) => {
                 _repositoryInfo = null;
@@ -47,14 +52,32 @@ namespace NuGet.VisualStudio {
             return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>());
         }
 
-        public IVsPackageManager CreatePackageManager(string source) {
-            return CreatePackageManager(_repositoryFactory.CreateRepository(source));
-        }
-
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
+            var fallbackRepository = CreateFallBackRepository(repository);
             RepositoryInfo info = GetRepositoryInfo();
 
-            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository, _recentPackageRepository);
+            return new VsPackageManager(_solutionManager, fallbackRepository, info.FileSystem, info.Repository, _recentPackageRepository);
+        }
+
+        /// <summary>
+        /// Creates a FallBackRepository with an aggregate repository that also constains the primaryRepository.
+        /// </summary>
+        private IPackageRepository CreateFallBackRepository(IPackageRepository primaryRepository) {
+            if (primaryRepository.Source.Equals(AggregatePackageSource.Instance.Source)) {
+                // If we're using the aggregate repository, we don't need to create a fall back repo.
+                return primaryRepository;
+            }
+
+            var sources = _packageSourceProvider.LoadPackageSources().ToList();
+            IEnumerable<IPackageRepository> repositories = sources.Select(c => _repositoryFactory.CreateRepository(c.Source));
+            
+            // We need to ensure that the primary repository is part of the aggregate repository. This could happen if the user
+            // explicitly specifies a source such as by using the -Source parameter.
+            if (!sources.Any(s => s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))) {
+                repositories = new[] { primaryRepository }.Concat(repositories);
+            }
+            var aggregateRepository = new AggregateRepository(repositories);
+            return new FallbackRepository(primaryRepository, aggregateRepository);
         }
 
         private RepositoryInfo GetRepositoryInfo() {

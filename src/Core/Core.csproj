@@ -62,6 +62,7 @@
     <Compile Include="Packages\IPackageMetadata.cs" />
     <Compile Include="Packages\IServerPackageMetadata.cs" />
     <Compile Include="PackageWalker\ConflictResult.cs" />
+    <Compile Include="Repositories\IDependencyProvider.cs" />
     <Compile Include="PackageWalker\PackageSorter.cs" />
     <Compile Include="PackageWalker\IPackageOperationResolver.cs" />
     <Compile Include="PackageWalker\IDependentsResolver.cs" />

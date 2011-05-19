@@ -8,21 +8,29 @@ namespace NuGet.PowerShell.Commands {
     /// </summary>
     [Cmdlet(VerbsData.Update, "Package")]
     public class UpdatePackageCommand : ProcessPackageBaseCommand {
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IProductUpdateService _productUpdateService;
         private bool _hasConnectedToHttpSource;
 
         public UpdatePackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                   ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
+                   ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public UpdatePackageCommand(ISolutionManager solutionManager,
                                     IVsPackageManagerFactory packageManagerFactory,
+                                    IPackageRepositoryFactory repositoryFactory,
+                                    IVsPackageSourceProvider packageSourceProvider,
                                     IHttpClientEvents httpClientEvents,
                                     IProductUpdateService productUpdateService)
             : base(solutionManager, packageManagerFactory, httpClientEvents) {
+            _repositoryFactory = repositoryFactory;
+            _packageSourceProvider = packageSourceProvider;
             _productUpdateService = productUpdateService;
         }
 
@@ -54,7 +62,8 @@ namespace NuGet.PowerShell.Commands {
 
         protected override IVsPackageManager CreatePackageManager() {
             if (!String.IsNullOrEmpty(Source)) {
-                return CreateObjectFromSource(PackageManagerFactory.CreatePackageManager, Source);
+                IPackageRepository repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
+                return PackageManagerFactory.CreatePackageManager(repository);
             }
             return base.CreatePackageManager();
         }

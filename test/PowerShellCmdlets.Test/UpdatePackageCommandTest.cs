@@ -4,6 +4,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
+using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
@@ -15,7 +16,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, null);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, null, null, null);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(),
@@ -28,19 +29,23 @@ namespace NuGet.PowerShell.Commands.Test {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             var vsPackageManager = new MockVsPackageManager();
             var sourceVsPackageManager = new MockVsPackageManager();
+            var mockPackageRepository = new MockPackageRepository();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            packageManagerFactory.Setup(m => m.CreatePackageManager("somesource")).Returns(sourceVsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, null) { CallBase = true };
-            cmdlet.Object.Source = "somesource";
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.ProjectName = "foo";
+            packageManagerFactory.Setup(m => m.CreatePackageManager(mockPackageRepository)).Returns(sourceVsPackageManager);
+            var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
+            cmdlet.Source = "somesource";
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
-            Assert.AreSame(sourceVsPackageManager, cmdlet.Object.PackageManager);
+            Assert.AreSame(sourceVsPackageManager, cmdlet.PackageManager);
         }
 
         [TestMethod]
@@ -49,13 +54,17 @@ namespace NuGet.PowerShell.Commands.Test {
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, null) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.ProjectName = "foo";
+            var mockPackageRepository = new MockPackageRepository();
+            var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
             Assert.AreEqual("my-id", vsPackageManager.PackageId);
@@ -68,13 +77,17 @@ namespace NuGet.PowerShell.Commands.Test {
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, null) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.ProjectName = "foo";
+            var mockPackageRepository = new MockPackageRepository();
+            var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
             Assert.AreEqual("my-id", vsPackageManager.PackageId);
@@ -87,15 +100,19 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, null) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.IgnoreDependencies = new SwitchParameter(isPresent: true);
-            cmdlet.Object.ProjectName = "foo";
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager); 
+            var mockPackageRepository = new MockPackageRepository();
+            var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
             Assert.AreEqual("my-id", vsPackageManager.PackageId);
@@ -113,16 +130,19 @@ namespace NuGet.PowerShell.Commands.Test {
             sourceRepository.Setup(p => p.Source).Returns(source);
             var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<string>())).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.IgnoreDependencies = new SwitchParameter(isPresent: true);
-            cmdlet.Object.Source = source;
-            cmdlet.Object.ProjectName = "foo";
+            var mockPackageRepository = new MockPackageRepository();
+            var sourceProvider = GetPackageSourceProvider(new PackageSource(source));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
+            cmdlet.Source = source;
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
@@ -138,16 +158,19 @@ namespace NuGet.PowerShell.Commands.Test {
             sourceRepository.Setup(p => p.Source).Returns(source);
             var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager("bing")).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.IgnoreDependencies = new SwitchParameter(isPresent: true);
-            cmdlet.Object.Source = "bing";
-            cmdlet.Object.ProjectName = "foo";
+            packageManagerFactory.Setup(c => c.CreatePackageManager(sourceRepository.Object)).Returns(vsPackageManager);
+            var sourceProvider = GetPackageSourceProvider(new PackageSource(source, "bing"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
+            cmdlet.Source = "bing";
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
@@ -163,19 +186,30 @@ namespace NuGet.PowerShell.Commands.Test {
             sourceRepository.Setup(p => p.Source).Returns(source);
             var vsPackageManager = new MockVsPackageManager(sourceRepository.Object);
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<string>())).Returns(vsPackageManager);
-            var cmdlet = new Mock<UpdatePackageCommand>(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, null, productUpdateService.Object) { CallBase = true };
-            cmdlet.Object.Id = "my-id";
-            cmdlet.Object.Version = new Version("2.8");
-            cmdlet.Object.IgnoreDependencies = new SwitchParameter(isPresent: true);
-            cmdlet.Object.Source = source;
-            cmdlet.Object.ProjectName = "foo";
+            packageManagerFactory.Setup(m => m.CreatePackageManager(sourceRepository.Object)).Returns(vsPackageManager);
+            var sourceProvider = GetPackageSourceProvider(new PackageSource(source, "bing"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new Version("2.8");
+            cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
+            cmdlet.Source = source;
+            cmdlet.ProjectName = "foo";
 
             // Act
-            cmdlet.Object.Execute();
+            cmdlet.Execute();
 
             // Assert
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
+        }
+
+        
+
+        private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources) {
+            var sourceProvider = new Mock<IVsPackageSourceProvider>();
+            sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
+            return sourceProvider.Object;
         }
 
         private class MockVsPackageManager : VsPackageManager {

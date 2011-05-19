@@ -224,15 +224,19 @@ namespace NuGet.PowerShell.Commands {
             return PSPathUtility.TryTranslatePSPath(SessionState, psPath, out path, out exists, out errorMessage);
         }
 
-        protected T CreateObjectFromSource<T>(Func<string, T> factory, string source) {
+        /// <summary>
+        /// Create a package repository from the source by trying to resolve relative paths.
+        /// </summary>
+        protected IPackageRepository CreateRepositoryFromSource(IPackageRepositoryFactory repositoryFactory, IVsPackageSourceProvider sourceProvider, string source) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
 
+            string resolvedSource = sourceProvider.ResolveSource(source);
             try {
-                T item = factory(source);
-                if (item != null) {
-                    return item;
+                IPackageRepository repository = repositoryFactory.CreateRepository(resolvedSource);
+                if (repository != null) {
+                    return repository;
                 }
             }
             catch (UriFormatException) {
@@ -247,14 +251,12 @@ namespace NuGet.PowerShell.Commands {
                 string errorMessage;
                 // translate relative path to absolute path
                 if (TryTranslatePSPath(source, out outputPath, out exists, out errorMessage) && exists == true) {
-                    return factory.Invoke(outputPath);
-                }
-                else {
-                    return factory.Invoke(source);
+                    return repositoryFactory.CreateRepository(outputPath);
                 }
             }
 
-            return default(T);
+            // We should never reach here.
+            throw new ArgumentException(Resources.Cmdlet_InvalidSource);
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]

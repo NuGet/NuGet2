@@ -124,6 +124,15 @@ namespace NuGet.PowerShell.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to resolve package source..
+        /// </summary>
+        internal static string Cmdlet_InvalidSource {
+            get {
+                return ResourceManager.GetString("Cmdlet_InvalidSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to retrieve package list because no source was specified..
         /// </summary>
         internal static string Cmdlet_NoActivePackageSource {

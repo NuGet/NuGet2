@@ -45,7 +45,9 @@
     <Compile Include="GetProjectCommandTest.cs" />
     <Compile Include="PSPathTranslationTests.cs" />
     <Compile Include="UninstallPackageCommandTest.cs" />
-    <Compile Include="UpdatePackageCommandTest.cs" />
+    <Compile Include="UpdatePackageCommandTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\Core.csproj">

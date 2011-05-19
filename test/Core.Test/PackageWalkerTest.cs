@@ -62,6 +62,75 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ResolveDependenciesForInstallPackageResolvesDependencyUsingDependencyProvider() {
+            // Arrange            
+            IPackage packageA = PackageUtility.CreatePackage("A",
+                                                            "1.0",
+                                                             dependencies: new List<PackageDependency> {
+                                                                 new PackageDependency("B")
+                                                             });
+            IPackage packageB = PackageUtility.CreatePackage("B");
+            var repository = new Mock<PackageRepositoryBase>();
+            repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
+            var dependencyProvider = repository.As<IDependencyProvider>();
+            dependencyProvider.Setup(c => c.GetDependencies(It.Is<string>(p => p == "B"))).Returns(new[] { packageB }.AsQueryable()).Verifiable();
+            var localRepository = new MockPackageRepository();
+
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
+                                                             repository.Object,
+                                                             NullLogger.Instance,
+                                                             ignoreDependencies: false);
+
+
+            // Act
+            var operations = resolver.ResolveOperations(packageA).ToList();
+
+            // Assert
+            Assert.AreEqual(2, operations.Count);
+            Assert.AreEqual(PackageAction.Install, operations.First().Action);
+            Assert.AreEqual(packageB, operations.First().Package);
+            Assert.AreEqual(PackageAction.Install, operations.Last().Action);
+            Assert.AreEqual(packageA, operations.Last().Package);
+
+            dependencyProvider.Verify();
+        }
+
+        [TestMethod]
+        public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyProvider() {
+            // Arrange            
+            IPackage packageA = PackageUtility.CreatePackage("A",
+                                                            "1.0",
+                                                             dependencies: new List<PackageDependency> {
+                                                                 new PackageDependency("B", new VersionSpec { MinVersion = new Version("1.1") } )
+                                                             });
+            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
+            IPackage packageB12 = PackageUtility.CreatePackage("B", "1.2");
+            var repository = new Mock<PackageRepositoryBase>();
+            repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
+            var dependencyProvider = repository.As<IDependencyProvider>();
+            dependencyProvider.Setup(c => c.GetDependencies(It.Is<string>(p => p == "B"))).Returns(new[] { packageB10, packageB12 }.AsQueryable()).Verifiable();
+            var localRepository = new MockPackageRepository();
+
+            IPackageOperationResolver resolver = new InstallWalker(localRepository,
+                                                             repository.Object,
+                                                             NullLogger.Instance,
+                                                             ignoreDependencies: false);
+
+
+            // Act
+            var operations = resolver.ResolveOperations(packageA).ToList();
+
+            // Assert
+            Assert.AreEqual(2, operations.Count);
+            Assert.AreEqual(PackageAction.Install, operations.First().Action);
+            Assert.AreEqual(packageB12, operations.First().Package);
+            Assert.AreEqual(PackageAction.Install, operations.Last().Action);
+            Assert.AreEqual(packageA, operations.Last().Package);
+
+            dependencyProvider.Verify();
+        }
+
+        [TestMethod]
         public void ResolveDependenciesForInstallCircularReferenceThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();

@@ -9,24 +9,31 @@ namespace NuGet.PowerShell.Commands {
     /// </summary>
     [Cmdlet(VerbsLifecycle.Install, "Package")]
     public class InstallPackageCommand : ProcessPackageBaseCommand {
-
+        private readonly IVsPackageSourceProvider _packageSourceProvider;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IProductUpdateService _productUpdateService;
         private bool _hasConnectedToHttpSource;
 
         public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(), 
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                   ServiceLocator.GetInstance<IPackageRepositoryFactory>(), 
+                   ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public InstallPackageCommand(
             ISolutionManager solutionManager, 
-            IVsPackageManagerFactory packageManagerFactory, 
+            IVsPackageManagerFactory packageManagerFactory,
+            IPackageRepositoryFactory repositoryFactory,
+            IVsPackageSourceProvider packageSourceProvider,
             IHttpClientEvents httpClientEvents,
             IProductUpdateService productUpdateService)
             : base(solutionManager, packageManagerFactory, httpClientEvents) {
             _productUpdateService = productUpdateService;
+            _repositoryFactory = repositoryFactory;
+            _packageSourceProvider = packageSourceProvider;
         }
 
         [Parameter(Position = 2)]
@@ -46,7 +53,8 @@ namespace NuGet.PowerShell.Commands {
             }
 
             if (!String.IsNullOrEmpty(Source)) {
-                return CreateObjectFromSource(PackageManagerFactory.CreatePackageManager, Source);
+                var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
+                return PackageManagerFactory.CreatePackageManager(repository);
             }
 
             return base.CreatePackageManager();

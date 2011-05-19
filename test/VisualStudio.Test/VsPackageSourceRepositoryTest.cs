@@ -54,5 +54,44 @@ namespace NuGet.VisualStudio.Test {
             Assert.AreEqual("A", packages[0].Id);
             Assert.AreEqual(new Version("1.0"), packages[0].Version);
         }
+
+        [TestMethod]
+        public void GetDependenciesReturnsPackagesFromAggregateSourcesIfActivePackageSourceIsAll() {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+            
+            var mockRepository1 = new MockPackageRepository();
+            var mockRepository2 = new MockPackageRepository();
+            
+            var source1 = new PackageSource("Source1");
+            var source2 = new PackageSource("Source2");
+
+            mockRepository1.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
+
+            mockSourceProvider.Setup(m => m.ActivePackageSource).Returns(AggregatePackageSource.Instance);
+            mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
+                switch(s) {
+                    case "Source1": return mockRepository1; 
+                    case "Source2": return mockRepository2;
+                    default: return null;
+                }
+            });
+            var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
+
+            // Act
+            var dependencyProvider = repository as IDependencyProvider;
+            List<IPackage> packages = dependencyProvider.GetDependencies("A").ToList();
+
+            // Assert
+            Assert.AreEqual(2, packages.Count);
+            Assert.AreEqual("A", packages[0].Id);
+            Assert.AreEqual(new Version("1.0"), packages[0].Version);
+
+            Assert.AreEqual("A", packages[1].Id);
+            Assert.AreEqual(new Version("1.2"), packages[1].Version);
+        }
     }
 }
