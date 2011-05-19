@@ -91,13 +91,10 @@ namespace NuGet.Dialog.Test {
             var localRepository = new MockPackageRepository();
             localRepository.AddPackage(packageA);
 
-            var projectManager = new Mock<IProjectManager>();
-            projectManager.Setup(p => p.IsInstalled(It.IsAny<IPackage>())).Returns<IPackage>(p => localRepository.Exists(p));
-
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
 
-            var provider = CreateOnlineProvider(packageManager.Object, projectManager.Object);
+            var provider = CreateOnlineProvider(packageManager.Object, localRepository);
 
             var extensionA = new PackageItem(provider, packageA, null);
             var extensionB = new PackageItem(provider, packageB, null);
@@ -132,10 +129,16 @@ namespace NuGet.Dialog.Test {
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(localRepository);
 
+            var project = new Mock<Project>();
+
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager.Object);
 
-            var provider = CreateOnlineProvider(packageManager.Object, projectManager.Object);
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var provider = CreateOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, project: project.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -146,6 +149,7 @@ namespace NuGet.Dialog.Test {
             provider.SelectedNode = firstTreeNode;
             IVsPackageManager activePackageManager = provider.GetActivePackageManager();
             Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
+            mockPackageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager.Object);
 
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
@@ -197,6 +201,7 @@ namespace NuGet.Dialog.Test {
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
             packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
 
             packageManager.Setup(p => p.InstallPackage(
                projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>())).Callback(
@@ -205,7 +210,10 @@ namespace NuGet.Dialog.Test {
                    projectManager.AddPackageReference(packageB.Id, packageB.Version);
                });
 
-            var provider = CreateOnlineProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object);
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var provider = CreateOnlineProvider(packageManager.Object, localRepository, null, null, project.Object, scriptExecutor.Object, solutionManager.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -269,9 +277,13 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
             packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
             packageManager.Setup(p => p.InstallPackage(projectManager, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>())).
-                Raises(p => p.PackageInstalled += null, packageManager, new PackageOperationEventArgs(packageB, ""));
+                Raises(p => p.PackageInstalled += null, packageManager, new PackageOperationEventArgs(packageB, null, ""));
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
 
-            var provider = CreateOnlineProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object);
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var provider = CreateOnlineProvider(packageManager.Object, null, null, null, project.Object, scriptExecutor.Object, solutionManager.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -310,11 +322,12 @@ namespace NuGet.Dialog.Test {
 
         private static OnlineProvider CreateOnlineProvider(
             IVsPackageManager packageManager = null,
-            IProjectManager projectManager = null,
+            IPackageRepository localRepository = null,
             IPackageRepositoryFactory repositoryFactory = null,
             IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
-            IScriptExecutor scriptExecutor = null) {
+            IScriptExecutor scriptExecutor = null,
+            ISolutionManager solutionManager = null) {
 
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -322,10 +335,6 @@ namespace NuGet.Dialog.Test {
                 packageManagerMock.Setup(p => p.SourceRepository).Returns(sourceRepository);
 
                 packageManager = packageManagerMock.Object;
-            }
-
-            if (projectManager == null) {
-                projectManager = new Mock<IProjectManager>().Object;
             }
 
             if (repositoryFactory == null) {
@@ -367,19 +376,28 @@ namespace NuGet.Dialog.Test {
                 new Mock<IProjectSelectorService>().Object
             );
 
+            if (localRepository == null) {
+                localRepository = new Mock<IPackageRepository>().Object;
+            }
+
+            if (solutionManager == null) {
+                solutionManager = new Mock<ISolutionManager>().Object;
+            }
+
             return new OnlineProvider(
                 project,
-                projectManager,
+                localRepository,
                 new System.Windows.ResourceDictionary(),
                 repositoryFactory,
                 packageSourceProvider,
                 factory.Object,
                 services,
-                new Mock<IProgressProvider>().Object);
+                new Mock<IProgressProvider>().Object,
+                solutionManager);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {
-            var projectSystem = new MockProjectSystem();
+            var projectSystem = new MockVsProjectSystem();
             return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }

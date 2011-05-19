@@ -67,6 +67,7 @@
     <Compile Include="Mocks\MockOutputConsoleProvider.cs" />
     <Compile Include="Mocks\MockPackagesProvider.cs" />
     <Compile Include="Mocks\MockTreeNode.cs" />
+    <Compile Include="Mocks\MockVsProjectSystem.cs" />
     <Compile Include="OnlineProviderTest.cs" />
     <Compile Include="PackagesProviderBaseTest.cs" />
     <Compile Include="PackagesSearchNodeTest.cs" />

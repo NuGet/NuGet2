@@ -64,7 +64,7 @@ namespace NuGet.Dialog.Test {
             projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
             projectManager.Setup(p => p.SourceRepository).Returns(new MockPackageRepository());
 
-            var provider = CreateUpdatesProvider(null, projectManager.Object);
+            var provider = CreateUpdatesProvider();
 
             // Act
             var extentionsTree = provider.ExtensionsTree;
@@ -120,7 +120,7 @@ namespace NuGet.Dialog.Test {
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
 
-            var provider = CreateUpdatesProvider(packageManager.Object, projectManager.Object);
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository);
 
             var extensionA = new PackageItem(provider, packageA2, null);
             var extensionC = new PackageItem(provider, packageC, null);
@@ -153,14 +153,20 @@ namespace NuGet.Dialog.Test {
             sourceRepository.AddPackage(packageA2);
             sourceRepository.AddPackage(packageC);
 
+            var project = new Mock<Project>();
+
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(localRepository);
 
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager.Object);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
-            var provider = CreateUpdatesProvider(packageManager: packageManager.Object, projectManager: projectManager.Object, licenseWindowOpener: mockLicenseWindowOpener.Object);
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, licenseWindowOpener: mockLicenseWindowOpener.Object, solutionManager: solutionManager.Object);
 
             var extensionA = new PackageItem(provider, packageA2, null);
             var extensionC = new PackageItem(provider, packageC, null);
@@ -203,21 +209,25 @@ namespace NuGet.Dialog.Test {
             sourceRepository.AddPackage(packageA2);
             sourceRepository.AddPackage(packageC);
 
+            var project = new Mock<Project>();
+
             var projectManager = CreateProjectManager(localRepository, sourceRepository);
 
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
-
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
             packageManager.Setup(p => p.UpdatePackage(
                projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, It.IsAny<ILogger>())).Callback(
                () => {
                    projectManager.AddPackageReference("A", new Version("2.0"), false);
                });
 
-            var project = new Mock<Project>();
             var scriptExecutor = new Mock<IScriptExecutor>();
 
-            var provider = CreateUpdatesProvider(packageManager.Object, projectManager, null, null, project.Object, scriptExecutor.Object, null);
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, null, null, project.Object, scriptExecutor.Object, null, solutionManager.Object);
             provider.SelectedNode = (UpdatesTreeNode)provider.ExtensionsTree.Nodes[0];
 
             var extensionA = new PackageItem(provider, packageA2, null);
@@ -249,7 +259,8 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
-            ILicenseWindowOpener licenseWindowOpener = null) {
+            ILicenseWindowOpener licenseWindowOpener = null,
+            ISolutionManager solutionManager = null) {
 
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -306,6 +317,10 @@ namespace NuGet.Dialog.Test {
                 new Mock<IProjectSelectorService>().Object
             );
 
+            if (solutionManager == null) {
+                solutionManager = new Mock<ISolutionManager>().Object;
+            }
+
             return new UpdatesProvider(
                 project,
                 localRepository,
@@ -314,11 +329,12 @@ namespace NuGet.Dialog.Test {
                 packageSourceProvider,
                 factory.Object,
                 services,
-                new Mock<IProgressProvider>().Object);
+                new Mock<IProgressProvider>().Object,
+                solutionManager);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {
-            var projectSystem = new MockProjectSystem();
+            var projectSystem = new MockVsProjectSystem();
             return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }

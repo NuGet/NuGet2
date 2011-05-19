@@ -94,9 +94,9 @@ namespace NuGet.Dialog.Test {
 
         private static PackageItem CreatePackageItem(IPackage package) {
             var packageManager = new Mock<IVsPackageManager>();
-            var projectManager = new Mock<IProjectManager>();
+            var localRepository = new Mock<IPackageRepository>();
 
-            MockPackagesProvider provider = new MockPackagesProvider(packageManager.Object, projectManager.Object);
+            var provider = new MockPackagesProvider(localRepository.Object, packageManager.Object);
             return new PackageItem(provider, package, null);
         }
     }

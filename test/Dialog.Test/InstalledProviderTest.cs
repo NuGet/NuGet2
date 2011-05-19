@@ -56,11 +56,8 @@ namespace NuGet.Dialog.Test {
 
         [TestMethod]
         public void RootNodeIsPopulatedWithOneNode() {
-            // Arrange
-            var projectManager = new Mock<IProjectManager>();
-            projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
-            
-            var provider = CreateInstalledProvider(null, projectManager.Object);
+            // Arrange            
+            var provider = CreateInstalledProvider();
 
             // Act
             var extentionsTree = provider.ExtensionsTree;
@@ -103,10 +100,7 @@ namespace NuGet.Dialog.Test {
 
             var packageC = PackageUtility.CreatePackage("C", "2.0");
 
-            var projectManager = new Mock<IProjectManager>();
-            projectManager.Setup(p => p.IsInstalled(It.IsAny<IPackage>())).Returns<IPackage>(p => repository.Exists(p));
-
-            var provider = CreateInstalledProvider(null, projectManager.Object);
+            var provider = CreateInstalledProvider(null, repository);
 
             var extensionA = new PackageItem(provider, packageA, null);
             var extensionC = new PackageItem(provider, packageC, null);
@@ -122,7 +116,7 @@ namespace NuGet.Dialog.Test {
 
         [TestMethod]
         public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager() {
-            // Local repository contains Package A and Package B
+            // Local repository contains Package A
 
             // Arrange
             var repository = new MockPackageRepository();
@@ -132,10 +126,12 @@ namespace NuGet.Dialog.Test {
 
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(repository);
+            projectManager.Setup(p => p.IsInstalled(It.Is<IPackage>(item => item == packageA))).Returns(true);
 
             var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.GetProjectManager(It.IsAny<Project>())).Returns(projectManager.Object);
 
-            var provider = CreateInstalledProvider(packageManager.Object, projectManager.Object);
+            var provider = CreateInstalledProvider(packageManager.Object, repository);
 
             var extensionA = new PackageItem(provider, packageA, null);
 
@@ -163,11 +159,16 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.UninstallPackage(
                 projectManager, It.IsAny<string>(), It.IsAny<Version>(), false, false, It.IsAny<ILogger>())).Callback(
                 () => projectManager.RemovePackageReference("A"));
+            packageManager.Setup(p => p.GetProjectManager(It.IsAny<Project>())).Returns(projectManager);
+            
 
             var project = new Mock<Project>();
             var scriptExecutor = new Mock<IScriptExecutor>();
 
-            var provider = CreateInstalledProvider(packageManager.Object, projectManager, project.Object, scriptExecutor.Object);
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var provider = CreateInstalledProvider(packageManager.Object, null, project.Object, scriptExecutor.Object, solutionManager.Object);
 
             var extensionA = new PackageItem(provider, packageA, null);
 
@@ -193,15 +194,12 @@ namespace NuGet.Dialog.Test {
 
         private static InstalledProvider CreateInstalledProvider(
             IVsPackageManager packageManager = null, 
-            IProjectManager projectManager = null,
+            IPackageRepository localRepository = null,
             Project project = null,
-            IScriptExecutor scriptExecutor = null) {
+            IScriptExecutor scriptExecutor = null,
+            ISolutionManager solutionManager = null) {
             if (packageManager == null) {
                 packageManager = new Mock<IVsPackageManager>().Object;
-            }
-
-            if (projectManager == null) {
-                projectManager = new Mock<IProjectManager>().Object;
             }
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
@@ -222,11 +220,26 @@ namespace NuGet.Dialog.Test {
                 new Mock<IProjectSelectorService>().Object
             );
 
-            return new InstalledProvider(packageManager, project, projectManager, new System.Windows.ResourceDictionary(), services, new Mock<IProgressProvider>().Object);
+            if (localRepository == null) {
+                localRepository = new MockPackageRepository();
+            }
+
+            if (solutionManager == null) {
+                solutionManager = new Mock<ISolutionManager>().Object;
+            }
+
+            return new InstalledProvider(
+                packageManager, 
+                project,
+                localRepository,
+                new System.Windows.ResourceDictionary(), 
+                services, 
+                new Mock<IProgressProvider>().Object,
+                solutionManager);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository) {
-            var projectSystem = new MockProjectSystem();
+            var projectSystem = new MockVsProjectSystem();
             return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }
     }

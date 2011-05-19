@@ -1,23 +1,24 @@
 ﻿using System.Windows;
-using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
-using NuGetConsole;
 
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {
 
         public MockPackagesProvider() 
-            : this(new Mock<IVsPackageManager>().Object, new Mock<IProjectManager>().Object) {
+            : this(new Mock<IPackageRepository>().Object, new Mock<IVsPackageManager>().Object) {
         }
 
-        public MockPackagesProvider(IVsPackageManager packageManager, IProjectManager projectManager)
-            : base(new Mock<Project>().Object, projectManager, new ResourceDictionary(),
+        public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManagerr)
+            : base(
+                localRepository,
+                new ResourceDictionary(),
                 new ProviderServices(new Mock<ILicenseWindowOpener>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider(), new Mock<IProjectSelectorService>().Object),
-                new Mock<IProgressProvider>().Object) {
+                new Mock<IProgressProvider>().Object,
+                new Mock<ISolutionManager>().Object) {
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {
