@@ -117,13 +117,10 @@
 
     <Target Name="CopyExecutableOutputToDropDirectory">
         <ItemGroup>
-            <ILMergedExe Include="$(ExeBuildDirectory)\NuGet.merged.exe" />
-            <ExeManifestFile Include="$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
+            <ExecutableFiles Include="$(ExeBuildDirectory)\Merged\NuGet.exe;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
-        
-        <Copy ContinueOnError="false" SourceFiles="@(ILMergedExe)" DestinationFiles="$(ExeDropDirectory)\NuGet.exe" />
-        <Copy ContinueOnError="false" SourceFiles="@(ExeManifestFile)" DestinationFolder="$(ExeDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
     </Target>
     
     <Target Name="CopyBootStrapperOutputToDropDirectory">
