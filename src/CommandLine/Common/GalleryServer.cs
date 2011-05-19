@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
@@ -14,20 +13,47 @@ namespace NuGet.Common {
         private const string PublichPackageService = "PublishedPackages/Publish";
 
         private const string _UserAgentClient = "NuGet Command Line";
-
-        private string _baseGalleryServerUrl;
+        private readonly Lazy<IHttpClient> _galleryClient;
+        private readonly string _galleryServerUrl;
 
         public GalleryServer()
             : this(DefaultGalleryServerUrl) {
         }
 
         public GalleryServer(string galleryServerUrl) {
-            _baseGalleryServerUrl = GetSafeRedirectedUri(galleryServerUrl);
+            if (string.IsNullOrEmpty(galleryServerUrl)) {
+                throw new ArgumentNullException("galleryServerUrl");
+            }
+            _galleryServerUrl = galleryServerUrl;
+            _galleryClient = new Lazy<IHttpClient>(EnsureClient);
+        }
+
+        public IHttpClient EnsureClient() {
+            IHttpClient client = null;
+            try {
+                client = new RedirectedHttpClient(new Uri(_galleryServerUrl));
+                // force the client to load the Uri so that we can catch the 403 - Forbidden: exception from the
+                // server and just return the proper IHttpClient.
+                var uri = client.Uri;
+            }
+            catch (WebException e) {
+                if (e.Status == WebExceptionStatus.Timeout) {
+                    // If we got a timeout error then throw it up to the consumer
+                    // because we are not able to connect to the gallery server.
+                    throw;
+                }
+                // Since we did not time out then it must be that we are getting the 403 error
+                // which is valid since this Url is going to be used for Post and Delete actions
+                // and we are simply trying to perform a GET to retrieve the server Url from the fw link.
+                // So let's create a new IHttpClient that is going to against this new Url
+                client = new HttpClient(e.Response.ResponseUri);
+            }
+            return client;
         }
 
         public void CreatePackage(string apiKey, Stream package) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/nupkg", _baseGalleryServerUrl, CreatePackageService, apiKey));
-            var request = CreateRequest(url, "POST", "application/octet-stream");
+            var action = String.Format("{0}/{1}/nupkg", CreatePackageService, apiKey);
+            var request = CreateRequest(action, "POST", "application/octet-stream");
 
             byte[] file = package.ReadAllBytes();
             request.ContentLength = file.Length;
@@ -38,8 +64,8 @@ namespace NuGet.Common {
         }
 
         public void CreatePackage(string apiKey, string externalUrl) {
-            var url = new Uri(String.Format("{0}/{1}/CreateFromExternalUrl", _baseGalleryServerUrl, CreatePackageService));
-            var request = CreateRequest(url, "POST", "application/json");
+            var action = String.Format("{0}/CreateFromExternalUrl", CreatePackageService);
+            var request = CreateRequest(action, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new CreateFromExternalUrlData {
@@ -57,8 +83,7 @@ namespace NuGet.Common {
         }
 
         public void PublishPackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}", _baseGalleryServerUrl, PublichPackageService));
-            var request = CreateRequest(url, "POST", "application/json");
+            var request = CreateRequest(PublichPackageService, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new PublishData {
@@ -75,16 +100,16 @@ namespace NuGet.Common {
         }
 
         public void DeletePackage(string apiKey, string packageID, string packageVersion) {
-            var url = new Uri(String.Format("{0}/{1}/{2}/{3}/{4}", _baseGalleryServerUrl, PackageService, apiKey, packageID, packageVersion));
-            var request = CreateRequest(url, "DELETE", "text/html");
+            var action = String.Format("{0}/{1}/{2}/{3}", PackageService, apiKey, packageID, packageVersion);
+            var request = CreateRequest(action, "DELETE", "text/html");
             request.ContentLength = 0;
 
             GetResponse(request);
         }
 
         public void RatePackage(string packageID, string packageVersion, string rating) {
-            var url = new Uri(String.Format("{0}/{1}/{2}", _baseGalleryServerUrl, PackageService, "RatePackage"));
-            var request = CreateRequest(url, "POST", "application/json");
+            var action = String.Format("{0}/{1}", PackageService, "RatePackage");
+            var request = CreateRequest(action, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new RatePackageData {
@@ -100,8 +125,10 @@ namespace NuGet.Common {
             GetResponse(request);
         }
 
-        private HttpWebRequest CreateRequest(Uri url, string method, string contentType) {
-            var request = (HttpWebRequest)WebRequest.Create(url);
+        private HttpWebRequest CreateRequest(string action, string method, string contentType) {
+            var actionUrl = string.Format("{0}/{1}", _galleryClient.Value.Uri, action);
+            var actionClient = new HttpClient(new Uri(actionUrl));
+            var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
             request.UserAgent = HttpUtility.CreateUserAgentString(_UserAgentClient);
@@ -120,20 +147,6 @@ namespace NuGet.Common {
                 }
 
                 throw new WebException(errorMessage, e, e.Status, e.Response);
-            }
-        }
-
-        private string GetSafeRedirectedUri(string uri) {
-            WebRequest request = WebRequest.Create(uri);
-            try {
-                WebResponse response = request.GetResponse();
-                if (response == null) {
-                    return null;
-                }
-                return response.ResponseUri.ToString();
-            }
-            catch (WebException e) {
-                return e.Response.ResponseUri.ToString(); ;
             }
         }
 

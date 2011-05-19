@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Net;
-using NuGet.Resources;
 
 namespace NuGet {
     public class ProxyFinder : IProxyFinder {
