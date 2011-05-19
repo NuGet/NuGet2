@@ -72,6 +72,7 @@ namespace NuGet {
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
+                httpRequest.CookieContainer = new CookieContainer();
                 if (AcceptCompression) {
                     httpRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 }
