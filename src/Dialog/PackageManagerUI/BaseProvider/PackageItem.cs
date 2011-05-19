@@ -1,51 +1,50 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Media.Imaging;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
 
     internal class PackageItem : IVsExtension, INotifyPropertyChanged {
+        private readonly PackagesProviderBase _provider;
+        private readonly IPackage _packageIdentity;
+        private bool _isSelected;
+        private readonly ObservableCollection<Project> _referenceProjectNames;
 
-        private PackagesProviderBase _provider;
-        private IPackage _packageIdentity;
+        public PackageItem(PackagesProviderBase provider, IPackage package) :
+            this(provider, package, new Project[0]) {
+        }
         
-        /// <summary>
-        /// The reference item is used within the Add Package dialog.
-        /// It will "house" the actual reference item that we'll use for the act of adding references
-        /// </summary>
-        public PackageItem(PackagesProviderBase provider, IPackage package, BitmapSource thumbnail) {
-
+        public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames) {
             _provider = provider;
             _packageIdentity = package;
-
-            Priority = 0;
-            ThumbnailImage = thumbnail;
-            MediumThumbnailImage = thumbnail;
-            SmallThumbnailImage = thumbnail;
+            _referenceProjectNames = new ObservableCollection<Project>(referenceProjectNames);
         }
 
-        /// <summary>
-        /// The embedded reference record that will be used to interface with the dialog list
-        /// </summary>
         public IPackage PackageIdentity {
             get { return _packageIdentity; }
         }
 
-        /// <summary>
-        /// Name of this reference item
-        /// </summary>
+        public string Id {
+            get { return _packageIdentity.Id; }
+        }
+
         public string Name {
             get {
                 return String.IsNullOrEmpty(_packageIdentity.Title) ? _packageIdentity.Id : _packageIdentity.Title;
             }
         }
 
-        /// <summary>
-        /// Description of this reference item
-        /// </summary>
+        public string Version {
+            get {
+                return _packageIdentity.Version.ToString();
+            }
+        }
+
         public string Description {
             get {
                 return _packageIdentity.Description;
@@ -58,13 +57,21 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        /// <summary>
-        /// Version of the underlying reference
-        /// </summary>
-        public string Version {
+        public IEnumerable<PackageDependency> Dependencies {
             get {
-                return _packageIdentity.Version.ToString();
+                return _packageIdentity.Dependencies;
             }
+        }
+
+        public ICollection<Project> ReferenceProjects {
+            get {
+                return _referenceProjectNames;
+            }
+        }
+
+        public string CommandName {
+            get;
+            set;
         }
 
         [SuppressMessage(
@@ -92,18 +99,13 @@ namespace NuGet.Dialog.Providers {
                 return _packageIdentity.LicenseUrl;
             }
         }
-
-        /// <summary>
-        /// Is this reference selected
-        /// </summary>
-        /// 
-        bool isSelected;
+        
         public bool IsSelected {
             get {
-                return isSelected;
+                return _isSelected;
             }
             set {
-                isSelected = value;
+                _isSelected = value;
                 OnNotifyPropertyChanged("IsSelected");
             }
         }
@@ -118,59 +120,27 @@ namespace NuGet.Dialog.Providers {
             OnNotifyPropertyChanged("IsEnabled");
         }
 
-        /// <summary>
-        /// The image to be used in the details pane for this reference
-        /// </summary>
-        public BitmapSource PreviewImage {
-            get;
-            set;
+        
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+
+        private void OnNotifyPropertyChanged(string propertyName) {
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public float Priority {
-            get;
-            private set;
-        }
-
-        public string CommandName {
-            get;
-            set;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance",
-            "CA1811:AvoidUncalledPrivateCode",
-            Justification = "We will need this property soon.")]
-        public BitmapSource ThumbnailImage {
-            get;
-            private set;
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnNotifyPropertyChanged(string propertyName) {
-            if (PropertyChanged != null) {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            get { return 0; }
         }
 
         public BitmapSource MediumThumbnailImage {
-            get;
-            private set;
+            get { return null; }
         }
 
         public BitmapSource SmallThumbnailImage {
-            get;
-            private set;
+            get { return null; }
         }
 
-        public string Id {
-            get { return _packageIdentity.Id; }
-        }
-
-        public IEnumerable<PackageDependency> Dependencies {
-            get {
-                return _packageIdentity.Dependencies;
-            }
+        public BitmapSource PreviewImage {
+            get { return null; }
         }
     }
 }

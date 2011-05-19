@@ -42,6 +42,8 @@ function global:Run-Test {
     param(
         [string]$Test
     )
+
+
     
     if(!(Test-Path $generatePackagesExePath)) {
         & $msbuildPath $generatePackagesProject /v:quiet
@@ -89,11 +91,14 @@ function global:Run-Test {
         if($tests.Count -eq 0) {
             throw "The test `"$Test`" doesn't exist"
         } 
-    }    
+    }
     
     $results = @()
     # The vshost that VS launches caues the functional tests to freeze sometimes so disable it
     [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
+
+    $savedErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     
     try {
         # Run all tests
@@ -125,6 +130,7 @@ function global:Run-Test {
             }
             
             $context = New-Object PSObject -Property $values
+
             try {
                 & $_ $context
                 
@@ -154,7 +160,7 @@ function global:Run-Test {
                     Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
                 }
             }
-            finally {   
+            finally {
                 try {           
                     # Clear the cache after running each test
                     [System.Runtime.Caching.MemoryCache]::Default.Trim(100) | Out-Null
@@ -174,7 +180,10 @@ function global:Run-Test {
             }
         }
     }
-    finally {        
+    finally {
+        # restore value of ErrorActionPreference to as before the running tests
+        $ErrorActionPreference = $savedErrorActionPreference
+
         # Deleting tests
         rm function:\Test*
         

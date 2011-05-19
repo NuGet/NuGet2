@@ -97,7 +97,7 @@ namespace NuGet.Dialog.Test {
             var localRepository = new Mock<IPackageRepository>();
 
             var provider = new MockPackagesProvider(localRepository.Object, packageManager.Object);
-            return new PackageItem(provider, package, null);
+            return new PackageItem(provider, package);
         }
     }
 }

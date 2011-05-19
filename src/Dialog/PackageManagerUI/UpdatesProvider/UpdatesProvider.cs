@@ -71,7 +71,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override IVsExtension CreateExtension(IPackage package) {
-            return new PackageItem(this, package, null) {
+            return new PackageItem(this, package) {
                 CommandName = Resources.Dialog_UpdateButton
             };
         }

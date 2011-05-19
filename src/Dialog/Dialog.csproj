@@ -127,6 +127,7 @@
     <Compile Include="PackageManagerUI\Converters\FixUrlConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\NormalizeTextConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\ProjectToDisplayNameConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\LoadPageResult.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />

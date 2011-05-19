@@ -303,4 +303,7 @@
   <data name="ErrorStringFormat" xml:space="preserve">
     <value>Error: {0}</value>
   </data>
+  <data name="Dialog_ProjectListLabel" xml:space="preserve">
+    <value>Currently installed in projects:</value>
+  </data>
 </root>

@@ -96,9 +96,9 @@ namespace NuGet.Dialog.Test {
 
             var provider = CreateOnlineProvider(packageManager.Object, localRepository);
 
-            var extensionA = new PackageItem(provider, packageA, null);
-            var extensionB = new PackageItem(provider, packageB, null);
-            var extensionC = new PackageItem(provider, packageC, null);
+            var extensionA = new PackageItem(provider, packageA);
+            var extensionB = new PackageItem(provider, packageB);
+            var extensionC = new PackageItem(provider, packageC);
 
             // Act
             bool canExecuteA = provider.CanExecute(extensionA);
@@ -160,7 +160,7 @@ namespace NuGet.Dialog.Test {
                 manualEvent.Set();
             };
 
-            var extensionB = new PackageItem(provider, packageB, null);
+            var extensionB = new PackageItem(provider, packageB);
 
             // Act
             provider.Execute(extensionB);
@@ -235,7 +235,7 @@ namespace NuGet.Dialog.Test {
                 }
             };
 
-            var extensionB = new PackageItem(provider, packageB, null);
+            var extensionB = new PackageItem(provider, packageB);
 
             // Act
             provider.Execute(extensionB);
@@ -311,7 +311,7 @@ namespace NuGet.Dialog.Test {
                 }
             };
 
-            var extensionB = new PackageItem(provider, packageB, null);
+            var extensionB = new PackageItem(provider, packageB);
 
             // Act
             provider.Execute(extensionB);

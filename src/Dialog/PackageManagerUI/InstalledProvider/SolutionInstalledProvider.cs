@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -87,12 +88,11 @@ namespace NuGet.Dialog.Providers {
                 try {
                     if (selectedProjectsSet.Contains(project)) {
                         // if the project is checked, install package into it  
-                        InstallPackageToProject(project, item.PackageIdentity
-                      );
+                        InstallPackageToProject(project, item);
                     }
                     else {
                         // if the project is unchecked, uninstall package from it
-                        UninstallPackageFromProject(project, item.PackageIdentity);
+                        UninstallPackageFromProject(project, item);
                     }
                 }
                 catch (Exception ex) {
@@ -108,15 +108,21 @@ namespace NuGet.Dialog.Providers {
                 Resources.Dialog_SolutionManageButton :
                 Resources.Dialog_UninstallButton;
 
-            return new PackageItem(this, package, null) {
+            return new PackageItem(this, package, GetReferenceProjects(package)) {
                 CommandName = commandText
             };
         }
 
         protected override void OnExecuteCompleted(PackageItem item) {
+            item.ReferenceProjects.Clear();
+
             // only remove the item if it is no longer installed into the solution
             if (!LocalRepository.Exists(item.PackageIdentity)) {
                 base.OnExecuteCompleted(item);
+            }
+            else {
+                // repopulate the list of projects that reference this package after every operation
+                item.ReferenceProjects.AddRange(GetReferenceProjects(item.PackageIdentity));
             }
         }
 
@@ -128,6 +134,17 @@ namespace NuGet.Dialog.Providers {
             get {
                 return Resources.Dialog_InstallAndUninstallProgress;
             }
+        }
+
+        /// <summary>
+        /// Get a list of projects which has the specified package installed.
+        /// </summary>
+        private IEnumerable<Project> GetReferenceProjects(IPackage package) {
+            return from project in _solutionManager.GetProjects()
+                   let projectManager = PackageManager.GetProjectManager(project)
+                   where projectManager.IsInstalled(package)
+                   orderby project.Name
+                   select project;
         }
     }
 }

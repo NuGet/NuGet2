@@ -84,18 +84,18 @@ namespace NuGet.Dialog.Providers {
                 throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
-            UninstallPackageFromProject(_project, item.PackageIdentity);           
+            UninstallPackageFromProject(_project, item);           
             return true;
         }
 
-        protected void InstallPackageToProject(Project project, IPackage item) {
+        protected void InstallPackageToProject(Project project, PackageItem item) {
             IProjectManager projectManager = null;
             try {
                 projectManager = PackageManager.GetProjectManager(project);
                 // make sure the package is not installed in this project before proceeding
-                if (!projectManager.IsInstalled(item)) {
+                if (!projectManager.IsInstalled(item.PackageIdentity)) {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.InstallPackage(projectManager, item.Id, item.Version, ignoreDependencies: false, logger: this);
+                    PackageManager.InstallPackage(projectManager, item.Id, item.PackageIdentity.Version, ignoreDependencies: false, logger: this);
                 }
             }
             finally {
@@ -105,12 +105,12 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected void UninstallPackageFromProject(Project project, IPackage item) {
+        protected void UninstallPackageFromProject(Project project, PackageItem item) {
             IProjectManager projectManager = null;
             try {
                 projectManager = PackageManager.GetProjectManager(project);
                 // make sure the package is installed in this project before proceeding
-                if (projectManager.IsInstalled(item)) {
+                if (projectManager.IsInstalled(item.PackageIdentity)) {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
                     PackageManager.UninstallPackage(projectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
                 }
@@ -131,7 +131,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override IVsExtension CreateExtension(IPackage package) {
-            return new PackageItem(this, package, null) {
+            return new PackageItem(this, package) {
                 CommandName = Resources.Dialog_UninstallButton
             };
         }

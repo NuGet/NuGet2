@@ -122,8 +122,8 @@ namespace NuGet.Dialog.Test {
 
             var provider = CreateUpdatesProvider(packageManager.Object, localRepository);
 
-            var extensionA = new PackageItem(provider, packageA2, null);
-            var extensionC = new PackageItem(provider, packageC, null);
+            var extensionA = new PackageItem(provider, packageA2);
+            var extensionC = new PackageItem(provider, packageC);
 
             // Act
             bool canExecuteA = provider.CanExecute(extensionA);
@@ -168,8 +168,8 @@ namespace NuGet.Dialog.Test {
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
             var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, licenseWindowOpener: mockLicenseWindowOpener.Object, solutionManager: solutionManager.Object);
 
-            var extensionA = new PackageItem(provider, packageA2, null);
-            var extensionC = new PackageItem(provider, packageC, null);
+            var extensionA = new PackageItem(provider, packageA2);
+            var extensionC = new PackageItem(provider, packageC);
 
             provider.SelectedNode = (UpdatesTreeNode)provider.ExtensionsTree.Nodes[0];
 
@@ -230,7 +230,7 @@ namespace NuGet.Dialog.Test {
             var provider = CreateUpdatesProvider(packageManager.Object, localRepository, null, null, project.Object, scriptExecutor.Object, null, solutionManager.Object);
             provider.SelectedNode = (UpdatesTreeNode)provider.ExtensionsTree.Nodes[0];
 
-            var extensionA = new PackageItem(provider, packageA2, null);
+            var extensionA = new PackageItem(provider, packageA2);
 
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 

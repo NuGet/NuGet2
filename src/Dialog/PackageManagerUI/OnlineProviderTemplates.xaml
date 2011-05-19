@@ -14,6 +14,7 @@
     <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
     <self:CountToVisibilityConverter x:Key="countConverter" />
     <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
+    <self:ProjectToDisplayNameConverter x:Key="ProjectToNameConverter" />
     <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
 
     <!-- data template for the package extension item -->
@@ -192,13 +193,13 @@
                 </ItemsControl>
 
                 <self:TextBlockControl 
-                    x:Name="NoneLabel"
                     Margin="25,5,0,0"
                     Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource invertedCountConverter}}"
                     Style="{StaticResource NoDependencyTextBoxStyle}" 
                     Text="{x:Static resources:Resources.Dialog_NoDependencyLabel}">
                 </self:TextBlockControl>
 
+                <!-- Disclaimer text -->
                 <self:TextBlockControl 
                     x:Name="Disclaimer"
                     FontStyle="Italic"
@@ -208,6 +209,24 @@
                     TextWrapping="Wrap">
                 </self:TextBlockControl>
                 
+                <!-- Installed Project list -->
+                <self:TextBlockControl 
+                    Margin="0,10,0,0" 
+                    Text="{x:Static resources:Resources.Dialog_ProjectListLabel}" 
+                    Style="{StaticResource DetailMetadataLabelStyle}"
+                    Visibility="{Binding Items.Count, ElementName=ProjectItems, Converter={StaticResource countConverter}}" />
+
+                <ItemsControl 
+                    x:Name="ProjectItems" 
+                    ItemsSource="{Binding ReferenceProjects}"
+                    Margin="25,5,0,0"
+                    DisplayMemberPath="Name">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource ProjectToNameConverter}}" ToolTipService.ToolTip="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </ScrollViewer>
     </DataTemplate>

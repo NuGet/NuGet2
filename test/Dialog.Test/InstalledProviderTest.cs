@@ -102,8 +102,8 @@ namespace NuGet.Dialog.Test {
 
             var provider = CreateInstalledProvider(null, repository);
 
-            var extensionA = new PackageItem(provider, packageA, null);
-            var extensionC = new PackageItem(provider, packageC, null);
+            var extensionA = new PackageItem(provider, packageA);
+            var extensionC = new PackageItem(provider, packageC);
 
             // Act
             bool canExecuteA = provider.CanExecute(extensionA);
@@ -133,7 +133,7 @@ namespace NuGet.Dialog.Test {
 
             var provider = CreateInstalledProvider(packageManager.Object, repository);
 
-            var extensionA = new PackageItem(provider, packageA, null);
+            var extensionA = new PackageItem(provider, packageA);
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
@@ -170,7 +170,7 @@ namespace NuGet.Dialog.Test {
 
             var provider = CreateInstalledProvider(packageManager.Object, null, project.Object, scriptExecutor.Object, solutionManager.Object);
 
-            var extensionA = new PackageItem(provider, packageA, null);
+            var extensionA = new PackageItem(provider, packageA);
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 

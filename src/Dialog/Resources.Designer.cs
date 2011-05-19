@@ -268,6 +268,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Currently installed in projects:.
+        /// </summary>
+        public static string Dialog_ProjectListLabel {
+            get {
+                return ResourceManager.GetString("Dialog_ProjectListLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select the projects for this operation:.
         /// </summary>
         public static string Dialog_ProjectSelectorDescription {

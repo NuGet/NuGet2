@@ -22,7 +22,7 @@ namespace NuGet.Dialog.Test {
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {
-            return new PackageItem(this, package, null);
+            return new PackageItem(this, package);
         }
 
         public override bool CanExecute(PackageItem item) {
