@@ -26,8 +26,8 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly ISelectedProviderSettings _selectedProviderSettings;
         private readonly IProductUpdateService _productUpdateService;
 
-        public PackageManagerWindow(bool forSolution) :
-            this(forSolution,
+        public PackageManagerWindow(bool isSolution) :
+            this(isSolution,
                  ServiceLocator.GetInstance<DTE>(),
                  ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
@@ -111,7 +111,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        private void SetupProviders(bool forSolution,
+        private void SetupProviders(bool isSolution,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
@@ -122,25 +122,20 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     ISolutionManager solutionManager) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
+            
             IPackageRepository localRepository;
-
             Project activeProject;
-            if (forSolution) {
-                activeProject = null;
-                localRepository = packageManager.LocalRepository;
-            }
-            else {
-                activeProject =  dte.GetActiveProject();;
-                IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
-                localRepository = projectManager.LocalRepository;
-            }
-          
+
+            // we need different sets of providers depending on whether the dialog is open for solution or a project
             OnlineProvider onlineProvider;
             InstalledProvider installedProvider;
             UpdatesProvider updatesProvider;
-            RecentProvider recentProvider;
+            OnlineProvider recentProvider;
 
-            if (forSolution) {
+            if (isSolution) {
+                activeProject = null;
+                localRepository = packageManager.LocalRepository;
+
                 onlineProvider = new SolutionOnlineProvider(
                     localRepository,
                     Resources,
@@ -180,6 +175,10 @@ namespace NuGet.Dialog.PackageManagerUI {
                     solutionManager);
             }
             else {
+                activeProject = dte.GetActiveProject(); ;
+                IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
+                localRepository = projectManager.LocalRepository;
+
                 onlineProvider = new OnlineProvider(
                     activeProject,
                     localRepository,

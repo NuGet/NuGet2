@@ -47,7 +47,7 @@
   <Class Name="NuGet.Dialog.Providers.OnlineProvider" Collapsed="true">
     <Position X="8.75" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AMAABAAAAAAAAgAAEGACBAQAAQgMQEQAAAAAADQAAAA=</HashCode>
+      <HashCode>AMAABAAAAAAAAgAAEGAABAQAAQoMQEQAAAAAADQAAAA=</HashCode>
       <FileName>PackageManagerUI\OnlineProvider\OnlineProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -75,29 +75,30 @@
   <Class Name="NuGet.Dialog.Providers.SolutionInstalledProvider" Collapsed="true">
     <Position X="4.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAgEAAAAAAAAEAABAAAAQAAAAAAAEAAAAAAAAA=</HashCode>
+      <HashCode>AEAAAAAgEAAAAAAAIEAABAAAAQgAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>PackageManagerUI\InstalledProvider\SolutionInstalledProvider.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NuGet.Dialog.Providers.SolutionOnlineProvider" Collapsed="true">
     <Position X="10.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <HashCode>AgAAAAAAAAAAAAAAAAEAAAAAAAIAABAAAAEAAAAAAIA=</HashCode>
       <FileName>PackageManagerUI\OnlineProvider\SolutionOnlineProvider.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="NuGet.Dialog.Providers.SolutionUpdatesProvider" Collapsed="true">
-    <Position X="8.75" Y="5" Width="1.5" />
+    <Position X="7.5" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AoAAAAAAAAAAAAAAAAECAAAAAAAAABAAAAEAAAAAAAA=</HashCode>
+      <HashCode>AoAAAAAAAAAAAAAAAAEAAAAAAAIAABAAAAEAAAAAAAA=</HashCode>
       <FileName>PackageManagerUI\UpdatesProvider\SolutionUpdatesProvider.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NuGet.Dialog.Providers.SolutionRecentProvider" Collapsed="true">
-    <Position X="6.75" Y="5" Width="1.5" />
+    <Position X="10.75" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <HashCode>AEAABAAAAAAAAgAAEAAAQAQAAAAEQEAAAAAAACQAAAA=</HashCode>
       <FileName>PackageManagerUI\RecentProvider\SolutionRecentProvider.cs</FileName>
     </TypeIdentifier>
   </Class>

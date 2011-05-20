@@ -106,7 +106,7 @@ namespace NuGet.Dialog.Providers {
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We don't want one failed project to affect the other projects.")]
         protected override bool ExecuteCore(PackageItem item) {
-            var activePackageManager = GetActivePackageManager();
+            IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
             var walker = new InstallWalker(
@@ -144,10 +144,10 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            return ExecuteAfterLicenseAggrement(item, activePackageManager, operations);
+            return ExecuteAfterLicenseAgreement(item, activePackageManager, operations);
         }
 
-        protected virtual bool ExecuteAfterLicenseAggrement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+        protected virtual bool ExecuteAfterLicenseAgreement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
             ExecuteCommandOnProject(_project, item, activePackageManager, operations);
             return true;
         }
@@ -195,47 +195,6 @@ namespace NuGet.Dialog.Providers {
 
         protected override string GetProgressMessage(IPackage package) {
             return Resources.Dialog_InstallProgress + package.ToString();
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want one project's failure to affect the wole operation.")]
-        protected bool InstallPackageIntoSolution(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            // treat solution-level packages specially
-            if (!activePackageManager.IsProjectLevel(item.PackageIdentity)) {
-                try {
-                    RegisterPackageOperationEvents(activePackageManager, null);
-                    activePackageManager.InstallPackage(item.PackageIdentity, ignoreDependencies: false);
-                }
-                finally {
-                    UnregisterPackageOperationEvents(activePackageManager, null);
-                }
-                return true;
-            }
-
-            // hide the progress window if we are going to show project selector window
-            HideProgressWindow();
-            IEnumerable<Project> selectedProjects = _providerServices.ProjectSelector.ShowProjectSelectorWindow(null);
-
-            if (selectedProjects == null) {
-                // user presses Cancel button on the Solution dialog
-                return false;
-            }
-
-            ShowProgressWindow();
-
-            var selectedProjectsSet = new HashSet<Project>(selectedProjects);
-            foreach (Project project in selectedProjectsSet) {
-                try {
-                    ExecuteCommandOnProject(project, item, activePackageManager, operations);
-                }
-                catch (Exception ex) {
-                    AddFailedProject(project, ex);
-                }
-            }
-
-            return true;
         }
     }
 }

@@ -18,6 +18,8 @@ namespace NuGet.Dialog.Providers {
         public PackageItem(PackagesProviderBase provider, IPackage package) :
             this(provider, package, new Project[0]) {
         }
+
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
         
         public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames) {
             _provider = provider;
@@ -120,25 +122,26 @@ namespace NuGet.Dialog.Providers {
             OnNotifyPropertyChanged("IsEnabled");
         }
 
-        
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
         private void OnNotifyPropertyChanged(string propertyName) {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // Not used but required by the interface IVsExtension.
         public float Priority {
             get { return 0; }
         }
 
+        // Not used but required by the interface IVsExtension.
         public BitmapSource MediumThumbnailImage {
             get { return null; }
         }
 
+        // Not used but required by the interface IVsExtension.
         public BitmapSource SmallThumbnailImage {
             get { return null; }
         }
 
+        // Not used but required by the interface IVsExtension.
         public BitmapSource PreviewImage {
             get { return null; }
         }

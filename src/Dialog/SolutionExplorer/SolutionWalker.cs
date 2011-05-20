@@ -17,7 +17,7 @@ namespace NuGet.Dialog {
             }
 
             if (checkedStateSelector == null) {
-                checkedStateSelector = p => true;
+                checkedStateSelector = p => false;
             }
 
             var children = CreateProjectNode(solution.Projects.OfType<Project>(), checkedStateSelector).ToArray();

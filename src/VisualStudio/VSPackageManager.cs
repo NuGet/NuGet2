@@ -65,6 +65,53 @@ namespace NuGet.VisualStudio {
             return projectManager;
         }
 
+        public void InstallPackage(
+            IEnumerable<Project> projects, 
+            IPackage package, 
+            IEnumerable<PackageOperation> operations, 
+            bool ignoreDependencies, 
+            ILogger logger, 
+            IPackageOperationEventListener packageOperationEventListener) {
+
+            if (package == null) {
+                throw new ArgumentNullException("package");
+            }
+
+            if (operations == null) {
+                throw new ArgumentNullException("operations");
+            }
+
+            if (projects == null) {
+                throw new ArgumentNullException("projects");
+            }
+
+            if (packageOperationEventListener == null) {
+                packageOperationEventListener = NullPackageOperationEventListener.Instance;
+            }
+
+            ExecuteOperatonsWithPackage(
+                null,
+                package,
+                operations,
+                () => {
+                    foreach (var project in projects) {
+                        try {
+                            packageOperationEventListener.OnBeforeAddPackageReference(project);
+
+                            var projectManager = GetProjectManager(project);
+                            AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies);
+                        }
+                        catch (Exception ex) {
+                            packageOperationEventListener.OnAddPackageReferenceError(project, ex);
+                        }
+                        finally {
+                            packageOperationEventListener.OnAfterAddPackageReference(project);
+                        }
+                    }
+                },
+                logger);
+        }
+
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
             InstallPackage(projectManager, packageId, version, ignoreDependencies, NullLogger.Instance);
         }
@@ -92,7 +139,12 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("operations");
             }
 
-            ExecuteOperatonsWithPackage(projectManager, package, operations, () => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies), logger);
+            ExecuteOperatonsWithPackage(
+                projectManager, 
+                package, 
+                operations, 
+                () => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies), 
+                logger);
         }
 
         public void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies) {

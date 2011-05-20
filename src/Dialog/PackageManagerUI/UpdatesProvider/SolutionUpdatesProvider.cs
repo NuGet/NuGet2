@@ -31,7 +31,7 @@ namespace NuGet.Dialog.Providers {
                 solutionManager) {
         }
 
-        protected override bool ExecuteAfterLicenseAggrement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+        protected override bool ExecuteAfterLicenseAgreement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
             _activePackageManager = activePackageManager;
 
             activePackageManager.UpdatePackage(

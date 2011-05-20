@@ -6,6 +6,9 @@ using EnvDTE;
 namespace NuGet.Dialog {
     public abstract class ProjectNodeBase : INotifyPropertyChanged {
         private bool _suppressNotifyParentOfIsSelectedChanged;
+        private FolderNode _parent;
+        private string _name;
+        private bool? _isSelected;
 
         protected ProjectNodeBase(string name) {
             if (name == null) {
@@ -21,35 +24,32 @@ namespace NuGet.Dialog {
             "CA1024:UsePropertiesWhereAppropriate",
             Justification = "The results need to be calculated dynamically.")]
         public abstract IEnumerable<Project> GetSelectedProjects();
-
-        private FolderNode _parent;
+        
         public FolderNode Parent {
             get {
                 return _parent;
             }
-            set {
+            internal set {
                 if (_parent != value) {
                     _parent = value;
                     OnPropertyChanged("Parent");
-                    OnIsSelectedChanged();
+                    OnSelectedChanged();
                 }
             }
         }
 
-        private string _name;
         public string Name {
             get {
                 return _name;
             }
-            set {
+            private set {
                 if (_name != value) {
                     _name = value;
                     OnPropertyChanged("Name");
                 }
             }
         }
-
-        private bool? _isSelected;
+        
         public bool? IsSelected {
             get {
                 return _isSelected;
@@ -57,13 +57,13 @@ namespace NuGet.Dialog {
             set {
                 if (_isSelected != value) {
                     _isSelected = value;
-                    OnIsSelectedChanged();
+                    OnSelectedChanged();
                     OnPropertyChanged("IsSelected");
                 }
             }
         }
 
-        protected virtual void OnIsSelectedChanged() {
+        protected virtual void OnSelectedChanged() {
             if (_suppressNotifyParentOfIsSelectedChanged) {
                 return;
             }

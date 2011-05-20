@@ -7,6 +7,7 @@ namespace NuGet.Dialog {
     public class FolderNode : ProjectNodeBase {
         private readonly ICollection<ProjectNodeBase> _children;
         private bool _suppressPropagatingIsSelectedProperty;
+        private bool _isExpanded = true;
         
         public FolderNode(string name, ICollection<ProjectNodeBase> children) :
             base(name) {
@@ -27,7 +28,6 @@ namespace NuGet.Dialog {
             }
         }
 
-        private bool _isExpanded = true;
         public bool IsExpanded {
             get {
                 return _isExpanded;
@@ -46,8 +46,8 @@ namespace NuGet.Dialog {
             }
         }
 
-        protected override void OnIsSelectedChanged() {
-            base.OnIsSelectedChanged();
+        protected override void OnSelectedChanged() {
+            base.OnSelectedChanged();
 
             if (_suppressPropagatingIsSelectedProperty) {
                 return;

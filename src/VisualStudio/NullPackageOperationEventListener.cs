@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Build.Evaluation;
 
 namespace NuGet.VisualStudio {
     internal sealed class NullPackageOperationEventListener : IPackageOperationEventListener {

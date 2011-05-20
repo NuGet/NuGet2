@@ -159,12 +159,6 @@ namespace NuGet.Dialog {
                 }
             }
 
-            //public HierarchyItemPair HierarchyInfo {
-            //    get {
-            //        return _hierarchyInfo;
-            //    }
-            //}
-
             public IVsHierarchy Hierarchy {
                 get {
                     return _hierarchyInfo.Hierarchy;
@@ -176,14 +170,6 @@ namespace NuGet.Dialog {
                     return _hierarchyInfo.ItemID;
                 }
             }
-
-            //public HierarchyItemPair NestedInfo {
-            //    get {
-            //        EnsureNestedInfo();
-
-            //        return _nestedInfo;
-            //    }
-            //}
 
             public IVsHierarchy NestedHierarchy {
                 get {
@@ -232,14 +218,6 @@ namespace NuGet.Dialog {
             public override int GetHashCode() {
                 return base.GetHashCode();
             }
-
-            //public static bool operator ==(HierarchyItemPair first, HierarchyItemPair second) {
-            //    return Object.Equals(first, second);
-            //}
-
-            //public static bool operator !=(HierarchyItemPair first, HierarchyItemPair second) {
-            //    return !Object.Equals(first, second);
-            //}
 
             public static bool MaybeMapToNested(HierarchyItemPair outerInfo, out HierarchyItemPair nestedInfo) {
                 Guid IID_IVsHierarchy = typeof(IVsHierarchy).GUID;

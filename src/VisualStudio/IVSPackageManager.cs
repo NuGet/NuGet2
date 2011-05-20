@@ -9,6 +9,7 @@ namespace NuGet.VisualStudio {
         IProjectManager GetProjectManager(Project project);
 
         // Install
+        void InstallPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, ILogger logger, IPackageOperationEventListener packageOperationEventListener);
         void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies);
         void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies, ILogger logger);
         void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, ILogger logger);

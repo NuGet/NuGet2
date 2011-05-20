@@ -9,7 +9,6 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     internal class RecentProvider : OnlineProvider {
-
         private readonly IPackageRepository _recentPackagesRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;

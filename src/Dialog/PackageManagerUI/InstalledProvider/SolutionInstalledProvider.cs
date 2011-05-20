@@ -14,8 +14,8 @@ namespace NuGet.Dialog.Providers {
     /// </summary>
     internal class SolutionInstalledProvider : InstalledProvider {
 
-        private ISolutionManager _solutionManager;
-        private IProjectSelectorService _projectSelectorService;
+        private readonly ISolutionManager _solutionManager;
+        private readonly IProjectSelectorService _projectSelectorService;
 
         public SolutionInstalledProvider(
             IVsPackageManager packageManager,

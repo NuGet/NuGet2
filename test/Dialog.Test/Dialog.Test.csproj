@@ -76,6 +76,12 @@
     <Compile Include="PackageItemTest.cs" />
     <Compile Include="QueryExtensionsTest.cs" />
     <Compile Include="SimpleTreeNodeTest.cs" />
+    <Compile Include="SolutionExplorer\MockProjectUtility.cs" />
+    <Compile Include="SolutionExplorer\FolderNodeTest.cs" />
+    <Compile Include="SolutionExplorer\ProjectNodeTest.cs" />
+    <Compile Include="SolutionInstalledProviderTest.cs" />
+    <Compile Include="SolutionOnlineProviderTest.cs" />
+    <Compile Include="SolutionUpdatesProviderTest.cs" />
     <Compile Include="UpdatesProviderTest.cs" />
     <Compile Include="UpdatesTreeNodeTest.cs" />
   </ItemGroup>
