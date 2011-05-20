@@ -59,6 +59,15 @@ namespace NuGet.Tools {
         }
 
         /// <summary>
+        /// Executes the NuGet Visualizer.
+        /// </summary>
+        private void ExecuteVisualizer(object sender, EventArgs e) {
+            var visualizer = ServiceLocator.GetInstance<Visualizer>();
+            string outputFile = visualizer.CreateGraph(_dte);
+            _dte.ItemOperations.OpenFile(outputFile);
+        }
+
+        /// <summary>
         /// This function is the callback used to execute a command when the a menu item is clicked.
         /// See the Initialize method to see how the menu item is associated to this function using
         /// the OleMenuCommandService service and the MenuCommand class.
@@ -101,6 +110,12 @@ namespace NuGet.Tools {
             command.Visible = !IsIDEInDebuggingOrBuildingContext() && HasActiveLoadedSupportedProject;
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
+        }
+
+        private void QueryStatusForVisualizer(object sender, EventArgs args) {
+            OleMenuCommand command = (OleMenuCommand)sender;
+            var solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
+            command.Visible = solutionManager.IsSolutionOpen;
         }
 
         private bool IsIDEInDebuggingOrBuildingContext() {
@@ -188,6 +203,10 @@ namespace NuGet.Tools {
                 CommandID generalSettingsCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, (int)PkgCmdIDList.cmdIdGeneralSettings);
                 OleMenuCommand generalSettingsCommand = new OleMenuCommand(ShowGeneralSettingsOptionPage, generalSettingsCommandID);
                 mcs.AddCommand(generalSettingsCommand);
+
+                CommandID visualizerCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, (int)PkgCmdIDList.cmdIdVisualizer);
+                OleMenuCommand visualizerCommand = new OleMenuCommand(ExecuteVisualizer, null, QueryStatusForVisualizer, visualizerCommandID);
+                mcs.AddCommand(visualizerCommand);
             }
         }
 

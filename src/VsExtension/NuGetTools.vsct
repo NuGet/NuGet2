@@ -20,7 +20,7 @@
         </Strings>
       </Menu>
     </Menus>
-    
+
     <Groups>
       <Group guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" priority="0x1000">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbar"/>
@@ -35,7 +35,7 @@
         <Parent guid="guidToolsGroup" id="idLibraryPackageManager" />
       </Group>
     </Groups>
-    
+
     <Buttons>
       <Button guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100" type="Button">
         <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
@@ -51,7 +51,7 @@
           <ButtonText>&amp;Package Manager Settings</ButtonText>
         </Strings>
       </Button>
-      
+
       <Button guid="guidPowerConsoleCmdSet" id="cmdidClearHost" priority="0x1010" type="Button">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarCommandsGroup"/>
         <Icon guid="guidToolbarImages" id="bmpClearConsole" />
@@ -86,6 +86,17 @@
                 <ButtonText>&amp;Package Manager Settings</ButtonText>
             </Strings>
         </Button>
+
+      <Button guid="guidToolsGroup" id="cmdIdVisualizer" priority="0xF400" type="Button">
+        <Parent guid="guidToolsGroup" id="idToolsGroup" />
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>TextOnly</CommandFlag>
+        <Strings>
+          <CommandName>cmdIdVisualizer</CommandName>
+          <ButtonText>Package &amp;Visualizer</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
@@ -105,7 +116,7 @@
         </Strings>
       </Combo>
     </Combos>
-   
+
     <Bitmaps>
       <Bitmap guid="guidToolbarImages" href="Resources\Toolbar.png"/>
     </Bitmaps>
@@ -113,6 +124,7 @@
 
   <VisibilityConstraints>
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
+    <VisibilityItem guid="guidToolsGroup" id="cmdIdVisualizer" context="UICONTEXT_SolutionExists" />
   </VisibilityConstraints>
 
   <CommandPlacements>
@@ -127,7 +139,7 @@
     <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
-    
+
       <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
       </CommandPlacement>
@@ -144,7 +156,7 @@
           <Parent guid="guidVenusCmdId" id="IDG_CTX_REFERENCE"/>
       </CommandPlacement>
   </CommandPlacements>
-  
+
   <Symbols>
     <GuidSymbol name="guidPowerConsolePkg" value="{F7D0E7A3-C60B-422A-BFAE-CEED36ADE7D2}" />    
     <GuidSymbol name="guidPowerConsoleCmdSet" value="{1E8A55F6-C18D-407F-91C8-94B02AE1CED6}">
@@ -171,8 +183,9 @@
       <IDSymbol name="idLibraryPackageManager" value="0x100" />
       <IDSymbol name="idToolsGroup" value="0x200" />
       <IDSymobl name="idGeneralSettings" value="0x300" />
+      <IDSymobl name="cmdIdVisualizer" value="0x310" />
     </GuidSymbol>
-                
+
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
         <IDSymbol name="cmdidAddPackages" value="0x0100" />

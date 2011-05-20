@@ -42,6 +42,7 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -169,6 +170,7 @@
     <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectedProviderSettingsManager.cs" />
+    <Compile Include="Visualizer\Visualizer.cs" />
     <Compile Include="WindowSizePersistenceHelper.cs" />
   </ItemGroup>
   <ItemGroup>
