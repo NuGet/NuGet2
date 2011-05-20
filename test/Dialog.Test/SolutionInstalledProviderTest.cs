@@ -105,9 +105,11 @@ namespace NuGet.Dialog.Test {
 
             var projectManager1 = new Mock<IProjectManager>();
             projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
+            projectManager1.Setup(p => p.IsInstalled(It.IsAny<IPackage>())).Returns<IPackage>(p => localRepository.Exists(p));
 
             var projectManager2 = new Mock<IProjectManager>();
             projectManager2.Setup(p => p.LocalRepository).Returns(localRepository);
+            projectManager2.Setup(p => p.IsInstalled(It.IsAny<IPackage>())).Returns<IPackage>(p => localRepository.Exists(p));
 
             var project1 = MockProjectUtility.CreateMockProject("Project1");
             var project2 = MockProjectUtility.CreateMockProject("Project2");
