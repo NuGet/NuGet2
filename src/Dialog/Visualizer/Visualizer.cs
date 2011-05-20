@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Options {
+namespace NuGet.Dialog {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(Visualizer))]
     public class Visualizer {
@@ -53,10 +53,17 @@ namespace NuGet.Options {
                 links.AddRange(installedPackages.Select(c => new DGMLLink { SourceName = project.GetCustomUniqueName(), DestName = c.GetFullName(), Category = "Installed Package" }));
             }
 
-            return GenerateDGML(nodes, links);
+            var document = GenerateDGML(nodes, links);
+            return SaveDocument(document);
         }
 
-        private static string GenerateDGML(List<DGMLNode> nodes, List<DGMLLink> links) {
+        private string SaveDocument(XDocument document) {
+            var saveFilePath = Path.Combine(_solutionManager.SolutionDirectory, "Packages.dgml");
+            document.Save(saveFilePath);
+            return saveFilePath;
+        }
+
+        private static XDocument GenerateDGML(List<DGMLNode> nodes, List<DGMLLink> links) {
             bool hasDependencies = links.Any(l => l.Category == "Package Dependency");
             var document = new XDocument(
                 new XElement(XName.Get("DirectedGraph", dgmlNS),
@@ -73,9 +80,7 @@ namespace NuGet.Options {
                         StyleElement("Project", "Node", "Background", "Blue"),
                         hasDependencies ? StyleElement("Package Dependency", "Link", "Background", "Yellow") : null))
             );
-            var path = Path.ChangeExtension(Path.GetTempFileName(), ".dgml");
-            document.Save(path);
-            return path;
+            return document;
         }
 
         private static XElement StyleElement(string category, string targetType, string propertyName, string propertyValue) {

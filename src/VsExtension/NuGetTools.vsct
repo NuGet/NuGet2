@@ -87,16 +87,16 @@
             </Strings>
         </Button>
 
-      <Button guid="guidToolsGroup" id="cmdIdVisualizer" priority="0xF400" type="Button">
-        <Parent guid="guidToolsGroup" id="idToolsGroup" />
-        <CommandFlag>DefaultInvisible</CommandFlag>
-        <CommandFlag>DynamicVisibility</CommandFlag>
-        <CommandFlag>TextOnly</CommandFlag>
-        <Strings>
-          <CommandName>cmdIdVisualizer</CommandName>
-          <ButtonText>Package &amp;Visualizer</ButtonText>
-        </Strings>
-      </Button>
+        <Button guid="guidToolsGroup" id="cmdIdVisualizer" priority="0xF400" type="Button">
+          <Parent guid="guidToolsGroup" id="idToolsGroup" />
+          <CommandFlag>DefaultInvisible</CommandFlag>
+          <CommandFlag>DynamicVisibility</CommandFlag>
+          <CommandFlag>TextOnly</CommandFlag>
+          <Strings>
+            <CommandName>cmdIdVisualizer</CommandName>
+            <ButtonText>Package &amp;Visualizer</ButtonText>
+          </Strings>
+        </Button>
     </Buttons>
 
     <Combos>

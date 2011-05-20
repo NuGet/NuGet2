@@ -1,12 +1,14 @@
 using System;
 using System.ComponentModel.Design;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Dialog;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Options;
 using NuGet.VisualStudio;
@@ -37,13 +39,24 @@ namespace NuGet.Tools {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
         public const string ProductVersion = "1.2.0.0";
+        private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
         private uint _debuggingContextCookie, _solutionBuildingContextCookie;
         private DTE _dte;
         private IConsoleStatus _consoleStatus;
         private IVsMonitorSelection _vsMonitorSelection;
+        private bool? _isVisualizerSupported;
 
         public NuGetPackage() {
+        }
+
+        private bool IsVisualizerSupported {
+            get {
+                if (!_isVisualizerSupported == null) {
+                    _isVisualizerSupported = _visualizerSupportedSKUs.Contains(_dte.Edition, StringComparer.OrdinalIgnoreCase);
+                }
+                return _isVisualizerSupported.Value;
+            }
         }
 
         private void ShowToolWindow(object sender, EventArgs e) {
@@ -115,7 +128,7 @@ namespace NuGet.Tools {
         private void QueryStatusForVisualizer(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
             var solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
-            command.Visible = solutionManager.IsSolutionOpen;
+            command.Visible = solutionManager.IsSolutionOpen && IsVisualizerSupported;
         }
 
         private bool IsIDEInDebuggingOrBuildingContext() {
