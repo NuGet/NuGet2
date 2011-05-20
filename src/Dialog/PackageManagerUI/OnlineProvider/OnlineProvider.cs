@@ -109,6 +109,8 @@ namespace NuGet.Dialog.Providers {
             IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
+            ShowProgressWindow();
+
             var walker = new InstallWalker(
                 LocalRepository,
                 activePackageManager.SourceRepository,

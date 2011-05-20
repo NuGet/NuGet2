@@ -251,8 +251,6 @@ namespace NuGet.Dialog.Providers {
             // write an introductory sentence before every operation starts to make the console easier to read
             string progressMessage = GetProgressMessage(item.PackageIdentity);
             WriteLineToOutputWindow("------- " + progressMessage + " -------");
-
-            ShowProgressWindow();
         }
 
         private void OnProgressAvailable(object sender, ProgressEventArgs e) {

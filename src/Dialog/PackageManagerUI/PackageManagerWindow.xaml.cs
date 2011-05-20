@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -133,6 +134,11 @@ namespace NuGet.Dialog.PackageManagerUI {
             OnlineProvider recentProvider;
 
             if (isSolution) {
+                Title = String.Format(
+                    CultureInfo.CurrentUICulture, 
+                    NuGet.Dialog.Resources.Dialog_Title, 
+                    dte.Solution.GetName() + ".sln");
+
                 activeProject = null;
                 localRepository = packageManager.LocalRepository;
 
@@ -175,9 +181,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                     solutionManager);
             }
             else {
-                activeProject = dte.GetActiveProject(); ;
+                activeProject = dte.GetActiveProject();
                 IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
                 localRepository = projectManager.LocalRepository;
+
+                Title = String.Format(
+                    CultureInfo.CurrentUICulture, 
+                    NuGet.Dialog.Resources.Dialog_Title, 
+                    activeProject.GetDisplayName());
 
                 onlineProvider = new OnlineProvider(
                     activeProject,

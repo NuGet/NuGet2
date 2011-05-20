@@ -13,7 +13,6 @@
     xmlns:ExtensionsExplorer="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer;assembly=Microsoft.VisualStudio.ExtensionsExplorer"
     mc:Ignorable="d"
     Background="{DynamicResource {x:Static vsfx:VsBrushes.EnvironmentBackgroundGradientKey}}"
-    Title="{x:Static resources:Resources.Dialog_Title}"
     WindowStartupLocation="CenterOwner"
     HasHelpButton="True" 
     HasMaximizeButton="False"

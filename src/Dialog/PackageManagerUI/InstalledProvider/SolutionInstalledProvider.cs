@@ -49,6 +49,7 @@ namespace NuGet.Dialog.Providers {
 
             // treat solution-level packages specially
             if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
+                ShowProgressWindow();
                 try {
                     RegisterPackageOperationEvents(PackageManager, null);
                     PackageManager.UninstallPackage(
@@ -64,9 +65,6 @@ namespace NuGet.Dialog.Providers {
                 }
                 return true;
             }
-
-            // hide progress window before we show the solution explorer
-            HideProgressWindow();
 
             // display the Manage dialog to allow user to pick projects to install/uninstall
             IEnumerable<Project> selectedProjects = _projectSelectorService.ShowProjectSelectorWindow(

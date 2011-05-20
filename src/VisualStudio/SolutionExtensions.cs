@@ -5,7 +5,6 @@ using EnvDTE;
 namespace NuGet.VisualStudio {
 
     public static class SolutionExtensions {
-
         /// <summary>
         /// Get the list of all supported projects in the current solution. This method
         /// recursively iterates through all projects.

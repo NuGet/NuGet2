@@ -84,6 +84,7 @@ namespace NuGet.Dialog.Providers {
                 throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
+            ShowProgressWindow();
             UninstallPackageFromProject(_project, item);
             return true;
         }

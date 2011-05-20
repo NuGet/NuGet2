@@ -475,7 +475,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add Library Package Reference.
+        ///   Looks up a localized string similar to {0} - Library Package Manager.
         /// </summary>
         public static string Dialog_Title {
             get {
