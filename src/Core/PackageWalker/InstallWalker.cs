@@ -250,7 +250,7 @@ namespace NuGet {
             // Next, query the source repo for the same dependency
             IPackage sourcePackage = SourceRepository.ResolveDependency(ConstraintProvider, dependency);
 
-            // We didn't found a copy in the local repository
+            // We didn't find a copy in the local repository
             if (package == null) {
                 return sourcePackage;
             }
