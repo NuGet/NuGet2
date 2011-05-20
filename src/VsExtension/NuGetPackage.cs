@@ -76,7 +76,7 @@ namespace NuGet.Tools {
         /// </summary>
         private void ExecuteVisualizer(object sender, EventArgs e) {
             var visualizer = ServiceLocator.GetInstance<Visualizer>();
-            string outputFile = visualizer.CreateGraph(_dte);
+            string outputFile = visualizer.CreateGraph();
             _dte.ItemOperations.OpenFile(outputFile);
         }
 
