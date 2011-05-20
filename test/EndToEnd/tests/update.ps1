@@ -119,6 +119,27 @@ function Test-UpdateSolutionOnlyPackageWhenAmbiguous {
     Assert-Throws { Update-Package SolutionOnlyPackage } "Unable to update 'SolutionOnlyPackage'. Found multiple versions installed."
 }
 
+function Test-UpdatePackageResolvesDependenciesAcrossSources {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    # Ensure Antlr is not avilable in local repo.
+    Assert-Null (Get-Package -ListAvailable -Source $context.RepositoryRoot Antlr)
+    # Install a package with no external dependency
+    Install-Package PackageWithExternalDependency -Source $context.RepositoryRoot -Version 0.5
+    # Upgrade to a version that has an external dependency
+    Update-Package PackageWithExternalDependency -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithExternalDependency
+    Assert-Package $p Antlr
+}
+
 function Test-UpdateAmbiguousProjectLevelPackageNoInstalledInProjectThrows {
     # Arrange
     $p1 = New-ClassLibrary

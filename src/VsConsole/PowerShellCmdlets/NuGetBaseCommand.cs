@@ -253,10 +253,11 @@ namespace NuGet.PowerShell.Commands {
                 if (TryTranslatePSPath(source, out outputPath, out exists, out errorMessage) && exists == true) {
                     return repositoryFactory.CreateRepository(outputPath);
                 }
+                else {
+                    return repositoryFactory.CreateRepository(source);
+                }
             }
-
-            // We should never reach here.
-            throw new ArgumentException(Resources.Cmdlet_InvalidSource);
+            return null;
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes", Justification = "This exception is passed to PowerShell. We really don't care about the type of exception here.")]

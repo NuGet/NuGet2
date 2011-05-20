@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -58,7 +58,6 @@ namespace NuGet.VisualStudio {
         public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
             var fallbackRepository = CreateFallBackRepository(repository);
             RepositoryInfo info = GetRepositoryInfo();
-
             return new VsPackageManager(_solutionManager, fallbackRepository, info.FileSystem, info.Repository, _recentPackageRepository);
         }
 

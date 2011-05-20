@@ -138,6 +138,25 @@ function Test-InstallPackageInvokeInstallScriptAndInitScript {
     Assert-NotNull (Get-ChildItem function:\Get-World)
 }
 
+function Test-InstallPackageResolvesDependenciesAcrossSources {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    # Ensure Antlr is not avilable in local repo.
+    Assert-Null (Get-Package -ListAvailable -Source $context.RepositoryRoot Antlr)
+    Install-Package PackageWithExternalDependency -Source $context.RepositoryRoot
+
+    # Assert
+
+    Assert-Package $p PackageWithExternalDependency
+    Assert-Package $p Antlr
+}
+
 function Test-VariablesPassedToInstallScriptsAreValidWithWebSite {
     param(
         $context

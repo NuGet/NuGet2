@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace NuGet {
-    public class AggregateRepository : PackageRepositoryBase, IPackageLookup {
+    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyProvider {
         private readonly IEnumerable<IPackageRepository> _repositories;
         private const string SourceValue = "(Aggregate source)";
 
@@ -36,7 +36,14 @@ namespace NuGet {
             // repository one by one until we find the package that matches.
             return Repositories.Select(r => r.FindPackage(packageId, version))
                                .FirstOrDefault(p => p != null);
-                        
+        }
+
+        public IQueryable<IPackage> GetDependencies(string packageId) {
+            // An AggregateRepository needs to call GetDependencies on individual repositories in the event any one of them 
+            // implements an IDependencyProvider.
+            return _repositories.SelectMany(r => r.GetDependencies(packageId))
+                                .Distinct(PackageEqualityComparer.IdAndVersion)
+                                .AsQueryable(); 
         }
     }
 }
