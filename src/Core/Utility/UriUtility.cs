@@ -1,8 +1,8 @@
 using System;
-using System.IO.Packaging;
 using System.IO;
+using System.IO.Packaging;
 
-namespace NuGet {    
+namespace NuGet {
     internal static class UriUtility {
         /// <summary>
         /// Converts a uri to a path. Only used for local paths.

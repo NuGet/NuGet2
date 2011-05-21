@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet {
     public static class PathUtility {

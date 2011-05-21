@@ -105,7 +105,7 @@ namespace NuGet {
             // Mark the package as visited
             Marker.MarkVisited(package);
 
-            
+
             ProcessPackageTarget(package);
 
             OnAfterPackageWalk(package);

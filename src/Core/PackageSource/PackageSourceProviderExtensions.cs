@@ -34,8 +34,8 @@ namespace NuGet {
         /// </summary>
         public static string ResolveSource(this IPackageSourceProvider provider, string value) {
             var resolvedSource = (from source in provider.LoadPackageSources()
-                                    where source.Name.Equals(value, StringComparison.CurrentCultureIgnoreCase) || source.Source.Equals(value, StringComparison.OrdinalIgnoreCase)
-                                    select source.Source
+                                  where source.Name.Equals(value, StringComparison.CurrentCultureIgnoreCase) || source.Source.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                  select source.Source
                                    ).FirstOrDefault();
 
             return resolvedSource ?? value;

@@ -1,5 +1,4 @@
 namespace NuGet {
-    using System;
     using System.Runtime.Versioning;
 
     public interface IPackageAssemblyReference : IPackageFile, IFrameworkTargetable {

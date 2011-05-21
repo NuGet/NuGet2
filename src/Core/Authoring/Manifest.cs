@@ -138,8 +138,8 @@ namespace NuGet {
                 // Set the source value of the current manifest file to the first item in the list of values
                 manifestFile.Source = sources.FirstOrDefault();
                 // Add a ManifestFile for all other items
-                Files.AddRange(from item in sources.Skip(1) 
-                                   select new ManifestFile { Source = item, Target = manifestFile.Target });
+                Files.AddRange(from item in sources.Skip(1)
+                               select new ManifestFile { Source = item, Target = manifestFile.Target });
             }
         }
 

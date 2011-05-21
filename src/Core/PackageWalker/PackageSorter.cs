@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NuGet{
+namespace NuGet {
     public class PackageSorter : PackageWalker {
         private IPackageRepository _repository;
         private IList<IPackage> _sortedPackages;
@@ -41,10 +41,10 @@ namespace NuGet{
                 throw new ArgumentNullException("repository");
             }
             Marker.Clear();
-            
+
             _repository = repository;
             _sortedPackages = new List<IPackage>();
-            
+
             foreach (var package in _repository.GetPackages()) {
                 Walk(package);
             }

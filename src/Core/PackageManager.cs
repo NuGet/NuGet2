@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 

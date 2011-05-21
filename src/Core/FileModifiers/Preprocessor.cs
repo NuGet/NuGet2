@@ -23,7 +23,7 @@ namespace NuGet {
         public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem) {
             Func<Stream> streamFactory = () => Process(file, projectSystem).AsStream();
             FileSystemExtensions.DeleteFileSafe(projectSystem, targetPath, streamFactory);
-        }               
+        }
 
         internal static string Process(IPackageFile file, IPropertyProvider propertyProvider) {
             return Process(file.GetStream(), propertyProvider);

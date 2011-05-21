@@ -31,7 +31,7 @@ namespace NuGet {
             catch {
                 return false;
             }
-            
+
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace NuGet {
         /// <returns>True if valid, False if invalid.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw during detection")]
         public static bool IsValidUncPath(string path) {
-            try {            
+            try {
                 Path.GetFullPath(path);
                 return Regex.IsMatch(path.Trim(), @"^\\");
             }
@@ -62,7 +62,7 @@ namespace NuGet {
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "We're trying to validate that a stirng is infct a uri")]
         public static bool IsValidUrl(string url) {
             Uri result;
-            
+
             // Make sure url starts with protocol:// because Uri.TryCreate() returns true for local and UNC paths even if badly formed.
             return Regex.IsMatch(url, @"^\w+://", RegexOptions.IgnoreCase) && Uri.TryCreate(url, UriKind.Absolute, out result);
         }

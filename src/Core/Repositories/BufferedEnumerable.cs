@@ -103,7 +103,7 @@ namespace NuGet {
             }
         }
 
-        internal class QueryState<T> {            
+        internal class QueryState<T> {
             public QueryState(int bufferSize) {
                 Cache = new List<T>(bufferSize);
                 HasItems = true;

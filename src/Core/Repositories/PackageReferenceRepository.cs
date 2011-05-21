@@ -11,7 +11,7 @@ namespace NuGet {
     public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider {
         public static readonly string PackageReferenceFile = "packages.config";
         private readonly PackageReferenceFile _packageReferenceFile;
-        private readonly string _fullPath;        
+        private readonly string _fullPath;
 
         public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
             if (fileSystem == null) {

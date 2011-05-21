@@ -43,7 +43,7 @@ namespace NuGet {
             // implements an IDependencyProvider.
             return _repositories.SelectMany(r => r.GetDependencies(packageId))
                                 .Distinct(PackageEqualityComparer.IdAndVersion)
-                                .AsQueryable(); 
+                                .AsQueryable();
         }
     }
 }

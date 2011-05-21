@@ -5,10 +5,10 @@ using System.Linq.Expressions;
 using NuGet.Resources;
 
 namespace NuGet {
-    internal class OrderingComparer<TElement> : ExpressionVisitor, IComparer<TElement> {        
-        private readonly Expression _expression;        
+    internal class OrderingComparer<TElement> : ExpressionVisitor, IComparer<TElement> {
+        private readonly Expression _expression;
         private readonly Dictionary<ParameterExpression, ParameterExpression> _parameters = new Dictionary<ParameterExpression, ParameterExpression>();
-        
+
         private bool _inOrderExpression;
         private Stack<Ordering<TElement>> _orderings;
 

@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace NuGet {
     internal static class QueryableUtility {
-        private static readonly string[] _orderMethods = new[] { "OrderBy", "ThenBy", "OrderByDescending", "ThenByDescending" };       
+        private static readonly string[] _orderMethods = new[] { "OrderBy", "ThenBy", "OrderByDescending", "ThenByDescending" };
         private static readonly MethodInfo[] _methods = typeof(Queryable).GetMethods(BindingFlags.Public | BindingFlags.Static);
 
         private static MethodInfo GetQueryableMethod(Expression expression) {
@@ -50,7 +50,7 @@ namespace NuGet {
 
         private class ExpressionRewriter : ExpressionVisitor {
             private readonly IQueryable _query;
-            
+
             public ExpressionRewriter(IQueryable query) {
                 _query = query;
             }

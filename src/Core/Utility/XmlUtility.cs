@@ -20,7 +20,7 @@ namespace NuGet {
         private static XDocument CreateDocument(XName rootName, IFileSystem fileSystem, string path) {
             XDocument document = new XDocument(new XElement(rootName));
             // Add it to the file system
-            fileSystem.AddFile(path, document.Save);         
+            fileSystem.AddFile(path, document.Save);
             return document;
         }
     }

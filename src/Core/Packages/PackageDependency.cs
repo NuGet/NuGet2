@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Globalization;
-using System.Text;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
-    public class PackageDependency {        
+    public class PackageDependency {
         public PackageDependency(string id)
             : this(id, null) {
         }

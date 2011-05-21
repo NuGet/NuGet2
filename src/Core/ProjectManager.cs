@@ -321,7 +321,7 @@ namespace NuGet {
         }
 
         public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies) {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider), updateDependencies);            
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider), updateDependencies);
         }
 
         public virtual void UpdatePackageReference(string packageId, Version version, bool updateDependencies) {
@@ -345,7 +345,7 @@ namespace NuGet {
             Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
 
             IPackage package = resolvePackage();
-            
+
             if (package != null && oldPackage.Version != package.Version) {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies);

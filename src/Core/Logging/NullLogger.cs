@@ -3,7 +3,7 @@ namespace NuGet {
         private static readonly ILogger _instance = new NullLogger();
 
         public static ILogger Instance {
-            get{
+            get {
                 return _instance;
             }
         }

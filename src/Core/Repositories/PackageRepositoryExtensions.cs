@@ -165,7 +165,7 @@ namespace NuGet {
                 // If the repository explicitly provides a way to retrieve dependencies, use it.
                 return dependencyResolver.GetDependencies(packageId);
             }
-            
+
             return repository.FindPackagesById(packageId);
         }
 

@@ -152,7 +152,7 @@ namespace NuGet {
             } while (lazyQueues.Any());
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="By definition we want to suppress all exceptions if the flag is set")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By definition we want to suppress all exceptions if the flag is set")]
         private TaskResult ReadQueue(LazyQueue<TVal> queue) {
             var result = new TaskResult { Queue = queue };
             TVal current;
@@ -211,7 +211,7 @@ namespace NuGet {
         }
 
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="By definition we want to suppress all exceptions if the flag is set")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By definition we want to suppress all exceptions if the flag is set")]
         private TResult TryExecute<TResult>(IQueryable queryable, Expression expression) {
             if (_ignoreFailures) {
                 try {

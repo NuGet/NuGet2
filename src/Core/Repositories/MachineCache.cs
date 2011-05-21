@@ -10,7 +10,7 @@ namespace NuGet {
     /// </summary>
     public class MachineCache : LocalPackageRepository {
         // Maximum number of packages that can live in this cache.
-        private const int MaxPackages = 100; 
+        private const int MaxPackages = 100;
         private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(GetCachePath));
 
         internal MachineCache(IFileSystem fileSystem)
@@ -18,7 +18,7 @@ namespace NuGet {
         }
 
         public static MachineCache Default {
-            get {  return _instance.Value; }
+            get { return _instance.Value; }
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace NuGet {
             try {
                 string path = getCachePath();
                 fileSystem = new PhysicalFileSystem(path);
-            } 
+            }
             catch (SecurityException) {
                 // We are unable to access the special directory. Create a machine cache using an empty file system
                 fileSystem = NullFileSystem.Instance;

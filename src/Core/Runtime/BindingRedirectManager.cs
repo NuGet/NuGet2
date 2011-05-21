@@ -54,7 +54,7 @@ namespace NuGet.Runtime {
             XElement assemblyBindingElement = null;
             foreach (var bindingRedirect in bindingRedirects) {
                 // Look to see if we already have this in the list of bindings already in config.
-                if (currentBindings.Contains(bindingRedirect)) {                    
+                if (currentBindings.Contains(bindingRedirect)) {
                     // Remove the assembly binding elements
                     foreach (var bindingElement in currentBindings[bindingRedirect]) {
                         RemoveElement(bindingElement);

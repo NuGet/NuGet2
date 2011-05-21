@@ -44,7 +44,7 @@ namespace NuGet {
             if (!source.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase)) {
                 source = source.TrimStart('\\');
             }
-                
+
             string pathFromBase = Path.Combine(basePath, source);
 
             if (IsWildCardSearch(pathFromBase)) {

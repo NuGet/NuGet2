@@ -70,7 +70,7 @@ namespace NuGet {
                     }
                 }
 
-                
+
 
                 return kvps.AsReadOnly();
             }

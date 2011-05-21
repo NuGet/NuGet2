@@ -11,7 +11,7 @@ namespace NuGet {
         [DataMember]
         public string Source { get; private set; }
 
-        public PackageSource(string source) 
+        public PackageSource(string source)
             : this(source, source) {
         }
 

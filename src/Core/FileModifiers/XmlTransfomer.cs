@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace NuGet {
     internal class XmlTransfomer : IPackageFileTransformer {
         private readonly IDictionary<XName, Action<XElement, XElement>> _nodeActions;
-        
+
         public XmlTransfomer(IDictionary<XName, Action<XElement, XElement>> nodeActions) {
             _nodeActions = nodeActions;
         }

@@ -14,7 +14,7 @@ namespace NuGet {
 
         void AddPackageReference(IPackage package, bool ignoreDependencies);
         void AddPackageReference(string packageId, Version version, bool ignoreDependencies);
-        
+
         void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies);
         void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies);
 

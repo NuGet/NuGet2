@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 
 namespace NuGet {
-    public class VersionSpec : IVersionSpec {        
+    public class VersionSpec : IVersionSpec {
         public VersionSpec() {
         }
 
@@ -45,7 +45,7 @@ namespace NuGet {
                 versionBuilder.Append(")");
             }
 
-            return versionBuilder.ToString(); 
+            return versionBuilder.ToString();
         }
     }
 }

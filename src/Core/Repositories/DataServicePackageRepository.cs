@@ -33,8 +33,8 @@ namespace NuGet {
             : this(new HttpClient(serviceRoot)) {
         }
 
-        public DataServicePackageRepository(IHttpClient client){
-            if(client == null) {
+        public DataServicePackageRepository(IHttpClient client) {
+            if (client == null) {
                 throw new ArgumentNullException("client");
             }
 
@@ -56,7 +56,7 @@ namespace NuGet {
         // trigger that functionality.
         private IDataServiceContext Context {
             get {
-                if(_context == null) {
+                if (_context == null) {
                     _context = new DataServiceContextWrapper(_httpClient.Uri);
                     _context.SendingRequest += OnSendingRequest;
                     _context.ReadingEntity += OnReadingEntity;
