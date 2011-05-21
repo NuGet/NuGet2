@@ -8,7 +8,9 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Providers {
     internal class SolutionOnlineProvider : OnlineProvider, IPackageOperationEventListener {
         private IVsPackageManager _activePackageManager;
-        private IProjectSelectorService _projectSelector;
+        private readonly IProjectSelectorService _projectSelector;
+        private readonly ISolutionManager _solutionManager;
+        private static readonly Dictionary<string, bool> _checkStateCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
         public SolutionOnlineProvider(
             IPackageRepository localRepository,
@@ -29,6 +31,7 @@ namespace NuGet.Dialog.Providers {
                 progressProvider,
                 solutionManager) {
             _projectSelector = providerServices.ProjectSelector;
+            _solutionManager = solutionManager;
         }
 
         protected override bool ExecuteAfterLicenseAgreement(
@@ -37,25 +40,29 @@ namespace NuGet.Dialog.Providers {
             IList<PackageOperation> operations) {
 
             _activePackageManager = activePackageManager;
-            IEnumerable<Project> selectedProjects;
+            IList<Project> selectedProjectsList;
 
             if (activePackageManager.IsProjectLevel(item.PackageIdentity)) {
                 // hide the progress window if we are going to show project selector window
                 HideProgressWindow();
-                selectedProjects = _projectSelector.ShowProjectSelectorWindow(ignored => true);
+                var selectedProjects = _projectSelector.ShowProjectSelectorWindow(DetermineProjectCheckState);
                 if (selectedProjects == null) {
                     // user presses Cancel button on the Solution dialog
                     return false;
                 }
                 ShowProgressWindow();
+
+                selectedProjectsList = selectedProjects.ToList();
+                // save the checked state of projects so that we can restore them the next time
+                SaveProjectCheckStates(selectedProjectsList);
             }
             else {
                 // solution package. just install into the solution
-                selectedProjects = Enumerable.Empty<Project>();
+                selectedProjectsList = new Project[0];
             }
 
             activePackageManager.InstallPackage(
-                selectedProjects,
+                selectedProjectsList,
                 item.PackageIdentity,
                 operations,
                 ignoreDependencies: false,
@@ -63,6 +70,26 @@ namespace NuGet.Dialog.Providers {
                 packageOperationEventListener: this);
 
             return true;
+        }
+
+        private void SaveProjectCheckStates(IList<Project> selectedProjects) {
+            HashSet<Project> selectedProjectSet = new HashSet<Project>(selectedProjects);
+            
+            foreach (Project project in _solutionManager.GetProjects()) {
+                if (!String.IsNullOrEmpty(project.UniqueName)) {
+                    bool checkState = selectedProjectSet.Contains(project);
+                    _checkStateCache[project.UniqueName] = checkState;
+                }
+            }
+        }
+
+        private static bool DetermineProjectCheckState(Project project) {
+            bool checkState;
+            if (String.IsNullOrEmpty(project.UniqueName) || 
+                !_checkStateCache.TryGetValue(project.UniqueName, out checkState)) {
+                checkState = true;
+            }
+            return checkState;
         }
 
         public void OnBeforeAddPackageReference(Project project) {

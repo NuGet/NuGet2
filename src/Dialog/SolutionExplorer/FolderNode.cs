@@ -17,8 +17,11 @@ namespace NuGet.Dialog {
             }
             _children = children;
 
-            foreach (var child in _children) {
-                child.Parent = this;
+            if (children.Count > 0) {
+                foreach (var child in _children) {
+                    child.Parent = this;
+                }
+                OnChildIsSelectedChanged();
             }
         }
 

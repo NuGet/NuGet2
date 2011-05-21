@@ -33,7 +33,6 @@ namespace NuGet.Dialog {
                 if (_parent != value) {
                     _parent = value;
                     OnPropertyChanged("Parent");
-                    OnSelectedChanged();
                 }
             }
         }
@@ -85,6 +84,10 @@ namespace NuGet.Dialog {
             _suppressNotifyParentOfIsSelectedChanged = true;
             IsSelected = isSelected;
             _suppressNotifyParentOfIsSelectedChanged = false;
+        }
+
+        public override string ToString() {
+            return Name;
         }
     }
 }

@@ -277,7 +277,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select the projects for this operation:.
+        ///   Looks up a localized string similar to Select the projects for this operation..
         /// </summary>
         public static string Dialog_ProjectSelectorDescription {
             get {
@@ -448,7 +448,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuGet failed to install the selected package into the following project(s)..
+        ///   Looks up a localized string similar to NuGet failed to install or uninstall the selected package in the following project(s)..
         /// </summary>
         public static string Dialog_SummaryErrorMessage {
             get {

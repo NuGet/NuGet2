@@ -124,6 +124,34 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             Assert.IsTrue(node.IsSelected == null);
         }
 
+        [TestMethod]
+        public void ParentFolderDoNotPropagateStateBackToChildrenWhenTheyAreFirstAddedToFolder() {
+            // Arrange
+            ProjectNode[] children = new ProjectNode[3];
+
+            // make two children selected, one unselected
+            for (int i = 0; i < 3; i++) {
+                var project = MockProjectUtility.CreateMockProject("p" + i);
+                var node = new ProjectNode(project) {
+                    IsSelected = i % 2 == 0
+                };
+                children[i] = node;
+            }
+
+            var folder = new FolderNode("A", children);
+
+            // Act
+            var root = new FolderNode("Root", new[] { folder });
+
+            // Assert
+            Assert.IsNull(folder.IsSelected);
+            for (int i = 0; i < 3; i++) {
+                Assert.IsTrue(children[0].IsSelected == true);
+                Assert.IsTrue(children[1].IsSelected == false);
+                Assert.IsTrue(children[2].IsSelected == true);
+            }
+        }
+
         private FolderNode CreateFolderNode(string name = "A", ICollection<ProjectNodeBase> children = null) {
             if (children == null) {
                 children = new List<ProjectNodeBase>();

@@ -82,7 +82,7 @@ namespace NuGet.Tools {
         /// <summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
             if (HasActiveLoadedSupportedProject) {
-                var window = new PackageManagerWindow(false);
+                var window = new PackageManagerWindow(isSolution: false);
                 try {
                     window.ShowModal();
                 }
@@ -114,7 +114,7 @@ namespace NuGet.Tools {
         }
 
         private void ShowAddPackageToSolutionDialog(object sender, EventArgs e) {
-            var window = new PackageManagerWindow(true);
+            var window = new PackageManagerWindow(isSolution: true);
             try {
                 window.ShowModal();
             }
@@ -240,6 +240,7 @@ namespace NuGet.Tools {
                 OleMenuCommand generalSettingsCommand = new OleMenuCommand(ShowGeneralSettingsOptionPage, generalSettingsCommandID);
                 mcs.AddCommand(generalSettingsCommand);
 
+                // menu command for Package Visualizer
                 CommandID visualizerCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, (int)PkgCmdIDList.cmdIdVisualizer);
                 OleMenuCommand visualizerCommand = new OleMenuCommand(ExecuteVisualizer, null, QueryStatusForVisualizer, visualizerCommandID);
                 mcs.AddCommand(visualizerCommand);

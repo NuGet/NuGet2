@@ -274,7 +274,7 @@
     <value>Last Updated:</value>
   </data>
   <data name="Dialog_ProjectSelectorDescription" xml:space="preserve">
-    <value>Select the projects for this operation:</value>
+    <value>Select the projects for this operation.</value>
   </data>
   <data name="Dialog_ProjectSelectorTitle" xml:space="preserve">
     <value>Select Projects</value>
@@ -298,7 +298,7 @@
     <value>Solution '{0}'</value>
   </data>
   <data name="Dialog_SummaryErrorMessage" xml:space="preserve">
-    <value>NuGet failed to install the selected package into the following project(s).</value>
+    <value>NuGet failed to install or uninstall the selected package in the following project(s).</value>
   </data>
   <data name="ErrorStringFormat" xml:space="preserve">
     <value>Error: {0}</value>
