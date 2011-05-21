@@ -17,6 +17,19 @@ namespace NuGet.Commands {
             @"**\\.**", ".**"
         };
 
+        // Target file paths to exclude when building the lib package for symbol server scenario
+        private static readonly string[] _libPackageExcludes = new[]{
+            @"**\*.pdb",
+            @"src\**\*"
+        };
+
+        // Target file paths to exclude when building the symbols package for symbol server scenario
+        private static readonly string[] _symbolPackageExcludes = new[]{
+            @"content\**\*",
+            @"tools\**\*.ps1"
+        };
+
+
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, string> _properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -200,16 +213,42 @@ namespace NuGet.Commands {
         }
 
         private void BuildFromNuspec(string path) {
-            PackageBuilder builder = null;
+            PackageBuilder mainPackageBuilder = createPackageBuilderFromNuspec(path);
 
+            if (Symbols) {
+                // remove source related files when building the lib package
+                ExcludeFilesForLibPackage(mainPackageBuilder.Files);
+            }
+
+            BuildPackage(path, mainPackageBuilder);
+
+            if (!Symbols) {
+                return;
+            }
+
+            PackageBuilder symbolsBuilder = createPackageBuilderFromNuspec(path);
+            // remove unnecessary files when building the symbols package
+            ExcludeFilesForSymbolPackage(mainPackageBuilder.Files);
+
+            string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
+            BuildPackage(path, symbolsBuilder, outputPath);
+        }
+
+        internal void ExcludeFilesForLibPackage(ICollection<IPackageFile> files) {
+            PathResolver.FilterPackageFiles(files, file => file.Path, _libPackageExcludes);
+        }
+
+        internal void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files)
+        {
+            PathResolver.FilterPackageFiles(files, file => file.Path, _symbolPackageExcludes);
+        }
+
+        private PackageBuilder createPackageBuilderFromNuspec(string path)
+        {
             if (String.IsNullOrEmpty(BasePath)) {
-                builder = new PackageBuilder(path);
+                return new PackageBuilder(path);
             }
-            else {
-                builder = new PackageBuilder(path, BasePath);
-            }
-
-            BuildPackage(path, builder);
+            return new PackageBuilder(path, BasePath);
         }
 
         private void BuildFromProjectFile(string path) {

@@ -22,7 +22,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Act
             var packCommand = new PackCommand { BasePath = @"x:\packagefiles\", NoDefaultExcludes = false };
             packCommand.ExcludeFiles(files);
-
+            
             // Assert
             Assert.AreEqual(3, files.Count);
             Assert.AreEqual(files[0].Path, @"x:\packagefiles\some-file\1.txt");
@@ -216,6 +216,101 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.AreEqual("foo.csproj", file);
+        }
+        [TestMethod]
+        public void ExcludeFilesForLibPackageRemovesAllPDBs()
+        {
+            // Arrange
+            var files = GetPackageFiles(
+                    @"lib\mylib.dll",
+                    @"lib\mylib.pdb",
+                    @"content\default.aspx",
+                    @"content\extra.pdb",
+                    @"tools\mycmd.exe",
+                    @"tools\mycmd.pdb"
+            );
+
+            // Act
+            var packCommand = new PackCommand();
+            packCommand.ExcludeFilesForLibPackage(files);
+
+            // Assert
+            Assert.AreEqual(3, files.Count);
+            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
+            Assert.AreEqual(files[1].Path, @"content\default.aspx");
+            Assert.AreEqual(files[2].Path, @"tools\mycmd.exe");
+        }
+
+        [TestMethod]
+        public void ExcludeFilesForLibPackageRemovesAllFilesFromSrcTargetFolder()
+        {
+            // Arrange
+            var files = GetPackageFiles(
+                    @"lib\mylib.dll",
+                    @"content\default.aspx",
+                    @"content\default.aspx.cs",
+                    @"src\foo.cs",
+                    @"src\extra\nested\bar.cs",
+                    @"src\extra\nested\bar.dll"
+            );
+
+            // Act
+            var packCommand = new PackCommand();
+            packCommand.ExcludeFilesForLibPackage(files);
+
+            // Assert
+            Assert.AreEqual(3, files.Count);
+            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
+            Assert.AreEqual(files[1].Path, @"content\default.aspx");
+            Assert.AreEqual(files[2].Path, @"content\default.aspx.cs");
+        }
+
+        [TestMethod]
+        public void ExcludeFilesForSymbolPackageRemovesAllContentFiles()
+        {
+            // Arrange
+            var files = GetPackageFiles(
+                    @"lib\mylib.dll",
+                    @"lib\mylib.pdb",
+                    @"content\default.aspx",
+                    @"content\bin\extra.pdb",
+                    @"src\mylib.cs"
+            );
+
+            // Act
+            var packCommand = new PackCommand();
+            packCommand.ExcludeFilesForSymbolPackage(files);
+
+            // Assert
+            Assert.AreEqual(3, files.Count);
+            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
+            Assert.AreEqual(files[1].Path, @"lib\mylib.pdb");
+            Assert.AreEqual(files[2].Path, @"src\mylib.cs");
+        }
+
+        [TestMethod]
+        public void ExcludeFilesForSymbolPackageRemovesScripts()
+        {
+            // Arrange
+            var files = GetPackageFiles(
+                    @"lib\mylib.dll",
+                    @"lib\mylib.pdb",
+                    @"tools\mycmd.exe",
+                    @"tools\init.ps1",
+                    @"tools\extra.ps1",
+                    @"src\mylib.cs"
+            );
+
+            // Act
+            var packCommand = new PackCommand();
+            packCommand.ExcludeFilesForSymbolPackage(files);
+
+            // Assert
+            Assert.AreEqual(4, files.Count);
+            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
+            Assert.AreEqual(files[1].Path, @"lib\mylib.pdb");
+            Assert.AreEqual(files[2].Path, @"tools\mycmd.exe");
+            Assert.AreEqual(files[3].Path, @"src\mylib.cs");
         }
 
         private static IList<IPackageFile> GetPackageFiles(params string[] paths) {
