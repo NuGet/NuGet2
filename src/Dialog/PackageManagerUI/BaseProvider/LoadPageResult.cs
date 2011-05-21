@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NuGet.Dialog.Providers {
 
-    internal class LoadPageResult  {
+    internal class LoadPageResult {
 
         public LoadPageResult(IEnumerable<IPackage> packages, int pageNumber, int totalCount) {
             Packages = packages;

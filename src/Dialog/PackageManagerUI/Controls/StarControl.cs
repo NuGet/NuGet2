@@ -33,8 +33,8 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             double width = _value * _starPath.ActualWidth;
             Rect rect = new Rect(0, 0, width, _starPath.ActualHeight);
-            _starPath.Clip = new RectangleGeometry() { 
-                Rect = rect 
+            _starPath.Clip = new RectangleGeometry() {
+                Rect = rect
             };
         }
 
@@ -51,11 +51,11 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public double Value {
-            get { 
-                return (double)GetValue(ValueProperty); 
+            get {
+                return (double)GetValue(ValueProperty);
             }
-            set { 
-                SetValue(ValueProperty, value); 
+            set {
+                SetValue(ValueProperty, value);
             }
         }
 

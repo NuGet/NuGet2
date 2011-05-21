@@ -8,7 +8,7 @@ namespace NuGet.Dialog {
         private const string SettingsRoot = "NuGet";
         private const string PropertyName = "SelectedProvider";
 
-        public SelectedProviderSettingsManager() : 
+        public SelectedProviderSettingsManager() :
             base(ServiceLocator.GetInstance<IServiceProvider>()) {
         }
 

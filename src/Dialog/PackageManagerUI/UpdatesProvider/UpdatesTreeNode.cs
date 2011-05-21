@@ -10,10 +10,10 @@ namespace NuGet.Dialog.Providers {
         private readonly IPackageRepository _localRepository;
 
         public UpdatesTreeNode(
-            PackagesProviderBase provider, 
-            string category, 
-            IVsExtensionsTreeNode parent, 
-            IPackageRepository localRepository, 
+            PackagesProviderBase provider,
+            string category,
+            IVsExtensionsTreeNode parent,
+            IPackageRepository localRepository,
             IPackageRepository sourceRepository) :
             base(provider, category, parent, sourceRepository) {
 

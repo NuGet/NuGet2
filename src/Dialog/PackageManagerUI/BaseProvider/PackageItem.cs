@@ -20,7 +20,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
-        
+
         public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames) {
             _provider = provider;
             _packageIdentity = package;
@@ -101,7 +101,7 @@ namespace NuGet.Dialog.Providers {
                 return _packageIdentity.LicenseUrl;
             }
         }
-        
+
         public bool IsSelected {
             get {
                 return _isSelected;

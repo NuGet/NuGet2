@@ -18,7 +18,7 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        public SimpleTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent, IPackageRepository repository) : 
+        public SimpleTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent, IPackageRepository repository) :
             base(parent, provider) {
 
             if (category == null) {

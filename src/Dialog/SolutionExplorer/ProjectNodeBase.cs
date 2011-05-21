@@ -24,7 +24,7 @@ namespace NuGet.Dialog {
             "CA1024:UsePropertiesWhereAppropriate",
             Justification = "The results need to be calculated dynamically.")]
         public abstract IEnumerable<Project> GetSelectedProjects();
-        
+
         public FolderNode Parent {
             get {
                 return _parent;
@@ -49,7 +49,7 @@ namespace NuGet.Dialog {
                 }
             }
         }
-        
+
         public bool? IsSelected {
             get {
                 return _isSelected;

@@ -68,7 +68,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             // each message is reprepseted by a Run element
             var run = new Run(message) {
-                Foreground = messageColor 
+                Foreground = messageColor
             };
 
             // if the paragraph is non-empty, add a line break before the new message

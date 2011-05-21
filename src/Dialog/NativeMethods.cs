@@ -9,7 +9,7 @@ namespace NuGet.Dialog {
         public static extern int RemoveMenu(IntPtr hMenu, int nPosition, int wFlags);
 
         [DllImport("User32")]
-        public static extern IntPtr GetSystemMenu(IntPtr hWnd, [param:MarshalAs(UnmanagedType.Bool)] bool bRevert);
+        public static extern IntPtr GetSystemMenu(IntPtr hWnd, [param: MarshalAs(UnmanagedType.Bool)] bool bRevert);
 
         [DllImport("User32")]
         public static extern int GetMenuItemCount(IntPtr hWnd);

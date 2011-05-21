@@ -73,14 +73,14 @@ namespace NuGet.Dialog.Providers {
                 // Selector function to return the initial checkbox state for a Project.
                 // We check a project by default if it has the current package installed.
                 project => PackageManager.GetProjectManager(project).IsInstalled(package));
-            
+
             if (selectedProjects == null) {
                 // user presses Cancel button on the Solution dialog
                 return false;
             }
 
             ShowProgressWindow();
-            
+
             var selectedProjectsSet = new HashSet<Project>(selectedProjects);
 
             // now install or uninstall the package depending on the checked states.

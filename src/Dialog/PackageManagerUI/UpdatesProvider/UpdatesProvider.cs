@@ -18,15 +18,15 @@ namespace NuGet.Dialog.Providers {
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager) : 
+            ISolutionManager solutionManager) :
             base(
                 project,
-                localRepository, 
-                resources, 
-                packageRepositoryFactory, 
-                packageSourceProvider, 
-                packageManagerFactory, 
-                providerServices, 
+                localRepository,
+                resources,
+                packageRepositoryFactory,
+                packageSourceProvider,
+                packageManagerFactory,
+                providerServices,
                 progressProvider,
                 solutionManager) {
         }

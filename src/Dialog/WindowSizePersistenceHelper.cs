@@ -16,9 +16,9 @@ namespace NuGet.Dialog {
 
         public static readonly DependencyProperty WindowTokenProperty =
             DependencyProperty.RegisterAttached(
-                "WindowToken", 
-                typeof(string), 
-                typeof(WindowSizePersistenceHelper), 
+                "WindowToken",
+                typeof(string),
+                typeof(WindowSizePersistenceHelper),
                 new UIPropertyMetadata(new PropertyChangedCallback(OnWindowTokenPropertyChange)));
 
         private static void OnWindowTokenPropertyChange(object sender, DependencyPropertyChangedEventArgs args) {

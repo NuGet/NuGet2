@@ -19,26 +19,26 @@ namespace NuGet.Dialog.Providers {
             ProviderServices providerServices,
             IProgressProvider progressProvider,
             ISolutionManager solutionManager) :
-            base(null, 
-                localRepository, 
-                resources, 
-                packageRepositoryFactory, 
-                packageSourceProvider, 
-                packageManagerFactory, 
-                providerServices, 
+            base(null,
+                localRepository,
+                resources,
+                packageRepositoryFactory,
+                packageSourceProvider,
+                packageManagerFactory,
+                providerServices,
                 progressProvider,
                 solutionManager) {
             _projectSelector = providerServices.ProjectSelector;
         }
 
         protected override bool ExecuteAfterLicenseAgreement(
-            PackageItem item, 
-            IVsPackageManager activePackageManager, 
+            PackageItem item,
+            IVsPackageManager activePackageManager,
             IList<PackageOperation> operations) {
 
             _activePackageManager = activePackageManager;
             IEnumerable<Project> selectedProjects;
-            
+
             if (activePackageManager.IsProjectLevel(item.PackageIdentity)) {
                 // hide the progress window if we are going to show project selector window
                 HideProgressWindow();

@@ -7,8 +7,8 @@ namespace NuGet.Dialog.Providers {
         private readonly Lazy<IPackageRepository> _repository;
 
         private IPackageRepository Repository {
-            get { 
-                return _repository.Value; 
+            get {
+                return _repository.Value;
             }
         }
 

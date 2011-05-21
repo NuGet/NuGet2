@@ -11,7 +11,7 @@ namespace NuGet.Dialog.PackageManagerUI {
     /// value is false.
     /// </summary>
     public class BooleanToVisibilityConverter : IValueConverter {
-        
+
         public bool Inverted { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {

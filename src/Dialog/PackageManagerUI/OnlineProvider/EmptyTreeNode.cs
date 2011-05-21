@@ -9,9 +9,9 @@ namespace NuGet.Dialog.Providers {
     /// </summary>
     internal class EmptyTreeNode : PackagesTreeNodeBase {
 
-         private readonly string _category;
+        private readonly string _category;
 
-        public EmptyTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent) : 
+        public EmptyTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent) :
             base(parent, provider) {
 
             if (category == null) {

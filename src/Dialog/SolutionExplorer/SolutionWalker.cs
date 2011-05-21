@@ -24,19 +24,19 @@ namespace NuGet.Dialog {
             Array.Sort(children, ProjectNodeComparer.Default);
 
             return new FolderNode(
-                String.Format(CultureInfo.CurrentCulture, Resources.Dialog_SolutionNode, solution.GetName()), 
+                String.Format(CultureInfo.CurrentCulture, Resources.Dialog_SolutionNode, solution.GetName()),
                 children);
         }
 
         private static IEnumerable<ProjectNodeBase> CreateProjectNode(
-            IEnumerable<Project> projects, 
+            IEnumerable<Project> projects,
             Func<Project, bool> checkedStateSelector) {
 
             foreach (var project in projects) {
                 if (project.IsSupported()) {
-                    yield return new ProjectNode(project) { 
+                    yield return new ProjectNode(project) {
                         // default checked state of this node will be determined by the passed-in selector
-                        IsSelected = checkedStateSelector(project) 
+                        IsSelected = checkedStateSelector(project)
                     };
                 }
                 else if (project.IsSolutionFolder()) {

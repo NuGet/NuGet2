@@ -8,7 +8,7 @@ namespace NuGet.Dialog {
         private readonly ICollection<ProjectNodeBase> _children;
         private bool _suppressPropagatingIsSelectedProperty;
         private bool _isExpanded = true;
-        
+
         public FolderNode(string name, ICollection<ProjectNodeBase> children) :
             base(name) {
 

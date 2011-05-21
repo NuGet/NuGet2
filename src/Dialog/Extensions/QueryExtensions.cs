@@ -19,7 +19,7 @@ namespace NuGet.Dialog.Extensions {
 
             // Get the property being sorted on
             PropertyInfo propertyInfo = GetProperty(source.ElementType, sortProperties.First(), knownTypes);
-            
+
             Debug.Assert(propertyInfo != null, "Unable to find property");
 
             // Make a parameter expression with the element type
@@ -45,7 +45,7 @@ namespace NuGet.Dialog.Extensions {
                     Expression.Property(convertExpression, propertyInfo)
                 );
             }
-            
+
             // Build the expression p => p.PropertyName or p => String.Concat(p.Property1, p.Property2, ... )
             LambdaExpression lambda = Expression.Lambda(expression, parameter);
 

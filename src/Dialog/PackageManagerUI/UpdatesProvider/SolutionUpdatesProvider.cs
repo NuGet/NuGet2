@@ -35,10 +35,10 @@ namespace NuGet.Dialog.Providers {
             _activePackageManager = activePackageManager;
 
             activePackageManager.UpdatePackage(
-                item.PackageIdentity.Id, 
-                item.PackageIdentity.Version, 
-                updateDependencies: true, 
-                logger: this, 
+                item.PackageIdentity.Id,
+                item.PackageIdentity.Version,
+                updateDependencies: true,
+                logger: this,
                 packageOperationEventListener: this);
 
             return true;

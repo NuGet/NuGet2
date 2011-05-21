@@ -18,7 +18,7 @@ namespace NuGet.Dialog {
         public IEnumerable<Project> ShowProjectSelectorWindow(Func<Project, bool> checkedStateSelector) {
             if (!_uiDispatcher.CheckAccess()) {
                 // Use Invoke() here to block the worker thread
-                object result = _uiDispatcher.Invoke( 
+                object result = _uiDispatcher.Invoke(
                     new Func<Func<Project, bool>, IEnumerable<Project>>(ShowProjectSelectorWindow),
                     checkedStateSelector);
 

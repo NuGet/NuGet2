@@ -122,7 +122,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     ISolutionManager solutionManager) {
 
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
-            
+
             IPackageRepository localRepository;
             Project activeProject;
 

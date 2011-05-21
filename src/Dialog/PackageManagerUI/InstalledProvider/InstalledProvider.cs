@@ -19,7 +19,7 @@ namespace NuGet.Dialog.Providers {
         private readonly Project _project;
 
         public InstalledProvider(
-            IVsPackageManager packageManager, 
+            IVsPackageManager packageManager,
             Project project,
             IPackageRepository localRepository,
             ResourceDictionary resources,
@@ -84,7 +84,7 @@ namespace NuGet.Dialog.Providers {
                 throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
             }
 
-            UninstallPackageFromProject(_project, item);           
+            UninstallPackageFromProject(_project, item);
             return true;
         }
 

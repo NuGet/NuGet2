@@ -23,10 +23,10 @@ namespace NuGet.Dialog.Providers {
             IPackageSourceProvider packageSourceProvider,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager) : 
+            ISolutionManager solutionManager) :
             base(
-                localRepository, 
-                resources, 
+                localRepository,
+                resources,
                 packageRepositoryFactory,
                 packageSourceProvider,
                 packageManagerFactory,
