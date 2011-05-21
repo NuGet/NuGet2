@@ -133,7 +133,7 @@ namespace NuGetConsole.Host.PowerShell {
 
             return sb.ToString();
         }
-        
+
         private bool IsEscapeSequence() {
             return CurrentChar == '`' && Array.IndexOf(_escapeChars, NextChar) >= 0;
         }

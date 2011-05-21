@@ -86,12 +86,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         public override KeyInfo ReadKey(ReadKeyOptions options) {
             // NOTE: readkey options are ignored as they are not really usable or applicable in PM console.
-            
+
             VsKeyInfo keyInfo = Console.Dispatcher.WaitKey();
 
             if (keyInfo == null) {
                 // abort current pipeline (ESC pressed)
-                throw new PipelineStoppedException(); 
+                throw new PipelineStoppedException();
             }
 
             ControlKeyStates states = default(ControlKeyStates);
@@ -101,7 +101,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             states |= (keyInfo.AltPressed ? ControlKeyStates.LeftAltPressed : 0); // assume LEFT alt
             states |= (keyInfo.ControlPressed ? ControlKeyStates.LeftCtrlPressed : 0); // assume LEFT ctrl
 
-            return new KeyInfo(keyInfo.VirtualKey, keyInfo.KeyChar, states, keyDown:(keyInfo.KeyStates == KeyStates.Down));
+            return new KeyInfo(keyInfo.VirtualKey, keyInfo.KeyChar, states, keyDown: (keyInfo.KeyStates == KeyStates.Down));
         }
 
         public override void ScrollBufferContents(Rectangle source, Coordinates destination, Rectangle clip, BufferCell fill) {

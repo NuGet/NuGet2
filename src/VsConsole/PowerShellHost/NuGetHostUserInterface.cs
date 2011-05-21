@@ -73,7 +73,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     }
                 }
                 return builder.ToString();
-            } finally {
+            }
+            finally {
                 WriteLine(String.Empty);
             }
         }

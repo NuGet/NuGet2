@@ -1,6 +1,3 @@
-using System.Collections.Concurrent;
-using System.Management.Automation.Host;
-using System.Management.Automation.Runspaces;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     public static class PowerShellHostService {
@@ -8,9 +5,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private static readonly IRunspaceManager _runspaceManager = new RunspaceManager();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability", 
+            "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
-            Justification="Can't dispose an object if we want to return it.")]
+            Justification = "Can't dispose an object if we want to return it.")]
         public static IHost CreateHost(string name, bool isAsync) {
             IHost host;
             if (isAsync) {
@@ -21,6 +18,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
 
             return host;
-        }        
+        }
     }
 }

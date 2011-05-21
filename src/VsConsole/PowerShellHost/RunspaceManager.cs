@@ -38,17 +38,17 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability", 
+            "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
-            Justification="We can't dispose it if we want to return it.")]
+            Justification = "We can't dispose it if we want to return it.")]
         private static Tuple<Runspace, NuGetPSHost> CreateRunspace(IConsole console, string hostName) {
             DTE dte = ServiceLocator.GetInstance<DTE>();
 
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
             initialSessionState.Variables.Add(
                 new SessionStateVariableEntry(
-                    "DTE", 
-                    (DTE2)dte, 
+                    "DTE",
+                    (DTE2)dte,
                     "Visual Studio DTE automation object",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant)
             );

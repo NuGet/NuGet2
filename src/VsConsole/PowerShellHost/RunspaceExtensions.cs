@@ -20,16 +20,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability", 
+            "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
-            Justification="It is disposed in the StateChanged event handler.")]
+            Justification = "It is disposed in the StateChanged event handler.")]
         public static Pipeline InvokeAsync(
-            this Runspace runspace, 
-            string command, 
-            object[] inputs, 
-            bool outputResults, 
+            this Runspace runspace,
+            string command,
+            object[] inputs,
+            bool outputResults,
             EventHandler<PipelineStateEventArgs> pipelineStateChanged) {
-            
+
             if (string.IsNullOrEmpty(command)) {
                 throw new ArgumentNullException("command");
             }

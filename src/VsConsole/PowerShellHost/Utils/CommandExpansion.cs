@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 
 namespace NuGetConsole.Host {
-    
+
     /// <summary>
     /// Common ITabExpansion based command expansion implementation.
     /// </summary>
