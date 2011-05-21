@@ -112,7 +112,7 @@
     <MakeDir Directories="$(OutputPath)Merged" Condition="!Exists('$(OutputPath)Merged')" />
     <Delete Files="$(ILMergeOutputFilePath)" Condition="Exists($(ILMergeOutputFilePath))" />
     <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
-    <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:&quot;Merged\$(ILMergeOutputFile)&quot; /log:&quot;$(ILMergeArtifactDirectory)\ilmerge.msbuild.log&quot; /ndebug /allowDup NuGet.exe NuGet.Core.dll" WorkingDirectory="$(OutputPath)" />
+    <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:&quot;Merged\$(ILMergeOutputFile)&quot; /log:&quot;Merged\ilmerge.msbuild.log&quot; /ndebug /allowDup NuGet.exe NuGet.Core.dll" WorkingDirectory="$(OutputPath)" />
   </Target>
   <Target Name="AfterBuild">
     <CallTarget Targets="MergeExecutable" />
