@@ -10,7 +10,7 @@ namespace NuGet.VisualStudio {
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
         [ImportingConstructor]
-        public VsPackageSourceRepository(IPackageRepositoryFactory repositoryFactory, 
+        public VsPackageSourceRepository(IPackageRepositoryFactory repositoryFactory,
                                          IVsPackageSourceProvider packageSourceProvider) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");

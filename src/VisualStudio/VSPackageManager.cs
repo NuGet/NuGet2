@@ -66,11 +66,11 @@ namespace NuGet.VisualStudio {
         }
 
         public void InstallPackage(
-            IEnumerable<Project> projects, 
-            IPackage package, 
-            IEnumerable<PackageOperation> operations, 
-            bool ignoreDependencies, 
-            ILogger logger, 
+            IEnumerable<Project> projects,
+            IPackage package,
+            IEnumerable<PackageOperation> operations,
+            bool ignoreDependencies,
+            ILogger logger,
             IPackageOperationEventListener packageOperationEventListener) {
 
             if (package == null) {
@@ -140,10 +140,10 @@ namespace NuGet.VisualStudio {
             }
 
             ExecuteOperatonsWithPackage(
-                projectManager, 
-                package, 
-                operations, 
-                () => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies), 
+                projectManager,
+                package,
+                operations,
+                () => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies),
                 logger);
         }
 

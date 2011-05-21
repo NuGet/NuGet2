@@ -1,5 +1,4 @@
 using EnvDTE80;
-using EnvDTE;
 
 namespace NuGet.VisualStudio {
     public interface ISourceControlFileSystemProvider {

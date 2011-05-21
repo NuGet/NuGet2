@@ -448,7 +448,7 @@ namespace NuGet.VisualStudio {
             }
             return name;
         }
-        
+
         private class PathComparer : IEqualityComparer<string> {
             public static readonly PathComparer Default = new PathComparer();
             public bool Equals(string x, string y) {

@@ -19,7 +19,7 @@ namespace NuGet.VisualStudio {
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
 
-        [ImportingConstructor]        
+        [ImportingConstructor]
         public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");

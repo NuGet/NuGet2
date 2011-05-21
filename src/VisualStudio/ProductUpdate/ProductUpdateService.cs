@@ -19,7 +19,7 @@ namespace NuGet.VisualStudio {
         private readonly IProductUpdateSettings _productUpdateSettings;
         private IUpdateWorker _updateWorker;
         private DTE _dte;
-        
+
         private bool _updateDeclined;
         private bool _updateAccepted;
 
@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio {
         }
 
         public ProductUpdateService(
-            IVsUIShell vsUIShell, 
+            IVsUIShell vsUIShell,
             IProductUpdateSettings productUpdateSettings,
             DTE dte) {
             if (productUpdateSettings == null) {

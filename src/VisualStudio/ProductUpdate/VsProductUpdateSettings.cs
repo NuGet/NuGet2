@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 namespace NuGet.VisualStudio.ProductUpdate {
 
     [Export(typeof(IProductUpdateSettings))]
-    public class VsProductUpdateSettings : SettingsManagerBase, IProductUpdateSettings  {
+    public class VsProductUpdateSettings : SettingsManagerBase, IProductUpdateSettings {
         private const string SettingsRoot = "NuGet";
         private const string CheckUpdatePropertyName = "ShouldCheckForUpdate";
 
@@ -12,8 +12,8 @@ namespace NuGet.VisualStudio.ProductUpdate {
             this(ServiceLocator.GetInstance<IServiceProvider>()) {
         }
 
-        public VsProductUpdateSettings(IServiceProvider serviceProvider) : 
-            base(serviceProvider){
+        public VsProductUpdateSettings(IServiceProvider serviceProvider) :
+            base(serviceProvider) {
         }
 
         public bool ShouldCheckForUpdate {

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     public partial class ProductUpdateBar : UserControl {
@@ -17,7 +15,7 @@ namespace NuGet.VisualStudio {
             if (productUpdateService == null) {
                 throw new ArgumentNullException("productUpdateService");
             }
-            
+
             _productUpdateService = productUpdateService;
             _productUpdateService.UpdateAvailable += OnUpdateAvailable;
         }

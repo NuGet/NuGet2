@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.VisualStudio;
 
 namespace NuGet.VisualStudio {
     public static class MessageHelper {
@@ -31,7 +30,7 @@ namespace NuGet.VisualStudio {
             ShowErrorMessage((exception.InnerException ?? exception).Message, title);
         }
 
-        public static void ShowErrorMessage(string message, string title ) {
+        public static void ShowErrorMessage(string message, string title) {
             VsShellUtilities.ShowMessageBox(
                 ServiceLocator.GetInstance<IServiceProvider>(),
                 message,

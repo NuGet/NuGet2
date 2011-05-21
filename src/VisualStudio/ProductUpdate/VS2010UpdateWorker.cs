@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio {
             if (extensionRepository == null) {
                 throw new ArgumentNullException("extensionRepository");
             }
-            
+
             _extensionManager = extensionManager;
             _extensionRepository = extensionRepository;
         }

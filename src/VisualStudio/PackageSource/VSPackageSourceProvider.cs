@@ -14,7 +14,7 @@ namespace NuGet.VisualStudio {
         internal const string FileSettingsActiveSectionName = "activePackageSource";
         internal const string DefaultPackageSource = "https://go.microsoft.com/fwlink/?LinkID=206669";
         internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
-        
+
         private readonly IPackageSourceSettingsManager _registrySettingsManager;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISettings _fileSettingsManager;
@@ -23,12 +23,12 @@ namespace NuGet.VisualStudio {
         private PackageSource _activePackageSource;
 
         [ImportingConstructor]
-        public VsPackageSourceProvider(IPackageSourceSettingsManager registrySettingsManager) : 
+        public VsPackageSourceProvider(IPackageSourceSettingsManager registrySettingsManager) :
             this(registrySettingsManager, Settings.UserSettings, PackageSourceProvider.Default) {
         }
 
         internal VsPackageSourceProvider(
-            IPackageSourceSettingsManager registrySettingsManager, 
+            IPackageSourceSettingsManager registrySettingsManager,
             ISettings fileSettingsManager,
             IPackageSourceProvider packageSourceProvider) {
 
@@ -112,13 +112,13 @@ namespace NuGet.VisualStudio {
             ActivePackageSource = null;
             _packageSources.Clear();
             _packageSources.AddRange(sources.Where(p => !IsAggregateSource(p)));
-            
+
             PersistPackageSources();
         }
 
         private void PersistPackageSources() {
             // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
-            
+
             // assert that we are not saving aggregate source
             Debug.Assert(!_packageSources.Any(p => IsAggregateSource(p.Name, p.Source)));
             _packageSourceProvider.SavePackageSources(_packageSources);
@@ -183,7 +183,7 @@ namespace NuGet.VisualStudio {
                 // and do the migration here, deleting the property in VS registry
                 _registrySettingsManager.ActivePackageSourceString = null;
             }
-            
+
             if (packageSource != null) {
                 // this is to guard against corrupted VS user settings store
                 AddPackageSource(packageSource);

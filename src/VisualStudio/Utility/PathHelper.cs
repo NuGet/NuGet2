@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio {
 
             // get the leaf folder name of this directory path
             // e.g. if the path is C:\documents\projects\visualstudio\, we want to get the 'visualstudio' part.
-            string folder = path.Split(new [] { Path.DirectorySeparatorChar}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? String.Empty;
+            string folder = path.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? String.Empty;
             // surround the folder name with the pair of \ characters.
             folder = Path.DirectorySeparatorChar + folder + Path.DirectorySeparatorChar;
 

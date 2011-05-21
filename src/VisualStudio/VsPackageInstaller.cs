@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio {
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
         [ImportingConstructor]
-        public VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory, 
+        public VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                   IScriptExecutor scriptExecutor,
                                   IPackageRepositoryFactory repositoryFactory) {
             _packageManagerFactory = packageManagerFactory;
@@ -25,7 +25,7 @@ namespace NuGet.VisualStudio {
             }
 
             IPackageRepository repository = _repositoryFactory.CreateRepository(source);
-            InstallPackage(repository, project, packageId, version, ignoreDependencies);            
+            InstallPackage(repository, project, packageId, version, ignoreDependencies);
         }
 
         internal void InstallPackage(IPackageRepository repository, Project project, string packageId, Version version, bool ignoreDependencies) {

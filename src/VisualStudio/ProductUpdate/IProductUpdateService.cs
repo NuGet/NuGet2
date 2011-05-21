@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using System;
+﻿using System;
 
 namespace NuGet.VisualStudio {
     public interface IProductUpdateService {

@@ -16,7 +16,7 @@ namespace NuGet.VisualStudio {
 
         // We need another dictionary for short names since there may be more than project name per short name
         private readonly Dictionary<string, HashSet<ProjectName>> _shortNameCache = new Dictionary<string, HashSet<ProjectName>>(StringComparer.OrdinalIgnoreCase);
- 
+
         /// <summary>
         /// Finds a project by short name, unique name or custom unique name.
         /// </summary>

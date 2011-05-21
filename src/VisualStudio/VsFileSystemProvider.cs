@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio {
         private readonly IComponentModel _componentModel;
 
         public VsFileSystemProvider()
-            : this(ServiceLocator.GetInstance<DTE>(), 
+            : this(ServiceLocator.GetInstance<DTE>(),
                    ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>()) {
         }
 

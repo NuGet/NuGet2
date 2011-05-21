@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Windows.Input;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGetConsole;

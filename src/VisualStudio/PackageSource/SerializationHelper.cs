@@ -6,7 +6,7 @@ using System.Text;
 namespace NuGet.VisualStudio {
 
     internal static class SerializationHelper {
-        
+
         public static string Serialize<T>(T objectGraph) where T : class {
             if (objectGraph == null) {
                 return String.Empty;
@@ -35,7 +35,7 @@ namespace NuGet.VisualStudio {
                 byte[] buffer = Encoding.UTF8.GetBytes(serializedString);
                 stream.Write(buffer, 0, buffer.Length);
                 stream.Seek(0, SeekOrigin.Begin);
-                
+
                 return (T)serializer.ReadObject(stream);
             }
         }

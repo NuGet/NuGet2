@@ -3,8 +3,8 @@
 namespace NuGet.VisualStudio {
     internal sealed class PersistencePackageMetadata : IPersistencePackageMetadata {
 
-        public PersistencePackageMetadata(string id, string version, DateTime lastUsedDate) : 
-            this(id, new Version(version), lastUsedDate){
+        public PersistencePackageMetadata(string id, string version, DateTime lastUsedDate) :
+            this(id, new Version(version), lastUsedDate) {
         }
 
         public PersistencePackageMetadata(string id, string version) :
