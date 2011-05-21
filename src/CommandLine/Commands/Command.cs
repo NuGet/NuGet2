@@ -54,19 +54,19 @@ namespace NuGet.Commands {
         public virtual CommandAttribute GetCommandAttribute() {
             var attributes = GetType().GetCustomAttributes(typeof(CommandAttribute), true);
             if (attributes.Any()) {
-                return (CommandAttribute) attributes.FirstOrDefault();
+                return (CommandAttribute)attributes.FirstOrDefault();
             }
 
             // Use the command name minus the suffix if present and default description
             string name = GetType().Name;
             int idx = name.LastIndexOf(CommandSuffix, StringComparison.OrdinalIgnoreCase);
-            if(idx >= 0){
+            if (idx >= 0) {
                 name = name.Substring(0, idx);
             }
             if (!String.IsNullOrEmpty(name)) {
                 return new CommandAttribute(name, NuGetResources.DefaultCommandDescription);
             }
             return null;
-        } 
+        }
     }
 }

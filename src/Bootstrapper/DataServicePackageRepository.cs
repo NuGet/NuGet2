@@ -13,8 +13,8 @@ namespace NuGet {
             : this(new HttpClient(serviceRoot)) {
         }
 
-        public DataServicePackageRepository(IHttpClient client){
-            if(client == null) {
+        public DataServicePackageRepository(IHttpClient client) {
+            if (client == null) {
                 throw new ArgumentNullException("client");
             }
 

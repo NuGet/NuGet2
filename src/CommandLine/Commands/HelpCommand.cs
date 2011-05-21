@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Linq;
@@ -119,7 +118,7 @@ namespace NuGet.Commands {
                     Console.Write(" {0, -" + (maxOptionWidth + 2) + "}", o.Value.Name +
                         (CommandLineUtility.IsMultiValuedProperty(o.Value) ? " +" : String.Empty));
                     Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", GetAltText(o.Key.AltName));
-                    
+
                     Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
 
                 }

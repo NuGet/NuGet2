@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -8,7 +7,7 @@ namespace NuGet.Commands {
         UsageSummaryResourceName = "PublishCommandUsageSummary")]
     public class PublishCommand : Command {
 
-        
+
 
         [Option(typeof(NuGetResources), "PublishCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }

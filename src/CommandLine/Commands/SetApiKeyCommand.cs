@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -32,11 +29,11 @@ namespace NuGet.Commands {
 
             var settings = Settings.UserSettings;
             settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, galleryServerUrl, apiKey);
-            
+
             // Setup the symbol server key
             if (setSymbolServerKey) {
                 settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, GalleryServer.DefaultSymbolServerUrl, apiKey);
-                Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved, 
+                Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
                                   CommandLineUtility.GetSourceDisplayName(galleryServerUrl),
                                   CommandLineUtility.GetSourceDisplayName(GalleryServer.DefaultSymbolServerUrl));
