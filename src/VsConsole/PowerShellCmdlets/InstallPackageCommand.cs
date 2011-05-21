@@ -17,14 +17,14 @@ namespace NuGet.PowerShell.Commands {
         public InstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IPackageRepositoryFactory>(), 
+                   ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>()) {
         }
 
         public InstallPackageCommand(
-            ISolutionManager solutionManager, 
+            ISolutionManager solutionManager,
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepositoryFactory repositoryFactory,
             IVsPackageSourceProvider packageSourceProvider,

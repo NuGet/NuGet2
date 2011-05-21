@@ -5,7 +5,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
 
-    [Cmdlet(VerbsCommon.Open, "PackagePage", DefaultParameterSetName=ParameterAttribute.AllParameterSets, SupportsShouldProcess=true)]
+    [Cmdlet(VerbsCommon.Open, "PackagePage", DefaultParameterSetName = ParameterAttribute.AllParameterSets, SupportsShouldProcess = true)]
     public class OpenPackagePageCommand : NuGetBaseCommand {
 
         private readonly IPackageRepositoryFactory _repositoryFactory;
@@ -17,7 +17,7 @@ namespace NuGet.PowerShell.Commands {
         }
 
         public OpenPackagePageCommand(IPackageRepositoryFactory repositoryFactory,
-                                IVsPackageSourceProvider packageSourceProvider) 
+                                IVsPackageSourceProvider packageSourceProvider)
             : base(null, null, null) {
             if (repositoryFactory == null) {
                 throw new ArgumentNullException("repositoryFactory");
@@ -68,7 +68,7 @@ namespace NuGet.PowerShell.Commands {
 
                 if (targetUrl != null) {
                     OpenUrl(targetUrl);
-                    
+
                     if (PassThru.IsPresent) {
                         WriteObject(targetUrl);
                     }

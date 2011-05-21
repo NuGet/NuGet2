@@ -17,7 +17,7 @@ namespace NuGet.PowerShell.Commands {
         /// <param name="exists">Returns null if not tested, or a bool representing path existence.</param>
         /// <param name="errorMessage">If translation failed, contains the reason.</param>
         /// <returns>True if successfully translated, false if not.</returns>        
-        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification="Following BCL TryParse pattern.")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "Following BCL TryParse pattern.")]
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "Following BCL TryParse pattern.")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "ps is a common powershell prefix")]
         public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage) {
@@ -56,7 +56,7 @@ namespace NuGet.PowerShell.Commands {
                     path = session.Path.GetUnresolvedProviderPathFromPSPath(psPath, out provider, out drive);
 
                     // ensure path is on the filesystem (not registry, certificate, variable etc.)
-                    if (provider.ImplementingType != typeof (FileSystemProvider)) {
+                    if (provider.ImplementingType != typeof(FileSystemProvider)) {
                         errorMessage = Resources.Cmdlet_InvalidProvider;
                     }
                     else {

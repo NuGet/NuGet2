@@ -19,7 +19,7 @@ namespace NuGet.PowerShell.Commands {
 
         public NewPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
-                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(), 
+                   ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>()) {
         }
 
@@ -119,7 +119,7 @@ namespace NuGet.PowerShell.Commands {
         private string GetTargetFilePath(Project projectIns, PackageBuilder builder) {
             // Get the output file path
             string outputFilePath = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);
-            
+
             bool fileExists = File.Exists(outputFilePath);
             // prevent overwrite if -NoClobber specified
             if (fileExists && NoClobber.IsPresent) {
@@ -133,7 +133,7 @@ namespace NuGet.PowerShell.Commands {
                     category: ErrorCategory.PermissionDenied,
                     target: TargetFile);
             }
-                        
+
             return outputFilePath;
         }
 

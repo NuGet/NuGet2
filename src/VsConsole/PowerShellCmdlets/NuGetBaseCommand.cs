@@ -181,7 +181,7 @@ namespace NuGet.PowerShell.Commands {
 
                 // Treat every name as a wildcard; results in simpler code
                 var pattern = new WildcardPattern(projectName, WildcardOptions.IgnoreCase);
-                
+
                 var matches = from s in allValidProjectNames
                               where pattern.IsMatch(s)
                               select _solutionManager.GetProject(s);
