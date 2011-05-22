@@ -39,6 +39,7 @@
         <KeyBinding Key="P" Modifiers="Control" Command="{Binding PublishCommand, FallbackValue={StaticResource DisabledCommand}}" />
         <KeyBinding Key="F2" Command="{Binding RenameContentCommand}" />
         <KeyBinding Key="Del" Command="{Binding DeleteContentCommand}" />
+        <KeyBinding Key="Enter"  Command="{Binding ViewContentCommand}" />
     </Window.InputBindings>
     
     <DockPanel x:Name="RootLayout" LastChildFill="False">
@@ -137,7 +138,7 @@
             </MenuItem>
 
             <MenuItem Header="_Content" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}">
-                <MenuItem Header="View File _Content" Command="{Binding ViewContentCommand}" />
+                <MenuItem Header="View File _Content" Command="{Binding ViewContentCommand}" InputGestureText="Enter" />
                 <MenuItem Header="Open File in Window_s shell..." Command="{Binding OpenContentFileCommand}" />
                 <Separator />
                 <MenuItem Header="_Add">
