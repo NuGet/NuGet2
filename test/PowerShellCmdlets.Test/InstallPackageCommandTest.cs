@@ -1,6 +1,5 @@
 using System;
 using System.Management.Automation;
-using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -73,7 +72,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            
+
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
             cmdlet.Id = "my-id";
             cmdlet.Version = new Version("2.8");

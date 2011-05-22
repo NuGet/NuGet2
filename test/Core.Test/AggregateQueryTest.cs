@@ -33,7 +33,7 @@ namespace NuGet.Test {
                 GetInvalidSequence("B"),
                 Enumerable.Range(0, 3).Select(i => i + "C").AsQueryable(),
             };
-            
+
             // Act and Assert
             ExceptionAssert.Throws<AggregateException>(
                 () => new AggregateQuery<string>(sources, StringComparer.Ordinal, ignoreFailures: false).OrderBy(c => c).ToArray());

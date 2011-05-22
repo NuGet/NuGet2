@@ -163,7 +163,7 @@ namespace NuGet.Test {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
             PackageSource source1 = new PackageSource("Source", "SourceName"), source2 = new PackageSource("http://www.test.com", "Baz");
-            sources.Setup(c => c.LoadPackageSources()).Returns(new[] {  source1, source2 });
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { source1, source2 });
 
             // Act
             var result1 = sources.Object.ResolveSource("http://www.test.com");
@@ -186,7 +186,7 @@ namespace NuGet.Test {
 
             // Act
             var result = sources.Object.ResolveSource(source);
-            
+
             // Assert
             Assert.AreEqual(source, result);
         }

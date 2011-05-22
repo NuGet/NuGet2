@@ -4,7 +4,7 @@ using NuGetConsole.Host.PowerShell;
 
 namespace PowerShellHost.Test {
     [TestClass]
-    public class CommandParserTest {        
+    public class CommandParserTest {
         [TestMethod]
         public void NullCommandThrows() {
             ExceptionAssert.ThrowsArgNull(() => CommandParser.Parse(null), "command");

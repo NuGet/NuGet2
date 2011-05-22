@@ -26,8 +26,8 @@ namespace NuGet.Test {
                                  content,
                                  CreateAssemblyReferences(assemblyReferences),
                                  tools,
-                                 dependencies, 
-                                 rating, 
+                                 dependencies,
+                                 rating,
                                  description);
         }
 

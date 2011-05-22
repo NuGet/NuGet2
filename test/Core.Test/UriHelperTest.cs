@@ -10,7 +10,7 @@ namespace NuGet.Test {
             Uri uri = UriUtility.CreatePartUri(@"a\b\c.txt");
 
             // Assert
-            Assert.AreEqual(new Uri("/a/b/c.txt", UriKind.Relative), uri); 
+            Assert.AreEqual(new Uri("/a/b/c.txt", UriKind.Relative), uri);
         }
 
         [TestMethod]

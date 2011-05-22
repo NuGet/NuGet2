@@ -160,7 +160,7 @@ namespace NuGet.Dialog.Test {
                 projectManager, It.IsAny<string>(), It.IsAny<Version>(), false, false, It.IsAny<ILogger>())).Callback(
                 () => projectManager.RemovePackageReference("A"));
             packageManager.Setup(p => p.GetProjectManager(It.IsAny<Project>())).Returns(projectManager);
-            
+
 
             var project = new Mock<Project>();
             var scriptExecutor = new Mock<IScriptExecutor>();
@@ -193,7 +193,7 @@ namespace NuGet.Dialog.Test {
         }
 
         private static InstalledProvider CreateInstalledProvider(
-            IVsPackageManager packageManager = null, 
+            IVsPackageManager packageManager = null,
             IPackageRepository localRepository = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
@@ -211,10 +211,10 @@ namespace NuGet.Dialog.Test {
             if (scriptExecutor == null) {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
-            
+
             var services = new ProviderServices(
                 null,
-                mockProgressWindowOpener.Object, 
+                mockProgressWindowOpener.Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
                 new Mock<IProjectSelectorService>().Object
@@ -229,11 +229,11 @@ namespace NuGet.Dialog.Test {
             }
 
             return new InstalledProvider(
-                packageManager, 
+                packageManager,
                 project,
                 localRepository,
-                new System.Windows.ResourceDictionary(), 
-                services, 
+                new System.Windows.ResourceDictionary(),
+                services,
                 new Mock<IProgressProvider>().Object,
                 solutionManager);
         }

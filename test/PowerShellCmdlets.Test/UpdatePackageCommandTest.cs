@@ -100,7 +100,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager); 
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             var mockPackageRepository = new MockPackageRepository();
             var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -205,7 +205,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
         }
 
-        
+
 
         private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources) {
             var sourceProvider = new Mock<IVsPackageSourceProvider>();

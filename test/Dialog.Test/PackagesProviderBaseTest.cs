@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

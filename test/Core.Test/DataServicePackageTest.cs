@@ -107,7 +107,7 @@ namespace NuGet.Test {
             var repository = new MockPackageRepository {
                 PackageUtility.CreatePackage("A", "1.2")
             };
-            
+
             // Act
             bool shouldUpdate = servicePackage.ShouldUpdatePackage(repository);
 

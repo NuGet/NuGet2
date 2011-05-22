@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Test;
-using System;
-using Moq;
 
 namespace NuGet.VisualStudio.Test {
     [TestClass]
@@ -187,7 +184,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var values = packageSourceProvider.LoadPackageSources().ToList();
-            
+
             // 11 = 10 package sources that we added + NuGet offical source
             Assert.AreEqual(11, values.Count);
             Assert.AreEqual(Resources.VsResources.OfficialSourceName, values[0].Name);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Linq;
+using System.Threading;
 using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -290,7 +290,7 @@ namespace NuGet.Dialog.Test {
                     packageB.Id,
                     packageB.Version,
                     false,
-                    provider), 
+                    provider),
                     Times.Never());
 
                 // Assert
@@ -299,7 +299,7 @@ namespace NuGet.Dialog.Test {
                     packageB.Id,
                     null,
                     false,
-                    false, 
+                    false,
                     provider),
                     Times.Never());
 

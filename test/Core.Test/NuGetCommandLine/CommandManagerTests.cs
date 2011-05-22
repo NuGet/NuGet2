@@ -22,7 +22,7 @@ namespace NuGet.Test.NuGetCommandLine {
         public void GetCommand_ThrowsIfNoCommandFound() {
             // Arrange
             CommandManager cm = new CommandManager();
-            
+
             // Act and Assert
             ExceptionAssert.Throws<CommandLineException>(() => cm.GetCommand("NoCommandByThisName"), "Unknown command: 'NoCommandByThisName'");
         }
@@ -80,10 +80,10 @@ namespace NuGet.Test.NuGetCommandLine {
             CommandManager cm = new CommandManager();
             ICommand cmd = new MockCommandEmptyAttributes();
             cm.RegisterCommand(cmd);
-            
+
             // Act
             var registeredCommands = cm.GetCommands();
-            
+
             // Assert
             Assert.IsFalse(registeredCommands.Any());
         }
@@ -92,7 +92,7 @@ namespace NuGet.Test.NuGetCommandLine {
         public void RegisterCommand_ReturnsExactMatchesEvenIfAmbigious() {
             // Arrange 
             CommandManager cm = new CommandManager();
-            
+
             cm.RegisterCommand(new MockCommand(new CommandAttribute("Foo", "desc")));
             cm.RegisterCommand(new MockCommand(new CommandAttribute("FooBar", "desc")));
 

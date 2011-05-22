@@ -27,7 +27,7 @@ namespace NuGet.Test.NuGetCommandLine {
             // Assert
             Assert.IsNull(actualItem);
         }
-        
+
         [TestMethod]
         public void ParseCommandLine_ThrowsCommandLineExpectionWhenUnknownCommand() {
             // Arrange 
@@ -72,7 +72,7 @@ namespace NuGet.Test.NuGetCommandLine {
             var ExpectedCommand = new MockCommand();
             var argsEnumerator = new List<string>() { "optionOne", "optionTwo" }.GetEnumerator();
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator );
+            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
             Assert.AreEqual(2, actualCommand.Arguments.Count);
             Assert.AreEqual("optionOne", actualCommand.Arguments[0]);
@@ -92,7 +92,7 @@ namespace NuGet.Test.NuGetCommandLine {
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
             var ExpectedCommand = new MockCommand();
             string expectedErrorMessage = "Unknown option: '/NotAnOption'";
-            var argsEnumerator = new List<string>() {"/NotAnOption"}.GetEnumerator();
+            var argsEnumerator = new List<string>() { "/NotAnOption" }.GetEnumerator();
             // Act & Assert
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
@@ -235,7 +235,7 @@ namespace NuGet.Test.NuGetCommandLine {
             var ExpectedCommand = new MockCommand();
             string expectedErrorMessage = "Unknown option: '/Count'";
             var argsEnumerator = new List<string>() { "/Count", "null" }.GetEnumerator();
-            
+
             // Act & Assert
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
@@ -298,7 +298,7 @@ namespace NuGet.Test.NuGetCommandLine {
 
             // Act
             parser.ExtractOptions(command, arguments.Split().AsEnumerable().GetEnumerator());
-            
+
             // Assert
             Assert.AreEqual(command.RegularProp, "RegularPropValue");
             Assert.AreEqual(command.ListProperty.Count, 3);
@@ -362,8 +362,8 @@ namespace NuGet.Test.NuGetCommandLine {
             public string RegularProp { get; set; }
 
             [Option("List property")]
-            public List<string> ListProperty { 
-                get { return _listProperty; } 
+            public List<string> ListProperty {
+                get { return _listProperty; }
             }
 
             public override void ExecuteCommand() {

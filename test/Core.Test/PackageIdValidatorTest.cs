@@ -1,7 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NuGet.Test {    
+namespace NuGet.Test {
     [TestClass]
     public class PackageIdValidatorTest {
         [TestMethod]

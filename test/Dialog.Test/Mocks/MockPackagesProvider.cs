@@ -8,7 +8,7 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {
 
-        public MockPackagesProvider() 
+        public MockPackagesProvider()
             : this(new Mock<IPackageRepository>().Object, new Mock<IVsPackageManager>().Object) {
         }
 

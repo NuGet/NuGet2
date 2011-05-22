@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Commands;
 
 namespace NuGet.Test.NuGetCommandLine {
@@ -31,7 +27,7 @@ namespace NuGet.Test.NuGetCommandLine {
         public void GetCommandAttributes_UsesCommandAttributesIfAvailable() {
             // Arrange
             var command = new MockCommandWithCommandAttributes();
-            
+
             // Act and Assert
             Assert.AreEqual(command.CommandAttribute.CommandName, "NameFromAttribute");
             Assert.AreEqual(command.CommandAttribute.Description, "DescFromAttribute");

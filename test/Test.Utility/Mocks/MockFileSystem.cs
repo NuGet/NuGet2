@@ -130,6 +130,6 @@ namespace NuGet.Test.Mocks {
 
         public virtual DateTimeOffset GetCreated(string path) {
             return DateTime.UtcNow;
-        } 
+        }
     }
 }

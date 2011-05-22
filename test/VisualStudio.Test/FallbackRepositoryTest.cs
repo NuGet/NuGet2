@@ -117,7 +117,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Act
             var repository = packageManagerFactory.CreateFallBackRepository(mockRepository1);
-            
+
             // Assert
             var fallbackRepo = repository as FallbackRepository;
             var aggregateRepo = (AggregateRepository)fallbackRepo.DependencyResolver;

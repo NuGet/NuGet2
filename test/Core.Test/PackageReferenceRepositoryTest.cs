@@ -163,7 +163,7 @@ namespace NuGet.Test {
             Assert.AreEqual(@"C:\MockFileSystem\packages.config", path);
         }
 
-        
+
         [TestMethod]
         public void GetPackagesReturnsPackagesFromSourceRepositoryListedInPackagesConfig() {
             // Arrange

@@ -5,7 +5,6 @@ using Moq;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
-using EnvDTE;
 
 namespace NuGet.Test.VisualStudio {
     [TestClass]

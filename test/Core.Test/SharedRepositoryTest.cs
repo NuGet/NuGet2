@@ -93,7 +93,7 @@ namespace NuGet.Test {
   <repository />
 </repositories>");
 
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\bar\baz");            
+            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\bar\baz");
             var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object) { CallBase = true };
             var r1 = new MockPackageRepository {
                 PackageUtility.CreatePackage("A")

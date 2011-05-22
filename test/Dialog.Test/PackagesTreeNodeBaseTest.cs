@@ -324,7 +324,7 @@ namespace NuGet.Dialog.Test {
 
             PackagesProviderBase provider = new MockPackagesProvider();
             return new MockTreeNode(parentTreeNode, provider, numberOfPackages);
-            
+
         }
 
         private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null) {

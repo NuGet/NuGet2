@@ -1,8 +1,8 @@
 namespace NuGet.Test {
     using System.IO;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using NuGet.Test.Mocks;
     using Moq;
+    using NuGet.Test.Mocks;
 
     [TestClass]
     public class FileSystemExtensionsTest {

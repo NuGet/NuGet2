@@ -5,7 +5,7 @@ using System.Management.Automation;
 
 namespace NuGet.PowerShell.Commands.Test {
     public class MockCommandRuntime : ICommandRuntime {
-        
+
         private readonly List<object> _output;
         private readonly List<ErrorRecord> _errors;
         private readonly List<string> _warnings;

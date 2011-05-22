@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -31,7 +26,7 @@ namespace PowerShellHost.Test {
             dispatcher = new ConsoleDispatcher(privateWpfConsole.Object);
             console.SetupGet(o => o.Dispatcher).Returns(dispatcher);
 
-            var host = new NuGetPSHost("Test") {ActiveConsole = console.Object};
+            var host = new NuGetPSHost("Test") { ActiveConsole = console.Object };
 
             mockRawUI = new Mock<NuGetRawUserInterface>(host);
             mockRawUI.CallBase = true;
@@ -63,7 +58,7 @@ namespace PowerShellHost.Test {
             // should the following WaitKey call fail
             bool queuedCancel = TryQueueCancel(dispatcher);
             Assert.IsTrue(queuedCancel);
-            
+
             // blocking
             VsKeyInfo keyInfo = dispatcher.WaitKey();
 
@@ -148,7 +143,7 @@ namespace PowerShellHost.Test {
             Assert.IsTrue(queuedCancel);
 
             SecureString secure = mockUI.Object.ReadLineAsSecureString();
-            
+
             IntPtr bstr = Marshal.SecureStringToBSTR(secure);
             string line = Marshal.PtrToStringBSTR(bstr);
             Marshal.FreeBSTR(bstr);

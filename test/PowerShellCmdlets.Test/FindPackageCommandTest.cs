@@ -8,7 +8,7 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 
 namespace NuGet.PowerShell.Commands.Test {
-    
+
     using PackageUtility = NuGet.Test.PackageUtility;
 
     [TestClass]
@@ -102,7 +102,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 PackageUtility.CreatePackage("Foobar", "0.4", description: "Awesome"),
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
-                
+
 
             var cmdlet = BuildCmdlet(packages: packages);
             cmdlet.Filter = "Awesome";

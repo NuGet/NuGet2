@@ -66,11 +66,11 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockPackageManager.Verify(p => p.InstallPackage(
-                    new Project[] { project1, project2 }, 
-                    packageB, 
-                    It.IsAny<IEnumerable<PackageOperation>>(), 
-                    false, 
-                    provider, 
+                    new Project[] { project1, project2 },
+                    packageB,
+                    It.IsAny<IEnumerable<PackageOperation>>(),
+                    false,
+                    provider,
                     provider), Times.Once());
 
                 manualEvent.Set();

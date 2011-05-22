@@ -758,7 +758,7 @@ Enabling license acceptance requires a license url.");
             // Act
             var builder = new PackageBuilder { Id = "test", Version = new Version("1.0"), Description = "test" };
             builder.Authors.Add("test");
-            foreach(var name in fileNames) {
+            foreach (var name in fileNames) {
                 builder.Files.Add(CreatePackageFile(name));
             }
 

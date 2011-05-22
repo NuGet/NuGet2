@@ -31,7 +31,7 @@ namespace NuGet.Test {
             Assert.AreSame(packageB, sortedPackages[1]);
             Assert.AreSame(packageA, sortedPackages[2]);
         }
-        
+
         [TestMethod]
         public void TestSortByDependencyComplex() {
 
@@ -42,7 +42,7 @@ namespace NuGet.Test {
             //      D    
 
             // Arrange
-            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new PackageDependency[] { new PackageDependency("B") } );
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new PackageDependency[] { new PackageDependency("B") });
             var packageB = PackageUtility.CreatePackage("B", "1.0", dependencies: new PackageDependency[] { new PackageDependency("D") });
             var packageC = PackageUtility.CreatePackage("C", "1.0", dependencies: new PackageDependency[] { new PackageDependency("D") });
             var packageD = PackageUtility.CreatePackage("D", "1.0");
@@ -51,7 +51,7 @@ namespace NuGet.Test {
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(p => p.GetPackages()).Returns(list.AsQueryable());
             var sorter = new PackageSorter();
-        
+
             // Act
             var sortedPackages = sorter.GetPackagesByDependencyOrder(mockRepository.Object).ToList();
 

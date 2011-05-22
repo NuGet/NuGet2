@@ -14,7 +14,7 @@ namespace NuGet.Test {
             // Act
 
             // Assert
-            Assert.IsNotNull(httpClient.ProxyFinder,"HttpClient.ProxyFinder is not initialized by default.");
+            Assert.IsNotNull(httpClient.ProxyFinder, "HttpClient.ProxyFinder is not initialized by default.");
             Assert.AreEqual(HttpClient.DefaultProxyFinder, httpClient.ProxyFinder);
         }
 
@@ -42,16 +42,16 @@ namespace NuGet.Test {
 
             // Act
             var request = httpClient.CreateRequest();
-            
+
             // Assert
-            Assert.AreEqual(request.Proxy,validProxy);
+            Assert.AreEqual(request.Proxy, validProxy);
         }
 
         [TestMethod]
         public void EmptyProviderListReturnsNullProxy() {
             // Arrange
             var httpClient = new HttpClient(new Uri("http://example.com"));
-            
+
             // Act
             httpClient.ProxyFinder = null;
             var request = httpClient.CreateRequest();

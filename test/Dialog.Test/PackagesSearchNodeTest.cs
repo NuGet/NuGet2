@@ -7,7 +7,7 @@ using NuGet.Dialog.Providers;
 namespace NuGet.Dialog.Test {
     [TestClass]
     public class PackagesSearchNodeTest {
-        
+
         [TestMethod]
         public void NamePropertyIsValid() {
             // Arrange

@@ -18,7 +18,7 @@ namespace NuGet.VisualStudio.Test {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             var repositorySettings = new RepositorySettings(solutionManager.Object, new Mock<IFileSystemProvider>().Object);
-            
+
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => { string s = repositorySettings.RepositoryPath; }, "Unable to locate the solution directory. Please ensure that the solution has been saved.");
         }

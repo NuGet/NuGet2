@@ -39,7 +39,7 @@ namespace NuGet.Dialog.Test {
 
             // Act
             var packages = node.GetPackages().ToList();
-            
+
             // Assert
             Assert.AreEqual(1, packages.Count);
             AssertPackage(packages[0], "A", "1.5");

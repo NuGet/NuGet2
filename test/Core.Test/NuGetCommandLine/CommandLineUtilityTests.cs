@@ -162,7 +162,7 @@ namespace NuGet.Test.NuGetCommandLine {
             public static string Message { get { return "This is a Message."; } }
             public static string MessageTwo { get { return "This is Message Two."; } }
             public static int NotValid { get { return 0; } }
-            public static string NoGet { private get { return "No Public Get."; } set{} }
+            public static string NoGet { private get { return "No Public Get."; } set { } }
         }
 
         private class MockClass { }

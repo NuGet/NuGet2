@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Test.Mocks;
 using Moq;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
     [TestClass]
@@ -435,7 +435,7 @@ namespace NuGet.Test {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            
+
             // A 1.0 -> B [1.0]
             IPackage A10 = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {

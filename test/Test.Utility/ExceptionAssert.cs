@@ -10,7 +10,7 @@ namespace NuGet.Test {
             Throws<TException>(act, ex => true);
         }
 
-        public static void Throws<TException>(Action act, Func<TException,bool> condition) where TException : Exception {
+        public static void Throws<TException>(Action act, Func<TException, bool> condition) where TException : Exception {
             Exception ex = Capture.Exception(act);
             Assert.IsNotNull(ex, "The expected exception was not thrown");
             Assert.IsInstanceOfType(ex, typeof(TException), "The exception thrown was not of the expected type");

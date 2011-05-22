@@ -12,7 +12,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingCtroWithNullFileSystemWithThrowException() {
             // Act & Assert
             ExceptionAssert.Throws<ArgumentNullException>(() => new UserSettings(null));
-        
+
         }
 
         [TestMethod]
@@ -54,7 +54,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<System.Xml.XmlException>(() => new UserSettings(mockFileSystem.Object));
 
         }
-        
+
         [TestMethod]
         public void UserSetting_CallingGetValuesWithNonExistantSectionReturnsNull() {
             // Arrange
@@ -136,7 +136,7 @@ namespace NuGet.Test {
             UserSettings settings = new UserSettings(mockFileSystem.Object);
 
             // Act
-            var result = settings.GetValue("NotTheSectionName","key1");
+            var result = settings.GetValue("NotTheSectionName", "key1");
 
             // Arrange 
             Assert.IsNull(result);
@@ -222,7 +222,7 @@ namespace NuGet.Test {
             var mockFileSystem = new Mock<IFileSystem>();
             var settings = new UserSettings(mockFileSystem.Object);
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("","SomeKey", "SomeValue"));
+            ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("", "SomeKey", "SomeValue"));
         }
 
         [TestMethod]
@@ -266,7 +266,7 @@ namespace NuGet.Test {
   <NewSectionName>
     <add key=""key"" value=""value"" />
   </NewSectionName>
-</configuration>", ms.ReadToEnd());        
+</configuration>", ms.ReadToEnd());
         }
 
         [TestMethod]
@@ -299,7 +299,7 @@ namespace NuGet.Test {
     <add key=""key"" value=""value"" />
     <add key=""keyTwo"" value=""valueTwo"" />
   </SectionName>
-</configuration>", ms.ReadToEnd());      
+</configuration>", ms.ReadToEnd());
         }
 
         [TestMethod]
@@ -340,7 +340,7 @@ namespace NuGet.Test {
             var mockFileSystem = new Mock<IFileSystem>();
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
             var settings = new UserSettings(mockFileSystem.Object);
-            
+
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("", values));
         }
@@ -360,7 +360,7 @@ namespace NuGet.Test {
             var mockFileSystem = new Mock<IFileSystem>();
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("", "value") };
             var settings = new UserSettings(mockFileSystem.Object);
-            
+
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("Section", values));
         }
@@ -582,7 +582,7 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             UserSettings settings = new UserSettings(mockFileSystem.Object);
 
-            
+
 
             // Act & Assert
             Assert.IsTrue(settings.DeleteValue("SectionName", "DeleteMe"));
@@ -594,7 +594,7 @@ namespace NuGet.Test {
   <SectionName2>
     <add key=""key"" value=""value"" />
   </SectionName2>
-</configuration>", ms.ReadToEnd());      
+</configuration>", ms.ReadToEnd());
         }
 
         [TestMethod]

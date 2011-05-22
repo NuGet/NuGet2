@@ -91,7 +91,7 @@ namespace NuGet.Test {
             // Arrange
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(@"A\A.nupkg");
-            
+
             var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem, enableCaching: false);
             var searchedPaths = new List<string>();
             Func<string, IPackage> openPackage = p => {

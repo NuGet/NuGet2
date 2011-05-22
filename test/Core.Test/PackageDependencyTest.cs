@@ -2,7 +2,7 @@
 
 namespace NuGet.Test {
     [TestClass]
-    public class PackageDependencyTest {       
+    public class PackageDependencyTest {
         [TestMethod]
         public void ToStringExactVersion() {
             // Arrange

@@ -27,7 +27,7 @@ namespace NuGet.Dialog.Test {
         public void GetPackagesReturnCorrectPackages() {
             // Arrange
             MockPackageRepository repository = new MockPackageRepository();
-            
+
             int numberOfPackages = 3;
             IPackage[] packages = new IPackage[numberOfPackages];
             for (int i = 0; i < numberOfPackages; i++) {

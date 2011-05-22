@@ -28,7 +28,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void ProjectionTest() {
             // Arrange
-            var mockContext = new Mock<IDataServiceContext>();            
+            var mockContext = new Mock<IDataServiceContext>();
             var mockStringQuery = new Mock<IDataServiceQuery<string>>();
             var mockIntQuery = new Mock<IDataServiceQuery<int>>();
             mockStringQuery.Setup(m => m.CreateQuery<int>(It.IsAny<Expression>())).Returns(mockIntQuery.Object);

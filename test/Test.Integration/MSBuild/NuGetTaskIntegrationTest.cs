@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Win32;
-using System.IO;
 
 namespace NuGet.Test.Integration.MSBuild {
     [TestClass]
@@ -20,7 +17,7 @@ namespace NuGet.Test.Integration.MSBuild {
         [TestInitialize]
         public void Initialize() {
             DeleteTestDirs();
-            
+
             Directory.CreateDirectory(_absolutePackageDir);
             Directory.CreateDirectory(_absolutePackageSourceDir);
             Directory.CreateDirectory(_packageSourceDir);

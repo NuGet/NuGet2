@@ -1,14 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
     [TestClass]
-    public class PreprocessorTest {        
+    public class PreprocessorTest {
         [TestMethod]
         public void TransformFileReplacesTokensWithValueAndReturnsModifiedStream() {
             // Arrange
@@ -51,7 +50,7 @@ namespace NuGet.Test {
             var processor = new Preprocessor();
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var mockFile = new Mock<IPackageFile>();
-            mockFile.Setup(m => m.Path).Returns("foo.bar.pp");           
+            mockFile.Setup(m => m.Path).Returns("foo.bar.pp");
             mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
 
             // Act

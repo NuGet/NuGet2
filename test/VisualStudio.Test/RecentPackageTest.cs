@@ -2,10 +2,9 @@
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace NuGet.VisualStudio.Test {
-    
+
     using PackageUtility = NuGet.Test.PackageUtility;
 
     [TestClass]

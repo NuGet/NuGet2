@@ -8,7 +8,7 @@ using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
     [TestClass]
-    public class UpdateCommandTest {        
+    public class UpdateCommandTest {
         [TestMethod]
         public void SelfUpdateNoCommandLinePackageOnServerThrows() {
             // Arrange
@@ -52,7 +52,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
             var updateCmd = new UpdateCommand(factory.Object);
-            updateCmd.Console  = consoleInfo.Console;
+            updateCmd.Console = consoleInfo.Console;
             updateCmd.Console = consoleInfo.Console;
 
             // Act & Assert

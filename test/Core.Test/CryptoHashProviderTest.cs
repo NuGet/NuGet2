@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test {
@@ -39,7 +37,7 @@ namespace NuGet.Test {
         public void CryptoHashProviderReturnsFalseIfHashValuesAreUnequal() {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
-            byte[] badBytes = Encoding.UTF8.GetBytes("this is a bad input");             
+            byte[] badBytes = Encoding.UTF8.GetBytes("this is a bad input");
             IHashProvider hashProvider = new CryptoHashProvider();
 
 
