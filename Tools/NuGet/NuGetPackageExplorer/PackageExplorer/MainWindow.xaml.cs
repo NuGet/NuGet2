@@ -21,7 +21,6 @@ namespace PackageExplorer {
     public partial class MainWindow : Window {
 
         private readonly IMruManager _mruManager;
-        private readonly IPackageViewModelFactory _packageViewModelFactory;
 
         [Import]
         public ISettingsManager SettingsManager { get; set; }
@@ -38,20 +37,24 @@ namespace PackageExplorer {
         [Import]
         public IPackageDownloader PackageDownloader { get; set; }
 
-        [Export]
-        public IPackageEditorService EditorService { get; set; }
-
         [Import]
         public IPluginManager PluginManager { get; set; }
 
+        [Import]
+        public IPackageChooser PackageChooser { get; set; }
+
+        [Import]
+        public IPackageViewModelFactory PackageViewModelFactory { get; set; }
+
+        [Export]
+        public IPackageEditorService EditorService { get; set; }
+
         [ImportingConstructor]
-        public MainWindow(IMruManager mruManager, IPackageViewModelFactory packageViewModelFactory) {
+        public MainWindow(IMruManager mruManager) {
             InitializeComponent();
             
             RecentFilesMenuItem.DataContext = _mruManager = mruManager;
             RecentFilesContainer.Collection = _mruManager.Files;
-
-            _packageViewModelFactory = packageViewModelFactory;
         }
 
         protected override void OnSourceInitialized(EventArgs e) {
@@ -101,7 +104,7 @@ namespace PackageExplorer {
             if (package != null) {
 
                 if (!RootLayout.LastChildFill) {
-                    var packageViewer = new PackageViewer(UIServices, _packageViewModelFactory);
+                    var packageViewer = new PackageViewer(UIServices, PackageChooser);
                     Grid.SetRow(packageViewer, 1);
                     RootLayout.Children.Add(packageViewer);
                     RootLayout.LastChildFill = true;
@@ -110,7 +113,7 @@ namespace PackageExplorer {
                     EditorService = packageViewer.PackageMetadataEditor;
                 }
 
-                DataContext = _packageViewModelFactory.CreateViewModel(package, packagePath);
+                DataContext = PackageViewModelFactory.CreateViewModel(package, packagePath);
                 if (!String.IsNullOrEmpty(packagePath)) {
                     _mruManager.NotifyFileAdded(package, packagePath, packageType);
                 }
@@ -174,35 +177,28 @@ namespace PackageExplorer {
                 return;
             }
 
-            var dialog = new PackageChooserDialog(_packageViewModelFactory.CreatePackageChooserViewModel()) {
-                Owner = this
-            };
+            PackageInfo selectedPackageInfo = PackageChooser.SelectPackage();
+            if (selectedPackageInfo != null) {
+                Version packageVersion = new Version(selectedPackageInfo.Version);
+                IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackageInfo.Id, packageVersion); ;
 
-            bool? result = dialog.ShowDialog();
-            if (result ?? false) {
-                PackageInfo selectedPackageInfo = dialog.SelectedPackage;
-                if (selectedPackageInfo != null) {
-                    Version packageVersion = new Version(selectedPackageInfo.Version);
-                    IPackage cachePackage = MachineCache.Default.FindPackage(selectedPackageInfo.Id, packageVersion); ;
+                Action<IPackage> processPackageAction = (package) => {
+                    DataServicePackage servicePackage = selectedPackageInfo.AsDataServicePackage();
+                    servicePackage.CorePackage = package;
+                    LoadPackage(servicePackage, selectedPackageInfo.DownloadUrl.ToString(), PackageType.DataServicePackage);
+                };
 
-                    Action<IPackage> processPackageAction = (package) => {
-                        DataServicePackage servicePackage = selectedPackageInfo.AsDataServicePackage();
-                        servicePackage.CorePackage = package;
-                        LoadPackage(servicePackage, selectedPackageInfo.DownloadUrl.ToString(), PackageType.DataServicePackage);
-                    };
-
-                    if (cachePackage == null || cachePackage.GetHash() != selectedPackageInfo.PackageHash) {
-                        PackageDownloader.Download(
-                            selectedPackageInfo.DownloadUrl,
-                            selectedPackageInfo.Id,
-                            packageVersion,
-                            ProxyService.Value,
-                            processPackageAction
-                        );
-                    }
-                    else {
-                        processPackageAction(cachePackage);
-                    }
+                if (cachePackage == null || cachePackage.GetHash() != selectedPackageInfo.PackageHash) {
+                    PackageDownloader.Download(
+                        selectedPackageInfo.DownloadUrl,
+                        selectedPackageInfo.Id,
+                        packageVersion,
+                        ProxyService.Value,
+                        processPackageAction
+                    );
+                }
+                else {
+                    processPackageAction(cachePackage);
                 }
             }
         }

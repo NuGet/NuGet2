@@ -95,11 +95,12 @@ namespace PackageExplorer {
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e) {
-            DialogResult = false;
+            PackageGrid.SelectedItem = null;
+            Hide();
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            DialogResult = true;
+            Hide();
         }
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
@@ -176,6 +177,16 @@ namespace PackageExplorer {
             }
 
             e.Handled = true;
+        }
+
+        private void StandardDialog_Closing(object sender, CancelEventArgs e) {
+            e.Cancel = true;
+            CancelButton_Click(this, null);
+        }
+
+        internal void ForceClose() {
+            this.Closing -= StandardDialog_Closing;
+            Close();
         }
     }
 }

@@ -16,11 +16,11 @@ namespace PackageExplorer {
     public partial class PackageViewer : UserControl {
         private const string PackageFileDataFormat = "PackageFileContent";
 
-        public PackageViewer(IUIServices messageBoxServices, IPackageViewModelFactory packageViewModelFactory) {
+        public PackageViewer(IUIServices messageBoxServices, IPackageChooser packageChooser) {
             InitializeComponent();
 
             PackageMetadataEditor.UIServices = messageBoxServices;
-            PackageMetadataEditor.PackageViewModelFactory = packageViewModelFactory;
+            PackageMetadataEditor.PackageChooser = packageChooser;
         }
 
         private void FileContentContainer_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {

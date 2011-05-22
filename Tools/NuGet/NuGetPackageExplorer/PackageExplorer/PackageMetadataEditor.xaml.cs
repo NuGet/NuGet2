@@ -21,7 +21,7 @@ namespace PackageExplorer {
         private EditableFrameworkAssemblyReference _newFrameworkAssembly;
 
         public IUIServices UIServices { get; set; }
-        public IPackageViewModelFactory PackageViewModelFactory { get; set; }
+        public IPackageChooser PackageChooser { get; set; }
 
         public PackageMetadataEditor() {
             InitializeComponent();
@@ -99,17 +99,11 @@ namespace PackageExplorer {
                     MessageLevel.Warning);
                 return;
             }
-
-            var dialog = new PackageChooserDialog(PackageViewModelFactory.CreatePackageChooserViewModel()) {
-                Owner = Window.GetWindow(this)
-            };
-            var result = dialog.ShowDialog();
-            if (result ?? false) {
-                var selectedPackage = dialog.SelectedPackage;
-                if (selectedPackage != null) {
-                    _newPackageDependency.Id = selectedPackage.Id;
-                    _newPackageDependency.VersionSpec = VersionUtility.ParseVersionSpec(selectedPackage.Version.ToString());
-                }
+            
+            var selectedPackage = PackageChooser.SelectPackage();
+            if (selectedPackage != null) {
+                _newPackageDependency.Id = selectedPackage.Id;
+                _newPackageDependency.VersionSpec = VersionUtility.ParseVersionSpec(selectedPackage.Version.ToString());
             }
         }
 
