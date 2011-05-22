@@ -100,7 +100,7 @@ namespace NuGet.Test.VisualStudio {
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), new MockPackageRepository());
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage(projectManager, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance), @"Unable to find package 'foo 1.0' in 'C:\MockFileSystem\'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage(projectManager, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance), @"Unable to find package 'foo' in 'C:\MockFileSystem\'.");
         }
 
         [TestMethod]

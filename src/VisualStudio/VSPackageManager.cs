@@ -333,6 +333,14 @@ namespace NuGet.VisualStudio {
                         // If the package doesn't exist in the project and is referenced by other projects
                         // then fail.
                         if (projectManager != null) {
+                            if (version == null) {
+                                throw new InvalidOperationException(
+                                        String.Format(CultureInfo.CurrentCulture,
+                                        VsResources.UnknownPackageInProject,
+                                        package.Id,
+                                        projectManager.Project.ProjectName));
+                            }
+
                             throw new InvalidOperationException(
                                     String.Format(CultureInfo.CurrentCulture,
                                     VsResources.UnknownPackageInProject,

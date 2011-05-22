@@ -136,7 +136,7 @@ function Test-UninstallPackageThatIsInstalledInAnotherProjectThrows {
     $p1 | Install-Package elmah -Version 1.1
 
     # Act & Assert
-    Assert-Throws { $p2 | Uninstall-Package elmah } "Unable to find package 'elmah 1.1' in '$($p2.Name)'."
+    Assert-Throws { $p2 | Uninstall-Package elmah } "Unable to find package 'elmah' in '$($p2.Name)'."
 }
 
 function Test-UninstallSolutionOnlyPackage {
