@@ -12,7 +12,7 @@ function Test-GetPackageListsInstalledPackages {
     $p = New-WebApplication
     
     # Act
-    Install-Package elmah -Project $p.Name
+    Install-Package elmah -Project $p.Name -Version 1.1
     Install-Package jQuery -Project $p.Name    
     $packages = Get-Package
     

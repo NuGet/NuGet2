@@ -42,7 +42,7 @@ function Test-RemovePackageRemovesPackageFromSolutionIfNotInUse {
     # Arrange
     $p1 = New-WebApplication
     
-    Install-Package elmah -Project $p1.Name
+    Install-Package elmah -Project $p1.Name -Version 1.1
     Assert-Reference $p1 elmah
     Assert-SolutionPackage elmah
     
@@ -56,7 +56,7 @@ function Test-UninstallingPackageWithConfigTransformWhenConfigReadOnly {
     # Arrange
     $p1 = New-WebApplication
     
-    Install-Package elmah -Project $p1.Name
+    Install-Package elmah -Project $p1.Name -Version 1.1
     Assert-Reference $p1 elmah
     Assert-SolutionPackage elmah
     attrib +R (Get-ProjectItemPath $p1 web.config)
@@ -158,7 +158,7 @@ function Test-UninstallSolutionOnlyPackage {
 function Test-UninstallPackageProjectLevelPackageThatsOnlyInstalledAtSolutionLevel {
     # Arrange
     $p = New-ClassLibrary
-    $p | Install-Package elmah
+    $p | Install-Package elmah -Version 1.1
     Remove-ProjectItem $p packages.config
     
     Assert-SolutionPackage elmah
@@ -275,7 +275,7 @@ function Test-UninstallPackageWorksWithPackagesHavingSameNames {
     $p5 = New-ConsoleApplication 'ProjectA'
 
     # Act
-    Get-Project -All | Install-Package elmah
+    Get-Project -All | Install-Package elmah -Version 1.1
     $all = @( $p1, $p2, $p3, $p4, $p5 )
     $all | % { Assert-Package $_ elmah }
 

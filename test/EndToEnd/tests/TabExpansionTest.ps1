@@ -71,7 +71,7 @@ function Test-TabExpansionForUninstallPackageShowSuggestionsForPackageId {
     # Arrange
     $project = New-ConsoleApplication
     Install-Package AntiXSS -Project $project.Name
-    Install-Package elmah -Project $project.Name
+    Install-Package elmah -Project $project.Name -Version 1.1
 
     # Act
     $suggestions = TabExpansion 'Uninstall-Package ' ''

@@ -278,7 +278,7 @@ function Test-InstallCanPipeToFSharpProjects {
     $p = New-FSharpLibrary
 
     # Act
-    $p | Install-Package elmah
+    $p | Install-Package elmah -Version 1.1
 
     # Assert
     Assert-Package $p elmah
@@ -501,7 +501,7 @@ function Test-InstallPackageWorksWithPackagesHavingSameNames {
     $p5 = New-ConsoleApplication 'ProjectA'
 
     # Act
-    Get-Project -All | Install-Package elmah
+    Get-Project -All | Install-Package elmah -Version 1.1
 
     # Assert
     $all = @( $p1, $p2, $p3, $p4, $p5 )

@@ -96,9 +96,6 @@ function global:Run-Test {
     $results = @()
     # The vshost that VS launches caues the functional tests to freeze sometimes so disable it
     [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
-
-    $savedErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
     
     try {
         # Run all tests
@@ -180,10 +177,7 @@ function global:Run-Test {
             }
         }
     }
-    finally {
-        # restore value of ErrorActionPreference to as before the running tests
-        $ErrorActionPreference = $savedErrorActionPreference
-
+    finally {        
         # Deleting tests
         rm function:\Test*
         

@@ -503,8 +503,9 @@ function Test-UpdateScenariosWithConstraints {
      
     # Act
     Update-Package A -Source $context.RepositoryPath
-    Update-Package C -Source $context.RepositoryPath
-    Update-Package F -Source $context.RepositoryPath
+    $gt = [char]0x2265
+    Assert-Throws { Update-Package C -Source $context.RepositoryPath } "Unable to resolve dependency 'D ($gt 2.0)'.'D' has an additional constraint (= 1.0) defined in packages.config."
+    Assert-Throws { Update-Package F -Source $context.RepositoryPath } "Updating 'F 1.0' failed. Unable to find a version of 'E' that is compatible with 'F 2.0'."
 
     # Assert
     Assert-Package $p1 A 1.0
