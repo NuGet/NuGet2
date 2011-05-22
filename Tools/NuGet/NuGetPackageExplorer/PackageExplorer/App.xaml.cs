@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Windows;
 using PackageExplorerViewModel;
+using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer {
     /// <summary>
@@ -12,13 +14,6 @@ namespace PackageExplorer {
 
         private CompositionContainer _container;
 
-        // %localappdata%/NuGet/PackageExplorerExtensions
-        private static readonly string ExtensionsDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "NuGet",
-            "PackageExplorerExtensions"
-        );
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal CompositionContainer Container {
             get {
@@ -26,17 +21,14 @@ namespace PackageExplorer {
                     var catalog1 = new AssemblyCatalog(typeof(App).Assembly);
                     var catalog2 = new AssemblyCatalog(typeof(PackageViewModel).Assembly);
                     var catalog = new AggregateCatalog(catalog1, catalog2);
-                    AddExtensionsCatalog(catalog);
+                    
                     _container = new CompositionContainer(catalog);
+
+                    // add PluginManager instance to be available as export to the rest of the app.
+                    _container.ComposeParts(new PluginManager(catalog));
                 }
 
                 return _container;
-            }
-        }
-
-        private void AddExtensionsCatalog(AggregateCatalog catalog) {
-            if (Directory.Exists(ExtensionsDirectory)) {
-                catalog.Catalogs.Add(new DirectoryCatalog(ExtensionsDirectory));
             }
         }
 

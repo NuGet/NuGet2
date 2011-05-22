@@ -2,6 +2,6 @@
 
 namespace NuGetPackageExplorer.Types {
     public interface IPackageContentViewer {
-        object GetView(Stream stream);
+        object GetView(string extension, Stream stream);
     }
 }

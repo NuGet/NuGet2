@@ -88,6 +88,7 @@
     <Compile Include="Types\IPackageContentViewerMetadata.cs" />
     <Compile Include="Types\IPackageDownloader.cs" />
     <Compile Include="Types\IPackageEditor.cs" />
+    <Compile Include="Types\IPluginManager.cs" />
     <Compile Include="Types\IUIServices.cs" />
     <Compile Include="Types\SourceLanguageType.cs" />
     <Compile Include="Types\IMruManager.cs" />

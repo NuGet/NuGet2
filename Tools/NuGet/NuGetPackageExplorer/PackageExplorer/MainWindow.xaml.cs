@@ -41,6 +41,9 @@ namespace PackageExplorer {
         [Export]
         public IPackageEditorService EditorService { get; set; }
 
+        [Import]
+        public IPluginManager PluginManager { get; set; }
+
         [ImportingConstructor]
         public MainWindow(IMruManager mruManager, IPackageViewModelFactory packageViewModelFactory) {
             InitializeComponent();
@@ -200,12 +203,6 @@ namespace PackageExplorer {
                     else {
                         processPackageAction(cachePackage);
                     }
-
-                    //if (cachePackage != null) {
-                    //    DataServicePackage servicePackage = selectedPackageInfo.AsDataServicePackage();
-                    //    servicePackage.CorePackage = cachePackage;
-                    //    LoadPackage(servicePackage, selectedPackageInfo.DownloadUrl.ToString(), PackageType.DataServicePackage);
-                    //}
                 }
             }
         }
@@ -405,6 +402,18 @@ namespace PackageExplorer {
                     ProxyService.Value,
                     package => LoadPackage(package, item.Path, PackageType.DataServicePackage)
                 );
+            }
+        }
+
+        private void AddPluginFromAssembly_Click(object sender, RoutedEventArgs e) {
+            string selectedFile;
+            bool result = UIServices.OpenFileDialog(
+                "Select Plugin Assembly",
+                ".NET assemblies (*.dll)|*.dll",
+                out selectedFile);
+
+            if (result) {
+                PluginManager.AddPluginFromAssembly(selectedFile);
             }
         }
     }

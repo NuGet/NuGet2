@@ -6,7 +6,7 @@ using NuGetPackageExplorer.Types;
 namespace PackageExplorer {
     [PackageContentViewerMetadata(1, ".jpg", ".gif", ".png")]
     internal class ImageFileViewer : IPackageContentViewer {
-        public object GetView(Stream stream) {
+        public object GetView(string extension, Stream stream) {
             var source = new BitmapImage();
             source.BeginInit();
             source.CacheOption = BitmapCacheOption.OnLoad;

@@ -170,8 +170,13 @@
                 <MenuItem Header="_Rename..." Command="{Binding RenameContentCommand}" InputGestureText="F2" />
                 <MenuItem Header="_Delete..." Command="{Binding DeleteContentCommand}" InputGestureText="Delete" />
             </MenuItem>
+            
+            <MenuItem Header="_Tools">
+                <self:GrayscaleMenuItem Header="_Add Plugin..." Click="AddPluginFromAssembly_Click">
+                </self:GrayscaleMenuItem>
+            </MenuItem>
 
-            <self:GrayscaleMenuItem Header="_Help">
+            <MenuItem Header="_Help">
                 <self:GrayscaleMenuItem Header="_NuGet Documentation" Command="GoToPage" CommandParameter="http://nuget.codeplex.com/documentation">
                     <self:GrayscaleMenuItem.Icon>
                         <self:GrayscaleImage Source="Images/Book_angleHS.png" />
@@ -183,7 +188,7 @@
                 <Separator />
                 <MenuItem Header="_Open Bug..." Command="GoToPage" CommandParameter="http://nuget.codeplex.com/WorkItem/Create" />
                 <MenuItem Header="_About..." Click="AboutMenuItem_Click" />
-            </self:GrayscaleMenuItem>
+            </MenuItem>
         </Menu>
 
         <!-- Status bar -->

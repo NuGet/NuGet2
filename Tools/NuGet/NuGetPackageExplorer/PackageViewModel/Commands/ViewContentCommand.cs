@@ -51,7 +51,7 @@ namespace PackageExplorerViewModel {
                     var contentViewer = FindContentViewer(file);
                     if (contentViewer != null) {
                         try {
-                            content = contentViewer.GetView(stream);
+                            content = contentViewer.GetView(Path.GetExtension(file.Name), stream);
                         }
                         catch (Exception) {
                             // don't let plugin crash the app
@@ -87,7 +87,7 @@ namespace PackageExplorerViewModel {
             string extension = Path.GetExtension(file.Name);
             return (from p in ViewModel.ContentViewerMetadata
                     where p.Metadata.SupportedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)
-                    orderby p.Metadata.Order
+                    orderby p.Metadata.Priority
                     select p.Value).FirstOrDefault();
         }
 

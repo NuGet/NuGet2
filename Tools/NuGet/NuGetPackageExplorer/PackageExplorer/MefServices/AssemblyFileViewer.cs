@@ -5,7 +5,7 @@ using NuGetPackageExplorer.Types;
 namespace PackageExplorer {
     [PackageContentViewerMetadata(0, ".dll", ".exe")]
     internal class AssemblyFileViewer : IPackageContentViewer {
-        public object GetView(Stream stream) {
+        public object GetView(string extension, Stream stream) {
             string tempFile = Path.GetTempFileName();
             using (FileStream fileStream = File.OpenWrite(tempFile)) {
                 stream.CopyTo(fileStream);

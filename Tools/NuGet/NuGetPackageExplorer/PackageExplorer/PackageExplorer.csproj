@@ -162,6 +162,7 @@
     <Compile Include="PackageViewer.xaml.cs">
       <DependentUpon>PackageViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MefServices\PluginManager.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>

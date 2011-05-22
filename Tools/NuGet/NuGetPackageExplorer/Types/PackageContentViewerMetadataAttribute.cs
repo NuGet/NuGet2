@@ -7,7 +7,7 @@ namespace NuGetPackageExplorer.Types {
     public sealed class PackageContentViewerMetadataAttribute : ExportAttribute {
 
         private readonly string[] _supportedExtensions;
-        private readonly int _order;
+        private readonly int _priority;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
         public string[] SupportedExtensions {
@@ -16,16 +16,16 @@ namespace NuGetPackageExplorer.Types {
             }
         }
 
-        public int Order {
+        public int Priority {
             get {
-                return _order;
+                return _priority;
             }
         }
 
-        public PackageContentViewerMetadataAttribute(int order, params string[] supportedExtensions) : 
+        public PackageContentViewerMetadataAttribute(int priority, params string[] supportedExtensions) : 
             base(typeof(IPackageContentViewer)) {
             _supportedExtensions = supportedExtensions;
-            _order = order;
+            _priority = priority;
         }
     }
 }
