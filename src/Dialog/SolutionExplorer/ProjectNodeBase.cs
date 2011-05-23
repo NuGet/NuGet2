@@ -68,7 +68,7 @@ namespace NuGet.Dialog {
             }
 
             if (Parent != null) {
-                Parent.OnChildIsSelectedChanged();
+                Parent.OnChildSelectedChanged();
             }
         }
 

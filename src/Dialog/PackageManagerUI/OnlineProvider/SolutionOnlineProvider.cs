@@ -73,7 +73,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         private void SaveProjectCheckStates(IList<Project> selectedProjects) {
-            HashSet<Project> selectedProjectSet = new HashSet<Project>(selectedProjects);
+            var selectedProjectSet = new HashSet<Project>(selectedProjects);
             
             foreach (Project project in _solutionManager.GetProjects()) {
                 if (!String.IsNullOrEmpty(project.UniqueName)) {

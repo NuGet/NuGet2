@@ -74,7 +74,7 @@
           <CommandFlag>DynamicVisibility</CommandFlag>
           <Strings>
               <CommandName>cmdidAddPackages</CommandName>
-              <ButtonText>Manage Package &amp;Library...</ButtonText>
+              <ButtonText>Manage &amp;Library Packages...</ButtonText>
           </Strings>
       </Button>
 
@@ -83,7 +83,7 @@
             <CommandFlag>DynamicVisibility</CommandFlag>
             <Strings>
                 <CommandName>cmdidAddPackagesToSolution</CommandName>
-                <ButtonText>Manage Package &amp;Library...</ButtonText>
+                <ButtonText>Manage &amp;Library Packages...</ButtonText>
             </Strings>
         </Button>
 

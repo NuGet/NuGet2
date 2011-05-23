@@ -21,7 +21,7 @@ namespace NuGet.Dialog {
                 foreach (var child in _children) {
                     child.Parent = this;
                 }
-                OnChildIsSelectedChanged();
+                OnChildSelectedChanged();
             }
         }
 
@@ -68,7 +68,7 @@ namespace NuGet.Dialog {
         }
 
         // invoked whenever one of its descendent nodes has its IsSelected property changed directly by user.
-        internal void OnChildIsSelectedChanged() {
+        internal void OnChildSelectedChanged() {
             // Here we detect the IsSelected states of all the direct children.
             // If all children are selected, mark this node as selected.
             // If all children are unselected, mark this node as unselected.
