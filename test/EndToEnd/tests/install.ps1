@@ -222,7 +222,7 @@ function Test-FSharpSimpleInstallWithContentFiles {
     $p = New-FSharpLibrary
     
     # Act
-    Install-Package jquery -Project $p.Name -Source $context.RepositoryRoot
+    Install-Package jquery -Version 1.5 -Project $p.Name -Source $context.RepositoryRoot
     
     # Assert
     Assert-Package $p jquery
@@ -878,10 +878,10 @@ function Test-InstallPackageAfterRenaming {
 
     # Act
     $p1.Name = "ProjectX"
-    Install-Package jquery -Source $context.RepositoryRoot -project "Folder1\Folder2\ProjectX"
+    Install-Package jquery -Version 1.5 -Source $context.RepositoryRoot -project "Folder1\Folder2\ProjectX"
 
     $f.Name = "Folder3"
-    Install-Package jquery -Source $context.RepositoryRoot -project "Folder1\Folder3\ProjectB"
+    Install-Package jquery -Version 1.5 -Source $context.RepositoryRoot -project "Folder1\Folder3\ProjectB"
 
     # Assert
     Assert-NotNull (Get-ProjectItem $p1 scripts\jquery-1.5.js)

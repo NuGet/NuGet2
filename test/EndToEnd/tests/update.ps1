@@ -620,3 +620,48 @@ function Test-UpdatingDependentPackagesPicksLowestCompatiblePackages {
     Assert-SolutionPackage A 1.5
     Assert-SolutionPackage B 2.0
 }
+
+function Test-UpdateAllPackagesInASingleProjectWithMultipleProjects {
+    param(
+        $context
+    )
+    # Arrange
+    $p1 = New-WebApplication
+    $p2 = New-WebApplication
+    $p1, $p2 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryRoot
+    $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryRoot
+
+    # Act
+    $p1 | Update-Package -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p1 jQuery 1.6.1
+    Assert-Package $p2 jQuery 1.5.1
+    Assert-Package $p1 jQuery.UI.Combined 1.8.13
+    Assert-Package $p2 jQuery.UI.Combined 1.8.11
+    Assert-SolutionPackage jQuery 1.5.1
+    Assert-SolutionPackage jQuery 1.6.1
+    Assert-SolutionPackage jQuery.UI.Combined 1.8.11
+    Assert-SolutionPackage jQuery.UI.Combined 1.8.13
+}
+
+function Test-UpdateAllPackagesInASingleProjectWithSafeFlagAndMultipleProjects {
+    # Arrange
+    $p1 = New-WebApplication
+    $p2 = New-WebApplication
+    $p1, $p2 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryRoot
+    $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryRoot
+
+    # Act
+    $p1 | Update-Package -Safe -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p1 jQuery 1.5.2
+    Assert-Package $p2 jQuery 1.5.1
+    Assert-Package $p1 jQuery.UI.Combined 1.8.13
+    Assert-Package $p2 jQuery.UI.Combined 1.8.11
+    Assert-SolutionPackage jQuery 1.5.1
+    Assert-SolutionPackage jQuery 1.5.2
+    Assert-SolutionPackage jQuery.UI.Combined 1.8.11
+    Assert-SolutionPackage jQuery.UI.Combined 1.8.13
+}

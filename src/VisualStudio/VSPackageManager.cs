@@ -247,8 +247,16 @@ namespace NuGet.VisualStudio {
                           NullPackageOperationEventListener.Instance);
         }
 
-        public void UpdatePackages(ILogger logger) {
-            UpdatePackages(safeUpdate: false, logger: logger);
+        public void UpdatePackages(bool updateDependencies, ILogger logger) {
+            UpdatePackages(updateDependencies, safeUpdate: false, logger: logger);
+        }
+
+        public void UpdatePackages(IProjectManager projectManager, bool updateDependencies, ILogger logger) {
+            UpdatePackages(projectManager, updateDependencies, safeUpdate: false, logger: logger);
+        }
+
+        public void SafeUpdatePackages(IProjectManager projectManager, bool updateDependencies, ILogger logger) {
+            UpdatePackages(projectManager, updateDependencies, safeUpdate: true, logger: logger);
         }
 
         public void SafeUpdatePackage(string packageId, bool updateDependencies, ILogger logger) {
@@ -269,8 +277,8 @@ namespace NuGet.VisualStudio {
                           logger);
         }
 
-        public void SafeUpdatePackages(ILogger logger) {
-            UpdatePackages(safeUpdate: true, logger: logger);
+        public void SafeUpdatePackages(bool updateDependencies, ILogger logger) {
+            UpdatePackages(updateDependencies, safeUpdate: true, logger: logger);
         }
 
         protected override void ExecuteUninstall(IPackage package) {
@@ -706,21 +714,38 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void UpdatePackages(bool safeUpdate, ILogger logger) {
+        private void UpdatePackages(IProjectManager projectManager, bool updateDependencies, bool safeUpdate, ILogger logger) {
+            UpdatePackages(LocalRepository, package => {
+                if (safeUpdate) {
+                    SafeUpdatePackage(projectManager, package.Id, updateDependencies, logger: logger);
+                }
+                else {
+                    UpdatePackage(projectManager, package.Id, version: null, updateDependencies: updateDependencies, logger: logger);
+                }
+            }, logger);
+        }
+
+        private void UpdatePackages(bool updateDependencies, bool safeUpdate, ILogger logger) {
+            UpdatePackages(LocalRepository, package => {
+                if (safeUpdate) {
+                    SafeUpdatePackage(package.Id, updateDependencies, logger: logger);
+                }
+                else {
+                    UpdatePackage(package.Id, version: null, updateDependencies: updateDependencies, logger: logger);
+                }
+            }, logger);
+        }
+
+        private void UpdatePackages(IPackageRepository localRepository, Action<IPackage> updateAction, ILogger logger) {
             var packageSorter = new PackageSorter();
             // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
-            var packages = packageSorter.GetPackagesByDependencyOrder(LocalRepository).Reverse();
+            var packages = packageSorter.GetPackagesByDependencyOrder(localRepository).Reverse();
             foreach (var package in packages) {
                 // While updating we might remove packages that were initially in the list. e.g.
                 // A 1.0 -> B 2.0, A 2.0 -> [], since updating to A 2.0 removes B, we end up skipping it.
-                if (LocalRepository.Exists(package.Id)) {
+                if (localRepository.Exists(package.Id)) {
                     try {
-                        if (safeUpdate) {
-                            SafeUpdatePackage(package.Id, updateDependencies: true, logger: logger);
-                        }
-                        else {
-                            UpdatePackage(package.Id, version: null, updateDependencies: true, logger: logger);
-                        }
+                        updateAction(package);
                     }
                     catch (Exception e) {
                         logger.Log(MessageLevel.Error, e.Message);

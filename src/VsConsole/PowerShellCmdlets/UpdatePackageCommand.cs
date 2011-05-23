@@ -113,10 +113,20 @@ namespace NuGet.PowerShell.Commands {
                     else {
                         // if no id was specified then update all packges in the solution
                         if (Safe.IsPresent) {
-                            PackageManager.SafeUpdatePackages(this);
+                            if (String.IsNullOrEmpty(ProjectName)) {
+                                PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, this);
+                            }
+                            else if(projectManager != null) {
+                                PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
+                            }
                         }
                         else {
-                            PackageManager.UpdatePackages(this);
+                            if (String.IsNullOrEmpty(ProjectName)) {
+                                PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, this);
+                            }
+                            else if(projectManager != null) {
+                                PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
+                            }
                         }
                     }
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);

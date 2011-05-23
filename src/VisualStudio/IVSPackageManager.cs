@@ -19,16 +19,20 @@ namespace NuGet.VisualStudio {
         void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger);
 
         // Update
-        void UpdatePackages(ILogger logger);
+        void UpdatePackages(bool updateDependencies, ILogger logger);
+        void UpdatePackages(IProjectManager projectManager, bool updateDependencies, ILogger logger);
+
         void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger);
         void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener packageOperationEventListener);
-        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger);
+        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger);        
         void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies);
         void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, ILogger logger);
         void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger);
 
         // Safe update (only bug fixes)
-        void SafeUpdatePackages(ILogger logger);
+        void SafeUpdatePackages(bool updateDependencies, ILogger logger);
+        void SafeUpdatePackages(IProjectManager projectManager, bool updateDependencies, ILogger logger);
+
         void SafeUpdatePackage(string packageId, bool updateDependencies, ILogger logger);
         void SafeUpdatePackage(IProjectManager projectManager, string packageId, bool updateDependencies, ILogger logger);
     }
