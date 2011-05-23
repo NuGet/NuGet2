@@ -196,7 +196,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options].
+        ///   Looks up a localized string similar to &lt;Package Id&gt; &lt;Package Version&gt; [API Key] [options].
         /// </summary>
         internal static string DeleteCommandUsageSummary {
             get {
@@ -331,20 +331,20 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List all versions of a package. By default, only the latest package version is displayed..
-        /// </summary>
-        internal static string ListCommandAllVersionsDescription {
-            get {
-                return ResourceManager.GetString("ListCommandAllVersionsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The specified source &apos;{0}&apos; is invalid. Please provide a valid source..
         /// </summary>
         internal static string InvalidSource {
             get {
                 return ResourceManager.GetString("InvalidSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List all versions of a package. By default, only the latest package version is displayed..
+        /// </summary>
+        internal static string ListCommandAllVersionsDescription {
+            get {
+                return ResourceManager.GetString("ListCommandAllVersionsDescription", resourceCulture);
             }
         }
         
@@ -565,7 +565,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the location of the manifest (Nuspec) file to create a package..
+        ///   Looks up a localized string similar to Specify the location of the manifest (Nuspec) or project file to create a package..
         /// </summary>
         internal static string PackageCommandUsageDescription {
             get {
@@ -574,7 +574,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;manifest&gt; [options].
+        ///   Looks up a localized string similar to &lt;manifest | project&gt; [options].
         /// </summary>
         internal static string PackageCommandUsageSummary {
             get {

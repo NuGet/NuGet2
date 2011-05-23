@@ -26,7 +26,7 @@ namespace NuGet.Commands {
 
         [ImportingConstructor]
         public HelpCommand(ICommandManager commandManager)
-            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, null) {
+            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, "http://docs.nuget.org") {
         }
 
         public HelpCommand(ICommandManager commandManager, string commandExe, string productName, string helpUrl) {
@@ -122,6 +122,12 @@ namespace NuGet.Commands {
                     Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
 
                 }
+
+                if (_helpUrl != null) {
+                    Console.WriteLine();
+                    Console.WriteLine("For more information, visit {0}", _helpUrl);
+                }
+
                 Console.WriteLine();
             }
         }

@@ -133,7 +133,7 @@
     <value>Specify the Id and version of the package to delete from the server.</value>
   </data>
   <data name="DeleteCommandUsageSummary" xml:space="preserve">
-    <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
+    <value>&lt;Package Id&gt; &lt;Package Version&gt; [API Key] [options]</value>
   </data>
   <data name="HelpCommandDescription" xml:space="preserve">
     <value>The Help command displays general help information and help information about other commands.</value>
@@ -202,10 +202,10 @@
     <value>Successfully created package '{0}'.</value>
   </data>
   <data name="PackageCommandUsageDescription" xml:space="preserve">
-    <value>Specify the location of the manifest (Nuspec) file to create a package.</value>
+    <value>Specify the location of the manifest (Nuspec) or project file to create a package.</value>
   </data>
   <data name="PackageCommandUsageSummary" xml:space="preserve">
-    <value>&lt;manifest&gt; [options]</value>
+    <value>&lt;manifest | project&gt; [options]</value>
   </data>
   <data name="PublishCommandDescription" xml:space="preserve">
     <value>Publishes a package that was uploaded to the server but not added to the live feed.</value>
