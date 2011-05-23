@@ -6,7 +6,7 @@ namespace NuGet.PowerShell.Commands {
     /// <summary>
     /// This project updates the specfied package to the specfied project.
     /// </summary>
-    [Cmdlet(VerbsData.Update, "Package")]
+    [Cmdlet(VerbsData.Update, "Package", DefaultParameterSetName = "All")]
     public class UpdatePackageCommand : ProcessPackageBaseCommand {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
@@ -36,7 +36,8 @@ namespace NuGet.PowerShell.Commands {
 
         // We need to override id since it's mandatory in the base class. We don't
         // want it to be mandatory here.
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "Project")]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "All")]
         public override string Id {
             get {
                 return base.Id;
@@ -46,7 +47,18 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
-        [Parameter(Position = 2)]
+        [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "All")]
+        [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
+        public override string ProjectName {
+            get {
+                return base.ProjectName;
+            }
+            set {
+                base.ProjectName = value;
+            }
+        }
+
+        [Parameter(Position = 2, ParameterSetName = "Project")]
         [ValidateNotNull]
         public Version Version { get; set; }
 
