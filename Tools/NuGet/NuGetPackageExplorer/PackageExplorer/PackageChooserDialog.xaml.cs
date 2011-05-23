@@ -15,8 +15,7 @@ namespace PackageExplorer {
     /// </summary>
     public partial class PackageChooserDialog : StandardDialog {
 
-        public string SortColumn
-        {
+        public string SortColumn {
             get { return (string)GetValue(SortColumnProperty); }
             set { SetValue(SortColumnProperty, value); }
         }
@@ -25,8 +24,7 @@ namespace PackageExplorer {
         public static readonly DependencyProperty SortColumnProperty =
             DependencyProperty.Register("SortColumn", typeof(string), typeof(PackageChooserDialog), null);
 
-        public ListSortDirection SortDirection
-        {
+        public ListSortDirection SortDirection {
             get { return (ListSortDirection)GetValue(SortDirectionProperty); }
             set { SetValue(SortDirectionProperty, value); }
         }
@@ -69,8 +67,7 @@ namespace PackageExplorer {
                 var header = (GridViewColumnHeader)column.Header;
                 if (header.Tag != null) {
                     AdornerLayer layer = AdornerLayer.GetAdornerLayer(header);
-                    if (layer != null)
-                    {
+                    if (layer != null) {
                         layer.Remove((Adorner)header.Tag);
                     }
                 }
@@ -80,8 +77,7 @@ namespace PackageExplorer {
                     header.Tag = newAdorner;
 
                     AdornerLayer layer = AdornerLayer.GetAdornerLayer(header);
-                    if (layer != null)
-                    {
+                    if (layer != null) {
                         layer.Add(newAdorner);
                     }
                 }
@@ -169,7 +165,7 @@ namespace PackageExplorer {
         private void OnShowLatestVersionValueChanged(object sender, RoutedEventArgs e) {
             CollectionViewSource cvs = (CollectionViewSource)Resources["PackageCollectionSource"];
             _collectionDeferRefresh = cvs.DeferRefresh();
-            
+
             cvs.GroupDescriptions.Clear();
             CheckBox box = (CheckBox)sender;
             if (box.IsChecked != true) {

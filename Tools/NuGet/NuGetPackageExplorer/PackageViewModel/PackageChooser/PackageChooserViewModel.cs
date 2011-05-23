@@ -33,7 +33,7 @@ namespace PackageExplorerViewModel {
             _showLatestVersion = showLatestVersion;
             Packages = new ObservableCollection<PackageInfo>();
             SortCommand = new RelayCommand<string>(Sort, column => TotalPackageCount > 0);
-            SearchCommand = new RelayCommand<string>(Search);
+            SearchCommand = new RelayCommand<string>(Search, CanSearch);
             NavigationCommand = new RelayCommand<string>(NavigationCommandExecute, NavigationCommandCanExecute);
             LoadedCommand = new RelayCommand(() => Sort("VersionDownloadCount", ListSortDirection.Descending));
             ChangePackageSourceCommand = new RelayCommand<string>(ChangePackageSource);
@@ -333,6 +333,10 @@ namespace PackageExplorerViewModel {
                 _currentSearch = searchTerm;
                 LoadPackages();
             }
+        }
+
+        private bool CanSearch(string searchTerm) {
+            return IsEditable;
         }
 
         private void Sort(string column) {

@@ -107,13 +107,19 @@
             VerticalAlignment="Center">
         </TextBox>
 
-        <Image
+        <!-- Search Button -->
+        <self:GrayscaleButton 
             Grid.Column="1"
             Grid.Row="1"
             Margin="0,4,6,0"
-            HorizontalAlignment="Right" 
+            ToolTip="Search"
+            HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Source="Images/search.png" />
+            Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+            Command="{Binding SearchCommand}"
+            CommandParameter="{Binding Text, ElementName=SearchBox}">
+            <self:GrayscaleImage Source="Images/search.png" />
+        </self:GrayscaleButton>
 
         <!-- package list view -->
         <ListView x:Name="PackageGrid" IsEnabled="{Binding IsEditable}" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5" ItemsSource="{Binding Source={StaticResource PackageCollectionSource}}" SelectionMode="Single" IsTextSearchEnabled="False">            
