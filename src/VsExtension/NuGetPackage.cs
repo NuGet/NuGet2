@@ -81,7 +81,20 @@ namespace NuGet.Tools {
 
         /// <summary>
         private void ShowAddPackageDialog(object sender, EventArgs e) {
-            if (HasActiveLoadedSupportedProject) {
+            if (IsSolutionNodeSelected) {
+                var window = new PackageManagerWindow(isSolution: true);
+                try {
+                    window.ShowModal();
+                }
+                catch (TargetInvocationException exception) {
+                    MessageHelper.ShowErrorMessage(
+                        (exception.InnerException ?? exception).Message,
+                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+
+                    ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
+                }
+            }
+            else if (HasActiveLoadedSupportedProject) {
                 var window = new PackageManagerWindow(isSolution: false);
                 try {
                     window.ShowModal();
@@ -108,28 +121,14 @@ namespace NuGet.Tools {
                 }
 
                 MessageHelper.ShowWarningMessage(
-                    errorMessage, 
+                    errorMessage,
                     NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-            }
-        }
-
-        private void ShowAddPackageToSolutionDialog(object sender, EventArgs e) {
-            var window = new PackageManagerWindow(isSolution: true);
-            try {
-                window.ShowModal();
-            }
-            catch (TargetInvocationException exception) {
-                MessageHelper.ShowErrorMessage(
-                    (exception.InnerException ?? exception).Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
-                ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
             }
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !IsIDEInDebuggingOrBuildingContext() && HasActiveLoadedSupportedProject;
+            command.Visible = !IsIDEInDebuggingOrBuildingContext() && (IsSolutionNodeSelected || HasActiveLoadedSupportedProject);
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
         }
@@ -138,13 +137,6 @@ namespace NuGet.Tools {
             OleMenuCommand command = (OleMenuCommand)sender;
             var solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
             command.Visible = solutionManager.IsSolutionOpen && IsVisualizerSupported;
-        }
-
-        private void BeforeQueryStatusForAddPackageToSolutionDialog(object sender, EventArgs args) {
-            OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext() ;
-            // disable the dialog menu if the console is busy executing a command;
-            command.Enabled = !_consoleStatus.IsBusy;
         }
 
         private bool IsIDEInDebuggingOrBuildingContext() {
@@ -225,11 +217,6 @@ namespace NuGet.Tools {
                 OleMenuCommand addPackageDialogCommand = new OleMenuCommand(ShowAddPackageDialog, null, BeforeQueryStatusForAddPackageDialog, addPackageDialogCommandID);
                 mcs.AddCommand(addPackageDialogCommand);
 
-                // menu command for opening Add Package Reference To Solution dialog
-                CommandID addPackageDialogToSolutionCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageToSolutionDialog);
-                OleMenuCommand addPackageDialogToSolutionCommand = new OleMenuCommand(ShowAddPackageToSolutionDialog, null, BeforeQueryStatusForAddPackageToSolutionDialog, addPackageDialogToSolutionCommandID);
-                mcs.AddCommand(addPackageDialogToSolutionCommand);
-
                 // menu command for opening Package Source settings options page
                 CommandID settingsCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidSourceSettings);
                 OleMenuCommand settingsMenuCommand = new OleMenuCommand(ShowPackageSourcesOptionPage, settingsCommandID);
@@ -261,6 +248,31 @@ namespace NuGet.Tools {
         private bool IsSolutionOpen {
             get {
                 return _dte != null && _dte.Solution != null && _dte.Solution.IsOpen;
+            }
+        }
+
+        private bool IsSolutionNodeSelected {
+            get {
+                IntPtr ppHier = IntPtr.Zero;
+                uint pitemid;
+                IVsMultiItemSelect ppMIS;
+                IntPtr ppSC;
+
+                try {
+                    _vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
+                    if (pitemid == (uint)VSConstants.VSITEMID.Root) {
+                        if (ppHier == IntPtr.Zero) {
+                            return true;
+                        }
+                    }
+                }
+                finally {
+                    if (ppHier != IntPtr.Zero) {
+                        Marshal.Release(ppHier);
+                    }
+                }
+
+                return false;
             }
         }
     }

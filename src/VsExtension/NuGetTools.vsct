@@ -78,15 +78,6 @@
           </Strings>
       </Button>
 
-        <Button guid="guidDialogCmdSet" id="cmdidAddPackagesToSolution" priority="0xF100" type="Button">
-            <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD" />
-            <CommandFlag>DynamicVisibility</CommandFlag>
-            <Strings>
-                <CommandName>cmdidAddPackagesToSolution</CommandName>
-                <ButtonText>Manage &amp;Library Packages...</ButtonText>
-            </Strings>
-        </Button>
-
         <Button guid="guidToolsGroup" id="idGeneralSettings" priority="0xF200" type="Button">
             <Parent guid="guidToolsGroup" id="idToolsGroup"/>
             <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
@@ -134,14 +125,9 @@
   <VisibilityConstraints>
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidToolsGroup" id="cmdIdVisualizer" context="UICONTEXT_SolutionExists" />
-    <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackagesToSolution" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
   </VisibilityConstraints>
 
-  <CommandPlacements>
-      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackagesToSolution" priority="0xF100">
-          <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS" />
-      </CommandPlacement>
-      
+  <CommandPlacements>      
     <CommandPlacement guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
     </CommandPlacement>
@@ -153,7 +139,9 @@
     <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
-
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD" />
+      </CommandPlacement>
       <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
           <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_REFROOT_ADD"/>
       </CommandPlacement>
@@ -202,7 +190,6 @@
 
     <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
         <IDSymbol name="cmdidAddPackages" value="0x0100" />
-        <IDSymbol name="cmdidAddPackagesToSolution" value="0x0200" />
     </GuidSymbol>
     <GuidSymbol name="guidVenusCmdId" value="{C7547851-4E3A-4E5B-9173-FA6E9C8BD82C}" >
         <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />
