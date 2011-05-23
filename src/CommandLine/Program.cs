@@ -7,7 +7,7 @@ using NuGet.Commands;
 
 namespace NuGet {
     public class Program {
-        private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "CommandLineExtensions");
+        private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "CommandLine");
 
         [Import]
         public HelpCommand HelpCommand { get; set; }
