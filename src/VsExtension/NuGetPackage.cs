@@ -80,32 +80,12 @@ namespace NuGet.Tools {
         }
 
         /// <summary>
-        private void ShowAddPackageDialog(object sender, EventArgs e) {
+        private void ShowManageLibraryPackageDialog(object sender, EventArgs e) {
             if (IsSolutionNodeSelected) {
-                var window = new PackageManagerWindow(isSolution: true);
-                try {
-                    window.ShowModal();
-                }
-                catch (TargetInvocationException exception) {
-                    MessageHelper.ShowErrorMessage(
-                        (exception.InnerException ?? exception).Message,
-                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
-                    ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
-                }
+                ShowManageLibraryPackageDialog(isSolution: true);
             }
             else if (HasActiveLoadedSupportedProject) {
-                var window = new PackageManagerWindow(isSolution: false);
-                try {
-                    window.ShowModal();
-                }
-                catch (TargetInvocationException exception) {
-                    MessageHelper.ShowErrorMessage(
-                        (exception.InnerException ?? exception).Message,
-                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
-                    ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
-                }
+                ShowManageLibraryPackageDialog(isSolution: false);
             }
             else {
                 // show error message when no supported project is selected.
@@ -123,6 +103,20 @@ namespace NuGet.Tools {
                 MessageHelper.ShowWarningMessage(
                     errorMessage,
                     NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+            }
+        }
+
+        private static void ShowManageLibraryPackageDialog(bool isSolution) {
+            var window = new PackageManagerWindow(isSolution);
+            try {
+                window.ShowModal();
+            }
+            catch (TargetInvocationException exception) {
+                MessageHelper.ShowErrorMessage(
+                    (exception.InnerException ?? exception).Message,
+                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+
+                ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
             }
         }
 
@@ -155,21 +149,16 @@ namespace NuGet.Tools {
         }
 
         private void ShowPackageSourcesOptionPage(object sender, EventArgs args) {
-            try {
-                ShowOptionPage(typeof(ToolsOptionsPage));
-            }
-            catch (Exception exception) {
-                MessageHelper.ShowErrorMessage(
-                    (exception.InnerException ?? exception).Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
-                ExceptionHelper.WriteToActivityLog(exception);
-            }
+            ShowOptionPageSafe(typeof(ToolsOptionsPage));
         }
 
         private void ShowGeneralSettingsOptionPage(object sender, EventArgs args) {
+            ShowOptionPageSafe(typeof(GeneralOptionPage));
+        }
+
+        private void ShowOptionPageSafe(Type optionPageType) {
             try {
-                ShowOptionPage(typeof(GeneralOptionPage));
+                ShowOptionPage(optionPageType);
             }
             catch (Exception exception) {
                 MessageHelper.ShowErrorMessage(
@@ -214,7 +203,7 @@ namespace NuGet.Tools {
 
                 // menu command for opening Add Package Reference dialog
                 CommandID addPackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
-                OleMenuCommand addPackageDialogCommand = new OleMenuCommand(ShowAddPackageDialog, null, BeforeQueryStatusForAddPackageDialog, addPackageDialogCommandID);
+                OleMenuCommand addPackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, addPackageDialogCommandID);
                 mcs.AddCommand(addPackageDialogCommand);
 
                 // menu command for opening Package Source settings options page
