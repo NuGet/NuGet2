@@ -256,7 +256,7 @@ namespace NuGet.Tools {
                 IntPtr ppHier = IntPtr.Zero;
                 uint pitemid;
                 IVsMultiItemSelect ppMIS;
-                IntPtr ppSC;
+                IntPtr ppSC = IntPtr.Zero;
 
                 try {
                     _vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
@@ -269,6 +269,9 @@ namespace NuGet.Tools {
                 finally {
                     if (ppHier != IntPtr.Zero) {
                         Marshal.Release(ppHier);
+                    }
+                    if (ppSC != IntPtr.Zero) {
+                        Marshal.Release(ppSC);
                     }
                 }
 
