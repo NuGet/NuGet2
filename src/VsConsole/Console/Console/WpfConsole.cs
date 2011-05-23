@@ -291,6 +291,10 @@ namespace NuGetConsole.Implementation.Console {
                 Invoke(() => _impl.WriteLine(text));
             }
 
+            public void WriteBackspace() {
+                Invoke(() => _impl.WriteBackspace());
+            }
+
             public void Write(string text, Color? foreground, Color? background) {
                 Invoke(() => _impl.Write(text, foreground, background));
             }
@@ -386,7 +390,7 @@ namespace NuGetConsole.Implementation.Console {
             // Append text to editor buffer
             ITextBuffer textBuffer = WpfTextView.TextBuffer;
             textBuffer.Insert(textBuffer.CurrentSnapshot.Length, text);
-
+            
             // Ensure caret visible (scroll)
             WpfTextView.Caret.EnsureVisible();
 
@@ -399,6 +403,27 @@ namespace NuGetConsole.Implementation.Console {
         public void WriteLine(string text) {
             // If append \n only, text becomes 1 line when copied to notepad.
             Write(text + Environment.NewLine);
+        }
+
+        public void WriteBackspace() {
+            if (_inputLineStart == null) // If not in input mode, need unlock to enable output
+            {
+                SetReadOnlyRegionType(ReadOnlyRegionType.None);
+            }
+
+            // Delete last character from input buffer.
+            ITextBuffer textBuffer = WpfTextView.TextBuffer;           
+            if (textBuffer.CurrentSnapshot.Length > 0) {
+                textBuffer.Delete(new Span(textBuffer.CurrentSnapshot.Length - 1, 1));
+            }
+
+            // Ensure caret visible (scroll)
+            WpfTextView.Caret.EnsureVisible();
+
+            if (_inputLineStart == null) // If not in input mode, need lock again
+            {
+                SetReadOnlyRegionType(ReadOnlyRegionType.All);
+            }
         }
 
         public void Write(string text, Color? foreground, Color? background) {

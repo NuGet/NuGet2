@@ -125,6 +125,7 @@ namespace NuGetConsole.Implementation.Console {
                 if (WpfConsole.Dispatcher.IsExecutingReadKey) {
                     switch (commandID) {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
+                        case VSConstants.VSStd2KCmdID.BACKSPACE:
                         case VSConstants.VSStd2KCmdID.RETURN:
                             var keyInfo = GetVsKeyInfo(pvaIn, commandID);
                             WpfConsole.Dispatcher.PostKey(keyInfo);
@@ -289,11 +290,14 @@ namespace NuGetConsole.Implementation.Console {
                 // <enter> pressed
                 keyChar = Environment.NewLine[0]; // [CR]LF
             }
+            else if ((commandID == VSConstants.VSStd2KCmdID.BACKSPACE) && pvaIn == IntPtr.Zero) {
+                keyChar = '\b'; // backspace control character
+            }
             else {
-                Debug.Assert(pvaIn != IntPtr.Zero);
+                Debug.Assert(pvaIn != IntPtr.Zero, "pvaIn != IntPtr.Zero");
 
                 // 1) deref pointer to char
-                keyChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
+                keyChar = (char) (ushort) Marshal.GetObjectForNativeVariant(pvaIn);
             }
 
             // 2) convert from char to virtual key, using current thread's input locale

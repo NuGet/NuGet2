@@ -94,11 +94,38 @@ namespace NuGetConsole.Host.PowerShell {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nested prompt not supported..
+        /// </summary>
+        internal static string ErrorNestedPromptNotSupported {
+            get {
+                return ResourceManager.GetString("ErrorNestedPromptNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package Manager Console Host Version {0}.
         /// </summary>
         internal static string PowerShellHostTitle {
             get {
                 return ResourceManager.GetString("PowerShellHostTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [?] Help (default is &quot;{0}&quot;):.
+        /// </summary>
+        internal static string PromptForChoiceSuffix {
+            get {
+                return ResourceManager.GetString("PromptForChoiceSuffix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zero length collection..
+        /// </summary>
+        internal static string ZeroLengthCollection {
+            get {
+                return ResourceManager.GetString("ZeroLengthCollection", resourceCulture);
             }
         }
     }

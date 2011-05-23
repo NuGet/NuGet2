@@ -74,6 +74,10 @@ namespace NuGet.VisualStudio {
             Write(text);
         }
 
+        public void WriteBackspace() {
+            throw new NotSupportedException();
+        }
+
         public bool IsExecutingCommand {
             get {
                 return false;
