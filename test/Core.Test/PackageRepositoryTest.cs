@@ -260,6 +260,44 @@ namespace NuGet.Test {
             Assert.AreEqual(new Version("1.0.1"), package5.Version);
         }
 
+        [TestMethod]
+        public void ResolveSafeVersionReturnsNullIfPackagesNull() {
+            // Act
+            var package = PackageRepositoryExtensions.ResolveSafeVersion(null);
+
+            // Assert
+            Assert.IsNull(package);
+        }
+
+        [TestMethod]
+        public void ResolveSafeVersionReturnsNullIfEmptyPackages() {
+            // Act
+            var package = PackageRepositoryExtensions.ResolveSafeVersion(Enumerable.Empty<IPackage>());
+
+            // Assert
+            Assert.IsNull(package);
+        }
+
+        [TestMethod]
+        public void ResolveSafeVersionReturnsHighestBuildAndRevisionWithLowestMajorAndMinor() {
+            var packages = new[] { 
+                PackageUtility.CreatePackage("A", "0.9"),
+                PackageUtility.CreatePackage("A", "0.9.3"),
+                PackageUtility.CreatePackage("A", "1.0"),
+                PackageUtility.CreatePackage("A", "1.0.2"),
+                PackageUtility.CreatePackage("A", "1.0.12"),
+                PackageUtility.CreatePackage("A", "1.0.13"),
+            };
+
+            // Act
+            var package = PackageRepositoryExtensions.ResolveSafeVersion(packages);
+
+            // Assert
+            Assert.IsNotNull(package);
+            Assert.AreEqual("A", package.Id);
+            Assert.AreEqual(new Version("0.9.3"), package.Version);
+        }
+
         private static IPackageRepository GetEmptyRepository() {
             Mock<IPackageRepository> repository = new Mock<IPackageRepository>();
             repository.Setup(c => c.GetPackages()).Returns(() => Enumerable.Empty<IPackage>().AsQueryable());

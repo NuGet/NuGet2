@@ -665,3 +665,16 @@ function Test-UpdateAllPackagesInASingleProjectWithSafeFlagAndMultipleProjects {
     Assert-SolutionPackage jQuery.UI.Combined 1.8.11
     Assert-SolutionPackage jQuery.UI.Combined 1.8.13
 }
+
+function Test-UpdatePackageWithDependentsThatHaveNoAvailableUpdatesThrows {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-WebApplication
+    $p1 | Install-Package A -Version 1.0 -Source $context.RepositoryPath
+
+    # Act
+    Assert-Throws { Update-Package B -Source $context.RepositoryPath } "Updating 'B 1.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'."
+}
