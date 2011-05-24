@@ -64,7 +64,7 @@ namespace NuGet.Dialog.Providers {
         protected internal override IVsPackageManager GetActivePackageManager() {
             if (_recentPackageManager == null) {
                 var repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
-                _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository);
+                _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false);
             }
 
             return _recentPackageManager;

@@ -122,7 +122,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IHttpClientEvents httpClientEvents,
                                     ISolutionManager solutionManager) {
 
-            IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
+            IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager(useFallbackForDependencies: true);
 
             IPackageRepository localRepository;
 

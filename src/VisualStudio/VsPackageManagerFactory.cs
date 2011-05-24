@@ -51,11 +51,11 @@ namespace NuGet.VisualStudio {
             };
         }
 
-        public IVsPackageManager CreatePackageManager() {
-            return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>());
+        public IVsPackageManager CreatePackageManager(bool useFallbackForDependencies) {
+            return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies);
         }
 
-        public IVsPackageManager CreatePackageManager(IPackageRepository repository) {
+        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies) {
             var fallbackRepository = CreateFallBackRepository(repository);
             RepositoryInfo info = GetRepositoryInfo();
             return new VsPackageManager(_solutionManager, fallbackRepository, info.FileSystem, info.Repository, _recentPackageRepository);

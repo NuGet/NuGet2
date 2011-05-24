@@ -252,7 +252,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
         private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true, IEnumerable<IPackage> packages = null) {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns(GetPackageManager);
             return new FindPackageCommand(
                 GetRepositoryFactory(packages),
                 GetSourceProvider(),

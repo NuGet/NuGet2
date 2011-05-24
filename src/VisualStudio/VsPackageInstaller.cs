@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("project");
             }
 
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(repository);
+            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false);
             IProjectManager projectManager = packageManager.GetProjectManager(project);
 
             EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) => {

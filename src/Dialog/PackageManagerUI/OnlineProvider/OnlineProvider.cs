@@ -93,11 +93,11 @@ namespace NuGet.Dialog.Providers {
             else if (SelectedNode.IsSearchResultsNode) {
                 PackagesSearchNode searchNode = (PackagesSearchNode)SelectedNode;
                 SimpleTreeNode baseNode = (SimpleTreeNode)searchNode.BaseNode;
-                return _packageManagerFactory.CreatePackageManager(baseNode.Repository);
+                return _packageManagerFactory.CreatePackageManager(baseNode.Repository, useFallbackForDependencies: true);
             }
             else {
                 var selectedNode = SelectedNode as SimpleTreeNode;
-                return (selectedNode != null) ? _packageManagerFactory.CreatePackageManager(selectedNode.Repository) : null;
+                return (selectedNode != null) ? _packageManagerFactory.CreatePackageManager(selectedNode.Repository, useFallbackForDependencies: true) : null;
             }
         }
 

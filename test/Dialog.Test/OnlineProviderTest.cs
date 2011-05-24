@@ -355,7 +355,7 @@ namespace NuGet.Dialog.Test {
             }
 
             var factory = new Mock<IVsPackageManagerFactory>();
-            factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>())).Returns(packageManager);
+            factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true)).Returns(packageManager);
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
