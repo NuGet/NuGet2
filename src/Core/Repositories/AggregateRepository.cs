@@ -6,10 +6,20 @@ namespace NuGet {
     public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyProvider {
         private readonly IEnumerable<IPackageRepository> _repositories;
         private const string SourceValue = "(Aggregate source)";
+        private ILogger _logger;
 
         public override string Source {
             get {
                 return SourceValue;
+            }
+        }
+
+        public ILogger Logger {
+            get {
+                return _logger ?? NullLogger.Instance;
+            }
+            set {
+                _logger = value;
             }
         }
 
@@ -28,7 +38,7 @@ namespace NuGet {
 
         public override IQueryable<IPackage> GetPackages() {
             return new AggregateQuery<IPackage>(_repositories.Select(r => r.GetPackages()),
-                PackageEqualityComparer.IdAndVersion, IgnoreFailingRepositories);
+                PackageEqualityComparer.IdAndVersion, Logger, IgnoreFailingRepositories);
         }
 
         public IPackage FindPackage(string packageId, Version version) {

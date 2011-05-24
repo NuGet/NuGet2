@@ -16,25 +16,29 @@ namespace NuGet {
         private readonly IEqualityComparer<TVal> _equalityComparer;
         private readonly IList<IEnumerable<TVal>> _subQueries;
         private readonly bool _ignoreFailures;
+        private readonly ILogger _logger;
 
-        public AggregateQuery(IEnumerable<IQueryable<TVal>> queryables, IEqualityComparer<TVal> equalityComparer, bool ignoreFailures) {
+        public AggregateQuery(IEnumerable<IQueryable<TVal>> queryables, IEqualityComparer<TVal> equalityComparer, ILogger logger, bool ignoreFailures) {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
             _expression = Expression.Constant(this);
-            _subQueries = GetSubQueries(_expression);
             _ignoreFailures = ignoreFailures;
+            _logger = logger;
+            _subQueries = GetSubQueries(_expression);
         }
 
         private AggregateQuery(IEnumerable<IQueryable<TVal>> queryables,
                                IEqualityComparer<TVal> equalityComparer,
                                IList<IEnumerable<TVal>> subQueries,
                                Expression expression,
+                               ILogger logger,
                                bool ignoreInvalidRepositories) {
             _queryables = queryables;
             _equalityComparer = equalityComparer;
             _expression = expression;
             _subQueries = subQueries;
             _ignoreFailures = ignoreInvalidRepositories;
+            _logger = logger;
         }
 
         public IEnumerator<TVal> GetEnumerator() {
@@ -160,7 +164,8 @@ namespace NuGet {
                 try {
                     result.HasValue = queue.TryPeek(out current);
                 }
-                catch {
+                catch (Exception ex) {
+                    LogWarning(ex);
                     current = default(TVal);
                 }
             }
@@ -173,7 +178,26 @@ namespace NuGet {
         }
 
         private IList<IEnumerable<TVal>> GetSubQueries(Expression expression) {
+            if (_ignoreFailures) {
+                // If we are using a LazyRepository as in the case of the CommandLine, calling the method below would cause the IQueryable to fail.
+                return UnrollAndEvalauateQueryables(expression);
+            }
             return _queryables.Select(query => GetSubQuery(query, expression)).ToList();
+        }
+
+        private List<IEnumerable<TVal>> UnrollAndEvalauateQueryables(Expression expression) {
+            var subQueries = new List<IEnumerable<TVal>>();
+            using (var enumerator = _queryables.GetEnumerator()) {
+                try {
+                    while (enumerator.MoveNext()) {
+                        subQueries.Add(GetSubQuery(enumerator.Current, expression));
+                    }
+                }
+                catch (Exception ex) {
+                    LogWarning(ex);
+                }
+            }
+            return subQueries;
         }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
@@ -188,7 +212,11 @@ namespace NuGet {
                 subQueries = GetSubQueries(expression);
             }
 
-            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression, _ignoreFailures });
+            return (IQueryable)ctor.Invoke(new object[] { _queryables, _equalityComparer, subQueries, expression, _logger, _ignoreFailures });
+        }
+
+        private void LogWarning(Exception ex) {
+            _logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
         }
 
         private static IEnumerable<TVal> GetSubQuery(IQueryable queryable, Expression expression) {
@@ -217,7 +245,8 @@ namespace NuGet {
                 try {
                     return Execute<TResult>(queryable, expression);
                 }
-                catch {
+                catch (Exception ex) {
+                    LogWarning(ex);
                     return default(TResult);
                 }
             }

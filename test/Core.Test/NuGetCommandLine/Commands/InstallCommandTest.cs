@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Commands;
+using NuGet.Common;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
@@ -36,6 +37,41 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.AreEqual(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Single().Key);
+        }
+
+        [TestMethod]
+        public void InstallCommandLogsWarningsForFailingRepositoriesIfNoSourcesAreSpecified() {
+            // Arrange
+            MessageLevel? level = null;
+            string message = null;
+            var repositoryA = new MockPackageRepository();
+            repositoryA.AddPackage(PackageUtility.CreatePackage("Foo"));
+            var repositoryB = new Mock<IPackageRepository>();
+            repositoryB.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
+            var fileSystem = new MockFileSystem();
+            var console = new Mock<IConsole>();
+            console.Setup(c => c.Log(It.IsAny<MessageLevel>(), It.IsAny<string>(), It.IsAny<object[]>())).Callback((MessageLevel a, string b, object[] c) => {
+                if (a == MessageLevel.Warning) {
+                    level = a;
+                    message = b;
+                }
+            });
+            
+            var sourceProvider = GetSourceProvider(new[] { new PackageSource("A"), new PackageSource("B") });
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository("A")).Returns(repositoryA);
+            factory.Setup(c => c.CreateRepository("B")).Returns(repositoryB.Object);
+            var installCommand = new TestInstallCommand(factory.Object, sourceProvider, fileSystem) {
+                Arguments = new List<string> { "Foo" },
+                Console = console.Object
+            };
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.AreEqual("Boom", message);
+            Assert.AreEqual(MessageLevel.Warning, level.Value);
         }
 
         [TestMethod]
@@ -163,12 +199,17 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             return factory.Object;
         }
 
-        private static IPackageSourceProvider GetSourceProvider() {
+        private static IPackageSourceProvider GetSourceProvider(IEnumerable<PackageSource> sources = null) {
             var sourceProvider = new Mock<IPackageSourceProvider>();
-            sourceProvider.Setup(c => c.LoadPackageSources()).Returns(new[] { 
-                new PackageSource("Some source", "Some source name"), new PackageSource("Some other source") });
+            sources = sources ?? new[] { new PackageSource("Some source", "Some source name"), new PackageSource("Some other source") };
+            sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
 
             return sourceProvider.Object;
+        }
+
+        private static IEnumerable<IPackage> GetPackagesWithException() {
+            yield return PackageUtility.CreatePackage("Baz");
+            throw new InvalidOperationException("Boom");
         }
 
         private class TestInstallCommand : InstallCommand {

@@ -16,7 +16,7 @@ namespace NuGet.Test {
             };
 
             // Act
-            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, ignoreFailures: true).OrderBy(c => c);
+            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: true).OrderBy(c => c);
 
             // Assert
             CollectionAssert.AreEqual(
@@ -36,7 +36,7 @@ namespace NuGet.Test {
 
             // Act and Assert
             ExceptionAssert.Throws<AggregateException>(
-                () => new AggregateQuery<string>(sources, StringComparer.Ordinal, ignoreFailures: false).OrderBy(c => c).ToArray());
+                () => new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: false).OrderBy(c => c).ToArray());
         }
 
 
@@ -50,7 +50,7 @@ namespace NuGet.Test {
             };
 
             // Act 
-            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, ignoreFailures: true).OrderBy(c => c);
+            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: true).OrderBy(c => c);
 
             // Assert
             Assert.AreEqual(6, aggregateQuery.Count());

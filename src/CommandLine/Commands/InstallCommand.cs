@@ -80,7 +80,9 @@ namespace NuGet.Commands {
                 return new AggregateRepository(from item in Source
                                                select RepositoryFactory.CreateRepository(SourceProvider.ResolveSource(item)));
             }
-            return SourceProvider.GetAggregate(RepositoryFactory);
+            var repository = SourceProvider.GetAggregate(RepositoryFactory, ignoreFailingRepositories: true);
+            repository.Logger = Console;
+            return repository;
         }
 
         private void InstallPackagesFromConfigFile(PackageManager packageManager, IFileSystem fileSystem, string packageReferenceFilePath) {

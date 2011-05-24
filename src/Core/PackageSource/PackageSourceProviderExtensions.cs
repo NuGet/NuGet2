@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace NuGet {
     public static class PackageSourceProviderExtensions {
-        public static IPackageRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory) {
+        public static AggregateRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory) {
             return GetAggregate(provider, factory, ignoreFailingRepositories: false);
         }
 
-        public static IPackageRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories) {
+        public static AggregateRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories) {
             Func<string, IPackageRepository> createRepository = factory.CreateRepository;
 
             if (ignoreFailingRepositories) {

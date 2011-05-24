@@ -57,7 +57,10 @@ namespace NuGet.Commands {
             if (Source.Any()) {
                 return new AggregateRepository(Source.Select(s => RepositoryFactory.CreateRepository(SourceProvider.ResolveSource(s))));
             }
-            return SourceProvider.GetAggregate(RepositoryFactory);
+            
+            var repository = SourceProvider.GetAggregate(RepositoryFactory, ignoreFailingRepositories: true);
+            repository.Logger = Console;
+            return repository;
         }
 
         public override void ExecuteCommand() {
