@@ -90,7 +90,7 @@ Register-TabExpansion 'Update-Package' @{
         $parameters = @{}
         if ($context.id) { $parameters.filter = $context.id }
 
-        GetPackageIds (Find-Package @parameters -Updates -ErrorAction SilentlyContinue)
+        GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
     }
     'ProjectName' = {
         GetProjectNames
@@ -99,11 +99,28 @@ Register-TabExpansion 'Update-Package' @{
         param($context)
 
         $parameters = @{}
-        if ($context.id) { $parameters.filter = $context.id }
 
-        $parameters.Remote = $true
-        $parameters.AllVersions = $true
-        GetPackageVersions $parameters $context
+        # Only show available versions if an id was specified
+        if ($context.id) { 
+            if ($context.Source) { $parameters.source = $context.Source }
+
+            # Find the installed package (this might be nothing since we could hav a partial id)
+            $packages = @(Get-Package $context.id | ?{ $_.Id -eq $context.id })
+
+            $parameters.filter = $context.id 
+            $parameters.Remote = $true
+            $parameters.AllVersions = $true
+            $versions = GetPackageVersions $parameters $context
+
+            if($packages.Count) {
+                $package = @($packages | Sort Version)[0]
+
+                # Only show versions that are higher than the lowest installed version
+                $versions = $versions | ?{ $_ -gt $package.Version }
+            }
+
+            $versions
+        }
     }
     'Source' = {
         GetPackageSources
@@ -155,7 +172,7 @@ function GetProjectNames {
 }
 
 function GetPackageIds($packages) {
-    $packages | Select -ExpandProperty Id
+    $packages | Select -ExpandProperty Id | Select -Unique
 }
 
 function GetPackageSources() {

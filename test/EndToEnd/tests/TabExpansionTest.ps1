@@ -118,6 +118,63 @@ function Test-TabExpansionForUpdatePackageShowSuggestionsForPackageId {
     Assert-True ($nhibernateUpdates.count -ge 1)
 }
 
+function Test-TabExpansionForUpdatePackageShowSuggestionsForPackageIdEvenIfNoUpdatesAvailable {
+    # Arrange
+    $project = New-ConsoleApplication
+    Install-Package jQuery -Project $project.Name
+
+    # Act
+    $suggestions = @(TabExpansion 'Update-Package ' '')
+
+    # Assert
+    Assert-NotNull $suggestions
+    Assert-True ($suggestions.count -ge 1)
+}
+
+function Test-TabExpansionForUpdatePackageShowSuggestionsForCustomSource {
+    param(
+        $context
+    )
+    # Arrange
+    $project = New-ConsoleApplication
+    Install-Package jQuery -Project $project.Name -Source $context.RepositoryRoot
+
+    # Act
+    $suggestions = @(TabExpansion "Update-Package -Source $($context.RepositoryRoot) " '')
+
+    # Assert
+    Assert-NotNull $suggestions
+    Assert-True ($suggestions.count -ge 1)
+}
+
+function Test-TabExpansionForUpdatePackageWithVersionAndNoId {
+    # Arrange
+    $project = New-ConsoleApplication
+    Install-Package 'NHibernate' -Project $project.Name -Version '2.1.2.4000'
+
+    # Act
+    $suggestions = TabExpansion 'Update-Package -Version ' ''    
+
+    # Assert
+    Assert-Null $suggestions
+}
+
+function Test-TabExpansionForUpdatePackageWithVersionOnlyShowsVersionsHigherThanInstalled {
+    # Arrange
+    $p1 = New-ConsoleApplication
+    $p2 = New-ConsoleApplication
+    $p1 | Install-Package NHibernate -Version 3.0.0.4000
+    $p2 | Install-Package NHibernate -Version 3.0.0.2001
+    $installedVersion = New-Object Version("3.0.0.2001")
+
+    # Act
+    $suggestions = TabExpansion 'Update-Package NHibernate -Version ' ''    
+    $versions = $suggestions | %{ New-Object Version($_) }
+
+    # Assert
+    $versions | %{ Assert-True ($_ -gt $installedVersion) }
+}
+
 function Test-TabExpansionForUpdatePackageShowSuggestionsForProjectNames {
     # Arrange
     $projectNames = @()
