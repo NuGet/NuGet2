@@ -31,7 +31,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             AddPowerShellModuleSearchPath();
 
             Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
-            LoadStartupScripts(runspace.Item1);
             LoadProfilesIntoRunspace(runspace.Item1);
 
             return runspace;
@@ -52,6 +51,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     "Visual Studio DTE automation object",
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant)
             );
+
+            initialSessionState.ImportPSModule(new string[] { NuGetCoreModuleName });
+
+#if DEBUG
+            //if (File.Exists(DebugConstants.TestModulePath)) {
+            //    initialSessionState.ImportPSModule(new string[] { DebugConstants.TestModulePath });
+            //}
+#endif
 
             // this is used by the functional tests
             var packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
@@ -84,34 +91,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             Environment.SetEnvironmentVariable(PSModulePathEnvVariable,
                                                String.Format(CultureInfo.InvariantCulture, "{0}\\Modules\\;{1}", extensionRoot, psModulePath),
                                                EnvironmentVariableTarget.Process);
-        }
-
-        private static void LoadStartupScripts(Runspace runspace) {
-            ExecutionPolicy policy = runspace.GetEffectiveExecutionPolicy();
-            if (policy != ExecutionPolicy.Unrestricted &&
-                policy != ExecutionPolicy.RemoteSigned &&
-                policy != ExecutionPolicy.Bypass) {
-
-                ExecutionPolicy machinePolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
-                if (machinePolicy != ExecutionPolicy.Undefined) {
-                    throw new InvalidOperationException(VsResources.Console_GroupPolicyError);
-                }
-
-                ExecutionPolicy userPolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
-                if (userPolicy != ExecutionPolicy.Undefined) {
-                    throw new InvalidOperationException(VsResources.Console_GroupPolicyError);
-                }
-
-                runspace.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
-            }
-
-            runspace.ImportModule(NuGetCoreModuleName);
-
-#if DEBUG
-            if (File.Exists(DebugConstants.TestModulePath)) {
-                runspace.ImportModule(DebugConstants.TestModulePath);
-            }
-#endif
         }
 
         private static void LoadProfilesIntoRunspace(Runspace runspace) {
