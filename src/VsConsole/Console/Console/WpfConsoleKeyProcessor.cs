@@ -92,16 +92,31 @@ namespace NuGetConsole.Implementation.Console {
                 return hr;
             }
 
-            // if the console has not been successfully started, do not accept any key inputs
-            if (!WpfConsole.Dispatcher.IsStartCompleted) {
-                return hr;
+            if (!WpfConsole.Dispatcher.IsExecutingReadKey) {
+                // if the console has not been successfully started, do not accept any key inputs, unless
+                // we are in the middle of a ReadKey call. This happens when the execution group policy setting
+                // is set to AllSigned, and PS is asking user to trust the certificate.
+                if (!WpfConsole.Dispatcher.IsStartCompleted) {
+                    return hr;
+                }
+
+                // if the console is in the middle of executing a command, do not accept any key inputs unless
+                // we are in the middle of a ReadKey call. 
+                if (WpfConsole.Dispatcher.IsExecutingCommand) {
+                    return hr;
+                }
             }
 
-            // if the console is in the middle of executing a command, do not accept any key inputs unless
-            // we are in the middle of a ReadKey call. 
-            if (WpfConsole.Dispatcher.IsExecutingCommand && !WpfConsole.Dispatcher.IsExecutingReadKey) {
-                return hr;
-            }
+            //// if the console has not been successfully started, do not accept any key inputs
+            //if (!WpfConsole.Dispatcher.IsStartCompleted) {
+            //    return hr;
+            //}
+
+            //// if the console is in the middle of executing a command, do not accept any key inputs unless
+            //// we are in the middle of a ReadKey call. 
+            //if (WpfConsole.Dispatcher.IsExecutingCommand && !WpfConsole.Dispatcher.IsExecutingReadKey) {
+            //    return hr;
+            //}
 
             if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97) {
                 //Debug.Print("Exec: GUID_VSStandardCommandSet97: {0}", (VSConstants.VSStd97CmdID)nCmdID);

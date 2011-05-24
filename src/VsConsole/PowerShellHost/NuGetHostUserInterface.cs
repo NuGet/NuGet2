@@ -13,7 +13,7 @@ using System.Windows.Media;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class NuGetHostUserInterface : PSHostUserInterface, IHostUISupportsMultipleChoiceSelection {
-        public const ConsoleColor NoColor = (ConsoleColor) (-1);
+        public const ConsoleColor NoColor = (ConsoleColor)(-1);
         private const int VkCodeReturn = 13;
         private const int VkCodeBackspace = 8;
         private static Color[] _consoleColors;
@@ -46,7 +46,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                                Collection<ChoiceDescription> choices,
                                                IEnumerable<int> defaultChoices) {
             WriteErrorLine("IHostUISupportsMultipleChoiceSelection.PromptForChoice not implemented.");
-
+            // TODO: 1.5
             return null;
         }
 
@@ -69,8 +69,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 throw new ArgumentNullException("descriptions");
             }
             if (descriptions.Count == 0) {
+                // emulate pwoershell.exe behaviour for empty collection.
                 throw new ArgumentException(
-                    Resources.ZeroLengthCollection,"descriptions");
+                    Resources.ZeroLengthCollection, "descriptions");
             }
 
             if (!String.IsNullOrEmpty(caption)) {
@@ -80,10 +81,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 WriteLine(message);
             }
 
+            // this stores the field/value pairs - e.g. unbound missing mandatory parameters,
+            // or scripted $host.ui.prompt invocation.
             var results = new Dictionary<string, PSObject>(descriptions.Count);
             int index = 0;
 
             foreach (FieldDescription description in descriptions) {
+                // if type is not resolvable, throw (as per powershell.exe)
                 if ((description == null) ||
                     String.IsNullOrEmpty(description.ParameterAssemblyFullName)) {
                     throw new ArgumentException("descriptions[" + index + "]");
@@ -93,16 +97,21 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 object answer;
                 string name = description.Name;
 
-                Type fieldType = GetFieldType(description) ?? typeof (String);
+                // as per powershell.exe, if input value cannot be coerced to
+                // parameter type then default to string.
+                Type fieldType = GetFieldType(description) ?? typeof(String);
 
-                // collection type?
-                if (typeof (IList).IsAssignableFrom(fieldType)) {
+                // is parameter a collection type?
+                if (typeof(IList).IsAssignableFrom(fieldType)) {
+                    // [int[]]$param1, [string[]]$param2
                     cancelled = PromptCollection(name, fieldType, out answer);
                 }
                 else {
+                    //[int]$param1, [string]$param2
                     cancelled = PromptScalar(name, fieldType, out answer);
                 }
 
+                // user hit ESC?
                 if (cancelled) {
                     WriteLine(String.Empty);
                     results.Clear();
@@ -115,75 +124,96 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return results;
         }
 
+        // parameter type is a scalar, like [int] or [string]
         private bool PromptScalar(string name, Type fieldType, out object answer) {
             bool cancelled;
 
-            if (fieldType.Equals(typeof (SecureString))) {
+            // if field a securestring, we prompt with masked input
+            if (fieldType.Equals(typeof(SecureString))) {
                 Write(name + ": ");
                 answer = ReadLineAsSecureString();
                 cancelled = (answer == null);
             }
-            else if (fieldType.Equals(typeof (PSCredential))) {
-                answer = this.PromptForCredential(null, null, null, String.Empty);
+            // if field is a credential type, we prompt with the secure dialog
+            else if (fieldType.Equals(typeof(PSCredential))) {
+                answer = PromptForCredential(null, null, null, String.Empty);
                 cancelled = (answer == null);
             }
             else {
+                // everything else is accepted as string, and coerced to the target type
+                // if coercion fails, just pass as string.
                 bool coercable = true;
                 string prompt = name + ": ";
                 do {
                     if (coercable) {
+                        // display field label as a prompt
                         Write(prompt);
                     }
                     else {
-                        // last input invalid
+                        // last input invalid, display in red
                         Write(prompt, ConsoleColor.Red);
                     }
                     string line = ReadLine();
+                    // user hit ESC?
                     cancelled = (line == null);
+                    // can powershell turn this string into the field type?
                     coercable = LanguagePrimitives.TryConvertTo(line, fieldType, out answer);
                 } while (!cancelled && !coercable);
             }
             return cancelled;
         }
 
+        // parameter type is a collection, like [int[]] or [string[]]
         private bool PromptCollection(string name, Type fieldType, out object answer) {
             bool cancelled;
-            Type elementType = typeof (Object);
+            // we default to an object[] array
+            Type elementType = typeof(Object);
 
             if (fieldType.IsArray) {
                 elementType = fieldType.GetElementType();
                 // FIXME: zero rank array check?
             }
 
+            // we will hold a list of the user's string input(s)
             var valuesToConvert = new ArrayList();
             bool coercable = true;
 
             while (true) {
-                string prompt = String.Format(CultureInfo.CurrentCulture,
+                // prompt for collection element, suffixed with the current index
+                string prompt = String.Format(
+                    CultureInfo.CurrentCulture,
                     "{0}[{1}]: ", name, valuesToConvert.Count);
+                
                 if (coercable) {
                     Write(prompt);
                 }
                 else {
-                    // last input invalid
+                    // last input invalid, display prompt in red
                     Write(prompt, ConsoleColor.Red);
                 }
 
                 string input = ReadLine();
+                // user hit ESC?
                 cancelled = (input == null);
+
+                // user hit ENTER on an empty line? we treat this as 
+                // terminating the input for the collection prompting.
                 bool inputComplete = String.IsNullOrEmpty(input);
 
                 if (cancelled || inputComplete) {
                     break;
                 }
 
+                // can powershell convert this input to the element type?
                 coercable = LanguagePrimitives.TryConvertTo(input, elementType, out answer);
                 if (coercable) {
+                    // yes, so store it
                     valuesToConvert.Add(answer);
                 }
             }
 
             if (!cancelled) {
+                // now, try to convert the entire collection of user inputs to the field's collection type
                 if (!LanguagePrimitives.TryConvertTo(valuesToConvert, elementType, out answer)) {
                     answer = valuesToConvert;
                 }
@@ -205,23 +235,26 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
             int chosen = -1;
             do {
+                // holds hotkeys, e.g. "[Y] Yes [N] No"
                 var accelerators = new string[choices.Count];
 
                 for (int index = 0; index < choices.Count; index++) {
                     ChoiceDescription choice = choices[index];
                     string label = choice.Label;
                     int ampIndex = label.IndexOf('&'); // hotkey marker
-                    accelerators[index] = String.Empty;
+                    accelerators[index] = String.Empty; // default to empty
 
                     // accelerator marker found?
                     if ((ampIndex != -1) &&
                         (ampIndex < (label.Length - 1))) {
+                        // grab the letter after '&'
                         accelerators[index] = label
-                            .Substring(ampIndex + 1, 1) // grab letter after '&'
+                            .Substring(ampIndex + 1, 1)
                             .ToUpper(CultureInfo.CurrentCulture);
                     }
                     Write(String.Format(CultureInfo.CurrentCulture, "[{0}] {1}  ",
                                         accelerators[index],
+                                        // remove the redundant marker from output
                                         label.Replace("&", String.Empty)));
                 }
                 Write(
@@ -234,14 +267,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 switch (input.Length) {
                     case 0:
-                        // enter
+                        // enter, accept default if provided
                         if (defaultChoice == -1) {
                             continue;
                         }
                         chosen = defaultChoice;
                         break;
                     case 1:
-                        // single letter accelerator
+                        // single letter accelerator, e.g. "Y"
                         chosen = Array.FindIndex(
                             accelerators,
                             accelerator => accelerator.Equals(
@@ -249,7 +282,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                 StringComparison.OrdinalIgnoreCase));
                         break;
                     default:
-                        // match against entire label
+                        // match against entire label, e.g. "Yes"
                         chosen = Array.FindIndex(
                             choices.ToArray(),
                             choice => choice.Label.Equals(
@@ -309,7 +342,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 return builder.ToString();
             }
             catch (PipelineStoppedException) {
-                // ESC
+                // ESC was hit
                 return null;
             }
             finally {
@@ -322,9 +355,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             "CA2000:Dispose objects before losing scope",
             Justification = "Caller's responsibility to dispose.")]
         public override SecureString ReadLineAsSecureString() {
-            try {
-                var secureString = new SecureString();
-
+            var secureString = new SecureString();
+            try {               
                 lock (_instanceLock) {
                     KeyInfo keyInfo;
                     while ((keyInfo = RawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) {
@@ -346,7 +378,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 return secureString;
             }
             catch (PipelineStoppedException) {
-                // ESC
+                // ESC was hit, clean up secure string
+                secureString.Dispose();
+
                 return null;
             }
             finally {
@@ -380,7 +414,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                                };
             }
 
-            var i = (int) c;
+            var i = (int)c;
             if (i >= 0 && i < _consoleColors.Length) {
                 return _consoleColors[i];
             }
