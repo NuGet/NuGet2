@@ -280,6 +280,7 @@
     <Resource Include="Images\NoteHS.png" />
     <Resource Include="Images\EditHS.png" />
     <Resource Include="Images\folder.png" />
+    <Resource Include="Images\cog.png" />
     <Content Include="nuspec.ico" />
   </ItemGroup>
   <ItemGroup>

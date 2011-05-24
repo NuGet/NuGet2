@@ -173,8 +173,11 @@
             </MenuItem>
             
             <MenuItem Header="_Tools">
-                <self:GrayscaleMenuItem Header="_Plugin Manager..." Click="AddPluginFromAssembly_Click">
-                </self:GrayscaleMenuItem>
+                <MenuItem Header="_Plugin Manager..." Click="AddPluginFromAssembly_Click">
+                    <MenuItem.Icon>
+                        <Image Source="images/cog.png" />
+                    </MenuItem.Icon>   
+                </MenuItem>
             </MenuItem>
 
             <MenuItem Header="_Help">
