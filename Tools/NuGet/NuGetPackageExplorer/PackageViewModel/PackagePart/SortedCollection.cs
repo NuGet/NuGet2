@@ -5,9 +5,14 @@ using System.Collections.Specialized;
 namespace PackageExplorerViewModel {
     public class SortedCollection<T> : ICollection<T>, INotifyCollectionChanged {
 
-        private readonly SortedSet<T> _items = new SortedSet<T>();
+        private readonly SortedSet<T> _items;
 
         public SortedCollection() {
+            _items = new SortedSet<T>();
+        }
+
+        public SortedCollection(IEnumerable<T> collection, IComparer<T> comparer) {
+            _items = new SortedSet<T>(collection, comparer);
         }
 
         public void Add(T item) {

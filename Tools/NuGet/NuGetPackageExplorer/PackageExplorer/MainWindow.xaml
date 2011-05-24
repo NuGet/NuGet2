@@ -173,7 +173,7 @@
             </MenuItem>
             
             <MenuItem Header="_Tools">
-                <self:GrayscaleMenuItem Header="_Add Plugin..." Click="AddPluginFromAssembly_Click">
+                <self:GrayscaleMenuItem Header="_Plugin Manager..." Click="AddPluginFromAssembly_Click">
                 </self:GrayscaleMenuItem>
             </MenuItem>
 

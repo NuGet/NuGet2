@@ -402,15 +402,11 @@ namespace PackageExplorer {
         }
 
         private void AddPluginFromAssembly_Click(object sender, RoutedEventArgs e) {
-            string selectedFile;
-            bool result = UIServices.OpenFileDialog(
-                "Select Plugin Assembly",
-                ".NET assemblies (*.dll)|*.dll",
-                out selectedFile);
-
-            if (result) {
-                PluginManager.AddPluginFromAssembly(selectedFile);
-            }
+            var dialog = new PluginManagerDialog() {
+                Owner = this,
+                DataContext = PackageViewModelFactory.CreatePluginViewModel()
+            };
+            dialog.ShowDialog();
         }
     }
 }

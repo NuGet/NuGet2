@@ -3,7 +3,7 @@ using System.Reflection;
 using NuGetPackageExplorer.Types;
 
 namespace PackageExplorer {
-    [PackageContentViewerMetadata(0, ".dll", ".exe")]
+    [PackageContentViewerMetadata(100, ".dll", ".exe")]
     internal class AssemblyFileViewer : IPackageContentViewer {
         public object GetView(string extension, Stream stream) {
             string tempFile = Path.GetTempFileName();

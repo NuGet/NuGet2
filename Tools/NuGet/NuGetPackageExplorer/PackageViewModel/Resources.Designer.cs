@@ -214,6 +214,15 @@ namespace PackageExplorerViewModel {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to *** The plugin that registers to read this file type fails to read the content of this file. ***.
+        /// </summary>
+        internal static string PluginFailToReadContent {
+            get {
+                return ResourceManager.GetString("PluginFailToReadContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is another file or folder with the same name..
         /// </summary>
         internal static string RenameCausesNameCollison {

@@ -21,7 +21,7 @@ namespace PackageExplorer {
                     var catalog1 = new AssemblyCatalog(typeof(App).Assembly);
                     var catalog2 = new AssemblyCatalog(typeof(PackageViewModel).Assembly);
                     var catalog = new AggregateCatalog(catalog1, catalog2);
-                    
+
                     _container = new CompositionContainer(catalog);
 
                     // add PluginManager instance to be available as export to the rest of the app.
@@ -46,7 +46,7 @@ namespace PackageExplorer {
                 }
             }
 
-            if (AppDomain.CurrentDomain.SetupInformation != null && 
+            if (AppDomain.CurrentDomain.SetupInformation != null &&
                 AppDomain.CurrentDomain.SetupInformation.ActivationArguments != null) {
                 // click-once deployment
                 var activationData = AppDomain.CurrentDomain.SetupInformation.ActivationArguments.ActivationData;

@@ -10,6 +10,7 @@ namespace PackageExplorerViewModel {
 
     [Export(typeof(IPackageViewModelFactory))]
     public class PackageViewModelFactory : IPackageViewModelFactory {
+        private readonly Lazy<PluginManagerViewModel> _pluginManagerViewModel;
 
         [Import]
         public IMruManager MruManager {
@@ -47,9 +48,19 @@ namespace PackageExplorerViewModel {
             set;
         }
 
+        [Import(typeof(IPluginManager))]
+        public IPluginManager PluginManager {
+            get;
+            set;
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [ImportMany(AllowRecomposition=true)]
         public List<Lazy<IPackageContentViewer, IPackageContentViewerMetadata>> ContentViewerMetadata { get; set; }
+
+        public PackageViewModelFactory() {
+            _pluginManagerViewModel = new Lazy<PluginManagerViewModel>(() => new PluginManagerViewModel(PluginManager, UIServices));
+        }
 
         public PackageViewModel CreateViewModel(NuGet.IPackage package, string packageSource) {
             return new PackageViewModel(
@@ -60,7 +71,7 @@ namespace PackageExplorerViewModel {
                 EditorService.Value, 
                 SettingsManager, 
                 ProxyService.Value,
-                ContentViewerMetadata.ToList());
+                ContentViewerMetadata);
         }
 
         public PackageChooserViewModel CreatePackageChooserViewModel() {
@@ -74,6 +85,10 @@ namespace PackageExplorerViewModel {
                 var model = (PackageChooserViewModel)sender;
                 SettingsManager.ShowLatestVersionOfPackage = model.ShowLatestVersion;
             }
+        }
+
+        public PluginManagerViewModel CreatePluginViewModel() {
+            return _pluginManagerViewModel.Value;
         }
     }
 }

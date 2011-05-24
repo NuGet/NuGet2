@@ -40,36 +40,44 @@ namespace PackageExplorerViewModel {
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification="We don't want plugin to crash the app.")]
         private void ShowFile(PackageFile file) {
-            bool isBinary = IsBinaryFile(file.Name);
-            long size;
+            long size = 0;
             object content = null;
+            bool isBinary = false;
 
-            if (isBinary) {
-                using (Stream stream = file.GetStream()) {
-                    size = stream.Length;
-
-                    var contentViewer = FindContentViewer(file);
-                    if (contentViewer != null) {
-                        try {
-                            content = contentViewer.GetView(Path.GetExtension(file.Name), stream);
-                        }
-                        catch (Exception) {
-                            // don't let plugin crash the app
-                            content = "*** Error: The plugin that registers to read this file type fails to read the content of this file. ***";
-                        }
+            // find a plugin which can handles this file's extension
+            var contentViewer = FindContentViewer(file);
+            if (contentViewer != null) {
+                isBinary = true;
+                try {
+                    using (Stream stream = file.GetStream()) {
+                        size = stream.Length;
+                        content = contentViewer.GetView(Path.GetExtension(file.Name), stream);
                     }
 
                     if (content == null) {
-                        content = Resources.UnsupportedFormatMessage;
+                        content = Resources.PluginFailToReadContent;
                     }
+                }
+                catch (Exception) {
+                    // don't let plugin crash the app
+                    content = Resources.PluginFailToReadContent;
+                }
 
-                    if (content is string) {
-                        isBinary = false;
-                    }
+                if (content is string) {
+                    isBinary = false;
                 }
             }
             else {
-                content = ReadFileContent(file, out size);
+                isBinary = IsBinaryFile(file.Name);
+                if (isBinary) {
+                    using (Stream stream = file.GetStream()) {
+                        size = stream.Length;
+                    }
+                    content = Resources.UnsupportedFormatMessage;
+                }
+                else {
+                    content = ReadFileContent(file, out size);
+                }
             }
 
             var fileInfo = new FileContentInfo(

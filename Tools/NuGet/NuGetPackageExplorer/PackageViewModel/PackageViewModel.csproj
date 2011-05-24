@@ -56,6 +56,7 @@
     <Compile Include="EmptyPackage.cs" />
     <Compile Include="FileHelper.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PluginManagerViewModel.cs" />
     <Compile Include="Types\IPackageChooser.cs" />
     <Compile Include="MruManager.cs" />
     <Compile Include="MruPackageSourceManager.cs" />
