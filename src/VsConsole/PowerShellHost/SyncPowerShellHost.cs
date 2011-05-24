@@ -15,13 +15,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 Runspace.Invoke(fullCommand, inputs, true);
                 OnExecuteCommandEnd();
             }
-            catch (RuntimeException e) {
-                ReportError(e.ErrorRecord);
-                ExceptionHelper.WriteToActivityLog(e);
-            }
             catch (Exception e) {
-                ReportError(e);
                 ExceptionHelper.WriteToActivityLog(e);
+                throw;
             }
 
             return true;

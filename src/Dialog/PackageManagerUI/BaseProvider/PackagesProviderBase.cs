@@ -419,10 +419,18 @@ namespace NuGet.Dialog.Providers {
             _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project, this);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             Project project = FindProjectFromFileSystem(e.FileSystem);
             Debug.Assert(project != null);
-            _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project, this);
+            try {
+                _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project, this);
+            }
+            catch (Exception ex) {
+                // Swallow exception for uninstall.ps1. Otherwise, there is no way to uninstall a package.
+                // But we log it as a warning.
+                LogCore(MessageLevel.Warning, ex.Message);
+            }
         }
 
         private Project FindProjectFromFileSystem(IFileSystem fileSystem) {
