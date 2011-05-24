@@ -213,7 +213,7 @@ public class Baz {
                           compile: new[] { "Runner.cs", @"..\Foo.cs", @"..\projects\Bar.cs" },
                           links: new[] { Tuple.Create(@"..\Baz.cs", @"Folder\Baz.cs") });
 
-            string[] args = new string[] { "pack", "-Symbols" };
+            string[] args = new string[] { "pack", "-Symbols", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -266,7 +266,7 @@ public class Cl_{0} {{
 
             CreateProject("ProjectWithCotent", content: contentFiles, compile: sourceFiles);
 
-            string[] args = new string[] { "pack" };
+            string[] args = new string[] { "pack", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -317,7 +317,7 @@ public class Cl_{0} {{
             CreateProject("ProjectWithNuSpec", content: new[] { "package.nuspec" },
                                                compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithNuSpec.csproj" };
+            string[] args = new string[] { "pack", "ProjectWithNuSpec.csproj", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -362,7 +362,7 @@ public class Cl_{0} {{
 
             CreateProject("FooProject", compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "FooProject.csproj" };
+            string[] args = new string[] { "pack", "FooProject.csproj", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -378,6 +378,28 @@ public class Cl_{0} {{
             Assert.AreEqual(new Version("1.2"), package.Version);
             Assert.AreEqual("Description from nuspec", package.Description);
             Assert.AreEqual("John", package.Authors.First());
+        }
+
+        [TestMethod]
+        public void PackageCommand_SpecifyingProjectFileWithNoBuildThrowsIfProjectNotBuilt() {
+            // Arrange                        
+            WriteAssemblyInfo("ProjectNoBuild",
+                               "1.5.0.0",
+                               "David",
+                               "Project with content");
+
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            CreateProject("ProjectNoBuild", compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "ProjectNoBuild.csproj" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Make sure the project has been built."));
         }
 
         [TestMethod]
@@ -403,7 +425,7 @@ public class Cl_{0} {{
             CreateProject("ProjectWithBrokenNuSpec", content: new[] { "package.nuspec" },
                                                compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithBrokenNuSpec.csproj" };
+            string[] args = new string[] { "pack", "ProjectWithBrokenNuSpec.csproj", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -443,7 +465,7 @@ public class Cl_{0} {{
             CreateProject("ProjectWithNuSpecAndFiles", content: new[] { "package.nuspec" },
                                                        compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithNuSpecAndFiles.csproj" };
+            string[] args = new string[] { "pack", "ProjectWithNuSpecAndFiles.csproj", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act
@@ -463,6 +485,47 @@ public class Cl_{0} {{
         }
 
         [TestMethod]
+        public void PackageCommand_PrefersProjectFileIfNuSpecAndProjectFileAreInTheSameDirectory() {
+            // Arrange                        
+            string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.nupkg";
+            WriteAssemblyInfo("ProjectWithNuSpecProjectWins",
+                               "1.2.0.0",
+                               "David2",
+                               "Project with nuspec");
+
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>$AssemblyName$</id>   
+    <version>$version$</version>
+    <description>$description$</description>
+    <authors>$author$</authors>
+  </metadata>
+</package>");
+
+            CreateProject("ProjectWithNuSpecProjectWins", content: new[] { "package.nuspec" },
+                                                       compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "-Build" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecProjectWins.dll" });
+            Assert.AreEqual("ProjectWithNuSpecProjectWins", package.Id);
+            Assert.AreEqual(new Version("1.2"), package.Version);
+            Assert.AreEqual("David2", package.Authors.First());
+            Assert.AreEqual("Project with nuspec", package.Description);
+        }
+
+        [TestMethod]
         public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced() {
             // Arrange                        
             string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.nupkg";
@@ -476,7 +539,7 @@ public class Cl_{0} {{
 
             CreateProject("ProjectWithAssembliesInOutputPath", compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithAssembliesInOutputPath.csproj" };
+            string[] args = new string[] { "pack", "ProjectWithAssembliesInOutputPath.csproj", "-Build" };
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act

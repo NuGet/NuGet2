@@ -45,8 +45,10 @@ namespace NuGet.Commands {
         public ProjectFactory(Project project) {
             _project = project;
             Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            AddSolutionDir();
+            
         }
-
+        
         private string TargetPath {
             get;
             set;
@@ -69,6 +71,8 @@ namespace NuGet.Commands {
 
         public bool IncludeSymbols { get; set; }
 
+        public bool Build { get; set; }
+
         public Dictionary<string, string> Properties { get; private set; }
 
         public bool IsTool { get; set; }
@@ -83,10 +87,6 @@ namespace NuGet.Commands {
         }
 
         public PackageBuilder CreateBuilder() {
-            if (TargetFramework != null) {
-                Logger.Log(MessageLevel.Info, NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
-            }
-
             BuildProject();
 
             Logger.Log(MessageLevel.Info, NuGetResources.PackagingFilesFromOutputPath, Path.GetDirectoryName(TargetPath));
@@ -167,20 +167,47 @@ namespace NuGet.Commands {
         }
 
         private void BuildProject() {
-            var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile);
-            BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
-            BuildParameters parameters = new BuildParameters(projectCollection);
-            parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
-            parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;
-            parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
-            BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
-            // Build the project so that the outputs are created
-            if (result.OverallResult == BuildResultCode.Failure) {
-                // If the build fails, report the error
-                throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
+            if (Build) {
+                if (TargetFramework != null) {
+                    Logger.Log(MessageLevel.Info, NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
+                }
+
+                var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile);
+                BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
+                BuildParameters parameters = new BuildParameters(projectCollection);
+                parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
+                parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;
+                parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
+                BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
+                // Build the project so that the outputs are created
+                if (result.OverallResult == BuildResultCode.Failure) {
+                    // If the build fails, report the error
+                    throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
+                }
+
+                TargetPath = ResolveTargetPath(result);
+            }
+            else {
+                TargetPath = ResolveTargetPath();
+
+                // Make if the target path doesn't exist, fail
+                if (!File.Exists(TargetPath)) {
+                    throw new CommandLineException(NuGetResources.UnableToFindBuildOutput, TargetPath);
+                }
+            }
+        }
+
+        private string ResolveTargetPath() {
+            // Set the project properties
+            foreach (var property in Properties) {
+                _project.SetProperty(property.Key, property.Value);
             }
 
-            TargetPath = ResolveTargetPath(result);
+            // Re-evaluate the project so that the new property values are applied
+            _project.ReevaluateIfNecessary();
+
+            // Return the new target path
+            return _project.GetPropertyValue("TargetPath");
         }
 
         private string ResolveTargetPath(BuildResult result) {
@@ -192,7 +219,7 @@ namespace NuGet.Commands {
                 }
             }
 
-            return targetPath ?? _project.GetPropertyValue("TargetPath");
+            return targetPath ?? ResolveTargetPath();
         }
 
         private void ExtractMetadataFromProject(PackageBuilder builder) {
@@ -272,7 +299,7 @@ namespace NuGet.Commands {
             var file = new PackageReferenceFile(packagesConfig);
 
             // Get the solution repository
-            IPackageRepository repository = GetPackagesRepository(_project.DirectoryPath);
+            IPackageRepository repository = GetPackagesRepository();
 
             // Collect all packages
             var packages = new List<IPackage>();
@@ -336,23 +363,45 @@ namespace NuGet.Commands {
         private static bool IsTransformFile(IPackageFile file) {
             return Path.GetExtension(file.Path).Equals(TransformFileExtension, StringComparison.OrdinalIgnoreCase);
         }
+        
+        private void AddSolutionDir() {
+            // Add the solution dir to the list of properties
+            string solutionDir = GetSolutionDir();
 
-        private IPackageRepository GetPackagesRepository(string path) {
+            if (!String.IsNullOrEmpty(solutionDir)) {
+                Properties.Add("SolutionDir", solutionDir);
+            }
+        }
+
+        private string GetSolutionDir() {
+            string path = _project.DirectoryPath;
+
             // Only look 4 folders up to find the solution directory
             const int maxDepth = 4;
             int depth = 0;
             do {
                 if (SolutionFileExists(path)) {
-                    string target = Path.Combine(path, GetPackagesPath(path));
-                    if (Directory.Exists(target)) {
-                        return new LocalPackageRepository(target);
-                    }
+                    return path;
                 }
 
                 path = Path.GetDirectoryName(path);
 
                 depth++;
             } while (depth < maxDepth);
+
+            return null;
+        }
+
+        private IPackageRepository GetPackagesRepository() {            
+            string solutionDir = GetSolutionDir();
+            if (String.IsNullOrEmpty(solutionDir)) {
+                return null;
+            }
+
+            string target = Path.Combine(solutionDir, GetPackagesPath(solutionDir));
+            if (Directory.Exists(target)) {
+                return new LocalPackageRepository(target);
+            }
 
             return null;
         }

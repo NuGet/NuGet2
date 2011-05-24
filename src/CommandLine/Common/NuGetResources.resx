@@ -444,4 +444,10 @@
   <data name="PackageCommandPropertiesDescription" xml:space="preserve">
     <value>Provides the ability to specify a semicolon ";" delimited list of properties when creating a package.</value>
   </data>
+  <data name="PackageCommandBuildDescription" xml:space="preserve">
+    <value>Determines if the project should be built before building the package.</value>
+  </data>
+  <data name="UnableToFindBuildOutput" xml:space="preserve">
+    <value>Unable to find '{0}'. Make sure the project has been built.</value>
+  </data>
 </root>

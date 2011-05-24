@@ -53,6 +53,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandBuildDescription")]
+        public bool Build { get; set; }
+
         [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
         public bool NoDefaultExcludes { get; set; }
 
@@ -212,7 +215,8 @@ namespace NuGet.Commands {
         private void BuildFromProjectFile(string path) {
             var factory = new ProjectFactory(path) {
                 IsTool = Tool,
-                Logger = Console
+                Logger = Console,
+                Build = Build
             };
 
             // Specify the configuration
@@ -256,12 +260,23 @@ namespace NuGet.Commands {
                 files = Directory.GetFiles(Directory.GetCurrentDirectory());
             }
 
+            return GetInputFile(files);
+        }
+
+        internal static string GetInputFile(IEnumerable<string> files) {
             var candidates = files.Where(file => _allowedExtensions.Contains(Path.GetExtension(file)))
                                   .ToList();
 
             switch (candidates.Count) {
                 case 1:
                     return candidates.Single();
+                case 2:
+                    // Remove all nuspec files
+                    candidates.RemoveAll(file => Path.GetExtension(file).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase));
+                    if (candidates.Count == 1) {
+                        return candidates.Single();
+                    }
+                    goto default;
                 default:
                     throw new CommandLineException(NuGetResources.PackageCommandSpecifyInputFileError);
             }

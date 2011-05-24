@@ -194,6 +194,30 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.AreEqual(files[0].Path, @"p:\some-file\test.txt");
         }
 
+        [TestMethod]
+        public void GetInputFileThrowsIfNoFiles() {
+            ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(Enumerable.Empty<string>()), "Please specify a nuspec or project file to use.");
+        }
+
+        [TestMethod]
+        public void GetInputFileMultipleProjectFilesThrows() {
+            ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(new[] { "a.csproj", "b.fsproj" }), "Please specify a nuspec or project file to use.");
+        }
+
+        [TestMethod]
+        public void GetInputFileMultipleNuSpecFilesThrows() {
+            ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(new[] { "a.nuspec", "b.NuspeC" }), "Please specify a nuspec or project file to use.");
+        }
+
+        [TestMethod]
+        public void GetInputFileNuSpecAndProjectFilePrefersProjectFile() {
+            // Act
+            string file = PackCommand.GetInputFile(new[] { "a.nuspec", "foo.csproj" });
+
+            // Assert
+            Assert.AreEqual("foo.csproj", file);
+        }
+
         private static IList<IPackageFile> GetPackageFiles(params string[] paths) {
             return (from p in paths
                     select new PhysicalPackageFile { SourcePath = p, TargetPath = p } as IPackageFile).ToList();

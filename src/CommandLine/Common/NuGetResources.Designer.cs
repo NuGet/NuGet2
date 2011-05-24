@@ -475,6 +475,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Determines if the project should be built before building the package..
+        /// </summary>
+        internal static string PackageCommandBuildDescription {
+            get {
+                return ResourceManager.GetString("PackageCommandBuildDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Determines what configuration should be used when building a package from the specified project file..
         /// </summary>
         internal static string PackageCommandConfigurationDescription {
@@ -903,6 +912,15 @@ namespace NuGet.Common {
         internal static string UnableToExtractAssemblyMetadata {
             get {
                 return ResourceManager.GetString("UnableToExtractAssemblyMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find &apos;{0}&apos;. Make sure the project has been built..
+        /// </summary>
+        internal static string UnableToFindBuildOutput {
+            get {
+                return ResourceManager.GetString("UnableToFindBuildOutput", resourceCulture);
             }
         }
         
