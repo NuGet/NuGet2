@@ -53,6 +53,11 @@ namespace NuGetConsole {
         void Write(string text, Color? foreground, Color? background);
 
         /// <summary>
+        /// Delete the last character from the current line and move the caret back one char.
+        /// </summary>
+        void WriteBackspace();
+
+        /// <summary>
         /// Clear the console content.
         /// 
         /// Note that this can only be called in a user command execution. If you need to

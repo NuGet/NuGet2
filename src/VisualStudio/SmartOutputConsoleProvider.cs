@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using NuGetConsole;
 
 namespace NuGet.VisualStudio {
@@ -69,6 +70,10 @@ namespace NuGet.VisualStudio {
 
             public void Write(string text, System.Windows.Media.Color? foreground, System.Windows.Media.Color? background) {
                 Write(text);
+            }
+
+            public void WriteBackspace() {
+                throw new NotSupportedException();
             }
 
             public void Clear() {

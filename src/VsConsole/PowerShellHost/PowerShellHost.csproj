@@ -47,6 +47,7 @@
       <InProject>false</InProject>
     </Compile>
     <Compile Include="IRunspaceManager.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="ProjectExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
