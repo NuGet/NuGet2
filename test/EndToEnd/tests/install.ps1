@@ -1154,3 +1154,17 @@ function Test-InstallPackageTargetingNetClientAndNet {
     Assert-NotNull $reference    
     Assert-True ($reference.Path.Contains("net40-client"))
 }
+
+function Test-InstallWithFailingInitPs1RollsBack {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Assert-Throws { $p | Install-Package PackageWithFailingInitPs1 -Source $context.RepositoryRoot } "This is an exception"
+
+    # Assert
+    Assert-Null (Get-SolutionPackage PackageWithFailingInitPs1)
+}

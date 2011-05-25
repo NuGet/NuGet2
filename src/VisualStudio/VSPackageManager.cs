@@ -536,12 +536,12 @@ namespace NuGet.VisualStudio {
         private void RunSolutionAction(Action action) {
             var packagesAdded = new List<IPackage>();
 
-            EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) => {
-                // Record packages that we successfully installed
+            EventHandler<PackageOperationEventArgs> installHandler = (sender, e) => {
+                // Record packages that we are installing so that if one fails, we can rollback
                 packagesAdded.Add(e.Package);
             };
 
-            PackageInstalled += installedHandler;
+            PackageInstalling += installHandler;
 
             try {
                 // Execute the action
@@ -562,7 +562,7 @@ namespace NuGet.VisualStudio {
             }
             finally {
                 // Remove the event handler
-                PackageInstalled -= installedHandler;
+                PackageInstalling -= installHandler;
             }
         }
 
