@@ -152,7 +152,8 @@ namespace NuGet {
         }
 
         protected virtual IPackage OpenPackage(string path) {
-            var package = new ZipPackage(() => FileSystem.OpenFile(path));
+            var package = new ZipPackage(() => FileSystem.OpenFile(path), _enableCaching);
+
             // Clear the cache whenever we open a new package file
             ZipPackage.ClearCache(package);
             return package;

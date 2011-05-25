@@ -51,11 +51,11 @@ namespace NuGet {
             EnsureManifest();
         }
 
-        internal ZipPackage(Func<Stream> streamFactory) {
+        internal ZipPackage(Func<Stream> streamFactory, bool enableCaching) {
             if (streamFactory == null) {
                 throw new ArgumentNullException("streamFactory");
             }
-            _enableCaching = true;
+            _enableCaching = enableCaching;
             _streamFactory = streamFactory;
             EnsureManifest();
         }

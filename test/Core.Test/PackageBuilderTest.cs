@@ -766,7 +766,7 @@ Enabling license acceptance requires a license url.");
             using (MemoryStream stream = new MemoryStream()) {
                 builder.Save(stream);
 
-                var zipPackage = new ZipPackage(() => new MemoryStream(stream.ToArray()));
+                var zipPackage = new ZipPackage(() => new MemoryStream(stream.ToArray()), enableCaching: false);
                 Assert.AreEqual(@"content\images\bread&butter.jpg", zipPackage.GetFiles().ElementAt(0).Path);
                 Assert.AreEqual(@"content\images\logo123?#78.png", zipPackage.GetFiles().ElementAt(1).Path);
                 Assert.AreEqual(@"lib\C#\test.dll", zipPackage.GetFiles().ElementAt(2).Path);

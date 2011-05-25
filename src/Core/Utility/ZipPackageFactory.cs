@@ -1,10 +1,10 @@
-﻿
-using System;
+﻿using System;
+using System.IO;
 
 namespace NuGet {
     public class ZipPackageFactory : IPackageFactory {
-        public IPackage CreatePackage(Func<System.IO.Stream> streamFactory) {
-            return new ZipPackage(streamFactory);
+        public IPackage CreatePackage(Func<Stream> streamFactory) {
+            return new ZipPackage(streamFactory, enableCaching: true);
         }
     }
 }
