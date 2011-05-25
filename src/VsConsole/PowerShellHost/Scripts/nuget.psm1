@@ -113,7 +113,7 @@ Register-TabExpansion 'Update-Package' @{
             $versions = GetPackageVersions $parameters $context
 
             if($packages.Count) {
-                $package = @($packages | Sort Version)[0]
+                $package = @($packages | Sort-Object Version)[0]
 
                 # Only show versions that are higher than the lowest installed version
                 $versions = $versions | ?{ $_ -gt $package.Version }
@@ -172,7 +172,7 @@ function GetProjectNames {
 }
 
 function GetPackageIds($packages) {
-    $packages | Select -ExpandProperty Id | Select -Unique
+    $packages | Select-Object -ExpandProperty Id -Unique
 }
 
 function GetPackageSources() {
