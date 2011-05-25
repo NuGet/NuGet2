@@ -50,9 +50,14 @@ namespace NuGet.Dialog.Providers {
                     // user presses Cancel button on the Solution dialog
                     return false;
                 }
+                
+                selectedProjectsList = selectedProjects.ToList();
+                if (selectedProjectsList.Count == 0) {
+                    return false;
+                }
+
                 ShowProgressWindow();
 
-                selectedProjectsList = selectedProjects.ToList();
                 // save the checked state of projects so that we can restore them the next time
                 SaveProjectCheckStates(selectedProjectsList);
             }

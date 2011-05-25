@@ -52,9 +52,9 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns(new Project[] { project1, project2 });
 
-            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object);
+            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -71,8 +71,9 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockPackageManager.Verify(p => p.UpdatePackage(
-                    packageB2.Id,
-                    packageB2.Version,
+                    new Project [] { project1, project2 },
+                    packageB2,
+                    It.IsAny<IEnumerable<PackageOperation>>(),
                     true,
                     provider,
                     provider), Times.Once());
@@ -95,7 +96,8 @@ namespace NuGet.Dialog.Test {
             IPackageRepositoryFactory repositoryFactory = null,
             IPackageSourceProvider packageSourceProvider = null,
             IScriptExecutor scriptExecutor = null,
-            ISolutionManager solutionManager = null) {
+            ISolutionManager solutionManager = null,
+            IProjectSelectorService projectSelectorService = null) {
 
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -136,12 +138,16 @@ namespace NuGet.Dialog.Test {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
+            if (projectSelectorService == null) {
+                projectSelectorService = new Mock<IProjectSelectorService>().Object;
+            }
+
             var services = new ProviderServices(
                 mockLicenseWindowOpener.Object,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
-                new Mock<IProjectSelectorService>().Object
+                projectSelectorService
             );
 
             if (localRepository == null) {

@@ -82,7 +82,7 @@ namespace NuGet.VisualStudio {
             }
 
             if (projects == null) {
-                throw new ArgumentNullException("projects");
+                throw new ArgumentNullException("projectManagers");
             }
 
             if (packageOperationEventListener == null) {
@@ -669,6 +669,48 @@ namespace NuGet.VisualStudio {
             foreach (var package in packages) {
                 ExecuteUninstall(package);
             }
+        }
+
+        public void UpdatePackage(
+            IEnumerable<Project> projects, 
+            IPackage package, 
+            IEnumerable<PackageOperation> operations, 
+            bool updateDependencies, 
+            ILogger logger, 
+            IPackageOperationEventListener packageOperationEventListener) {
+
+            if (operations == null) {
+                throw new ArgumentNullException("operations");
+            }
+
+            if (projects == null) {
+                throw new ArgumentNullException("projects");
+            }
+
+            if (packageOperationEventListener == null) {
+                packageOperationEventListener = NullPackageOperationEventListener.Instance;
+            }
+
+            ExecuteOperatonsWithPackage(
+                null,
+                package,
+                operations,
+                () => {
+                    foreach (var project in projects) {
+                        try {
+                            packageOperationEventListener.OnBeforeAddPackageReference(project);
+                            var projectManager = GetProjectManager(project);
+                            UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies);
+                        }
+                        catch (Exception ex) {
+                            packageOperationEventListener.OnAddPackageReferenceError(project, ex);
+                        }
+                        finally {
+                            packageOperationEventListener.OnAfterAddPackageReference(project);
+                        }
+                    }
+                },
+                logger);
         }
 
         private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
