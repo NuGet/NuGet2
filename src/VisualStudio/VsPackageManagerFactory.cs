@@ -51,8 +51,11 @@ namespace NuGet.VisualStudio {
             };
         }
 
-        public IVsPackageManager CreatePackageManager(bool useFallbackForDependencies) {
-            return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies);
+        /// <summary>
+        /// Creates an VsPackageManagerInstance that uses the Active Repository (the repository selected in the console drop down) and uses a fallback repository for dependencies.
+        /// </summary>
+        public IVsPackageManager CreatePackageManager() {
+            return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: true);
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies) {

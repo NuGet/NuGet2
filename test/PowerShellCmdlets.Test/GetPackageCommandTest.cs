@@ -299,7 +299,7 @@ namespace NuGet.PowerShell.Commands.Test {
         public void GetPackagesThrowsWhenNoSourceIsProvidedAndRemoteIsPresent() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns(GetPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
             var cmdlet = new Mock<GetPackageCommand>(GetDefaultRepositoryFactory(), new Mock<IVsPackageSourceProvider>().Object, TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, new Mock<IPackageRepository>().Object, null, null) { CallBase = true }.Object;
@@ -577,7 +577,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             if (packageManagerFactory == null) {
                 var mockFactory = new Mock<IVsPackageManagerFactory>();
-                mockFactory.Setup(m => m.CreatePackageManager(true)).Returns(GetPackageManager);
+                mockFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
 
                 packageManagerFactory = mockFactory.Object;
             }
@@ -650,7 +650,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object);
 
             var factory = new Mock<IVsPackageManagerFactory>();
-            factory.Setup(c => c.CreatePackageManager(true)).Returns(packageManager);
+            factory.Setup(c => c.CreatePackageManager()).Returns(packageManager);
 
             return factory.Object;
         }

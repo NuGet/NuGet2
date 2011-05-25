@@ -52,7 +52,7 @@ namespace NuGet.VisualStudio.Test {
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Throws(new Exception("A"));
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Throws(new Exception("A"));
             packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true)).Throws(new Exception("B"));
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
 

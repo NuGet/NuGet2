@@ -160,7 +160,7 @@ namespace NuGet.PowerShell.Commands {
                 return null;
             }
 
-            return PackageManagerFactory.CreatePackageManager(useFallbackForDependencies: true);
+            return PackageManagerFactory.CreatePackageManager();
         }
 
         /// <summary>

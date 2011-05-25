@@ -48,7 +48,7 @@ namespace NuGet {
                     }
                     catch (Exception ex) {
                         Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
-                        return Enumerable.Empty<IPackage>().AsQueryable();
+                        return Enumerable.Empty<IPackage>().AsSafeQueryable();
                     }
                 };
             }
@@ -88,7 +88,7 @@ namespace NuGet {
                     }
                     catch (Exception ex) {
                         Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
-                        return Enumerable.Empty<IPackage>().AsQueryable();
+                        return Enumerable.Empty<IPackage>().AsSafeQueryable();
                     }
                 };
             }

@@ -199,7 +199,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private void ExecuteInitScripts() {
             if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
                 try {
-                    var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager(useFallbackForDependencies: false);
+                    var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager();
                     var localRepository = packageManager.LocalRepository;
 
                     // invoke init.ps1 files in the order of package dependency.

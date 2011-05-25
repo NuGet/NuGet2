@@ -15,7 +15,7 @@ namespace NuGet.PowerShell.Commands.Test {
         public void UpdatePackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns((IVsPackageManager)null);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, null, null, null);
 
             // Act and Assert
@@ -30,7 +30,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var vsPackageManager = new MockVsPackageManager();
             var sourceVsPackageManager = new MockVsPackageManager();
             var mockPackageRepository = new MockPackageRepository();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns(vsPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             packageManagerFactory.Setup(m => m.CreatePackageManager(mockPackageRepository, true)).Returns(sourceVsPackageManager);
             var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -53,7 +53,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns(vsPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             var mockPackageRepository = new MockPackageRepository();
             var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -76,7 +76,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns(vsPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             var mockPackageRepository = new MockPackageRepository();
             var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -100,7 +100,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(true)).Returns(vsPackageManager);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             var mockPackageRepository = new MockPackageRepository();
             var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();

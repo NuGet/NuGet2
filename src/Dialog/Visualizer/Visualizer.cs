@@ -22,7 +22,7 @@ namespace NuGet.Dialog {
         }
 
         public string CreateGraph() {
-            var packageManager = _packageManagerFactory.CreatePackageManager(useFallbackForDependencies: false);
+            var packageManager = _packageManagerFactory.CreatePackageManager();
             var solutionManager = new SolutionManager();
 
             var nodes = new List<DGMLNode>();
