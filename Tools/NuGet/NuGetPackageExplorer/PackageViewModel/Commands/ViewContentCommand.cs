@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -36,26 +37,31 @@ namespace PackageExplorerViewModel {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want plugin to crash the app.")]
+            Justification = "We don't want plugin to crash the app.")]
         private void ShowFile(PackageFile file) {
-            long size = 0;
+            long size = -1;
             object content = null;
             bool isBinary = false;
 
-            // find a plugin which can handles this file's extension
-            var contentViewer = FindContentViewer(file);
-            if (contentViewer != null) {
+            // find all plugins which can handle this file's extension
+            var contentViewers = FindContentViewer(file);
+            if (contentViewers != null) {
                 isBinary = true;
                 try {
-                    using (Stream stream = file.GetStream()) {
-                        size = stream.Length;
-                        content = contentViewer.GetView(Path.GetExtension(file.Name), stream);
-                    }
-
-                    if (content == null) {
-                        content = Resources.PluginFailToReadContent;
+                    // iterate over all plugins, looking for the first one that return non-null content
+                    foreach (var viewer in contentViewers) {
+                        using (Stream stream = file.GetStream()) {
+                            if (size == -1) {
+                                size = stream.Length;
+                            }
+                            content = viewer.GetView(Path.GetExtension(file.Name), stream);
+                            if (content != null) {
+                                // found a plugin that can read this file, stop
+                                break;
+                            }
+                        }
                     }
                 }
                 catch (Exception) {
@@ -67,11 +73,16 @@ namespace PackageExplorerViewModel {
                     isBinary = false;
                 }
             }
-            else {
+
+            // if plugins fail to read this file, fall back to the default viewer
+            if (content == null) {
                 isBinary = IsBinaryFile(file.Name);
                 if (isBinary) {
-                    using (Stream stream = file.GetStream()) {
-                        size = stream.Length;
+                    // don't calculate the size again if we already have it
+                    if (size == -1) {
+                        using (Stream stream = file.GetStream()) {
+                            size = stream.Length;
+                        }
                     }
                     content = Resources.UnsupportedFormatMessage;
                 }
@@ -91,12 +102,12 @@ namespace PackageExplorerViewModel {
             ViewModel.ShowFile(fileInfo);
         }
 
-        private IPackageContentViewer FindContentViewer(PackageFile file) {
+        private IEnumerable<IPackageContentViewer> FindContentViewer(PackageFile file) {
             string extension = Path.GetExtension(file.Name);
-            return (from p in ViewModel.ContentViewerMetadata
-                    where p.Metadata.SupportedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)
-                    orderby p.Metadata.Priority
-                    select p.Value).FirstOrDefault();
+            return from p in ViewModel.ContentViewerMetadata
+                   where p.Metadata.SupportedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)
+                   orderby p.Metadata.Priority
+                   select p.Value;
         }
 
         private static string ReadFileContent(PackageFile file, out long size) {
