@@ -36,7 +36,7 @@ namespace NuGet.VisualStudio.Test {
             var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
 
             // Act
-            var repository = packageManagerFactory.CreateFallBackRepository(mockRepository1);
+            var repository = packageManagerFactory.CreateFallbackRepository(mockRepository1);
 
             // Assert
             var dependencyProvider = repository as IDependencyProvider;
@@ -84,10 +84,45 @@ namespace NuGet.VisualStudio.Test {
             var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
 
             // Act
-            var repository = packageManagerFactory.CreateFallBackRepository(aggregateRepo);
+            var repository = packageManagerFactory.CreateFallbackRepository(aggregateRepo);
 
             // Assert
             Assert.AreEqual(aggregateRepo, repository);
+        }
+
+        [TestMethod]
+        public void CreateFallbackRepositoryUsesResolvedSourceNameWhenEnsuringRepositoryIsNotAlreadyListedInAggregate() {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+
+            var mockRepository1 = new MockPackageRepository();
+            var mockRepository2 = new MockPackageRepository("http://redirected");
+            var aggregateRepo = new AggregateRepository(new[] { mockRepository1, mockRepository2 });
+
+            var source1 = new PackageSource("Source1");
+            var source2 = new PackageSource("Source2");
+            var aggregateSource = AggregatePackageSource.Instance;
+
+            mockRepository1.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
+
+            mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2, aggregateSource });
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
+                switch (s) {
+                    case "Source1": return mockRepository1;
+                    case "Source2": return mockRepository2;
+                    default: return null;
+                }
+            });
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+
+            // Act
+            FallbackRepository repository = (FallbackRepository)packageManagerFactory.CreateFallbackRepository(mockRepository2);
+
+            // Assert
+            var dependencyProvider = (AggregateRepository)repository.DependencyResolver;
+            Assert.AreEqual(2, dependencyProvider.Repositories.Count());
         }
 
         [TestMethod]
@@ -116,7 +151,7 @@ namespace NuGet.VisualStudio.Test {
             var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
 
             // Act
-            var repository = packageManagerFactory.CreateFallBackRepository(mockRepository1);
+            var repository = packageManagerFactory.CreateFallbackRepository(mockRepository1);
 
             // Assert
             var fallbackRepo = repository as FallbackRepository;

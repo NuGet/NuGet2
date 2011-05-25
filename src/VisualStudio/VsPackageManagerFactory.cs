@@ -59,29 +59,28 @@ namespace NuGet.VisualStudio {
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies) {
-            var fallbackRepository = CreateFallBackRepository(repository);
+            var fallbackRepository = CreateFallbackRepository(repository);
             RepositoryInfo info = GetRepositoryInfo();
             return new VsPackageManager(_solutionManager, fallbackRepository, info.FileSystem, info.Repository, _recentPackageRepository);
         }
 
         /// <summary>
-        /// Creates a FallBackRepository with an aggregate repository that also constains the primaryRepository.
+        /// Creates a FallbackRepository with an aggregate repository that also constains the primaryRepository.
         /// </summary>
-        internal IPackageRepository CreateFallBackRepository(IPackageRepository primaryRepository) {
+        internal IPackageRepository CreateFallbackRepository(IPackageRepository primaryRepository) {
             if (AggregatePackageSource.Instance.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase)) {
                 // If we're using the aggregate repository, we don't need to create a fall back repo.
                 return primaryRepository;
             }
 
-            var sources = _packageSourceProvider.LoadPackageSources().ToList();
-            IEnumerable<IPackageRepository> repositories = sources.Select(c => _repositoryFactory.CreateRepository(c.Source));
+            var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
 
             // We need to ensure that the primary repository is part of the aggregate repository. This could happen if the user
             // explicitly specifies a source such as by using the -Source parameter.
-            if (!sources.Any(s => s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))) {
-                repositories = new[] { primaryRepository }.Concat(repositories);
+            if (!aggregateRepository.Repositories.Any(s => s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))) {
+                aggregateRepository = new AggregateRepository(new[] { primaryRepository }.Concat(aggregateRepository.Repositories));
+                aggregateRepository.IgnoreFailingRepositories = true;
             }
-            var aggregateRepository = new AggregateRepository(repositories);
             return new FallbackRepository(primaryRepository, aggregateRepository);
         }
 
