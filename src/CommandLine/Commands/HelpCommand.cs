@@ -26,7 +26,7 @@ namespace NuGet.Commands {
 
         [ImportingConstructor]
         public HelpCommand(ICommandManager commandManager)
-            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, "http://docs.nuget.org") {
+            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, "http://docs.nuget.org/docs/reference/command-line-reference") {
         }
 
         public HelpCommand(ICommandManager commandManager, string commandExe, string productName, string helpUrl) {
