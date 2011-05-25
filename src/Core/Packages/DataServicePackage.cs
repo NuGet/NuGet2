@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using NuGet.Resources;
@@ -304,8 +305,15 @@ namespace NuGet {
             return new PackageDependency(id, versionSpec);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to return null if any error occurred while trying to find the package.")]
         private IPackage GetPackage(IPackageRepository repository) {
-            return repository.FindPackage(Id, ((IPackageMetadata)this).Version);
+            try {
+                return repository.FindPackage(Id, ((IPackageMetadata)this).Version);
+            }
+            catch {
+                // If the package in the repository is corrupted then return null
+                return null;
+            }
         }
 
         /// <summary>

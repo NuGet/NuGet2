@@ -1168,3 +1168,17 @@ function Test-InstallWithFailingInitPs1RollsBack {
     # Assert
     Assert-Null (Get-SolutionPackage PackageWithFailingInitPs1)
 }
+
+function Test-InstallPackageWithBadFileInMachineCache {
+    # Arrange
+    # Write a bad package file to the machine cache
+    "foo" > "$($env:LocalAppData)\NuGet\Cache\Ninject.2.2.1.0.nupkg"
+
+    # Act
+    $p = New-WebApplication
+    $p | Install-Package Ninject -Version 2.2.1.0
+
+    # Assert
+    Assert-Package $p Ninject
+    Assert-SolutionPackage Ninject
+}

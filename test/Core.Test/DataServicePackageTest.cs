@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
@@ -110,6 +111,26 @@ namespace NuGet.Test {
 
             // Act
             bool shouldUpdate = servicePackage.ShouldUpdatePackage(repository);
+
+            // Assert
+            Assert.IsTrue(shouldUpdate);
+        }
+
+        [TestMethod]
+        public void ShouldUpdateReturnsTrueIfRepositoryThrows() {
+            // Arrange
+            var servicePackage = new DataServicePackage {
+                Id = "A",
+                Version = "1.2",
+                PackageHash = "HASH",
+                OldHash = "HASH"
+            };
+
+            var repository = new Mock<MockPackageRepository>();
+            repository.Setup(m => m.GetPackages()).Throws(new Exception());
+
+            // Act
+            bool shouldUpdate = servicePackage.ShouldUpdatePackage(repository.Object);
 
             // Assert
             Assert.IsTrue(shouldUpdate);
