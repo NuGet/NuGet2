@@ -147,6 +147,7 @@ namespace NuGet.PowerShell.Commands {
             ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
 
@@ -155,7 +156,12 @@ namespace NuGet.PowerShell.Commands {
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }
 
-            ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project);
+            try {
+                ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project);
+            }
+            catch (Exception ex) {
+                Log(MessageLevel.Warning, ex.Message);
+            }
         }
 
         protected virtual void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project) {

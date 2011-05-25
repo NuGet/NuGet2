@@ -445,3 +445,21 @@ function Test-WebSiteUninstallPackageWithNestedSourceFilesAndAnotherProject {
     Assert-Null (Get-ProjectItem $p1 App_Code\netfx)
     Assert-Null (Get-ProjectItem $p1 App_Code)
 }
+
+function Test-UninstallPackageSwallowExceptionThrownByUninstallScript {
+   param(
+       $context
+   )
+
+   # Arrange
+   $p = New-ConsoleApplication
+   $p | Install-Package TestUninstallThrowPackage -Source $context.RepositoryRoot
+   Assert-Package $p TestUninstallThrowPackage
+
+   # Act
+   $p | Uninstall-Package TestUninstallThrowPackage
+
+   # Assert
+   Assert-Null (Get-ProjectPackage $p TestUninstallThrowPackage)
+
+}
