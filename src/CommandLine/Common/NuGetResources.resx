@@ -388,7 +388,7 @@
     <value>Determines what configuration should be used when building a package from the specified project file.</value>
   </data>
   <data name="PackageCommandSymbolsDescription" xml:space="preserve">
-    <value>Determines if a package containing sources and symbols should be created. Only valid when building a package from a project.</value>
+    <value>Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular nupkg and the corresponding symbols package.</value>
   </data>
   <data name="PackagingFilesFromOutputPath" xml:space="preserve">
     <value>Packing files from '{0}'.</value>

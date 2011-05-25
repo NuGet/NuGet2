@@ -556,7 +556,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Determines if a package containing sources and symbols should be created. Only valid when building a package from a project..
+        ///   Looks up a localized string similar to Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular nupkg and the corresponding symbols package..
         /// </summary>
         internal static string PackageCommandSymbolsDescription {
             get {
