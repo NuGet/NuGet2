@@ -1166,6 +1166,7 @@ function Test-InstallWithFailingInitPs1RollsBack {
     Assert-Throws { $p | Install-Package PackageWithFailingInitPs1 -Source $context.RepositoryRoot } "This is an exception"
 
     # Assert
+    Assert-Null (Get-ProjectPackage $p PackageWithFailingInitPs1)
     Assert-Null (Get-SolutionPackage PackageWithFailingInitPs1)
 }
 
