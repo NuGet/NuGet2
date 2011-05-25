@@ -73,6 +73,7 @@ namespace NuGet.VisualStudio {
                 return primaryRepository;
             }
 
+            var sources = _packageSourceProvider.LoadPackageSources().ToList();
             var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
 
             // We need to ensure that the primary repository is part of the aggregate repository. This could happen if the user

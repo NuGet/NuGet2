@@ -293,6 +293,41 @@ namespace NuGet.Test {
             Assert.AreEqual(2, packages.Count());
         }
 
+        [TestMethod]
+        public void SupressErrorWorksForRepositoriesPropetyIfIgnoreFlagIsSet() {
+            // Arrange
+            var repositories = Enumerable.Range(0, 3).Select(e => {
+                if (e == 1) {
+                    throw new InvalidOperationException();
+                }
+                return new MockPackageRepository();
+            });
+
+            var aggregateRepository = new AggregateRepository(repositories) { IgnoreFailingRepositories = true };            
+
+            // Act
+            var result = aggregateRepository.Repositories;
+
+            // Assert
+            Assert.AreEqual(2, result.Count());
+        }
+
+        [TestMethod]
+        public void RepositoriesPropetyThrowsIfIgnoreFlagIsNotSet() {
+            // Arrange
+            var repositories = Enumerable.Range(0, 3).Select(e => {
+                if (e == 1) {
+                    throw new InvalidOperationException("Repository exception");
+                }
+                return new MockPackageRepository();
+            });
+
+            var aggregateRepository = new AggregateRepository(repositories);
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => aggregateRepository.Repositories.Select(c => c.Source).ToList(), "Repository exception");
+        }
+
         private static IEnumerable<IPackage> GetPackagesWithException() {
             yield return PackageUtility.CreatePackage("A");
             throw new InvalidOperationException();

@@ -126,6 +126,39 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
+        public void CreateFallbackRepositoryDoesNotThrowWhenIteratingOverFailingRepositories() {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+
+            var mockRepository1 = new MockPackageRepository();
+            var mockRepository2 = new MockPackageRepository("http://redirected");
+
+            var source1 = new PackageSource("Source1");
+            var source2 = new PackageSource("Source2");
+            var source3 = new PackageSource("SourceBad");
+            var aggregateSource = AggregatePackageSource.Instance;
+
+            mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source3, source2, aggregateSource });
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
+                switch (s) {
+                    case "Source1": return mockRepository1;
+                    case "Source2": return mockRepository2;
+                    case "SourceBad": throw new InvalidOperationException();
+                    default: return null;
+                }
+            });
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+
+            // Act
+            FallbackRepository repository = (FallbackRepository)packageManagerFactory.CreateFallbackRepository(mockRepository2);
+
+            // Assert
+            var dependencyProvider = (AggregateRepository)repository.DependencyResolver;
+            Assert.AreEqual(2, dependencyProvider.Repositories.Count());
+        }
+
+        [TestMethod]
         public void CreateFallbackRepositoryIncludesRepositoryOnceInAggregateDependencyResolver() {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();

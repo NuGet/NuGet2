@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -114,6 +115,57 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(result.GetType(), typeof(SafeEnumerableQuery<int>));
+        }
+
+        [TestMethod]
+        public void SafeIterateWithFailingElementAtTheBeginningOfSequence() {
+            // Arrange
+            var enumerable = Enumerable.Range(0, 4).Select(e => {
+                if (e == 0) {
+                    throw new Exception();
+                }
+                return e * e;
+            });
+
+            // Act
+            var result = EnumerableExtensions.SafeIterate(enumerable);
+
+            // Assert
+            CollectionAssert.AreEqual(new[] { 1, 4, 9 }, result.ToList());
+        }
+
+        [TestMethod]
+        public void SafeIterateWithFailingElementInMiddleOfSequence() {
+            // Arrange
+            var enumerable = Enumerable.Range(0, 4).Select(e => {
+                if (e == 1 || e == 3) {
+                    throw new Exception();
+                }
+                return e * e;
+            });
+
+            // Act
+            var result = EnumerableExtensions.SafeIterate(enumerable);
+
+            // Assert
+            CollectionAssert.AreEqual(new[] { 0, 4 }, result.ToList());
+        }
+
+        [TestMethod]
+        public void SafeIterateWithFailingElementAtEndOfSequence() {
+            // Arrange
+            var enumerable = Enumerable.Range(0, 4).Select(e => {
+                if (e == 3) {
+                    throw new Exception();
+                }
+                return e * e;
+            });
+
+            // Act
+            var result = EnumerableExtensions.SafeIterate(enumerable);
+
+            // Assert
+            CollectionAssert.AreEqual(new[] { 0, 1, 4 }, result.ToList());
         }
 
         private class Item {

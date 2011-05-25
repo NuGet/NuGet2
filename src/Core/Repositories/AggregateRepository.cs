@@ -27,7 +27,12 @@ namespace NuGet {
         public bool IgnoreFailingRepositories { get; set; }
 
         public IEnumerable<IPackageRepository> Repositories {
-            get { return _repositories; }
+            get {
+                if (IgnoreFailingRepositories) {
+                    return EnumerableExtensions.SafeIterate(_repositories);
+                }
+                return _repositories;
+            }
         }
 
         public AggregateRepository(IEnumerable<IPackageRepository> repositories) {
@@ -52,11 +57,11 @@ namespace NuGet {
                     }
                 };
             }
-            return new AggregateQuery<IPackage>(_repositories.Select(getPackages),
+            return new AggregateQuery<IPackage>(Repositories.Select(getPackages),
                 PackageEqualityComparer.IdAndVersion, Logger, IgnoreFailingRepositories);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="We want to suppress any exception that we may encounter.")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
         public IPackage FindPackage(string packageId, Version version) {
             // When we're looking for an exact package, we can optimize but searching each
             // repository one by one until we find the package that matches.
@@ -93,7 +98,7 @@ namespace NuGet {
                 };
             }
 
-            return _repositories.SelectMany(getDependencies)
+            return Repositories.SelectMany(getDependencies)
                                 .Distinct(PackageEqualityComparer.IdAndVersion)
                                 .AsQueryable();
         }
