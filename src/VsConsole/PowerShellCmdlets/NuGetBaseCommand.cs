@@ -236,6 +236,8 @@ namespace NuGet.PowerShell.Commands {
                 throw new ArgumentNullException("source");
             }
 
+            UriFormatException uriException = null;
+
             string resolvedSource = sourceProvider.ResolveSource(source);
             try {
                 IPackageRepository repository = repositoryFactory.CreateRepository(resolvedSource);
@@ -243,8 +245,9 @@ namespace NuGet.PowerShell.Commands {
                     return repository;
                 }
             }
-            catch (UriFormatException) {
+            catch (UriFormatException ex) {
                 // if the source is relative path, it can result in invalid uri exception
+                uriException = ex;
             }
 
             Uri uri;
@@ -259,6 +262,13 @@ namespace NuGet.PowerShell.Commands {
                 }
                 else {
                     return repositoryFactory.CreateRepository(source);
+                }
+            }
+            else {
+                // if this is not a valid relative path either, 
+                // we rethrow the UriFormatException that we caught earlier.
+                if (uriException != null) {
+                    throw uriException;
                 }
             }
             return null;

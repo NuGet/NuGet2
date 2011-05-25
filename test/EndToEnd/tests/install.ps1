@@ -1183,3 +1183,11 @@ function Test-InstallPackageWithBadFileInMachineCache {
     Assert-Package $p Ninject
     Assert-SolutionPackage Ninject
 }
+
+function Test-InstallPackageThrowsWhenSourceIsInvalid {
+    # Arrange
+    $p = New-WebApplication 
+
+    # Act & Assert
+    Assert-Throws { Install-Package jQuery -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
+}

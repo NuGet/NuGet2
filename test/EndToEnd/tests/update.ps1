@@ -678,3 +678,11 @@ function Test-UpdatePackageWithDependentsThatHaveNoAvailableUpdatesThrows {
     # Act
     Assert-Throws { Update-Package B -Source $context.RepositoryPath } "Updating 'B 1.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'."
 }
+
+function Test-UpdatePackageThrowsWhenSourceIsInvalid {
+    # Arrange
+    $p = New-WebApplication 
+
+    # Act & Assert
+    Assert-Throws { Update-Package jQuery -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
+}

@@ -182,3 +182,8 @@ function Test-GetPackageAcceptsRelativePathSource2 {
 
     popd
 }
+
+function Test-GetPackageThrowsWhenSourceIsInvalid {
+    # Act & Assert
+    Assert-Throws { Get-Package -ListAvailable -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
+}

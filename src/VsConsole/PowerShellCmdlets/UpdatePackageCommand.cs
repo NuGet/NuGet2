@@ -75,7 +75,7 @@ namespace NuGet.PowerShell.Commands {
         protected override IVsPackageManager CreatePackageManager() {
             if (!String.IsNullOrEmpty(Source)) {
                 IPackageRepository repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
-                return PackageManagerFactory.CreatePackageManager(repository);
+                return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository);
             }
             return base.CreatePackageManager();
         }

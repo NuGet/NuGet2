@@ -54,7 +54,7 @@ namespace NuGet.PowerShell.Commands {
 
             if (!String.IsNullOrEmpty(Source)) {
                 var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
-                return PackageManagerFactory.CreatePackageManager(repository);
+                return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository);
             }
 
             return base.CreatePackageManager();
@@ -67,9 +67,8 @@ namespace NuGet.PowerShell.Commands {
 
             try {
                 SubscribeToProgressEvents();
-                IProjectManager projectManager = ProjectManager;
                 if (PackageManager != null) {
-                    PackageManager.InstallPackage(projectManager, Id, Version, IgnoreDependencies.IsPresent, this);
+                    PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies.IsPresent, this);
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }
             }
