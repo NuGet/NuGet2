@@ -178,26 +178,7 @@ namespace NuGet {
         }
 
         private IList<IEnumerable<TVal>> GetSubQueries(Expression expression) {
-            if (_ignoreFailures) {
-                // If we are using a LazyRepository as in the case of the CommandLine, calling the method below would cause the IQueryable to fail.
-                return UnrollAndEvalauateQueryables(expression);
-            }
             return _queryables.Select(query => GetSubQuery(query, expression)).ToList();
-        }
-
-        private List<IEnumerable<TVal>> UnrollAndEvalauateQueryables(Expression expression) {
-            var subQueries = new List<IEnumerable<TVal>>();
-            using (var enumerator = _queryables.GetEnumerator()) {
-                try {
-                    while (enumerator.MoveNext()) {
-                        subQueries.Add(GetSubQuery(enumerator.Current, expression));
-                    }
-                }
-                catch (Exception ex) {
-                    LogWarning(ex);
-                }
-            }
-            return subQueries;
         }
 
         private IQueryable CreateQuery(Type elementType, Expression expression) {
