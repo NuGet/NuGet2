@@ -213,20 +213,22 @@ namespace NuGet.Commands {
         }
 
         private void BuildFromNuspec(string path) {
-            PackageBuilder mainPackageBuilder = createPackageBuilderFromNuspec(path);
+            PackageBuilder packageBuilder = CreatePackageBuilderFromNuspec(path);
 
             if (Symbols) {
                 // remove source related files when building the lib package
-                ExcludeFilesForLibPackage(mainPackageBuilder.Files);
+                ExcludeFilesForLibPackage(packageBuilder.Files);
             }
 
-            BuildPackage(path, mainPackageBuilder);
+            BuildPackage(path, packageBuilder);
 
-            if (!Symbols) {
-                return;
+            if (Symbols) {
+                BuildSymbolsPackage(path, packageBuilder);
             }
+        }
 
-            PackageBuilder symbolsBuilder = createPackageBuilderFromNuspec(path);
+        private void BuildSymbolsPackage(string path, PackageBuilder mainPackageBuilder) {
+            PackageBuilder symbolsBuilder = CreatePackageBuilderFromNuspec(path);
             // remove unnecessary files when building the symbols package
             ExcludeFilesForSymbolPackage(mainPackageBuilder.Files);
 
@@ -238,13 +240,11 @@ namespace NuGet.Commands {
             PathResolver.FilterPackageFiles(files, file => file.Path, _libPackageExcludes);
         }
 
-        internal void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files)
-        {
+        internal void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files) {
             PathResolver.FilterPackageFiles(files, file => file.Path, _symbolPackageExcludes);
         }
 
-        private PackageBuilder createPackageBuilderFromNuspec(string path)
-        {
+        private PackageBuilder CreatePackageBuilderFromNuspec(string path) {
             if (String.IsNullOrEmpty(BasePath)) {
                 return new PackageBuilder(path);
             }
