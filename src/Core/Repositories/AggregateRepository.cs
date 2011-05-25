@@ -39,6 +39,7 @@ namespace NuGet {
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
         public override IQueryable<IPackage> GetPackages() {
+            // We need to follow this pattern in all AggregateRepository methods to ensure it suppresses exceptions that may occur if the Ignore flag is set.  Oh how I despise my code. 
             Func<IPackageRepository, IQueryable<IPackage>> getPackages = r => r.GetPackages();
             if (IgnoreFailingRepositories) {
                 getPackages = r => {

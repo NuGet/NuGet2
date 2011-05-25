@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
@@ -184,6 +186,122 @@ namespace NuGet.Test {
             Assert.AreEqual(1, updates.Count);
             Assert.AreEqual("A", updates[0].Id);
             Assert.AreEqual(new Version("3.0"), updates[0].Version);
+        }
+
+        [TestMethod]
+        public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowWhenInvoked() {
+            // Arrange
+            var mockRepository = new Mock<IPackageRepository>();
+            mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
+
+            var repository = new AggregateRepository(new[] { 
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("A"), 
+                }, 
+                mockRepository.Object,
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("B"), 
+                } 
+            });
+            repository.IgnoreFailingRepositories = true;
+
+            // Act
+            var packages = repository.GetPackages().OrderBy(p => p.Id).ToList();
+
+            // Assert
+            Assert.AreEqual(2, packages.Count);
+        }
+
+        [TestMethod]
+        public void SupressErrorWorksForFindPackagesForRepositoriesThatThrowWhenInvoked() {
+            // Arrange
+            var mockRepository = new Mock<IPackageRepository>();
+            mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
+
+            var packageLookup = new Mock<PackageLookupBase>();
+            packageLookup.Setup(c => c.FindPackage(It.IsAny<string>(), It.IsAny<Version>())).Throws(new Exception());
+            var mockRepositoryWithLookup = packageLookup.As<IPackageRepository>();
+            mockRepositoryWithLookup.Setup(c => c.GetPackages()).Throws(new InvalidOperationException());
+
+            var repository = new AggregateRepository(new[] { 
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("A"), 
+                }, 
+                mockRepository.Object,
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("B"), 
+                },
+                mockRepositoryWithLookup.Object
+            });
+            repository.IgnoreFailingRepositories = true;
+
+            // Act
+            var package = repository.FindPackage("C", new Version("1.0"));
+
+            // Assert
+            Assert.IsNull(package);
+        }
+
+        [TestMethod]
+        public void SupressErrorWorksForGetDependenciesForRepositoriesThatThrowWhenInvoked() {
+            // Arrange
+            var mockRepository = new Mock<IPackageRepository>();
+            mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
+            var mockRepoWithLookup = new Mock<IPackageRepository>();
+            mockRepository.As<IDependencyProvider>().Setup(c => c.GetDependencies(It.IsAny<string>())).Throws(new Exception());
+
+            var repository = new AggregateRepository(new[] { 
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("A"), 
+                }, 
+                mockRepository.Object,
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("B"), 
+                },
+                mockRepoWithLookup.Object
+            });
+            repository.IgnoreFailingRepositories = true;
+
+            // Act
+            var packages = repository.GetDependencies("C");
+
+            // Assert
+            Assert.IsFalse(packages.Any());
+        }
+
+        [TestMethod]
+        public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowDuringEnumeration() {
+            // Arrange
+            var mockRepository = new Mock<IPackageRepository>();
+            mockRepository.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
+
+            var repository = new AggregateRepository(new[] { 
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("A"), 
+                }, 
+                mockRepository.Object,
+                new MockPackageRepository { 
+                    PackageUtility.CreatePackage("B"), 
+                },
+            });
+            repository.IgnoreFailingRepositories = true;
+
+            // Act
+            var packages = repository.GetPackages();
+
+            // Assert
+            Assert.AreEqual(2, packages.Count());
+        }
+
+        private static IEnumerable<IPackage> GetPackagesWithException() {
+            yield return PackageUtility.CreatePackage("A");
+            throw new InvalidOperationException();
+        }
+
+        public abstract class PackageLookupBase : IPackageLookup {
+            public virtual IPackage FindPackage(string packageId, Version version) {
+                throw new NotImplementedException();
+            }
         }
     }
 }
