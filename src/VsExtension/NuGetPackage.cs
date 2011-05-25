@@ -81,33 +81,35 @@ namespace NuGet.Tools {
 
         /// <summary>
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e) {
-            if (IsSolutionNodeSelected) {
-                ShowManageLibraryPackageDialog(isSolution: true);
-            }
-            else if (HasActiveLoadedSupportedProject) {
-                ShowManageLibraryPackageDialog(isSolution: false);
+            if (_vsMonitorSelection.GetIsSolutionNodeSelected()) {
+                ShowManageLibraryPackageDialog(null);
             }
             else {
-                // show error message when no supported project is selected.
-                Project project = _dte.GetActiveProject();
-                string projectName = project != null ? project.Name : String.Empty;
-
-                string errorMessage;
-                if (String.IsNullOrEmpty(projectName)) {
-                    errorMessage = Resources.NoProjectSelected;
+                Project project = _vsMonitorSelection.GetActiveProject();
+                if (project != null && !project.IsUnloaded() && project.IsSupported()) {
+                    ShowManageLibraryPackageDialog(project);
                 }
                 else {
-                    errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
-                }
+                    // show error message when no supported project is selected.
+                    string projectName = project != null ? project.Name : String.Empty;
 
-                MessageHelper.ShowWarningMessage(
-                    errorMessage,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                    string errorMessage;
+                    if (String.IsNullOrEmpty(projectName)) {
+                        errorMessage = Resources.NoProjectSelected;
+                    }
+                    else {
+                        errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
+                    }
+
+                    MessageHelper.ShowWarningMessage(
+                        errorMessage,
+                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                }
             }
         }
 
-        private static void ShowManageLibraryPackageDialog(bool isSolution) {
-            var window = new PackageManagerWindow(isSolution);
+        private static void ShowManageLibraryPackageDialog(Project project) {
+            var window = new PackageManagerWindow(project);
             try {
                 window.ShowModal();
             }
@@ -122,7 +124,7 @@ namespace NuGet.Tools {
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !IsIDEInDebuggingOrBuildingContext() && (IsSolutionNodeSelected || HasActiveLoadedSupportedProject);
+            command.Visible = !IsIDEInDebuggingOrBuildingContext() && (_vsMonitorSelection.GetIsSolutionNodeSelected() || HasActiveLoadedSupportedProject);
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
         }
@@ -229,42 +231,14 @@ namespace NuGet.Tools {
         /// </summary>
         private bool HasActiveLoadedSupportedProject {
             get {
-                Project project = _dte.GetActiveProject();
-                return (project != null && !project.IsUnloaded() && project.IsSupported());
+                Project project = _vsMonitorSelection.GetActiveProject();
+                return project != null && !project.IsUnloaded() && project.IsSupported();
             }
         }
 
         private bool IsSolutionOpen {
             get {
                 return _dte != null && _dte.Solution != null && _dte.Solution.IsOpen;
-            }
-        }
-
-        private bool IsSolutionNodeSelected {
-            get {
-                IntPtr ppHier = IntPtr.Zero;
-                uint pitemid;
-                IVsMultiItemSelect ppMIS;
-                IntPtr ppSC = IntPtr.Zero;
-
-                try {
-                    _vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
-                    if (pitemid == (uint)VSConstants.VSITEMID.Root) {
-                        if (ppHier == IntPtr.Zero) {
-                            return true;
-                        }
-                    }
-                }
-                finally {
-                    if (ppHier != IntPtr.Zero) {
-                        Marshal.Release(ppHier);
-                    }
-                    if (ppSC != IntPtr.Zero) {
-                        Marshal.Release(ppSC);
-                    }
-                }
-
-                return false;
             }
         }
     }

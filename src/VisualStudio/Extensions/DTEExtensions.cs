@@ -1,30 +1,73 @@
 using System;
 using System.Runtime.InteropServices;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio {
     public static class DTEExtensions {
-        public static Project GetActiveProject(this _DTE dte) {
-            if (dte == null) {
-                throw new ArgumentNullException("dte");
-            }
-
-            Project activeProject = null;
+        public static Project GetActiveProject(this IVsMonitorSelection vsMonitorSelection) {
+            IntPtr ppHier = IntPtr.Zero;
+            uint pitemid;
+            IVsMultiItemSelect ppMIS;
+            IntPtr ppSC = IntPtr.Zero;
 
             try {
-                var activeProjects = (object[])dte.ActiveSolutionProjects;
-                if (activeProjects != null && activeProjects.Length > 0) {
-                    Project project = activeProjects[0] as Project;
-                    if (project != null) {
-                        return project;
+                vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
+
+                if (ppHier == IntPtr.Zero) {
+                    return null;
+                }
+
+                // multiple items are selected.
+                if (pitemid == (uint)VSConstants.VSITEMID.Selection) {
+                    return null;
+                }
+
+                IVsHierarchy hierarchy = Marshal.GetTypedObjectForIUnknown(ppHier, typeof(IVsHierarchy)) as IVsHierarchy;
+                if (hierarchy != null) {
+                    object project = null;
+                    if (hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out project) >= 0) {
+                        return (Project)project;
+                    }
+                }
+
+                return null;
+            }
+            finally {
+                if (ppHier != IntPtr.Zero) {
+                    Marshal.Release(ppHier);
+                }
+                if (ppSC != IntPtr.Zero) {
+                    Marshal.Release(ppSC);
+                }
+            }
+        }
+
+        public static bool GetIsSolutionNodeSelected(this IVsMonitorSelection vsMonitorSelection) {
+            IntPtr ppHier = IntPtr.Zero;
+            uint pitemid;
+            IVsMultiItemSelect ppMIS;
+            IntPtr ppSC = IntPtr.Zero;
+
+            try {
+                vsMonitorSelection.GetCurrentSelection(out ppHier, out pitemid, out ppMIS, out ppSC);
+                if (pitemid == (uint)VSConstants.VSITEMID.Root) {
+                    if (ppHier == IntPtr.Zero) {
+                        return true;
                     }
                 }
             }
-            catch (COMException) {
-                // accessing ActiveSolutionProjects can result in a COMException if the solution explorer is hidden
+            finally {
+                if (ppHier != IntPtr.Zero) {
+                    Marshal.Release(ppHier);
+                }
+                if (ppSC != IntPtr.Zero) {
+                    Marshal.Release(ppSC);
+                }
             }
 
-            return activeProject;
+            return false;
         }
     }
 }

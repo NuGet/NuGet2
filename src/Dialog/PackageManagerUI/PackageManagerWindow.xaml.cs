@@ -27,8 +27,8 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly ISelectedProviderSettings _selectedProviderSettings;
         private readonly IProductUpdateService _productUpdateService;
 
-        public PackageManagerWindow(bool isSolution) :
-            this(isSolution,
+        public PackageManagerWindow(Project project) :
+            this(project,
                  ServiceLocator.GetInstance<DTE>(),
                  ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
@@ -42,7 +42,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<ISolutionManager>()) {
         }
 
-        public PackageManagerWindow(bool forSolution,
+        public PackageManagerWindow(Project project,
                                     DTE dte,
                                     IVsUIShell vsUIShell,
                                     IVsPackageManagerFactory packageManagerFactory,
@@ -83,7 +83,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 providerServices.ProjectSelector);
 
             SetupProviders(
-                forSolution,
+                project,
                 dte,
                 packageManagerFactory,
                 repositoryFactory,
@@ -112,7 +112,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        private void SetupProviders(bool isSolution,
+        private void SetupProviders(Project activeProject,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory packageRepositoryFactory,
@@ -125,7 +125,6 @@ namespace NuGet.Dialog.PackageManagerUI {
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager();
 
             IPackageRepository localRepository;
-            Project activeProject;
 
             // we need different sets of providers depending on whether the dialog is open for solution or a project
             OnlineProvider onlineProvider;
@@ -133,7 +132,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             UpdatesProvider updatesProvider;
             OnlineProvider recentProvider;
 
-            if (isSolution) {
+            if (activeProject == null) {
                 Title = String.Format(
                     CultureInfo.CurrentUICulture, 
                     NuGet.Dialog.Resources.Dialog_Title, 
@@ -181,7 +180,6 @@ namespace NuGet.Dialog.PackageManagerUI {
                     solutionManager);
             }
             else {
-                activeProject = dte.GetActiveProject();
                 IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
                 localRepository = projectManager.LocalRepository;
 
