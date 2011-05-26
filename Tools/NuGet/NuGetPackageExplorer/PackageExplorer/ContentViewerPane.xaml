@@ -11,16 +11,15 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
        
-        <Viewbox
+        <ScrollViewer
             Visibility="{Binding IsTextFile, Converter={StaticResource invertedBoolToVis}}"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            StretchDirection="DownOnly"
-            Margin="5"
-            Stretch="Uniform">
-            <ContentPresenter
-                Content="{Binding Content}" />    
-        </Viewbox>
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto"
+            Padding="2"
+            Content="{Binding Content}">
+        </ScrollViewer>
 
         <self:SyntaxHighlightingTextBox
             x:Name="contentBox"
