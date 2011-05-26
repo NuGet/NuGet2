@@ -74,7 +74,7 @@
           <CommandFlag>DynamicVisibility</CommandFlag>
           <Strings>
               <CommandName>cmdidAddPackages</CommandName>
-              <ButtonText>Manage &amp;Library Packages...</ButtonText>
+              <ButtonText>Manage &amp;NuGet Packages...</ButtonText>
           </Strings>
       </Button>
 
