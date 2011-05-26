@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace NuGet {
     public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyProvider {
+        /// <summary>
+        /// When the ignore flag is set up, this collection keeps track of failing repositories so that the AggregateRepository 
+        /// does not query them again.
+        /// </summary>
+        private readonly ConcurrentBag<IPackageRepository> _failingRepositories = new ConcurrentBag<IPackageRepository>();
         private readonly IEnumerable<IPackageRepository> _repositories;
         private const string SourceValue = "(Aggregate source)";
         private ILogger _logger;
@@ -29,7 +35,7 @@ namespace NuGet {
         public IEnumerable<IPackageRepository> Repositories {
             get {
                 if (IgnoreFailingRepositories) {
-                    return EnumerableExtensions.SafeIterate(_repositories);
+                    return EnumerableExtensions.SafeIterate(_repositories.Select(EnsureValid).Where(r => r != null));
                 }
                 return _repositories;
             }
@@ -47,13 +53,19 @@ namespace NuGet {
             // We need to follow this pattern in all AggregateRepository methods to ensure it suppresses exceptions that may occur if the Ignore flag is set.  Oh how I despise my code. 
             Func<IPackageRepository, IQueryable<IPackage>> getPackages = r => r.GetPackages();
             if (IgnoreFailingRepositories) {
-                getPackages = r => {
+                getPackages = repo => {
+                    var defaultResult = Enumerable.Empty<IPackage>().AsSafeQueryable();
+                    if (_failingRepositories.Contains(repo)) {
+                        return defaultResult;
+                    }
+
                     try {
-                        return r.GetPackages();
+                        return repo.GetPackages();
                     }
                     catch (Exception ex) {
-                        Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
-                        return Enumerable.Empty<IPackage>().AsSafeQueryable();
+                        _failingRepositories.Add(repo);
+                        LogRepository(repo, ex);
+                        return defaultResult;
                     }
                 };
             }
@@ -67,12 +79,16 @@ namespace NuGet {
             // repository one by one until we find the package that matches.
             Func<IPackageRepository, IPackage> findPackage = r => r.FindPackage(packageId, version);
             if (IgnoreFailingRepositories) {
-                findPackage = r => {
+                findPackage = repo => {
+                    if (_failingRepositories.Contains(repo)) {
+                        return null;
+                    }
                     try {
-                        return r.FindPackage(packageId, version);
+                        return repo.FindPackage(packageId, version);
                     }
                     catch (Exception ex) {
-                        Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
+                        _failingRepositories.Add(repo);
+                        LogRepository(repo, ex);
                         return null;
                     }
                 };
@@ -87,13 +103,19 @@ namespace NuGet {
             // implements an IDependencyProvider.
             Func<IPackageRepository, IQueryable<IPackage>> getDependencies = r => r.GetDependencies(packageId);
             if (IgnoreFailingRepositories) {
-                getDependencies = r => {
+                getDependencies = repo => {
+                    var defaultResult = Enumerable.Empty<IPackage>().AsSafeQueryable();
+                    if (_failingRepositories.Contains(repo)) {
+                        return defaultResult;
+                    }
+
                     try {
-                        return r.GetDependencies(packageId);
+                        return repo.GetDependencies(packageId);
                     }
                     catch (Exception ex) {
-                        Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
-                        return Enumerable.Empty<IPackage>().AsSafeQueryable();
+                        _failingRepositories.Add(repo);
+                        LogRepository(repo, ex);
+                        return defaultResult;
                     }
                 };
             }
@@ -102,5 +124,29 @@ namespace NuGet {
                                 .Distinct(PackageEqualityComparer.IdAndVersion)
                                 .AsQueryable();
         }
+
+        private void LogRepository(IPackageRepository repository, Exception ex) {
+            _failingRepositories.Add(repository);
+            Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
+        }
+
+        /// <summary>
+        /// For remote repositories with redirected http clients, trying to access Source is when it would attempt to resolve it and throw. We need to safely iterate it.
+        /// </summary>
+        private IPackageRepository EnsureValid(IPackageRepository repository) {
+            try {
+                if (_failingRepositories.Contains(repository)) {
+                    return null;
+                }
+                string source = repository.Source;
+                return repository;
+            }
+            catch (Exception ex) {
+                LogRepository(repository, ex);
+                throw;
+            }
+        }
+
+        
     }
 }

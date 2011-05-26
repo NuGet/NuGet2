@@ -294,7 +294,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void SupressErrorWorksForRepositoriesPropetyIfIgnoreFlagIsSet() {
+        public void SupressErrorWorksForRepositoriesPropertyIfIgnoreFlagIsSet() {
             // Arrange
             var repositories = Enumerable.Range(0, 3).Select(e => {
                 if (e == 1) {
@@ -313,7 +313,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void RepositoriesPropetyThrowsIfIgnoreFlagIsNotSet() {
+        public void RepositoriesPropertyThrowsIfIgnoreFlagIsNotSet() {
             // Arrange
             var repositories = Enumerable.Range(0, 3).Select(e => {
                 if (e == 1) {
@@ -326,6 +326,26 @@ namespace NuGet.Test {
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => aggregateRepository.Repositories.Select(c => c.Source).ToList(), "Repository exception");
+        }
+
+        [TestMethod]
+        public void GetPackagesSupressesExceptionForConsecutiveCalls() {
+            // Arrange
+            var repo1 = new Mock<IPackageRepository>();
+            repo1.Setup(r => r.GetPackages()).Returns(Enumerable.Repeat(PackageUtility.CreatePackage("Foo"), 50).AsQueryable()).Verifiable();
+            var repo2 = new Mock<IPackageRepository>();
+            repo2.Setup(r => r.GetPackages()).Throws(new Exception()).Verifiable();
+
+            var aggregateRepository = new AggregateRepository(new[] { repo1.Object, repo2.Object }) { IgnoreFailingRepositories = true };
+
+            // Act 
+            for (int i = 0; i < 5; i++) {
+                aggregateRepository.GetPackages();
+            }
+
+            // Assert
+            repo1.Verify(r => r.GetPackages(), Times.Exactly(5));
+            repo2.Verify(r => r.GetPackages(), Times.AtMostOnce());
         }
 
         private static IEnumerable<IPackage> GetPackagesWithException() {
