@@ -124,6 +124,24 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void GetAggregateHandlesInvalidUriSources() {
+            // Arrange
+            var factory = PackageRepositoryFactory.Default;
+            var sources = new Mock<IPackageSourceProvider>();
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { 
+                new PackageSource("Bad 1"), 
+                new PackageSource(@"x:sjdkfjhsdjhfgjdsgjglhjk"), 
+                new PackageSource(@"http:\\//") 
+            });
+
+            // Act
+            var repo = (AggregateRepository)sources.Object.GetAggregate(factory, ignoreFailingRepositories: true);
+
+            // Assert
+            Assert.IsFalse(repo.Repositories.Any());
+        }
+
+        [TestMethod]
         public void GetAggregateSetsIgnoreInvalidRepositoryProperty() {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
