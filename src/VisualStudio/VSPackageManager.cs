@@ -85,31 +85,13 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("projectManagers");
             }
 
-            if (packageOperationEventListener == null) {
-                packageOperationEventListener = NullPackageOperationEventListener.Instance;
-            }
-
-            ExecuteOperatonsWithPackage(
-                null,
+            ExecuteOperationsWithPackage(
+                projects,
                 package,
                 operations,
-                () => {
-                    foreach (var project in projects) {
-                        try {
-                            packageOperationEventListener.OnBeforeAddPackageReference(project);
-
-                            var projectManager = GetProjectManager(project);
-                            AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies);
-                        }
-                        catch (Exception ex) {
-                            packageOperationEventListener.OnAddPackageReferenceError(project, ex);
-                        }
-                        finally {
-                            packageOperationEventListener.OnAfterAddPackageReference(project);
-                        }
-                    }
-                },
-                logger);
+                projectManager => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies),
+                logger,
+                packageOperationEventListener);
         }
 
         public void InstallPackage(IProjectManager projectManager, string packageId, Version version, bool ignoreDependencies) {
@@ -139,7 +121,7 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("operations");
             }
 
-            ExecuteOperatonsWithPackage(
+            ExecuteOperationsWithPackage(
                 projectManager,
                 package,
                 operations,
@@ -167,6 +149,31 @@ namespace NuGet.VisualStudio {
             else {
                 UninstallPackage(package, forceRemove, removeDependencies);
             }
+        }
+
+        public void UpdatePackage(
+            IEnumerable<Project> projects,
+            IPackage package,
+            IEnumerable<PackageOperation> operations,
+            bool updateDependencies,
+            ILogger logger,
+            IPackageOperationEventListener packageOperationEventListener) {
+
+            if (operations == null) {
+                throw new ArgumentNullException("operations");
+            }
+
+            if (projects == null) {
+                throw new ArgumentNullException("projects");
+            }
+
+            ExecuteOperationsWithPackage(
+                projects,
+                package,
+                operations,
+                projectManager => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies),
+                logger,
+                packageOperationEventListener);
         }
 
         public void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies) {
@@ -217,7 +224,7 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("operations");
             }
 
-            ExecuteOperatonsWithPackage(projectManager, package, operations, () => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies), logger);
+            ExecuteOperationsWithPackage(projectManager, package, operations, () => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies), logger);
         }
 
         public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger) {
@@ -463,7 +470,48 @@ namespace NuGet.VisualStudio {
             RunProjectAction(projectManager, () => projectManager.AddPackageReference(packageId, version, ignoreDependencies));
         }
 
-        private void ExecuteOperatonsWithPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, Action action, ILogger logger) {
+        private void ExecuteOperationsWithPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, Action<IProjectManager> projectAction, ILogger logger, IPackageOperationEventListener packageOperationEventListener) {
+            if (packageOperationEventListener == null) {
+                packageOperationEventListener = NullPackageOperationEventListener.Instance;
+            }
+
+            ExecuteOperationsWithPackage(
+                null,
+                package,
+                operations,
+                () => {
+                    bool success = false;
+
+                    foreach (var project in projects) {
+                        try {
+                            packageOperationEventListener.OnBeforeAddPackageReference(project);
+
+                            IProjectManager projectManager = GetProjectManager(project);
+                            InitializeLogger(logger, projectManager);
+
+                            projectAction(projectManager);
+                            success |= true;
+                        }
+                        catch (Exception ex) {
+                            packageOperationEventListener.OnAddPackageReferenceError(project, ex);
+                            success |= false;
+                        }
+                        finally {
+                            packageOperationEventListener.OnAfterAddPackageReference(project);
+                        }
+                    }
+
+                    // Throw an exception only if all the update failed for all projects
+                    // so we rollback any solution level operations that might have happened
+                    if (!success) {
+                        throw new InvalidOperationException(VsResources.OperationFailed);
+                    }
+
+                },
+                logger);
+        }
+
+        private void ExecuteOperationsWithPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, Action action, ILogger logger) {
             InitializeLogger(logger, projectManager);
 
             RunSolutionAction(() => {
@@ -669,48 +717,6 @@ namespace NuGet.VisualStudio {
             foreach (var package in packages) {
                 ExecuteUninstall(package);
             }
-        }
-
-        public void UpdatePackage(
-            IEnumerable<Project> projects,
-            IPackage package,
-            IEnumerable<PackageOperation> operations,
-            bool updateDependencies,
-            ILogger logger,
-            IPackageOperationEventListener packageOperationEventListener) {
-
-            if (operations == null) {
-                throw new ArgumentNullException("operations");
-            }
-
-            if (projects == null) {
-                throw new ArgumentNullException("projects");
-            }
-
-            if (packageOperationEventListener == null) {
-                packageOperationEventListener = NullPackageOperationEventListener.Instance;
-            }
-
-            ExecuteOperatonsWithPackage(
-                null,
-                package,
-                operations,
-                () => {
-                    foreach (var project in projects) {
-                        try {
-                            packageOperationEventListener.OnBeforeAddPackageReference(project);
-                            var projectManager = GetProjectManager(project);
-                            UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies);
-                        }
-                        catch (Exception ex) {
-                            packageOperationEventListener.OnAddPackageReferenceError(project, ex);
-                        }
-                        finally {
-                            packageOperationEventListener.OnAfterAddPackageReference(project);
-                        }
-                    }
-                },
-                logger);
         }
 
         private void UpdatePackage(string packageId, Action<IProjectManager> projectAction, Func<IPackage> resolvePackage, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {

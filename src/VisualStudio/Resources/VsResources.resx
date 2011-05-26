@@ -240,4 +240,7 @@
   <data name="PackageUpdatedSuccessfully" xml:space="preserve">
     <value>'{0}' updated successfully.</value>
   </data>
+  <data name="OperationFailed" xml:space="preserve">
+    <value>Operation failed.</value>
+  </data>
 </root>

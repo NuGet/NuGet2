@@ -304,6 +304,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Operation failed..
+        /// </summary>
+        public static string OperationFailed {
+            get {
+                return ResourceManager.GetString("OperationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; cannot be removed because it in use by &apos;{1}&apos;.
         /// </summary>
         public static string PackageCannotBeRemovedBecauseItIsInUse {
