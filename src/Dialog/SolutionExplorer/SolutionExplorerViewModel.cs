@@ -8,7 +8,7 @@ namespace NuGet.Dialog {
         private Lazy<ProjectNodeBase> _solutionNode;
 
         public SolutionExplorerViewModel(
-            Solution solution, 
+            Solution solution,
             Func<Project, bool> checkedStateSelector,
             Func<Project, bool> enabledStateSelector) {
             if (solution == null) {

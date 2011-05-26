@@ -8,8 +8,8 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog {
     internal static class SolutionWalker {
         public static ProjectNodeBase Walk(
-            Solution solution, 
-            Func<Project, bool> checkedStateSelector, 
+            Solution solution,
+            Func<Project, bool> checkedStateSelector,
             Func<Project, bool> enabledStateSelector) {
             if (solution == null) {
                 throw new ArgumentNullException("solution");

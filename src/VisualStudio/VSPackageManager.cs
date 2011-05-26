@@ -672,11 +672,11 @@ namespace NuGet.VisualStudio {
         }
 
         public void UpdatePackage(
-            IEnumerable<Project> projects, 
-            IPackage package, 
-            IEnumerable<PackageOperation> operations, 
-            bool updateDependencies, 
-            ILogger logger, 
+            IEnumerable<Project> projects,
+            IPackage package,
+            IEnumerable<PackageOperation> operations,
+            bool updateDependencies,
+            ILogger logger,
             IPackageOperationEventListener packageOperationEventListener) {
 
             if (operations == null) {

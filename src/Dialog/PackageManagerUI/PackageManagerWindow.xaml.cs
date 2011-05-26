@@ -134,8 +134,8 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             if (activeProject == null) {
                 Title = String.Format(
-                    CultureInfo.CurrentUICulture, 
-                    NuGet.Dialog.Resources.Dialog_Title, 
+                    CultureInfo.CurrentUICulture,
+                    NuGet.Dialog.Resources.Dialog_Title,
                     dte.Solution.GetName() + ".sln");
 
                 activeProject = null;
@@ -184,8 +184,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                 localRepository = projectManager.LocalRepository;
 
                 Title = String.Format(
-                    CultureInfo.CurrentUICulture, 
-                    NuGet.Dialog.Resources.Dialog_Title, 
+                    CultureInfo.CurrentUICulture,
+                    NuGet.Dialog.Resources.Dialog_Title,
                     activeProject.GetDisplayName());
 
                 onlineProvider = new OnlineProvider(

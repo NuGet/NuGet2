@@ -25,7 +25,7 @@ namespace NuGet.VisualStudio {
         void UpdatePackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, ILogger logger, IPackageOperationEventListener packageOperationEventListener);
         void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger);
         void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener packageOperationEventListener);
-        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger);        
+        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger);
         void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies);
         void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, ILogger logger);
         void UpdatePackage(IProjectManager projectManager, string packageId, Version version, bool updateDependencies, ILogger logger);

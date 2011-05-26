@@ -50,7 +50,7 @@ namespace NuGet.Dialog.Providers {
                     // user presses Cancel button on the Solution dialog
                     return false;
                 }
-                
+
                 selectedProjectsList = selectedProjects.ToList();
                 if (selectedProjectsList.Count == 0) {
                     return false;
@@ -79,7 +79,7 @@ namespace NuGet.Dialog.Providers {
 
         private void SaveProjectCheckStates(IList<Project> selectedProjects) {
             var selectedProjectSet = new HashSet<Project>(selectedProjects);
-            
+
             foreach (Project project in _solutionManager.GetProjects()) {
                 if (!String.IsNullOrEmpty(project.UniqueName)) {
                     bool checkState = selectedProjectSet.Contains(project);
@@ -90,7 +90,7 @@ namespace NuGet.Dialog.Providers {
 
         private static bool DetermineProjectCheckState(Project project) {
             bool checkState;
-            if (String.IsNullOrEmpty(project.UniqueName) || 
+            if (String.IsNullOrEmpty(project.UniqueName) ||
                 !_checkStateCache.TryGetValue(project.UniqueName, out checkState)) {
                 checkState = true;
             }
