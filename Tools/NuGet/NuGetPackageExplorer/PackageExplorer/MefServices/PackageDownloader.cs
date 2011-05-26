@@ -40,6 +40,7 @@ namespace PackageExplorer {
             WebClient client = new WebClient();
             string userAgent = HttpUtility.CreateUserAgentString(PackageExplorerViewModel.Constants.UserAgentClient);
             client.Headers[HttpRequestHeader.UserAgent] = userAgent;
+            client.UseDefaultCredentials = true;
             client.Proxy = proxyService.GetProxy(uri);
 
             client.DownloadDataCompleted += (sender, e) => {

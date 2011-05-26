@@ -28,6 +28,9 @@ namespace NuGet {
             var httpRequest = webRequest as HttpWebRequest;
             if (httpRequest != null) {
                 httpRequest.UserAgent = UserAgent;
+                httpRequest.CookieContainer = new CookieContainer();
+                httpRequest.UseDefaultCredentials = true;
+                httpRequest.PreAuthenticate = true;
                 httpRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 // default Timeout period is 100 seconds
                 httpRequest.Timeout = 1000 * 200;
