@@ -31,6 +31,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             AddPowerShellModuleSearchPath();
 
             Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
+            AdjustExecutionPolicy(runspace.Item1);
             LoadProfilesIntoRunspace(runspace.Item1);
 
             return runspace;
@@ -91,6 +92,26 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             Environment.SetEnvironmentVariable(PSModulePathEnvVariable,
                                                String.Format(CultureInfo.InvariantCulture, "{0}\\Modules\\;{1}", extensionRoot, psModulePath),
                                                EnvironmentVariableTarget.Process);
+        }
+
+        private static void AdjustExecutionPolicy(Runspace runspace) {
+            ExecutionPolicy policy = runspace.GetEffectiveExecutionPolicy();
+            if (policy != ExecutionPolicy.Unrestricted &&
+                policy != ExecutionPolicy.RemoteSigned &&
+                policy != ExecutionPolicy.Bypass) {
+
+                ExecutionPolicy machinePolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
+                if (machinePolicy != ExecutionPolicy.Undefined) {
+                    return;
+                }
+
+                ExecutionPolicy userPolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
+                if (userPolicy != ExecutionPolicy.Undefined) {
+                    return;
+                }
+
+                runspace.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
+            }
         }
 
         private static void LoadProfilesIntoRunspace(Runspace runspace) {

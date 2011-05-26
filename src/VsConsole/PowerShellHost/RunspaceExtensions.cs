@@ -90,8 +90,27 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return pipeline;
         }
 
-        public static void ImportModule(this Runspace runspace, string modulePath) {
-            runspace.Invoke("Import-Module '" + modulePath + "'", null, false);
+        public static ExecutionPolicy GetEffectiveExecutionPolicy(this Runspace runspace) {
+            return GetExecutionPolicy(runspace, "Get-ExecutionPolicy");
+        }
+
+        public static ExecutionPolicy GetExecutionPolicy(this Runspace runspace, ExecutionPolicyScope scope) {
+            return GetExecutionPolicy(runspace, "Get-ExecutionPolicy -Scope " + scope);
+        }
+
+        private static ExecutionPolicy GetExecutionPolicy(this Runspace runspace, string command) {
+            Collection<PSObject> results = runspace.Invoke(command, null, false);
+            if (results.Count > 0) {
+                return (ExecutionPolicy)results[0].BaseObject;
+            }
+            else {
+                return ExecutionPolicy.Undefined;
+            }
+        }
+
+        public static void SetExecutionPolicy(this Runspace runspace, ExecutionPolicy policy, ExecutionPolicyScope scope) {
+            string command = string.Format(CultureInfo.InvariantCulture, "Set-ExecutionPolicy {0} -Scope {1} -Force", policy.ToString(), scope.ToString());
+            runspace.Invoke(command, null, false);
         }
 
         public static void ExecuteScript(this Runspace runspace, string installPath, string scriptPath, IPackage package) {
