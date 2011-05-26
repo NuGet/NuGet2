@@ -226,8 +226,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 return _fileSystem;
             }
 
-            protected override PackageManager GetPackageManager(IFileSystem fileSystem) {
-                return _packageManager ?? base.GetPackageManager(fileSystem);
+            protected override PackageManager GetPackageManager(IFileSystem fileSystem, bool useMachineCache) {
+                return _packageManager ?? base.GetPackageManager(fileSystem, useMachineCache);
             }
         }
     }

@@ -50,14 +50,15 @@ namespace NuGet.Commands {
 
         public override void ExecuteCommand() {
             IFileSystem fileSystem = GetFileSystem();
-            PackageManager packageManager = GetPackageManager(fileSystem);
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
             if (Path.GetFileName(Arguments[0]).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
-                InstallPackagesFromConfigFile(packageManager, fileSystem, Arguments[0]);
+                InstallPackagesFromConfigFile(fileSystem, Arguments[0]);
             }
             else {
+                PackageManager packageManager = GetPackageManager(fileSystem);
+
                 string packageId = Arguments[0];
 
                 Version version = Version != null ? new Version(Version) : null;
@@ -81,8 +82,9 @@ namespace NuGet.Commands {
             return repository;
         }
 
-        private void InstallPackagesFromConfigFile(PackageManager packageManager, IFileSystem fileSystem, string packageReferenceFilePath) {
+        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, string packageReferenceFilePath) {
             var packageReferences = new PackageReferenceFile(fileSystem, packageReferenceFilePath).GetPackageReferences();
+            PackageManager packageManager = GetPackageManager(fileSystem, useMachineCache: true);
 
             bool installedAny = false;
             foreach (var package in packageReferences) {
@@ -98,10 +100,15 @@ namespace NuGet.Commands {
             }
         }
 
-        protected virtual PackageManager GetPackageManager(IFileSystem fileSystem) {
+        protected virtual PackageManager GetPackageManager(IFileSystem fileSystem, bool useMachineCache = false) {
             var repository = GetRepository();
 
-            var packageManager = new PackageManager(repository, new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions), fileSystem);
+            if (useMachineCache) {
+                repository = new AggregateRepository(new[] { MachineCache.Default, repository });
+            }
+
+            var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
+            var packageManager = new PackageManager(repository, pathResolver, fileSystem);
             packageManager.Logger = Console;
 
             return packageManager;
