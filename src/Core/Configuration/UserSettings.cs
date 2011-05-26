@@ -8,15 +8,22 @@ using NuGet.Resources;
 namespace NuGet {
     public class UserSettings : ISettings {
         private const string _configFileName = "NuGet.Config";
-        private XDocument _config;
+        private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
 
-        public UserSettings(IFileSystem fileSystem) {
+        public UserSettings(IFileSystem fileSystem) : this(fileSystem, _configFileName, false) { }
+
+        public UserSettings(IFileSystem fileSystem, string filename, bool throwIfNoFile) {
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }
             _fileSystem = fileSystem;
-            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configFileName);
+            if (throwIfNoFile) {
+                _config = XmlUtility.GetDocument(_fileSystem, filename);
+            }
+            else {
+                _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, filename);
+            }
         }
 
         public string GetValue(string section, string key) {

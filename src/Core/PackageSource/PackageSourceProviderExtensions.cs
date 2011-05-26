@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NuGet {
@@ -9,6 +10,27 @@ namespace NuGet {
 
         public static AggregateRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories) {
             return new AggregateRepository(factory, provider.LoadPackageSources().Select(s => s.Source), ignoreFailingRepositories);
+        }
+
+        public static IPackageRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories, IEnumerable<string> feeds) {
+            Func<string, IPackageRepository> createRepository = factory.CreateRepository;
+
+            if (ignoreFailingRepositories) {
+                createRepository = (source) => {
+                    try {
+                        return factory.CreateRepository(source);
+                    }
+                    catch (InvalidOperationException) {
+                        return null;
+                    }
+                };
+            }
+
+            var repositories = (from item in feeds 
+                                let repository = createRepository(provider.ResolveSource(item))
+                                where repository != null
+                                select repository).ToArray();
+            return new AggregateRepository(repositories) { IgnoreFailingRepositories = ignoreFailingRepositories };
         }
 
         /// <summary>

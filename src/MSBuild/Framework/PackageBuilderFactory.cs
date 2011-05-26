@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 
 namespace NuGet.Authoring {
     public class PackageBuilderFactory : IPackageBuilderFactory {

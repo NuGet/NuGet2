@@ -117,20 +117,71 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BlankApiKey" xml:space="preserve">
+    <value>ApiKey is blank - unable to locate in config file.</value>
+  </data>
+  <data name="BuildSpecificConfig" xml:space="preserve">
+    <value>Using build-specified config file for feeds</value>
+  </data>
+  <data name="BuildSpecificFeeds" xml:space="preserve">
+    <value>Using build-specified feeds</value>
+  </data>
   <data name="CreatedPackage" xml:space="preserve">
     <value>Created a package for {0} at {1}.</value>
   </data>
   <data name="CreatingPackage" xml:space="preserve">
     <value>Creating a package for {0} at {1}.</value>
   </data>
+  <data name="DefaultSymbolServer" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FeedsAndConfigSpecified" xml:space="preserve">
+    <value>Cannot specify feeds and local config file</value>
+  </data>
+  <data name="InvalidFeedUrl" xml:space="preserve">
+    <value>Feed Url '{0}' is not a valid Url</value>
+  </data>
+  <data name="LookingForDependencies" xml:space="preserve">
+    <value>Looking for NuGet dependencies</value>
+  </data>
+  <data name="MachineSpecificConfig" xml:space="preserve">
+    <value>Using machine config file for feeds</value>
+  </data>
+  <data name="NoPackagesFound" xml:space="preserve">
+    <value>No packages found requiring installation</value>
+  </data>
+  <data name="PackageConfigNotFound" xml:space="preserve">
+    <value>Package configuration file '{0}' does not exist</value>
+  </data>
+  <data name="PackageConfigParseError" xml:space="preserve">
+    <value>Error parsing packages.config file at '{0}'</value>
+  </data>
   <data name="PackageDirDoesNotExist" xml:space="preserve">
     <value>The package directory does not exist.</value>
+  </data>
+  <data name="PackageDoesNotExist" xml:space="preserve">
+    <value>The package at '{0}' does not exist.</value>
+  </data>
+  <data name="PushCommandPackageCreated" xml:space="preserve">
+    <value>Package created at {0}.</value>
+  </data>
+  <data name="PushCommandPackagePublished" xml:space="preserve">
+    <value>Package published at {0}.</value>
+  </data>
+  <data name="PushCommandPushingPackage" xml:space="preserve">
+    <value>Pushing package '{0}' to '{1}'.</value>
   </data>
   <data name="SpecFileDoesNotExist" xml:space="preserve">
     <value>The spec file does not exist.</value>
   </data>
   <data name="SpecFileMustNotBeEmpty" xml:space="preserve">
     <value>The spec file must not be empty.</value>
+  </data>
+  <data name="StartingFetch" xml:space="preserve">
+    <value>Starting to grab dependent packages using NuGet</value>
+  </data>
+  <data name="SymbolServerNotConfigured" xml:space="preserve">
+    <value>The symbol server is not configured.</value>
   </data>
   <data name="UnexpectedError" xml:space="preserve">
     <value>An unexpected error occurred while creating the package: {0}</value>

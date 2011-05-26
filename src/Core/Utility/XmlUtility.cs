@@ -6,9 +6,7 @@ namespace NuGet {
         internal static XDocument GetOrCreateDocument(XName rootName, IFileSystem fileSystem, string path) {
             if (fileSystem.FileExists(path)) {
                 try {
-                    using (Stream configSream = fileSystem.OpenFile(path)) {
-                        return XDocument.Load(configSream);
-                    }
+                    return GetDocument(fileSystem, path);
                 }
                 catch (FileNotFoundException) {
                     return CreateDocument(rootName, fileSystem, path);
@@ -22,6 +20,12 @@ namespace NuGet {
             // Add it to the file system
             fileSystem.AddFile(path, document.Save);
             return document;
+        }
+
+        internal static XDocument GetDocument(IFileSystem fileSystem, string path) {
+            using (Stream configStream = fileSystem.OpenFile(path)) {
+                return XDocument.Load(configStream);
+            }
         }
     }
 }

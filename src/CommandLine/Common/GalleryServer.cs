@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Json;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.Common {
-    public class GalleryServer : IProgressProvider {
+    public class GalleryServer : IGalleryServer, IProgressProvider {
         public static readonly string DefaultSymbolServerUrl = "http://nuget.gw.symbolsource.org/Public/NuGet";
         public static readonly string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string CreatePackageService = "PackageFiles";
