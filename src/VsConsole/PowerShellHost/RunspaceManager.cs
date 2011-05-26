@@ -55,9 +55,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             initialSessionState.ImportPSModule(new string[] { NuGetCoreModuleName });
 
 #if DEBUG
-            //if (File.Exists(DebugConstants.TestModulePath)) {
-            //    initialSessionState.ImportPSModule(new string[] { DebugConstants.TestModulePath });
-            //}
+            if (File.Exists(DebugConstants.TestModulePath)) {
+                initialSessionState.ImportPSModule(new string[] { DebugConstants.TestModulePath });
+            }
 #endif
 
             // this is used by the functional tests

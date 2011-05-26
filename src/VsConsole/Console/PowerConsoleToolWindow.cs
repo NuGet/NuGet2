@@ -127,6 +127,8 @@ namespace NuGetConsole.Implementation {
             };
             timer.Start();
 
+
+
             base.OnToolWindowCreated();
         }
 
@@ -374,6 +376,7 @@ namespace NuGetConsole.Implementation {
                             WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
                                 OnDispatcherStartCompleted();
                             };
+                            WpfConsole.Dispatcher.StartWaitingKey += OnDispatcherStartWaitingKey;
                             WpfConsole.Dispatcher.Start();
                         }
                     }
@@ -382,6 +385,12 @@ namespace NuGetConsole.Implementation {
                     }
                 }
             }
+        }
+
+        private void OnDispatcherStartWaitingKey(object sender, EventArgs args) {
+            WpfConsole.Dispatcher.StartWaitingKey -= OnDispatcherStartWaitingKey;
+            // we want to hide the text "initialize host..." when waiting for key input
+            ConsoleParentPane.NotifyInitializationCompleted();
         }
 
         private void OnDispatcherStartCompleted() {

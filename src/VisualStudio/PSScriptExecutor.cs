@@ -62,8 +62,8 @@ namespace NuGet.VisualStudio {
                 return host;
             }
             else {
-                // the PowerShell host fails to initialize if group policy restricts loading of scripts
-                throw new InvalidOperationException(VsResources.Console_GroupPolicyError);
+                // the PowerShell host fails to initialize if group policy restricts to AllSigned
+                throw new InvalidOperationException(VsResources.Console_InitializeHostFails);
             }
         }
     }

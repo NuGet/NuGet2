@@ -72,7 +72,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
         protected Runspace Runspace {
             get {
-                Debug.Assert(_initialized != null);
                 return _runspace;
             }
         }

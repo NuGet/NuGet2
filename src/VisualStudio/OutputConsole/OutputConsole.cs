@@ -27,6 +27,11 @@ namespace NuGet.VisualStudio {
 
         public event EventHandler StartCompleted;
 
+        event EventHandler IConsoleDispatcher.StartWaitingKey {
+            add { }
+            remove {}
+        }
+
         public bool IsStartCompleted {
             get;
             private set;

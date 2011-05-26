@@ -40,6 +40,8 @@ namespace NuGetConsole.Implementation.Console {
 
         public event EventHandler StartCompleted;
 
+        public event EventHandler StartWaitingKey;
+
         public ConsoleDispatcher(IPrivateWpfConsole wpfConsole) {
             UtilityMethods.ThrowIfArgumentNull(wpfConsole);
 
@@ -79,6 +81,9 @@ namespace NuGetConsole.Implementation.Console {
 
         public VsKeyInfo WaitKey() {
             try {
+                // raise the StartWaitingKey event on main thread
+                RaiseEventSafe(StartWaitingKey);
+
                 // set/reset the cancellation token
                 _cancelWaitKeySource = new CancellationTokenSource();
                 _isExecutingReadKey = true;
@@ -93,6 +98,12 @@ namespace NuGetConsole.Implementation.Console {
             }
             finally {
                 _isExecutingReadKey = false;
+            }
+        }
+
+        private void RaiseEventSafe(EventHandler handler) {
+            if (handler != null) {
+                Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(() => handler(this, EventArgs.Empty));
             }
         }
 
@@ -130,9 +141,7 @@ namespace NuGetConsole.Implementation.Console {
                             Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(_dispatcher.Start);
                         }
 
-                        if (StartCompleted != null) {
-                            Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(() => StartCompleted(this, EventArgs.Empty));
-                        }
+                        RaiseEventSafe(StartCompleted);
                         IsStartCompleted = true;
                     },
                     TaskContinuationOptions.NotOnCanceled

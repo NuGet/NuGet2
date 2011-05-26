@@ -17,6 +17,11 @@ namespace NuGetConsole {
         /// Raised when the Start method completes asynchronously.
         /// </summary>
         event EventHandler StartCompleted;
+        
+        /// <summary>
+        /// Raised every time the WaitKey() method is called.
+        /// </summary>
+        event EventHandler StartWaitingKey;
 
         /// <summary>
         /// Indicates whether the StartCompleted event has raised.

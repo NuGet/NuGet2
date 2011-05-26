@@ -153,8 +153,8 @@
   <data name="PackageCannotBeRemovedBecauseItIsInUse" xml:space="preserve">
     <value>'{0}' cannot be removed because it in use by '{1}'</value>
   </data>
-  <data name="Console_GroupPolicyError" xml:space="preserve">
-    <value>Your machine group policy or user group policy disables execution of PowerShell script. Adjust your group policy settings to allow execution of PowerShell scripts.</value>
+  <data name="Console_InitializeHostFails" xml:space="preserve">
+    <value>Failed to initialize the PowerShell host. If your PowerShell execution policy setting is set to AllSigned, open the Package Manager Console to initialize the host first.</value>
   </data>
   <data name="SolutionDirectoryNotAvailable" xml:space="preserve">
     <value>Unable to locate the solution directory. Please ensure that the solution has been saved.</value>
