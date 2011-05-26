@@ -76,11 +76,7 @@ namespace NuGet.Commands {
         }
 
         private IPackageRepository GetRepository() {
-            if (Source.Any()) {
-                return new AggregateRepository(from item in Source
-                                               select RepositoryFactory.CreateRepository(SourceProvider.ResolveSource(item)));
-            }
-            var repository = SourceProvider.GetAggregate(RepositoryFactory, ignoreFailingRepositories: true);
+            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             repository.Logger = Console;
             return repository;
         }

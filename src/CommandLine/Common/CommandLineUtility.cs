@@ -10,121 +10,12 @@ using NuGet.Common;
 
 namespace NuGet {
     internal static class CommandLineUtility {
-        private static Dictionary<Tuple<Type, string>, string> _cachedResourceStrings;
-
+        public readonly static string ApiKeysSectionName = "apikeys";
         private static readonly HashSet<string> _supportedProjectExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {  
             ".csproj",
             ".vbproj",
             ".fsproj",
         };
-
-        public readonly static string ApiKeysSectionName = "apikeys";
-
-        public static Type RemoveNullableFromType(Type type) {
-            return Nullable.GetUnderlyingType(type) ?? type;
-        }
-
-        public static object ChangeType(object value, Type type) {
-            if (type == null) {
-                throw new ArgumentNullException("type");
-            }
-
-            if (value == null) {
-                if (TypeAllowsNull(type)) {
-                    return null;
-                }
-                return Convert.ChangeType(value, type, CultureInfo.CurrentCulture);
-            }
-
-            type = RemoveNullableFromType(type);
-
-            if (value.GetType() == type) {
-                return value;
-            }
-
-            TypeConverter converter = TypeDescriptor.GetConverter(type);
-            if (converter.CanConvertFrom(value.GetType())) {
-                return converter.ConvertFrom(value);
-            }
-
-            TypeConverter otherConverter = TypeDescriptor.GetConverter(value.GetType());
-            if (otherConverter.CanConvertTo(type)) {
-                return otherConverter.ConvertTo(value, type);
-            }
-
-            throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                NuGetResources.UnableToConvertTypeError, value.GetType(), type));
-        }
-
-        public static bool TypeAllowsNull(Type type) {
-            return Nullable.GetUnderlyingType(type) != null || !type.IsValueType;
-        }
-
-        public static Type GetGenericCollectionType(Type type) {
-            return GetInterfaceType(type, typeof(ICollection<>));
-        }
-
-        public static Type GetDictionaryType(Type type) {
-            return GetInterfaceType(type, typeof(IDictionary<,>));
-        }
-
-        private static Type GetInterfaceType(Type type, Type interfaceType) {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == interfaceType) {
-                return type;
-            }
-            return (from t in type.GetInterfaces()
-                    where t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType
-                    select t).SingleOrDefault();
-        }
-
-        public static bool IsKeyValueProperty(PropertyInfo property) {
-            return GetDictionaryType(property.PropertyType) != null;
-        }
-
-        public static bool IsMultiValuedProperty(PropertyInfo property) {
-            return GetGenericCollectionType(property.PropertyType) != null || IsKeyValueProperty(property);
-        }
-
-        public static string GetLocalizedString(Type resourceType, string resourceName) {
-            if (String.IsNullOrEmpty(resourceName)) {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "resourceName");
-            }
-
-            if (resourceType == null) {
-                throw new ArgumentNullException("resourceType");
-            }
-
-            if (_cachedResourceStrings == null) {
-                _cachedResourceStrings = new Dictionary<Tuple<Type, string>, string>();
-            }
-
-            var key = Tuple.Create(resourceType, resourceName);
-            string resourceValue;
-
-            if (!_cachedResourceStrings.TryGetValue(key, out resourceValue)) {
-                PropertyInfo property = resourceType.GetProperty(resourceName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-
-                if (property == null) {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, resourceName));
-                }
-
-                if (property.PropertyType != typeof(string)) {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyNotStringType, resourceName, resourceType));
-                }
-
-                MethodInfo getMethod = property.GetGetMethod(true);
-                if ((getMethod == null) || (!getMethod.IsAssembly && !getMethod.IsPublic)) {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, resourceName));
-                }
-                resourceValue = (string)property.GetValue(null, null);
-                _cachedResourceStrings[key] = resourceValue;
-            }
-
-            return resourceValue;
-        }
 
         public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true) {
             var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);

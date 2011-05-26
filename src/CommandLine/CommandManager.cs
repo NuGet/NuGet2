@@ -50,7 +50,7 @@ namespace NuGet {
 
             foreach (PropertyInfo propInfo in command.GetType().GetProperties()) {
                 foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true)) {
-                    if (!propInfo.CanWrite && !CommandLineUtility.IsMultiValuedProperty(propInfo)) {
+                    if (!propInfo.CanWrite && !TypeHelper.IsMultiValuedProperty(propInfo)) {
                         // If the property has neither a setter nor is of a type that can be cast to ICollection<> then there's no way to assign 
                         // values to it. In this case throw.
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,

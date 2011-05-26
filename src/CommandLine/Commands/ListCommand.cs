@@ -41,7 +41,6 @@ namespace NuGet.Commands {
 
         public IEnumerable<IPackage> GetPackages() {
             IPackageRepository packageRepository = GetRepository();
-
             IQueryable<IPackage> packages = packageRepository.GetPackages().OrderBy(p => p.Id);
             if (Arguments != null && Arguments.Any()) {
                 packages = packages.Find(Arguments.ToArray());
@@ -54,11 +53,7 @@ namespace NuGet.Commands {
         }
 
         private IPackageRepository GetRepository() {
-            if (Source.Any()) {
-                return new AggregateRepository(Source.Select(s => RepositoryFactory.CreateRepository(SourceProvider.ResolveSource(s))));
-            }
-            
-            var repository = SourceProvider.GetAggregate(RepositoryFactory, ignoreFailingRepositories: true);
+            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             repository.Logger = Console;
             return repository;
         }

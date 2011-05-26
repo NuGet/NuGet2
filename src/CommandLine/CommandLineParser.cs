@@ -83,7 +83,7 @@ namespace NuGet {
         private static void AssignValue(PropertyInfo property, ICommand command, string option, object value) {
             try {
 
-                if (CommandLineUtility.IsMultiValuedProperty(property)) {
+                if (TypeHelper.IsMultiValuedProperty(property)) {
                     // If we were able to look up a parent of type ICollection<>, perform a Add operation on it.
                     // Note that we expect the value is a string.
                     var stringValue = value as string;
@@ -94,7 +94,7 @@ namespace NuGet {
                     // Example of a list value : nuget pack -option "foo;bar;baz"
                     // Example of a keyvalue value: nuget pack -option "foo=bar;baz=false"
                     foreach (var item in stringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
-                        if (CommandLineUtility.IsKeyValueProperty(property)) {
+                        if (TypeHelper.IsKeyValueProperty(property)) {
                             int eqIndex = item.IndexOf("=", StringComparison.OrdinalIgnoreCase);
                             if (eqIndex > -1) {
                                 string propertyKey = item.Substring(0, eqIndex);
@@ -108,7 +108,7 @@ namespace NuGet {
                     }
                 }
                 else {
-                    property.SetValue(command, CommandLineUtility.ChangeType(value, property.PropertyType), null);
+                    property.SetValue(command, TypeHelper.ChangeType(value, property.PropertyType), null);
                 }
             }
             catch {

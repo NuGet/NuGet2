@@ -11,7 +11,7 @@ namespace NuGet {
 
         public string GetDescription() {
             if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName)) {
-                return CommandLineUtility.GetLocalizedString(ResourceType, DescriptionResourceName);
+                return ResourceHelper.GetLocalizedString(ResourceType, DescriptionResourceName);
             }
             return Description;
         }

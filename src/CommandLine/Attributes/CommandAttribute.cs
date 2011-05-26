@@ -18,21 +18,21 @@ namespace NuGet {
 
         public string GetDescription() {
             if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName)) {
-                return CommandLineUtility.GetLocalizedString(ResourceType, DescriptionResourceName);
+                return ResourceHelper.GetLocalizedString(ResourceType, DescriptionResourceName);
             }
             return Description;
         }
 
         public string GetUsageSummary() {
             if (ResourceType != null && !String.IsNullOrEmpty(UsageSummaryResourceName)) {
-                return CommandLineUtility.GetLocalizedString(ResourceType, UsageSummaryResourceName);
+                return ResourceHelper.GetLocalizedString(ResourceType, UsageSummaryResourceName);
             }
             return UsageSummary;
         }
 
         public string GetUsageDescription() {
             if (ResourceType != null && !String.IsNullOrEmpty(UsageDescriptionResourceName)) {
-                return CommandLineUtility.GetLocalizedString(ResourceType, UsageDescriptionResourceName);
+                return ResourceHelper.GetLocalizedString(ResourceType, UsageDescriptionResourceName);
             }
             return UsageDescription;
         }

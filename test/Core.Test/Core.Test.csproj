@@ -52,6 +52,7 @@
     <Compile Include="NuGetCommandLine\Commands\PackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
     <Compile Include="NuGetCommandLine\CommandTest.cs" />
+    <Compile Include="NuGetCommandLine\TypeHelperTest.cs" />
     <Compile Include="NullFileSystemTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageHelperTest.cs" />
@@ -77,7 +78,7 @@
     <Compile Include="Mocks\MockAssembly.cs" />
     <Compile Include="NuGetCommandLine\CommandAttributeTests.cs" />
     <Compile Include="NuGetCommandLine\CommandLinePaserTests.cs" />
-    <Compile Include="NuGetCommandLine\CommandLineUtilityTests.cs" />
+    <Compile Include="NuGetCommandLine\ResourceHelperTests.cs" />
     <Compile Include="NuGetCommandLine\CommandManagerTests.cs" />
     <Compile Include="NuGetCommandLine\Commands\ListCommandTests.cs" />
     <Compile Include="NuGetCommandLine\OptionAttributeTests.cs" />

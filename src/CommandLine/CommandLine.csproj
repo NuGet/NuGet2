@@ -55,6 +55,7 @@
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="Common\AggregateRepositoryHelper.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
@@ -70,6 +71,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\ResourceHelper.cs" />
+    <Compile Include="Common\TypeHelper.cs" />
     <Compile Include="ICommandManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
