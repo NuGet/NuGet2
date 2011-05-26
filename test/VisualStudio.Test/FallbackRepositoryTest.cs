@@ -11,6 +11,84 @@ namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class FallbackRepositoryTest {
         [TestMethod]
+        public void CreatePackageManagerUsesPrimaryRepositoryAsDependencyProviderIfUseFallbackIsFalse() {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+            var mockFileSystemProvider = new Mock<IFileSystemProvider>();
+
+            var mockRepository1 = new MockPackageRepository();
+            var mockRepository2 = new MockPackageRepository();
+
+            var source1 = new PackageSource("Source1");
+            var source2 = new PackageSource("Source2");
+
+            mockRepository1.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
+
+            mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
+            mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
+                switch (s) {
+                    case "Source1": return mockRepository1;
+                    case "Source2": return mockRepository2;
+                    default: return null;
+                }
+            });
+
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null);
+
+            // Act
+            var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: false);
+
+            // Assert
+            Assert.AreEqual(mockRepository1, packageManager.SourceRepository);
+        }
+
+        [TestMethod]
+        public void CreatePackageManagerUsesFallbackRepositoryyAsDependencyProviderIfUseFallbackIsTrue() {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+            var mockFileSystemProvider = new Mock<IFileSystemProvider>();
+
+            var mockRepository1 = new MockPackageRepository();
+            var mockRepository2 = new MockPackageRepository();
+
+            var source1 = new PackageSource("Source1");
+            var source2 = new PackageSource("Source2");
+
+            mockRepository1.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
+
+            mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
+            mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
+                switch (s) {
+                    case "Source1": return mockRepository1;
+                    case "Source2": return mockRepository2;
+                    default: return null;
+                }
+            });
+
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null);
+
+            // Act
+            var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: true);
+
+            // Assert
+            Assert.IsInstanceOfType(packageManager.SourceRepository, typeof(FallbackRepository));
+            var fallbackRepo = (FallbackRepository)packageManager.SourceRepository;
+            Assert.IsInstanceOfType(fallbackRepo.DependencyResolver, typeof(AggregateRepository));
+            var dependencyProvider = (AggregateRepository)fallbackRepo.DependencyResolver;
+            Assert.AreEqual(2, dependencyProvider.Repositories.Count());
+            Assert.AreEqual(mockRepository1, dependencyProvider.Repositories.First());
+            Assert.AreEqual(mockRepository2, dependencyProvider.Repositories.Last());
+
+        }
+
+
+        [TestMethod]
         public void GetDependenciesReturnsPackagesFromAggregateSources() {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();

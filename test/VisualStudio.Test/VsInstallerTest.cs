@@ -64,8 +64,9 @@ namespace NuGet.VisualStudio.Test {
             installer.InstallPackage(sourceRepository, project, "foo", new Version("1.0"), ignoreDependencies: false);
 
             // Assert
-            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Init, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
-            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Install, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
+            packageManagerFactory.Verify(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false), Times.Once());
+            packageManagerFactory.Verify(m => m.CreatePackageManager(), Times.Never());
+            packageManagerFactory.Verify(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true), Times.Never());
         }
 
         // This repository better simulates what happens when we're running the package manager in vs

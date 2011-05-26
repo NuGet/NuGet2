@@ -59,9 +59,11 @@ namespace NuGet.VisualStudio {
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies) {
-            var fallbackRepository = CreateFallbackRepository(repository);
+            if (useFallbackForDependencies) {
+                repository = CreateFallbackRepository(repository);
+            }
             RepositoryInfo info = GetRepositoryInfo();
-            return new VsPackageManager(_solutionManager, fallbackRepository, info.FileSystem, info.Repository, _recentPackageRepository);
+            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository, _recentPackageRepository);
         }
 
         /// <summary>
