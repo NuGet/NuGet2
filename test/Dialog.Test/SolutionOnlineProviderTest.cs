@@ -121,7 +121,81 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
+
+            var provider = CreateSolutionOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA);
+            firstTreeNode.Repository.AddPackage(packageB);
+            firstTreeNode.Repository.AddPackage(packageC);
+
+            provider.SelectedNode = firstTreeNode;
+            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
+            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
+
+            var manualEvent = new ManualResetEventSlim(false);
+
+            provider.ExecuteCompletedCallback = delegate {
+                // Assert
+                mockPackageManager.Verify(p => p.InstallPackage(
+                    It.IsAny<IEnumerable<Project>>(),
+                    packageB,
+                    It.IsAny<IEnumerable<PackageOperation>>(),
+                    false,
+                    provider,
+                    provider), Times.Never());
+
+                manualEvent.Set();
+            };
+
+            var extensionB = new PackageItem(provider, packageB);
+
+            // Act
+            provider.Execute(extensionB);
+
+            // do not allow the method to return
+            manualEvent.Wait();
+        }
+
+        [TestMethod]
+        public void ExecuteMethodDoNotCallInstallPackageIfUserDoesNotSelectAnyProject() {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageB);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA);
+
+            var projectManager1 = new Mock<IProjectManager>();
+            projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var projectManager2 = new Mock<IProjectManager>();
+            projectManager2.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var project1 = MockProjectUtility.CreateMockProject("Project1");
+            var project2 = MockProjectUtility.CreateMockProject("Project2");
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project2))).Returns(projectManager2.Object);
+            packageManager.Setup(p => p.IsProjectLevel(It.IsAny<IPackage>())).Returns(true);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project1"))).Returns(project1);
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
+            solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
+
+            var mockProjectSelector = new Mock<IProjectSelectorService>();
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[0]);
 
             var provider = CreateSolutionOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -209,9 +283,9 @@ namespace NuGet.Dialog.Test {
 
             if (projectSelectorService == null) {
                 var mockProjectSelector = new Mock<IProjectSelectorService>();
-                mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns(
-                        solutionManager.GetProjects()
-                    );
+                mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(
+                    solutionManager.GetProjects()
+                );
                 projectSelectorService = mockProjectSelector.Object;
             }
 

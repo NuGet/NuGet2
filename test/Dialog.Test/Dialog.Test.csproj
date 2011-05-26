@@ -72,6 +72,7 @@
     <Compile Include="PackagesProviderBaseTest.cs" />
     <Compile Include="PackagesSearchNodeTest.cs" />
     <Compile Include="PackagesTreeNodeBaseTest.cs" />
+    <Compile Include="ProjectSelectorServiceExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PackageItemTest.cs" />
     <Compile Include="QueryExtensionsTest.cs" />

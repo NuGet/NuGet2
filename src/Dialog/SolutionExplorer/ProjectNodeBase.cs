@@ -9,6 +9,7 @@ namespace NuGet.Dialog {
         private FolderNode _parent;
         private string _name;
         private bool? _isSelected;
+        private bool _isEnabled = true;
 
         protected ProjectNodeBase(string name) {
             if (name == null) {
@@ -45,6 +46,18 @@ namespace NuGet.Dialog {
                 if (_name != value) {
                     _name = value;
                     OnPropertyChanged("Name");
+                }
+            }
+        }
+
+        public bool IsEnabled {
+            get {
+                return _isEnabled;
+            }
+            set {
+                if (_isEnabled != value) {
+                    _isEnabled = value;
+                    OnPropertyChanged("IsEnabled");
                 }
             }
         }

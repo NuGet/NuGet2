@@ -126,7 +126,7 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns(Enumerable.Empty<Project>());
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(Enumerable.Empty<Project>());
 
             var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -273,7 +273,7 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
 
             var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -365,7 +365,7 @@ namespace NuGet.Dialog.Test {
 
             if (projectSelectorService == null) {
                 var mockProjectSelector = new Mock<IProjectSelectorService>();
-                mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>())).Returns(
+                mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(
                         solutionManager.GetProjects()
                     );
                 projectSelectorService = mockProjectSelector.Object;

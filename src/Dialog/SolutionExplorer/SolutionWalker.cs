@@ -7,7 +7,10 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog {
     internal static class SolutionWalker {
-        public static ProjectNodeBase Walk(Solution solution, Func<Project, bool> checkedStateSelector) {
+        public static ProjectNodeBase Walk(
+            Solution solution, 
+            Func<Project, bool> checkedStateSelector, 
+            Func<Project, bool> enabledStateSelector) {
             if (solution == null) {
                 throw new ArgumentNullException("solution");
             }
@@ -20,7 +23,11 @@ namespace NuGet.Dialog {
                 checkedStateSelector = p => false;
             }
 
-            var children = CreateProjectNode(solution.Projects.OfType<Project>(), checkedStateSelector).ToArray();
+            if (enabledStateSelector == null) {
+                enabledStateSelector = p => true;
+            }
+
+            var children = CreateProjectNode(solution.Projects.OfType<Project>(), checkedStateSelector, enabledStateSelector).ToArray();
             Array.Sort(children, ProjectNodeComparer.Default);
 
             return new FolderNode(
@@ -30,13 +37,15 @@ namespace NuGet.Dialog {
 
         private static IEnumerable<ProjectNodeBase> CreateProjectNode(
             IEnumerable<Project> projects,
-            Func<Project, bool> checkedStateSelector) {
+            Func<Project, bool> checkedStateSelector,
+            Func<Project, bool> enabledStateSelector) {
 
             foreach (var project in projects) {
                 if (project.IsSupported()) {
                     yield return new ProjectNode(project) {
                         // default checked state of this node will be determined by the passed-in selector
-                        IsSelected = checkedStateSelector(project)
+                        IsSelected = checkedStateSelector(project),
+                        IsEnabled = enabledStateSelector(project)
                     };
                 }
                 else if (project.IsSolutionFolder()) {
@@ -46,7 +55,8 @@ namespace NuGet.Dialog {
                                 OfType<ProjectItem>().
                                 Where(p => p.SubProject != null).
                                 Select(p => p.SubProject),
-                            checkedStateSelector
+                            checkedStateSelector,
+                            enabledStateSelector
                         ).ToArray();
 
                         if (children.Length > 0) {

@@ -45,7 +45,15 @@ namespace NuGet.Dialog.Providers {
                 var selectedProjects = _projectSelector.ShowProjectSelectorWindow(
                     // Selector function to return the initial checkbox state for a Project.
                     // We check a project if it has the current package installed by Id, but not version
-                    project => activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id)
+                    project => activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
+                    project => {
+                        var localRepository = activePackageManager.GetProjectManager(project).LocalRepository;
+
+                        // for the Updates solution dialog, we only enable a project if it has a old version of 
+                        // the package installed.
+                        return localRepository.Exists(item.Id) &&
+                               !localRepository.Exists(item.Id, item.PackageIdentity.Version);
+                    }
                 );
 
                 if (selectedProjects == null) {

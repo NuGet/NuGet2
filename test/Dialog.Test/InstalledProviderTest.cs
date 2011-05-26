@@ -137,12 +137,19 @@ namespace NuGet.Dialog.Test {
 
             var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
+            var mre = new ManualResetEventSlim(false);
+            provider.ExecuteCompletedCallback = () => {
+                // Assert
+                packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", null, false, false, provider), Times.Once());
+                mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
+
+                mre.Set();
+            };
+
             // Act
             provider.Execute(extensionA);
 
-            // Assert
-            packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", null, false, false, provider), Times.Once());
-            mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
+            mre.Wait();
         }
 
         [TestMethod]

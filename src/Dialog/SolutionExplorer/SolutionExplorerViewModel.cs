@@ -7,12 +7,16 @@ namespace NuGet.Dialog {
     internal class SolutionExplorerViewModel {
         private Lazy<ProjectNodeBase> _solutionNode;
 
-        public SolutionExplorerViewModel(Solution solution, Func<Project, bool> checkedStateSelector) {
+        public SolutionExplorerViewModel(
+            Solution solution, 
+            Func<Project, bool> checkedStateSelector,
+            Func<Project, bool> enabledStateSelector) {
             if (solution == null) {
                 throw new ArgumentNullException("solution");
             }
 
-            _solutionNode = new Lazy<ProjectNodeBase>(() => SolutionWalker.Walk(solution, checkedStateSelector));
+            _solutionNode = new Lazy<ProjectNodeBase>(
+                () => SolutionWalker.Walk(solution, checkedStateSelector, enabledStateSelector));
         }
 
         public IEnumerable<ProjectNodeBase> ProjectNodes {

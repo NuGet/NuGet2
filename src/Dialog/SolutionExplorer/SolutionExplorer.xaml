@@ -77,6 +77,7 @@
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsEnabled" Value="{Binding IsEnabled, Mode=OneWay}" />
                     <Setter Property="Margin" Value="0,2,0,2" />
                 </Style>
             </TreeView.ItemContainerStyle>

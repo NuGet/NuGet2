@@ -70,7 +70,8 @@ namespace NuGet.Dialog.Providers {
             IEnumerable<Project> selectedProjects = _projectSelectorService.ShowProjectSelectorWindow(
                 // Selector function to return the initial checkbox state for a Project.
                 // We check a project by default if it has the current package installed.
-                project => PackageManager.GetProjectManager(project).IsInstalled(package));
+                project => PackageManager.GetProjectManager(project).IsInstalled(package),
+                ignored => true);
 
             if (selectedProjects == null) {
                 // user presses Cancel button on the Solution dialog
