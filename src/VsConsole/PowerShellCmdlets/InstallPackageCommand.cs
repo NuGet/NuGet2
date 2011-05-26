@@ -54,7 +54,7 @@ namespace NuGet.PowerShell.Commands {
 
             if (!String.IsNullOrEmpty(Source)) {
                 var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
-                return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository);
+                return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true);
             }
 
             return base.CreatePackageManager();

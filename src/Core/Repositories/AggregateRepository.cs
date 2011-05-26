@@ -125,20 +125,13 @@ namespace NuGet {
                                 .AsQueryable();
         }
 
-        private void LogRepository(IPackageRepository repository, Exception ex) {
-            _failingRepositories.Add(repository);
-            Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
-        }
-
-        /// <summary>
-        /// For remote repositories with redirected http clients, trying to access Source is when it would attempt to resolve it and throw. We need to safely iterate it.
-        /// </summary>
         private IPackageRepository EnsureValid(IPackageRepository repository) {
             try {
                 if (_failingRepositories.Contains(repository)) {
                     return null;
                 }
-                string source = repository.Source;
+                // For remote repositories with redirected http clients, trying to access Source is when it would attempt to resolve it and throw. We need to safely iterate it.
+                (repository.Source ?? String.Empty).ToString();
                 return repository;
             }
             catch (Exception ex) {
@@ -147,6 +140,10 @@ namespace NuGet {
             }
         }
 
+        private void LogRepository(IPackageRepository repository, Exception ex) {
+            _failingRepositories.Add(repository);
+            Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
+        }
         
     }
 }
