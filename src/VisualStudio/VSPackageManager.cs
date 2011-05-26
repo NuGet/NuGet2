@@ -494,7 +494,6 @@ namespace NuGet.VisualStudio {
                         }
                         catch (Exception ex) {
                             packageOperationEventListener.OnAddPackageReferenceError(project, ex);
-                            success |= false;
                         }
                         finally {
                             packageOperationEventListener.OnAfterAddPackageReference(project);
