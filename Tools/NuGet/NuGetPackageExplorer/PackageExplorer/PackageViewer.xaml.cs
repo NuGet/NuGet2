@@ -222,11 +222,11 @@ namespace PackageExplorer {
             menu.Opened -= PackageFolderContextMenu_Opened;
         }
 
-        private static readonly Dictionary<string, Tuple<string, string>[]> _frameworkFolders =
-           new Dictionary<string, Tuple<string, string>[]>() {
-               { "Windows Phone", new[] { Tuple.Create("v7.0", "sl3-wp") } },
-               { "Siverlight", new[] { Tuple.Create("(no version)", "sl"), Tuple.Create("v2.0", "sl2"), Tuple.Create("v3.0", "sl30"), Tuple.Create("v4.0", "sl40"), Tuple.Create("v5.0", "sl50") } },
-               { ".NET", new[] { Tuple.Create("(no version)", "net"), Tuple.Create("v1.0", "net10"), Tuple.Create("v1.1", "net11"), Tuple.Create("v2.0", "net20"),Tuple.Create("v3.0", "net30"),Tuple.Create("v3.5", "net35"), Tuple.Create("v4.0", "net40") }},
+        private static readonly Dictionary<string, string[]> _frameworkFolders =
+           new Dictionary<string, string[]>() {
+               { "Windows Phone", new[] { "v7.0", "sl3-wp", "v7.1 (Mango)", "sl4-WindowsPhone71" }},
+               { "Siverlight", new[] {"(no version)", "sl", "v2.0", "sl2", "v3.0", "sl30", "v4.0", "sl40", "v5.0", "sl50" }},
+               { ".NET", new[] { "(no version)", "net", "v1.0", "net10", "v1.1", "net11", "v2.0", "net20", "v3.0", "net30", "v3.5", "net35", "v4.0", "net40"}}
            };
 
         private void AddFrameworkFoldersToContextMenu(ContextMenu menu) {
@@ -251,10 +251,11 @@ namespace PackageExplorer {
                 };
                 item.SetBinding(FrameworkElement.VisibilityProperty, visibilityBinding);
 
-                foreach (var child in pair.Value) {
+                string[] values = pair.Value;
+                for (int i = 0; i < values.Length; i += 2) {
                     MenuItem childItem = new MenuItem {
-                        Header = child.Item1,
-                        CommandParameter = child.Item2
+                        Header = values[i],
+                        CommandParameter = values[i+1]
                     };
                     childItem.SetBinding(MenuItem.CommandProperty, commandBinding);
                     item.Items.Add(childItem);
