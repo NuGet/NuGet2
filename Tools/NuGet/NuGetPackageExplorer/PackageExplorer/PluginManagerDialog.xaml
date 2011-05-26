@@ -16,13 +16,14 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         
-        <ListBox x:Name="PluginFiles" Grid.RowSpan="2" Margin="0,0,10,0" AlternationCount="2" ItemsSource="{Binding Plugins}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" DisplayMemberPath="Name">
+        <Label Content="_Loaded plugins:" Target="{Binding ElementName=PluginFiles}" Grid.ColumnSpan="2" />
+        <ListBox x:Name="PluginFiles" Grid.Row="1" Grid.RowSpan="2" Margin="0,0,10,0" AlternationCount="2" ItemsSource="{Binding Plugins}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" DisplayMemberPath="Name">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Setter Property="Padding" Value="3,4" />
@@ -35,12 +36,12 @@
             </ListBox.ItemContainerStyle>
         </ListBox>
         
-        <StackPanel Grid.Column="1" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
             <Button Content="_Add" Margin="0,0,0,10" Padding="15,0" Command="{Binding AddCommand}" />
             <Button Content="_Delete" Padding="15,0" Command="{Binding DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=PluginFiles}" />
         </StackPanel>
 
-        <Button Grid.Column="1" Grid.Row="1" Padding="15,0" Content="_Close" Click="Button_Click" IsDefault="True" IsCancel="True">
+        <Button Grid.Column="1" Grid.Row="2" Padding="15,0" Content="_Close" Click="Button_Click" IsDefault="True" IsCancel="True">
         </Button>
     </Grid>
 </self:StandardDialog>
