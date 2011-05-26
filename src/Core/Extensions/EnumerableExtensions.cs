@@ -48,10 +48,10 @@ namespace NuGet {
         /// Iterates over an IEnumerable while ignoring any exceptions.
         /// </summary>
         /// <returns>An IEnumerable containing elements from the original sequence that did not throw.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="By defintion we want to ignore all exceptions")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By defintion we want to ignore all exceptions")]
         public static IEnumerable<TElement> SafeIterate<TElement>(IEnumerable<TElement> source) {
             var result = new List<TElement>();
-            using (var enumerator = source.GetEnumerator()) { 
+            using (var enumerator = source.GetEnumerator()) {
                 bool hasNext = true;
                 while (hasNext) {
                     try {

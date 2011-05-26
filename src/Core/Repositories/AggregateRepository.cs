@@ -144,6 +144,6 @@ namespace NuGet {
             _failingRepositories.Add(repository);
             Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
         }
-        
+
     }
 }

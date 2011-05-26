@@ -1,6 +1,4 @@
 using System;
-using System.Globalization;
-using NuGet.Resources;
 
 namespace NuGet {
     public class PackageRepositoryFactory : IPackageRepositoryFactory {
