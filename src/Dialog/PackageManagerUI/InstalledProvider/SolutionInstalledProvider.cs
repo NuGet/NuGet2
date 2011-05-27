@@ -34,6 +34,16 @@ namespace NuGet.Dialog.Providers {
             return true;
         }
 
+        protected override void FillRootNodes() {
+            var allNode = new SimpleTreeNode(
+                this, 
+                Resources.Dialog_RootNodeAll, 
+                RootNode, 
+                LocalRepository, 
+                collapseVersion: false);
+            RootNode.Nodes.Add(allNode);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",

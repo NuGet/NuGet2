@@ -89,6 +89,62 @@ namespace NuGet.Dialog.Test {
         }
 
         [TestMethod]
+        public void SolutionInstalledProviderShowsAllVersions() {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA);
+            localRepository.AddPackage(packageA2);
+            localRepository.AddPackage(packageB);
+
+            var projectManager1 = new Mock<IProjectManager>();
+            projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var projectManager2 = new Mock<IProjectManager>();
+            projectManager2.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var project1 = MockProjectUtility.CreateMockProject("Project1");
+            var project2 = MockProjectUtility.CreateMockProject("Project2");
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project2))).Returns(projectManager2.Object);
+            packageManager.Setup(p => p.IsProjectLevel(It.IsAny<IPackage>())).Returns(true);
+
+            var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository);
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            provider.SelectedNode = firstTreeNode;
+            firstTreeNode.IsSelected = true;
+
+            var mre = new ManualResetEventSlim(false);
+
+            firstTreeNode.QueryExecutionCallback += () => {
+                var allExtensions = firstTreeNode.Extensions;
+
+                // Assert
+                Assert.AreEqual(3, allExtensions.Count);
+                Assert.AreEqual("A", allExtensions[0].Id);
+                Assert.AreEqual("1.0", ((PackageItem)allExtensions[0]).Version);
+                Assert.AreEqual("A", allExtensions[1].Id);
+                Assert.AreEqual("2.0", ((PackageItem)allExtensions[1]).Version);
+                Assert.AreEqual("B", allExtensions[2].Id);
+                Assert.AreEqual("2.0", ((PackageItem)allExtensions[2]).Version);
+
+                mre.Set();
+            };
+
+            // Act
+            var ignore = firstTreeNode.Extensions;
+
+            mre.Wait();
+        }
+
+        [TestMethod]
         public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
