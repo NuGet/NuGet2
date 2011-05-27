@@ -109,15 +109,26 @@ namespace NuGet.Dialog.Providers {
             IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
+            IList<PackageOperation> operations;
+            bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, activePackageManager, out operations);
+            if (!acceptLicense) {
+                return false;
+            }
+
+            ExecuteCommandOnProject(_project, item, activePackageManager, operations);
+            return true;
+        }
+
+        protected bool CheckPSScriptAndShowLicenseAgreement(PackageItem item, IVsPackageManager packageManager, out IList<PackageOperation> operations) {
             ShowProgressWindow();
 
             var walker = new InstallWalker(
                 LocalRepository,
-                activePackageManager.SourceRepository,
+                packageManager.SourceRepository,
                 this,
                 ignoreDependencies: false);
 
-            IList<PackageOperation> operations = walker.ResolveOperations(item.PackageIdentity).ToList();
+            operations = walker.ResolveOperations(item.PackageIdentity).ToList();
 
             IList<IPackage> scriptPackages = (from o in operations
                                               where o.Package.HasPowerShellScript()
@@ -130,7 +141,7 @@ namespace NuGet.Dialog.Providers {
             }
 
             IEnumerable<IPackage> licensePackages = from o in operations
-                                                    where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !activePackageManager.LocalRepository.Exists(o.Package)
+                                                    where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
                                                     select o.Package;
 
             // display license window if necessary
@@ -146,11 +157,6 @@ namespace NuGet.Dialog.Providers {
                 ShowProgressWindow();
             }
 
-            return ExecuteAfterLicenseAgreement(item, activePackageManager, operations);
-        }
-
-        protected virtual bool ExecuteAfterLicenseAgreement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            ExecuteCommandOnProject(_project, item, activePackageManager, operations);
             return true;
         }
 

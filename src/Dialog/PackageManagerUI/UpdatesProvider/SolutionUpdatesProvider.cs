@@ -34,20 +34,17 @@ namespace NuGet.Dialog.Providers {
             _projectSelector = providerServices.ProjectSelector;
         }
 
-        protected override bool ExecuteAfterLicenseAgreement(PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            _activePackageManager = activePackageManager;
+        protected override bool ExecuteCore(PackageItem item) {
+            _activePackageManager = GetActivePackageManager();
 
             IList<Project> selectedProjectsList;
-
-            if (activePackageManager.IsProjectLevel(item.PackageIdentity)) {
-                // hide the progress window if we are going to show project selector window
-                HideProgressWindow();
+            if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
                 var selectedProjects = _projectSelector.ShowProjectSelectorWindow(
                     // Selector function to return the initial checkbox state for a Project.
                     // We check a project if it has the current package installed by Id, but not version
-                    project => activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
+                    project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
                     project => {
-                        var localRepository = activePackageManager.GetProjectManager(project).LocalRepository;
+                        var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
 
                         // for the Updates solution dialog, we only enable a project if it has a old version of 
                         // the package installed.
@@ -65,15 +62,19 @@ namespace NuGet.Dialog.Providers {
                 if (selectedProjectsList.Count == 0) {
                     return false;
                 }
-
-                ShowProgressWindow();
             }
             else {
                 // solution package. just update into the solution
                 selectedProjectsList = new Project[0];
             }
 
-            activePackageManager.UpdatePackage(
+            IList<PackageOperation> operations;
+            bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+            if (!acceptLicense) {
+                return false;
+            }
+
+            _activePackageManager.UpdatePackage(
                 selectedProjectsList,
                 item.PackageIdentity,
                 operations,
@@ -82,10 +83,6 @@ namespace NuGet.Dialog.Providers {
                 packageOperationEventListener: this);
 
             return true;
-        }
-
-        protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            Debug.Fail("This method should not get called.");
         }
 
         public void OnBeforeAddPackageReference(Project project) {

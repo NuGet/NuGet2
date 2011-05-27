@@ -34,17 +34,11 @@ namespace NuGet.Dialog.Providers {
             _solutionManager = solutionManager;
         }
 
-        protected override bool ExecuteAfterLicenseAgreement(
-            PackageItem item,
-            IVsPackageManager activePackageManager,
-            IList<PackageOperation> operations) {
-
-            _activePackageManager = activePackageManager;
+        protected override bool ExecuteCore(PackageItem item) {
+            _activePackageManager = GetActivePackageManager();
             IList<Project> selectedProjectsList;
 
-            if (activePackageManager.IsProjectLevel(item.PackageIdentity)) {
-                // hide the progress window if we are going to show project selector window
-                HideProgressWindow();
+            if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
                 var selectedProjects = _projectSelector.ShowProjectSelectorWindow(DetermineProjectCheckState, ignored => true);
                 if (selectedProjects == null) {
                     // user presses Cancel button on the Solution dialog
@@ -56,8 +50,6 @@ namespace NuGet.Dialog.Providers {
                     return false;
                 }
 
-                ShowProgressWindow();
-
                 // save the checked state of projects so that we can restore them the next time
                 SaveProjectCheckStates(selectedProjectsList);
             }
@@ -66,7 +58,13 @@ namespace NuGet.Dialog.Providers {
                 selectedProjectsList = new Project[0];
             }
 
-            activePackageManager.InstallPackage(
+            IList<PackageOperation> operations;
+            bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+            if (!acceptLicense) {
+                return false;
+            }
+
+            _activePackageManager.InstallPackage(
                 selectedProjectsList,
                 item.PackageIdentity,
                 operations,
