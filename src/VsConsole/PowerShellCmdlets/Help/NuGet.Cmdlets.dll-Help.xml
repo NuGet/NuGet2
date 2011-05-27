@@ -146,7 +146,7 @@ c:\temp\packages to find the package.
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com/</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Install-Package</maml:linkText>
@@ -338,7 +338,7 @@ Returns a list of recently installed packages.
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-Package</maml:linkText>
@@ -475,7 +475,7 @@ Uninstalls the Elmah package even if another package depends on it.
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Uninstall-Package</maml:linkText>
@@ -612,7 +612,7 @@ Updates the Elmah package to a specific version.
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com/</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Update-Package</maml:linkText>
@@ -730,7 +730,7 @@ Creates a new package from the specified project, MyProjectName using the specif
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-Package</maml:linkText>
@@ -809,7 +809,7 @@ Adds binding redirects to the specified project, MyProjectName.
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Add-BindingRedirect</maml:linkText>
@@ -919,7 +919,7 @@ Returns a reference to every project in the solution.
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-Project</maml:linkText>
@@ -1079,7 +1079,7 @@ Assigns the license URL to the variable, $url, without opening the URL in a brow
     <maml:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online version:</maml:linkText>
-        <maml:uri>http://nuget.codeplex.com</maml:uri>
+        <maml:uri>http://docs.nuget.org/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Open-PackagePage</maml:linkText>
