@@ -4,7 +4,9 @@ using System.Windows.Input;
 
 namespace NuGetConsole {    
     [Serializable]
-    public class VsKeyInfo {        
+    public class VsKeyInfo {
+        private static readonly Lazy<VsKeyInfo> VsKeyInfoReturn = new Lazy<VsKeyInfo>(
+            () => Create(Key.Return, '\r', 13));
 
         private VsKeyInfo() {
         }
@@ -30,6 +32,10 @@ namespace NuGetConsole {
                                      CapsLockToggled = capsLockToggled,
                                      NumLockToggled = numLockToggled
                                  };
+        }
+
+        public static VsKeyInfo Enter {
+            get { return VsKeyInfoReturn.Value; }
         }
 
         public Key Key { get; private set; }
