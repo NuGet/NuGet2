@@ -698,4 +698,9 @@ function Test-UpdatePackageInOneProjectDoesNotCheckAllPackagesInSolution {
 
     # Act
     $p2 | Update-Package -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p1 jQuery 1.5.1
+    Assert-SolutionPackage jQuery 1.5.1
+    Assert-Null (Get-ProjectPackage $p2 jQuery)
 }
