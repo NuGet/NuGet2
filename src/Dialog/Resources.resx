@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Dialog_Close" xml:space="preserve">
-    <value>_Close</value>
+    <value>Close</value>
   </data>
   <data name="Dialog_CreatedByLabel" xml:space="preserve">
     <value>Created by:</value>
@@ -202,7 +202,7 @@
     <value>Name</value>
   </data>
   <data name="Dialog_Title" xml:space="preserve">
-    <value>{0} - Library Package Manager</value>
+    <value>{0} - Manage NuGet Packages</value>
   </data>
   <data name="Dialog_UninstallButton" xml:space="preserve">
     <value>_Uninstall</value>
@@ -280,10 +280,10 @@
     <value>Select Projects</value>
   </data>
   <data name="Dialog_Cancel" xml:space="preserve">
-    <value>_Cancel</value>
+    <value>Cancel</value>
   </data>
   <data name="Dialog_OK" xml:space="preserve">
-    <value>_OK</value>
+    <value>OK</value>
   </data>
   <data name="Dialog_SummaryWindowTitle" xml:space="preserve">
     <value>Summary</value>

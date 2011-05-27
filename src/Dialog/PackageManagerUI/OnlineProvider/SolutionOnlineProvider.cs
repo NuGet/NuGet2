@@ -38,7 +38,10 @@ namespace NuGet.Dialog.Providers {
             _activePackageManager = GetActivePackageManager();
             IList<Project> selectedProjectsList;
 
+            ShowProgressWindow();
             if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
+
+                HideProgressWindow();
                 var selectedProjects = _projectSelector.ShowProjectSelectorWindow(DetermineProjectCheckState, ignored => true);
                 if (selectedProjects == null) {
                     // user presses Cancel button on the Solution dialog

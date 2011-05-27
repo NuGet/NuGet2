@@ -29,7 +29,7 @@
         <local:ProjectToIconConverter x:Key="ProjectToIconConverter" />
         
         <Style TargetType="{x:Type Button}">
-            <Setter Property="Margin" Value="10,10,0,10" />
+            <Setter Property="Margin" Value="10,10,0,0" />
             <Setter Property="MinWidth" Value="75" />
             <Setter Property="MinHeight" Value="23" />
             <Setter Property="Padding" Value="4,0" />
@@ -65,7 +65,7 @@
         </HierarchicalDataTemplate>
     </Window.Resources>
     
-    <DockPanel Margin="10">
+    <DockPanel Margin="10,10,10,8">
         <Label DockPanel.Dock="Top" Content="{x:Static resources:Resources.Dialog_ProjectSelectorDescription}" />
         
         <UniformGrid DockPanel.Dock="Bottom" HorizontalAlignment="Right" Columns="2">

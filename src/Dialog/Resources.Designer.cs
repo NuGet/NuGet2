@@ -61,7 +61,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to _Cancel.
+        ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Dialog_Cancel {
             get {
@@ -70,7 +70,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to _Close.
+        ///   Looks up a localized string similar to Close.
         /// </summary>
         public static string Dialog_Close {
             get {
@@ -196,7 +196,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to _OK.
+        ///   Looks up a localized string similar to OK.
         /// </summary>
         public static string Dialog_OK {
             get {
@@ -475,7 +475,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Library Package Manager.
+        ///   Looks up a localized string similar to {0} - Manage NuGet Packages.
         /// </summary>
         public static string Dialog_Title {
             get {
