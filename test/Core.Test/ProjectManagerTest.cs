@@ -898,7 +898,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageD10);
 
             // Act 
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Updating 'C 1.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Updating 'C 1.0' to 'C 2.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'.");
         }
 
         [TestMethod]
@@ -958,7 +958,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageB20);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' to 'B 2.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'.");
         }
 
         [TestMethod]
@@ -999,7 +999,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageC10);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' failed. Unable to find a version of 'C' that is compatible with 'B 2.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' to 'B 2.0' failed. Unable to find a version of 'C' that is compatible with 'B 2.0'.");
         }
 
         [TestMethod]
@@ -1097,7 +1097,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageC20);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("C"), "Updating 'C 1.0' failed. Unable to find a version of 'B' that is compatible with 'C 2.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("C"), "Updating 'C 1.0' to 'C 2.0' failed. Unable to find a version of 'B' that is compatible with 'C 2.0'.");
         }
 
         [TestMethod]

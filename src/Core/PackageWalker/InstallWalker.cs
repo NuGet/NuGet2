@@ -296,12 +296,12 @@ namespace NuGet {
         private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents) {
             if (dependents.Count() == 1) {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                       NuGetResources.ConflictErrorWithDependent, package.GetFullName(), dependents.Single().Id, resolvedPackage.GetFullName()));
+                       NuGetResources.ConflictErrorWithDependent, package.GetFullName(), resolvedPackage.GetFullName(), dependents.Single().Id));
             }
 
             return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
-                        NuGetResources.ConflictErrorWithDependents, package.GetFullName(), String.Join(", ",
-                        dependents.Select(d => d.Id)), resolvedPackage.GetFullName()));
+                        NuGetResources.ConflictErrorWithDependents, package.GetFullName(), resolvedPackage.GetFullName(), String.Join(", ",
+                        dependents.Select(d => d.Id))));
         }
 
         /// <summary>

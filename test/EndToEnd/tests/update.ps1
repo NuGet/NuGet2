@@ -229,7 +229,7 @@ function Test-SubTreeUpdateWithConflict {
     Assert-Package $p D 1.0
     Assert-Package $p G 1.0
 
-    Assert-Throws { $p | Update-Package C -Source $context.RepositoryPath } "Updating 'C 1.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'."
+    Assert-Throws { $p | Update-Package C -Source $context.RepositoryPath } "Updating 'C 1.0' to 'C 2.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'."
     Assert-Null (Get-ProjectPackage $p C 2.0)
     Assert-Null (Get-SolutionPackage C 2.0)
     Assert-Package $p A 1.0
@@ -505,7 +505,7 @@ function Test-UpdateScenariosWithConstraints {
     Update-Package A -Source $context.RepositoryPath
     $gt = [char]0x2265
     Assert-Throws { Update-Package C -Source $context.RepositoryPath } "Unable to resolve dependency 'D ($gt 2.0)'.'D' has an additional constraint (= 1.0) defined in packages.config."
-    Assert-Throws { Update-Package F -Source $context.RepositoryPath } "Updating 'F 1.0' failed. Unable to find a version of 'E' that is compatible with 'F 2.0'."
+    Assert-Throws { Update-Package F -Source $context.RepositoryPath } "Updating 'F 1.0' to 'F 2.0' failed. Unable to find a version of 'E' that is compatible with 'F 2.0'."
 
     # Assert
     Assert-Package $p1 A 1.0
@@ -676,7 +676,7 @@ function Test-UpdatePackageWithDependentsThatHaveNoAvailableUpdatesThrows {
     $p1 | Install-Package A -Version 1.0 -Source $context.RepositoryPath
 
     # Act
-    Assert-Throws { Update-Package B -Source $context.RepositoryPath } "Updating 'B 1.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'."
+    Assert-Throws { Update-Package B -Source $context.RepositoryPath } "Updating 'B 1.0' to 'B 2.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'."
 }
 
 function Test-UpdatePackageThrowsWhenSourceIsInvalid {

@@ -121,10 +121,10 @@
     <value>Circular dependency detected '{0}'.</value>
   </data>
   <data name="ConflictErrorWithDependent" xml:space="preserve">
-    <value>Updating '{0}' failed. Unable to find a version of '{1}' that is compatible with '{2}'.</value>
+    <value>Updating '{0}' to '{1}' failed. Unable to find a version of '{2}' that is compatible with '{1}'.</value>
   </data>
   <data name="ConflictErrorWithDependents" xml:space="preserve">
-    <value>Updating '{0}' failed. Unable to find versions of '{1}' that are compatible with '{2}'.</value>
+    <value>Updating '{0}' to '{1}' failed. Unable to find versions of '{2}' that are compatible with '{1}'.</value>
   </data>
   <data name="Debug_AddedFile" xml:space="preserve">
     <value>Added file '{0}'.</value>

@@ -106,7 +106,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Updating &apos;{0}&apos; failed. Unable to find a version of &apos;{1}&apos; that is compatible with &apos;{2}&apos;..
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos; to &apos;{1}&apos; failed. Unable to find a version of &apos;{2}&apos; that is compatible with &apos;{1}&apos;..
         /// </summary>
         internal static string ConflictErrorWithDependent {
             get {
@@ -115,7 +115,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Updating &apos;{0}&apos; failed. Unable to find versions of &apos;{1}&apos; that are compatible with &apos;{2}&apos;..
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos; to &apos;{1}&apos; failed. Unable to find versions of &apos;{2}&apos; that are compatible with &apos;{1}&apos;..
         /// </summary>
         internal static string ConflictErrorWithDependents {
             get {
