@@ -762,7 +762,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void UpdatePackages(IProjectManager projectManager, bool updateDependencies, bool safeUpdate, ILogger logger) {
-            UpdatePackages(LocalRepository, package => {
+            UpdatePackages(projectManager.LocalRepository, package => {
                 if (safeUpdate) {
                     SafeUpdatePackage(projectManager, package.Id, updateDependencies, logger: logger);
                 }

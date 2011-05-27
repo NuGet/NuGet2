@@ -686,3 +686,16 @@ function Test-UpdatePackageThrowsWhenSourceIsInvalid {
     # Act & Assert
     Assert-Throws { Update-Package jQuery -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
 }
+
+function Test-UpdatePackageInOneProjectDoesNotCheckAllPackagesInSolution {
+    param(
+        $context
+    )
+    # Arrange
+    $p1 = New-ConsoleApplication
+    $p2 = New-ConsoleApplication
+    $p1 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryRoot
+
+    # Act
+    $p2 | Update-Package -Source $context.RepositoryRoot
+}
