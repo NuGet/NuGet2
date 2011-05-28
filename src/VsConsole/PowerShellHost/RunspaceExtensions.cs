@@ -125,6 +125,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
+        public static void ImportModule(this Runspace runspace, string modulePath) {
+            runspace.Invoke("Import-Module '" + modulePath + "'", null, false);
+        }
+
         public static void ChangePSDirectory(this Runspace runspace, string directory) {
             if (!String.IsNullOrWhiteSpace(directory)) {
                 runspace.Invoke("Set-Location " + directory, null, false);
