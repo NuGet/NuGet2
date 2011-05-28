@@ -22,6 +22,7 @@ namespace NuGet.Dialog {
                     child.Parent = this;
                 }
                 OnChildSelectedChanged();
+                OnChildEnabledChanged();
             }
         }
 
@@ -97,6 +98,12 @@ namespace NuGet.Dialog {
                 IsSelected = null;
             }
             _suppressPropagatingIsSelectedProperty = false;
+        }
+
+        // invoked whenever one of its descendent nodes has its IsEnabled property changed.
+        internal void OnChildEnabledChanged() {
+            // enable this node if at least one of the children node is enabled
+            IsEnabled = Children.Any(c => c.IsEnabled);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             var node = new ProjectNode(project);
 
             // Act & Assert
-            Assert.IsTrue(node.IsSelected == null || node.IsSelected == false);
+            Assert.IsTrue(node.IsSelected == false);
         }
 
         [TestMethod]
@@ -35,13 +35,14 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [TestMethod]
-        public void GetSelectedProjectReturnsProjectIfIsSelectedIsTrue() {
+        public void GetSelectedProjectReturnsProjectIfIsSelectedIsTrueAndIsEnabledIsTrue() {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
 
             // Act
             node.IsSelected = true;
+            node.IsEnabled = true;
 
             // Assert
             Assert.AreSame(project, node.GetSelectedProjects().Single());
@@ -58,6 +59,31 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
 
             // Assert
             Assert.IsFalse(node.GetSelectedProjects().Any());
+        }
+
+        [TestMethod]
+        public void GetSelectedProjectReturnsEmptyIfIsSelectedIsFalseOrIsEnabledIsFalse() {
+            // Arrange
+            var project = MockProjectUtility.CreateMockProject("A");
+            var node = new ProjectNode(project);
+
+            // Act
+            node.IsSelected = false;
+            node.IsEnabled = false;
+            var result1 = node.GetSelectedProjects();
+
+            node.IsSelected = true;
+            node.IsEnabled = false;
+            var result2 = node.GetSelectedProjects();
+
+            node.IsSelected = false;
+            node.IsEnabled = true;
+            var result3 = node.GetSelectedProjects();
+
+            // Assert
+            Assert.IsFalse(result1.Any());
+            Assert.IsFalse(result2.Any());
+            Assert.IsFalse(result3.Any());
         }
 
         [TestMethod]

@@ -18,7 +18,7 @@ namespace NuGet.Dialog {
         }
 
         public override IEnumerable<Project> GetSelectedProjects() {
-            if (IsSelected ?? false) {
+            if (IsSelected == true && IsEnabled) {
                 yield return _project;
             }
         }

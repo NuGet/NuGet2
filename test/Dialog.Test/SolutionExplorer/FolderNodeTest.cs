@@ -17,6 +17,15 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [TestMethod]
+        public void IsSelectedSetToFalseByDefault() {
+            // Arrange
+            var node = CreateFolderNode();
+
+            // Act && Assert
+            Assert.IsTrue(node.IsSelected == false);
+        }
+
+        [TestMethod]
         public void PropertyChildrenIsCorrect() {
             // Arrange
             var node = CreateFolderNode();
@@ -51,6 +60,31 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [TestMethod]
+        public void SelectParentWillSelectAllChildrenExceptTheDisabledOnes() {
+            // Arrange
+            ProjectNode[] children = new ProjectNode[3];
+
+            // make two children enabled, one disabled
+            for (int i = 0; i < 3; i++) {
+                var project = MockProjectUtility.CreateMockProject("p" + i);
+                var node = new ProjectNode(project) {
+                    IsEnabled = i % 2 == 0
+                };
+                children[i] = node;
+            }
+
+            var folder = new FolderNode("A", children);
+
+            // Act
+            folder.IsSelected = true;
+
+            // Assert
+            Assert.IsTrue(children[0].IsSelected == true);
+            Assert.IsTrue(children[1].IsSelected == false);
+            Assert.IsTrue(children[2].IsSelected == true);
+        }
+
+        [TestMethod]
         public void UnselectParentWillUnselectAllChildren() {
             // Arrange
             var node = CreateFolderNode();
@@ -66,6 +100,36 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             foreach (var child in node.Children) {
                 Assert.IsTrue(child.IsSelected == false);
             }
+        }
+
+        [TestMethod]
+        public void UnselectParentWillUnselectAllChildrenExceptTheDisabledOnes() {
+            // Arrange
+            ProjectNode[] children = new ProjectNode[3];
+
+            // make two children enabled, one disabled
+            for (int i = 0; i < 3; i++) {
+                var project = MockProjectUtility.CreateMockProject("p" + i);
+                var node = new ProjectNode(project) {
+                    IsSelected = true,
+                    IsEnabled = i % 2 == 0,
+                };
+                children[i] = node;
+            }
+
+            var folder = new FolderNode("A", children);
+
+            Assert.IsTrue(children[0].IsSelected == true);
+            Assert.IsTrue(children[1].IsSelected == true);
+            Assert.IsTrue(children[2].IsSelected == true);
+
+            // Act
+            folder.IsSelected = false;
+
+            // Assert
+            Assert.IsTrue(children[0].IsSelected == false);
+            Assert.IsTrue(children[1].IsSelected == true);
+            Assert.IsTrue(children[2].IsSelected == false);
         }
 
         [TestMethod]
@@ -98,7 +162,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [TestMethod]
-        public void SelectOnOfTheChildrenWillChangeParentToUnderminateState() {
+        public void SelectOneOfTheChildrenWillChangeParentToUnderminateState() {
             // Arrange
             var node = CreateFolderNode();
 
@@ -111,7 +175,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [TestMethod]
-        public void UnselectOnOfTheChildrenWillChangeParentToUnderminateState() {
+        public void UnselectOneOfTheChildrenWillChangeParentToUnderminateState() {
             // Arrange
             var node = CreateFolderNode();
             node.IsSelected = true;
@@ -150,6 +214,48 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
                 Assert.IsTrue(children[1].IsSelected == false);
                 Assert.IsTrue(children[2].IsSelected == true);
             }
+        }
+
+        [TestMethod]
+        public void ParentNodeIsDisabledIfAllChildrenAreDisabled() {
+            // Arrange
+            var children = new ProjectNode[3];
+
+            // disable all children
+            for (int i = 0; i < 3; i++) {
+                var project = MockProjectUtility.CreateMockProject("p" + i);
+                var node = new ProjectNode(project) {
+                    IsEnabled = false
+                };
+                children[i] = node;
+            }
+
+            // Act
+            var folder = new FolderNode("A", children);
+
+            // Assert
+            Assert.IsFalse(folder.IsEnabled);
+        }
+
+        [TestMethod]
+        public void ParentNodeIsEnabledIfAtLeastOneChildrenIsEnabled() {
+            // Arrange
+            var children = new ProjectNode[3];
+
+            // make two children enabled, one disabled
+            for (int i = 0; i < 3; i++) {
+                var project = MockProjectUtility.CreateMockProject("p" + i);
+                var node = new ProjectNode(project) {
+                    IsEnabled = i % 2 == 0
+                };
+                children[i] = node;
+            }
+
+            // Act
+            var folder = new FolderNode("A", children);
+
+            // Assert
+            Assert.IsTrue(folder.IsEnabled);
         }
 
         private FolderNode CreateFolderNode(string name = "A", ICollection<ProjectNodeBase> children = null) {

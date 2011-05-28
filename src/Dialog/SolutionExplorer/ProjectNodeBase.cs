@@ -8,7 +8,7 @@ namespace NuGet.Dialog {
         private bool _suppressNotifyParentOfIsSelectedChanged;
         private FolderNode _parent;
         private string _name;
-        private bool? _isSelected;
+        private bool? _isSelected = false;
         private bool _isEnabled = true;
 
         protected ProjectNodeBase(string name) {
@@ -57,6 +57,7 @@ namespace NuGet.Dialog {
             set {
                 if (_isEnabled != value) {
                     _isEnabled = value;
+                    OnEnabledChanged();
                     OnPropertyChanged("IsEnabled");
                 }
             }
@@ -85,6 +86,12 @@ namespace NuGet.Dialog {
             }
         }
 
+        private void OnEnabledChanged() {
+            if (Parent != null) {
+                Parent.OnChildEnabledChanged();
+            }
+        }
+
         protected void OnPropertyChanged(string propertyName) {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -94,9 +101,13 @@ namespace NuGet.Dialog {
             // we want to apply the same state to all of its descending.
             // But we don't want to notify this back to the parent,
             // hence the suppression. Otherwise, we'll fall into an infinite loop.
-            _suppressNotifyParentOfIsSelectedChanged = true;
-            IsSelected = isSelected;
-            _suppressNotifyParentOfIsSelectedChanged = false;
+
+            // However, only do the above if this node is enabled.
+            if (IsEnabled) {
+                _suppressNotifyParentOfIsSelectedChanged = true;
+                IsSelected = isSelected;
+                _suppressNotifyParentOfIsSelectedChanged = false;
+            }
         }
 
         public override string ToString() {
