@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
+﻿
 namespace NuGet.Common {
     public class CommandLineRepositoryFactory : PackageRepositoryFactory {
         private const string UserAgentClient = "NuGet Command Line";

@@ -36,10 +36,10 @@ namespace NuGet.Dialog.Providers {
 
         protected override void FillRootNodes() {
             var allNode = new SimpleTreeNode(
-                this, 
-                Resources.Dialog_RootNodeAll, 
-                RootNode, 
-                LocalRepository, 
+                this,
+                Resources.Dialog_RootNodeAll,
+                RootNode,
+                LocalRepository,
                 collapseVersion: false);
             RootNode.Nodes.Add(allNode);
         }

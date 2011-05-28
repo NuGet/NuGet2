@@ -66,9 +66,9 @@ namespace NuGet {
             }
 
             _repositories = (from source in packageSources
-                                let repository = createRepository(source)
-                                where repository != null
-                                select repository).ToArray();
+                             let repository = createRepository(source)
+                             where repository != null
+                             select repository).ToArray();
 
         }
 

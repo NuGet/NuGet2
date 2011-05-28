@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio {
 
         event EventHandler IConsoleDispatcher.StartWaitingKey {
             add { }
-            remove {}
+            remove { }
         }
 
         public bool IsStartCompleted {

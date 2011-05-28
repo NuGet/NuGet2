@@ -121,7 +121,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
                                     ISolutionManager solutionManager) {
-            
+
             // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
 

@@ -46,9 +46,9 @@ namespace NuGet.Commands {
             _project = project;
             Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             AddSolutionDir();
-            
+
         }
-        
+
         private string TargetPath {
             get;
             set;
@@ -363,7 +363,7 @@ namespace NuGet.Commands {
         private static bool IsTransformFile(IPackageFile file) {
             return Path.GetExtension(file.Path).Equals(TransformFileExtension, StringComparison.OrdinalIgnoreCase);
         }
-        
+
         private void AddSolutionDir() {
             // Add the solution dir to the list of properties
             string solutionDir = GetSolutionDir();
@@ -392,7 +392,7 @@ namespace NuGet.Commands {
             return null;
         }
 
-        private IPackageRepository GetPackagesRepository() {            
+        private IPackageRepository GetPackagesRepository() {
             string solutionDir = GetSolutionDir();
             if (String.IsNullOrEmpty(solutionDir)) {
                 return null;
