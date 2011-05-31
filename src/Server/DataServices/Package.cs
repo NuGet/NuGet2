@@ -42,6 +42,12 @@ namespace NuGet.Server.DataServices {
             VersionDownloadCount = -1;
             VersionRatingsCount = -1;
             IsLatestVersion = true;
+            Path = derivedData.Path;
+        }
+
+        internal string Path {
+            get;
+            set;
         }
 
         public string Id {
@@ -90,7 +96,7 @@ namespace NuGet.Server.DataServices {
         }
 
         public int VersionDownloadCount {
-            get; 
+            get;
             set;
         }
 

@@ -41,7 +41,7 @@ namespace NuGet.Server.DataServices {
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext) {
             var package = (Package)entity;
 
-            return PackageUtility.GetPackageUrl(package.Id, package.Version, operationContext.AbsoluteServiceUri);
+            return PackageUtility.GetPackageUrl(package.Path, operationContext.AbsoluteServiceUri);
         }
 
         public string GetStreamContentType(object entity, DataServiceOperationContext operationContext) {

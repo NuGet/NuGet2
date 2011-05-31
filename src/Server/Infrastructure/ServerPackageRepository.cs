@@ -46,7 +46,7 @@ namespace NuGet.Server.Infrastructure {
 
         protected override IPackage OpenPackage(string path) {
             IPackage package = base.OpenPackage(path);
-            _derivedDataLookup[package] = CalculateDerivedData(FileSystem.GetFullPath(path));
+            _derivedDataLookup[package] = CalculateDerivedData(path);
             return package;
         }
 
@@ -60,7 +60,8 @@ namespace NuGet.Server.Infrastructure {
                 PackageSize = fileBytes.Length,
                 PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes)),
                 LastUpdated = FileSystem.GetLastModified(path),
-                Created = FileSystem.GetCreated(path)
+                Created = FileSystem.GetCreated(path),
+                Path = path
             };
         }
     }

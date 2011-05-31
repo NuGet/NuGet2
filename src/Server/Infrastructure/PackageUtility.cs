@@ -6,16 +6,12 @@ namespace NuGet.Server.Infrastructure {
     public class PackageUtility {
         internal static string PackagePhysicalPath = HostingEnvironment.MapPath("~/Packages");
 
-        public static Uri GetPackageUrl(string id, string version, Uri baseUri) {
-            return new Uri(baseUri, GetPackageDownloadUrl(id, version));
+        public static Uri GetPackageUrl(string path, Uri baseUri) {
+            return new Uri(baseUri, GetPackageDownloadUrl(path));
         }
 
-        private static string GetPackageDownloadUrl(string id, string version) {
-            return VirtualPathUtility.ToAbsolute("~/Packages/" + GetPackageFileName(id, version));
-        }
-
-        public static string GetPackageFileName(string id, string version) {
-            return id + "." + version + Constants.PackageExtension;
+        private static string GetPackageDownloadUrl(string path) {
+            return VirtualPathUtility.ToAbsolute("~/Packages/" + path);
         }
     }
 }
