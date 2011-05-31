@@ -456,9 +456,9 @@ public class Cl_{0} {{
     <authors>$author$</authors>
   </metadata>
   <files>
-    <file src=""bin\Release\*.dll"" target=""lib\net40"" />
-    <file src=""bin\Release\*.pdb"" target=""lib\net40"" />
-    <file src=""bin\Release\*.xml"" target=""lib\net40"" />
+    <file src=""bin\Debug\*.dll"" target=""lib\net40"" />
+    <file src=""bin\Debug\*.pdb"" target=""lib\net40"" />
+    <file src=""bin\Debug\*.xml"" target=""lib\net40"" />
   </files>
 </package>");
 
