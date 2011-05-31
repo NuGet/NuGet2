@@ -122,13 +122,14 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
-        public IQueryable<IPackage> GetDependencies(string packageId) {
+        public IEnumerable<IPackage> GetDependencies(string packageId) {
             // An AggregateRepository needs to call GetDependencies on individual repositories in the event any one of them 
             // implements an IDependencyProvider.
-            Func<IPackageRepository, IQueryable<IPackage>> getDependencies = r => r.GetDependencies(packageId);
+            Func<IPackageRepository, IEnumerable<IPackage>> getDependencies = r => r.GetDependencies(packageId);
             if (IgnoreFailingRepositories) {
                 getDependencies = repo => {
-                    var defaultResult = Enumerable.Empty<IPackage>().AsSafeQueryable();
+                    var defaultResult = Enumerable.Empty<IPackage>();
+
                     if (_failingRepositories.Contains(repo)) {
                         return defaultResult;
                     }
@@ -145,8 +146,7 @@ namespace NuGet {
             }
 
             return Repositories.SelectMany(getDependencies)
-                                .Distinct(PackageEqualityComparer.IdAndVersion)
-                                .AsQueryable();
+                                .Distinct(PackageEqualityComparer.IdAndVersion);
         }
 
         private IPackageRepository EnsureValid(IPackageRepository repository) {

@@ -260,11 +260,11 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageE20);
             sourceRepository.AddPackage(packageE10);
 
-            IPackageOperationResolver projectResolver = new ProjectInstallWalker(localRepository,
+            IPackageOperationResolver projectResolver = new UpdateWalker(localRepository,
                                                                                 sourceRepository,
                                                                                 new DependentsWalker(localRepository),
                                                                                 NullLogger.Instance,
-                                                                                ignoreDependencies: false);
+                                                                                updateDependencies: true);
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                                    sourceRepository,
@@ -459,11 +459,11 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(B101);
             sourceRepository.AddPackage(B20);
 
-            IPackageOperationResolver resolver = new ProjectInstallWalker(localRepository,
-                                                                          sourceRepository,
-                                                                          new DependentsWalker(localRepository),
-                                                                          NullLogger.Instance,
-                                                                          ignoreDependencies: false);
+            IPackageOperationResolver resolver = new UpdateWalker(localRepository,
+                                                                  sourceRepository,
+                                                                  new DependentsWalker(localRepository),
+                                                                  NullLogger.Instance,
+                                                                  updateDependencies: true) { AcceptedTargets = PackageTargets.Project };
 
             // Act
             var packages = resolver.ResolveOperations(B101).ToList();
@@ -684,11 +684,11 @@ namespace NuGet.Test {
 
 
 
-            IPackageOperationResolver resolver = new ProjectInstallWalker(localRepository,
+            IPackageOperationResolver resolver = new UpdateWalker(localRepository,
                                                                           sourceRepository,
                                                                           new DependentsWalker(localRepository),
                                                                           NullLogger.Instance,
-                                                                          ignoreDependencies: false);
+                                                                          updateDependencies: true);
 
             var operations = resolver.ResolveOperations(packageA2).ToList();
             Assert.AreEqual(8, operations.Count);
@@ -914,11 +914,11 @@ namespace NuGet.Test {
             IPackage toolsPackage = PackageUtility.CreatePackage("B", "1.5", tools: new[] { "init.ps1" });
             sourceRepository.AddPackage(toolsPackage);
 
-            IPackageOperationResolver resolver = new ProjectInstallWalker(localRepository,
-                                                                          sourceRepository,
-                                                                          new DependentsWalker(localRepository),
-                                                                          NullLogger.Instance,
-                                                                          ignoreDependencies: false);
+            IPackageOperationResolver resolver = new UpdateWalker(localRepository,
+                                                                   sourceRepository,
+                                                                   new DependentsWalker(localRepository),
+                                                                   NullLogger.Instance,
+                                                                   updateDependencies: true) { AcceptedTargets = PackageTargets.Project };
 
             // Act
             var packages = resolver.ResolveOperations(projectPackage)

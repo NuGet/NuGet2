@@ -135,12 +135,14 @@ namespace NuGet {
         }
 
         public virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
-            Execute(package, new ProjectInstallWalker(LocalRepository,
-                                                      SourceRepository,
-                                                      new DependentsWalker(LocalRepository),
-                                                      ConstraintProvider,
-                                                      NullLogger.Instance,
-                                                      ignoreDependencies));
+            Execute(package, new UpdateWalker(LocalRepository,
+                                              SourceRepository,
+                                              new DependentsWalker(LocalRepository),
+                                              ConstraintProvider,
+                                              NullLogger.Instance,
+                                              !ignoreDependencies) {
+                                                  AcceptedTargets = PackageTargets.Project
+                                              });
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {

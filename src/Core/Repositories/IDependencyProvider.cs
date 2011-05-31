@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace NuGet {
     public interface IDependencyProvider {
-        IQueryable<IPackage> GetDependencies(string packageId);
+        IEnumerable<IPackage> GetDependencies(string packageId);
     }
 }

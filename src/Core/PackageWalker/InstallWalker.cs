@@ -74,8 +74,8 @@ namespace NuGet {
             }
         }
 
-        protected virtual ConflictResult GetConflict(string packageId) {
-            var conflictingPackage = Marker.FindPackage(packageId);
+        protected virtual ConflictResult GetConflict(IPackage package) {
+            var conflictingPackage = Marker.FindPackage(package.Id);
             if (conflictingPackage != null) {
                 return new ConflictResult(conflictingPackage, Marker, Marker);
             }
@@ -83,7 +83,7 @@ namespace NuGet {
         }
 
         protected override void OnBeforePackageWalk(IPackage package) {
-            ConflictResult conflictResult = GetConflict(package.Id);
+            ConflictResult conflictResult = GetConflict(package);
 
             if (conflictResult == null) {
                 return;

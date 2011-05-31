@@ -61,6 +61,24 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adding assembly reference &apos;{0}&apos;..
+        /// </summary>
+        internal static string AddingAssemblyReference {
+            get {
+                return ResourceManager.GetString("AddingAssemblyReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding package reference &apos;{0}&apos;..
+        /// </summary>
+        internal static string AddingPackageReference {
+            get {
+                return ResourceManager.GetString("AddingPackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ambiguous command &apos;{0}&apos;. Possible values: {1}..
         /// </summary>
         internal static string AmbiguousCommand {
@@ -430,6 +448,24 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No packages.config specified. Use the -self switch to update NuGet.exe..
+        /// </summary>
+        internal static string NoPackagesConfigSpecified {
+            get {
+                return ResourceManager.GetString("NoPackagesConfigSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;..
+        /// </summary>
+        internal static string NoUpdatesAvailable {
+            get {
+                return ResourceManager.GetString("NoUpdatesAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [option] on &apos;{0}&apos; is invalid without a setter..
         /// </summary>
         internal static string OptionInvalidWithoutSetter {
@@ -610,6 +646,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0} {1}&apos; does not exist. Make sure all packages exist in the packages folder before running updateRestoring the packages directory before running update..
+        /// </summary>
+        internal static string PackageDoesNotExist {
+            get {
+                return ResourceManager.GetString("PackageDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Packing files from &apos;{0}&apos;..
         /// </summary>
         internal static string PackagingFilesFromOutputPath {
@@ -754,6 +799,24 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Removing assembly reference &apos;{0}&apos;..
+        /// </summary>
+        internal static string RemovingAssemblyReference {
+            get {
+                return ResourceManager.GetString("RemovingAssemblyReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Removing package reference &apos;{0}&apos;..
+        /// </summary>
+        internal static string RemovingPackageReference {
+            get {
+                return ResourceManager.GetString("RemovingPackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The resource type &apos;{0}&apos; does not have an accessible get for the &apos;{1}&apos; property..
         /// </summary>
         internal static string ResourcePropertyDoesNotHaveAccessibleGet {
@@ -844,6 +907,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Skipping update check for &apos;{0} {1}&apos;. Update supported for packages that only contain binaries..
+        /// </summary>
+        internal static string SkippingUpdateCheck {
+            get {
+                return ResourceManager.GetString("SkippingUpdateCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Assembly to use for metadata..
         /// </summary>
         internal static string SpecCommandAssemblyPathDescription {
@@ -925,6 +997,33 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to find &apos;{0}&apos;. Make sure they are specified in packages.config..
+        /// </summary>
+        internal static string UnableToFindPackages {
+            get {
+                return ResourceManager.GetString("UnableToFindPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to locate the packages folder. Try specifying it using the repositoryPath switch..
+        /// </summary>
+        internal static string UnableToLocatePackagesFolder {
+            get {
+                return ResourceManager.GetString("UnableToLocatePackagesFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to locate project file..
+        /// </summary>
+        internal static string UnableToLocateProjectFile {
+            get {
+                return ResourceManager.GetString("UnableToLocateProjectFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown command: &apos;{0}&apos;.
         /// </summary>
         internal static string UnknowCommandError {
@@ -961,11 +1060,20 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update the running NuGet.exe to the newest version available from the server..
+        ///   Looks up a localized string similar to Update packages to latest available versions. This command also updates nuget.exe itself..
         /// </summary>
         internal static string UpdateCommandDescription {
             get {
                 return ResourceManager.GetString("UpdateCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package ids to update..
+        /// </summary>
+        internal static string UpdateCommandIdDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandIdDescription", resourceCulture);
             }
         }
         
@@ -975,6 +1083,42 @@ namespace NuGet.Common {
         internal static string UpdateCommandNuGetUpToDate {
             get {
                 return ResourceManager.GetString("UpdateCommandNuGetUpToDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path to the local packages folder (location where packages are installed)..
+        /// </summary>
+        internal static string UpdateCommandRepositoryPathDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandRepositoryPathDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Looks for updates with the highest version available within the same major and minor version as the installed package..
+        /// </summary>
+        internal static string UpdateCommandSafeDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandSafeDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update the running NuGet.exe to the newest version available from the server..
+        /// </summary>
+        internal static string UpdateCommandSelfDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandSelfDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package sources to use for updates..
+        /// </summary>
+        internal static string UpdateCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandSourceDescription", resourceCulture);
             }
         }
         
@@ -1011,6 +1155,15 @@ namespace NuGet.Common {
         internal static string UpdateCommandUpdatingNuGet {
             get {
                 return ResourceManager.GetString("UpdateCommandUpdatingNuGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos; to &apos;{1}&apos;..
+        /// </summary>
+        internal static string UpdatingPackage {
+            get {
+                return ResourceManager.GetString("UpdatingPackage", resourceCulture);
             }
         }
         

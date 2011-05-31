@@ -583,6 +583,32 @@ public class Cl_{0} {{
             Assert.IsFalse(File.Exists(expectedPackage));
         }
 
+        [TestMethod]
+        public void UpdateCommandThrowsWithNoArguments() {
+            // Arrange            
+            var args = new string[] { "update" };
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config specified. Use the -self switch to update NuGet.exe."));
+        }
+
+        [TestMethod]
+        public void UpdateCommandWithInvalidFileThrows() {
+            // Arrange            
+            var args = new string[] { "update", "lolz.txt" };
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config specified."));
+        }
+
         private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
             var package = new ZipPackage(packageFile);
             var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToList();

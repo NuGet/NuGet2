@@ -89,11 +89,11 @@ namespace NuGet {
             return FindPackages(repository, packageIds, GetFilterExpression);
         }
 
-        public static IQueryable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
-            return from p in repository.GetPackages()
-                   where p.Id.ToLower() == packageId.ToLower()
-                   orderby p.Id
-                   select p;
+        public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId) {
+            return (from p in repository.GetPackages()
+                    where p.Id.ToLower() == packageId.ToLower()
+                    orderby p.Id
+                    select p).ToList();
         }
 
         /// <summary>
@@ -126,7 +126,6 @@ namespace NuGet {
             }
 
             IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
-                                                       .ToList()
                                                        .OrderByDescending(p => p.Version);
 
             if (versionSpec != null) {
@@ -159,7 +158,7 @@ namespace NuGet {
         /// <summary>
         /// Returns a set of dependencies ordered by ascending versions while accounting for repositories that implement an IDependencyProvider
         /// </summary>
-        public static IQueryable<IPackage> GetDependencies(this IPackageRepository repository, string packageId) {
+        public static IEnumerable<IPackage> GetDependencies(this IPackageRepository repository, string packageId) {
             var dependencyResolver = repository as IDependencyProvider;
             if (dependencyResolver != null) {
                 // If the repository explicitly provides a way to retrieve dependencies, use it.

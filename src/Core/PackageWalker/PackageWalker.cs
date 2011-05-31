@@ -133,7 +133,7 @@ namespace NuGet {
 
                     // If we ended up with both that means we found a dependency only packges
                     // that has a mix of solution and project level packages
-                    if (parentInfo.Target == PackageTargets.Both) {
+                    if (parentInfo.Target == PackageTargets.All) {
                         throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);
                     }
                 }

@@ -5,6 +5,7 @@ namespace NuGet {
         IPackageRepository LocalRepository { get; }
         ILogger Logger { get; set; }
         IPackageRepository SourceRepository { get; }
+        IPackagePathResolver PathResolver { get; }
 
         event EventHandler<PackageOperationEventArgs> PackageInstalled;
         event EventHandler<PackageOperationEventArgs> PackageInstalling;
@@ -13,8 +14,9 @@ namespace NuGet {
 
         void InstallPackage(IPackage package, bool ignoreDependencies);
         void InstallPackage(string packageId, Version version, bool ignoreDependencies);
-        void UpdatePackage(IPackage oldPackage, IPackage newPackage, bool updateDependencies);
+        void UpdatePackage(IPackage newPackage, bool updateDependencies);
         void UpdatePackage(string packageId, Version version, bool updateDependencies);
+        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies);
         void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies);
         void UninstallPackage(string packageId, Version version, bool forceRemove, bool removeDependencies);
     }

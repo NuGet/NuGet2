@@ -277,7 +277,7 @@
     <value>Currently running NuGet.exe {0}.</value>
   </data>
   <data name="UpdateCommandDescription" xml:space="preserve">
-    <value>Update the running NuGet.exe to the newest version available from the server.</value>
+    <value>Update packages to latest available versions. This command also updates nuget.exe itself.</value>
   </data>
   <data name="UpdateCommandNuGetUpToDate" xml:space="preserve">
     <value>NuGet.exe is up to date.</value>
@@ -449,5 +449,56 @@
   </data>
   <data name="UnableToFindBuildOutput" xml:space="preserve">
     <value>Unable to find '{0}'. Make sure the project has been built.</value>
+  </data>
+  <data name="NoPackagesConfigSpecified" xml:space="preserve">
+    <value>No packages.config specified. Use the -self switch to update NuGet.exe.</value>
+  </data>
+  <data name="NoUpdatesAvailable" xml:space="preserve">
+    <value>No updates available for '{0}'.</value>
+  </data>
+  <data name="PackageDoesNotExist" xml:space="preserve">
+    <value>'{0} {1}' does not exist. Make sure all packages exist in the packages folder before running updateRestoring the packages directory before running update.</value>
+  </data>
+  <data name="SkippingUpdateCheck" xml:space="preserve">
+    <value>Skipping update check for '{0} {1}'. Update supported for packages that only contain binaries.</value>
+  </data>
+  <data name="UnableToFindPackages" xml:space="preserve">
+    <value>Unable to find '{0}'. Make sure they are specified in packages.config.</value>
+  </data>
+  <data name="UnableToLocatePackagesFolder" xml:space="preserve">
+    <value>Unable to locate the packages folder. Try specifying it using the repositoryPath switch.</value>
+  </data>
+  <data name="UnableToLocateProjectFile" xml:space="preserve">
+    <value>Unable to locate project file.</value>
+  </data>
+  <data name="UpdateCommandIdDescription" xml:space="preserve">
+    <value>Package ids to update.</value>
+  </data>
+  <data name="UpdateCommandRepositoryPathDescription" xml:space="preserve">
+    <value>Path to the local packages folder (location where packages are installed).</value>
+  </data>
+  <data name="UpdateCommandSafeDescription" xml:space="preserve">
+    <value>Looks for updates with the highest version available within the same major and minor version as the installed package.</value>
+  </data>
+  <data name="UpdateCommandSelfDescription" xml:space="preserve">
+    <value>Update the running NuGet.exe to the newest version available from the server.</value>
+  </data>
+  <data name="UpdateCommandSourceDescription" xml:space="preserve">
+    <value>Package sources to use for updates.</value>
+  </data>
+  <data name="UpdatingPackage" xml:space="preserve">
+    <value>Updating '{0}' to '{1}'.</value>
+  </data>
+  <data name="AddingAssemblyReference" xml:space="preserve">
+    <value>Adding assembly reference '{0}'.</value>
+  </data>
+  <data name="AddingPackageReference" xml:space="preserve">
+    <value>Adding package reference '{0}'.</value>
+  </data>
+  <data name="RemovingAssemblyReference" xml:space="preserve">
+    <value>Removing assembly reference '{0}'.</value>
+  </data>
+  <data name="RemovingPackageReference" xml:space="preserve">
+    <value>Removing package reference '{0}'.</value>
   </data>
 </root>

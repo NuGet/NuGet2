@@ -66,11 +66,14 @@
     <Compile Include="Common\ConsoleCredentialProvider.cs" />
     <Compile Include="Common\GalleryServer.cs" />
     <Compile Include="Common\IConsole.cs" />
+    <Compile Include="Common\IMSBuildProjectSystem.cs" />
+    <Compile Include="Common\MSBuildProjectSystem.cs" />
     <Compile Include="Common\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\ReadOnlyPackageRepository.cs" />
     <Compile Include="Common\ResourceHelper.cs" />
     <Compile Include="Common\TypeHelper.cs" />
     <Compile Include="ICommandManager.cs" />

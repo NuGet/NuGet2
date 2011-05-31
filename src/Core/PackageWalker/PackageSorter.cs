@@ -18,6 +18,12 @@ namespace NuGet {
             }
         }
 
+        protected override bool SkipDependencyResolveError {
+            get {
+                return true;
+            }
+        }
+
         protected override void OnAfterPackageWalk(IPackage package) {
             base.OnAfterPackageWalk(package);
 

@@ -204,7 +204,7 @@ namespace NuGet.VisualStudio {
                 }
                 else {
                     // We might be updating a solution only package
-                    UpdatePackage(package, newPackage, updateDependencies);
+                    UpdatePackage(newPackage, updateDependencies);
                 }
 
                 // Add package to recent repository
@@ -750,7 +750,7 @@ namespace NuGet.VisualStudio {
 
                 if (newPackage != null && package.Version != newPackage.Version) {
                     // We might be updating a solution only package
-                    UpdatePackage(package, newPackage, updateDependencies);
+                    UpdatePackage(newPackage, updateDependencies);
 
                     // Add package to recent repository
                     AddPackageToRecentRepository(newPackage);

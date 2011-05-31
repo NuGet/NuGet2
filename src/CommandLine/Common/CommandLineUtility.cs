@@ -38,8 +38,12 @@ namespace NuGet {
         }
 
         public static bool TryGetProjectFile(out string projectFile) {
+            return TryGetProjectFile(Directory.GetCurrentDirectory(), out projectFile);
+        }
+
+        public static bool TryGetProjectFile(string directory, out string projectFile) {
             projectFile = null;
-            var files = Directory.GetFiles(Directory.GetCurrentDirectory());
+            var files = Directory.GetFiles(directory);
 
             var candidates = files.Where(file => _supportedProjectExtensions.Contains(Path.GetExtension(file)))
                                   .ToList();
@@ -52,5 +56,46 @@ namespace NuGet {
 
             return !String.IsNullOrEmpty(projectFile);
         }
+
+        public static string GetSolutionDir(string projectDirectory) {
+            string path = projectDirectory;
+
+            // Only look 4 folders up to find the solution directory
+            const int maxDepth = 5;
+            int depth = 0;
+            do {
+                if (SolutionFileExists(path)) {
+                    return path;
+                }
+
+                path = Path.GetDirectoryName(path);
+
+                depth++;
+            } while (depth < maxDepth);
+
+            return null;
+        }
+
+        public static string GetUnambiguousFile(string searchPattern) {
+            var files = Directory.GetFiles(Directory.GetCurrentDirectory(), searchPattern);
+            if (files.Length == 1) {
+                return files[0];
+            }
+
+            return null;
+        }
+
+        private static bool SolutionFileExists(string path) {
+            return Directory.GetFiles(path, "*.sln").Any();
+        }
+
+#if DEBUG
+        internal static void WaitForDebugger() {
+            System.Console.WriteLine("Waiting for debugger");
+            while (!System.Diagnostics.Debugger.IsAttached) {
+
+            }
+        }
+#endif
     }
 }

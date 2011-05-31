@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 
 namespace NuGet.VisualStudio {
     /// <summary>
@@ -33,7 +34,7 @@ namespace NuGet.VisualStudio {
             _primaryRepository.RemovePackage(package);
         }
 
-        public IQueryable<IPackage> GetDependencies(string packageId) {
+        public IEnumerable<IPackage> GetDependencies(string packageId) {
             return _dependencyResolver.FindPackagesById(packageId);
         }
     }

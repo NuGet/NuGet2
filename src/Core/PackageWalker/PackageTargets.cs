@@ -6,6 +6,6 @@ namespace NuGet {
         None = 0,
         Project = 1,
         External = 2,
-        Both = Project | External
+        All = Project | External
     }
 }

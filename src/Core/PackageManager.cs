@@ -282,7 +282,15 @@ namespace NuGet {
             UpdatePackage(packageId, version: null, updateDependencies: updateDependencies);
         }
 
+        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies) {
+            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, versionSpec), updateDependencies);
+        }
+
         public void UpdatePackage(string packageId, Version version, bool updateDependencies) {
+            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, version), updateDependencies);
+        }
+
+        public void UpdatePackage(string packageId, Func<IPackage> resolvePackage, bool updateDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -298,22 +306,22 @@ namespace NuGet {
 
             Logger.Log(MessageLevel.Debug, NuGetResources.Debug_LookingForUpdates, packageId);
 
-            IPackage newPackage = SourceRepository.FindPackage(packageId, version: version);
+            IPackage newPackage = resolvePackage();
 
             if (newPackage != null && oldPackage.Version != newPackage.Version) {
-                UpdatePackage(oldPackage, newPackage, updateDependencies);
+                UpdatePackage(newPackage, updateDependencies);
             }
             else {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
             }
         }
 
-        public void UpdatePackage(IPackage oldPackage, IPackage newPackage, bool updateDependencies) {
-            // Install the new package
-            InstallPackage(newPackage, !updateDependencies);
-
-            // Remove the old one
-            UninstallPackage(oldPackage, updateDependencies);
+        public void UpdatePackage(IPackage newPackage, bool updateDependencies) {
+            Execute(newPackage, new UpdateWalker(LocalRepository,
+                                                SourceRepository,
+                                                new DependentsWalker(LocalRepository),
+                                                Logger,
+                                                updateDependencies));
         }
     }
 }

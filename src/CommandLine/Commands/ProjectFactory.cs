@@ -46,7 +46,6 @@ namespace NuGet.Commands {
             _project = project;
             Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             AddSolutionDir();
-
         }
 
         private string TargetPath {
@@ -374,22 +373,7 @@ namespace NuGet.Commands {
         }
 
         private string GetSolutionDir() {
-            string path = _project.DirectoryPath;
-
-            // Only look 4 folders up to find the solution directory
-            const int maxDepth = 4;
-            int depth = 0;
-            do {
-                if (SolutionFileExists(path)) {
-                    return path;
-                }
-
-                path = Path.GetDirectoryName(path);
-
-                depth++;
-            } while (depth < maxDepth);
-
-            return null;
+            return CommandLineUtility.GetSolutionDir(_project.DirectoryPath);
         }
 
         private IPackageRepository GetPackagesRepository() {
@@ -404,10 +388,6 @@ namespace NuGet.Commands {
             }
 
             return null;
-        }
-
-        private bool SolutionFileExists(string path) {
-            return Directory.GetFiles(path, "*.sln").Any();
         }
 
         private string GetPackagesPath(string dir) {
@@ -522,7 +502,7 @@ namespace NuGet.Commands {
 
             public Walker(List<IPackage> packages) {
                 _packages = packages;
-                _repository = new PackageRepository(packages.ToList());
+                _repository = new ReadOnlyPackageRepository(packages.ToList());
             }
 
             protected override IPackage ResolveDependency(PackageDependency dependency) {
@@ -539,21 +519,6 @@ namespace NuGet.Commands {
                     Walk(package);
                 }
                 return _packages;
-            }
-
-            private class PackageRepository : PackageRepositoryBase {
-                private readonly IEnumerable<IPackage> _packages;
-                public PackageRepository(IEnumerable<IPackage> packages) {
-                    _packages = packages;
-                }
-
-                public override string Source {
-                    get { return null; }
-                }
-
-                public override IQueryable<IPackage> GetPackages() {
-                    return _packages.AsQueryable();
-                }
             }
         }
 

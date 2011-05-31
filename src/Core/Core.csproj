@@ -170,7 +170,7 @@
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
     <Compile Include="PackageWalker\InstallWalker.cs" />
-    <Compile Include="PackageWalker\ProjectInstallWalker.cs" />
+    <Compile Include="PackageWalker\UpdateWalker.cs" />
     <Compile Include="PackageWalker\DependentsWalker.cs" />
     <Compile Include="PackageWalker\UninstallWalker.cs" />
     <Compile Include="ProjectSystem\IFileSystem.cs" />
