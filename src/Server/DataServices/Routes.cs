@@ -1,15 +1,15 @@
-﻿using System.Data.Services;
+﻿#if DEBUG
+using System.Data.Services;
 using System.ServiceModel.Activation;
 using System.Web.Routing;
 using Ninject;
-using NuGet.Server;
 using NuGet.Server.DataServices;
 using NuGet.Server.Infrastructure;
 using RouteMagic;
 
-[assembly: WebActivator.PreApplicationStartMethod(typeof($rootnamespace$.NuGetRoutes), "Start")]
+[assembly: WebActivator.PreApplicationStartMethod(typeof(NuGet.Server.NuGetRoutes), "Start")]
 
-namespace $rootnamespace$ {
+namespace NuGet.Server {
     public static class NuGetRoutes {
         public static void Start() {
             MapRoutes(RouteTable.Routes);
@@ -18,18 +18,18 @@ namespace $rootnamespace$ {
         private static void MapRoutes(RouteCollection routes) {
             // Route to create a new package
             routes.MapDelegate("CreatePackage",
-                                "PackageFiles/{apiKey}/nupkg",
-                                context => CreatePackageService().CreatePackage(context));
+                               "PackageFiles/{apiKey}/nupkg",
+                               context => CreatePackageService().CreatePackage(context));
 
             // Route to publish a package
             routes.MapDelegate("PublishPackage",
-                                "PublishedPackages/Publish",
-                                context => CreatePackageService().PublishPackage(context));
+                               "PublishedPackages/Publish",
+                               context => CreatePackageService().PublishPackage(context));
 
             // Route to delete packages
             routes.MapDelegate("DeletePackage",
-                                "Packages/{apiKey}/{packageId}/{version}",
-                                context => CreatePackageService().DeletePackage(context));
+                               "Packages/{apiKey}/{packageId}/{version}",
+                               context => CreatePackageService().DeletePackage(context));
             
             // The default route is http://{root}/nuget/Packages
             var factory = new DataServiceHostFactory();
@@ -44,3 +44,4 @@ namespace $rootnamespace$ {
         }
     }
 }
+#endif

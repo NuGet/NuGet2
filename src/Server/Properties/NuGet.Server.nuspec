@@ -14,7 +14,7 @@
           <frameworkAssembly assemblyName="System.Data.Services" />
         </frameworkAssemblies>
         <dependencies>
-            <dependency id="NuGet.Core" version="1.2" />
+            <dependency id="NuGet.Core" version="1.4" />
         </dependencies>
     </metadata>
 </package>

@@ -16,4 +16,5 @@ glob:*.docstates
 glob:TestResults
 glob:[Tt]humbs.db
 glob:src/Server/Packages/*.nupkg
+glob:src/Server/Server.Publish.xml
 DebugConstants.cs

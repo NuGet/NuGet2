@@ -25,6 +25,25 @@ namespace NuGet.Server.Infrastructure {
                    select new Package(package, _derivedDataLookup[package]);
         }
 
+        public override void AddPackage(IPackage package) {
+            string fileName = PathResolver.GetPackageFileName(package);
+            using (Stream stream = package.GetStream()) {
+                FileSystem.AddFile(fileName, stream);
+            }
+        }
+
+        public void RemovePackage(string packageId, Version version) {
+            IPackage package = FindPackage(packageId, version);
+            if (package != null) {
+                RemovePackage(package);
+            }
+        }
+
+        public override void RemovePackage(IPackage package) {
+            string fileName = PathResolver.GetPackageFileName(package);
+            FileSystem.DeleteFile(fileName);
+        }
+
         protected override IPackage OpenPackage(string path) {
             IPackage package = base.OpenPackage(path);
             _derivedDataLookup[package] = CalculateDerivedData(FileSystem.GetFullPath(path));

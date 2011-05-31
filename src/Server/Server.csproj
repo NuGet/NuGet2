@@ -8,15 +8,18 @@
     <RootNamespace>NuGet.Server</RootNamespace>
     <AssemblyName>NuGet.Server</AssemblyName>
     <OutputPath>bin</OutputPath>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Elmah, Version=1.1.11517.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\elmah.1.1\lib\Elmah.dll</HintPath>
+    <Reference Include="Elmah">
+      <HintPath>..\..\packages\elmah.corelibrary.1.2\lib\Elmah.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Ninject, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Ninject.2.2.1.0\lib\.NetFramework 4.0\Ninject.dll</HintPath>
+    <Reference Include="Ninject">
+      <HintPath>..\..\packages\Ninject.2.2.1.4\lib\net40-Full\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="RouteMagic">
+      <HintPath>..\..\packages\RouteMagic.0.2.2.2\lib\net40\RouteMagic.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -36,7 +39,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="WebActivator">
-      <HintPath>..\..\packages\WebActivator.1.4\lib\NETFramework40\WebActivator.dll</HintPath>
+      <HintPath>..\..\packages\WebActivator.1.4.1\lib\net40\WebActivator.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -45,9 +48,12 @@
     </Compile>
     <Compile Include="DataServices\Package.cs" />
     <Compile Include="DataServices\PackageContext.cs" />
+    <Compile Include="Handlers\PackageService.cs" />
     <Compile Include="Infrastructure\Bindings.cs" />
     <Compile Include="Infrastructure\Helpers.cs" />
+    <Compile Include="Infrastructure\IPackageAuthenticationService.cs" />
     <Compile Include="Infrastructure\IServerPackageRepository.cs" />
+    <Compile Include="Infrastructure\PackageAuthenticationService.cs" />
     <Compile Include="Infrastructure\ServerPackageRepository.cs" />
     <Compile Include="Infrastructure\NinjectBootstrapper.cs" />
     <Compile Include="Infrastructure\DerivedPackageData.cs" />
@@ -62,7 +68,9 @@
     <Content Include="favicon.ico" />
     <Content Include="DataServices\Packages.svc" />
     <Content Include="Packages\Readme.txt" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -71,6 +79,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataServices\Routes.cs" />
     <None Include="Properties\NuGet.Server.nuspec" />
     <Content Include="DataServices\Routes.cs.pp" />
   </ItemGroup>
@@ -98,12 +107,11 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>False</UseIIS>
+          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>15248</DevelopmentServerPort>
+          <DevelopmentServerPort>18572</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>
-          </IISUrl>
+          <IISUrl>http://localhost:18572/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
