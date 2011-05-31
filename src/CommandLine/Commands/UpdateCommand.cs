@@ -71,7 +71,7 @@ namespace NuGet.Commands {
             return null;
         }
 
-        private string GetPackagesConfigPath(string path) {
+        private static string GetPackagesConfigPath(string path) {
             if (path.EndsWith(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
                 return Path.GetFullPath(path);
             }
@@ -155,7 +155,7 @@ namespace NuGet.Commands {
             if (String.IsNullOrEmpty(packagesDir)) {
                 // Try to resolve the packages directory from the project
                 string projectDir = Path.GetDirectoryName(projectRoot);
-                string solutionDir = CommandLineUtility.GetSolutionDir(projectDir);
+                string solutionDir = ProjectHelper.GetSolutionDir(projectDir);
 
                 if (!String.IsNullOrEmpty(solutionDir)) {
                     packagesDir = Path.Combine(solutionDir, PackagesFolder);
@@ -179,7 +179,7 @@ namespace NuGet.Commands {
             // Try to locate the project file associated with this packages.config file
             string directory = Path.GetDirectoryName(packageReferenceFilePath);
             string projectFile;
-            if (CommandLineUtility.TryGetProjectFile(directory, out projectFile)) {
+            if (ProjectHelper.TryGetProjectFile(directory, out projectFile)) {
                 return new MSBuildProjectSystem(projectFile);
             }
 

@@ -34,7 +34,7 @@ namespace NuGet.Commands {
                 manifest.Metadata.Description = metadata.Description;
             }
             else {
-                if (!CommandLineUtility.TryGetProjectFile(out projectFile)) {
+                if (!ProjectHelper.TryGetProjectFile(out projectFile)) {
                     manifest.Metadata.Id = Arguments.Any() ? Arguments[0] : "Package";
                     manifest.Metadata.Version = "1.0";
                 }

@@ -381,7 +381,7 @@ namespace NuGet.Commands {
         }
 
         private string GetSolutionDir() {
-            return CommandLineUtility.GetSolutionDir(_project.DirectoryPath);
+            return ProjectHelper.GetSolutionDir(_project.DirectoryPath);
         }
 
         private IPackageRepository GetPackagesRepository() {
