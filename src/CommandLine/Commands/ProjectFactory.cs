@@ -314,18 +314,26 @@ namespace NuGet.Commands {
             // Add the transform file to the package builder
             ProcessTransformFiles(builder, packages.SelectMany(GetTransformFiles));
 
+            var dependencies = builder.Dependencies.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
+
             // Reduce the set of packages we want to include as dependencies to the minimal set.
             // Normally, packages.config has the full closure included, we to only add top level
             // packages, i.e packages with in-degree 0
             foreach (var package in GetMinimumSet(packages)) {
                 // Don't add duplicate dependencies
-                if (builder.Dependencies.Any(d => d.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase))) {
+                if (dependencies.ContainsKey(package.Id)) {
                     continue;
                 }
 
                 IVersionSpec spec = VersionUtility.ParseVersionSpec(package.Version.ToString());
                 var dependency = new PackageDependency(package.Id, spec);
-                builder.Dependencies.Add(dependency);
+                dependencies[dependency.Id] = dependency;
+            }
+
+            // Clear all dependencies
+            builder.Dependencies.Clear();
+            foreach (var d in dependencies.Values) {
+                builder.Dependencies.Add(d);
             }
         }
 

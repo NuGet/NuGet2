@@ -52,9 +52,6 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandVersionDescription")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandConfigurationDescription")]
-        public string Configuration { get; set; }
-
         [Option(typeof(NuGetResources), "PackageCommandExcludeDescription")]
         public ICollection<string> Exclude {
             get { return _excludes; }
@@ -258,14 +255,9 @@ namespace NuGet.Commands {
                 Build = Build
             };
 
-            // Specify the configuration
-            factory.Properties.Add("Configuration", Configuration ?? "Release");
-
             // Add the additional Properties to the properties of the Project Factory
             foreach (var property in Properties) {
-                if (!factory.Properties.ContainsKey(property.Key)) {
-                    factory.Properties.Add(property.Key, property.Value);
-                }
+                factory.Properties.Add(property.Key, property.Value);
             }
 
             // Create a builder for the main package as well as the sources/symbols package
