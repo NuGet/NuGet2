@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -9,6 +10,13 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
+        public IPackageSourceProvider SourceProvider { get; private set; }
+
+        [ImportingConstructor]
+        public SetApiKeyCommand(IPackageSourceProvider packageSourceProvider) {
+            SourceProvider = packageSourceProvider;
+        }
+
         public override void ExecuteCommand() {
             //Frist argument should be the ApiKey
             string apiKey = Arguments[0];
@@ -16,30 +24,29 @@ namespace NuGet.Commands {
             bool setSymbolServerKey = false;
 
             //If the user passed a source use it for the gallery location
-            string galleryServerUrl;
+            string source;
             if (String.IsNullOrEmpty(Source)) {
-                galleryServerUrl = GalleryServer.DefaultGalleryServerUrl;
+                source = GalleryServer.DefaultGalleryServerUrl;
                 // If no source was specified, set the default symbol server key to be the same
                 setSymbolServerKey = true;
             }
             else {
-                CommandLineUtility.ValidateSource(Source);
-                galleryServerUrl = Source;
+                source = SourceProvider.ResolveAndValidateSource(Source);
             }
 
             var settings = Settings.UserSettings;
-            settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, galleryServerUrl, apiKey);
+            settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, source, apiKey);
 
             // Setup the symbol server key
             if (setSymbolServerKey) {
                 settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, GalleryServer.DefaultSymbolServerUrl, apiKey);
                 Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
-                                  CommandLineUtility.GetSourceDisplayName(galleryServerUrl),
-                                  CommandLineUtility.GetSourceDisplayName(GalleryServer.DefaultSymbolServerUrl));
+                                  SourceProvider.GetDisplayName(source),
+                                  SourceProvider.GetDisplayName(GalleryServer.DefaultSymbolServerUrl));
             }
             else {
-                Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, CommandLineUtility.GetSourceDisplayName(galleryServerUrl));
+                Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, SourceProvider.GetDisplayName(source));
             }
         }
     }

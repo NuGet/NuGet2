@@ -115,7 +115,7 @@ namespace NuGet.Commands {
                 int maxAltOptionWidth = options.Max(o => (o.Key.AltName ?? String.Empty).Length);
 
                 foreach (var o in options) {
-                    Console.Write(" {0, -" + (maxOptionWidth + 2) + "}", o.Value.Name +
+                    Console.Write(" -{0, -" + (maxOptionWidth + 2) + "}", o.Value.Name +
                         (TypeHelper.IsMultiValuedProperty(o.Value) ? " +" : String.Empty));
                     Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", GetAltText(o.Key.AltName));
 

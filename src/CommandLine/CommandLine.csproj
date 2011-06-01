@@ -73,6 +73,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\PackageSourceProviderExtensions.cs" />
     <Compile Include="Common\ProjectHelper.cs" />
     <Compile Include="Common\ReadOnlyPackageRepository.cs" />
     <Compile Include="Common\ResourceHelper.cs" />

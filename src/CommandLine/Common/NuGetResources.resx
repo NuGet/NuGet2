@@ -118,25 +118,25 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DeleteCommandDeletedPackage" xml:space="preserve">
-    <value>{0} {1} was deleted from the server</value>
+    <value>{0} {1} was deleted successfully.</value>
   </data>
   <data name="DeleteCommandDeletingPackage" xml:space="preserve">
-    <value>Deleting {0} {1} from the server.</value>
+    <value>Deleting {0} {1} from the {2}.</value>
   </data>
   <data name="DeleteCommandDescription" xml:space="preserve">
     <value>Deletes a package from the server.</value>
   </data>
   <data name="DeleteCommandSourceDescription" xml:space="preserve">
-    <value>Specifies the base GalleryServer Url.</value>
+    <value>Specifies the server URL.</value>
   </data>
   <data name="DeleteCommandUsageDescription" xml:space="preserve">
     <value>Specify the Id and version of the package to delete from the server.</value>
   </data>
   <data name="DeleteCommandUsageSummary" xml:space="preserve">
-    <value>&lt;Package Id&gt; &lt;Package Version&gt; [API Key] [options]</value>
+    <value>&lt;package Id&gt; &lt;package version&gt; [API Key] [options]</value>
   </data>
   <data name="HelpCommandDescription" xml:space="preserve">
-    <value>The Help command displays general help information and help information about other commands.</value>
+    <value>Displays general help information and help information about other commands.</value>
   </data>
   <data name="HelpCommandUsageDecription" xml:space="preserve">
     <value>Pass a command name to display help information for that command.</value>
@@ -148,13 +148,13 @@
     <value>Invalid option value: '{0} {1}'</value>
   </data>
   <data name="ListCommandDescription" xml:space="preserve">
-    <value>Displays a list of packages at a given source. If no source is specified the default feed is used.</value>
+    <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.</value>
   </data>
   <data name="ListCommandNoPackages" xml:space="preserve">
     <value>No packages found.</value>
   </data>
   <data name="ListCommandSourceDescription" xml:space="preserve">
-    <value>The location to look for packages.</value>
+    <value>A list of packages sources to search.</value>
   </data>
   <data name="ListCommandUsageDescription" xml:space="preserve">
     <value>Specify optional search terms.</value>
@@ -166,13 +166,13 @@
     <value>Displays a detailed list of information for each package.</value>
   </data>
   <data name="InstallCommandDescription" xml:space="preserve">
-    <value>Install a package from a given source. If no source is specified the default feed is used.</value>
+    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.</value>
   </data>
   <data name="InstallCommandVersionDescription" xml:space="preserve">
     <value>The version of the package to install.</value>
   </data>
   <data name="InstallCommandSourceDescription" xml:space="preserve">
-    <value>The location to look for packages.</value>
+    <value>A list of packages sources to use for the install.</value>
   </data>
   <data name="InstallCommandUsageDescription" xml:space="preserve">
     <value>Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed.</value>
@@ -187,13 +187,13 @@
     <value>[option] on '{0}' is invalid without a setter.</value>
   </data>
   <data name="PackageCommandBasePathDescription" xml:space="preserve">
-    <value>The Base Path of the files defined in the nuspec file.</value>
+    <value>The base path of the files defined in the nuspec file.</value>
   </data>
   <data name="PackageCommandDescription" xml:space="preserve">
     <value>Creates a NuGet package based on the specified nuspec or project file.</value>
   </data>
   <data name="PackageCommandOutputDirDescription" xml:space="preserve">
-    <value>Specifies the directory for the created NuGet package file</value>
+    <value>Specifies the directory for the created NuGet package file. If not specified, uses the current directory.</value>
   </data>
   <data name="PackageCommandSpecifyInputFileError" xml:space="preserve">
     <value>Please specify a nuspec or project file to use.</value>
@@ -202,13 +202,13 @@
     <value>Successfully created package '{0}'.</value>
   </data>
   <data name="PackageCommandUsageDescription" xml:space="preserve">
-    <value>Specify the location of the manifest (Nuspec) or project file to create a package.</value>
+    <value>Specify the location of the nuspec or project file to create a package.</value>
   </data>
   <data name="PackageCommandUsageSummary" xml:space="preserve">
-    <value>&lt;manifest | project&gt; [options]</value>
+    <value>&lt;nuspec | project&gt; [options]</value>
   </data>
   <data name="PublishCommandDescription" xml:space="preserve">
-    <value>Publishes a package that was uploaded to the server but not added to the live feed.</value>
+    <value>Publishes a package that was uploaded to the server but not added to the feed.</value>
   </data>
   <data name="PublishCommandPackagePublished" xml:space="preserve">
     <value>Your package was published.</value>
@@ -217,19 +217,19 @@
     <value>Publishing {0} {1} to {2}...</value>
   </data>
   <data name="PublishCommandSourceDescription" xml:space="preserve">
-    <value>Specifies the base GalleryServer Url.</value>
+    <value>Specifies the server URL.</value>
   </data>
   <data name="PublishCommandUsageDescription" xml:space="preserve">
-    <value>Specify the Id and Version of the package that will be publised to the live feed.</value>
+    <value>Specify the id and version of the package that will be publised to the feed.</value>
   </data>
   <data name="PublishCommandUsageSummary" xml:space="preserve">
-    <value>&lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options]</value>
+    <value>&lt;package id&gt; &lt;package version&gt; &lt;API Key&gt; [options]</value>
   </data>
   <data name="PushCommandPushingPackage" xml:space="preserve">
     <value>Pushing {0} to {1}...</value>
   </data>
   <data name="PushCommandDescription" xml:space="preserve">
-    <value>Pushes a package to the server and optionally publish it to the feed.</value>
+    <value>Pushes a package to the server and optionally publishes it.</value>
   </data>
   <data name="PushCommandInvalidResponse" xml:space="preserve">
     <value>{0}: {1}</value>
@@ -241,16 +241,16 @@
     <value>Your package was uploaded to '{0}' but not published.</value>
   </data>
   <data name="PushCommandCreateOnlyDescription" xml:space="preserve">
-    <value>Specifies if the package should be created and uploaded to the server but not published to the live feed. False by default.</value>
+    <value>Specifies if the package should be created and uploaded to the server but not published to the server. False by default.</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
-    <value>Specifies the base GalleryServer Url.</value>
+    <value>Specifies the server URL.</value>
   </data>
   <data name="PushCommandUsageDescription" xml:space="preserve">
-    <value>Specify the location of the package and your API key to push the package to the server.</value>
+    <value>Specify the path to the package and your API key to push the package to the server.</value>
   </data>
   <data name="PushCommandUsageSummary" xml:space="preserve">
-    <value>&lt;package location&gt; [API key] [options]</value>
+    <value>&lt;package path&gt; [API key] [options]</value>
   </data>
   <data name="ResourcePropertyDoesNotHaveAccessibleGet" xml:space="preserve">
     <value>The resource type '{0}' does not have an accessible get for the '{1}' property.</value>
@@ -313,7 +313,7 @@
     <value>Created '{0}' successfully.</value>
   </data>
   <data name="SpecCommandDescription" xml:space="preserve">
-    <value>Generates a nuspec for a new package.</value>
+    <value>Generates a nuspec for a new package. If this command is run in the same folder as a project file (.csproj, .vbproj, .fsproj), it will create a tokenized nuspec file.</value>
   </data>
   <data name="SpecCommandForceDescription" xml:space="preserve">
     <value>Overwrite nuspec file if it exists.</value>
@@ -334,7 +334,7 @@
     <value>Delete canceled</value>
   </data>
   <data name="DeleteCommandConfirm" xml:space="preserve">
-    <value>{0} {1} will be deleted from the server. Would you like to continue?</value>
+    <value>{0} {1} will be deleted from the {2}. Would you like to continue?</value>
   </data>
   <data name="DeleteCommandNoPromptDescription" xml:space="preserve">
     <value>Do not prompt when deleting.</value>
@@ -349,43 +349,40 @@
     <value>Ambiguous option '{0}'. Possible values: {1}.</value>
   </data>
   <data name="PackageCommandVersionDescription" xml:space="preserve">
-    <value>Overrides the Version number from the nuspec file.</value>
+    <value>Overrides the version number from the nuspec file.</value>
   </data>
   <data name="PackageCommandExcludeDescription" xml:space="preserve">
     <value>Specifies one or more wildcard patterns to exclude when creating a package.</value>
   </data>
   <data name="InstallCommandOutputDirDescription" xml:space="preserve">
-    <value>Specifies the directory in which packages will be installed</value>
+    <value>Specifies the directory in which packages will be installed. If none specified, uses the current directory.</value>
   </data>
   <data name="InstallCommandNothingToInstall" xml:space="preserve">
     <value>All packages listed in {0} are already installed.</value>
   </data>
   <data name="NoApiKeyFound" xml:space="preserve">
-    <value>No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the 'SetApiKey' command.</value>
+    <value>No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the 'setApiKey' command.</value>
   </data>
   <data name="SetApiKeyCommandApiKeySaved" xml:space="preserve">
     <value>The API Key '{0}' was saved for {1}.</value>
   </data>
   <data name="SetApiKeyCommandSourceDescription" xml:space="preserve">
-    <value>Base URL to the Gallery Server where the API Key is valid.</value>
+    <value>Server URL where the API key is valid.</value>
   </data>
   <data name="SetApiKeyCommandDescription" xml:space="preserve">
-    <value>Saves an API key for a given Gallery Server URL, when no URL is provided API key is saved for the default source.</value>
+    <value>Saves an API key for a given server URL. When no URL is provided API key is saved for the NuGet gallery.</value>
   </data>
   <data name="SetApiKeyCommandUsageDescription" xml:space="preserve">
-    <value>Specify the API key to save and an optional URL to the Gallery Server that provided the API key.</value>
+    <value>Specify the API key to save and an optional URL to the server that provided the API key.</value>
   </data>
   <data name="SetApiKeyCommandUsageSummary" xml:space="preserve">
-    <value>&lt;API key&gt; [Source]</value>
+    <value>&lt;API key&gt; [options]</value>
   </data>
   <data name="BuildingProjectTargetingFramework" xml:space="preserve">
     <value>Building project for target framework '{0}'.</value>
   </data>
   <data name="FailedToBuildProject" xml:space="preserve">
     <value>Failed to build '{0}'.</value>
-  </data>
-  <data name="PackageCommandConfigurationDescription" xml:space="preserve">
-    <value>Determines what configuration should be used when building a package from the specified project file.</value>
   </data>
   <data name="PackageCommandSymbolsDescription" xml:space="preserve">
     <value>Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular nupkg and the corresponding symbols package.</value>
@@ -411,23 +408,20 @@
   <data name="PackageCommandToolDescription" xml:space="preserve">
     <value>Determines if the output files of the project should be in the tool folder. </value>
   </data>
-  <data name="SetApiKeyCommandSymbolsDescription" xml:space="preserve">
-    <value>Sets the API key for the default symbol server.</value>
-  </data>
   <data name="DefaultSymbolServer" xml:space="preserve">
     <value>the symbol server</value>
   </data>
   <data name="LiveFeed" xml:space="preserve">
-    <value>the NuGet gallery feed</value>
+    <value>the NuGet gallery</value>
   </data>
   <data name="PackageCommandAttemptingToBuildSymbolsPackage" xml:space="preserve">
     <value>Attempting to build symbols package for '{0}'.</value>
   </data>
   <data name="Warning_SymbolServerNotConfigured" xml:space="preserve">
-    <value>Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'nuget.exe SetApiKey [your API key from http://www.nuget.org]'.</value>
+    <value>Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'nuget.exe setApiKey [your API key from http://www.nuget.org]'.</value>
   </data>
   <data name="SpecCommandUsageSummary" xml:space="preserve">
-    <value>[packageid]</value>
+    <value>[package id]</value>
   </data>
   <data name="UsingNuspecForMetadata" xml:space="preserve">
     <value>Using '{0}' for metadata.</value>
@@ -457,7 +451,7 @@
     <value>No updates available for '{0}'.</value>
   </data>
   <data name="PackageDoesNotExist" xml:space="preserve">
-    <value>'{0} {1}' does not exist. Make sure all packages exist in the packages folder before running updateRestoring the packages directory before running update.</value>
+    <value>'{0} {1}' does not exist. Make sure all packages exist in the packages folder before running update.</value>
   </data>
   <data name="SkippingUpdateCheck" xml:space="preserve">
     <value>Skipping update check for '{0} {1}'. Update supported for packages that only contain binaries.</value>
@@ -484,7 +478,7 @@
     <value>Update the running NuGet.exe to the newest version available from the server.</value>
   </data>
   <data name="UpdateCommandSourceDescription" xml:space="preserve">
-    <value>Package sources to use for updates.</value>
+    <value>A list of package sources to search for updates.</value>
   </data>
   <data name="UpdatingPackage" xml:space="preserve">
     <value>Updating '{0}' to '{1}'.</value>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using NuGet.Common;
 
@@ -13,8 +14,14 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
-        public override void ExecuteCommand() {
+        public IPackageSourceProvider SourceProvider { get; private set; }
 
+        [ImportingConstructor]
+        public DeleteCommand(IPackageSourceProvider packageSourceProvider) {
+            SourceProvider = packageSourceProvider;
+        }
+
+        public override void ExecuteCommand() {
             //First argument should be the package ID
             string packageId = Arguments[0];
             //Second argument should be the package Version
@@ -26,15 +33,16 @@ namespace NuGet.Commands {
             }
 
             //If the user passed a source use it for the gallery location
-            string galleryServerUrl = String.IsNullOrEmpty(Source) ? GalleryServer.DefaultGalleryServerUrl : Source;
-            var gallery = new GalleryServer(galleryServerUrl);
+            string source = SourceProvider.ResolveAndValidateSource(Source) ?? GalleryServer.DefaultGalleryServerUrl;
+            var gallery = new GalleryServer(source);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings.UserSettings, galleryServerUrl) : userSetApiKey;
+            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source) : userSetApiKey;
 
+            string sourceDisplayName = SourceProvider.GetDisplayName(source);
 
-            if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion))) {
-                Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion);
+            if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName))) {
+                Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion, sourceDisplayName);
                 gallery.DeletePackage(apiKey, packageId, packageVersion);
                 Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, packageId, packageVersion);
             }

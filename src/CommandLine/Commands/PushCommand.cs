@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using NuGet.Common;
 
@@ -14,6 +15,13 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
+        public IPackageSourceProvider SourceProvider { get; private set; }
+
+        [ImportingConstructor]
+        public PushCommand(IPackageSourceProvider packageSourceProvider) {
+            SourceProvider = packageSourceProvider;
+        }
+
         public override void ExecuteCommand() {
             // Frist argument should be the package
             string packagePath = Arguments[0];
@@ -23,8 +31,7 @@ namespace NuGet.Commands {
             string source = null;
 
             if (!String.IsNullOrEmpty(Source)) {
-                CommandLineUtility.ValidateSource(Source);
-                source = Source;
+                source = SourceProvider.ResolveAndValidateSource(Source);
             }
             else {
                 if (packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase)) {
@@ -39,17 +46,17 @@ namespace NuGet.Commands {
             PushPackage(packagePath, source);
 
             if (pushSymbols) {
-                PushSymbols(packagePath, source);
+                PushSymbols(packagePath);
             }
         }
 
-        private void PushSymbols(string packagePath, string source) {
+        private void PushSymbols(string packagePath) {
             // Get the symbol package for this package
             string symbolPackagePath = GetSymbolsPath(packagePath);
 
             // Push the symbols package if it exists
             if (File.Exists(symbolPackagePath)) {
-                source = GalleryServer.DefaultSymbolServerUrl;
+                string source = GalleryServer.DefaultSymbolServerUrl;
 
                 // See if the api key exists
                 string apiKey = GetApiKey(source, throwIfNotFound: false);
@@ -90,7 +97,7 @@ namespace NuGet.Commands {
                 }
             };
 
-            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(source));
+            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), SourceProvider.GetDisplayName(source));
 
             try {
                 using (Stream stream = package.GetStream()) {
@@ -106,7 +113,7 @@ namespace NuGet.Commands {
 
             // Publish the package on the server
             if (!CreateOnly) {
-                var cmd = new PublishCommand();
+                var cmd = new PublishCommand(SourceProvider);
                 cmd.Console = Console;
                 cmd.Source = source;
                 cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), apiKey };
@@ -127,7 +134,7 @@ namespace NuGet.Commands {
 
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source, throwIfNotFound);
             }
 
             return apiKey;

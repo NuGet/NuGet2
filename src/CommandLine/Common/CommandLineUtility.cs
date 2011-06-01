@@ -8,22 +8,12 @@ namespace NuGet {
     internal static class CommandLineUtility {
         public readonly static string ApiKeysSectionName = "apikeys";
         
-        public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true) {
+        public static string GetApiKey(IPackageSourceProvider sourceProvider, ISettings settings, string source, bool throwIfNotFound = true) {
             var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
             if (String.IsNullOrEmpty(value) && throwIfNotFound) {
-                throw new CommandLineException(NuGetResources.NoApiKeyFound, GetSourceDisplayName(source));
+                throw new CommandLineException(NuGetResources.NoApiKeyFound, sourceProvider.GetDisplayName(source));
             }
             return value;
-        }
-
-        public static string GetSourceDisplayName(string source) {
-            if (String.IsNullOrEmpty(source) || source.Equals(GalleryServer.DefaultGalleryServerUrl)) {
-                return NuGetResources.LiveFeed + " (" + GalleryServer.DefaultGalleryServerUrl + ")";
-            }
-            if (source.Equals(GalleryServer.DefaultSymbolServerUrl)) {
-                return NuGetResources.DefaultSymbolServer + " (" + GalleryServer.DefaultSymbolServerUrl + ")";
-            }
-            return "'" + source + "'";
         }
 
         public static void ValidateSource(string source) {
