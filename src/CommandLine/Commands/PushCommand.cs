@@ -39,22 +39,26 @@ namespace NuGet.Commands {
             PushPackage(packagePath, source);
 
             if (pushSymbols) {
-                // Get the symbol package for this package
-                string symbolPackagePath = GetSymbolsPath(packagePath);
+                PushSymbols(packagePath, source);
+            }
+        }
 
-                // Push the symbols package if it exists
-                if (File.Exists(symbolPackagePath)) {
-                    source = GalleryServer.DefaultSymbolServerUrl;
+        private void PushSymbols(string packagePath, string source) {
+            // Get the symbol package for this package
+            string symbolPackagePath = GetSymbolsPath(packagePath);
 
-                    // See if the api key exists
-                    string apiKey = GetApiKey(source, throwIfNotFound: false);
+            // Push the symbols package if it exists
+            if (File.Exists(symbolPackagePath)) {
+                source = GalleryServer.DefaultSymbolServerUrl;
 
-                    if (String.IsNullOrEmpty(apiKey)) {
-                        Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
-                    }
-                    else {
-                        PushPackage(symbolPackagePath, source, apiKey);
-                    }
+                // See if the api key exists
+                string apiKey = GetApiKey(source, throwIfNotFound: false);
+
+                if (String.IsNullOrEmpty(apiKey)) {
+                    Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
+                }
+                else {
+                    PushPackage(symbolPackagePath, source, apiKey);
                 }
             }
         }
@@ -70,17 +74,34 @@ namespace NuGet.Commands {
 
         private void PushPackage(string packagePath, string source, string apiKey = null) {
             var gallery = new GalleryServer(source);
-
             // Use the specified api key or fall back to default behavior
             apiKey = apiKey ?? GetApiKey(source);
 
             // Push the package to the server
             var package = new ZipPackage(packagePath);
 
+            bool complete = false;
+            gallery.ProgressAvailable += (sender, e) => {
+                Console.Write("\r" + NuGetResources.PushingPackage, e.PercentComplete);
+
+                if (e.PercentComplete == 100) {
+                    Console.WriteLine();
+                    complete = true;
+                }
+            };
+
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(source));
 
-            using (Stream stream = package.GetStream()) {
-                gallery.CreatePackage(apiKey, stream);
+            try {
+                using (Stream stream = package.GetStream()) {
+                    gallery.CreatePackage(apiKey, stream);
+                }
+            }
+            catch {
+                if (!complete) {
+                    Console.WriteLine();
+                }
+                throw;
             }
 
             // Publish the package on the server

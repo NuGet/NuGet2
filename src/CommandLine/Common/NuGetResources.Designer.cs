@@ -799,6 +799,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pushing: {0}%.
+        /// </summary>
+        internal static string PushingPackage {
+            get {
+                return ResourceManager.GetString("PushingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Removing assembly reference &apos;{0}&apos;..
         /// </summary>
         internal static string RemovingAssemblyReference {

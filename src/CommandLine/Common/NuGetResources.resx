@@ -501,4 +501,7 @@
   <data name="RemovingPackageReference" xml:space="preserve">
     <value>Removing package reference '{0}'.</value>
   </data>
+  <data name="PushingPackage" xml:space="preserve">
+    <value>Pushing: {0}%</value>
+  </data>
 </root>

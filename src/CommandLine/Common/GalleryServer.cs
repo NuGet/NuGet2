@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Json;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.Common {
-    public class GalleryServer {
+    public class GalleryServer : IProgressProvider {
         public static readonly string DefaultSymbolServerUrl = "http://nuget.gw.symbolsource.org/Public/NuGet";
         public static readonly string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string CreatePackageService = "PackageFiles";
@@ -16,6 +16,8 @@ namespace NuGet.Common {
         private const string _UserAgentClient = "NuGet Command Line";
         private readonly Lazy<IHttpClient> _galleryClient;
         private readonly string _galleryServerUrl;
+
+        public event EventHandler<ProgressEventArgs> ProgressAvailable;
 
         public GalleryServer()
             : this(DefaultGalleryServerUrl) {
@@ -53,13 +55,32 @@ namespace NuGet.Common {
         }
 
         public void CreatePackage(string apiKey, Stream packageStream) {
+            const int chunkSize = 1024 * 4; // 4KB
+
             var action = String.Format("{0}/{1}/nupkg", CreatePackageService, apiKey);
             var request = CreateRequest(action, "POST", "application/octet-stream");
 
-            byte[] file = packageStream.ReadAllBytes();
-            request.ContentLength = file.Length;
-            var requestStream = request.GetRequestStream();
-            requestStream.Write(file, 0, file.Length);
+            // Set the timeout to the same as the read write timeout (5 mins is the default)
+            request.Timeout = request.ReadWriteTimeout;
+
+            byte[] buffer = packageStream.ReadAllBytes();
+            request.ContentLength = buffer.Length;
+
+            OnProgressAvailable(0);
+            int offset = 0;
+            using (var requestStream = request.GetRequestStream()) {
+                while (offset < buffer.Length) {
+                    int count = Math.Min(buffer.Length - offset, chunkSize);
+                    requestStream.Write(buffer, offset, count);
+                    offset += count;
+                    int percentage = (offset * 100) / buffer.Length;                   
+                    if (percentage < 100) {
+                        OnProgressAvailable(percentage);
+                    }
+                }
+            }
+
+            OnProgressAvailable(100);
 
             GetResponse(request);
         }
@@ -126,6 +147,12 @@ namespace NuGet.Common {
             GetResponse(request);
         }
 
+        private void OnProgressAvailable(int percentage) {
+            if (ProgressAvailable != null) {
+                ProgressAvailable(this, new ProgressEventArgs(percentage));
+            }
+        }
+
         private HttpWebRequest CreateRequest(string action, string method, string contentType) {
             var actionUrl = String.Format("{0}/{1}", _galleryClient.Value.Uri, action);
             var actionClient = new HttpClient(new Uri(actionUrl));
@@ -140,7 +167,7 @@ namespace NuGet.Common {
             try {
                 return request.GetResponse();
             }
-            catch (WebException e) {                
+            catch (WebException e) {
                 if (e.Response == null) {
                     throw;
                 }
