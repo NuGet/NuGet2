@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.Common {
     public class GalleryServer {
@@ -10,7 +11,7 @@ namespace NuGet.Common {
         public static readonly string DefaultGalleryServerUrl = "http://go.microsoft.com/fwlink/?LinkID=207106";
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
-        private const string PublichPackageService = "PublishedPackages/Publish";
+        private const string PublishPackageService = "PublishedPackages/Publish";
 
         private const string _UserAgentClient = "NuGet Command Line";
         private readonly Lazy<IHttpClient> _galleryClient;
@@ -21,8 +22,8 @@ namespace NuGet.Common {
         }
 
         public GalleryServer(string galleryServerUrl) {
-            if (string.IsNullOrEmpty(galleryServerUrl)) {
-                throw new ArgumentNullException("galleryServerUrl");
+            if (String.IsNullOrEmpty(galleryServerUrl)) {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "galleryServerUrl");
             }
             _galleryServerUrl = galleryServerUrl;
             _galleryClient = new Lazy<IHttpClient>(EnsureClient);
@@ -37,7 +38,7 @@ namespace NuGet.Common {
                 var uri = client.Uri;
             }
             catch (WebException e) {
-                if (e.Status == WebExceptionStatus.Timeout) {
+                if (e.Status == WebExceptionStatus.Timeout || e.Response == null) {
                     // If we got a timeout error then throw it up to the consumer
                     // because we are not able to connect to the gallery server.
                     throw;
@@ -51,11 +52,11 @@ namespace NuGet.Common {
             return client;
         }
 
-        public void CreatePackage(string apiKey, Stream package) {
+        public void CreatePackage(string apiKey, Stream packageStream) {
             var action = String.Format("{0}/{1}/nupkg", CreatePackageService, apiKey);
             var request = CreateRequest(action, "POST", "application/octet-stream");
 
-            byte[] file = package.ReadAllBytes();
+            byte[] file = packageStream.ReadAllBytes();
             request.ContentLength = file.Length;
             var requestStream = request.GetRequestStream();
             requestStream.Write(file, 0, file.Length);
@@ -83,7 +84,7 @@ namespace NuGet.Common {
         }
 
         public void PublishPackage(string apiKey, string packageID, string packageVersion) {
-            var request = CreateRequest(PublichPackageService, "POST", "application/json");
+            var request = CreateRequest(PublishPackageService, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new PublishData {
@@ -126,7 +127,7 @@ namespace NuGet.Common {
         }
 
         private HttpWebRequest CreateRequest(string action, string method, string contentType) {
-            var actionUrl = string.Format("{0}/{1}", _galleryClient.Value.Uri, action);
+            var actionUrl = String.Format("{0}/{1}", _galleryClient.Value.Uri, action);
             var actionClient = new HttpClient(new Uri(actionUrl));
             var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
@@ -139,9 +140,13 @@ namespace NuGet.Common {
             try {
                 return request.GetResponse();
             }
-            catch (WebException e) {
-                string errorMessage = String.Empty;
+            catch (WebException e) {                
+                if (e.Response == null) {
+                    throw;
+                }
+
                 var response = (HttpWebResponse)e.Response;
+                string errorMessage = String.Empty;
                 using (var stream = response.GetResponseStream()) {
                     errorMessage = stream.ReadToEnd();
                 }
