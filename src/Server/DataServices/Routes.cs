@@ -1,5 +1,4 @@
-﻿#if DEBUG
-using System.Data.Services;
+﻿using System.Data.Services;
 using System.ServiceModel.Activation;
 using System.Web.Routing;
 using Ninject;
@@ -30,13 +29,15 @@ namespace NuGet.Server {
             routes.MapDelegate("DeletePackage",
                                "Packages/{apiKey}/{packageId}/{version}",
                                context => CreatePackageService().DeletePackage(context));
-            
+
+#if DEBUG
             // The default route is http://{root}/nuget/Packages
             var factory = new DataServiceHostFactory();
             var serviceRoute = new ServiceRoute("nuget", factory, typeof(Packages));
             serviceRoute.Defaults = new RouteValueDictionary { { "serviceType", "odata" } };
             serviceRoute.Constraints = new RouteValueDictionary { { "serviceType", "odata" } };
             routes.Add("nuget", serviceRoute);
+#endif
         }
 
         private static PackageService CreatePackageService() {
@@ -44,4 +45,3 @@ namespace NuGet.Server {
         }
     }
 }
-#endif
