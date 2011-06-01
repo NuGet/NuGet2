@@ -22,7 +22,8 @@ namespace NuGet.Dialog {
         }
 
         public string CreateGraph() {
-            var packageManager = _packageManagerFactory.CreatePackageManager();
+            // We only use the package manager to locate the LocalRepository, we should be fine disabling fallback.
+            var packageManager = _packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
             var solutionManager = new SolutionManager();
 
             var nodes = new List<DGMLNode>();
