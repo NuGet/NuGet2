@@ -62,7 +62,6 @@
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="ProxyFinderTest.cs" />
-    <Compile Include="Server\Infrastructure\HelpersTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />
     <Compile Include="BindingRedirectManagerTest.cs" />
@@ -92,7 +91,6 @@
     <Compile Include="PackageManagerTest.cs" />
     <Compile Include="SecurityTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server\Infrastructure\ServerPackageRepositoryTest.cs" />
     <Compile Include="UriHelperTest.cs" />
     <Compile Include="UserSettingsTests.cs" />
     <Compile Include="VersionSpecTest.cs" />
@@ -104,10 +102,6 @@
     <ProjectReference Include="..\..\src\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Server\Server.csproj">
-      <Project>{793B20A9-E263-4B54-BB31-305B602087CE}</Project>
-      <Name>Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CommandLine\CommandLine.csproj">
       <Project>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</Project>

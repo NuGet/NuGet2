@@ -88,6 +88,7 @@
         <MSBuild Projects="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuGetTestRoot)\MSBuild.Test\MSBuild.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Targets="RunTests" />
     </Target>
     
     <Target Name="ReportFxCopResults">
