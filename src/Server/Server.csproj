@@ -48,7 +48,7 @@
     </Compile>
     <Compile Include="DataServices\Package.cs" />
     <Compile Include="DataServices\PackageContext.cs" />
-    <Compile Include="Handlers\PackageService.cs" />
+    <Compile Include="Publishing\PackageService.cs" />
     <Compile Include="Infrastructure\Bindings.cs" />
     <Compile Include="Infrastructure\Helpers.cs" />
     <Compile Include="Infrastructure\IPackageAuthenticationService.cs" />
