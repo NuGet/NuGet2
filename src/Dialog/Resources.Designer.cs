@@ -151,6 +151,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Install the package into the selected projects. Clear a selection to uninstall the package from that project..
+        /// </summary>
+        public static string Dialog_InstalledSolutionInstruction {
+            get {
+                return ResourceManager.GetString("Dialog_InstalledSolutionInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Installing....
         /// </summary>
         public static string Dialog_InstallProgress {
@@ -223,6 +232,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Install the package in the following projects:.
+        /// </summary>
+        public static string Dialog_OnlineSolutionInstruction {
+            get {
+                return ResourceManager.GetString("Dialog_OnlineSolutionInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operation failed..
         /// </summary>
         public static string Dialog_OperationFailed {
@@ -273,15 +291,6 @@ namespace NuGet.Dialog {
         public static string Dialog_ProjectListLabel {
             get {
                 return ResourceManager.GetString("Dialog_ProjectListLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Select the projects for this operation..
-        /// </summary>
-        public static string Dialog_ProjectSelectorDescription {
-            get {
-                return ResourceManager.GetString("Dialog_ProjectSelectorDescription", resourceCulture);
             }
         }
         
@@ -534,6 +543,15 @@ namespace NuGet.Dialog {
         public static string Dialog_UpdatesProviderNoItem {
             get {
                 return ResourceManager.GetString("Dialog_UpdatesProviderNoItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update the package in the following projects:.
+        /// </summary>
+        public static string Dialog_UpdatesSolutionInstruction {
+            get {
+                return ResourceManager.GetString("Dialog_UpdatesSolutionInstruction", resourceCulture);
             }
         }
         

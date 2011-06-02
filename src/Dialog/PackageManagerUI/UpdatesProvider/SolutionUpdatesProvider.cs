@@ -41,6 +41,7 @@ namespace NuGet.Dialog.Providers {
             if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
                 HideProgressWindow();
                 var selectedProjects = _projectSelector.ShowProjectSelectorWindow(
+                    Resources.Dialog_UpdatesSolutionInstruction,
                     // Selector function to return the initial checkbox state for a Project.
                     // We check a project if it has the current package installed by Id, but not version
                     project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),

@@ -42,7 +42,10 @@ namespace NuGet.Dialog.Providers {
             if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
 
                 HideProgressWindow();
-                var selectedProjects = _projectSelector.ShowProjectSelectorWindow(DetermineProjectCheckState, ignored => true);
+                var selectedProjects = _projectSelector.ShowProjectSelectorWindow(
+                    Resources.Dialog_OnlineSolutionInstruction,
+                    DetermineProjectCheckState, 
+                    ignored => true);
                 if (selectedProjects == null) {
                     // user presses Cancel button on the Solution dialog
                     return false;

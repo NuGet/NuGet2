@@ -52,7 +52,7 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[] { project1, project2 });
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[] { project1, project2 });
 
             var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -128,7 +128,7 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[0]);
+            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[0]);
 
             var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
             var extensionTree = provider.ExtensionsTree;

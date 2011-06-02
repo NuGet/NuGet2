@@ -273,8 +273,8 @@
   <data name="Dialog_LastUpdatedLabel" xml:space="preserve">
     <value>Last Updated:</value>
   </data>
-  <data name="Dialog_ProjectSelectorDescription" xml:space="preserve">
-    <value>Select the projects for this operation.</value>
+  <data name="Dialog_OnlineSolutionInstruction" xml:space="preserve">
+    <value>Install the package in the following projects:</value>
   </data>
   <data name="Dialog_ProjectSelectorTitle" xml:space="preserve">
     <value>Select Projects</value>
@@ -305,5 +305,11 @@
   </data>
   <data name="Dialog_ProjectListLabel" xml:space="preserve">
     <value>Currently installed in projects:</value>
+  </data>
+  <data name="Dialog_InstalledSolutionInstruction" xml:space="preserve">
+    <value>Install the package into the selected projects. Clear a selection to uninstall the package from that project.</value>
+  </data>
+  <data name="Dialog_UpdatesSolutionInstruction" xml:space="preserve">
+    <value>Update the package in the following projects:</value>
   </data>
 </root>
