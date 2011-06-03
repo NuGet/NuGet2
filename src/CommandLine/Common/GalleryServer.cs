@@ -73,7 +73,7 @@ namespace NuGet.Common {
                     int count = Math.Min(buffer.Length - offset, chunkSize);
                     requestStream.Write(buffer, offset, count);
                     offset += count;
-                    int percentage = (offset * 100) / buffer.Length;                   
+                    int percentage = (offset * 100) / buffer.Length;
                     if (percentage < 100) {
                         OnProgressAvailable(percentage);
                     }
@@ -154,8 +154,8 @@ namespace NuGet.Common {
         }
 
         private HttpWebRequest CreateRequest(string action, string method, string contentType) {
-            var actionUrl = String.Format("{0}/{1}", _galleryClient.Value.Uri, action);
-            var actionClient = new HttpClient(new Uri(actionUrl));
+            var actionUrl = new Uri(_galleryClient.Value.Uri, action);
+            var actionClient = new HttpClient(actionUrl);
             var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
