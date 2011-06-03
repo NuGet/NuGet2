@@ -18,17 +18,17 @@ namespace NuGet.Server {
             // Route to create a new package
             routes.MapDelegate("CreatePackage",
                                "PackageFiles/{apiKey}/nupkg",
-                               context => CreatePackageService().CreatePackage(context));
+                               context => CreatePackageService().CreatePackage(context.HttpContext));
 
             // Route to publish a package
             routes.MapDelegate("PublishPackage",
                                "PublishedPackages/Publish",
-                               context => CreatePackageService().PublishPackage(context));
+                               context => CreatePackageService().PublishPackage(context.HttpContext));
 
             // Route to delete packages
             routes.MapDelegate("DeletePackage",
                                "Packages/{apiKey}/{packageId}/{version}",
-                               context => CreatePackageService().DeletePackage(context));
+                               context => CreatePackageService().DeletePackage(context.HttpContext));
 
 #if DEBUG
             // The default route is http://{root}/nuget/Packages

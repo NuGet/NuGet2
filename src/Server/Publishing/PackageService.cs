@@ -14,7 +14,7 @@ namespace NuGet.Server {
             _authenticationService = authenticationService;
         }
 
-        public void CreatePackage(HttpContext context) {
+        public void CreatePackage(HttpContextBase context) {
             RouteData routeData = GetRouteData(context);
             // Get the api key from the route
             string apiKey = routeData.GetRequiredString("apiKey");
@@ -27,11 +27,11 @@ namespace NuGet.Server {
                          () => _serverRepository.AddPackage(package));
         }
 
-        public void PublishPackage(HttpContext context) {
+        public void PublishPackage(HttpContextBase context) {
             // No-op
         }
 
-        public void DeletePackage(HttpContext context) {
+        public void DeletePackage(HttpContextBase context) {
             // Only accept delete requests
             if (!context.Request.HttpMethod.Equals("DELETE", StringComparison.OrdinalIgnoreCase)) {
                 context.Response.StatusCode = 404;
@@ -51,7 +51,7 @@ namespace NuGet.Server {
                          () => _serverRepository.RemovePackage(packageId, version));
         }
 
-        private void Authenticate(HttpContext context, string apiKey, string packageId, Action action) {
+        private void Authenticate(HttpContextBase context, string apiKey, string packageId, Action action) {
             if (_authenticationService.IsAuthenticated(context.User, apiKey, packageId)) {
                 action();
             }
@@ -60,13 +60,13 @@ namespace NuGet.Server {
             }
         }
 
-        private static void WriteAccessDenied(HttpContext context, string packageId) {
+        private static void WriteAccessDenied(HttpContextBase context, string packageId) {
             context.Response.StatusCode = 401;
             context.Response.Write(String.Format("Access denied for package '{0}'.", packageId));
         }
 
-        private RouteData GetRouteData(HttpContext context) {
-            return RouteTable.Routes.GetRouteData(new HttpContextWrapper(context));
+        private RouteData GetRouteData(HttpContextBase context) {
+            return RouteTable.Routes.GetRouteData(context);
         }
     }
 }
