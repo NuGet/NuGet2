@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using EnvDTE;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
@@ -355,6 +356,44 @@ namespace NuGet.Test.VisualStudio {
             Assert.IsTrue(projectSystem.ReferenceExists("B1.dll"));
             Assert.IsTrue(packageManager.LocalRepository.Exists(A20));
             Assert.IsTrue(projectSystem.ReferenceExists("A2.dll"));
+        }
+
+        [TestMethod]
+        public void UpdatePackageWithNoProjectsInstallsAtSolutionLevel() {
+            // Arrange 
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object);
+
+            var package = PackageUtility.CreatePackage("foo", "1.0", dependencies: new PackageDependency[] { new PackageDependency("bar") });
+            sourceRepository.AddPackage(package);
+
+            var package2 = PackageUtility.CreatePackage("bar", "2.0");
+            sourceRepository.AddPackage(package2);
+
+            var package3 = PackageUtility.CreatePackage("awesome", "1.0");
+            localRepository.AddPackage(package3);
+
+            var operations = new PackageOperation[] {  
+                 new PackageOperation(package, PackageAction.Install), 
+                 new PackageOperation(package2, PackageAction.Install), 
+                 new PackageOperation(package3, PackageAction.Uninstall) 
+             };
+
+            // Act 
+            packageManager.UpdatePackage(Enumerable.Empty<Project>(), 
+                                         package, 
+                                         operations, 
+                                         updateDependencies: true, 
+                                         logger: NullLogger.Instance, 
+                                         packageOperationEventListener: null);
+
+            // Assert 
+            Assert.IsTrue(packageManager.LocalRepository.Exists(package));
+            Assert.IsTrue(packageManager.LocalRepository.Exists(package2));
+            Assert.IsTrue(!packageManager.LocalRepository.Exists(package3));
         }
 
         // This repository better simulates what happens when we're running the package manager in vs

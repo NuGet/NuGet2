@@ -78,6 +78,7 @@ namespace NuGet.Dialog.Providers {
 
             // display the Manage dialog to allow user to pick projects to install/uninstall
             IEnumerable<Project> selectedProjects = _projectSelectorService.ShowProjectSelectorWindow(
+                Resources.Dialog_InstalledSolutionInstruction,
                 // Selector function to return the initial checkbox state for a Project.
                 // We check a project by default if it has the current package installed.
                 project => PackageManager.GetProjectManager(project).IsInstalled(package),

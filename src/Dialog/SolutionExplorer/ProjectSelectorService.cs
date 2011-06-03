@@ -9,17 +9,18 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog {
     [Export(typeof(IProjectSelectorService))]
     internal class ProjectSelectorService : IProjectSelectorService {
-
         private readonly Dispatcher _uiDispatcher;
+
         public ProjectSelectorService() {
             _uiDispatcher = Dispatcher.CurrentDispatcher;
         }
 
-        public IEnumerable<Project> ShowProjectSelectorWindow(Func<Project, bool> checkedStateSelector, Func<Project, bool> enabledStateSelector) {
+        public IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Func<Project, bool> checkedStateSelector, Func<Project, bool> enabledStateSelector) {
             if (!_uiDispatcher.CheckAccess()) {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(
-                    new Func<Func<Project, bool>, Func<Project, bool>, IEnumerable<Project>>(ShowProjectSelectorWindow),
+                    new Func<string, Func<Project, bool>, Func<Project, bool>, IEnumerable<Project>>(ShowProjectSelectorWindow),
+                    instructionText,
                     checkedStateSelector,
                     enabledStateSelector);
 
@@ -33,6 +34,7 @@ namespace NuGet.Dialog {
             var window = new SolutionExplorer() {
                 DataContext = viewModel
             };
+            window.InstructionText.Text = instructionText;
 
             bool? dialogResult = window.ShowModal();
             if (dialogResult ?? false) {
