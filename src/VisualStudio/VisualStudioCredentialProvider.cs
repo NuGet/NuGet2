@@ -6,21 +6,25 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace NuGet.VisualStudio {
     public class VisualStudioCredentialProvider: BaseProxyProvider {
 
-        public VisualStudioCredentialProvider() {
-            VsWebProxyService = ServiceLocator.GetGlobalService<SVsWebProxy, IVsWebProxy>();
+        private IVsWebProxy _webProxyService;
+
+        public VisualStudioCredentialProvider()
+            : this(ServiceLocator.GetGlobalService<SVsWebProxy, IVsWebProxy>()) {
         }
 
-        protected IVsWebProxy VsWebProxyService {
-            get;
-            set;
+        public VisualStudioCredentialProvider(IVsWebProxy webProxyService) {
+            if (webProxyService == null) {
+                throw new ArgumentNullException("webProxyService");
+            }
+            _webProxyService = webProxyService;
         }
 
         public override IWebProxy GetProxy(Uri uri) {
             bool forcePrompt = false;
             while (true) {
-                var cachedCreds = HasSavedCredentials(uri);
-                if (forcePrompt || !cachedCreds) {
-                    GetCredentials(uri, true);
+                var hasCachedCredentials = HasSavedCredentials(uri);
+                if (forcePrompt || !hasCachedCredentials) {
+                    GetCredentials(uri, forcePrompt: true);
                 }
                 if(IsValidProxy(uri, WebRequest.DefaultWebProxy)) {
                     break;
@@ -68,21 +72,24 @@ namespace NuGet.VisualStudio {
         /// <returns></returns>
         private ICredentials GetCredentials(Uri uri, bool forcePrompt) {
             __VsWebProxyState oldState;
-            if(!forcePrompt) {
-                oldState = __VsWebProxyState.VsWebProxyState_DefaultCredentials;
+            if (forcePrompt) {
+                oldState = __VsWebProxyState.VsWebProxyState_PromptForCredentials;
             }
             else {
-                oldState = __VsWebProxyState.VsWebProxyState_PromptForCredentials;
+                oldState = __VsWebProxyState.VsWebProxyState_DefaultCredentials;
             }
             var newState = (uint)__VsWebProxyState.VsWebProxyState_NoCredentials;
             int result = 0;
 
             ThreadHelper.Generic.Invoke(() => {
-                result = VsWebProxyService.PrepareWebProxy(uri.OriginalString,
+                result = _webProxyService.PrepareWebProxy(uri.OriginalString,
                                                       (uint)oldState,
                                                       out newState,
                                                       Convert.ToInt32(forcePrompt));
             });
+            // If result is anything but 0 that most likely means that there was an error
+            // so we will null out the DefaultWebProxy.Credentials so that we don't get
+            // invalid credentials stored for subsequent requests.
             if (result != 0 || newState == (uint)__VsWebProxyState.VsWebProxyState_Abort) {
                 // Clear out the current credentials because the user might have clicked cancel
                 // and we don't want to use the currently set credentials if they are wrong.
