@@ -42,6 +42,7 @@
     <Compile Include="RecentRepository\RecentPackage.cs" />
     <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />
+    <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>

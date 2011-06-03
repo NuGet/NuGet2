@@ -29,16 +29,29 @@ namespace NuGet {
             _packageFactory = packageFactory;
             _hashProvider = hashProvider;
         }
-
         public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
-
             if (packageHash == null) {
                 throw new ArgumentNullException("packageHash");
             }
+            if (package == null) {
+                throw new ArgumentNullException("package");
+            }
 
+            var downloadClient = new HttpClient(uri);
+            downloadClient.UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient);
+            return DownloadPackage(downloadClient, packageHash, package);
+        }
+
+        public IPackage DownloadPackage(IHttpClient downloadClient, byte[] packageHash, IPackageMetadata package) {
+            if (downloadClient == null) {
+                throw new ArgumentNullException("downloadClient");
+            }
+            if (packageHash == null) {
+                throw new ArgumentNullException("packageHash");
+            }
             if (package == null) {
                 throw new ArgumentNullException("package");
             }
@@ -54,11 +67,7 @@ namespace NuGet {
                 OnSendingRequest(e.Request);
             };
 
-            IHttpClient downloadClient = null;
-
             try {
-                downloadClient = new HttpClient(uri);
-                downloadClient.UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient);
                 downloadClient.ProgressAvailable += progressAvailableHandler;
                 downloadClient.SendingRequest += beforeSendingRequesthandler;
 

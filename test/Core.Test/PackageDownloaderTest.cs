@@ -10,10 +10,8 @@ namespace NuGet.Test {
         [TestMethod]
         public void DownloadPackageWithUnverifiedPackageThrowsInvalidDataException() {
             // Arrange
-            var response = new Mock<WebResponse>();
-            response.Setup(r => r.GetResponseStream()).Returns(new MemoryStream(new byte[] { 123 }));
-            var request = new Mock<WebRequest>();
-            request.Setup(r => r.GetResponse()).Returns(response.Object);
+            var downloadClient = new Mock<IHttpClient>();
+            downloadClient.Setup(c => c.DownloadData()).Returns(new byte[] { 123 });
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(h => h.VerifyHash(It.IsAny<byte[]>(), It.IsAny<byte[]>())).Returns(false);
             var packageFactory = new Mock<IPackageFactory>();
@@ -23,7 +21,7 @@ namespace NuGet.Test {
             var package = PackageUtility.CreatePackage("A", "1.0");
 
             // Act, Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(new Uri("http://example.com/"), new byte[0], package));
+            ExceptionAssert.Throws<InvalidDataException>(() => downloader.DownloadPackage(downloadClient.Object, new byte[0], package));
         }
     }
 }
