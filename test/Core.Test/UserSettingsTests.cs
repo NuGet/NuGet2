@@ -14,6 +14,44 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentNullException>(() => new UserSettings(null));
 
         }
+        [TestMethod]
+        public void UserSettings_CallingCtroWithNullFilenameWithThrowException() {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            // Act & Assert
+            ExceptionAssert.Throws<ArgumentNullException>(() => new UserSettings(mockFileSystem.Object, null, false));
+        }
+
+        [TestMethod]
+        public void UserSettings_WillThrowExceptionIfConstructorParameterIsSet() {
+            // Arrange 
+            const string fakefilenameConfig = "fakeFilename.config";
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(x => x.OpenFile(fakefilenameConfig)).Throws(new FileNotFoundException());
+            // Act & Assert
+            ExceptionAssert.Throws<FileNotFoundException>(() => new UserSettings(mockFileSystem.Object, fakefilenameConfig, true));
+        }
+
+        [TestMethod]
+        public void UserSettings_WillGetConfigurationFromSpecifiedPath() {
+            // Arrange 
+            const string fakefilenameConfig = "fakeFilename.config";
+            var mockFileSystem = new Mock<IFileSystem>();
+            string config = @"
+<configuration>
+    <SectionName>
+        <Notadd key='key1' value='value1' />
+        <add Key='key2' Value='value2' />
+    </SectionName>
+</configuration>";
+            mockFileSystem.Setup(m => m.OpenFile(fakefilenameConfig)).Returns(config.AsStream());
+
+            // Act
+            UserSettings settings = new UserSettings(mockFileSystem.Object, fakefilenameConfig, true);
+
+            // Assert 
+            mockFileSystem.Verify(x => x.OpenFile(fakefilenameConfig), Times.Once(), "File was not read");
+        }
 
         [TestMethod]
         public void UserSettings_CallingGetValuesWithNullSectionWillThrowException() {

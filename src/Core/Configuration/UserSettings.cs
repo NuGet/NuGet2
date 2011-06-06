@@ -17,6 +17,9 @@ namespace NuGet {
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }
+            if (filename == null) {
+                throw new ArgumentNullException("filename");
+            }
             _fileSystem = fileSystem;
             if (throwIfNoFile) {
                 _config = XmlUtility.GetDocument(_fileSystem, filename);
