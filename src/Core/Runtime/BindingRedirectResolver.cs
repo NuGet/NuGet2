@@ -68,7 +68,9 @@ namespace NuGet.Runtime {
                     // If we have an assembly with the same unique key in our list of a different version then we want to use that version
                     // then we want to add a redirect for that assembly
                     if (assemblyNameLookup.TryGetValue(key, out targetAssembly) && targetAssembly.Version != referenceAssembly.Version) {
-                        redirectAssemblies.Add(targetAssembly);
+                        if (!String.IsNullOrEmpty(targetAssembly.PublicKeyToken)) {
+                            redirectAssemblies.Add(targetAssembly);
+                        }
                     }
                 }
             }
