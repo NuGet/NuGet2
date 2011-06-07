@@ -179,6 +179,10 @@ namespace NuGet.Dialog.Providers {
                 IList<IVsExtension> allExtensions = SelectedNode.Extensions;
                 // if a package has been uninstalled, remove it from the Installed tab
                 allExtensions.RemoveAll(extension => !LocalRepository.Exists((extension as PackageItem).PackageIdentity));
+
+                // the PackagesTreeNodeBase caches the list of packages in each tree node. For this provider,
+                // we don't want it to do so, because after every uninstall, we remove uninstalled packages.
+                SelectedNode.ResetQuery();
             }
         }
 
