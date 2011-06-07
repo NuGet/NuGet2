@@ -132,10 +132,9 @@
     <Compile Include="PackageManagerUI\BaseProvider\LoadPageResult.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
-    <Compile Include="PackageManagerUI\ILicenseWindowOpener.cs" />
     <Compile Include="PackageManagerUI\InstalledProvider\SolutionInstalledProvider.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
-    <Compile Include="PackageManagerUI\LicenseWindowOpener.cs" />
+    <Compile Include="PackageManagerUI\IWindowServices.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\SolutionOnlineProvider.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
@@ -167,9 +166,8 @@
       <DependentUpon>SummaryWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\SolutionUpdatesProvider.cs" />
-    <Compile Include="SolutionExplorer\ProjectSelectorService.cs" />
+    <Compile Include="PackageManagerUI\WindowServices.cs" />
     <Compile Include="PackageManagerUI\RecentProvider\RecentProvider.cs" />
-    <Compile Include="SolutionExplorer\IProjectSelectorService.cs" />
     <Compile Include="SolutionExplorer\ProjectToIconConverter.cs" />
     <Compile Include="SolutionExplorer\ProjectUtilities.cs" />
     <Compile Include="SolutionExplorer\SolutionExplorer.xaml.cs">

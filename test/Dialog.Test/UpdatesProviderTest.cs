@@ -165,8 +165,8 @@ namespace NuGet.Dialog.Test {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
 
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
-            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, licenseWindowOpener: mockLicenseWindowOpener.Object, solutionManager: solutionManager.Object);
+            var mockWindowServices = new Mock<IWindowServices>();
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, windowServices: mockWindowServices.Object, solutionManager: solutionManager.Object);
 
             var extensionA = new PackageItem(provider, packageA2);
             var extensionC = new PackageItem(provider, packageC);
@@ -177,7 +177,7 @@ namespace NuGet.Dialog.Test {
 
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
-                mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
+                mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
                 packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, provider), Times.Once());
 
                 manualEvent.Set();
@@ -259,7 +259,7 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
-            ILicenseWindowOpener licenseWindowOpener = null,
+            IWindowServices windowServices = null,
             ISolutionManager solutionManager = null) {
 
             if (packageManager == null) {
@@ -296,9 +296,9 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            if (licenseWindowOpener == null) {
-                var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
-                licenseWindowOpener = mockLicenseWindowOpener.Object;
+            if (windowServices == null) {
+                var mockWindowServices = new Mock<IWindowServices>();
+                windowServices = mockWindowServices.Object;
             }
 
             if (project == null) {
@@ -310,11 +310,10 @@ namespace NuGet.Dialog.Test {
             }
 
             var services = new ProviderServices(
-                licenseWindowOpener,
+                windowServices,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider(),
-                new Mock<IProjectSelectorService>().Object
+                new MockOutputConsoleProvider()
             );
 
             if (solutionManager == null) {

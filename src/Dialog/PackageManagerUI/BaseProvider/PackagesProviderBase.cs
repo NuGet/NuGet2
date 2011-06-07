@@ -289,7 +289,7 @@ namespace NuGet.Dialog.Providers {
             }
 
             if (_failedProjects != null && _failedProjects.Count > 0) {
-                _providerServices.ProjectSelector.ShowSummaryWindow(_failedProjects);
+                _providerServices.WindowServices.ShowSummaryWindow(_failedProjects);
             }
 
             // write a blank line into the output window to separate entries from different operations

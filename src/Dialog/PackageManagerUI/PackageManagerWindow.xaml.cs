@@ -76,11 +76,10 @@ namespace NuGet.Dialog.PackageManagerUI {
             // the console the first time an entry is written to it
             _smartOutputConsoleProvider = new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider);
             providerServices = new ProviderServices(
-                providerServices.LicenseWindow,
+                providerServices.WindowServices,
                 providerServices.ProgressWindow,
                 providerServices.ScriptExecutor,
-                _smartOutputConsoleProvider,
-                providerServices.ProjectSelector);
+                _smartOutputConsoleProvider);
 
             SetupProviders(
                 project,

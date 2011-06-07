@@ -3,16 +3,37 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Windows.Threading;
 using EnvDTE;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog {
-    [Export(typeof(IProjectSelectorService))]
-    internal class ProjectSelectorService : IProjectSelectorService {
+namespace NuGet.Dialog.PackageManagerUI {
+    [Export(typeof(IWindowServices))]
+    internal class WindowServices : IWindowServices {
         private readonly Dispatcher _uiDispatcher;
 
-        public ProjectSelectorService() {
+        public WindowServices() {
             _uiDispatcher = Dispatcher.CurrentDispatcher;
+        }
+
+        bool IWindowServices.ShowLicenseWindow(IEnumerable<IPackage> packages) {
+            if (_uiDispatcher.CheckAccess()) {
+                return ShowLicenseWindow(packages);
+            }
+            else {
+                // Use Invoke() here to block the worker thread
+                object result = _uiDispatcher.Invoke(new Func<object, bool>(ShowLicenseWindow), packages);
+                return (bool)result;
+            }
+        }
+
+        private bool ShowLicenseWindow(object dataContext) {
+            var licenseWidow = new LicenseAcceptanceWindow() {
+                DataContext = dataContext
+            };
+
+            // call ShowModal() instead of ShowDialog() so that the dialog
+            // automatically centers within parent window
+            bool? dialogResult = licenseWidow.ShowModal();
+            return dialogResult ?? false;
         }
 
         public IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Func<Project, bool> checkedStateSelector, Func<Project, bool> enabledStateSelector) {
@@ -56,6 +77,17 @@ namespace NuGet.Dialog {
             };
 
             window.ShowModal();
+        }
+
+        public bool AskToRemoveDependencyPackages(string message) {
+            if (!_uiDispatcher.CheckAccess()) {
+                object result = _uiDispatcher.Invoke(
+                    new Func<string, bool>(AskToRemoveDependencyPackages), 
+                    message);
+                return (bool)result;
+            }
+
+            return MessageHelper.ShowQueryMessage(message, null);
         }
     }
 }

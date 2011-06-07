@@ -312,4 +312,7 @@
   <data name="Dialog_UpdatesSolutionInstruction" xml:space="preserve">
     <value>Update the package in the following projects:</value>
   </data>
+  <data name="Dialog_RemoveDependencyMessage" xml:space="preserve">
+    <value>Package '{0}' depends on the following packages. Do you want to uninstall them too?</value>
+  </data>
 </root>

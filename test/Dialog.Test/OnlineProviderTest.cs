@@ -358,7 +358,7 @@ namespace NuGet.Dialog.Test {
             factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true)).Returns(packageManager);
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+            var mockWindowServices = new Mock<IWindowServices>();
 
             if (project == null) {
                 project = new Mock<Project>().Object;
@@ -369,11 +369,10 @@ namespace NuGet.Dialog.Test {
             }
 
             var services = new ProviderServices(
-                mockLicenseWindowOpener.Object,
+                mockWindowServices.Object,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider(),
-                new Mock<IProjectSelectorService>().Object
+                new MockOutputConsoleProvider()
             );
 
             if (localRepository == null) {

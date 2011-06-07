@@ -358,6 +358,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package &apos;{0}&apos; depends on the following packages. Do you want to uninstall them too?.
+        /// </summary>
+        public static string Dialog_RemoveDependencyMessage {
+            get {
+                return ResourceManager.GetString("Dialog_RemoveDependencyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Report Abuse.
         /// </summary>
         public static string Dialog_ReportAbuse {

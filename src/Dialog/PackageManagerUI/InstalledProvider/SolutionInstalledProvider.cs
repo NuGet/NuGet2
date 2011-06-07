@@ -4,8 +4,8 @@ using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
-using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -15,7 +15,7 @@ namespace NuGet.Dialog.Providers {
     internal class SolutionInstalledProvider : InstalledProvider {
 
         private readonly ISolutionManager _solutionManager;
-        private readonly IProjectSelectorService _projectSelectorService;
+        private readonly IWindowServices _windowServices;
 
         public SolutionInstalledProvider(
             IVsPackageManager packageManager,
@@ -27,7 +27,7 @@ namespace NuGet.Dialog.Providers {
             : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager) {
 
             _solutionManager = solutionManager;
-            _projectSelectorService = providerServices.ProjectSelector;
+            _windowServices = providerServices.WindowServices;
         }
 
         public override bool CanExecute(PackageItem item) {
@@ -51,14 +51,12 @@ namespace NuGet.Dialog.Providers {
         protected override bool ExecuteCore(PackageItem item) {
             IPackage package = item.PackageIdentity;
 
-            // because we are not removing dependencies, we don't need to walk the graph to search for script files
-            bool hasScript = package.HasPowerShellScript();
-            if (hasScript && !RegistryHelper.CheckIfPowerShell2Installed()) {
-                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
-            }
+            bool removeDepedencies = false;
 
             // treat solution-level packages specially
             if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
+                removeDepedencies = AskRemoveDependencyAndCheckPSScript(package);
+                
                 ShowProgressWindow();
                 try {
                     RegisterPackageOperationEvents(PackageManager, null);
@@ -67,7 +65,7 @@ namespace NuGet.Dialog.Providers {
                         item.PackageIdentity.Id,
                         item.PackageIdentity.Version,
                         forceRemove: false,
-                        removeDependencies: false,
+                        removeDependencies: removeDepedencies,
                         logger: this);
                 }
                 finally {
@@ -77,7 +75,7 @@ namespace NuGet.Dialog.Providers {
             }
 
             // display the Manage dialog to allow user to pick projects to install/uninstall
-            IEnumerable<Project> selectedProjects = _projectSelectorService.ShowProjectSelectorWindow(
+            IEnumerable<Project> selectedProjects = _windowServices.ShowProjectSelectorWindow(
                 Resources.Dialog_InstalledSolutionInstruction,
                 // Selector function to return the initial checkbox state for a Project.
                 // We check a project by default if it has the current package installed.
@@ -88,6 +86,8 @@ namespace NuGet.Dialog.Providers {
                 // user presses Cancel button on the Solution dialog
                 return false;
             }
+
+            removeDepedencies = AskRemoveDependencyAndCheckPSScript(package);
 
             ShowProgressWindow();
 
@@ -102,7 +102,7 @@ namespace NuGet.Dialog.Providers {
                     }
                     else {
                         // if the project is unchecked, uninstall package from it
-                        UninstallPackageFromProject(project, item);
+                        UninstallPackageFromProject(project, item, removeDepedencies);
                     }
                 }
                 catch (Exception ex) {

@@ -135,13 +135,13 @@ namespace NuGet.Dialog.Test {
 
             var extensionA = new PackageItem(provider, packageA);
 
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+            var mockWindowServices = new Mock<IWindowServices>();
 
             var mre = new ManualResetEventSlim(false);
             provider.ExecuteCompletedCallback = () => {
                 // Assert
                 packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", null, false, false, provider), Times.Once());
-                mockLicenseWindowOpener.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
+                mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
 
                 mre.Set();
             };
@@ -179,7 +179,7 @@ namespace NuGet.Dialog.Test {
 
             var extensionA = new PackageItem(provider, packageA);
 
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
+            var mockLicenseWindowOpener = new Mock<IWindowServices>();
 
             var manualEvent = new ManualResetEventSlim(false);
 
@@ -223,8 +223,7 @@ namespace NuGet.Dialog.Test {
                 null,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider(),
-                new Mock<IProjectSelectorService>().Object
+                new MockOutputConsoleProvider()
             );
 
             if (localRepository == null) {

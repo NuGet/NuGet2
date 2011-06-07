@@ -179,7 +179,7 @@
                 </DockPanel>
 
                 <!-- Dependencies list -->
-                <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DependenciesLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                <self:TextBlockControl Margin="0,3,0,0" Text="{x:Static resources:Resources.Dialog_DependenciesLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                                         
                 <ItemsControl
                     x:Name="DependencyItems"

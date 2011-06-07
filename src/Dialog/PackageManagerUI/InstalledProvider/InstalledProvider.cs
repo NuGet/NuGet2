@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 using NuGetConsole.Host.PowerShellProvider;
 
@@ -17,6 +19,7 @@ namespace NuGet.Dialog.Providers {
 
         private readonly IVsPackageManager _packageManager;
         private readonly Project _project;
+        private readonly IWindowServices _windowServices;
 
         public InstalledProvider(
             IVsPackageManager packageManager,
@@ -34,6 +37,7 @@ namespace NuGet.Dialog.Providers {
 
             _packageManager = packageManager;
             _project = project;
+            _windowServices = providerServices.WindowServices;
         }
 
         protected IVsPackageManager PackageManager {
@@ -78,15 +82,60 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-            // because we are not removing dependencies, we don't need to walk the graph to search for script files
-            bool hasScript = item.PackageIdentity.HasPowerShellScript(new string[] { "uninstall.ps1" });
-            if (hasScript && !RegistryHelper.CheckIfPowerShell2Installed()) {
-                throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+            bool removeDependencies = AskRemoveDependencyAndCheckPSScript(item.PackageIdentity);
+            ShowProgressWindow();
+            UninstallPackageFromProject(_project, item, removeDependencies);
+            HideProgressWindow();
+            return true;
+        }
+
+        protected bool AskRemoveDependencyAndCheckPSScript(IPackage package) {
+            var uninstallWalker = new UninstallWalker(
+                LocalRepository,
+                new DependentsWalker(LocalRepository),
+                logger: NullLogger.Instance,
+                removeDependencies: true,
+                forceRemove: false) {
+                ThrowOnConflicts = false
+            };
+
+            IList<PackageOperation> operations = uninstallWalker.ResolveOperations(package).ToList();
+            var uninstallPackageNames = (from o in operations
+                                         where o.Action == PackageAction.Uninstall && !PackageEqualityComparer.IdAndVersion.Equals(o.Package, package)
+                                         select o.Package.ToString()).ToList();
+
+            bool removeDependencies = false;
+            if (uninstallPackageNames.Count > 0) {
+                // show each dependency package on one line
+                String packageNames = String.Join(Environment.NewLine, uninstallPackageNames);
+                String message = String.Format(CultureInfo.CurrentCulture, Resources.Dialog_RemoveDependencyMessage, package)
+                        + Environment.NewLine
+                        + Environment.NewLine
+                        + packageNames;
+
+                removeDependencies = _windowServices.AskToRemoveDependencyPackages(message);
             }
 
-            ShowProgressWindow();
-            UninstallPackageFromProject(_project, item);
-            return true;
+            bool hasScriptPackages;
+            if (removeDependencies) {
+                // if user wants to remove dependencies, we need to check all of them for PS scripts
+                var scriptPackages = from o in operations
+                                     where o.Package.HasPowerShellScript()
+                                     select o.Package;
+                hasScriptPackages = scriptPackages.Any();
+            }
+            else {
+                // otherwise, just check the to-be-uninstalled package
+                hasScriptPackages = package.HasPowerShellScript(new string[] {PowerShellScripts.Uninstall});
+            }
+
+            if (hasScriptPackages) {
+                if (!RegistryHelper.CheckIfPowerShell2Installed()) {
+                    throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+                }
+            }
+
+            return removeDependencies;
         }
 
         protected void InstallPackageToProject(Project project, PackageItem item) {
@@ -106,14 +155,14 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        protected void UninstallPackageFromProject(Project project, PackageItem item) {
+        protected void UninstallPackageFromProject(Project project, PackageItem item, bool removeDependencies) {
             IProjectManager projectManager = null;
             try {
                 projectManager = PackageManager.GetProjectManager(project);
                 // make sure the package is installed in this project before proceeding
                 if (projectManager.IsInstalled(item.PackageIdentity)) {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.UninstallPackage(projectManager, item.Id, version: null, forceRemove: false, removeDependencies: false, logger: this);
+                    PackageManager.UninstallPackage(projectManager, item.Id, version: null, forceRemove: false, removeDependencies: removeDependencies, logger: this);
                 }
             }
             finally {
@@ -127,7 +176,9 @@ namespace NuGet.Dialog.Providers {
             base.OnExecuteCompleted(item);
 
             if (SelectedNode != null) {
-                SelectedNode.Extensions.Remove((IVsExtension)item);
+                IList<IVsExtension> allExtensions = SelectedNode.Extensions;
+                // if a package has been uninstalled, remove it from the Installed tab
+                allExtensions.RemoveAll(extension => !LocalRepository.Exists((extension as PackageItem).PackageIdentity));
             }
         }
 

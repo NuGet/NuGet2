@@ -130,26 +130,26 @@ namespace NuGet.Dialog.Providers {
 
             operations = walker.ResolveOperations(item.PackageIdentity).ToList();
 
-            IList<IPackage> scriptPackages = (from o in operations
-                                              where o.Package.HasPowerShellScript()
-                                              select o.Package).ToList();
+            var scriptPackages = from o in operations
+                                 where o.Package.HasPowerShellScript()
+                                 select o.Package;
 
-            if (scriptPackages.Count > 0) {
+            if (scriptPackages.Any()) {
                 if (!RegistryHelper.CheckIfPowerShell2Installed()) {
                     throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
                 }
             }
 
-            IEnumerable<IPackage> licensePackages = from o in operations
-                                                    where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
-                                                    select o.Package;
+            var licensePackages = from o in operations
+                                  where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
+                                  select o.Package;
 
             // display license window if necessary
             if (licensePackages.Any()) {
                 // hide the progress window if we are going to show license window
                 HideProgressWindow();
 
-                bool accepted = _providerServices.LicenseWindow.ShowLicenseWindow(licensePackages);
+                bool accepted = _providerServices.WindowServices.ShowLicenseWindow(licensePackages);
                 if (!accepted) {
                     return false;
                 }

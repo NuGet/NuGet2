@@ -181,10 +181,10 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
-            var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(Enumerable.Empty<Project>());
+            var mockWindowService = new Mock<IWindowServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(Enumerable.Empty<Project>());
 
-            var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
+            var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, windowServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -328,10 +328,10 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
-            var mockProjectSelector = new Mock<IProjectSelectorService>();
-            mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
+            var mockWindowService = new Mock<IWindowServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns((Func<IEnumerable<Project>>)null);
 
-            var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, projectSelectorService: mockProjectSelector.Object);
+            var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, windowServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -378,7 +378,7 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null,
             IScriptExecutor scriptExecutor = null,
             ISolutionManager solutionManager = null,
-            IProjectSelectorService projectSelectorService = null) {
+            IWindowServices windowServices = null) {
 
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -409,7 +409,6 @@ namespace NuGet.Dialog.Test {
             factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true)).Returns(packageManager);
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
-            var mockLicenseWindowOpener = new Mock<ILicenseWindowOpener>();
 
             if (scriptExecutor == null) {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
@@ -419,20 +418,19 @@ namespace NuGet.Dialog.Test {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
-            if (projectSelectorService == null) {
-                var mockProjectSelector = new Mock<IProjectSelectorService>();
+            if (windowServices == null) {
+                var mockProjectSelector = new Mock<IWindowServices>();
                 mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(
                         solutionManager.GetProjects()
                     );
-                projectSelectorService = mockProjectSelector.Object;
+                windowServices = mockProjectSelector.Object;
             }
 
             var services = new ProviderServices(
-                mockLicenseWindowOpener.Object,
+                windowServices,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider(),
-                projectSelectorService
+                new MockOutputConsoleProvider()
             );
 
             if (localRepository == null) {
