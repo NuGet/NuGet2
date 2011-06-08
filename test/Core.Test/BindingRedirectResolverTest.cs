@@ -67,36 +67,28 @@ namespace NuGet.Test {
 
         [TestMethod]
         public void GetBindingRedirectsOnlyRedirectsStrongNamedAssemblies() {
-            // A, B, C2
-            // A -> C2
-            // B -> C1
+            // A, B2
+            // A -> B1
             var A = new MockAssembly {
                 Name = "A",
                 Version = new Version("1.0.0.0"),
-                PublicKeyToken = "a34a755ec277222f"
+                PublicKeyToken = ""
             };
 
-            var B = new MockAssembly {
+            var B1 = new MockAssembly {
                 Name = "B",
                 Version = new Version("1.0.0.0"),
-                PublicKeyToken = "b34a755ec277222f"
+                PublicKeyToken = null
             };
 
-            var C1 = new MockAssembly {
-                Name = "C",
-                Version = new Version("1.0.0.0")
+            var B2 = new MockAssembly {
+                Name = "B",
+                Version = new Version("2.0.0.0")
             };
 
-            var C2 = new MockAssembly {
-                Name = "C",
-                Version = new Version("2.0.0.0"),
-                PublicKeyToken = "c34a755ec277222f"
-            };
+            var assemblies = new[] { A, B2 };
 
-            var assemblies = new[] { A, B, C2 };
-
-            A.References.Add(C2);
-            B.References.Add(C1);
+            A.References.Add(B1);
 
             // Act
             var redirectAssemblies = BindingRedirectResolver.GetBindingRedirects(assemblies).ToList();

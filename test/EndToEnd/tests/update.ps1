@@ -704,3 +704,19 @@ function Test-UpdatePackageInOneProjectDoesNotCheckAllPackagesInSolution {
     Assert-SolutionPackage jQuery 1.5.1
     Assert-Null (Get-ProjectPackage $p2 jQuery)
 }
+
+function Test-BindingRedirectShouldNotBeAddedForNonStrongNamedAssemblies {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-ConsoleApplication
+    $p | Install-Package NonStrongNameB -Version 1.0.0.0 -Source $context.RepositoryRoot
+    $p | Install-Package NonStrongNameA -Source $context.RepositoryRoot
+
+    # Act
+    $p | Update-Package NonStrongNameB -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Null (Get-ProjectItem $p app.config)
+}
