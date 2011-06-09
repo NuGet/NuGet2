@@ -33,7 +33,10 @@ namespace NuGet.Dialog.PackageManagerUI {
                 if (_currentWindow.Title != title) {
                     _currentWindow.Title = title;
                 }
-                _currentWindow.ShowDialog();
+
+                if (!_currentWindow.IsVisible) {
+                    _currentWindow.ShowDialog();
+                }
             }
             else {
                 _currentWindow = new ProgressDialog();

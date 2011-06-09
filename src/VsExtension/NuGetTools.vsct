@@ -70,6 +70,7 @@
 
       <Button guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x0100" type="Button">
           <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
+          <Icon guid="guidToolbarImages" id="bmpAddNuGetPackage" />
           <CommandFlag>DefaultInvisible</CommandFlag>
           <CommandFlag>DynamicVisibility</CommandFlag>
           <Strings>
@@ -89,9 +90,10 @@
 
         <Button guid="guidToolsGroup" id="cmdIdVisualizer" priority="0xF400" type="Button">
           <Parent guid="guidToolsGroup" id="idToolsGroup" />
+          <Icon guid="guidToolbarImages" id="bmpVisualizer" />
           <CommandFlag>DefaultInvisible</CommandFlag>
           <CommandFlag>DynamicVisibility</CommandFlag>
-          <CommandFlag>TextOnly</CommandFlag>
+          <CommandFlag>IconAndText</CommandFlag>
           <Strings>
             <CommandName>cmdIdVisualizer</CommandName>
             <ButtonText>Package &amp;Visualizer</ButtonText>
@@ -180,6 +182,8 @@
       <IDSymbol name="bmpClearConsole" value="2" />
       <IDSymbol name="bmpSourceSettings" value="3" />
       <IDSymbol name="bmpStopHost" value="4" />
+      <IDSymbol name="bmpVisualizer" value="5" />
+      <IDSymbol name="bmpAddNuGetPackage" value="6" />
     </GuidSymbol>
     <GuidSymbol name="guidToolsGroup" value="{C0D88179-5D25-4982-BFE6-EC5FD59AC103}">
       <IDSymbol name="idLibraryPackageManager" value="0x100" />

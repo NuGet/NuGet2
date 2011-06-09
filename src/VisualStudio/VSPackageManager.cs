@@ -502,7 +502,7 @@ namespace NuGet.VisualStudio {
 
                     // Throw an exception only if all the update failed for all projects
                     // so we rollback any solution level operations that might have happened
-                    if (!success) {
+                    if (projects.Any() && !success) {
                         throw new InvalidOperationException(VsResources.OperationFailed);
                     }
 
