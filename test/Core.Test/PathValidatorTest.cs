@@ -3,7 +3,6 @@
 namespace NuGet.VisualStudio.Test {
     [TestClass]
     public class PathValidatorTest {
-
         [TestMethod]
         public void IsValidFilePathReturnsTrueForValidLocalPath() {
             // Act
@@ -41,8 +40,7 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void IsValidFilePathReturnsFalseForRelativePathWithDriveLetter()
-        {
+        public void IsValidFilePathReturnsFalseForRelativePathWithDriveLetter() {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"C:Path\To\Source");
 
@@ -69,8 +67,7 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
-        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingDoubleBackslash()
-        {
+        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingDoubleBackslash() {
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\server");
 
@@ -158,6 +155,5 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.IsFalse(isValid);
         }
-
     }
 }

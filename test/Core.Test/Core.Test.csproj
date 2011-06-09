@@ -60,6 +60,7 @@
     <Compile Include="PackageSorterTest.cs" />
     <Compile Include="PackageSourceProviderTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
+    <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="ProxyFinderTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
