@@ -526,6 +526,9 @@ Uninstalls the Elmah package even if another package depends on it.
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
         <command:parameter required="false" position="named">
+          <maml:name>Safe</maml:name>
+        </command:parameter>
+        <command:parameter required="false" position="named">
           <maml:name>Source</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
@@ -537,7 +540,7 @@ Uninstalls the Elmah package even if another package depends on it.
       <command:parameter required="true" position="1">
         <maml:name>Id</maml:name>
         <maml:description>
-          <maml:para>Specifies the package ID of the package to update.</maml:para>
+          <maml:para>Specifies the package ID of the package to update. If omitted, every package is updated.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
@@ -553,11 +556,17 @@ Uninstalls the Elmah package even if another package depends on it.
       <command:parameter required="false" position="named">
         <maml:name>ProjectName</maml:name>
         <maml:description>
-          <maml:para>Specifies the project containing the project to update. If ommitted, the default project is chosen.</maml:para>
+          <maml:para>Specifies the project containing the project to update. If ommitted, the package is updated in every project with the package installed.</maml:para>
         </maml:description>
         <command:parameterValue required="true">
           string
         </command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Safe</maml:name>
+        <maml:description>
+          <maml:para>Constrains upgrades to newer versions with the same Major and Minor version component. For example, if version 1.0.0 of a package is installed, and versions 1.0.1, 1.0.2, and 1.1 are available in the feed, the -Safe flag updates the package to 1.0.2.</maml:para>
+        </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Source</maml:name>
@@ -587,7 +596,7 @@ Uninstalls the Elmah package even if another package depends on it.
           <maml:para>
 Description
 ------------------------------------------------------------------
-Updates the Elmah package installed in the default project to the latest version.
+Updates the Elmah package installed in every project to the latest version.
           </maml:para>
           <maml:para></maml:para>
           <maml:para></maml:para>
@@ -600,10 +609,38 @@ Updates the Elmah package installed in the default project to the latest version
           <maml:para>
 Description
 ------------------------------------------------------------------
-Updates the Elmah package to a specific version.
+Updates the Elmah package to a specific version in every project.
           </maml:para>
           <maml:para></maml:para>
           <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+     <command:example>
+        <maml:title>----------  EXAMPLE 3  ----------</maml:title>
+        <dev:code>PM&gt; Update-Package</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Updates every package in every project.
+          </maml:para>
+          <maml:para></maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+    </command:example>
+    <command:example>
+      <maml:title>----------  EXAMPLE 3  ----------</maml:title>
+      <dev:code>PM&gt; Update-Package -Safe -Project MvcApplication1</dev:code>
+        <dev:remarks>
+          <maml:para>
+Description
+------------------------------------------------------------------
+Updates every package in the project, MvcApplication1, to the latest "safe" version. For example,
+For example, if version 1.0.0 of a package is installed, and versions 1.0.1, 1.0.2, and 1.1 are 
+available in the feed, the -Safe flag updates the package to 1.0.2.
+          </maml:para>
+            <maml:para></maml:para>
+            <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
