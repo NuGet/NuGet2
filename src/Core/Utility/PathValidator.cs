@@ -26,7 +26,7 @@ namespace NuGet {
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw during detection")]
         public static bool IsValidLocalPath(string path) {
             try {
-                return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:") && Path.IsPathRooted(path);
+                return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:\\") && Path.IsPathRooted(path);
             }
             catch {
                 return false;
@@ -47,7 +47,7 @@ namespace NuGet {
         public static bool IsValidUncPath(string path) {
             try {
                 Path.GetFullPath(path);
-                return Regex.IsMatch(path.Trim(), @"^\\");
+                return Regex.IsMatch(path.Trim(), @"^\\\\");
             }
             catch {
                 return false;

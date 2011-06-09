@@ -41,6 +41,16 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [TestMethod]
+        public void IsValidFilePathReturnsFalseForRelativePathWithDriveLetter()
+        {
+            // Act
+            var isValid = PathValidator.IsValidLocalPath(@"C:Path\To\Source");
+
+            // Assert
+            Assert.IsFalse(isValid);
+        }
+
+        [TestMethod]
         public void IsValidFilePathReturnsFalseForAbsolutePathWithoutDriveLetter() {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"\Path\To\Source");
@@ -48,10 +58,21 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.IsFalse(isValid);
         }
+
         [TestMethod]
         public void IsValidUncPathReturnsFalseForInvalidUncPathMissingShare() {
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\");
+
+            // Assert
+            Assert.IsFalse(isValid);
+        }
+
+        [TestMethod]
+        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingDoubleBackslash()
+        {
+            // Act
+            var isValid = PathValidator.IsValidUncPath(@"\server");
 
             // Assert
             Assert.IsFalse(isValid);
