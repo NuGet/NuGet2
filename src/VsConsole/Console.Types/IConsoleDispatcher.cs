@@ -1,6 +1,4 @@
 using System;
-using System.Threading;
-using System.Windows.Input;
 
 namespace NuGetConsole {
     /// <summary>
@@ -17,7 +15,7 @@ namespace NuGetConsole {
         /// Raised when the Start method completes asynchronously.
         /// </summary>
         event EventHandler StartCompleted;
-        
+
         /// <summary>
         /// Raised every time the WaitKey() method is called.
         /// </summary>
@@ -39,7 +37,7 @@ namespace NuGetConsole {
         bool IsKeyAvailable { get; }
 
         VsKeyInfo WaitKey();
-                
+
         /// <summary>
         /// Clear existing console content. This must be used if you want to clear the console
         /// content externally (not inside a host command execution). The console dispatcher manages

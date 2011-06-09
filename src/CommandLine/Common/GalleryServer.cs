@@ -73,7 +73,7 @@ namespace NuGet.Common {
                     int count = Math.Min(buffer.Length - offset, chunkSize);
                     requestStream.Write(buffer, offset, count);
                     offset += count;
-                    int percentage = (offset * 100) / buffer.Length;                   
+                    int percentage = (offset * 100) / buffer.Length;
                     if (percentage < 100) {
                         OnProgressAvailable(percentage);
                     }

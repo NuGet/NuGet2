@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
-using NuGet.VisualStudio;
 using NuGet.Dialog.PackageManagerUI;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     internal class SolutionUpdatesProvider : UpdatesProvider, IPackageOperationEventListener {

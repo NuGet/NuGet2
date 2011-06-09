@@ -9,7 +9,6 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
 using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal class RunspaceManager : IRunspaceManager {
@@ -94,7 +93,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                 ExecutionPolicy machinePolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
                 ExecutionPolicy userPolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
-                
+
                 if (machinePolicy == ExecutionPolicy.Undefined && userPolicy == ExecutionPolicy.Undefined) {
                     runspace.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
                 }

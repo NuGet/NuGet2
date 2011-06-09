@@ -66,20 +66,20 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public IVsUIShell VsUIShell {
-            get { return ServiceProvider.GetService<IVsUIShell>(typeof (SVsUIShell)); }
+            get { return ServiceProvider.GetService<IVsUIShell>(typeof(SVsUIShell)); }
         }
 
         private IVsStatusbar VsStatusBar {
             get {
                 if (_vsStatusBar == null) {
-                    _vsStatusBar = ServiceProvider.GetService<IVsStatusbar>(typeof (SVsStatusbar));
+                    _vsStatusBar = ServiceProvider.GetService<IVsStatusbar>(typeof(SVsStatusbar));
                 }
                 return _vsStatusBar;
             }
         }
 
         private IOleServiceProvider OleServiceProvider {
-            get { return ServiceProvider.GetService<IOleServiceProvider>(typeof (IOleServiceProvider)); }
+            get { return ServiceProvider.GetService<IOleServiceProvider>(typeof(IOleServiceProvider)); }
         }
 
         private IContentType ContentType {
@@ -88,7 +88,7 @@ namespace NuGetConsole.Implementation.Console {
                     _contentType = Factory.ContentTypeRegistryService.GetContentType(this.ContentTypeName);
                     if (_contentType == null) {
                         _contentType = Factory.ContentTypeRegistryService.AddContentType(
-                            this.ContentTypeName, new string[] {"text"});
+                            this.ContentTypeName, new string[] { "text" });
                     }
                 }
 
@@ -203,7 +203,7 @@ namespace NuGetConsole.Implementation.Console {
                         marginSize += rightMargin.MarginSize;
                     }
 
-                    var n = (int) ((WpfTextView.ViewportWidth - marginSize)/WpfTextView.FormattedLineSource.ColumnWidth);
+                    var n = (int)((WpfTextView.ViewportWidth - marginSize) / WpfTextView.FormattedLineSource.ColumnWidth);
                     _consoleWidth = Math.Max(80, n); // Larger of 80 or n
                 }
                 return _consoleWidth;
@@ -226,8 +226,8 @@ namespace NuGetConsole.Implementation.Console {
                     _view.Initialize(
                         VsTextBuffer as IVsTextLines,
                         IntPtr.Zero,
-                        (uint) (TextViewInitFlags.VIF_HSCROLL | TextViewInitFlags.VIF_VSCROLL) |
-                        (uint) TextViewInitFlags3.VIF_NO_HWND_SUPPORT,
+                        (uint)(TextViewInitFlags.VIF_HSCROLL | TextViewInitFlags.VIF_VSCROLL) |
+                        (uint)TextViewInitFlags3.VIF_NO_HWND_SUPPORT,
                         null);
 
                     // Set font and color
@@ -245,7 +245,7 @@ namespace NuGetConsole.Implementation.Console {
                     }
 
                     // add myself as IConsole
-                    WpfTextView.TextBuffer.Properties.AddProperty(typeof (IConsole), this);
+                    WpfTextView.TextBuffer.Properties.AddProperty(typeof(IConsole), this);
 
                     // Initial mark readonly region. Must call Start() to start accepting inputs.
                     SetReadOnlyRegionType(ReadOnlyRegionType.All);
@@ -420,7 +420,7 @@ namespace NuGetConsole.Implementation.Console {
             if (_historyInputs == null) {
                 _historyInputs = InputHistory.History;
                 if (_historyInputs == null) {
-                    _historyInputs = new string[] {};
+                    _historyInputs = new string[] { };
                 }
 
                 _currentHistoryInputIndex = _historyInputs.Count;
@@ -460,8 +460,8 @@ namespace NuGetConsole.Implementation.Console {
                     ref _pdwCookieForStatusBar,
                     1 /* in progress */,
                     operation,
-                    (uint) percentComplete,
-                    (uint) 100);
+                    (uint)percentComplete,
+                    (uint)100);
             }
         }
 
@@ -470,8 +470,8 @@ namespace NuGetConsole.Implementation.Console {
                 ref _pdwCookieForStatusBar,
                 0 /* completed */,
                 String.Empty,
-                (uint) 100,
-                (uint) 100);
+                (uint)100,
+                (uint)100);
         }
 
         public void SetExecutionMode(bool isExecuting) {

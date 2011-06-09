@@ -301,7 +301,7 @@ namespace NuGetConsole.Implementation.Console {
                 Debug.Assert(pvaIn != IntPtr.Zero, "pvaIn != IntPtr.Zero");
 
                 // 1) deref pointer to char
-                keyChar = (char) (ushort) Marshal.GetObjectForNativeVariant(pvaIn);
+                keyChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
             }
 
             // 2) convert from char to virtual key, using current thread's input locale

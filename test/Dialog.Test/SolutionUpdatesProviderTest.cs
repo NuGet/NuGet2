@@ -71,7 +71,7 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockPackageManager.Verify(p => p.UpdatePackage(
-                    new Project [] { project1, project2 },
+                    new Project[] { project1, project2 },
                     packageB2,
                     It.IsAny<IEnumerable<PackageOperation>>(),
                     true,

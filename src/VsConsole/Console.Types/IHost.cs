@@ -20,7 +20,7 @@ namespace NuGetConsole {
         /// <summary>
         /// Sets the default runspace from the console
         /// </summary>
-        void SetDefaultRunspace(); 
+        void SetDefaultRunspace();
 
         /// <summary>
         /// Get the current command prompt used by this host.

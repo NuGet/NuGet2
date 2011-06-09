@@ -7,7 +7,6 @@ using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Threading;
 using System.Windows.Input;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

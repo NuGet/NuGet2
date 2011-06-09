@@ -56,7 +56,7 @@ namespace NuGet.Dialog.Providers {
             // treat solution-level packages specially
             if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
                 removeDepedencies = AskRemoveDependencyAndCheckPSScript(package);
-                
+
                 ShowProgressWindow();
                 try {
                     RegisterPackageOperationEvents(PackageManager, null);

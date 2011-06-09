@@ -56,7 +56,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                     message = b;
                 }
             });
-            
+
             var sourceProvider = GetSourceProvider(new[] { new PackageSource("A"), new PackageSource("B") });
             var factory = new Mock<IPackageRepositoryFactory>();
             factory.Setup(c => c.CreateRepository("A")).Returns(repositoryA);

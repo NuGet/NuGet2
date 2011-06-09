@@ -1,4 +1,3 @@
-using System.Linq;
 
 namespace NuGet {
     public class UpdateWalker : InstallWalker {

@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.Options {
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.Interoperability", 
+        "Microsoft.Interoperability",
         "CA1408:DoNotUseAutoDualClassInterfaceType")]
     [Guid("2819C3B6-FC75-4CD5-8C77-877903DE864C")]
     [ComVisible(true)]

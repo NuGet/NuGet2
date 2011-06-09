@@ -383,11 +383,11 @@ namespace NuGet.Test.VisualStudio {
              };
 
             // Act 
-            packageManager.UpdatePackage(Enumerable.Empty<Project>(), 
-                                         package, 
-                                         operations, 
-                                         updateDependencies: true, 
-                                         logger: NullLogger.Instance, 
+            packageManager.UpdatePackage(Enumerable.Empty<Project>(),
+                                         package,
+                                         operations,
+                                         updateDependencies: true,
+                                         logger: NullLogger.Instance,
                                          packageOperationEventListener: null);
 
             // Assert 

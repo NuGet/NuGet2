@@ -303,7 +303,7 @@ namespace NuGet.Test {
                 return new MockPackageRepository();
             });
 
-            var aggregateRepository = new AggregateRepository(repositories) { IgnoreFailingRepositories = true };            
+            var aggregateRepository = new AggregateRepository(repositories) { IgnoreFailingRepositories = true };
 
             // Act
             var result = aggregateRepository.Repositories;

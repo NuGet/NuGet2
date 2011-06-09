@@ -22,7 +22,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Act
             var packCommand = new PackCommand { BasePath = @"x:\packagefiles\", NoDefaultExcludes = false };
             packCommand.ExcludeFiles(files);
-            
+
             // Assert
             Assert.AreEqual(3, files.Count);
             Assert.AreEqual(files[0].Path, @"x:\packagefiles\some-file\1.txt");
@@ -218,8 +218,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.AreEqual("foo.csproj", file);
         }
         [TestMethod]
-        public void ExcludeFilesForLibPackageRemovesAllPDBs()
-        {
+        public void ExcludeFilesForLibPackageRemovesAllPDBs() {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -242,8 +241,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [TestMethod]
-        public void ExcludeFilesForLibPackageRemovesAllFilesFromSrcTargetFolder()
-        {
+        public void ExcludeFilesForLibPackageRemovesAllFilesFromSrcTargetFolder() {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -266,8 +264,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [TestMethod]
-        public void ExcludeFilesForSymbolPackageRemovesAllContentFiles()
-        {
+        public void ExcludeFilesForSymbolPackageRemovesAllContentFiles() {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -289,8 +286,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [TestMethod]
-        public void ExcludeFilesForSymbolPackageRemovesScripts()
-        {
+        public void ExcludeFilesForSymbolPackageRemovesScripts() {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",

@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace NuGet.Test.NuGetCommandLine {
     [TestClass]
     public class ResourceHelperTests {
-        
+
         [TestMethod]
         public void GetLocalizedString_ThrowsArgumentExceptionForNullType() {
             // Act & Assert

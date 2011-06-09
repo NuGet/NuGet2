@@ -348,7 +348,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var lines = new List<string>();
             var console = new Mock<IConsole>();
             console.Setup(m => m.WriteLine(It.IsAny<string>())).Callback<string>(lines.Add);
-            console.Setup(m => m.WriteWarning(It.IsAny<string>())).Callback<string>(lines.Add);            
+            console.Setup(m => m.WriteWarning(It.IsAny<string>())).Callback<string>(lines.Add);
             return new ConsoleInfo(console.Object, lines);
         }
 

@@ -96,8 +96,8 @@ namespace NuGet.Dialog.Providers {
                 logger: NullLogger.Instance,
                 removeDependencies: true,
                 forceRemove: false) {
-                ThrowOnConflicts = false
-            };
+                    ThrowOnConflicts = false
+                };
 
             IList<PackageOperation> operations = uninstallWalker.ResolveOperations(package).ToList();
             var uninstallPackageNames = (from o in operations
@@ -126,7 +126,7 @@ namespace NuGet.Dialog.Providers {
             }
             else {
                 // otherwise, just check the to-be-uninstalled package
-                hasScriptPackages = package.HasPowerShellScript(new string[] {PowerShellScripts.Uninstall});
+                hasScriptPackages = package.HasPowerShellScript(new string[] { PowerShellScripts.Uninstall });
             }
 
             if (hasScriptPackages) {

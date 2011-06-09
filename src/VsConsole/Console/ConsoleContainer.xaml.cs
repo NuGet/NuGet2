@@ -11,7 +11,7 @@ namespace NuGetConsole {
         public ConsoleContainer(IProductUpdateService productUpdateService) {
             InitializeComponent();
 
-            RootLayout.Children.Add(new ProductUpdateBar(productUpdateService));            
+            RootLayout.Children.Add(new ProductUpdateBar(productUpdateService));
         }
 
         public void AddConsoleEditor(UIElement content) {

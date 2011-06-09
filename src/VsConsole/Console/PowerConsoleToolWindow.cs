@@ -3,10 +3,8 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -14,10 +12,9 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
-
+using NuGet.VisualStudio;
 using NuGetConsole.Implementation.Console;
 using NuGetConsole.Implementation.PowerConsole;
-using NuGet.VisualStudio;
 
 namespace NuGetConsole.Implementation {
     /// <summary>

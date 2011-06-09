@@ -9,7 +9,7 @@ using NuGet.Server.Infrastructure;
 namespace NuGet.Server.DataServices {
     // Disabled for live service
     [System.ServiceModel.ServiceBehavior(IncludeExceptionDetailInFaults = true)]
-    public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {       
+    public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider {
         private IServerPackageRepository Repository {
             get {
                 // It's bad to use the container directly but we aren't in the loop when this 
@@ -17,7 +17,7 @@ namespace NuGet.Server.DataServices {
                 return NinjectBootstrapper.Kernel.Get<IServerPackageRepository>();
             }
         }
-        
+
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config) {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);

@@ -347,7 +347,7 @@ namespace NuGet.Options {
 
             char[] rgch = new char[MaxDirectoryLength + 1];
 
-             // allocate a buffer in unmanaged memory for file name (string)
+            // allocate a buffer in unmanaged memory for file name (string)
             IntPtr bufferPtr = Marshal.AllocCoTaskMem((rgch.Length + 1) * 2);
             // copy initial path to bufferPtr
             Marshal.Copy(rgch, 0, bufferPtr, rgch.Length);
@@ -381,7 +381,7 @@ namespace NuGet.Options {
         private string DetermineInitialDirectory() {
             // determine the inital directory to show in the folder dialog
             string initialDir = NewPackageSource.Text;
-            
+
             if (IsPathRootedSafe(initialDir) && Directory.Exists(initialDir)) {
                 return initialDir;
             }

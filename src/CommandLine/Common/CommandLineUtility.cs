@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using NuGet.Common;
 
 namespace NuGet {
     internal static class CommandLineUtility {
         public readonly static string ApiKeysSectionName = "apikeys";
-        
+
         public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true) {
             var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
             if (String.IsNullOrEmpty(value) && throwIfNotFound) {

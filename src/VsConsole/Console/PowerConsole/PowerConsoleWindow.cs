@@ -11,7 +11,7 @@ namespace NuGetConsole.Implementation.PowerConsole {
     [Export(typeof(IHostInitializer))]
     internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer, IDisposable {
         public const string ContentType = "PackageConsole";
-        
+
         private Dictionary<string, HostInfo> _hostInfos;
         private HostInfo _activeHostInfo;
 

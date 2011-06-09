@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Input;
 
-namespace NuGetConsole {    
+namespace NuGetConsole {
     [Serializable]
     public class VsKeyInfo {
         private static readonly Lazy<VsKeyInfo> VsKeyInfoReturn = new Lazy<VsKeyInfo>(
@@ -22,16 +21,16 @@ namespace NuGetConsole {
             bool numLockToggled = false) {
 
             return new VsKeyInfo {
-                                     Key = key,
-                                     KeyChar = keyChar,
-                                     VirtualKey = virtualKey,
-                                     KeyStates = keyStates,
-                                     ShiftPressed = shiftPressed,
-                                     ControlPressed = controlPressed,
-                                     AltPressed = altPressed,
-                                     CapsLockToggled = capsLockToggled,
-                                     NumLockToggled = numLockToggled
-                                 };
+                Key = key,
+                KeyChar = keyChar,
+                VirtualKey = virtualKey,
+                KeyStates = keyStates,
+                ShiftPressed = shiftPressed,
+                ControlPressed = controlPressed,
+                AltPressed = altPressed,
+                CapsLockToggled = capsLockToggled,
+                NumLockToggled = numLockToggled
+            };
         }
 
         public static VsKeyInfo Enter {
@@ -44,7 +43,7 @@ namespace NuGetConsole {
         public KeyStates KeyStates { get; private set; }
         public bool ShiftPressed { get; private set; }
         public bool ControlPressed { get; private set; }
-        public bool AltPressed { get; private set; }        
+        public bool AltPressed { get; private set; }
         public bool CapsLockToggled { get; private set; }
         public bool NumLockToggled { get; private set; }
     }

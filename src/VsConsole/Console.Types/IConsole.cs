@@ -16,7 +16,7 @@ namespace NuGetConsole {
         /// Indicates to the active host whether this console wants to show a disclaimer header.
         /// </summary>
         bool ShowDisclaimerHeader { get; }
-        
+
         /// <summary>
         /// Get the console dispatcher which dispatches user interaction.
         /// </summary>

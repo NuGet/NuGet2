@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
-using NuGet.VisualStudio;
 using NuGet.Dialog.PackageManagerUI;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
     internal class SolutionOnlineProvider : OnlineProvider, IPackageOperationEventListener {
@@ -45,7 +45,7 @@ namespace NuGet.Dialog.Providers {
                 HideProgressWindow();
                 var selectedProjects = _windowServices.ShowProjectSelectorWindow(
                     Resources.Dialog_OnlineSolutionInstruction,
-                    DetermineProjectCheckState, 
+                    DetermineProjectCheckState,
                     ignored => true);
                 if (selectedProjects == null) {
                     // user presses Cancel button on the Solution dialog

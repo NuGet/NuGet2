@@ -4,8 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio {
-    public class VisualStudioCredentialProvider: BaseProxyProvider {
-
+    public class VisualStudioCredentialProvider : BaseProxyProvider {
         private IVsWebProxy _webProxyService;
 
         public VisualStudioCredentialProvider()
@@ -26,7 +25,7 @@ namespace NuGet.VisualStudio {
                 if (forcePrompt || !hasCachedCredentials) {
                     GetCredentials(uri, forcePrompt: true);
                 }
-                if(IsValidProxy(uri, WebRequest.DefaultWebProxy)) {
+                if (IsValidProxy(uri, WebRequest.DefaultWebProxy)) {
                     break;
                 }
                 else {
@@ -47,7 +46,7 @@ namespace NuGet.VisualStudio {
                 // and return false otherwise it might be a server error
                 // and we don't want to be responsible for handling those errors here.
                 var webResponse = webException.Response as HttpWebResponse;
-                if(webResponse != null && webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
+                if (webResponse != null && webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
                     return false;
                 }
             }
@@ -60,7 +59,7 @@ namespace NuGet.VisualStudio {
         /// <param name="uri"></param>
         /// <returns></returns>
         private bool HasSavedCredentials(Uri uri) {
-            return GetCredentials(uri,false) != null;
+            return GetCredentials(uri, false) != null;
         }
 
         /// <summary>

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -51,7 +49,7 @@ namespace NuGetConsole.Host.PowerShell {
             public string pszCaptionText;
             public IntPtr hbmBanner;
         }
-    
+
         [DllImport("credui", EntryPoint = "CredUIPromptForCredentialsW", CharSet = CharSet.Unicode)]
         private static extern CredUiReturnCodes CredUIPromptForCredentials(ref CreduiInfo pUiInfo, string pszTargetName, IntPtr reserved, int dwAuthError, StringBuilder pszUserName, int ulUserNameMaxChars, StringBuilder pszPassword, int ulPasswordMaxChars, ref int pfSave, CreduiFlags dwFlags);
 
@@ -67,17 +65,17 @@ namespace NuGetConsole.Host.PowerShell {
             PSCredential credential = null;
 
             var info = new CreduiInfo {
-                                          pszCaptionText = caption,
-                                          pszMessageText = message
-                                      };
+                pszCaptionText = caption,
+                pszMessageText = message
+            };
 
             var pszUserName = new StringBuilder(userName, 0x201);
             var pszPassword = new StringBuilder(0x100);
             int pfSave = Convert.ToInt32(false);
             info.cbSize = Marshal.SizeOf(info);
             info.hwndParent = parentHwnd;
-            
-            var dwFlags = CreduiFlags.DO_NOT_PERSIST;            
+
+            var dwFlags = CreduiFlags.DO_NOT_PERSIST;
             if ((allowedCredentialTypes & PSCredentialTypes.Domain) != PSCredentialTypes.Domain) {
                 dwFlags |= CreduiFlags.GENERIC_CREDENTIALS;
                 if ((options & PSCredentialUIOptions.AlwaysPrompt) == PSCredentialUIOptions.AlwaysPrompt) {
@@ -86,16 +84,16 @@ namespace NuGetConsole.Host.PowerShell {
             }
 
             var codes = CredUiReturnCodes.ERROR_INVALID_PARAMETER;
-            
-            if ((pszUserName.Length <= 0x201) && (pszPassword.Length <= 0x100)) {                
+
+            if ((pszUserName.Length <= 0x201) && (pszPassword.Length <= 0x100)) {
                 codes = CredUIPromptForCredentials(
                     ref info, targetName, IntPtr.Zero, 0, pszUserName,
                     0x201, pszPassword, 0x100, ref pfSave, dwFlags);
             }
 
             if (codes == CredUiReturnCodes.NO_ERROR) {
-                
-                string providedUserName = pszUserName.ToString();                
+
+                string providedUserName = pszUserName.ToString();
                 var providedPassword = new SecureString();
 
                 for (int i = 0; i < pszPassword.Length; i++) {
@@ -103,7 +101,7 @@ namespace NuGetConsole.Host.PowerShell {
                     pszPassword[i] = '\0';
                 }
                 providedPassword.MakeReadOnly();
-                
+
                 if (!String.IsNullOrEmpty(providedUserName)) {
                     credential = new PSCredential(providedUserName, providedPassword);
                 }

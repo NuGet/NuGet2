@@ -57,7 +57,7 @@ namespace NuGetConsole.Host.PowerShellProvider {
             return new string[0];
         }
 
-        public void SetDefaultRunspace() {            
+        public void SetDefaultRunspace() {
         }
     }
 }

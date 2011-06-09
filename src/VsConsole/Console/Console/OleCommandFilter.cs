@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio;
 
 namespace NuGetConsole.Implementation.Console {
     class OleCommandFilter : IOleCommandTarget {

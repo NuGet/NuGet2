@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace NuGet.Common {    
+namespace NuGet.Common {
     public class ReadOnlyPackageRepository : PackageRepositoryBase {
         private readonly IEnumerable<IPackage> _packages;
         public ReadOnlyPackageRepository(IEnumerable<IPackage> packages) {

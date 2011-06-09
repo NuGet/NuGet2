@@ -82,7 +82,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         public bool AskToRemoveDependencyPackages(string message) {
             if (!_uiDispatcher.CheckAccess()) {
                 object result = _uiDispatcher.Invoke(
-                    new Func<string, bool>(AskToRemoveDependencyPackages), 
+                    new Func<string, bool>(AskToRemoveDependencyPackages),
                     message);
                 return (bool)result;
             }

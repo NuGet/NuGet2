@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Web;
 
 public static class Helpers {
     public static string GetRepositoryUrl(Uri currentUrl, string applicationPath) {
         var uriBuilder = new UriBuilder(currentUrl);
-            
+
         string repositoryUrl = uriBuilder.Scheme + "://" + uriBuilder.Host;
         if (uriBuilder.Port != 80) {
             repositoryUrl += ":" + uriBuilder.Port;
@@ -16,7 +15,7 @@ public static class Helpers {
             repositoryUrl += "/";
         }
         repositoryUrl += "nuget";
-            
+
         return repositoryUrl;
     }
 }

@@ -48,10 +48,10 @@ namespace NuGetConsole.Implementation.Console {
         private IPrivateConsoleStatus _privateConsoleStatus;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification="MEF export")]
+            "Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "MEF export")]
         [Export(typeof(IConsoleStatus))]
-        public IConsoleStatus ConsoleStatus { 
-            get { return _privateConsoleStatus; } 
+        public IConsoleStatus ConsoleStatus {
+            get { return _privateConsoleStatus; }
         }
 
         public WpfConsoleService() {

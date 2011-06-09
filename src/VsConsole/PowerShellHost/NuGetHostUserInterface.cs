@@ -183,7 +183,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 string prompt = String.Format(
                     CultureInfo.CurrentCulture,
                     "{0}[{1}]: ", name, valuesToConvert.Count);
-                
+
                 if (coercable) {
                     Write(prompt);
                 }
@@ -254,7 +254,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     }
                     Write(String.Format(CultureInfo.CurrentCulture, "[{0}] {1}  ",
                                         accelerators[index],
-                                        // remove the redundant marker from output
+                        // remove the redundant marker from output
                                         label.Replace("&", String.Empty)));
                 }
                 Write(
@@ -356,7 +356,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             Justification = "Caller's responsibility to dispose.")]
         public override SecureString ReadLineAsSecureString() {
             var secureString = new SecureString();
-            try {               
+            try {
                 lock (_instanceLock) {
                     KeyInfo keyInfo;
                     while ((keyInfo = RawUI.ReadKey()).VirtualKeyCode != VkCodeReturn) {

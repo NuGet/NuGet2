@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Management.Automation;
 using NuGet.VisualStudio;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
