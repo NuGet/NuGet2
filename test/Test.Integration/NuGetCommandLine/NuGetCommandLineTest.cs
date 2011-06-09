@@ -593,7 +593,7 @@ public class Cl_{0} {{
 
             // Assert
             Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config specified. Use the -self switch to update NuGet.exe."));
+            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config or solution file specified. Use the -self switch to update NuGet.exe."));
         }
 
         [TestMethod]
@@ -606,7 +606,7 @@ public class Cl_{0} {{
 
             // Assert
             Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config specified."));
+            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config or solution file specified."));
         }
 
         private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {

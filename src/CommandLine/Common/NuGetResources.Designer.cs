@@ -232,6 +232,24 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Found 1 project with a packages.config file. ({0}).
+        /// </summary>
+        internal static string FoundProject {
+            get {
+                return ResourceManager.GetString("FoundProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found {0} projects with a packages.config file. ({1}).
+        /// </summary>
+        internal static string FoundProjects {
+            get {
+                return ResourceManager.GetString("FoundProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays general help information and help information about other commands..
         /// </summary>
         internal static string HelpCommandDescription {
@@ -340,6 +358,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No packages.config or solution file specified. Use the -self switch to update NuGet.exe..
+        /// </summary>
+        internal static string InvalidFile {
+            get {
+                return ResourceManager.GetString("InvalidFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid option value: &apos;{0} {1}&apos;.
         /// </summary>
         internal static string InvalidOptionValueError {
@@ -430,6 +457,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Looking for installed packages in &apos;{0}&apos;..
+        /// </summary>
+        internal static string LookingForInstalledPackages {
+            get {
+                return ResourceManager.GetString("LookingForInstalledPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
         /// </summary>
         internal static string MissingOptionValueError {
@@ -448,11 +484,11 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No packages.config specified. Use the -self switch to update NuGet.exe..
+        ///   Looks up a localized string similar to No projects found with packages.config..
         /// </summary>
-        internal static string NoPackagesConfigSpecified {
+        internal static string NoProjectsFound {
             get {
-                return ResourceManager.GetString("NoPackagesConfigSpecified", resourceCulture);
+                return ResourceManager.GetString("NoProjectsFound", resourceCulture);
             }
         }
         
@@ -637,7 +673,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0} {1}&apos; does not exist. Make sure all packages exist in the packages folder before running update..
+        ///   Looks up a localized string similar to Unable to locate &apos;{0} {1}&apos;. Make sure all packages exist in the packages folder before running update..
         /// </summary>
         internal static string PackageDoesNotExist {
             get {
@@ -844,6 +880,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Scanning for projects....
+        /// </summary>
+        internal static string ScanningForProjects {
+            get {
+                return ResourceManager.GetString("ScanningForProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for {1}..
         /// </summary>
         internal static string SetApiKeyCommandApiKeySaved {
@@ -997,6 +1042,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to find solution &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnableToFindSolution {
+            get {
+                return ResourceManager.GetString("UnableToFindSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to locate the packages folder. Try specifying it using the repositoryPath switch..
         /// </summary>
         internal static string UnableToLocatePackagesFolder {
@@ -1006,7 +1060,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to locate project file..
+        ///   Looks up a localized string similar to Unable to locate project file for &apos;{0}&apos;..
         /// </summary>
         internal static string UnableToLocateProjectFile {
             get {
@@ -1155,6 +1209,15 @@ namespace NuGet.Common {
         internal static string UpdatingPackage {
             get {
                 return ResourceManager.GetString("UpdatingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos;....
+        /// </summary>
+        internal static string UpdatingProject {
+            get {
+                return ResourceManager.GetString("UpdatingProject", resourceCulture);
             }
         }
         
