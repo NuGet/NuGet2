@@ -311,7 +311,7 @@ namespace NuGet.Dialog.Providers {
             return Provider.SortDescriptors;
         }
 
-        protected void ResetQuery() {
+        protected internal void ResetQuery() {
             _query = null;
         }
 
