@@ -61,7 +61,7 @@ namespace NuGet.Common {
         }
 
         private ProjectItem GetItem(string itemType, string name) {
-            return Project.GetItems(itemType).FirstOrDefault(i => i.EvaluatedInclude.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+            return GetItems(itemType, name).FirstOrDefault();
         }
 
         private IEnumerable<ProjectItem> GetItems(string itemType, string name) {
