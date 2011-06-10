@@ -91,12 +91,17 @@ namespace NuGet.Dialog.Providers {
 
             ShowProgressWindow();
 
-            var selectedProjectsSet = new HashSet<Project>(selectedProjects);
+            // bug #1181: Use HashSet<unique name> instead of HashSet<Project>.
+            // in some rare cases, the project instance returned by GetProjects() may be different 
+            // than the ones in selectedProjectSet.
+            var selectedProjectsSet = new HashSet<string>(
+                selectedProjects.Select(p => p.UniqueName), 
+                StringComparer.OrdinalIgnoreCase);
 
             // now install or uninstall the package depending on the checked states.
             foreach (Project project in _solutionManager.GetProjects()) {
                 try {
-                    if (selectedProjectsSet.Contains(project)) {
+                    if (selectedProjectsSet.Contains(project.UniqueName)) {
                         // if the project is checked, install package into it  
                         InstallPackageToProject(project, item);
                     }
