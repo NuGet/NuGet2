@@ -42,7 +42,7 @@ namespace NuGet.Dialog {
                     continue;
                 }
                 // Project has packages. Add a node for it
-                nodes.Add(new DGMLNode { Name = project.GetCustomUniqueName(), Label = project.Name, Category = "Project" });
+                nodes.Add(new DGMLNode { Name = project.GetCustomUniqueName(), Label = project.GetDisplayName(), Category = "Project" });
 
                 var dependencies = VisitProjectPackages(nodes, links, repo);
                 var installedPackages = repo.GetPackages().Except(dependencies);
