@@ -6,7 +6,6 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test.Integration.PathResolver {
-
     /// <summary>
     /// Tests based on scenarios specified in http://nuget.codeplex.com/wikipage?title=File%20Element%20Specification
     /// </summary>
@@ -666,6 +665,229 @@ namespace NuGet.Test.Integration.PathResolver {
             Assert.AreEqual(package.Files.Last().Path, @"lib\net40\foo.dll");
         }
 
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib
+        /// Expected: lib\release\baz.dll
+        /// </summary>
+        [TestMethod]
+        public void PathWithWildCardInDirectoryNameAndFileName() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                        new File("baz.dll"))));
+            string search = @"bin\*\*.dll";
+            string target = "lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\baz.dll", package.Files.First().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib
+        /// Expected: lib\release\baz.dll
+        /// </summary>
+        [TestMethod]
+        public void PathWithWildCardInDirectoryNameAndFileExtension() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                        new File("baz.dll"))));
+            string search = @"bin\*\*.*";
+            string target = "lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\baz.dll", package.Files.First().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib
+        /// Expected: lib\release\baz.dll
+        /// </summary>
+        [TestMethod]
+        public void SourceStructureIsPreservedWithRecursiveWildCard() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                        new File("baz.dll"))));
+            string search = @"bin\**\*.*";
+            string target = "lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\release\baz.dll", package.Files.First().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib\foo.dll
+        /// Expected: lib\release\baz.dll
+        /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
+        /// </summary>
+        [TestMethod]
+        public void SourceWithWildcardIgnoresExtensionBasedRenameRule() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("bin",
+                                                new Dir("release",
+                                                        new File("baz.dll"))));
+            string search = @"bin\*\*.dll";
+            string target = @"lib\foo.dll";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+            
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\foo.dll\baz.dll", package.Files.First().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib\foo.dll
+        /// Expected: lib\release\baz.dll
+        /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
+        /// </summary>
+        [TestMethod]
+        public void WildCardInMiddleOfPath() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("Output",
+                                            new Dir("NuGet",
+                                                new Dir("NuGet.Server",
+                                                    new File("NuGet.Server.dll"),
+                                                    new File("NuGet.Core.dll")),
+                                                new Dir("NuGet.Core",
+                                                    new File("NuGet.Core.dll")))));
+            string search = @"Output\*\NuGet.Core\*.Core.dll";
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\NuGet.Core.dll", package.Files.First().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib\foo.dll
+        /// Expected: lib\release\baz.dll
+        /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
+        /// </summary>
+        [TestMethod]
+        public void WildCardInMiddleOfPathAndExtension() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("Output",
+                                            new Dir("NuGet",
+                                                new Dir("NuGet.Server",
+                                                    new File("NuGet.Server.dll"),
+                                                    new File("NuGet.Core.dll")),
+                                                new Dir("NuGet.Core",
+                                                    new File("NuGet.Core.dll")))));
+            string search = @"Output\*\NuGet.Server\*.dll";
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(2, package.Files.Count);
+            Assert.AreEqual(@"lib\NuGet.Core.dll", package.Files.First().Path);
+            Assert.AreEqual(@"lib\NuGet.Server.dll", package.Files.Last().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: bin\*\*.dll
+        /// Target: lib\foo.dll
+        /// Expected: lib\release\baz.dll
+        /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
+        /// </summary>
+        [TestMethod]
+        public void RecursiveSearchForPathNotInBaseDirectory() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("Packages", new Dir("bin")),
+                                           new Dir("Output",
+                                                new Dir("NuGet",
+                                                    new Dir("NuGet.Server",
+                                                        new File("NuGet.Server.dll"),
+                                                        new File("NuGet.Core.dll")))));
+            
+            string search = Path.Combine(root, @"output\**\*.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            string builderBase = Path.Combine(@"packages\bin");
+            var package = new PackageBuilder(manifest, builderBase);
+
+            // Assert
+            Assert.AreEqual(2, package.Files.Count);
+            Assert.AreEqual(@"lib\NuGet\NuGet.Server\NuGet.Core.dll", package.Files.First().Path);
+            Assert.AreEqual(@"lib\NuGet\NuGet.Server\NuGet.Server.dll", package.Files.Last().Path);
+        }
+
+        /// <summary>
+        /// Source: output\foo.dll, output\output\foo.dll, output\output\output\foo.dll, output\foo\output.dll
+        /// Search: output\output\foo.dll
+        /// Target: lib\foo.dll
+        /// Expected: lib\release\baz.dll
+        /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
+        /// </summary>
+        [TestMethod]
+        public void WildCardInPathDoesNotPickUpFileInNestedDirectories() {
+            // Arrange
+            string expectedContent = "this is the right foo";
+            string root = CreateFileSystem(new Dir("Output",
+                                               new Dir("foo",
+                                                    new File("output.dll")),
+                                               new File("foo.dll"),
+                                                new Dir("output",
+                                                    new File("foo.dll", expectedContent),
+                                                        new Dir("output",
+                                                            new File("foo.dll")))));
+
+            string search = Path.Combine(root, @"output\*\foo.dll");
+            string target = @"lib";
+            Stream manifest = GetManifest(search, target);
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\foo.dll", package.Files.First().Path);
+            
+            // Verify that we picked up the right file
+            var actualContents = package.Files.First().GetStream().ReadToEnd();
+            Assert.AreEqual(expectedContent, actualContents);
+        }
+
         private Stream GetManifest(string search, string target) {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -685,15 +907,16 @@ namespace NuGet.Test.Integration.PathResolver {
 
         private class File {
             protected readonly string _name;
-            public File(string name) {
+            private readonly string _contents;
+            public File(string name, string contents = "") {
                 _name = name;
+                _contents = contents;
             }
 
             public File Parent { get; set; }
 
             public virtual void Create() {
-                using (System.IO.File.Create(GetFullPath())) {
-                }
+                System.IO.File.AppendAllText(GetFullPath(), _contents);
             }
 
             public string GetFullPath() {

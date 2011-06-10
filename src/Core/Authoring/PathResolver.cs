@@ -34,101 +34,95 @@ namespace NuGet {
                 .Replace(@"\*\*", ".*") // For recursive wildcards that don't end in a slash e.g. **.txt would be treated as a .txt file at any depth
                 .Replace(@"\*", @"[^\\]*(\\)?") // For non recursive searches, limit it any character that is not a directory separator
                 .Replace(@"\?", ".") // ? translates to a single any character
-               + '$', RegexOptions.IgnoreCase);
+               + '$', RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
         }
 
-        internal static PathSearchFilter ResolveSearchFilter(string basePath, string source) {
-            basePath = basePath ?? String.Empty;
-
-            // If there's a single leading slash, then trim it. Two slashes would mean network paths and we should leave those untouched.
-            if (!source.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase)) {
-                source = source.TrimStart('\\');
+        internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(string basePath, string searchPath, string targetPath) {
+            if (!searchPath.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase)) {
+                // If we aren't dealing with network paths, trim the leading slash. 
+                searchPath = searchPath.TrimStart(Path.DirectorySeparatorChar);
             }
 
-            string pathFromBase = Path.Combine(basePath, source);
+            string basePathToEnumerate = GetPathToEnumerateFrom(basePath, searchPath);
 
-            if (IsWildCardSearch(pathFromBase)) {
-                return GetPathSearchFilter(pathFromBase);
+            // Append the basePath to searchPattern and get the search regex. We need to do this because the search regex is matched from line start.
+            Regex searchRegex = WildCardToRegex(Path.Combine(basePath, searchPath));
+
+            // This is a hack to prevent enumerating over the entire directory tree if the only wildcard characters are the ones in the file name. 
+            // If the path portion of the search path does not contain any wildcard characters only iterate over the TopDirectory.
+            SearchOption searchOption = SearchOption.AllDirectories;
+            bool isRecursiveSearch = searchPath.IndexOf("**", StringComparison.OrdinalIgnoreCase) != -1;
+            bool isWildCardPath = Path.GetDirectoryName(searchPath).Contains('*');
+            if (!isRecursiveSearch && !isWildCardPath) {
+                searchOption = SearchOption.TopDirectoryOnly;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(basePathToEnumerate, "*.*", searchOption)) {
+                if (searchRegex.IsMatch(file)) {
+                    var pathInsidePackage = ResolvePackagePath(basePathToEnumerate, searchPath, file, targetPath);
+                    yield return new PhysicalPackageFile { SourcePath = file, TargetPath = pathInsidePackage };
+                }
+            }
+        }
+
+        internal static string GetPathToEnumerateFrom(string basePath, string searchPath) {
+            string basePathToEnumerate;
+            int wildCardIndex = searchPath.IndexOf('*');
+            if (wildCardIndex == -1) {
+                // For paths without wildcard, we could either have base relative paths (such as lib\foo.dll) or paths outside the base path
+                // (such as basePath: C:\packages and searchPath: D:\packages\foo.dll)
+                // In this case, Path.Combine would pick up the right root to enumerate from.
+                var searchRoot = Path.GetDirectoryName(searchPath);
+                basePathToEnumerate = Path.Combine(basePath, searchRoot);
             }
             else {
-                pathFromBase = Path.GetFullPath(pathFromBase.TrimStart(Path.DirectorySeparatorChar));
-                string directory = Path.GetDirectoryName(pathFromBase);
-                string searchFilter = Path.GetFileName(pathFromBase);
-                return new PathSearchFilter {
-                    SearchDirectory = NormalizeSearchDirectory(directory),
-                    SearchPattern = NormalizeSearchFilter(searchFilter),
-                    SearchOption = SearchOption.TopDirectoryOnly,
-                    WildCardSearch = false
-                };
+                // If not, find the first directory separator and use the path to the left of it as the base path to enumerate from.
+                int directorySeparatoryIndex = searchPath.LastIndexOf(Path.DirectorySeparatorChar, wildCardIndex);
+                if (directorySeparatoryIndex == -1) {
+                    // We're looking at a path like "NuGet*.dll", NuGet*\bin\release\*.dll
+                    // In this case, the basePath would continue to be the path to begin enumeration from.
+                    basePathToEnumerate = basePath;
+                }
+                else {
+                    string nonWildCardPortion = searchPath.Substring(0, directorySeparatoryIndex);
+                    basePathToEnumerate = Path.Combine(basePath, nonWildCardPortion);
+                }
             }
+            return basePathToEnumerate;
         }
 
-        private static PathSearchFilter GetPathSearchFilter(string path) {
-            Debug.Assert(IsWildCardSearch(path));
-
-            var searchFilter = new PathSearchFilter { WildCardSearch = true };
-            int recursiveSearchIndex = path.IndexOf("**", StringComparison.OrdinalIgnoreCase);
-
-            if (recursiveSearchIndex != -1) {
-                // Recursive searches are of the format /foo/bar/**/*[.abc]
-                string searchPattern = path.Substring(recursiveSearchIndex + 2).TrimStart(Path.DirectorySeparatorChar);
-                string searchDirectory = recursiveSearchIndex == 0 ? "." : path.Substring(0, recursiveSearchIndex - 1);
-
-                searchFilter.SearchDirectory = NormalizeSearchDirectory(searchDirectory);
-                searchFilter.SearchPattern = NormalizeSearchFilter(searchPattern);
-                searchFilter.SearchOption = SearchOption.AllDirectories;
-            }
-            else {
-                string searchDirectory = Path.GetDirectoryName(path);
-                string searchPattern = Path.GetFileName(path);
-
-                searchFilter.SearchDirectory = NormalizeSearchDirectory(searchDirectory);
-                searchFilter.SearchPattern = NormalizeSearchFilter(searchPattern);
-                searchFilter.SearchOption = SearchOption.TopDirectoryOnly;
-            }
-
-            return searchFilter;
-        }
 
         /// <summary>
-        /// Resolves the path of a file inside of a package 
+        /// Determins the path of the file inside a package.
+        /// For recursive wildcard paths, we preserve the path portion beginning with the wildcard.
+        /// For non-recursive wildcard paths, we use the file name from the actual file path on disk.
         /// </summary>
-        /// <param name="searchFilter">The search filter used to add the file.</param>
-        /// <param name="path">The absolute path to the file being added.</param>
-        /// <param name="targetPath">The target path prefix for the .</param>
-        internal static string ResolvePackagePath(PathSearchFilter searchFilter, string path, string targetPath) {
-            string packagePath = null;
-            if (!searchFilter.WildCardSearch && Path.GetExtension(searchFilter.SearchPattern).Equals(Path.GetExtension(targetPath), StringComparison.OrdinalIgnoreCase)) {
+        internal static string ResolvePackagePath(string searchDirectory, string searchPattern, string fullPath, string targetPath) {
+            string packagePath;
+            bool isWildCardSearch = IsWildCardSearch(searchPattern);
+            bool isRecursiveWildCardSearch = isWildCardSearch && searchPattern.IndexOf("**", StringComparison.OrdinalIgnoreCase) != -1;
+            
+            if (isRecursiveWildCardSearch && fullPath.StartsWith(searchDirectory, StringComparison.OrdinalIgnoreCase)) {
+                // The search pattern is recursive. Preserve the non-wildcard portion of the path.
+                // e.g. Search: X:\foo\**\*.cs results in SearchDirectory: X:\foo and a file path of X:\foo\bar\biz\boz.cs
+                // Truncating X:\foo\ would result in the package path.
+                packagePath = fullPath.Substring(searchDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
+            }
+            else if (!isWildCardSearch && Path.GetExtension(searchPattern).Equals(Path.GetExtension(targetPath), StringComparison.OrdinalIgnoreCase)) {
                 // If the search does not contain wild cards, and the target path shares the same extension, copy it
                 // e.g. <file src="ie\css\style.css" target="Content\css\ie.css" /> --> Content\css\ie.css
                 return targetPath;
             }
-            else if (path.StartsWith(searchFilter.SearchDirectory, StringComparison.OrdinalIgnoreCase)) {
-                // The SearchDirectory property contains the path leading up to the first wildcard or the complete directory path for includes without wildcard. 
-                // e.g. Search: X:\foo\**\*.cs results in SearchDirectory: X:\foo and a file path of X:\foo\bar\biz\boz.cs
-                // e.g. Search: X:\foo\bar.cs results in SearchDirectory: X:\foo and a file path X:\foo\bar.cs
-                // Truncating X:\foo\ would result in the package path.
-                packagePath = path.Substring(searchFilter.SearchDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
-            }
             else {
-                // Review: When would we ever come to this condition?
-                packagePath = Path.GetFileName(path);
+                packagePath = Path.GetFileName(fullPath);
             }
             return Path.Combine(targetPath ?? String.Empty, packagePath);
         }
 
-        private static string NormalizeSearchDirectory(string directory) {
-            return Path.GetFullPath(String.IsNullOrEmpty(directory) ? "." : directory);
-        }
-
-        private static string NormalizeSearchFilter(string filter) {
-            return String.IsNullOrEmpty(filter) ? "*" : filter;
-        }
-
         /// <summary>
-        /// Returns true if the path does not contain any wildcards.
+        /// Returns true if the path contains any wildcard characters.
         /// </summary>
-        private static bool IsWildCardSearch(string filter) {
+        internal static bool IsWildCardSearch(string filter) {
             return filter.IndexOf('*') != -1;
         }
     }
