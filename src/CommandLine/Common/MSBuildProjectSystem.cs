@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Evaluation;
-using System.Reflection;
 
 namespace NuGet.Common {
     public class MSBuildProjectSystem : PhysicalFileSystem, IProjectSystem, IMSBuildProjectSystem {
