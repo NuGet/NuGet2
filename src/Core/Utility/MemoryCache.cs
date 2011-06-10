@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace NuGet {
     internal sealed class MemoryCache {
@@ -7,18 +9,19 @@ namespace NuGet {
         }
 
         internal static MemoryCache Default {
-            get
-            {
+            get {
                 return InternalMemoryCache.Instance;
             }
         }
 
         private ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
 
+        internal int Count { get { return _cache.Count; } }
+
         internal T GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan slidingExpiration) where T : class {
             CacheItem result;
-            if (!_cache.TryGetValue(cacheKey, out result) || result.Expiry < DateTime.Now) {
-                result = new CacheItem { Item = factory(), Expiry = DateTime.Now.Add(slidingExpiration) };
+            if (!_cache.TryGetValue(cacheKey, out result)) {
+                result = new CacheItem(this, cacheKey, factory(), slidingExpiration);
                 _cache[cacheKey] = result;
             }
             return (T)result.Item;
@@ -30,8 +33,21 @@ namespace NuGet {
         }
 
         private class CacheItem {
-            public object Item { get; set; }
-            public DateTime Expiry { get; set; }
+            public CacheItem(MemoryCache owner, string cacheKey, object item, TimeSpan expiry) {
+                _item = item;
+
+                Task.Factory.StartNew(() => {
+                    Thread.Sleep(expiry);
+                    owner.Remove(cacheKey);
+                });
+            }
+
+            private object _item;
+            public object Item {
+                get {
+                    return _item;
+                }
+            }
         }
 
         private class InternalMemoryCache {
