@@ -128,6 +128,10 @@ namespace NuGet.Dialog.Providers {
 
             if (SelectedNode != null) {
                 SelectedNode.Extensions.Remove((IVsExtension)item);
+                
+                // the PackagesTreeNodeBase caches the list of packages in each tree node. For this provider,
+                // we don't want it to do so, because after every uninstall, we remove uninstalled packages.
+                SelectedNode.ResetQuery();
             }
         }
 
