@@ -52,7 +52,7 @@ namespace NuGet {
 
         private class InternalMemoryCache {
             private InternalMemoryCache() { }
-            internal static MemoryCache Instance = new MemoryCache();
+            internal static readonly MemoryCache Instance = new MemoryCache();
         }
     }
 }
