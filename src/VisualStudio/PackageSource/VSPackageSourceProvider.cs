@@ -10,15 +10,11 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IVsPackageSourceProvider))]
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IVsPackageSourceProvider {
-
         internal const string FileSettingsActiveSectionName = "activePackageSource";
-        internal const string DefaultPackageSource = "https://go.microsoft.com/fwlink/?LinkID=206669";
         internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
-
         private readonly IPackageSourceSettingsManager _registrySettingsManager;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISettings _fileSettingsManager;
-
         private List<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
@@ -209,7 +205,7 @@ namespace NuGet.VisualStudio {
             }
             else {
                 // If there is an official feed that already points to the right place, we're done
-                if (DefaultPackageSource.Equals(officialFeed.Source, StringComparison.OrdinalIgnoreCase)) {
+                if (NuGetConstants.DefaultFeedUrl.Equals(officialFeed.Source, StringComparison.OrdinalIgnoreCase)) {
                     return;
                 }
 
@@ -218,7 +214,7 @@ namespace NuGet.VisualStudio {
             }
 
             // Insert it at first position 
-            officialFeed = new PackageSource(DefaultPackageSource, OfficialFeedName);
+            officialFeed = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
             _packageSources.Insert(0, officialFeed);
 
             // Only make it the active source if there isn't one already

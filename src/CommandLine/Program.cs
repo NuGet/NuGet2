@@ -29,8 +29,11 @@ namespace NuGet {
                     AddExtensionsToCatalog(catalog);
                 }
                 using (var container = new CompositionContainer(catalog)) {
+                    var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
+                    var packageSourceProvider = new PackageSourceProvider(Settings.UserSettings, new[] { defaultPackageSource });
+
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
-                    container.ComposeExportedValue<IPackageSourceProvider>(PackageSourceProvider.Default);
+                    container.ComposeExportedValue<IPackageSourceProvider>(packageSourceProvider);
                     container.ComposeParts(this);
                 }
             }

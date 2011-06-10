@@ -58,6 +58,9 @@
     <Compile Include="..\..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="..\..\Common\NuGetConstants.cs">
+      <Link>Common\NuGetConstants.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.ExtensionManager" />

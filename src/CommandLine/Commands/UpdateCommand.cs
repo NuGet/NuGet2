@@ -9,7 +9,6 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>")]
     public class UpdateCommand : Command {
-        private const string DefaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
         private const string PackagesFolder = "packages";
@@ -257,10 +256,10 @@ namespace NuGet.Commands {
         }
 
         internal void SelfUpdate(string exePath, Version version) {
-            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, DefaultFeedUrl);
+            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, NuGetConstants.DefaultFeedUrl);
 
             // Get the nuget command line package from the specified repository
-            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(DefaultFeedUrl);
+            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
 
             IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
 
