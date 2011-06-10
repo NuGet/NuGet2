@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Build.Evaluation;
+using System.Reflection;
 
 namespace NuGet.Common {
     public class MSBuildProjectSystem : PhysicalFileSystem, IProjectSystem, IMSBuildProjectSystem {
@@ -63,8 +64,15 @@ namespace NuGet.Common {
             return Project.GetItems(itemType).FirstOrDefault(i => i.EvaluatedInclude.StartsWith(name, StringComparison.OrdinalIgnoreCase));
         }
 
+        private IEnumerable<ProjectItem> GetItems(string itemType, string name) {
+            return Project.GetItems(itemType).Where(i => i.EvaluatedInclude.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+        }
+
         public ProjectItem GetReference(string name) {
-            return GetItem("Reference", Path.GetFileNameWithoutExtension(name));
+            name = Path.GetFileNameWithoutExtension(name);
+            return GetItems("Reference", name)
+                   .Where(item => new AssemblyName(item.EvaluatedInclude).Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                   .FirstOrDefault();
         }
 
         public FrameworkName TargetFramework {

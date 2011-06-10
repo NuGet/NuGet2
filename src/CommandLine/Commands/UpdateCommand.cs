@@ -99,10 +99,11 @@ namespace NuGet.Commands {
 
             string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
             var pathResolver = new DefaultPackagePathResolver(repositoryPath);
+            IPackageRepository sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
             foreach (var project in projects) {
                 try {
-                    UpdatePackages(project.PackagesConfigPath, repositoryPath);
+                    UpdatePackages(project.PackagesConfigPath, project.Project, repositoryPath, sourceRepository);
                     if (Verbose) {
                         Console.WriteLine();
                     }
@@ -153,9 +154,9 @@ namespace NuGet.Commands {
             return null;
         }
 
-        private void UpdatePackages(string packagesConfigPath, string repositoryPath = null) {
+        private void UpdatePackages(string packagesConfigPath, IMSBuildProjectSystem project = null, string repositoryPath = null, IPackageRepository sourceRepository = null) {
             // Get the msbuild project
-            IMSBuildProjectSystem project = GetMSBuildProject(packagesConfigPath);
+            project = project ?? GetMSBuildProject(packagesConfigPath);
 
             // Resolve the repository path
             repositoryPath = repositoryPath ?? GetReposioryPath(project.Root);
@@ -164,7 +165,7 @@ namespace NuGet.Commands {
 
             // Create the local and source repositories
             var localRepository = new PackageReferenceRepository(project, new SharedPackageRepository(repositoryPath));
-            var sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
+            sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             IPackageConstraintProvider constraintProvider = localRepository;
 
             Console.WriteLine(NuGetResources.UpdatingProject, project.ProjectName);
@@ -230,7 +231,6 @@ namespace NuGet.Commands {
                                      IPackageConstraintProvider constraintProvider,
                                      IPackagePathResolver pathResolver,
                                      IProjectSystem project) {
-
             var projectManager = new ProjectManager(sourceRepository, pathResolver, project, localRepository);
             projectManager.ConstraintProvider = constraintProvider;
 

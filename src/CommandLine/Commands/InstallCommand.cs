@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -86,7 +86,7 @@ namespace NuGet.Commands {
             return repository;
         }
 
-        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file) {            
+        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file) {
             var packageReferences = file.GetPackageReferences().ToList();
             PackageManager packageManager = GetPackageManager(fileSystem, useMachineCache: true);
 
