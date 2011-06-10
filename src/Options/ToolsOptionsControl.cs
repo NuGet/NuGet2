@@ -186,7 +186,7 @@ namespace NuGet.Options {
             }
 
             // check to see if source has already been added
-            bool hasSource = sourcesList.Any(ps => String.Equals(source, ps.Source, StringComparison.OrdinalIgnoreCase));
+            bool hasSource = sourcesList.Any(ps => String.Equals(PathUtility.GetCanonicalPath(source), PathUtility.GetCanonicalPath(ps.Source), StringComparison.OrdinalIgnoreCase));
             if (hasSource) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);

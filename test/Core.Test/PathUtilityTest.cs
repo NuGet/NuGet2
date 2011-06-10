@@ -137,5 +137,135 @@ namespace NuGet.Test {
             // Assert
             Assert.AreEqual(targetPath, absolutePath);
         }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectLocalPathWithTrailingBackslash() {
+            // Arrange
+            string basePath = @"c:\foo\bar\baz";
+            string canonicalPath = @"c:\foo\bar\baz\";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectLocalPathWithoutMultipleBackslashes() {
+            // Arrange
+            string basePath = @"c:\\foo\\bar\\baz";
+            string canonicalPath = @"c:\foo\bar\baz\";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUncPathWithTrailingBackslash() {
+            // Arrange
+            string basePath = @"\\server\share\foo\bar\baz";
+            string canonicalPath = @"\\server\share\foo\bar\baz\";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUncPathWithoutMultipleBackslashes() {
+            // Arrange
+            string basePath = @"\\server\\share\\foo\\bar\\baz";
+            string canonicalPath = @"\\server\share\foo\bar\baz\";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUrlForDomainOnlyWithTrailingSlash() {
+            // Arrange
+            string basePath = @"http://www.example.com";
+            string canonicalPath = @"http://www.example.com/";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUrlForFolderWithoutTrailingSlash() {
+            // Arrange
+            string basePath = @"http://www.example.com/nuget";
+            string canonicalPath = @"http://www.example.com/nuget";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUrlForFolderWithTrailingSlash() {
+            // Arrange
+            string basePath = @"http://www.example.com/nuget/";
+            string canonicalPath = @"http://www.example.com/nuget/";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUrlWithFilename() {
+            // Arrange
+            string basePath = @"http://www.example.com/nuget/index.html";
+            string canonicalPath = @"http://www.example.com/nuget/index.html";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUrlWithQuerystring() {
+            // Arrange
+            string basePath = @"http://www.example.com/nuget/index.html?abc=123";
+            string canonicalPath = @"http://www.example.com/nuget/index.html?abc=123";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
+
+        [TestMethod]
+        public void GetCanonicalPathReturnsCorrectUrlWithEncodedQuerystring() {
+            // Arrange
+            string basePath = @"http://www.example.com/nuget/index.html?abc%3D123";
+            string canonicalPath = @"http://www.example.com/nuget/index.html?abc=123";
+
+            // Act
+            string targetPath = PathUtility.GetCanonicalPath(basePath);
+
+            // Assert
+            Assert.AreEqual(targetPath, canonicalPath);
+        }
     }
 }

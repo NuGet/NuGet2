@@ -44,5 +44,21 @@ namespace NuGet {
             Uri resultUri = new Uri(new Uri(basePath), new Uri(relativePath, UriKind.Relative));
             return resultUri.LocalPath;
         }
+
+        public static string GetCanonicalPath(string path) {
+            if (PathValidator.IsValidLocalPath(path) || (PathValidator.IsValidUncPath(path))) {
+                int length = path.Length;
+                if ((length != 0) && (path[length - 1] != Path.DirectorySeparatorChar))
+                {
+                    path += Path.DirectorySeparatorChar;
+                }
+                return Path.GetFullPath(path);
+            }
+            if (PathValidator.IsValidUrl(path)) {
+                var url = new Uri(path);
+                return url.ToString();
+            }
+            return path;
+        }
     }
 }
