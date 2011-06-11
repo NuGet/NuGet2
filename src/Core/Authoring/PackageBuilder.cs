@@ -251,7 +251,6 @@ namespace NuGet {
                     source));
             }
             Files.AddRange(searchFiles);
-            
         }
 
         private static void CreatePart(Package package, string path, Stream sourceStream) {

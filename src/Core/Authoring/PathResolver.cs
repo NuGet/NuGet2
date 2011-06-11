@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -42,7 +41,7 @@ namespace NuGet {
                 // If we aren't dealing with network paths, trim the leading slash. 
                 searchPath = searchPath.TrimStart(Path.DirectorySeparatorChar);
             }
-
+            basePath = NormalizeBasePath(basePath);
             string basePathToEnumerate = GetPathToEnumerateFrom(basePath, searchPath);
 
             // Append the basePath to searchPattern and get the search regex. We need to do this because the search regex is matched from line start.
@@ -117,6 +116,10 @@ namespace NuGet {
                 packagePath = Path.GetFileName(fullPath);
             }
             return Path.Combine(targetPath ?? String.Empty, packagePath);
+        }
+
+        private static string NormalizeBasePath(string directory) {
+            return Path.GetFullPath(String.IsNullOrEmpty(directory) ? "." : directory);
         }
 
         /// <summary>

@@ -322,11 +322,5 @@ namespace NuGet.Test {
             Assert.AreEqual(@"bin\debug\baz.dll", files[0].Path);
             Assert.AreEqual(@"bin\debug\notbaz.dll", files[1].Path);
         }
-
-        private void AssertEqual(PathSearchFilter expected, PathSearchFilter actual) {
-            Assert.AreEqual(expected.SearchDirectory, actual.SearchDirectory);
-            Assert.AreEqual(expected.SearchOption, actual.SearchOption);
-            Assert.AreEqual(expected.SearchPattern, actual.SearchPattern);
-        }
     }
 }

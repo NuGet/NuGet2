@@ -138,7 +138,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authoring\PathSearchFilter.cs" />
     <Compile Include="Logging\NullLogger.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="PackageOperationEventArgs.cs" />
