@@ -79,6 +79,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package source name &apos;All&apos; is a reserved name..
+        /// </summary>
+        internal static string AddSourceCommandAllNameIsReserved {
+            get {
+                return ResourceManager.GetString("AddSourceCommandAllNameIsReserved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Registers a new package source..
         /// </summary>
         internal static string AddSourceCommandDescription {
@@ -102,15 +111,6 @@ namespace NuGet.Common {
         internal static string AddSourceCommandSourceAddedSuccessfully {
             get {
                 return ResourceManager.GetString("AddSourceCommandSourceAddedSuccessfully", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Source to be registered..
-        /// </summary>
-        internal static string AddSourceCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("AddSourceCommandSourceDescription", resourceCulture);
             }
         }
         
@@ -142,7 +142,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to -Name [name] -Source [source].
+        ///   Looks up a localized string similar to &lt;name&gt; &lt;source&gt;.
         /// </summary>
         internal static string AddSourceCommandUsageSummary {
             get {
@@ -518,7 +518,7 @@ namespace NuGet.Common {
                 return ResourceManager.GetString("ListCommandVerboseListDescription", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Displays a list of registered sources..
         /// </summary>
@@ -563,13 +563,13 @@ namespace NuGet.Common {
                 return ResourceManager.GetString("LookingForInstalledPackages", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Name of the source..
+        ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
         /// </summary>
-        internal static string NameDescription {
+        internal static string MissingOptionValueError {
             get {
-                return ResourceManager.GetString("NameDescription", resourceCulture);
+                return ResourceManager.GetString("MissingOptionValueError", resourceCulture);
             }
         }
         
@@ -579,15 +579,6 @@ namespace NuGet.Common {
         internal static string NameRequired {
             get {
                 return ResourceManager.GetString("NameRequired", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
-        /// </summary>
-        internal static string MissingOptionValueError {
-            get {
-                return ResourceManager.GetString("MissingOptionValueError", resourceCulture);
             }
         }
         
@@ -961,7 +952,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to find any package sources matching name: {0}..
+        ///   Looks up a localized string similar to Unable to find any package source(s) matching name: {0}..
         /// </summary>
         internal static string RemoveSourceCommandNoMatchingSourcesFound {
             get {
@@ -979,7 +970,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to -Name [name].
+        ///   Looks up a localized string similar to &lt;name&gt;.
         /// </summary>
         internal static string RemoveSourceCommandUsageSummary {
             get {
@@ -1002,6 +993,15 @@ namespace NuGet.Common {
         internal static string RemovingPackageReference {
             get {
                 return ResourceManager.GetString("RemovingPackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        internal static string ReservedPackageNameAll {
+            get {
+                return ResourceManager.GetString("ReservedPackageNameAll", resourceCulture);
             }
         }
         

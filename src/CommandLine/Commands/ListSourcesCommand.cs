@@ -25,13 +25,13 @@ namespace NuGet.Commands {
             }
             Console.PrintJustified(0, NuGetResources.ListSourcesCommandRegisteredSources);
             Console.WriteLine();
-            var sourcePadding = Enumerable.Repeat(" ", 6);
+            var sourcePadding = new String(' ', 6);
             for (int i = 0; i < sourcesList.Count; i++) {
                 var source = sourcesList[i];
                 var indexNumber = i + 1;
-                var namePadding = i >= 9 ? Enumerable.Repeat(" ", 1) : Enumerable.Repeat(" ", 2);
-                Console.WriteLine("  {0}.{1}{2}", indexNumber, string.Concat(namePadding), source.Name);
-                Console.WriteLine("{0}{1}", string.Concat(sourcePadding), source.Source);
+                var namePadding = new String(' ', i >= 9 ? 1 : 2);
+                Console.WriteLine("  {0}.{1}{2}", indexNumber, namePadding, source.Name);
+                Console.WriteLine("{0}{1}", sourcePadding, source.Source);
             }
         }
     }
