@@ -30,20 +30,26 @@ namespace NuGet.Dialog.Providers {
         private bool _isExpanded;
         private bool _isSelected;
         private bool _loadingInProgress;
-        private readonly bool _collapseVersion;
+        private readonly bool _collapseVersions;
 
         private CancellationTokenSource _currentCancellationSource;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<EventArgs> PageDataChanged;
 
-        protected PackagesTreeNodeBase(IVsExtensionsTreeNode parent, PackagesProviderBase provider, bool collapseVersion = true) {
+        protected PackagesTreeNodeBase(IVsExtensionsTreeNode parent, PackagesProviderBase provider, bool collapseVersions = true) {
             Debug.Assert(provider != null);
 
-            _collapseVersion = collapseVersion;
+            _collapseVersions = collapseVersions;
             Parent = parent;
             Provider = provider;
             PageSize = DefaultItemsPerPage;
+        }
+
+        public bool CollapseVersions {
+            get {
+                return _collapseVersions;
+            }
         }
 
         protected PackagesProviderBase Provider {
@@ -278,7 +284,7 @@ namespace NuGet.Dialog.Providers {
                 // Buffer 3 page sizes
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
 
-                if (_collapseVersion) {
+                if (_collapseVersions) {
                     _query = _query.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
                 }
             }

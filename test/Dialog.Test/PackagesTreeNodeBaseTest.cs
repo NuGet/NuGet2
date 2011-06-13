@@ -251,6 +251,37 @@ namespace NuGet.Dialog.Test {
                                });
         }
 
+        [TestMethod]
+        public void DuplicateExtensionsAreNotRemovedIfCollapseVersionsPropertyIsFalse() {
+            // Arrange
+            var node = CreatePackagesTreeNodeBase(new[]{
+                    PackageUtility.CreatePackage("A", "1.0",rating:1),
+                    PackageUtility.CreatePackage("A", "2.0",rating:1),
+                    PackageUtility.CreatePackage("A", "3.0",rating:1),
+                    PackageUtility.CreatePackage("B", "1.0",rating:2),
+                    PackageUtility.CreatePackage("B", "2.0",rating:2),
+                    PackageUtility.CreatePackage("C", "4.0",rating:2.3)
+                }, 
+                parentTreeNode: null, 
+                collapseVersions: false);
+
+            // Act
+            TreeNodeActionTest(node,
+                               n => n.LoadPage(1),
+                               n => {
+                                   // Assert
+                                   Assert.AreEqual(1, n.TotalPages);
+                                   Assert.AreEqual(1, n.CurrentPage);
+                                   Assert.AreEqual(6, n.Extensions.Count);
+                                   Assert.AreEqual("C", n.Extensions[0].Name);
+                                   Assert.AreEqual("B", n.Extensions[1].Name);
+                                   Assert.AreEqual("B", n.Extensions[2].Name);
+                                   Assert.AreEqual("A", n.Extensions[3].Name);
+                                   Assert.AreEqual("A", n.Extensions[4].Name);
+                                   Assert.AreEqual("A", n.Extensions[5].Name);
+                               });
+        }
+
         private static void TreeNodeActionTest(Action<PackagesTreeNodeBase> treeNodeAction,
                                                Action<PackagesTreeNodeBase> callback,
                                                int? pageSize = null,
@@ -317,23 +348,23 @@ namespace NuGet.Dialog.Test {
             ExceptionAssert.ThrowsArgOutOfRange(() => node.LoadPage(0), "pageNumber", 1, null, true);
         }
 
-        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IVsExtensionsTreeNode parentTreeNode = null, int numberOfPackages = 1) {
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IVsExtensionsTreeNode parentTreeNode = null, int numberOfPackages = 1, bool collapseVersions = true) {
             if (parentTreeNode == null) {
                 parentTreeNode = parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
-            return new MockTreeNode(parentTreeNode, provider, numberOfPackages);
+            return new MockTreeNode(parentTreeNode, provider, numberOfPackages, collapseVersions);
 
         }
 
-        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null) {
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null, bool collapseVersions = true) {
             if (parentTreeNode == null) {
                 parentTreeNode = parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
-            return new MockTreeNode(parentTreeNode, provider, packages) {
+            return new MockTreeNode(parentTreeNode, provider, packages, collapseVersions) {
                 IsSelected = true
             };
         }

@@ -31,14 +31,14 @@ namespace NuGet.Dialog.Test {
             return _packages.AsQueryable();
         }
 
-        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages)
-            : base(parent, provider) {
+        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions)
+            : base(parent, provider, collapseVersions) {
 
             _numberOfPackages = numberOfPackages;
         }
 
-        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, IEnumerable<IPackage> packages)
-            : base(parent, provider) {
+        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, IEnumerable<IPackage> packages, bool collapseVersions)
+            : base(parent, provider, collapseVersions) {
 
             _packages = packages;
         }
