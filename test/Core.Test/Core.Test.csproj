@@ -59,6 +59,7 @@
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageSorterTest.cs" />
     <Compile Include="PackageSourceProviderTest.cs" />
+    <Compile Include="PathResolverTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
@@ -85,7 +86,6 @@
     <Compile Include="PackageBuilderTest.cs" />
     <Compile Include="PackageRepositoryFactoryTest.cs" />
     <Compile Include="PackageRepositoryTest.cs" />
-    <Compile Include="PathResolverTest.cs" />
     <Compile Include="PreprocessorTest.cs" />
     <Compile Include="ProjectManagerTest.cs" />
     <Compile Include="FileSystemExtensionsTest.cs" />

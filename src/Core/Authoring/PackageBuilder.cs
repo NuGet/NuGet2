@@ -245,23 +245,12 @@ namespace NuGet {
         }
 
         private void AddFiles(string basePath, string source, string destination) {
-            PathSearchFilter searchFilter = PathResolver.ResolveSearchFilter(basePath, source);
-            IEnumerable<string> searchFiles = Directory.EnumerateFiles(searchFilter.SearchDirectory,
-                                                          searchFilter.SearchPattern,
-                                                          searchFilter.SearchOption);
-
-            if (!searchFilter.WildCardSearch && !searchFiles.Any()) {
+            IEnumerable<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination);
+            if (!PathResolver.IsWildCardSearch(source) && !searchFiles.Any()) {
                 throw new FileNotFoundException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound,
                     source));
             }
-
-            foreach (var file in searchFiles) {
-                var destinationPath = PathResolver.ResolvePackagePath(searchFilter, file, destination);
-                Files.Add(new PhysicalPackageFile {
-                    SourcePath = file,
-                    TargetPath = destinationPath
-                });
-            }
+            Files.AddRange(searchFiles);
         }
 
         private static void CreatePart(Package package, string path, Stream sourceStream) {
