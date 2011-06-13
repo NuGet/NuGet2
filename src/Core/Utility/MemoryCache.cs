@@ -2,17 +2,18 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace NuGet {
     internal sealed class MemoryCache {
         private static readonly Lazy<MemoryCache> _default = new Lazy<MemoryCache>(() => new MemoryCache());
+        // Interval to wait before cleaning up expired items
         private static readonly TimeSpan _gcInterval = TimeSpan.FromSeconds(10);
 
         private readonly ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
+        private readonly Timer _timer;
 
         private MemoryCache() {
-            StartGCTask();
+            _timer = new Timer(GarbageCollectExpiredEntries, null, _gcInterval, _gcInterval);
         }
 
         internal static MemoryCache Default {
@@ -28,6 +29,7 @@ namespace NuGet {
                 cachedItem = new CacheItem(factory());
                 _cache.TryAdd(cacheKey, cachedItem);
             }
+
             // Increase the expiration time
             cachedItem.Expires = DateTime.Now + slidingExpiration;
             return (T)cachedItem.Value;
@@ -38,29 +40,21 @@ namespace NuGet {
             _cache.TryRemove(cacheKey, out item);
         }
 
-        private void StartGCTask() {
-            Task.Factory.StartNew(GarbageCollectExpiredEntries, TaskCreationOptions.LongRunning);
-        }
+        private void GarbageCollectExpiredEntries(object state) {
+            // Take a snapshot of the entries
+            var entries = _cache.ToList();
 
-        private void GarbageCollectExpiredEntries() {
-            while (true) {
-                // Take a snapshot of the entries
-                var entries = _cache.ToList();
-
-                // Remove all the expired ones
-                foreach (var entry in entries) {
-                    if (entry.Value.Expired) {
-                        Remove(entry.Key);
-                    }
+            // Remove all the expired ones
+            foreach (var entry in entries) {
+                if (entry.Value.Expired) {
+                    Remove(entry.Key);
                 }
-
-                Thread.Sleep(_gcInterval);
             }
         }
 
         private class CacheItem {
             private readonly object _value;
-            
+
             public CacheItem(object value) {
                 _value = value;
             }
