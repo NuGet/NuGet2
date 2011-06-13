@@ -216,7 +216,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             private readonly IFileSystem _fileSystem;
             private readonly PackageManager _packageManager;
 
-            public TestInstallCommand(IPackageRepositoryFactory factory, IPackageSourceProvider sourceProvider, IFileSystem fileSystem, PackageManager packageManager = null)
+            public TestInstallCommand(IPackageRepositoryFactory factory,
+                                      IPackageSourceProvider sourceProvider,
+                                      IFileSystem fileSystem,
+                                      PackageManager packageManager = null)
                 : base(factory, sourceProvider) {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
@@ -228,6 +231,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             protected override PackageManager GetPackageManager(IFileSystem fileSystem, bool useMachineCache) {
                 return _packageManager ?? base.GetPackageManager(fileSystem, useMachineCache);
+            }
+
+            protected override PackageReferenceFile GetPackageReferenceFile(string path) {
+                return new PackageReferenceFile(_fileSystem, path);
             }
         }
     }

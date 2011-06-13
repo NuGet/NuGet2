@@ -1,31 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace NuGet {
     public class PackageSourceProvider : IPackageSourceProvider {
         internal const string FileSettingsSectionName = "packageSources";
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly PackageSourceProvider Default = new PackageSourceProvider(Settings.UserSettings);
+        
+        private readonly ISettings _settingsManager;
+        private readonly IEnumerable<PackageSource> _defaultPackageSources;
 
-        private ISettings _settingsManager;
+        public PackageSourceProvider(ISettings settingsManager)
+            : this(settingsManager, defaultSources: null) {
+        }
 
-        public PackageSourceProvider(ISettings settingsManager) {
+        /// <summary>
+        /// Creates a new PackageSourceProvider instance.
+        /// </summary>
+        /// <param name="settingsManager">Specifies the settings file to use to read package sources.</param>
+        /// <param name="defaultSources">Specifies the sources to return if no package sources are available.</param>
+        public PackageSourceProvider(ISettings settingsManager, IEnumerable<PackageSource> defaultSources) {
             if (settingsManager == null) {
                 throw new ArgumentNullException("settingsManager");
             }
-
             _settingsManager = settingsManager;
+            _defaultPackageSources = defaultSources ?? Enumerable.Empty<PackageSource>();
         }
 
+        /// <summary>
+        /// Returns PackageSources if specified in the config file. Else returns the default sources specified in the constructor.
+        /// If no default values were specified, returns an empty sequence.
+        /// </summary>
         public IEnumerable<PackageSource> LoadPackageSources() {
             IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(FileSettingsSectionName);
             if (settingsValue != null && settingsValue.Any()) {
                 return settingsValue.Select(p => new PackageSource(p.Value, p.Key)).ToList();
             }
-
-            return Enumerable.Empty<PackageSource>();
+            return _defaultPackageSources;
         }
 
         public void SavePackageSources(IEnumerable<PackageSource> sources) {

@@ -5,10 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace NuGet.Test {
-
     [TestClass]
     public class PackageSourceProviderTest {
-
         [TestMethod]
         public void TestNoPackageSourcesAreReturnedIfUserSettingsIsEmpty() {
             // Arrange
@@ -19,6 +17,47 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(0, values.Count);
+        }
+
+        [TestMethod]
+        public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsNull() {
+            // Arrange
+            var settings = new MockUserSettingsManager();
+            var provider = new PackageSourceProvider(settings, defaultSources: null);
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+            // Assert
+            Assert.IsFalse(values.Any());
+        }
+
+        [TestMethod]
+        public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsEmpty() {
+            // Arrange
+            var settings = new MockUserSettingsManager();
+            var provider = new PackageSourceProvider(settings, defaultSources: new PackageSource[] { });
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+            // Assert
+            Assert.IsFalse(values.Any());
+        }
+
+        [TestMethod]
+        public void LoadPackageSourcesReturnsDefaultSourcesIfSpecified() {
+            // Arrange
+            var settings = new MockUserSettingsManager();
+            var provider = new PackageSourceProvider(settings, defaultSources: new[] { new PackageSource("A"), new PackageSource("B") });
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.AreEqual(2, values.Count);
+            Assert.AreEqual("A", values.First().Source);
+            Assert.AreEqual("B", values.Last().Source);
         }
 
         [TestMethod]

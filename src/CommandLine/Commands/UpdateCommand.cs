@@ -7,9 +7,8 @@ using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", UsageSummary = "<packages.config>")]
+    [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>")]
     public class UpdateCommand : Command {
-        private const string DefaultFeedUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
         private const string PackagesFolder = "packages";
@@ -46,26 +45,101 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "UpdateCommandSelfDescription")]
         public bool Self { get; set; }
 
+        [Option(typeof(NuGetResources), "UpdateCommandVerboseDescription")]
+        public bool Verbose { get; set; }
+
         public override void ExecuteCommand() {
             if (Self) {
                 Assembly assembly = typeof(UpdateCommand).Assembly;
                 SelfUpdate(assembly.Location, assembly.GetName().Version);
             }
             else {
-                string packagesFile = GetPackagesFile();
+                string inputFile = GetInputFile();
 
-                if (String.IsNullOrEmpty(packagesFile)) {
-                    throw new CommandLineException(NuGetResources.NoPackagesConfigSpecified);
+                if (String.IsNullOrEmpty(inputFile)) {
+                    throw new CommandLineException(NuGetResources.InvalidFile);
+                }
+                else if (inputFile.EndsWith(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
+                    UpdatePackages(inputFile);
                 }
                 else {
-                    UpdatePackages(packagesFile);
+                    if (!File.Exists(inputFile)) {
+                        throw new CommandLineException(NuGetResources.UnableToFindSolution, inputFile);
+                    }
+                    else {
+                        string solutionDir = Path.GetDirectoryName(inputFile);
+                        UpdateAllPackages(solutionDir);
+                    }
                 }
             }
         }
 
-        private string GetPackagesFile() {
+        private void UpdateAllPackages(string solutionDir) {
+            Console.WriteLine(NuGetResources.ScanningForProjects);
+
+            // Search recursively for all packages.config files
+            var packagesConfigFiles = Directory.GetFiles(solutionDir, PackageReferenceRepository.PackageReferenceFile, SearchOption.AllDirectories);
+            var projects = packagesConfigFiles.Select(p => GetProject(p))
+                                              .Where(p => p.Project != null)
+                                              .ToList();
+
+
+            if (projects.Count == 0) {
+                Console.WriteLine(NuGetResources.NoProjectsFound);
+                return;
+            }
+
+            if (projects.Count == 1) {
+                Console.WriteLine(NuGetResources.FoundProject, projects.Single().Project.ProjectName);
+            }
+            else {
+                Console.WriteLine(NuGetResources.FoundProjects, projects.Count, String.Join(", ", projects.Select(p => p.Project.ProjectName)));
+            }
+
+            string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
+            var pathResolver = new DefaultPackagePathResolver(repositoryPath);
+            IPackageRepository sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
+
+            foreach (var project in projects) {
+                try {
+                    UpdatePackages(project.PackagesConfigPath, project.Project, repositoryPath, sourceRepository);
+                    if (Verbose) {
+                        Console.WriteLine();
+                    }
+                }
+                catch (Exception e) {
+                    Console.WriteWarning(e.Message);
+                }
+            }
+        }
+
+        private ProjectPair GetProject(string packagesConfigPath) {
+            try {
+                return new ProjectPair {
+                    PackagesConfigPath = packagesConfigPath,
+                    Project = GetMSBuildProject(packagesConfigPath)
+                };
+            }
+            catch (Exception) {
+                return new ProjectPair {
+                    PackagesConfigPath = packagesConfigPath
+                };
+            }
+        }
+
+        private string GetInputFile() {
             if (Arguments.Any()) {
-                return GetPackagesConfigPath(Arguments[0]);
+                string path = Arguments[0];
+                string extension = Path.GetExtension(path).ToLowerInvariant();
+
+                switch (extension) {
+                    case ".config":
+                        return GetPackagesConfigPath(path);
+                    case ".sln":
+                        return Path.GetFullPath(path);
+                    default:
+                        break;
+                }
             }
 
             return null;
@@ -76,76 +150,25 @@ namespace NuGet.Commands {
                 return Path.GetFullPath(path);
             }
 
-            throw new CommandLineException(NuGetResources.NoPackagesConfigSpecified);
+            return null;
         }
 
-        private void UpdatePackages(string packageReferenceFilePath) {
-            // Get the reference file
-            var referenceFile = new PackageReferenceFile(packageReferenceFilePath);
-
+        private void UpdatePackages(string packagesConfigPath, IMSBuildProjectSystem project = null, string repositoryPath = null, IPackageRepository sourceRepository = null) {
             // Get the msbuild project
-            IMSBuildProjectSystem project = GetMSBuildProject(packageReferenceFilePath);
+            project = project ?? GetMSBuildProject(packagesConfigPath);
 
             // Resolve the repository path
-            string repositoryPath = GetReposioryPath(project.Root);
+            repositoryPath = repositoryPath ?? GetReposioryPath(project.Root);
 
             var pathResolver = new DefaultPackagePathResolver(repositoryPath);
 
             // Create the local and source repositories
-            var localRepository = new LocalPackageRepository(repositoryPath);
-            var sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
+            var localRepository = new PackageReferenceRepository(project, new SharedPackageRepository(repositoryPath));
+            sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
+            IPackageConstraintProvider constraintProvider = localRepository;
 
-            UpdatePackages(referenceFile, project, localRepository, sourceRepository, pathResolver);
-        }
-
-        internal void UpdatePackages(PackageReferenceFile referenceFile,
-                                     IMSBuildProjectSystem project,
-                                     IPackageRepository localRepository,
-                                     IPackageRepository sourceRepository,
-                                     IPackagePathResolver pathResolver) {
-            // Get the list of update operations
-            var updateOperations = GetUpdates(referenceFile, localRepository, sourceRepository).ToList();
-
-            // If there's nothing to update, bail out
-            if (!updateOperations.Any()) {
-                return;
-            }
-
-            foreach (var operation in updateOperations) {
-                if (operation.Action == PackageAction.Uninstall) {
-                    Console.WriteLine(NuGetResources.RemovingPackageReference, operation.Package.GetFullName());
-                    referenceFile.DeleteEntry(operation.Package.Id, operation.Package.Version);
-                }
-                else {
-                    Console.WriteLine(NuGetResources.AddingPackageReference, operation.Package.GetFullName());
-                    referenceFile.AddEntry(operation.Package.Id, operation.Package.Version);
-                }
-
-                // Get the install path to this package
-                string installPath = pathResolver.GetInstallPath(operation.Package);
-
-                // Resolve all assemblies for the target framework
-                var assembies = project.GetCompatibleItems(operation.Package.AssemblyReferences, "Assemblies");
-
-                foreach (var assemblyReference in assembies) {
-                    if (operation.Action == PackageAction.Uninstall) {
-                        Console.WriteLine(NuGetResources.RemovingAssemblyReference, assemblyReference.Name);
-
-                        project.RemoveReference(assemblyReference.Name);
-                    }
-                    else {
-                        Console.WriteLine(NuGetResources.AddingAssemblyReference, assemblyReference.Name);
-
-                        string referencePath = Path.Combine(installPath, assemblyReference.Path);
-
-                        using (Stream stream = assemblyReference.GetStream()) {
-                            project.AddReference(referencePath, stream);
-                        }
-                    }
-                }
-            }
-
-            // Save the project
+            Console.WriteLine(NuGetResources.UpdatingProject, project.ProjectName);
+            UpdatePackages(localRepository, sourceRepository, constraintProvider, pathResolver, project);
             project.Save();
         }
 
@@ -157,17 +180,33 @@ namespace NuGet.Commands {
                 string projectDir = Path.GetDirectoryName(projectRoot);
                 string solutionDir = ProjectHelper.GetSolutionDir(projectDir);
 
-                if (!String.IsNullOrEmpty(solutionDir)) {
-                    packagesDir = Path.Combine(solutionDir, PackagesFolder);
-                }
+                return GetRepositoryPathFromSolution(solutionDir);
             }
 
+            return GetPackagesDir(packagesDir);
+        }
+
+        private string GetRepositoryPathFromSolution(string solutionDir) {
+            string packagesDir = RepositoryPath;
+
+            if (String.IsNullOrEmpty(packagesDir) &&
+                !String.IsNullOrEmpty(solutionDir)) {
+                packagesDir = Path.Combine(solutionDir, PackagesFolder);
+            }
+
+            return GetPackagesDir(packagesDir);
+        }
+
+        private string GetPackagesDir(string packagesDir) {
             if (!String.IsNullOrEmpty(packagesDir)) {
                 // Get the full path to the packages directory
                 packagesDir = Path.GetFullPath(packagesDir);
 
                 // REVIEW: Do we need to check for existence?
                 if (Directory.Exists(packagesDir)) {
+                    string currentDirectory = Directory.GetCurrentDirectory();
+                    string relativePath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(currentDirectory), packagesDir);
+                    Console.WriteLine(NuGetResources.LookingForInstalledPackages, relativePath);
                     return packagesDir;
                 }
             }
@@ -183,97 +222,44 @@ namespace NuGet.Commands {
                 return new MSBuildProjectSystem(projectFile);
             }
 
-            throw new CommandLineException(NuGetResources.UnableToLocateProjectFile);
+            throw new CommandLineException(NuGetResources.UnableToLocateProjectFile, packageReferenceFilePath);
         }
 
-        internal IEnumerable<PackageOperation> GetUpdates(PackageReferenceFile referenceFile,
-                                                          IPackageRepository localRepository,
-                                                          IPackageRepository sourceRepository) {
-            var candidates = new List<IPackage>();
-            var constraints = new Dictionary<IPackage, IVersionSpec>();
+        internal void UpdatePackages(IPackageRepository localRepository,
+                                     IPackageRepository sourceRepository,
+                                     IPackageConstraintProvider constraintProvider,
+                                     IPackagePathResolver pathResolver,
+                                     IProjectSystem project) {
+            var projectManager = new ProjectManager(sourceRepository, pathResolver, project, localRepository);
+            projectManager.ConstraintProvider = constraintProvider;
 
-            var packageReferences = GetPackageReferences(referenceFile);
-
-            foreach (var packageReference in packageReferences) {
-                // Look for the package in the local repository
-                IPackage package = localRepository.FindPackage(packageReference.Id, packageReference.Version);
-
-                // If we didn't find the package then we can't successfully perform the update
-                if (package == null) {
-                    Console.WriteWarning(NuGetResources.PackageDoesNotExist, packageReference.Id, packageReference.Version);
-                    continue;
-                }
-
-                // Only consider packages that are valid to update (i.e. have binaries)
-                if (!SupportsUpdates(package)) {
-                    Console.WriteWarning(NuGetResources.SkippingUpdateCheck, packageReference.Id, packageReference.Version);
-                    continue;
-                }
-
-                // Add it to the list of candidates
-                candidates.Add(package);
-
-                // Keep track of the constraints for this package
-                constraints[package] = packageReference.VersionConstraint;
+            if (Verbose) {
+                projectManager.Logger = Console;
             }
 
-            foreach (var package in GetUpdateOrder(candidates)) {
-                IVersionSpec versionConstraint = constraints[package];
-
-                // Use the right version constraint
-                IVersionSpec constraint = Safe ? VersionUtility.GetSafeRange(package.Version) : versionConstraint;
-
-                IPackage newPackage;
-
-                if (constraint != null) {
-                    newPackage = sourceRepository.FindPackage(package.Id, constraint);
-                }
-                else {
-                    newPackage = sourceRepository.FindPackage(package.Id);
-                }
-
-                if (newPackage != null && newPackage.Version > package.Version) {
-                    Console.WriteLine(NuGetResources.UpdatingPackage, newPackage.Id, newPackage.Version);
-
-                    // Create the walker and resolve dependencies
-                    var walker = new UpdateWalker(localRepository,
-                                                  sourceRepository,
-                                                  new DependentsWalker(localRepository),
-                                                  Console,
-                                                  updateDependencies: true);
-
-                    // Return the list of operations we're going to perform
-                    foreach (PackageOperation operation in walker.ResolveOperations(newPackage)) {
-                        yield return operation;
+            foreach (var package in GetPackages(localRepository)) {
+                if (localRepository.Exists(package.Id)) {
+                    try {
+                        if (Safe) {
+                            IVersionSpec safeRange = VersionUtility.GetSafeRange(package.Version);
+                            projectManager.UpdatePackageReference(package.Id, safeRange, updateDependencies: true);
+                        }
+                        else {
+                            projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true);
+                        }
+                    }
+                    catch (Exception e) {
+                        Console.WriteWarning(e.Message);
                     }
                 }
-                else {
-                    Console.WriteLine(NuGetResources.NoUpdatesAvailable, package.Id);
-                }
             }
-        }
-
-        private IEnumerable<PackageReference> GetPackageReferences(PackageReferenceFile referenceFile) {
-            IEnumerable<PackageReference> references = referenceFile.GetPackageReferences();
-            if (Id.Any()) {
-                var referenceIdSet = new HashSet<string>(references.Select(r => r.Id), StringComparer.OrdinalIgnoreCase);
-                var idSet = new HashSet<string>(Id, StringComparer.OrdinalIgnoreCase);
-                var invalid = Id.Where(id => !referenceIdSet.Contains(id));
-
-                if (invalid.Any()) {
-                    throw new CommandLineException(NuGetResources.UnableToFindPackages, String.Join(", ", invalid));
-                }
-
-                references = references.Where(r => idSet.Contains(r.Id));
-            }
-            return references;
         }
 
         internal void SelfUpdate(string exePath, Version version) {
-            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, DefaultFeedUrl);
+            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, NuGetConstants.DefaultFeedUrl);
 
             // Get the nuget command line package from the specified repository
-            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(DefaultFeedUrl);
+            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
 
             IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
 
@@ -330,14 +316,26 @@ namespace NuGet.Commands {
             File.Move(oldPath, newPath);
         }
 
-        private static bool SupportsUpdates(IPackage package) {
-            // We only support assemblies for now
-            return !package.GetContentFiles().Any() && package.AssemblyReferences.Any();
-        }
+        private IEnumerable<IPackage> GetPackages(IPackageRepository repository) {
+            var packages = repository.GetPackages();
+            if (Id.Any()) {
+                var packageIdSet = new HashSet<string>(packages.Select(r => r.Id), StringComparer.OrdinalIgnoreCase);
+                var idSet = new HashSet<string>(Id, StringComparer.OrdinalIgnoreCase);
+                var invalid = Id.Where(id => !packageIdSet.Contains(id));
 
-        private IEnumerable<IPackage> GetUpdateOrder(IEnumerable<IPackage> packages) {
+                if (invalid.Any()) {
+                    throw new CommandLineException(NuGetResources.UnableToFindPackages, String.Join(", ", invalid));
+                }
+
+                packages = packages.Where(r => idSet.Contains(r.Id));
+            }
             var packageSorter = new PackageSorter();
             return packageSorter.GetPackagesByDependencyOrder(new ReadOnlyPackageRepository(packages)).Reverse();
+        }
+
+        private class ProjectPair {
+            public string PackagesConfigPath { get; set; }
+            public IMSBuildProjectSystem Project { get; set; }
         }
     }
 }

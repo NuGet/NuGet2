@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -53,7 +54,7 @@ namespace NuGet.Commands {
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
             if (Path.GetFileName(Arguments[0]).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
-                InstallPackagesFromConfigFile(fileSystem, Arguments[0]);
+                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(Arguments[0]));
             }
             else {
                 PackageManager packageManager = GetPackageManager(fileSystem);
@@ -75,14 +76,18 @@ namespace NuGet.Commands {
             }
         }
 
+        protected virtual PackageReferenceFile GetPackageReferenceFile(string path) {
+            return new PackageReferenceFile(Path.GetFullPath(path));
+        }
+
         private IPackageRepository GetRepository() {
             var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             repository.Logger = Console;
             return repository;
         }
 
-        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, string packageReferenceFilePath) {
-            var packageReferences = new PackageReferenceFile(fileSystem, packageReferenceFilePath).GetPackageReferences();
+        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file) {
+            var packageReferences = file.GetPackageReferences().ToList();
             PackageManager packageManager = GetPackageManager(fileSystem, useMachineCache: true);
 
             bool installedAny = false;
@@ -94,7 +99,7 @@ namespace NuGet.Commands {
                 }
             }
 
-            if (!installedAny) {
+            if (!installedAny && packageReferences.Any()) {
                 Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, PackageReferenceRepository.PackageReferenceFile);
             }
         }

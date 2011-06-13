@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -9,8 +10,14 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PublishCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        public override void ExecuteCommand() {
+        public IPackageSourceProvider SourceProvider { get; private set; }
 
+        [ImportingConstructor]
+        public PublishCommand(IPackageSourceProvider packageSourceProvider) {
+            SourceProvider = packageSourceProvider;
+        }
+
+        public override void ExecuteCommand() {
             //Frist argument should be the package ID
             string packageId = Arguments[0];
             //Second argument should be the package Version
@@ -22,13 +29,13 @@ namespace NuGet.Commands {
             }
 
             //If the user passed a source use it for the gallery location
-            string galleryServerUrl = String.IsNullOrEmpty(Source) ? GalleryServer.DefaultGalleryServerUrl : Source;
-            var gallery = new GalleryServer(galleryServerUrl);
+            string source = SourceProvider.ResolveAndValidateSource(Source) ?? GalleryServer.DefaultGalleryServerUrl;
+            var gallery = new GalleryServer(source);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings.UserSettings, galleryServerUrl) : userSetApiKey;
+            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source) : userSetApiKey;
 
-            Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, packageId, packageVersion, CommandLineUtility.GetSourceDisplayName(Source));
+            Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, packageId, packageVersion, SourceProvider.GetDisplayName(Source));
             gallery.PublishPackage(apiKey, packageId, packageVersion);
             Console.WriteLine(NuGetResources.PublishCommandPackagePublished);
         }

@@ -151,7 +151,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1} will be deleted from the server. Would you like to continue?.
+        ///   Looks up a localized string similar to {0} {1} will be deleted from the {2}. Would you like to continue?.
         /// </summary>
         internal static string DeleteCommandConfirm {
             get {
@@ -160,7 +160,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1} was deleted from the server.
+        ///   Looks up a localized string similar to {0} {1} was deleted successfully..
         /// </summary>
         internal static string DeleteCommandDeletedPackage {
             get {
@@ -169,7 +169,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deleting {0} {1} from the server..
+        ///   Looks up a localized string similar to Deleting {0} {1} from the {2}..
         /// </summary>
         internal static string DeleteCommandDeletingPackage {
             get {
@@ -196,7 +196,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
+        ///   Looks up a localized string similar to Specifies the server URL..
         /// </summary>
         internal static string DeleteCommandSourceDescription {
             get {
@@ -214,7 +214,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;Package Id&gt; &lt;Package Version&gt; [API Key] [options].
+        ///   Looks up a localized string similar to &lt;package Id&gt; &lt;package version&gt; [API Key] [options].
         /// </summary>
         internal static string DeleteCommandUsageSummary {
             get {
@@ -232,7 +232,25 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Help command displays general help information and help information about other commands..
+        ///   Looks up a localized string similar to Found 1 project with a packages.config file. ({0}).
+        /// </summary>
+        internal static string FoundProject {
+            get {
+                return ResourceManager.GetString("FoundProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found {0} projects with a packages.config file. ({1}).
+        /// </summary>
+        internal static string FoundProjects {
+            get {
+                return ResourceManager.GetString("FoundProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays general help information and help information about other commands..
         /// </summary>
         internal static string HelpCommandDescription {
             get {
@@ -259,7 +277,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Install a package from a given source. If no source is specified the default feed is used..
+        ///   Looks up a localized string similar to Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used..
         /// </summary>
         internal static string InstallCommandDescription {
             get {
@@ -286,7 +304,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory in which packages will be installed.
+        ///   Looks up a localized string similar to Specifies the directory in which packages will be installed. If none specified, uses the current directory..
         /// </summary>
         internal static string InstallCommandOutputDirDescription {
             get {
@@ -295,7 +313,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The location to look for packages..
+        ///   Looks up a localized string similar to A list of packages sources to use for the install..
         /// </summary>
         internal static string InstallCommandSourceDescription {
             get {
@@ -340,6 +358,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No packages.config or solution file specified. Use the -self switch to update NuGet.exe..
+        /// </summary>
+        internal static string InvalidFile {
+            get {
+                return ResourceManager.GetString("InvalidFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid option value: &apos;{0} {1}&apos;.
         /// </summary>
         internal static string InvalidOptionValueError {
@@ -367,7 +394,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays a list of packages at a given source. If no source is specified the default feed is used..
+        ///   Looks up a localized string similar to Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used..
         /// </summary>
         internal static string ListCommandDescription {
             get {
@@ -385,7 +412,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The location to look for packages..
+        ///   Looks up a localized string similar to A list of packages sources to search..
         /// </summary>
         internal static string ListCommandSourceDescription {
             get {
@@ -421,11 +448,20 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to the NuGet gallery feed.
+        ///   Looks up a localized string similar to the NuGet gallery.
         /// </summary>
         internal static string LiveFeed {
             get {
                 return ResourceManager.GetString("LiveFeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Looking for installed packages in &apos;{0}&apos;..
+        /// </summary>
+        internal static string LookingForInstalledPackages {
+            get {
+                return ResourceManager.GetString("LookingForInstalledPackages", resourceCulture);
             }
         }
         
@@ -439,7 +475,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the &apos;SetApiKey&apos; command..
+        ///   Looks up a localized string similar to No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the &apos;setApiKey&apos; command..
         /// </summary>
         internal static string NoApiKeyFound {
             get {
@@ -448,11 +484,11 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No packages.config specified. Use the -self switch to update NuGet.exe..
+        ///   Looks up a localized string similar to No projects found with packages.config..
         /// </summary>
-        internal static string NoPackagesConfigSpecified {
+        internal static string NoProjectsFound {
             get {
-                return ResourceManager.GetString("NoPackagesConfigSpecified", resourceCulture);
+                return ResourceManager.GetString("NoProjectsFound", resourceCulture);
             }
         }
         
@@ -502,7 +538,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Base Path of the files defined in the nuspec file..
+        ///   Looks up a localized string similar to The base path of the files defined in the nuspec file..
         /// </summary>
         internal static string PackageCommandBasePathDescription {
             get {
@@ -516,15 +552,6 @@ namespace NuGet.Common {
         internal static string PackageCommandBuildDescription {
             get {
                 return ResourceManager.GetString("PackageCommandBuildDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Determines what configuration should be used when building a package from the specified project file..
-        /// </summary>
-        internal static string PackageCommandConfigurationDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandConfigurationDescription", resourceCulture);
             }
         }
         
@@ -556,7 +583,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file.
+        ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file. If not specified, uses the current directory..
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
             get {
@@ -610,7 +637,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the location of the manifest (Nuspec) or project file to create a package..
+        ///   Looks up a localized string similar to Specify the location of the nuspec or project file to create a package..
         /// </summary>
         internal static string PackageCommandUsageDescription {
             get {
@@ -619,7 +646,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;manifest | project&gt; [options].
+        ///   Looks up a localized string similar to &lt;nuspec | project&gt; [options].
         /// </summary>
         internal static string PackageCommandUsageSummary {
             get {
@@ -637,7 +664,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Overrides the Version number from the nuspec file..
+        ///   Looks up a localized string similar to Overrides the version number from the nuspec file..
         /// </summary>
         internal static string PackageCommandVersionDescription {
             get {
@@ -646,7 +673,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0} {1}&apos; does not exist. Make sure all packages exist in the packages folder before running updateRestoring the packages directory before running update..
+        ///   Looks up a localized string similar to Unable to locate &apos;{0} {1}&apos;. Make sure all packages exist in the packages folder before running update..
         /// </summary>
         internal static string PackageDoesNotExist {
             get {
@@ -664,7 +691,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Publishes a package that was uploaded to the server but not added to the live feed..
+        ///   Looks up a localized string similar to Publishes a package that was uploaded to the server but not added to the feed..
         /// </summary>
         internal static string PublishCommandDescription {
             get {
@@ -691,7 +718,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
+        ///   Looks up a localized string similar to Specifies the server URL..
         /// </summary>
         internal static string PublishCommandSourceDescription {
             get {
@@ -700,7 +727,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the Id and Version of the package that will be publised to the live feed..
+        ///   Looks up a localized string similar to Specify the id and version of the package that will be publised to the feed..
         /// </summary>
         internal static string PublishCommandUsageDescription {
             get {
@@ -709,7 +736,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;Package Id&gt; &lt;Package Version&gt; &lt;API Key&gt; [options].
+        ///   Looks up a localized string similar to &lt;package id&gt; &lt;package version&gt; &lt;API Key&gt; [options].
         /// </summary>
         internal static string PublishCommandUsageSummary {
             get {
@@ -718,7 +745,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies if the package should be created and uploaded to the server but not published to the live feed. False by default..
+        ///   Looks up a localized string similar to Specifies if the package should be created and uploaded to the server but not published to the server. False by default..
         /// </summary>
         internal static string PushCommandCreateOnlyDescription {
             get {
@@ -727,7 +754,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pushes a package to the server and optionally publish it to the feed..
+        ///   Looks up a localized string similar to Pushes a package to the server and optionally publishes it..
         /// </summary>
         internal static string PushCommandDescription {
             get {
@@ -772,7 +799,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the base GalleryServer Url..
+        ///   Looks up a localized string similar to Specifies the server URL..
         /// </summary>
         internal static string PushCommandSourceDescription {
             get {
@@ -781,7 +808,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the location of the package and your API key to push the package to the server..
+        ///   Looks up a localized string similar to Specify the path to the package and your API key to push the package to the server..
         /// </summary>
         internal static string PushCommandUsageDescription {
             get {
@@ -790,7 +817,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;package location&gt; [API key] [options].
+        ///   Looks up a localized string similar to &lt;package path&gt; [API key] [options].
         /// </summary>
         internal static string PushCommandUsageSummary {
             get {
@@ -853,6 +880,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Scanning for projects....
+        /// </summary>
+        internal static string ScanningForProjects {
+            get {
+                return ResourceManager.GetString("ScanningForProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for {1}..
         /// </summary>
         internal static string SetApiKeyCommandApiKeySaved {
@@ -871,7 +907,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Saves an API key for a given Gallery Server URL, when no URL is provided API key is saved for the default source..
+        ///   Looks up a localized string similar to Saves an API key for a given server URL. When no URL is provided API key is saved for the NuGet gallery..
         /// </summary>
         internal static string SetApiKeyCommandDescription {
             get {
@@ -880,7 +916,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Base URL to the Gallery Server where the API Key is valid..
+        ///   Looks up a localized string similar to Server URL where the API key is valid..
         /// </summary>
         internal static string SetApiKeyCommandSourceDescription {
             get {
@@ -889,16 +925,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sets the API key for the default symbol server..
-        /// </summary>
-        internal static string SetApiKeyCommandSymbolsDescription {
-            get {
-                return ResourceManager.GetString("SetApiKeyCommandSymbolsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify the API key to save and an optional URL to the Gallery Server that provided the API key..
+        ///   Looks up a localized string similar to Specify the API key to save and an optional URL to the server that provided the API key..
         /// </summary>
         internal static string SetApiKeyCommandUsageDescription {
             get {
@@ -907,7 +934,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;API key&gt; [Source].
+        ///   Looks up a localized string similar to &lt;API key&gt; [options].
         /// </summary>
         internal static string SetApiKeyCommandUsageSummary {
             get {
@@ -943,7 +970,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generates a nuspec for a new package..
+        ///   Looks up a localized string similar to Generates a nuspec for a new package. If this command is run in the same folder as a project file (.csproj, .vbproj, .fsproj), it will create a tokenized nuspec file..
         /// </summary>
         internal static string SpecCommandDescription {
             get {
@@ -970,7 +997,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [packageid].
+        ///   Looks up a localized string similar to [package id].
         /// </summary>
         internal static string SpecCommandUsageSummary {
             get {
@@ -1015,6 +1042,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to find solution &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnableToFindSolution {
+            get {
+                return ResourceManager.GetString("UnableToFindSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to locate the packages folder. Try specifying it using the repositoryPath switch..
         /// </summary>
         internal static string UnableToLocatePackagesFolder {
@@ -1024,7 +1060,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to locate project file..
+        ///   Looks up a localized string similar to Unable to locate project file for &apos;{0}&apos;..
         /// </summary>
         internal static string UnableToLocateProjectFile {
             get {
@@ -1123,7 +1159,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package sources to use for updates..
+        ///   Looks up a localized string similar to A list of package sources to search for updates..
         /// </summary>
         internal static string UpdateCommandSourceDescription {
             get {
@@ -1177,6 +1213,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Updating &apos;{0}&apos;....
+        /// </summary>
+        internal static string UpdatingProject {
+            get {
+                return ResourceManager.GetString("UpdatingProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Using &apos;{0}&apos; for metadata..
         /// </summary>
         internal static string UsingNuspecForMetadata {
@@ -1204,7 +1249,7 @@ namespace NuGet.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;nuget.exe SetApiKey [your API key from http://www.nuget.org]&apos;..
+        ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;nuget.exe setApiKey [your API key from http://www.nuget.org]&apos;..
         /// </summary>
         internal static string Warning_SymbolServerNotConfigured {
             get {

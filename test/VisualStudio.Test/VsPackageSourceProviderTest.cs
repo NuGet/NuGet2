@@ -31,7 +31,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(1, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[0].Source);
+            Assert.AreEqual("https://go.microsoft.com/fwlink/?LinkID=206669", sources[0].Source);
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(1, sources.Count);
-            Assert.AreEqual(VsPackageSourceProvider.DefaultPackageSource, sources[0].Source);
+            Assert.AreEqual("https://go.microsoft.com/fwlink/?LinkID=206669", sources[0].Source);
         }
 
         [TestMethod]
@@ -84,7 +84,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.AreEqual(2, sources.Count);
-            Assert.AreEqual(new PackageSource(VsPackageSourceProvider.DefaultPackageSource, "NuGet official package source"), sources[0]);
+            Assert.AreEqual(new PackageSource("https://go.microsoft.com/fwlink/?LinkID=206669", "NuGet official package source"), sources[0]);
             Assert.AreEqual(new PackageSource("a", "a"), sources[1]);
         }
 

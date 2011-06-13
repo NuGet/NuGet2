@@ -56,6 +56,9 @@
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\AggregateRepositoryHelper.cs" />
+    <Compile Include="..\..\Common\NuGetConstants.cs">
+      <Link>Common\NuGetConstants.cs</Link>
+    </Compile>
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
@@ -73,6 +76,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NuGetResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\PackageSourceProviderExtensions.cs" />
     <Compile Include="Common\ProjectHelper.cs" />
     <Compile Include="Common\ReadOnlyPackageRepository.cs" />
     <Compile Include="Common\ResourceHelper.cs" />

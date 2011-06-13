@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Evaluation;
 
@@ -9,7 +10,7 @@ namespace NuGet.Common {
     public class MSBuildProjectSystem : PhysicalFileSystem, IProjectSystem, IMSBuildProjectSystem {
         public MSBuildProjectSystem(string projectFile)
             : base(Path.GetDirectoryName(projectFile)) {
-            Project = new Project(projectFile);
+            Project = GetProject(projectFile);
         }
 
         private Project Project {
@@ -17,12 +18,8 @@ namespace NuGet.Common {
             set;
         }
 
-        public override void AddFile(string path, Stream stream) {
-            throw new NotSupportedException();
-        }
-
         public void AddFrameworkReference(string name) {
-            throw new NotSupportedException();
+            // No-op
         }
 
         public void AddReference(string referencePath, Stream stream) {
@@ -63,16 +60,19 @@ namespace NuGet.Common {
             }
         }
 
-        public override void DeleteFile(string path) {
-            throw new NotSupportedException();
+        private ProjectItem GetItem(string itemType, string name) {
+            return GetItems(itemType, name).FirstOrDefault();
         }
 
-        private ProjectItem GetItem(string itemType, string name) {
-            return Project.GetItems(itemType).FirstOrDefault(i => i.EvaluatedInclude.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+        private IEnumerable<ProjectItem> GetItems(string itemType, string name) {
+            return Project.GetItems(itemType).Where(i => i.EvaluatedInclude.StartsWith(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public ProjectItem GetReference(string name) {
-            return GetItem("Reference", Path.GetFileNameWithoutExtension(name));
+            name = Path.GetFileNameWithoutExtension(name);
+            return GetItems("Reference", name)
+                   .Where(item => new AssemblyName(item.EvaluatedInclude).Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                   .FirstOrDefault();
         }
 
         public FrameworkName TargetFramework {
@@ -91,6 +91,10 @@ namespace NuGet.Common {
 
         public void Save() {
             Project.Save();
+        }
+
+        private Project GetProject(string projectFile) {
+            return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(projectFile).FirstOrDefault() ?? new Project(projectFile);
         }
     }
 }
