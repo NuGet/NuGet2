@@ -1204,6 +1204,15 @@ namespace NuGet.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show verbose output while updating..
+        /// </summary>
+        internal static string UpdateCommandVerboseDescription {
+            get {
+                return ResourceManager.GetString("UpdateCommandVerboseDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Updating &apos;{0}&apos; to &apos;{1}&apos;..
         /// </summary>
         internal static string UpdatingPackage {
