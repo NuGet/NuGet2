@@ -9,7 +9,7 @@ namespace NuGet.Test {
         public void RegisteringMoreThanOneInstanceOfSameProviderOnlyKeepsOne() {
             // Arrange
             var proxyFinder = new ProxyFinder();
-            var mockProvider = new Mock<IProxyProvider>();
+            var mockProvider = new Mock<ICredentialProvider>();
 
             // Act
             Enumerable.Repeat(mockProvider.Object, 2).ToList().ForEach(proxyFinder.RegisterProvider);
@@ -22,7 +22,7 @@ namespace NuGet.Test {
         public void UnregisteringNonRegisteredProvidersShouldNotThrowExceptions() {
             // Arrange
             var proxyFinder = new ProxyFinder();
-            var mockProvider = new Mock<IProxyProvider>();
+            var mockProvider = new Mock<ICredentialProvider>();
 
             // Act
             proxyFinder.UnregisterProvider(mockProvider.Object);

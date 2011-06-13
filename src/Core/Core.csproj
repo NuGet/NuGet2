@@ -82,8 +82,10 @@
     <Compile Include="Repositories\NullConstraintProvider.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
-    <Compile Include="Utility\BaseProxyProvider.cs" />
+    <Compile Include="Utility\CredentialService.cs" />
     <Compile Include="Utility\HttpUtility.cs" />
+    <Compile Include="Utility\ICredentialProvider.cs" />
+    <Compile Include="Utility\ICredentialService.cs" />
     <Compile Include="Utility\IHttpClientEvents.cs" />
     <Compile Include="Repositories\LazyQueue.cs" />
     <Compile Include="Repositories\ProgressEventArgs.cs" />
@@ -113,7 +115,6 @@
     <Compile Include="Utility\IntegratedCredentialProvider.cs" />
     <Compile Include="Utility\IProgressProvider.cs" />
     <Compile Include="Utility\IProxyFinder.cs" />
-    <Compile Include="Utility\IProxyProvider.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="Utility\PackageHelper.cs" />
