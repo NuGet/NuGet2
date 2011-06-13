@@ -47,15 +47,11 @@ namespace NuGet {
 
         public static string GetCanonicalPath(string path) {
             if (PathValidator.IsValidLocalPath(path) || (PathValidator.IsValidUncPath(path))) {
-                int length = path.Length;
-                if ((length != 0) && (path[length - 1] != Path.DirectorySeparatorChar))
-                {
-                    path += Path.DirectorySeparatorChar;
-                }
-                return Path.GetFullPath(path);
+                return Path.GetFullPath(EnsureTrailingSlash(path));
             }
             if (PathValidator.IsValidUrl(path)) {
                 var url = new Uri(path);
+                // return canonical representation of Uri
                 return url.ToString();
             }
             return path;
