@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 
 namespace NuGet {
-    internal sealed class MemoryCache {
+    internal sealed class MemoryCache : IDisposable {
         private static readonly Lazy<MemoryCache> _default = new Lazy<MemoryCache>(() => new MemoryCache());
         // Interval to wait before cleaning up expired items
         private static readonly TimeSpan _gcInterval = TimeSpan.FromSeconds(10);
@@ -49,6 +49,12 @@ namespace NuGet {
                 if (entry.Value.Expired) {
                     Remove(entry.Key);
                 }
+            }
+        }
+
+        void IDisposable.Dispose() {
+            if (_timer != null) {
+                _timer.Dispose();
             }
         }
 
