@@ -59,9 +59,7 @@
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageSorterTest.cs" />
     <Compile Include="PackageSourceProviderTest.cs" />
-    <Compile Include="PathResolverTest.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="PathResolverTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="ProxyFinderTest.cs" />

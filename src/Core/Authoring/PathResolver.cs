@@ -50,18 +50,20 @@ namespace NuGet {
             // This is a hack to prevent enumerating over the entire directory tree if the only wildcard characters are the ones in the file name. 
             // If the path portion of the search path does not contain any wildcard characters only iterate over the TopDirectory.
             SearchOption searchOption = SearchOption.AllDirectories;
+            // (a) Path is not recursive search
             bool isRecursiveSearch = searchPath.IndexOf("**", StringComparison.OrdinalIgnoreCase) != -1;
+            // (b) Path does not have any wildcards.
             bool isWildCardPath = Path.GetDirectoryName(searchPath).Contains('*');
             if (!isRecursiveSearch && !isWildCardPath) {
                 searchOption = SearchOption.TopDirectoryOnly;
             }
 
-            foreach (var file in Directory.EnumerateFiles(basePathToEnumerate, "*.*", searchOption)) {
-                if (searchRegex.IsMatch(file)) {
-                    var pathInsidePackage = ResolvePackagePath(basePathToEnumerate, searchPath, file, targetPath);
-                    yield return new PhysicalPackageFile { SourcePath = file, TargetPath = pathInsidePackage };
-                }
-            }
+            // Starting from the base path, enumerate over all files and match it using the wildcard expression provided by the user.
+            var files = Directory.EnumerateFiles(basePathToEnumerate, "*.*", searchOption);
+            return from file in files
+                   where searchRegex.IsMatch(file)
+                   select new PhysicalPackageFile { SourcePath = file,
+                                                    TargetPath = ResolvePackagePath(basePathToEnumerate, searchPath, file, targetPath) };
         }
 
         internal static string GetPathToEnumerateFrom(string basePath, string searchPath) {
