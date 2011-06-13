@@ -9,6 +9,8 @@
     <AssemblyName>NuGet.Core</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
@@ -46,7 +48,6 @@
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Configuration\UserSettings.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Extensions\ObjectCacheExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\SettingsExtensions.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Utility\IProxyFinder.cs" />
     <Compile Include="Utility\IProxyProvider.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
+    <Compile Include="Utility\MemoryCache.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
     <Compile Include="Utility\PackageHelper.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
@@ -128,7 +130,6 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Services.Client" />
-    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
