@@ -24,9 +24,11 @@ namespace NuGet {
         internal T GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan slidingExpiration) where T : class {
             CacheItem cachedItem;
             if (!_cache.TryGetValue(cacheKey, out cachedItem) || cachedItem.Expired) {
+                // Recreate the item if it's expired or doesn't exit
                 cachedItem = new CacheItem(factory());
                 _cache.TryAdd(cacheKey, cachedItem);
             }
+            // Increase the expiration time
             cachedItem.Expires = DateTime.Now + slidingExpiration;
             return (T)cachedItem.Value;
         }
