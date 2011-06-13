@@ -519,4 +519,7 @@
   <data name="UnableToFindSolution" xml:space="preserve">
     <value>Unable to find solution '{0}'.</value>
   </data>
+  <data name="UpdateCommandVerboseDescription" xml:space="preserve">
+    <value>Show verbose output while updating.</value>
+  </data>
 </root>
