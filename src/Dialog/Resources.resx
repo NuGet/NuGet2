@@ -220,7 +220,7 @@
     <value>Updates</value>
   </data>
   <data name="Dialog_UpdatesProviderNoItem" xml:space="preserve">
-    <value>No package updates are available from the selected package source.</value>
+    <value>No package updates are available.</value>
   </data>
   <data name="Dialog_VersionLabel" xml:space="preserve">
     <value>Version:</value>
