@@ -364,22 +364,23 @@ namespace NuGetConsole.Implementation {
             Justification = "We really don't want exceptions from the console to bring down VS")]
         private void StartConsoleSession(FrameworkElement consolePane) {
             if (WpfConsole != null && WpfConsole.Content == consolePane && WpfConsole.Host != null) {
-                if (WpfConsole.Host.IsCommandEnabled) {
-                    try {
-                        if (WpfConsole.Dispatcher.IsStartCompleted) {
+                try {
+                    if (WpfConsole.Dispatcher.IsStartCompleted) {
+                        OnDispatcherStartCompleted();
+                    }
+                    else {
+                        WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
                             OnDispatcherStartCompleted();
-                        }
-                        else {
-                            WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
-                                OnDispatcherStartCompleted();
-                            };
-                            WpfConsole.Dispatcher.StartWaitingKey += OnDispatcherStartWaitingKey;
-                            WpfConsole.Dispatcher.Start();
-                        }
+                        };
+                        WpfConsole.Dispatcher.StartWaitingKey += OnDispatcherStartWaitingKey;
+                        WpfConsole.Dispatcher.Start();
                     }
-                    catch (Exception x) {
-                        WpfConsole.WriteLine(x.ToString());
-                    }
+                }
+                catch (Exception x) {
+                    // hide the text "initialize host" when an error occurs.
+                    ConsoleParentPane.NotifyInitializationCompleted();
+
+                    WpfConsole.WriteLine(x.ToString());
                 }
             }
         }
