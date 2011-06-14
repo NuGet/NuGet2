@@ -363,7 +363,7 @@ namespace NuGetConsole.Implementation {
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We really don't want exceptions from the console to bring down VS")]
         private void StartConsoleSession(FrameworkElement consolePane) {
-            if (WpfConsole != null && WpfConsole.Content == consolePane) {
+            if (WpfConsole != null && WpfConsole.Content == consolePane && WpfConsole.Host != null) {
                 if (WpfConsole.Host.IsCommandEnabled) {
                     try {
                         if (WpfConsole.Dispatcher.IsStartCompleted) {

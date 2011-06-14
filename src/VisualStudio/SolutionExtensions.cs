@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnvDTE;
+using System;
 
 namespace NuGet.VisualStudio {
 
@@ -26,9 +27,18 @@ namespace NuGet.VisualStudio {
                     yield return project;
                 }
 
+                ProjectItems projectItems = null;
+                try {
+                    // bug 1138: Oracle Database Project doesn't implement the ProjectItems property
+                    projectItems = project.ProjectItems;
+                }
+                catch (NotImplementedException) {
+                    continue;
+                }
+
                 // ProjectItems property can be null if the project is unloaded
-                if (project.ProjectItems != null) {
-                    foreach (ProjectItem projectItem in project.ProjectItems) {
+                if (projectItems != null) {
+                    foreach (ProjectItem projectItem in projectItems) {
                         if (projectItem.SubProject != null) {
                             projects.Push(projectItem.SubProject);
                         }
