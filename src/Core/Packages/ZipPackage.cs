@@ -156,7 +156,7 @@ namespace NuGet {
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
             get {
                 if (_enableCaching) {
-                    return MemoryCache.Default.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
+                    return MemoryCache.Instance.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
                 }
                 return GetAssembliesNoCache();
             }
@@ -169,7 +169,7 @@ namespace NuGet {
 
         public IEnumerable<IPackageFile> GetFiles() {
             if (_enableCaching) {
-                return MemoryCache.Default.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
+                return MemoryCache.Instance.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
             }
             return GetFilesNoCache();
         }
@@ -271,8 +271,8 @@ namespace NuGet {
 
             // Remove the cache entries for files and assemblies
             if (zipPackage != null) {
-                MemoryCache.Default.Remove(zipPackage.GetAssembliesCacheKey());
-                MemoryCache.Default.Remove(zipPackage.GetFilesCacheKey());
+                MemoryCache.Instance.Remove(zipPackage.GetAssembliesCacheKey());
+                MemoryCache.Instance.Remove(zipPackage.GetFilesCacheKey());
             }
         }
     }

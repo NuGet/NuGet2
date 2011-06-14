@@ -5,20 +5,21 @@ using System.Threading;
 
 namespace NuGet {
     internal sealed class MemoryCache : IDisposable {
-        private static readonly Lazy<MemoryCache> _default = new Lazy<MemoryCache>(() => new MemoryCache());
+        private static readonly Lazy<MemoryCache> _instance = new Lazy<MemoryCache>(() => new MemoryCache());
         // Interval to wait before cleaning up expired items
-        private static readonly TimeSpan _gcInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(10);
 
+        // Cache keys are case-sensitive
         private readonly ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
         private readonly Timer _timer;
 
         private MemoryCache() {
-            _timer = new Timer(GarbageCollectExpiredEntries, null, _gcInterval, _gcInterval);
+            _timer = new Timer(RemoveExpiredEntries, null, _cleanupInterval, _cleanupInterval);
         }
 
-        internal static MemoryCache Default {
+        internal static MemoryCache Instance {
             get {
-                return _default.Value;
+                return _instance.Value;
             }
         }
 
@@ -31,7 +32,9 @@ namespace NuGet {
             }
 
             // Increase the expiration time
-            cachedItem.Expires = DateTime.Now + slidingExpiration;
+            long expires = (DateTime.UtcNow + slidingExpiration).Ticks;
+            cachedItem.Expires = expires;
+
             return (T)cachedItem.Value;
         }
 
@@ -40,7 +43,7 @@ namespace NuGet {
             _cache.TryRemove(cacheKey, out item);
         }
 
-        private void GarbageCollectExpiredEntries(object state) {
+        private void RemoveExpiredEntries(object state) {
             // Take a snapshot of the entries
             var entries = _cache.ToList();
 
@@ -60,6 +63,7 @@ namespace NuGet {
 
         private class CacheItem {
             private readonly object _value;
+            private long _expires;
 
             public CacheItem(object value) {
                 _value = value;
@@ -71,11 +75,21 @@ namespace NuGet {
                 }
             }
 
-            public DateTime Expires { get; set; }
+            public long Expires {
+                get {
+                    return _expires;
+                }
+                set {
+                    _expires = value;
+                }
+            }
 
             public bool Expired {
                 get {
-                    return DateTime.Now > Expires;
+                    long ticks = DateTime.UtcNow.Ticks;
+                    long expires = Interlocked.Read(ref _expires);
+                    // > is atomic on primitive types
+                    return ticks > expires;
                 }
             }
         }
