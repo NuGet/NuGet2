@@ -33,7 +33,7 @@ namespace NuGet.Commands {
             var gallery = new PackageServer(source, CommandLineConstants.UserAgent);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings.UserSettings, source) : userSetApiKey;
+            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source) : userSetApiKey;
 
             Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, packageId, packageVersion, SourceProvider.GetDisplayName(Source));
             gallery.PublishPackage(apiKey, packageId, packageVersion);

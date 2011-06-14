@@ -134,7 +134,7 @@ namespace NuGet.Commands {
 
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source, throwIfNotFound);
             }
 
             return apiKey;

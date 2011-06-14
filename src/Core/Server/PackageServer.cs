@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using Microsoft.Internal.Web.Utils;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet {
     public class PackageServer : IPackageServer, IProgressProvider {
@@ -35,7 +35,7 @@ namespace NuGet {
         public void CreatePackage(string apiKey, Stream packageStream) {
             const int chunkSize = 1024 * 4; // 4KB
 
-            var action = String.Format("{0}/{1}/nupkg", CreatePackageService, apiKey);
+            var action = String.Join("/", CreatePackageService, apiKey, "nupkg");
             var request = CreateRequest(action, "POST", "application/octet-stream");
 
             // Set the timeout to the same as the read write timeout (5 mins is the default)
@@ -94,7 +94,7 @@ namespace NuGet {
             var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
-            
+
             if (!String.IsNullOrEmpty(_userAgent)) {
                 request.UserAgent = HttpUtility.CreateUserAgentString(_userAgent);
             }
