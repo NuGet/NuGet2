@@ -32,8 +32,7 @@ namespace NuGet {
             }
 
             // Increase the expiration time
-            long expires = (DateTime.UtcNow + slidingExpiration).Ticks;
-            cachedItem.Expires = expires;
+            cachedItem.UpdateUsage(slidingExpiration);
 
             return (T)cachedItem.Value;
         }
@@ -75,13 +74,8 @@ namespace NuGet {
                 }
             }
 
-            public long Expires {
-                get {
-                    return _expires;
-                }
-                set {
-                    _expires = value;
-                }
+            public void UpdateUsage(TimeSpan slidingExpiration) {
+                _expires = (DateTime.UtcNow + slidingExpiration).Ticks;
             }
 
             public bool Expired {
