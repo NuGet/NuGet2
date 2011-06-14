@@ -160,7 +160,6 @@ function global:Run-Test {
             finally {
                 try {           
                     # Clear the cache after running each test
-                    [System.Runtime.Caching.MemoryCache]::Default.Trim(100) | Out-Null
                     [NuGet.MachineCache]::Default.Clear()
                 }
                 catch {
