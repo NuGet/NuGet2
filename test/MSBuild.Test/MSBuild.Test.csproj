@@ -49,6 +49,10 @@
       <Project>{74CD9786-C226-4A58-A250-2DBC9EE29670}</Project>
       <Name>MSBuild</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Test.Utility\Test.Utility.csproj">
+      <Project>{F016882A-C798-4446-BB75-D3C393A38B32}</Project>
+      <Name>Test.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

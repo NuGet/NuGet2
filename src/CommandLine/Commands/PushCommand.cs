@@ -35,10 +35,10 @@ namespace NuGet.Commands {
             }
             else {
                 if (packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase)) {
-                    source = GalleryServer.DefaultSymbolServerUrl;
+                    source = NuGetConstants.DefaultSymbolServerUrl;
                 }
                 else {
-                    source = GalleryServer.DefaultGalleryServerUrl;
+                    source = NuGetConstants.DefaultGalleryServerUrl;
                     pushSymbols = true;
                 }
             }
@@ -56,7 +56,7 @@ namespace NuGet.Commands {
 
             // Push the symbols package if it exists
             if (File.Exists(symbolPackagePath)) {
-                string source = GalleryServer.DefaultSymbolServerUrl;
+                string source = NuGetConstants.DefaultSymbolServerUrl;
 
                 // See if the api key exists
                 string apiKey = GetApiKey(source, throwIfNotFound: false);
@@ -80,7 +80,7 @@ namespace NuGet.Commands {
         }
 
         private void PushPackage(string packagePath, string source, string apiKey = null) {
-            var gallery = new GalleryServer(source);
+            var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
             // Use the specified api key or fall back to default behavior
             apiKey = apiKey ?? GetApiKey(source);
 
@@ -88,7 +88,7 @@ namespace NuGet.Commands {
             var package = new ZipPackage(packagePath);
 
             bool complete = false;
-            gallery.ProgressAvailable += (sender, e) => {
+            packageServer.ProgressAvailable += (sender, e) => {
                 Console.Write("\r" + NuGetResources.PushingPackage, e.PercentComplete);
 
                 if (e.PercentComplete == 100) {
@@ -101,7 +101,7 @@ namespace NuGet.Commands {
 
             try {
                 using (Stream stream = package.GetStream()) {
-                    gallery.CreatePackage(apiKey, stream);
+                    packageServer.CreatePackage(apiKey, stream);
                 }
             }
             catch {
@@ -134,7 +134,7 @@ namespace NuGet.Commands {
 
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, source, throwIfNotFound);
             }
 
             return apiKey;

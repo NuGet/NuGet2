@@ -9,113 +9,124 @@ using NuGet.MSBuild.Resources;
 namespace NuGet.MSBuild {
     public class NuGetFetch : Task {
         private readonly IPackageManagerFactory _packageManagerFactory;
-        private IFileSystem _fileSystem;
-        private readonly IPackageReferenceProvider _packageReferenceProvider;
-        private readonly IAggregateRepositoryFactory _aggregateRepositoryFactory;
+        private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IPackageSourceProvider _sourceProvider;
 
         [Required]
         public string PackageDir { get; set; }
 
-        [Required]
         public string PackageConfigFile { get; set; }
 
-        public string NugetConfigPath { get; set; }
-
-        public bool ExcludeVersion { get; set; }
-
-        public bool IgnoreUnavailableRepositories { get; set; }
-
-        public string[] FeedUrls { get; set; }
+        public string[] Sources { get; set; }
 
         public NuGetFetch()
-            : this(null, null, null, null)
-        { }
+            : this(new PackageManagerFactory(),
+                   new FileSystemProvider(),
+                   PackageRepositoryFactory.Default,
+                   PackageSourceProvider.Default) {
+        }
 
-        public NuGetFetch(
-            IPackageManagerFactory packageManagerFactory,
-            IFileSystem fileSystem,
-            IPackageReferenceProvider packageReferenceProvider,
-            IAggregateRepositoryFactory aggregateRepositoryFactory) {
-            _packageManagerFactory = packageManagerFactory ?? new PackageManagerFactory();
-            _fileSystem = fileSystem;
-            _packageReferenceProvider = packageReferenceProvider ?? new PackageReferenceProvider();
-            _aggregateRepositoryFactory = aggregateRepositoryFactory ?? new AggregateRepositoryFactory();
+        public NuGetFetch(IPackageManagerFactory packageManagerFactory,
+                          IFileSystemProvider fileSystemProvider,
+                          IPackageRepositoryFactory repositoryFactory,
+                          IPackageSourceProvider packageSourceProvider) {
+
+            _packageManagerFactory = packageManagerFactory;
+            _fileSystemProvider = fileSystemProvider;
+            _repositoryFactory = repositoryFactory;
+            _sourceProvider = packageSourceProvider;
         }
 
         public override bool Execute() {
-            bool installedAny = false;
-
-            IPackageRepository packageRepository;
-            Func<IPackageRepository> creator;
-            if (FeedUrls == null || !FeedUrls.Any()) {
-                if (!String.IsNullOrWhiteSpace(NugetConfigPath)) {
-                    Log.LogMessage(MessageImportance.Normal, NuGetResources.BuildSpecificConfig);
-                    creator = (() => _aggregateRepositoryFactory.createSpecificSettingsRepository(NugetConfigPath));
-                }
-                else {
-                    Log.LogMessage(MessageImportance.Normal, NuGetResources.MachineSpecificConfig);
-                    creator = (() => _aggregateRepositoryFactory.createDefaultSettingsRepository());
-                }
-            } 
-            else {
-                if (!String.IsNullOrWhiteSpace(NugetConfigPath)) {
-                    Log.LogError(NuGetResources.FeedsAndConfigSpecified);
-                    return false;
-                }
-                Log.LogMessage(MessageImportance.Normal, NuGetResources.BuildSpecificFeeds);
-                creator = (()=>_aggregateRepositoryFactory.createSpecificFeedsRepository(IgnoreUnavailableRepositories, FeedUrls));
-            }
-            
-            Log.LogMessage(NuGetResources.LookingForDependencies);
-           
-            try {
-                packageRepository = creator();
-            }
-            catch (InvalidOperationException ex) {
-                Log.LogError(ex.Message);
+            IPackageRepository sourceRepository;
+            if (!TryCreateRepository(out sourceRepository)) {
+                // We were unable to determine a repository. Terminate here because there must have been an error.
                 return false;
             }
 
-            _fileSystem = _fileSystem ?? new PhysicalFileSystem(PackageDir);
-            IPackageManager packageManager = _packageManagerFactory.CreateFrom(packageRepository, PackageDir);
+            Log.LogMessage(NuGetResources.LookingForDependencies);
+
+            var fileSystem = _fileSystemProvider.CreateFileSystem(PackageDir);
+            var packageManager = _packageManagerFactory.CreateFrom(sourceRepository, PackageDir);
             packageManager.Logger = new MSBuildLogger(Log);
 
             IEnumerable<PackageReference> packageReferences;
-            try {
-                packageReferences =_packageReferenceProvider.getPackageReferences(PackageConfigFile);
-            }
-            catch (FileNotFoundException) {
-                Log.LogError(NuGetResources.PackageConfigNotFound, PackageConfigFile);
-                return false;
-            }
-            catch (InvalidOperationException) {
-                Log.LogError(NuGetResources.PackageConfigParseError, PackageConfigFile);
+            if (!TryGetPackageReferences(fileSystem, out packageReferences)) {
                 return false;
             }
 
             Log.LogMessage(NuGetResources.StartingFetch);
-            foreach (var package in packageReferences) {
-                if (!IsPackageInstalled(package.Id, package.Version, packageManager)) {
-                    // Note that we ignore dependencies here because packages.config already contains the full closure
-                    packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true);
-                    installedAny = true;
-                }
-            }
 
+            bool installedAny = InstallPackages(packageManager, fileSystem, packageReferences);
             if (!installedAny) {
                 Log.LogMessage(NuGetResources.NoPackagesFound);
             }
             return true;
         }
 
+        private bool InstallPackages(IPackageManager packageManager, IFileSystem fileSystem, IEnumerable<PackageReference> packageReferences) {
+            bool installedAny = false;
+            foreach (var package in packageReferences) {
+                if (!IsPackageInstalled(packageManager, fileSystem, package)) {
+                    // Note that we ignore dependencies here because packages.config already contains the full closure
+                    packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true);
+                    installedAny = true;
+                }
+            }
+            return installedAny;
+        }
+
+        private bool TryCreateRepository(out IPackageRepository repository) {
+            var feedsSpecified = Sources != null && Sources.Any();
+            // If the user specifies a source, use that. If not fall back to the default package sources.
+            var sources = feedsSpecified ? Sources : _sourceProvider.LoadPackageSources().Select(s => s.Source);
+
+            Log.LogMessage(MessageImportance.Normal, NuGetResources.BuildSpecificFeeds);
+            try {
+                // For a user specified list of sources, throw exceptions letting them know 
+                AggregateRepository aggregate = new AggregateRepository(_repositoryFactory, sources, ignoreFailingRepositories: !feedsSpecified);
+                repository = new AggregateRepository(new[] { MachineCache.Default }.Concat(aggregate.Repositories));
+                return true;
+            }
+            catch (InvalidOperationException exception) {
+                Log.LogError(exception.Message);
+            }
+            catch (UriFormatException exception) {
+                Log.LogError(exception.Message);
+            }
+            repository = null;
+            return false;
+        }
+
+        private bool TryGetPackageReferences(IFileSystem fileSystem, out IEnumerable<PackageReference> packageReferences) {
+            packageReferences = null;
+            var packageConfigFile = String.IsNullOrEmpty(PackageConfigFile) ? PackageReferenceRepository.PackageReferenceFile : PackageConfigFile;
+
+            if (!fileSystem.FileExists(packageConfigFile)) {
+                Log.LogError(NuGetResources.PackageConfigNotFound, packageConfigFile);
+                return false;
+            }
+
+            try {
+                var packageReferenceFile = new PackageReferenceFile(fileSystem, packageConfigFile);
+                packageReferences = packageReferenceFile.GetPackageReferences().ToList();
+                return true;
+            }
+            catch (InvalidOperationException) {
+                Log.LogError(NuGetResources.PackageConfigParseError, packageConfigFile);
+            }
+            return false;
+        }
+
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private bool IsPackageInstalled(string packageId, Version version, IPackageManager packageManager) {
-            var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
-            var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
+        private bool IsPackageInstalled(IPackageManager packageManager, IFileSystem fileSystem, PackageReference packageReference) {
+            var packageDir = packageManager.PathResolver.GetPackageDirectory(packageReference.Id, packageReference.Version);
+            var packageFile = packageManager.PathResolver.GetPackageFileName(packageReference.Id, packageReference.Version);
 
             string packagePath = Path.Combine(packageDir, packageFile);
 
-            return _fileSystem.FileExists(packagePath);
+            return fileSystem.FileExists(packagePath);
         }
     }
 }

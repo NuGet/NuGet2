@@ -4,19 +4,23 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuGet.Common;
 using NuGet.MSBuild;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test.MSBuild {
     [TestClass]
     public class NuGetPushTaskUnitTest {
+        private const string apiKey = "myApiKey";
+        private const string server = "server";
+
         [TestMethod]
         public void WillLogAnErrorWhenThePackageDoesNotExist() {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
             var fileSystemStub = new Mock<IFileSystem>();
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
 
-            NuGet.MSBuild.NuGetPush task = CreateTaskWithDefaultStubs(buildEngineStub:buildEngineStub, fileSystemStub:fileSystemStub);
+            NuGetPush task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub, fileSystemStub: fileSystemProvider);
 
             fileSystemStub
                 .Setup(x => x.FileExists(It.IsAny<string>()))
@@ -24,6 +28,7 @@ namespace NuGet.Test.MSBuild {
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
+            fileSystemProvider.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(fileSystemStub.Object);
 
             task.PackagePath = "aPathThatDoesNotExist";
 
@@ -35,19 +40,19 @@ namespace NuGet.Test.MSBuild {
 
         [TestMethod]
         public void WillGetApiKeyFromConfigFileIfNotSpecified() {
-            var galleryServerStub = new Mock<IGalleryServer>();
+            var packageServerStub = new Mock<IPackageServer>();
             var settingsStub = new Mock<ISettings>();
 
-            NuGet.MSBuild.NuGetPush task = CreateTaskWithDefaultStubs(galleryServerStub: galleryServerStub, settingsStub:settingsStub);
+            NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub, settingsStub: settingsStub);
 
             task.ApiKey = "";
             task.Source = "the-site-to-upload-to";
             settingsStub
                 .Setup(x => x.GetValues(It.IsAny<string>()))
-                .Returns(new List<KeyValuePair<string, string>>{ new KeyValuePair<string, string>(task.Source, "shshshshs") });
-            galleryServerStub
+                .Returns(new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>(task.Source, "shshshshs") });
+            packageServerStub
                 .Setup(x => x.CreatePackage(It.IsAny<string>(), It.IsAny<Stream>()));
-            galleryServerStub
+            packageServerStub
                 .Setup(x => x.PublishPackage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
 
             bool actualResult = task.Execute();
@@ -57,13 +62,13 @@ namespace NuGet.Test.MSBuild {
 
         [TestMethod]
         public void WillPublishPackageByDefault() {
-            var galleryServerStub = new Mock<IGalleryServer>();
+            var packageServerStub = new Mock<IPackageServer>();
 
-            NuGet.MSBuild.NuGetPush task = CreateTaskWithDefaultStubs(galleryServerStub: galleryServerStub);
+            NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub);
 
-            galleryServerStub
+            packageServerStub
                 .Setup(x => x.CreatePackage(It.IsAny<string>(), It.IsAny<Stream>()));
-            galleryServerStub
+            packageServerStub
                 .Setup(x => x.PublishPackage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
 
             bool actualResult = task.Execute();
@@ -73,14 +78,14 @@ namespace NuGet.Test.MSBuild {
 
         [TestMethod]
         public void WillPushButNotPublishIfCreateOnly() {
-            var galleryServerStub = new Mock<IGalleryServer>();
+            var packageServerStub = new Mock<IPackageServer>();
 
-            NuGet.MSBuild.NuGetPush task = CreateTaskWithDefaultStubs(galleryServerStub: galleryServerStub);
+            NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub);
             task.CreateOnly = true;
 
-            galleryServerStub
+            packageServerStub
                 .Setup(x => x.CreatePackage(It.IsAny<string>(), It.IsAny<Stream>()));
-            galleryServerStub
+            packageServerStub
                 .Setup(x => x.PublishPackage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Throws(new Exception());
 
@@ -89,56 +94,55 @@ namespace NuGet.Test.MSBuild {
             Assert.IsTrue(actualResult);
         }
 
-        private const string apiKey = "myApiKey";
-        private const string server = "server";
+        private static NuGetPush CreateTaskWithDefaultStubs(Mock<IBuildEngine> buildEngineStub = null,
+                                                            Mock<IPackageServer> packageServerStub = null,
+                                                            Mock<IFileSystemProvider> fileSystemStub = null,
+                                                            Mock<IPackageFactory> packageFactoryStub = null,
+                                                            Mock<ISettings> settingsStub = null) {
+            const string packagePath = "thePackageId.1.0.nupkg";
 
-        static NuGet.MSBuild.NuGetPush CreateTaskWithDefaultStubs(
-            Mock<IBuildEngine> buildEngineStub = null,
-            Mock<IGalleryServer> galleryServerStub = null,
-            Mock<IFileSystem> fileSystemStub = null,
-            Mock<IPackageFactory> packageFactoryStub = null,
-            Mock<ISettings> settingsStub=null)
-        {
-
-            if (buildEngineStub == null)
+            if (buildEngineStub == null) {
                 buildEngineStub = new Mock<IBuildEngine>();
-            if (galleryServerStub == null)
-                galleryServerStub = new Mock<IGalleryServer>();
-            if (fileSystemStub == null)
-                fileSystemStub = new Mock<IFileSystem>();
-            if (packageFactoryStub == null)
+            }
+            if (packageServerStub == null) {
+                packageServerStub = new Mock<IPackageServer>();
+            }
+            if (fileSystemStub == null) {
+                fileSystemStub = new Mock<IFileSystemProvider>();
+            }
+            if (packageFactoryStub == null) {
                 packageFactoryStub = new Mock<IPackageFactory>();
-            if (settingsStub==null)
+            }
+            if (settingsStub == null) {
                 settingsStub = new Mock<ISettings>();
+            }
 
-            Mock<IGalleryServerFactory> galleryServerFactoryStub = new Mock<IGalleryServerFactory>();
+            Mock<IPackageServerFactory> packageServerFactory = new Mock<IPackageServerFactory>();
             Mock<IPackage> packageStub = new Mock<IPackage>();
-
-            var strm = new Mock<Stream>();
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile(packagePath);
 
             packageStub
                 .Setup(x => x.Id)
                 .Returns("package");
             packageStub
                 .Setup(x => x.Version)
-                .Returns(new Version(1,0,0,0));
-            galleryServerFactoryStub
-                .Setup(x => x.createFrom(It.IsAny<string>()))
-                .Returns(galleryServerStub.Object);
-            packageStub
-                .Setup(x => x.GetStream())
-                .Returns(strm.Object);
+                .Returns(new Version(1, 0, 0, 0));
+            packageServerFactory
+                .Setup(x => x.CreateFrom(It.IsAny<string>()))
+                .Returns(packageServerStub.Object);
             fileSystemStub
-                .Setup(x => x.FileExists(It.IsAny<string>()))
-                .Returns(true);
+                .Setup(x => x.CreateFileSystem(It.IsAny<string>()))
+                .Returns(mockFileSystem);
             packageFactoryStub
-                .Setup(x => x.CreatePackage(It.IsAny<string>()))
+                .Setup(x => x.CreatePackage(It.IsAny<Func<Stream>>()))
                 .Returns(packageStub.Object);
 
-            var task = new global::NuGet.MSBuild.NuGetPush(galleryServerFactoryStub.Object, packageFactoryStub.Object, fileSystemStub.Object, settingsStub.Object);
+
+            var task = new NuGetPush(packageServerFactory.Object, packageFactoryStub.Object, fileSystemStub.Object, settingsStub.Object);
 
             task.BuildEngine = buildEngineStub.Object;
-            task.PackagePath = "/thePackageId.1.0.nupkg";
+            task.PackagePath = packagePath;
             task.ApiKey = apiKey;
             task.Source = server;
 

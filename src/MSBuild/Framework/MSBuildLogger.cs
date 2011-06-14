@@ -2,10 +2,8 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace NuGet.MSBuild
-{
-    public class MSBuildLogger : ILogger
-    {
+namespace NuGet.MSBuild {
+    public class MSBuildLogger : ILogger {
         private readonly TaskLoggingHelper _buildLog;
 
         public MSBuildLogger(TaskLoggingHelper buildLog) {

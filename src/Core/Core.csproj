@@ -52,6 +52,9 @@
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\SettingsExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
+    <Compile Include="Server\PublishData.cs" />
+    <Compile Include="Server\PackageServer.cs" />
+    <Compile Include="Server\IPackageServer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />

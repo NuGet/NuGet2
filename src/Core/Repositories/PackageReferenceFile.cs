@@ -33,17 +33,11 @@ namespace NuGet {
 
         private IFileSystem FileSystem { get; set; }
 
-        public IEnumerable<PackageReference> GetPackageReferences() {
-            return GetPackageReferences(false);
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
-        public IEnumerable<PackageReference> GetPackageReferences(bool mustExist) {
+        public IEnumerable<PackageReference> GetPackageReferences() {
             XDocument document = GetDocument();
+
             if (document == null) {
-                if (mustExist) {
-                    throw new FileNotFoundException(_path);
-                }
                 yield break;
             }
 

@@ -7,26 +7,16 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class UserSettings : ISettings {
-        private const string _configFileName = "NuGet.Config";
+        private const string ConfigFileName = "NuGet.Config";
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
 
-        public UserSettings(IFileSystem fileSystem) : this(fileSystem, _configFileName, false) { }
-
-        public UserSettings(IFileSystem fileSystem, string filename, bool throwIfNoFile) {
+        public UserSettings(IFileSystem fileSystem) { 
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }
-            if (filename == null) {
-                throw new ArgumentNullException("filename");
-            }
             _fileSystem = fileSystem;
-            if (throwIfNoFile) {
-                _config = XmlUtility.GetDocument(_fileSystem, filename);
-            }
-            else {
-                _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, filename);
-            }
+            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, ConfigFileName);
         }
 
         public string GetValue(string section, string key) {
@@ -184,7 +174,7 @@ namespace NuGet {
         }
 
         private void Save(XDocument document) {
-            _fileSystem.AddFile(_configFileName, document.Save);
+            _fileSystem.AddFile(ConfigFileName, document.Save);
         }
 
     }

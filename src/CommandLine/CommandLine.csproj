@@ -59,6 +59,7 @@
     <Compile Include="..\..\Common\NuGetConstants.cs">
       <Link>Common\NuGetConstants.cs</Link>
     </Compile>
+    <Compile Include="Common\CommandLineConstants.cs" />
     <Compile Include="Common\CommandLineException.cs" />
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
@@ -67,10 +68,8 @@
     <Compile Include="Common\CommandLineUtility.cs" />
     <Compile Include="Common\Console.cs" />
     <Compile Include="Common\ConsoleCredentialProvider.cs" />
-    <Compile Include="Common\GalleryServer.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\IMSBuildProjectSystem.cs" />
-    <Compile Include="Common\IGalleryServer.cs" />
     <Compile Include="Common\MSBuildProjectSystem.cs" />
     <Compile Include="Common\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>

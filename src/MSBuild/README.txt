@@ -75,10 +75,6 @@ Detailed control can be achieved by setting the following properties:
  PublishDir
    The directory to publish to, as calculated by Microsoft.  Default is app.publish. 
 
- NuGetConfigPath
-   The path to a nuget.config file to use to find the required feeds.
-
-
 ItemGroups
 ==========
 

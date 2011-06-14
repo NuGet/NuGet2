@@ -85,7 +85,11 @@ namespace NuGet.Test.Mocks {
         }
 
         public virtual Stream OpenFile(string path) {
-            return Paths[path]();
+            Func<Stream> factory;
+            if (!Paths.TryGetValue(path, out factory)) {
+                throw new FileNotFoundException(path + " not found.");
+            }
+            return factory();
         }
 
         public string ReadAllText(string path) {

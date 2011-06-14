@@ -14,43 +14,27 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentNullException>(() => new UserSettings(null));
 
         }
-        [TestMethod]
-        public void UserSettings_CallingCtroWithNullFilenameWithThrowException() {
-            // Arrange
-            var mockFileSystem = new Mock<IFileSystem>();
-            // Act & Assert
-            ExceptionAssert.Throws<ArgumentNullException>(() => new UserSettings(mockFileSystem.Object, null, false));
-        }
-
-        [TestMethod]
-        public void UserSettings_WillThrowExceptionIfConstructorParameterIsSet() {
-            // Arrange 
-            const string fakefilenameConfig = "fakeFilename.config";
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(x => x.OpenFile(fakefilenameConfig)).Throws(new FileNotFoundException());
-            // Act & Assert
-            ExceptionAssert.Throws<FileNotFoundException>(() => new UserSettings(mockFileSystem.Object, fakefilenameConfig, true));
-        }
 
         [TestMethod]
         public void UserSettings_WillGetConfigurationFromSpecifiedPath() {
             // Arrange 
-            const string fakefilenameConfig = "fakeFilename.config";
+            const string configFile = "NuGet.Config";
             var mockFileSystem = new Mock<IFileSystem>();
             string config = @"
 <configuration>
     <SectionName>
-        <Notadd key='key1' value='value1' />
+        <add key='key1' value='value1' />
         <add Key='key2' Value='value2' />
     </SectionName>
 </configuration>";
-            mockFileSystem.Setup(m => m.OpenFile(fakefilenameConfig)).Returns(config.AsStream());
+            mockFileSystem.Setup(m => m.OpenFile(configFile)).Returns(config.AsStream());
+            mockFileSystem.Setup(m => m.FileExists(configFile)).Returns(true);
 
             // Act
-            UserSettings settings = new UserSettings(mockFileSystem.Object, fakefilenameConfig, true);
+            UserSettings settings = new UserSettings(mockFileSystem.Object);
 
             // Assert 
-            mockFileSystem.Verify(x => x.OpenFile(fakefilenameConfig), Times.Once(), "File was not read");
+            mockFileSystem.Verify(x => x.OpenFile(configFile), Times.Once(), "File was not read");
         }
 
         [TestMethod]

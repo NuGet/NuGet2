@@ -13,11 +13,11 @@ namespace NuGet.Common {
         }
 
         public static string GetDisplayName(this IPackageSourceProvider sourceProvider, string source) {
-            if (String.IsNullOrEmpty(source) || source.Equals(GalleryServer.DefaultGalleryServerUrl)) {
-                return NuGetResources.LiveFeed + " (" + GalleryServer.DefaultGalleryServerUrl + ")";
+            if (String.IsNullOrEmpty(source) || source.Equals(NuGetConstants.DefaultGalleryServerUrl)) {
+                return NuGetResources.LiveFeed + " (" + NuGetConstants.DefaultGalleryServerUrl + ")";
             }
-            if (source.Equals(GalleryServer.DefaultSymbolServerUrl)) {
-                return NuGetResources.DefaultSymbolServer + " (" + GalleryServer.DefaultSymbolServerUrl + ")";
+            if (source.Equals(NuGetConstants.DefaultSymbolServerUrl)) {
+                return NuGetResources.DefaultSymbolServer + " (" + NuGetConstants.DefaultSymbolServerUrl + ")";
             }
             return "'" + source + "'";
         }

@@ -26,7 +26,7 @@ namespace NuGet.Commands {
             //If the user passed a source use it for the gallery location
             string source;
             if (String.IsNullOrEmpty(Source)) {
-                source = GalleryServer.DefaultGalleryServerUrl;
+                source = NuGetConstants.DefaultGalleryServerUrl;
                 // If no source was specified, set the default symbol server key to be the same
                 setSymbolServerKey = true;
             }
@@ -39,11 +39,11 @@ namespace NuGet.Commands {
 
             // Setup the symbol server key
             if (setSymbolServerKey) {
-                settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, GalleryServer.DefaultSymbolServerUrl, apiKey);
+                settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, NuGetConstants.DefaultSymbolServerUrl, apiKey);
                 Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
                                   SourceProvider.GetDisplayName(source),
-                                  SourceProvider.GetDisplayName(GalleryServer.DefaultSymbolServerUrl));
+                                  SourceProvider.GetDisplayName(NuGetConstants.DefaultSymbolServerUrl));
             }
             else {
                 Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, SourceProvider.GetDisplayName(source));
