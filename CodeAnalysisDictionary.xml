@@ -20,6 +20,7 @@
       <Word>Asax</Word>
       <Word>Plugin</Word>
       <Word>Plugins</Word>
+      <Word>Notifier</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>
