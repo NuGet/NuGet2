@@ -21,7 +21,9 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return Repository.GetUpdates(_localRepository.GetPackages()).AsQueryable();
+            return Repository.GetUpdates(_localRepository.GetPackages())
+                             .ToList()
+                             .AsQueryable();
         }
     }
 }
