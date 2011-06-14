@@ -135,7 +135,7 @@ namespace NuGet.Dialog.Test {
 
             var extensionA = new PackageItem(provider, packageA);
 
-            var mockWindowServices = new Mock<IWindowServices>();
+            var mockWindowServices = new Mock<IUserNotifierServices>();
 
             var mre = new ManualResetEventSlim(false);
             provider.ExecuteCompletedCallback = () => {
@@ -179,7 +179,7 @@ namespace NuGet.Dialog.Test {
 
             var extensionA = new PackageItem(provider, packageA);
 
-            var mockLicenseWindowOpener = new Mock<IWindowServices>();
+            var mockLicenseWindowOpener = new Mock<IUserNotifierServices>();
 
             var manualEvent = new ManualResetEventSlim(false);
 

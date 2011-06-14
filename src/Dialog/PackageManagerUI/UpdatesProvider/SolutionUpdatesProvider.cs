@@ -10,7 +10,7 @@ namespace NuGet.Dialog.Providers {
     internal class SolutionUpdatesProvider : UpdatesProvider, IPackageOperationEventListener {
 
         private IVsPackageManager _activePackageManager;
-        private readonly IWindowServices _windowServices;
+        private readonly IUserNotifierServices _userNotifierServices;
 
         public SolutionUpdatesProvider(
             IPackageRepository localRepository,
@@ -31,7 +31,7 @@ namespace NuGet.Dialog.Providers {
                 providerServices,
                 progressProvider,
                 solutionManager) {
-            _windowServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.WindowServices;
         }
 
         protected override bool ExecuteCore(PackageItem item) {
@@ -41,7 +41,7 @@ namespace NuGet.Dialog.Providers {
             IList<Project> selectedProjectsList;
             if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
                 HideProgressWindow();
-                var selectedProjects = _windowServices.ShowProjectSelectorWindow(
+                var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                     Resources.Dialog_UpdatesSolutionInstruction,
                     // Selector function to return the initial checkbox state for a Project.
                     // We check a project if it has the current package installed by Id, but not version

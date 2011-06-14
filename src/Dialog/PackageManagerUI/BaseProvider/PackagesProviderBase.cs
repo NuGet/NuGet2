@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.VisualStudio;
 using NuGetConsole;
+using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -436,6 +438,24 @@ namespace NuGet.Dialog.Providers {
         private Project FindProjectFromFileSystem(IFileSystem fileSystem) {
             var projectSystem = fileSystem as IVsProjectSystem;
             return _solutionManager.GetProject(projectSystem.UniqueName);
+        }
+
+        protected void CheckInstallPSScripts(IPackage package, IPackageRepository sourceRepository, out IList<PackageOperation> operations) {
+            var walker = new InstallWalker(
+                LocalRepository,
+                sourceRepository,
+                this,
+                ignoreDependencies: false);
+
+            operations = walker.ResolveOperations(package).ToList();
+            var scriptPackages = from o in operations
+                                 where o.Package.HasPowerShellScript()
+                                 select o.Package;
+            if (scriptPackages.Any()) {
+                if (!RegistryHelper.CheckIfPowerShell2Installed()) {
+                    throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
+                }
+            }
         }
     }
 }

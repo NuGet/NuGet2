@@ -134,7 +134,7 @@
     <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
     <Compile Include="PackageManagerUI\InstalledProvider\SolutionInstalledProvider.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
-    <Compile Include="PackageManagerUI\IWindowServices.cs" />
+    <Compile Include="PackageManagerUI\IUserNotifierServices.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
     <Compile Include="PackageManagerUI\OnlineProvider\SolutionOnlineProvider.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
@@ -166,7 +166,7 @@
       <DependentUpon>SummaryWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageManagerUI\UpdatesProvider\SolutionUpdatesProvider.cs" />
-    <Compile Include="PackageManagerUI\WindowServices.cs" />
+    <Compile Include="PackageManagerUI\UserNotifierServices.cs" />
     <Compile Include="PackageManagerUI\RecentProvider\RecentProvider.cs" />
     <Compile Include="SolutionExplorer\ProjectToIconConverter.cs" />
     <Compile Include="SolutionExplorer\ProjectUtilities.cs" />

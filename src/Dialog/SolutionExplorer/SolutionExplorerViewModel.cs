@@ -9,8 +9,8 @@ namespace NuGet.Dialog {
 
         public SolutionExplorerViewModel(
             Solution solution,
-            Func<Project, bool> checkedStateSelector,
-            Func<Project, bool> enabledStateSelector) {
+            Predicate<Project> checkedStateSelector,
+            Predicate<Project> enabledStateSelector) {
             if (solution == null) {
                 throw new ArgumentNullException("solution");
             }

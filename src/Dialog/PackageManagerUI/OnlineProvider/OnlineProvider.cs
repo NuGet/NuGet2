@@ -122,24 +122,7 @@ namespace NuGet.Dialog.Providers {
         protected bool CheckPSScriptAndShowLicenseAgreement(PackageItem item, IVsPackageManager packageManager, out IList<PackageOperation> operations) {
             ShowProgressWindow();
 
-            var walker = new InstallWalker(
-                LocalRepository,
-                packageManager.SourceRepository,
-                this,
-                ignoreDependencies: false);
-
-            operations = walker.ResolveOperations(item.PackageIdentity).ToList();
-
-            var scriptPackages = from o in operations
-                                 where o.Package.HasPowerShellScript()
-                                 select o.Package;
-
-            if (scriptPackages.Any()) {
-                if (!RegistryHelper.CheckIfPowerShell2Installed()) {
-                    throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
-                }
-            }
-
+            CheckInstallPSScripts(item.PackageIdentity, packageManager.SourceRepository, out operations);
             var licensePackages = from o in operations
                                   where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
                                   select o.Package;

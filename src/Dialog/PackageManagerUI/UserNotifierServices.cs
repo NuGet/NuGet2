@@ -6,15 +6,15 @@ using EnvDTE;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI {
-    [Export(typeof(IWindowServices))]
-    internal class WindowServices : IWindowServices {
+    [Export(typeof(IUserNotifierServices))]
+    internal class UserNotifierServices : IUserNotifierServices {
         private readonly Dispatcher _uiDispatcher;
 
-        public WindowServices() {
+        public UserNotifierServices() {
             _uiDispatcher = Dispatcher.CurrentDispatcher;
         }
 
-        bool IWindowServices.ShowLicenseWindow(IEnumerable<IPackage> packages) {
+        bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<IPackage> packages) {
             if (_uiDispatcher.CheckAccess()) {
                 return ShowLicenseWindow(packages);
             }
@@ -36,11 +36,11 @@ namespace NuGet.Dialog.PackageManagerUI {
             return dialogResult ?? false;
         }
 
-        public IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Func<Project, bool> checkedStateSelector, Func<Project, bool> enabledStateSelector) {
+        public IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Predicate<Project> checkedStateSelector, Predicate<Project> enabledStateSelector) {
             if (!_uiDispatcher.CheckAccess()) {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(
-                    new Func<string, Func<Project, bool>, Func<Project, bool>, IEnumerable<Project>>(ShowProjectSelectorWindow),
+                    new Func<string, Predicate<Project>, Predicate<Project>, IEnumerable<Project>>(ShowProjectSelectorWindow),
                     instructionText,
                     checkedStateSelector,
                     enabledStateSelector);
@@ -79,10 +79,10 @@ namespace NuGet.Dialog.PackageManagerUI {
             window.ShowModal();
         }
 
-        public bool AskToRemoveDependencyPackages(string message) {
+        public bool ShowRemoveDependenciesWindow(string message) {
             if (!_uiDispatcher.CheckAccess()) {
                 object result = _uiDispatcher.Invoke(
-                    new Func<string, bool>(AskToRemoveDependencyPackages),
+                    new Func<string, bool>(ShowRemoveDependenciesWindow),
                     message);
                 return (bool)result;
             }

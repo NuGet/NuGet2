@@ -9,8 +9,8 @@ namespace NuGet.Dialog {
     internal static class SolutionWalker {
         public static ProjectNodeBase Walk(
             Solution solution,
-            Func<Project, bool> checkedStateSelector,
-            Func<Project, bool> enabledStateSelector) {
+            Predicate<Project> checkedStateSelector,
+            Predicate<Project> enabledStateSelector) {
             if (solution == null) {
                 throw new ArgumentNullException("solution");
             }
@@ -37,8 +37,8 @@ namespace NuGet.Dialog {
 
         private static IEnumerable<ProjectNodeBase> CreateProjectNode(
             IEnumerable<Project> projects,
-            Func<Project, bool> checkedStateSelector,
-            Func<Project, bool> enabledStateSelector) {
+            Predicate<Project> checkedStateSelector,
+            Predicate<Project> enabledStateSelector) {
 
             foreach (var project in projects) {
                 if (project.IsSupported()) {

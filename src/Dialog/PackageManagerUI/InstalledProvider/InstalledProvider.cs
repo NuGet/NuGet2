@@ -19,7 +19,7 @@ namespace NuGet.Dialog.Providers {
 
         private readonly IVsPackageManager _packageManager;
         private readonly Project _project;
-        private readonly IWindowServices _windowServices;
+        private readonly IUserNotifierServices _userNotifierServices;
 
         public InstalledProvider(
             IVsPackageManager packageManager,
@@ -37,7 +37,7 @@ namespace NuGet.Dialog.Providers {
 
             _packageManager = packageManager;
             _project = project;
-            _windowServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.WindowServices;
         }
 
         protected IVsPackageManager PackageManager {
@@ -82,14 +82,14 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-            bool removeDependencies = AskRemoveDependencyAndCheckPSScript(item.PackageIdentity);
+            bool removeDependencies = AskRemoveDependencyAndCheckUninstallPSScript(item.PackageIdentity);
             ShowProgressWindow();
             UninstallPackageFromProject(_project, item, removeDependencies);
             HideProgressWindow();
             return true;
         }
 
-        protected bool AskRemoveDependencyAndCheckPSScript(IPackage package) {
+        protected bool AskRemoveDependencyAndCheckUninstallPSScript(IPackage package) {
             var uninstallWalker = new UninstallWalker(
                 LocalRepository,
                 new DependentsWalker(LocalRepository),
@@ -98,8 +98,8 @@ namespace NuGet.Dialog.Providers {
                 forceRemove: false) {
                     ThrowOnConflicts = false
                 };
-
             IList<PackageOperation> operations = uninstallWalker.ResolveOperations(package).ToList();
+        
             var uninstallPackageNames = (from o in operations
                                          where o.Action == PackageAction.Uninstall && !PackageEqualityComparer.IdAndVersion.Equals(o.Package, package)
                                          select o.Package.ToString()).ToList();
@@ -113,7 +113,7 @@ namespace NuGet.Dialog.Providers {
                         + Environment.NewLine
                         + packageNames;
 
-                removeDependencies = _windowServices.AskToRemoveDependencyPackages(message);
+                removeDependencies = _userNotifierServices.ShowRemoveDependenciesWindow(message);
             }
 
             bool hasScriptPackages;
@@ -178,7 +178,7 @@ namespace NuGet.Dialog.Providers {
             if (SelectedNode != null) {
                 IList<IVsExtension> allExtensions = SelectedNode.Extensions;
                 // if a package has been uninstalled, remove it from the Installed tab
-                allExtensions.RemoveAll(extension => !LocalRepository.Exists((extension as PackageItem).PackageIdentity));
+                allExtensions.RemoveAll(extension => !LocalRepository.Exists(((PackageItem)extension).PackageIdentity));
 
                 // the PackagesTreeNodeBase caches the list of packages in each tree node. For this provider,
                 // we don't want it to do so, because after every uninstall, we remove uninstalled packages.

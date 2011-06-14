@@ -6,6 +6,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
+using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -15,7 +16,7 @@ namespace NuGet.Dialog.Providers {
     internal class SolutionInstalledProvider : InstalledProvider {
 
         private readonly ISolutionManager _solutionManager;
-        private readonly IWindowServices _windowServices;
+        private readonly IUserNotifierServices _userNotifierServices;
 
         public SolutionInstalledProvider(
             IVsPackageManager packageManager,
@@ -27,7 +28,7 @@ namespace NuGet.Dialog.Providers {
             : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager) {
 
             _solutionManager = solutionManager;
-            _windowServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.WindowServices;
         }
 
         public override bool CanExecute(PackageItem item) {
@@ -55,7 +56,7 @@ namespace NuGet.Dialog.Providers {
 
             // treat solution-level packages specially
             if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
-                removeDepedencies = AskRemoveDependencyAndCheckPSScript(package);
+                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package);
 
                 ShowProgressWindow();
                 try {
@@ -75,7 +76,7 @@ namespace NuGet.Dialog.Providers {
             }
 
             // display the Manage dialog to allow user to pick projects to install/uninstall
-            IEnumerable<Project> selectedProjects = _windowServices.ShowProjectSelectorWindow(
+            IEnumerable<Project> selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                 Resources.Dialog_InstalledSolutionInstruction,
                 // Selector function to return the initial checkbox state for a Project.
                 // We check a project by default if it has the current package installed.
@@ -87,16 +88,37 @@ namespace NuGet.Dialog.Providers {
                 return false;
             }
 
-            removeDepedencies = AskRemoveDependencyAndCheckPSScript(package);
-
-            ShowProgressWindow();
-
             // bug #1181: Use HashSet<unique name> instead of HashSet<Project>.
             // in some rare cases, the project instance returned by GetProjects() may be different 
             // than the ones in selectedProjectSet.
             var selectedProjectsSet = new HashSet<string>(
                 selectedProjects.Select(p => p.UniqueName), 
                 StringComparer.OrdinalIgnoreCase);
+
+            // now determine if user has actually made any change to the checkboxes
+            IList<Project> allProjects = _solutionManager.GetProjects().ToList();
+            
+            bool hasInstallWork = allProjects.Any(p => 
+                selectedProjectsSet.Contains(p.UniqueName) && !IsPackageInstalledInProject(p, package));
+
+            bool hasUninstallWork = allProjects.Any(p => 
+                !selectedProjectsSet.Contains(p.UniqueName) && IsPackageInstalledInProject(p, package));
+
+            if (!hasInstallWork && !hasUninstallWork) {
+                // nothing to do, so return
+                return false;
+            }
+
+            if (hasInstallWork) {
+                IList<PackageOperation> operations;
+                CheckInstallPSScripts(package, PackageManager.SourceRepository, out operations);
+            }
+
+            if (hasUninstallWork) {
+                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package);
+            }
+
+            ShowProgressWindow();
 
             // now install or uninstall the package depending on the checked states.
             foreach (Project project in _solutionManager.GetProjects()) {
@@ -115,7 +137,13 @@ namespace NuGet.Dialog.Providers {
                 }
             }
 
+            HideProgressWindow();
             return true;
+        }
+
+        private bool IsPackageInstalledInProject(Project project, IPackage package) {
+            IProjectManager projectManager = PackageManager.GetProjectManager(project);
+            return projectManager != null && projectManager.IsInstalled(package);
         }
 
         public override IVsExtension CreateExtension(IPackage package) {

@@ -16,7 +16,7 @@ namespace NuGet.Dialog.Test {
             : base(
                 localRepository,
                 new ResourceDictionary(),
-                new ProviderServices(new Mock<IWindowServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
+                new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
                 new Mock<IProgressProvider>().Object,
                 new Mock<ISolutionManager>().Object) {
         }

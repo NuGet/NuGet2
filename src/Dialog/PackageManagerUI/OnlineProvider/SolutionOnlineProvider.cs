@@ -9,7 +9,7 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Providers {
     internal class SolutionOnlineProvider : OnlineProvider, IPackageOperationEventListener {
         private IVsPackageManager _activePackageManager;
-        private readonly IWindowServices _windowServices;
+        private readonly IUserNotifierServices _userNotifierServices;
         private readonly ISolutionManager _solutionManager;
         private static readonly Dictionary<string, bool> _checkStateCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
@@ -31,7 +31,7 @@ namespace NuGet.Dialog.Providers {
                 providerServices,
                 progressProvider,
                 solutionManager) {
-            _windowServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.WindowServices;
             _solutionManager = solutionManager;
         }
 
@@ -43,7 +43,7 @@ namespace NuGet.Dialog.Providers {
             if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
 
                 HideProgressWindow();
-                var selectedProjects = _windowServices.ShowProjectSelectorWindow(
+                var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                     Resources.Dialog_OnlineSolutionInstruction,
                     DetermineProjectCheckState,
                     ignored => true);

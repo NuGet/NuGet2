@@ -6,19 +6,19 @@ namespace NuGet.Dialog.Providers {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export]
     public sealed class ProviderServices {
-        public IWindowServices WindowServices { get; private set; }
+        public IUserNotifierServices WindowServices { get; private set; }
         public IProgressWindowOpener ProgressWindow { get; private set; }
         public IScriptExecutor ScriptExecutor { get; private set; }
         public IOutputConsoleProvider OutputConsoleProvider { get; private set; }
 
         [ImportingConstructor]
         public ProviderServices(
-            IWindowServices windowServices,
+            IUserNotifierServices userNotifierServices,
             IProgressWindowOpener progressWindow,
             IScriptExecutor scriptExecutor,
             IOutputConsoleProvider outputConsoleProvider) {
 
-            WindowServices = windowServices;
+            WindowServices = userNotifierServices;
             ProgressWindow = progressWindow;
             ScriptExecutor = scriptExecutor;
             OutputConsoleProvider = outputConsoleProvider;

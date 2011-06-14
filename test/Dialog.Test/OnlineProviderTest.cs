@@ -358,7 +358,7 @@ namespace NuGet.Dialog.Test {
             factory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true)).Returns(packageManager);
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
-            var mockWindowServices = new Mock<IWindowServices>();
+            var mockWindowServices = new Mock<IUserNotifierServices>();
 
             if (project == null) {
                 project = new Mock<Project>().Object;

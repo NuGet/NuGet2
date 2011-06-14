@@ -165,8 +165,8 @@ namespace NuGet.Dialog.Test {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
 
-            var mockWindowServices = new Mock<IWindowServices>();
-            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, windowServices: mockWindowServices.Object, solutionManager: solutionManager.Object);
+            var mockWindowServices = new Mock<IUserNotifierServices>();
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, userNotifierServices: mockWindowServices.Object, solutionManager: solutionManager.Object);
 
             var extensionA = new PackageItem(provider, packageA2);
             var extensionC = new PackageItem(provider, packageC);
@@ -259,7 +259,7 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
-            IWindowServices windowServices = null,
+            IUserNotifierServices userNotifierServices = null,
             ISolutionManager solutionManager = null) {
 
             if (packageManager == null) {
@@ -296,9 +296,9 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            if (windowServices == null) {
-                var mockWindowServices = new Mock<IWindowServices>();
-                windowServices = mockWindowServices.Object;
+            if (userNotifierServices == null) {
+                var mockWindowServices = new Mock<IUserNotifierServices>();
+                userNotifierServices = mockWindowServices.Object;
             }
 
             if (project == null) {
@@ -310,7 +310,7 @@ namespace NuGet.Dialog.Test {
             }
 
             var services = new ProviderServices(
-                windowServices,
+                userNotifierServices,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider()

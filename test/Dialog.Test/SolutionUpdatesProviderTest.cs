@@ -51,10 +51,10 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
-            var mockWindowService = new Mock<IWindowServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[] { project1, project2 });
+            var mockWindowService = new Mock<IUserNotifierServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns(new Project[] { project1, project2 });
 
-            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, windowServices: mockWindowService.Object);
+            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -127,10 +127,10 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
-            var mockWindowService = new Mock<IWindowServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Func<Project, bool>>(), It.IsAny<Func<Project, bool>>())).Returns(new Project[0]);
+            var mockWindowService = new Mock<IUserNotifierServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns(new Project[0]);
 
-            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, windowServices: mockWindowService.Object);
+            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -173,7 +173,7 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null,
             IScriptExecutor scriptExecutor = null,
             ISolutionManager solutionManager = null,
-            IWindowServices windowServices = null) {
+            IUserNotifierServices userNotifierServices = null) {
 
             if (packageManager == null) {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -205,9 +205,9 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            if (windowServices == null) {
-                var mockWindowServices = new Mock<IWindowServices>();
-                windowServices = mockWindowServices.Object;
+            if (userNotifierServices == null) {
+                var mockWindowServices = new Mock<IUserNotifierServices>();
+                userNotifierServices = mockWindowServices.Object;
             }
 
             if (scriptExecutor == null) {
@@ -218,12 +218,12 @@ namespace NuGet.Dialog.Test {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
-            if (windowServices == null) {
-                windowServices = new Mock<IWindowServices>().Object;
+            if (userNotifierServices == null) {
+                userNotifierServices = new Mock<IUserNotifierServices>().Object;
             }
 
             var services = new ProviderServices(
-                windowServices,
+                userNotifierServices,
                 mockProgressWindowOpener.Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider()
