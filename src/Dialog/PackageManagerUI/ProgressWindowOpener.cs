@@ -10,12 +10,47 @@ namespace NuGet.Dialog.PackageManagerUI {
         private ProgressDialog _currentWindow;
         private readonly Dispatcher _uiDispatcher;
 
+        private Lazy<DispatcherTimer> _showTimer;
+
         public ProgressWindowOpener() {
             _uiDispatcher = Dispatcher.CurrentDispatcher;
+
+            _showTimer = new Lazy<DispatcherTimer>(() => {
+                var timer = new DispatcherTimer {
+                    Interval = TimeSpan.FromMilliseconds(500)
+                };
+                timer.Tick += new EventHandler(OnShowTimerTick);
+                return timer;
+            });
+        }
+
+        private bool IsPendingShow {
+            get {
+                return _showTimer.IsValueCreated && _showTimer.Value.IsEnabled;
+            }
+        }
+
+        private void CancelPendingShow() {
+            if (_showTimer.IsValueCreated) {
+                _showTimer.Value.Stop();
+            }
+        }
+
+        private void OnShowTimerTick(object sender, EventArgs e) {
+            CancelPendingShow();
+
+            if (!_currentWindow.IsVisible) {
+                if (_currentWindow.IsLoaded) {
+                    _currentWindow.ShowDialog();
+                }
+                else {
+                    _currentWindow.ShowModal();
+                }
+            }
         }
 
         /// <summary>
-        /// Show the progress window with the specified title.
+        /// Show the progress window with the specified title, after a delay of 500ms.
         /// </summary>
         /// <param name="title">The window title</param>
         /// <remarks>
@@ -28,22 +63,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                 return;
             }
 
-            if (IsOpen) {
-                // if the window is hidden, just re-show it instead of creating a new window instance
-                if (_currentWindow.Title != title) {
-                    _currentWindow.Title = title;
+            if (!IsPendingShow) {
+                if (_currentWindow == null) {
+                    _currentWindow = new ProgressDialog();
+                    _currentWindow.Closed += OnWindowClosed;
                 }
-
-                if (!_currentWindow.IsVisible) {
-                    _currentWindow.ShowDialog();
-                }
-            }
-            else {
-                _currentWindow = new ProgressDialog();
                 _currentWindow.Title = title;
-                _currentWindow.Closed += OnWindowClosed;
 
-                _currentWindow.ShowModal();
+                _showTimer.Value.Start();
             }
         }
 
@@ -68,18 +95,25 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
 
             if (IsOpen) {
+                CancelPendingShow();
                 _currentWindow.Hide();
             }
         }
 
+        /// <summary>
+        /// This property is only logical. The dialog may not be actually visible even if 
+        /// the property returns true, due to the delay in showing.
+        /// </summary>
         public bool IsOpen {
             get {
-                return _currentWindow != null;
+                return _currentWindow != null && (_currentWindow.IsVisible || IsPendingShow);
             }
         }
 
         public bool Close() {
             if (IsOpen) {
+                CancelPendingShow();
+
                 _currentWindow.ForceClose();
                 _currentWindow = null;
                 return true;
@@ -91,6 +125,12 @@ namespace NuGet.Dialog.PackageManagerUI {
 
         public void SetCompleted(bool successful) {
             if (IsOpen) {
+                if (successful) {
+                    // if successful, we are going to close the dialog automatically.
+                    // so cancel any pending show operation.
+                    CancelPendingShow();
+                }
+
                 _currentWindow.SetCompleted(successful);
             }
         }
@@ -147,14 +187,14 @@ namespace NuGet.Dialog.PackageManagerUI {
                 throw new ArgumentNullException("operation");
             }
 
-            if (percentComplete < 0) {
-                percentComplete = 0;
-            }
-            else if (percentComplete > 100) {
-                percentComplete = 100;
-            }
-
             if (IsOpen) {
+                if (percentComplete < 0) {
+                    percentComplete = 0;
+                }
+                else if (percentComplete > 100) {
+                    percentComplete = 100;
+                }
+
                 _currentWindow.ShowProgress(operation, percentComplete);
             }
         }
