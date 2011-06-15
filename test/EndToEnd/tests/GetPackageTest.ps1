@@ -187,3 +187,20 @@ function Test-GetPackageThrowsWhenSourceIsInvalid {
     # Act & Assert
     Assert-Throws { Get-Package -ListAvailable -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
 }
+
+function Test-UpdatedPackageAppearInRecentPackageList {
+    # Arrange
+    Clear-RecentPackageRepository
+
+    $p = New-ConsoleApplication
+    Install-Package jQuery -Version 1.5
+    Update-Package jQuery -Version 1.6
+
+    # Act
+    $result = @(Get-Package -Recent)
+
+    # Assert
+    Assert-AreEqual 1 $result.Count
+    Assert-AreEqual "jQuery" $result[0].Id
+    Assert-AreEqual "1.6" $result[0].Version
+}

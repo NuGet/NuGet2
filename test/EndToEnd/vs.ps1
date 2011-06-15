@@ -430,3 +430,7 @@ function Close-Solution {
         $dte.Solution.Close()
     }
 }
+
+function Clear-RecentPackageRepository() {
+    $host.PrivateData.RecentPackageRepository.Clear() | out-null
+}

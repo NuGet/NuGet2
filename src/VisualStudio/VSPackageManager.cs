@@ -725,6 +725,8 @@ namespace NuGet.VisualStudio {
             if (appliesToProject) {
                 eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
 
+                IPackage newPackage = null;
+
                 foreach (var project in _solutionManager.GetProjects()) {
                     IProjectManager projectManager = GetProjectManager(project);
                     InitializeLogger(logger, projectManager);
@@ -733,6 +735,11 @@ namespace NuGet.VisualStudio {
                         eventListener.OnBeforeAddPackageReference(project);
                         try {
                             RunSolutionAction(() => projectAction(projectManager));
+                            
+                            if (newPackage == null) {
+                                // after the update, get the new version to add to the recent package repository
+                                newPackage = projectManager.LocalRepository.FindPackage(packageId);
+                            }
                         }
                         catch (Exception e) {
                             logger.Log(MessageLevel.Error, e.Message);
@@ -742,6 +749,10 @@ namespace NuGet.VisualStudio {
                             eventListener.OnAfterAddPackageReference(project);
                         }
                     }
+                }
+
+                if (newPackage != null) {
+                    AddPackageToRecentRepository(newPackage);
                 }
             }
             else {

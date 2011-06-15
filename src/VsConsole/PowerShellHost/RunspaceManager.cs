@@ -52,9 +52,21 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant)
             );
 
+            Tuple<string, object>[] privateData;
+
             // this is used by the functional tests
             var packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            var privateData = Tuple.Create<string, object>("packageManagerFactory", packageManagerFactory);
+            var pmfTuple = Tuple.Create<string, object>("packageManagerFactory", packageManagerFactory);
+
+            privateData = new Tuple<string, object>[] { pmfTuple };
+
+#if DEBUG
+            var recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();
+            var rprTuple = Tuple.Create<string, object>("recentPackageRepository", recentPackageRepository);
+
+            privateData = new[] { pmfTuple, rprTuple };
+#endif
+
             var host = new NuGetPSHost(hostName, privateData) {
                 ActiveConsole = console
             };
