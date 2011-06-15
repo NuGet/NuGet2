@@ -27,7 +27,7 @@ namespace NuGet.VisualStudio {
         }
 
         public static void ShowErrorMessage(Exception exception, string title) {
-            ShowErrorMessage((exception.InnerException ?? exception).Message, title);
+            ShowErrorMessage(ExceptionUtility.Unwrap(exception).Message, title);
         }
 
         public static void ShowErrorMessage(string message, string title) {

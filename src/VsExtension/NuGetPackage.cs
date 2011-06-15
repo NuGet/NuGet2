@@ -115,11 +115,10 @@ namespace NuGet.Tools {
                 window.ShowModal();
             }
             catch (TargetInvocationException exception) {
-                MessageHelper.ShowErrorMessage(
-                    (exception.InnerException ?? exception).Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                MessageHelper.ShowErrorMessage(exception,
+                                               NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
-                ExceptionHelper.WriteToActivityLog(exception.InnerException ?? exception);
+                ExceptionHelper.WriteToActivityLog(exception);
             }
         }
 
@@ -164,9 +163,8 @@ namespace NuGet.Tools {
                 ShowOptionPage(optionPageType);
             }
             catch (Exception exception) {
-                MessageHelper.ShowErrorMessage(
-                    (exception.InnerException ?? exception).Message,
-                    NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                MessageHelper.ShowErrorMessage(exception.Message,
+                                               NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                 ExceptionHelper.WriteToActivityLog(exception);
             }

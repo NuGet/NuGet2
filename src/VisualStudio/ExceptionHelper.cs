@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.VisualStudio {
@@ -9,6 +10,8 @@ namespace NuGet.VisualStudio {
             if (exception == null) {
                 throw new ArgumentNullException("exception");
             }
+
+            exception = ExceptionUtility.Unwrap(exception);
 
             ActivityLog.LogError(LogEntrySource, exception.Message + exception.StackTrace);
         }

@@ -166,7 +166,7 @@ namespace NuGet {
 
         private void LogRepository(IPackageRepository repository, Exception ex) {
             _failingRepositories.Add(repository);
-            Logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
+            Logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
         }
 
     }

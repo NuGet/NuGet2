@@ -329,10 +329,7 @@ namespace NuGet.PowerShell.Commands {
         void IErrorHandler.HandleException(Exception exception, bool terminating,
             string errorId, ErrorCategory category, object target) {
 
-            // Only unwrap target invocation exceptions
-            if (exception is TargetInvocationException) {
-                exception = exception.InnerException;
-            }
+            exception = ExceptionUtility.Unwrap(exception);
 
             var error = new ErrorRecord(exception, errorId, category, target);
 

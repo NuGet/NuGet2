@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
-
 using Microsoft.VisualStudio.Text;
+using NuGet;
 
 namespace NuGetConsole.Implementation.Console {
 
@@ -133,8 +133,8 @@ namespace NuGetConsole.Implementation.Console {
                 ).ContinueWith(
                     task => {
                         if (task.IsFaulted) {
-                            var exception = task.Exception;
-                            WriteError((exception.InnerException ?? exception).Message);
+                            var exception = ExceptionUtility.Unwrap(task.Exception);
+                            WriteError(exception.Message);
                         }
 
                         if (host.IsCommandEnabled) {

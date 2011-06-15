@@ -355,7 +355,7 @@ namespace NuGet.Dialog.Providers {
                 }
                 else if (task.IsFaulted) {
                     // show error message in the Message pane
-                    ShowMessagePane((exception.InnerException ?? exception).Message);
+                    ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
                 }
                 else {
                     LoadPageResult result = task.Result;

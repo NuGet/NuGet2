@@ -197,7 +197,7 @@ namespace NuGet {
         }
 
         private void LogWarning(Exception ex) {
-            _logger.Log(MessageLevel.Warning, (ex.InnerException ?? ex).Message);
+            _logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
         }
 
         private static IEnumerable<TVal> GetSubQuery(IQueryable queryable, Expression expression) {

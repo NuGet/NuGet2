@@ -312,7 +312,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         }
 
         protected void ReportError(Exception exception) {
-            WriteErrorLine((exception.InnerException ?? exception).Message);
+            exception = ExceptionUtility.Unwrap(exception);
+            WriteErrorLine(exception.Message);
         }
 
         private void WriteErrorLine(string message) {

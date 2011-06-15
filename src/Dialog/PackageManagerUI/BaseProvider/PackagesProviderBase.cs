@@ -286,7 +286,7 @@ namespace NuGet.Dialog.Providers {
             }
             else {
                 // show error message in the progress window in case of error
-                LogCore(MessageLevel.Error, (e.Error.InnerException ?? e.Error).Message);
+                LogCore(MessageLevel.Error, ExceptionUtility.Unwrap(e.Error).Message);
                 _providerServices.ProgressWindow.SetCompleted(successful: false);
             }
 
@@ -327,7 +327,7 @@ namespace NuGet.Dialog.Providers {
                 throw new ArgumentNullException("exception");
             }
 
-            _failedProjects[project] = exception;
+            _failedProjects[project] = ExceptionUtility.Unwrap(exception);
         }
 
         public abstract IVsExtension CreateExtension(IPackage package);
@@ -431,7 +431,7 @@ namespace NuGet.Dialog.Providers {
             catch (Exception ex) {
                 // Swallow exception for uninstall.ps1. Otherwise, there is no way to uninstall a package.
                 // But we log it as a warning.
-                LogCore(MessageLevel.Warning, ex.Message);
+                LogCore(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
             }
         }
 
