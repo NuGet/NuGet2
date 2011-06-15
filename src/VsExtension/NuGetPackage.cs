@@ -163,7 +163,7 @@ namespace NuGet.Tools {
                 ShowOptionPage(optionPageType);
             }
             catch (Exception exception) {
-                MessageHelper.ShowErrorMessage(exception.Message,
+                MessageHelper.ShowErrorMessage(exception,
                                                NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                 ExceptionHelper.WriteToActivityLog(exception);
