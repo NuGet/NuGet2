@@ -42,13 +42,11 @@
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
-    <Compile Include="Commands\AddSourceCommand.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\InstallCommand.cs" />
-    <Compile Include="Commands\ListSourcesCommand.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
-    <Compile Include="Commands\RemoveSourceCommand.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
+    <Compile Include="Commands\SourcesCommand.cs" />
     <Compile Include="Commands\SpecCommand.cs" />
     <Compile Include="Commands\PublishCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
