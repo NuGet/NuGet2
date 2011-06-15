@@ -3,14 +3,15 @@ using System.Net;
 
 namespace NuGet {
     /// <summary>
-    /// Provides a system proxy defaulted with sytems integrated credentials for NTLM/Integrated authentication
+    /// Provides sytems integrated credentials for NTLM/Integrated authentication
     /// type of proxy.
     /// </summary>
-    public class IntegratedCredentialProvider : BaseProxyProvider {
-        public override IWebProxy GetProxy(Uri uri) {
-            WebProxy proxy = GetSystemProxy(uri);
-            proxy.Credentials = CredentialCache.DefaultCredentials;
-            return proxy;
+    public class IntegratedCredentialProvider : ICredentialProvider {
+        public ICredentials GetCredentials(Uri uri) {
+            return GetCredentials(uri, null);
+        }
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
+            return CredentialCache.DefaultCredentials;
         }
     }
 }

@@ -3,16 +3,11 @@ using System.Net;
 using System.Security;
 
 namespace NuGet {
-    public class ConsoleCredentialProvider : IProxyProvider {
-        public IWebProxy GetProxy(Uri uri) {
-            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(uri);
-            IWebProxy proxy = new WebProxy(proxyUri);
-
-            proxy.Credentials = GetCredentials();
-            return proxy;
+    public class ConsoleCredentialProvider : ICredentialProvider {
+        public ICredentials GetCredentials(Uri uri) {
+            return GetCredentials(uri, null);
         }
-
-        private NetworkCredential GetCredentials() {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
             Console.Write("Username: ");
             string username = Console.ReadLine();
             Console.Write("Password: ");

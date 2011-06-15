@@ -41,11 +41,17 @@
     <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
       <Link>ProgressEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Utility\BaseProxyProvider.cs">
-      <Link>BaseProxyProvider.cs</Link>
+    <Compile Include="..\Core\Utility\CredentialService.cs">
+      <Link>CredentialService.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\HttpClient.cs">
       <Link>HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\ICredentialProvider.cs">
+      <Link>ICredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\ICredentialService.cs">
+      <Link>ICredentialService.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\IHttpClient.cs">
       <Link>IHttpClient.cs</Link>
@@ -61,9 +67,6 @@
     </Compile>
     <Compile Include="..\Core\Utility\IProxyFinder.cs">
       <Link>IProxyFinder.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\IProxyProvider.cs">
-      <Link>IProxyProvider.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\ProxyFinder.cs">
       <Link>ProxyFinder.cs</Link>

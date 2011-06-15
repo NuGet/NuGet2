@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-    public class ProxyFinder : IProxyFinder {
+    public class ProxyFinder : CredentialService, IProxyFinder {
         /// <summary>
         /// Local Cache of Proxy objects that will store the Proxy that was discovered during the session
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
         /// for the same Uri again.
         /// </summary>
         private readonly ConcurrentDictionary<Uri, IWebProxy> _proxyCache = new ConcurrentDictionary<Uri, IWebProxy>();
-        /// <summary>
-        /// Local cache of registered proxy providers to use when locating a valid proxy
-        /// to use for the given Uri.
-        /// </summary>
-        private readonly ISet<IProxyProvider> _providerCache = new HashSet<IProxyProvider>();
+        ///// <summary>
+        ///// Local cache of registered proxy providers to use when locating a valid proxy
+        ///// to use for the given Uri.
+        ///// </summary>
+        //private readonly ISet<IProxyProvider> _providerCache = new HashSet<IProxyProvider>();
         /// <summary>
         /// Returns an instance of a IWebProxy interface that is to be used for creating requests to the given Uri
         /// </summary>
@@ -28,41 +28,6 @@ namespace NuGet {
 
             bool isSystemProxySet = IsSystemProxySet(uri);
             return isSystemProxySet ? GetProxyInternal(uri) : null;
-        }
-
-        /// <summary>
-        /// Allows the consumer to provide a list of proxy providers to use
-        /// for locating of different IWebProxy instances.
-        /// </summary>
-        /// <param name="provider"></param>
-        public void RegisterProvider(IProxyProvider provider) {
-            if (provider == null) {
-                throw new ArgumentNullException("provider");
-            }
-            _providerCache.Add(provider);
-        }
-
-        /// <summary>
-        /// Unregisters the specified proxy provider from the proxy finder.
-        /// </summary>
-        /// <param name="provider"></param>
-        public void UnregisterProvider(IProxyProvider provider) {
-            if (provider == null) {
-                throw new ArgumentNullException("provider");
-            }
-            if (!_providerCache.Contains(provider)) {
-                return;
-            }
-            _providerCache.Remove(provider);
-        }
-
-        /// <summary>
-        /// Returns a list of already registered IProxyProvider instances that one can enumerate
-        /// </summary>
-        public ICollection<IProxyProvider> RegisteredProviders {
-            get {
-                return _providerCache;
-            }
         }
 
         /// <summary>
@@ -80,13 +45,7 @@ namespace NuGet {
                 return cachedProxy;
             }
 
-            foreach (var provider in _providerCache) {
-                var proxy = ExecuteProvider(provider, uri);
-                if (proxy != null) {
-                    result = proxy;
-                    break;
-                }
-            }
+            systemProxy.Credentials = GetCredentials(uri);
 
             // TODO: If the proxy that is returned is null do we really want to cache this?
             // PRO: Subsequent requests for the given Uri should automatically return a null
@@ -97,14 +56,6 @@ namespace NuGet {
             _proxyCache.TryAdd(systemProxy.Address, result);
 
             return result;
-        }
-
-        protected virtual IWebProxy ExecuteProvider(IProxyProvider provider, Uri uri) {
-            var proxy = provider.GetProxy(uri);
-            if (IsProxyValid(proxy, uri)) {
-                return proxy;
-            }
-            return null;
         }
 
         /// <summary>
@@ -118,6 +69,17 @@ namespace NuGet {
             IWebProxy proxy = WebRequest.DefaultWebProxy;
             string proxyUrl = proxy.GetProxy(uri).OriginalString;
             return new WebProxy(proxyUrl);
+        }
+
+        protected override bool AreCredentialsValid(ICredentials credentials, Uri uri, IWebProxy proxy) {
+            // If for some strange reason we get to this method even though the proxy is not set
+            // or the proxy configuration should not require a proxy to reach the requested Uri then
+            // this method will most likely return true because the IsProxyValid method only check to ensure
+            // that we catch the Proxy Authentication requests and nothing else.
+            var systemProxy = GetSystemProxy(uri);
+            systemProxy.Credentials = credentials;
+            var isProxyValid = IsProxyValid(systemProxy, uri);
+            return isProxyValid;
         }
 
         /// <summary>
