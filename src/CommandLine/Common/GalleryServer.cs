@@ -154,13 +154,22 @@ namespace NuGet.Common {
         }
 
         private HttpWebRequest CreateRequest(string action, string method, string contentType) {
-            var actionUrl = new Uri(_galleryClient.Value.Uri, action);
+            Uri baseUri = EnsureTrailingSlash(_galleryClient.Value.Uri);
+            var actionUrl = new Uri(baseUri, action);
             var actionClient = new HttpClient(actionUrl);
             var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
             request.UserAgent = HttpUtility.CreateUserAgentString(_UserAgentClient);
             return request;
+        }
+
+        private Uri EnsureTrailingSlash(Uri uri) {
+            string value = uri.AbsoluteUri;
+            if (!value.EndsWith("/")) {
+                value += "/";
+            }
+            return new Uri(value);
         }
 
         private WebResponse GetResponse(WebRequest request) {
