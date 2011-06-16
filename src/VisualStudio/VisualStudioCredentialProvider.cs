@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio {
             bool forcePrompt = false;
             ICredentials credentials = null;
             while (true) {
-                var hasCachedCredentials = HasSavedCredentials(uri);
+                var hasCachedCredentials = HasSavedCredentials(uri, out credentials);
                 if (forcePrompt || !hasCachedCredentials) {
                     var proxyState = GetCredentials(uri, true, out credentials);
                     if (proxyState == __VsWebProxyState.VsWebProxyState_Abort) {
@@ -71,9 +71,9 @@ namespace NuGet.VisualStudio {
         /// This method checks to see if the user has already saved credentials for the given Url.
         /// </summary>
         /// <param name="uri"></param>
+        /// <param name="credentials1"></param>
         /// <returns></returns>
-        private bool HasSavedCredentials(Uri uri) {
-            ICredentials credentials = null;
+        private bool HasSavedCredentials(Uri uri, out ICredentials credentials) {
             GetCredentials(uri, false, out credentials);
             return credentials != null;
         }

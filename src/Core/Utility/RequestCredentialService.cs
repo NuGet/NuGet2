@@ -1,70 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-
-    /// <summary>
-    /// This service is responsible for providing the consumer with the correct ICredentials
-    /// object instances required to properly establish communication with repositories.
-    /// </summary>
-    public class CredentialService : ICredentialService {
-        private readonly ConcurrentDictionary<Uri,ICredentials> _credentialCache = new ConcurrentDictionary<Uri, ICredentials>();
-        private readonly ISet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
-
-        /// <summary>
-        /// Returns a list of already registered ICredentialProvider instances that one can enumerate
-        /// </summary>
-        public ICollection<ICredentialProvider> RegisteredProviders {
-            get {
-                return _providerCache;
-            }
-        }
-
-        /// <summary>
-        /// Allows the consumer to provide a list of credential providers to use
-        /// for locating of different ICredentials instances.
-        /// </summary>
-        public void RegisterProvider(ICredentialProvider provider) {
-            if (provider == null) {
-                throw new ArgumentNullException("provider");
-            }
-            _providerCache.Add(provider);
-        }
-
-        /// <summary>
-        /// Unregisters the specified credential provider from the proxy finder.
-        /// </summary>
-        /// <param name="provider"></param>
-        public void UnregisterProvider(ICredentialProvider provider) {
-            if (provider == null) {
-                throw new ArgumentNullException("provider");
-            }
-            if (!_providerCache.Contains(provider)) {
-                return;
-            }
-            _providerCache.Remove(provider);
-        }
-
-
-        /// <summary>
-        /// Returns an ICredentials object instance that represents a valid
-        /// credential object that should be used for communicating.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <returns></returns>
+    public class RequestCredentialService: CredentialProviderRegistry, IRequestCredentialService {
+        private readonly ConcurrentDictionary<Uri, ICredentials> _credentialCache = new ConcurrentDictionary<Uri, ICredentials>();
+        
         public ICredentials GetCredentials(Uri uri) {
             return GetCredentials(uri, null);
         }
-
-        /// <summary>
-        /// Returns an ICredentials object instance that represents a valid
-        /// credential object that should be used for communicating.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
         public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
@@ -80,6 +24,7 @@ namespace NuGet {
         /// then cache them for subsequent requests.
         /// </summary>
         /// <param name="uri"></param>
+        /// <param name="proxy"></param>
         /// <returns></returns>
         private ICredentials GetCredentialsInternal(Uri uri, IWebProxy proxy) {
             ICredentials result = null;
@@ -115,7 +60,6 @@ namespace NuGet {
             }
             return null;
         }
-
         /// <summary>
         /// This method is responsible for checking to see if the provided url requires
         /// authentication.

@@ -10,7 +10,7 @@ namespace NuGet {
 
         private static ICredentialProvider _integratedCredentialProvider = new IntegratedCredentialProvider();
         private static IProxyFinder _defaultProxyFinder = CreateFinder();
-        private static ICredentialService _defaultCredentialService = CreateCredentialService();
+        private static IRequestCredentialService _defaultCredentialService = CreateCredentialService();
 
         private Uri _uri;
 
@@ -47,7 +47,7 @@ namespace NuGet {
             set;
         }
 
-        public ICredentialService CredentialService {
+        public IRequestCredentialService CredentialService {
             get;
             set;
         }
@@ -66,7 +66,7 @@ namespace NuGet {
             }
         }
 
-        public static ICredentialService DefaultCredentialService {
+        public static IRequestCredentialService DefaultCredentialService {
             get {
                 return _defaultCredentialService;
             }
@@ -96,7 +96,7 @@ namespace NuGet {
             // If the user has manually set or passed in a proxy as Null then we probably don't want to auto detect.
             if (ProxyFinder != null) {
                 // Set the request proxy.
-                request.Proxy = ProxyFinder.GetProxy(Uri);
+                request.Proxy = ProxyFinder.GetProxy(Uri) ?? request.Proxy;
             }
 
             if (CredentialService != null) {
@@ -160,8 +160,8 @@ namespace NuGet {
             proxyFinder.RegisterProvider(_integratedCredentialProvider);
             return proxyFinder;
         }
-        private static ICredentialService CreateCredentialService() {
-            var credentialService = new CredentialService();
+        private static IRequestCredentialService CreateCredentialService() {
+            var credentialService = new RequestCredentialService();
             credentialService.RegisterProvider(_integratedCredentialProvider);
             return credentialService;
         }

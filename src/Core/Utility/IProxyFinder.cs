@@ -6,7 +6,7 @@ namespace NuGet {
     /// This interface represents the basic interface that one needs to implement to
     /// be able to provide support to the consumer for when a proxy object is required.
     /// </summary>
-    public interface IProxyFinder: ICredentialService {
+    public interface IProxyFinder: ICredentialProviderRegistry {
         /// <summary>
         /// Returns an IWebProxy object instance that represents a valid
         /// proxy object that should be used for communicating.

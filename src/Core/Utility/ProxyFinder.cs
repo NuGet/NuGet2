@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-    public class ProxyFinder : CredentialService, IProxyFinder {
+    public class ProxyFinder : CredentialProviderRegistry, IProxyFinder {
         /// <summary>
         /// Local Cache of Proxy objects that will store the Proxy that was discovered during the session
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
@@ -45,7 +45,7 @@ namespace NuGet {
                 return cachedProxy;
             }
 
-            systemProxy.Credentials = GetCredentials(uri);
+            systemProxy.Credentials = GetProxyCredentials(uri);
 
             // TODO: If the proxy that is returned is null do we really want to cache this?
             // PRO: Subsequent requests for the given Uri should automatically return a null
@@ -56,6 +56,29 @@ namespace NuGet {
             _proxyCache.TryAdd(systemProxy.Address, result);
 
             return result;
+        }
+
+        private ICredentials GetProxyCredentials(Uri uri) {
+            ICredentials result = null;
+
+            foreach (var provider in RegisteredProviders) {
+                var credentials = ExecuteProvider(provider, uri);
+                if (credentials != null) {
+                    result = credentials;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        protected virtual ICredentials ExecuteProvider(ICredentialProvider provider, Uri uri) {
+            var credentials = provider.GetCredentials(uri);
+            if (credentials != null) {
+                var systemProxy = GetSystemProxy(uri);
+                systemProxy.Credentials = credentials;
+                return IsProxyValid(systemProxy, uri) ? credentials : null;
+            }
+            return null;
         }
 
         /// <summary>
@@ -69,17 +92,6 @@ namespace NuGet {
             IWebProxy proxy = WebRequest.DefaultWebProxy;
             string proxyUrl = proxy.GetProxy(uri).OriginalString;
             return new WebProxy(proxyUrl);
-        }
-
-        protected override bool AreCredentialsValid(ICredentials credentials, Uri uri, IWebProxy proxy) {
-            // If for some strange reason we get to this method even though the proxy is not set
-            // or the proxy configuration should not require a proxy to reach the requested Uri then
-            // this method will most likely return true because the IsProxyValid method only check to ensure
-            // that we catch the Proxy Authentication requests and nothing else.
-            var systemProxy = GetSystemProxy(uri);
-            systemProxy.Credentials = credentials;
-            var isProxyValid = IsProxyValid(systemProxy, uri);
-            return isProxyValid;
         }
 
         /// <summary>
