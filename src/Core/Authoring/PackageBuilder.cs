@@ -14,20 +14,31 @@ namespace NuGet {
         internal const string ManifestRelationType = "manifest";
 
         public PackageBuilder(string path)
-            : this(path, Path.GetDirectoryName(path)) {
+            : this(path, NullPropertyProvider.Instance) {
+        }
 
+        public PackageBuilder(string path, IPropertyProvider propertyProvider)
+            : this(path, Path.GetDirectoryName(path), propertyProvider) {
         }
 
         public PackageBuilder(string path, string basePath)
+            : this(path, basePath, NullPropertyProvider.Instance) {
+        }
+
+        public PackageBuilder(string path, string basePath, IPropertyProvider propertyProvider)
             : this() {
             using (Stream stream = File.OpenRead(path)) {
-                ReadManifest(stream, basePath);
+                ReadManifest(stream, basePath, propertyProvider);
             }
         }
 
         public PackageBuilder(Stream stream, string basePath)
+            : this(stream, basePath, NullPropertyProvider.Instance) {
+        }
+
+        public PackageBuilder(Stream stream, string basePath, IPropertyProvider propertyProvider)
             : this() {
-            ReadManifest(stream, basePath);
+            ReadManifest(stream, basePath, propertyProvider);
         }
 
         public PackageBuilder() {
@@ -175,9 +186,9 @@ namespace NuGet {
             }
         }
 
-        private void ReadManifest(Stream stream, string basePath) {
+        private void ReadManifest(Stream stream, string basePath, IPropertyProvider propertyProvider) {
             // Deserialize the document and extract the metadata
-            Manifest manifest = Manifest.ReadFrom(stream);
+            Manifest manifest = Manifest.ReadFrom(stream, propertyProvider);
 
             Populate(manifest.Metadata);
 

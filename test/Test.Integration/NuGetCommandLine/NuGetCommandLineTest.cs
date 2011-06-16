@@ -583,6 +583,69 @@ public class Cl_{0} {{
             Assert.IsFalse(File.Exists(expectedPackage));
         }
 
+        
+        [TestMethod]
+        public void PackCommandAllowsPassingPropertiesFromCommandLine() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithProperties.nuspec");
+            string expectedPackage = "foo.1.1.nupkg";
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "foo.txt"), "test");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>$id$</id>   
+    <version>$version$</version>
+    <description>Desc</description>
+    <authors>Auth</authors>
+  </metadata>
+</package>");
+            string[] args = new string[] { "pack", "/p", "id=foo;version=1.1" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(File.Exists(expectedPackage));
+            var package = VerifyPackageContents(expectedPackage, new[] { @"foo.txt" });
+            Assert.AreEqual("foo", package.Id);
+            Assert.AreEqual(new Version("1.1"), package.Version);
+            Assert.AreEqual("Auth", package.Authors.First());
+            Assert.AreEqual("Desc", package.Description);            
+        }
+
+        [TestMethod]
+        public void PackCommandAllowsPassingVersionSetsVersionProperty() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithProperties.nuspec");
+            string expectedPackage = "MyPackage.2.5.nupkg";
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "foo.txt"), "test");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>MyPackage</id>   
+    <version>$version$</version>
+    <description>Desc</description>
+    <authors>Auth</authors>
+  </metadata>
+</package>");
+            string[] args = new string[] { "pack", "/version", "2.5" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(File.Exists(expectedPackage));
+            var package = VerifyPackageContents(expectedPackage, new[] { @"foo.txt" });
+            Assert.AreEqual("MyPackage", package.Id);
+            Assert.AreEqual(new Version("2.5"), package.Version);
+            Assert.AreEqual("Auth", package.Authors.First());
+            Assert.AreEqual("Desc", package.Description);
+        }
+
         [TestMethod]
         public void UpdateCommandThrowsWithNoArguments() {
             // Arrange            
