@@ -242,10 +242,18 @@ namespace NuGet.Commands {
         }
 
         private PackageBuilder CreatePackageBuilderFromNuspec(string path) {
-            if (String.IsNullOrEmpty(BasePath)) {
-                return new PackageBuilder(path);
+            // Set the version property if the flag is set
+            if (!String.IsNullOrEmpty(Version)) {
+                Properties["version"] = Version;
             }
-            return new PackageBuilder(path, BasePath);
+
+            // Initialize the property provider based on what was passed in using the properties flag
+            var propertyProvider = new DictionaryPropertyProvider(Properties);
+
+            if (String.IsNullOrEmpty(BasePath)) {
+                return new PackageBuilder(path, propertyProvider);
+            }
+            return new PackageBuilder(path, BasePath, propertyProvider);
         }
 
         private void BuildFromProjectFile(string path) {
@@ -310,6 +318,22 @@ namespace NuGet.Commands {
                     goto default;
                 default:
                     throw new CommandLineException(NuGetResources.PackageCommandSpecifyInputFileError);
+            }
+        }
+
+        private class DictionaryPropertyProvider : IPropertyProvider {
+            private readonly IDictionary<string, string> _properties;
+
+            public DictionaryPropertyProvider(IDictionary<string, string> properties) {
+                _properties = properties;
+            }
+
+            public dynamic GetPropertyValue(string propertyName) {
+                string value;
+                if (_properties.TryGetValue(propertyName, out value)) {
+                    return value;
+                }
+                return null;
             }
         }
     }
