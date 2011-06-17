@@ -18,17 +18,16 @@ namespace NuGet.Commands {
         };
 
         // Target file paths to exclude when building the lib package for symbol server scenario
-        private static readonly string[] _libPackageExcludes = new[]{
+        private static readonly string[] _libPackageExcludes = new[] {
             @"**\*.pdb",
             @"src\**\*"
         };
 
         // Target file paths to exclude when building the symbols package for symbol server scenario
-        private static readonly string[] _symbolPackageExcludes = new[]{
+        private static readonly string[] _symbolPackageExcludes = new[] {
             @"content\**\*",
             @"tools\**\*.ps1"
         };
-
 
         private readonly HashSet<string> _excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, string> _properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

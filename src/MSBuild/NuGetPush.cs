@@ -44,13 +44,13 @@ namespace NuGet.MSBuild {
             }
             else {
                 if (PackagePath.EndsWith(SymbolsExtension, StringComparison.OrdinalIgnoreCase)) {
-                    source = MsBuildConstants.DefaultSymbolServerUrl;
+                    source = NuGetConstants.DefaultSymbolServerUrl;
                 }
                 else {
-                    source = MsBuildConstants.DefaultGalleryServerUrl;
+                    source = NuGetConstants.DefaultGalleryServerUrl;
                     pushSymbols = true;
                 }
-            }
+            }   
 
             var fileSystem = _fileSystemProvider.CreateFileSystem(Path.GetDirectoryName(PackagePath));
             if (!fileSystem.FileExists(PackagePath)) {
@@ -61,9 +61,9 @@ namespace NuGet.MSBuild {
             if (String.IsNullOrEmpty(ApiKey)) {
                 // If the user did not pass an API Key look in the config file
                 ApiKey = _settings.GetDecryptedValue(ApiKeysSectionName, source);
-                if (String.IsNullOrEmpty(ApiKey))
+                if (String.IsNullOrEmpty(ApiKey)) {
                     Log.LogMessage(NuGetResources.BlankApiKey);
-
+                }
             }
 
             PushPackage(fileSystem, PackagePath, source);
@@ -80,7 +80,9 @@ namespace NuGet.MSBuild {
 
             // Push the symbols package if it exists
             if (fileSystem.FileExists(symbolPackagePath)) {
-                source = MsBuildConstants.DefaultSymbolServerUrl;
+                source = NuGetConstants.DefaultSymbolServerUrl;
+
+                Log.LogMessage(NuGetResources.PushCommandPushingPackage, Path.GetFileNameWithoutExtension(symbolPackagePath), source);
 
                 if (String.IsNullOrEmpty(ApiKey)) {
                     Log.LogWarning(NuGetResources.SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
@@ -94,8 +96,7 @@ namespace NuGet.MSBuild {
         private void PushPackage(IFileSystem fileSystem, string packagePath, string source) {
             var packageServer = _packageServerFactory.CreateFrom(source);
 
-            var packageStream = fileSystem.OpenFile(packagePath);
-            IPackage package = _zipPackageFactory.CreatePackage(() => packageStream);
+            IPackage package = _zipPackageFactory.CreatePackage(() => fileSystem.OpenFile(packagePath));
 
             // Push the package to the server
             Log.LogMessage(NuGetResources.PushCommandPushingPackage, package.GetFullName(), source);

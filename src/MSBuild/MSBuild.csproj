@@ -31,12 +31,13 @@
     <Compile Include="Framework\FileSystemProvider.cs" />
     <Compile Include="Framework\MSBuildLogger.cs" />
     <Compile Include="NuGetPush.cs" />
-    <Compile Include="Interfaces\IPackageBuilderFactory.cs" />
     <Compile Include="NuGet.cs" />
     <Compile Include="NuGetFetch.cs" />
-    <Compile Include="Framework\PackageBuilderFactory.cs" />
     <Compile Include="Framework\PackageManagerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\..\Common\NuGetConstants.cs">
+      <Link>Framework\NuGetConstants.cs</Link>
+    </Compile>
     <Compile Include="Resources\NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

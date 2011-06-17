@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuGet.Authoring;
 using NuGet.MSBuild;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test.MSBuild {
     [TestClass]
     public class NuGetTaskUnitTest {
-        private const string createdPackage = "/thePackageId.1.0.nupkg";
+        private const string createdPackage = "thePackageId.1.0.nupkg";
         private const string NuSpecFile = "thePackageId.nuspec";
+
+        public TestContext TestContext { get; set; }
 
         [TestMethod]
         public void WillLogAnErrorWhenTheSpecFileIsEmpty() {
@@ -35,107 +37,117 @@ namespace NuGet.Test.MSBuild {
         }
 
         [TestMethod]
-        public void WillSetOutputPathWhenRun() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
+        public void OutputPathUsesPackageIdAndVerion() {
+            // Arrange
+            var packageBuilder = new PackageBuilder { Id = "Foo", Version = new Version("1.1") };
 
-            bool actualResut = task.Execute();
-            string packagePath = task.OutputPackage;
+            // Act
+            var task = CreateTaskWithDefaultStubs();
+            task.PackageDir = @"X:\";
+            string outputPath = task.GetOutputPath(packageBuilder);
 
-            packageBuilderStub.Verify(x => x.Save(It.IsAny<Stream>()));
-            Assert.AreEqual(createdPackage, packagePath);
+            // Assert
+            Assert.AreEqual(@"X:\Foo.1.1.nupkg", outputPath);
+        }
+
+        [TestMethod]
+        public void OutputPathAppendsSymbolPackageIdentifier() {
+            // Arrange
+            var packageBuilder = new PackageBuilder { Id = "Foo", Version = new Version("1.1") };
+
+            // Act
+            var task = CreateTaskWithDefaultStubs();
+            task.PackageDir = @"X:\";
+            var outputPath = task.GetOutputPath(packageBuilder, symbols: true);
+
+            // Assert
+            Assert.AreEqual(@"X:\Foo.1.1.symbols.nupkg", outputPath);
         }
 
         [TestMethod]
         public void WillErrorWhenTheSpecFileDoesNotExist() {
+            // Arrange
             string actualMessage = null;
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
             fileSystemProviderStub.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
             var buildEngineStub = new Mock<IBuildEngine>();
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(fileSystemProviderStub: fileSystemProviderStub, buildEngineStub: buildEngineStub);
+            var task = CreateTaskWithDefaultStubs(fileSystemProviderStub: fileSystemProviderStub, buildEngineStub: buildEngineStub);
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
             task.SpecFile = "aPathThatDoesNotExist";
 
+            // Act
             bool actualResut = task.Execute();
 
+            // Assert
             Assert.AreEqual("The spec file does not exist.", actualMessage);
             Assert.IsFalse(actualResut);
         }
 
         [TestMethod]
-        public void WillCreatePackageUsingSpecFileAndWorkingDirectory() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
-
-            bool actualResut = task.Execute();
-
-            packageBuilderStub.Verify(x => x.Save(It.IsAny<Stream>()));
-            Assert.IsTrue(actualResut);
-        }
-
-        [TestMethod]
         public void WillRemoveNuspecFilesFromPackage() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            var packageFileStub = new Mock<IPackageFile>();
-            packageFileStub.Setup(x => x.Path).Returns("/aFile.nuspec");
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
-            packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
+            // Arrange
+            var regularFile = new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" };
+            var packageFiles = new List<IPackageFile> { 
+                new PhysicalPackageFile { SourcePath = @"C:\foo.nuspec", TargetPath = "foo.nuspec" },
+                regularFile
+            };
 
-            bool actualResut = task.Execute();
-
-            Assert.AreEqual(0, packageBuilderStub.Object.Files.Count);
+            // Act
+            var task = CreateTaskWithDefaultStubs(fileSystemRoot: @"C:\");
+            task.ExcludeFiles(packageFiles);
+            
+            // Assert
+            Assert.AreEqual(1, packageFiles.Count);
+            Assert.AreEqual(regularFile, packageFiles.Single());
         }
 
         [TestMethod]
         public void WillRemoveNupkgFilesFromPackage() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            var packageFileStub = new Mock<IPackageFile>();
-            packageFileStub.Setup(x => x.Path).Returns("/aFile.nupkg");
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
-            packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
+            // Arrange
+            var regularFile = new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" };
+            var packageFiles = new List<IPackageFile> { 
+                new PhysicalPackageFile { SourcePath = @"C:\foo.nupkg", TargetPath = "foo.nupkg" },
+                regularFile
+            };
 
-            bool actualResut = task.Execute();
+            // Act
+            var task = CreateTaskWithDefaultStubs(fileSystemRoot: @"C:\");
+            task.ExcludeFiles(packageFiles);
 
-            Assert.AreEqual(0, packageBuilderStub.Object.Files.Count);
+            // Assert
+            Assert.AreEqual(1, packageFiles.Count);
+            Assert.AreEqual(regularFile, packageFiles.Single());
         }
 
         [TestMethod]
-        public void WillNotRemoveALibraryFileFromPackage() {
-            var packageBuilderStub = new Mock<IPackageBuilder>();
-            var packageFileStub = new Mock<IPackageFile>();
-            packageFileStub.Setup(x => x.Path).Returns("/lib/aFile.dll");
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub);
-            packageBuilderStub.Setup(x => x.Files).Returns(new Collection<IPackageFile>() { packageFileStub.Object });
+        public void WillNotRemoveLibraryFilesFromPackage() {
+            // Arrange
+            var packageFiles = new List<IPackageFile> { 
+                new PhysicalPackageFile { SourcePath = @"C:\foo.dll", TargetPath = @"lib\foo.dll" },
+                new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" }
+            };
 
-            bool actualResut = task.Execute();
+            // Act
+            var task = CreateTaskWithDefaultStubs(fileSystemRoot: @"C:\");
+            task.ExcludeFiles(packageFiles);
 
-            Assert.AreEqual(1, packageBuilderStub.Object.Files.Count);
-        }
-
-        [TestMethod]
-        public void WillLogMessagesBeforeAndAfterPackageCreation() {
-            Queue<string> actualMessages = new Queue<string>();
-            var buildEngineStub = new Mock<IBuildEngine>();
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub);
-            buildEngineStub
-                .Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()))
-                .Callback<BuildMessageEventArgs>(e => actualMessages.Enqueue(e.Message));
-
-            task.Execute();
-
-            Assert.AreEqual("Creating a package for /thePackageId.nuspec at /thePackageId.1.0.nupkg.", actualMessages.Dequeue());
-            Assert.AreEqual("Created a package for /thePackageId.nuspec at /thePackageId.1.0.nupkg.", actualMessages.Dequeue());
+            // Assert
+            Assert.AreEqual(2, packageFiles.Count);
         }
 
         [TestMethod]
         public void WillLogAnErrorWhenAnUnexpectedErrorHappens() {
             string actualMessage = null;
-            var packageBuilderStub = new Mock<IPackageBuilder>();
             var buildEngineStub = new Mock<IBuildEngine>();
-            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(packageBuilderStub: packageBuilderStub, buildEngineStub: buildEngineStub);
-            packageBuilderStub.Setup(x => x.Save(It.IsAny<Stream>())).Throws(new Exception());
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            var fileSystem = new Mock<IFileSystem>();
+            fileSystem.Setup(c => c.FileExists(It.IsAny<string>())).Returns(true);
+            fileSystem.Setup(c => c.OpenFile("package.nuspec")).Returns(@"<xml version=""1.0"">".AsStream());
+            fileSystemProvider.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(fileSystem.Object);
+            var task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub);
+
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
@@ -146,44 +158,25 @@ namespace NuGet.Test.MSBuild {
             Assert.IsFalse(actualResut);
         }
 
-        private static NuGet.MSBuild.NuGet CreateTaskWithDefaultStubs(Mock<IFileSystemProvider> fileSystemProviderStub = null,
-                                                              Mock<IPackageBuilderFactory> packageBuilderFactoryStub = null,
-                                                              Mock<IPackageBuilder> packageBuilderStub = null,
-                                                              Mock<IBuildEngine> buildEngineStub = null) {
-
+        private static NuGet.MSBuild.NuGet CreateTaskWithDefaultStubs(
+                                                              Mock<IFileSystemProvider> fileSystemProviderStub = null,
+                                                              Mock<IBuildEngine> buildEngineStub = null,
+                                                              string fileSystemRoot = "/") {
             if (fileSystemProviderStub == null) {
                 fileSystemProviderStub = new Mock<IFileSystemProvider>();
                 var mockFileSystem = new MockFileSystem();
-                mockFileSystem.AddFile(NuSpecFile);
+                mockFileSystem.AddFile(fileSystemRoot + NuSpecFile);
                 fileSystemProviderStub.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(mockFileSystem);
             }
-            if (packageBuilderFactoryStub == null) {
-                packageBuilderFactoryStub = new Mock<IPackageBuilderFactory>();
-            }
-            if (packageBuilderStub == null) {
-                packageBuilderStub = new Mock<IPackageBuilder>();
-            }
+
             if (buildEngineStub == null) {
                 buildEngineStub = new Mock<IBuildEngine>();
             }
 
-            packageBuilderStub
-                .SetupGet(x => x.Id)
-                .Returns("thePackageId");
-            packageBuilderStub
-                .SetupGet(x => x.Version)
-                .Returns(new Version(1, 0));
-            packageBuilderStub
-                .SetupGet(x => x.Files)
-                .Returns(new Collection<IPackageFile>());
-            packageBuilderFactoryStub
-                .Setup(x => x.CreateFrom('/' + NuSpecFile))
-                .Returns(packageBuilderStub.Object);
-
-            var task = new NuGet.MSBuild.NuGet(fileSystemProviderStub.Object, packageBuilderFactoryStub.Object, "/");
+            var task = new NuGet.MSBuild.NuGet(fileSystemProviderStub.Object, fileSystemRoot);
 
             task.BuildEngine = buildEngineStub.Object;
-            task.SpecFile = "thePackageId.nuspec";
+            task.SpecFile = fileSystemRoot + "thePackageId.nuspec";
 
             return task;
         }
