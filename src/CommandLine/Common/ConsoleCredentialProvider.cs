@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Security;
+using Console = System.Console;
 
 namespace NuGet {
     public class ConsoleCredentialProvider : ICredentialProvider {
@@ -8,6 +9,7 @@ namespace NuGet {
             return GetCredentials(uri, null);
         }
         public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
+            Console.WriteLine("Please provide credentials for: {0}", uri.OriginalString);
             Console.Write("Username: ");
             string username = Console.ReadLine();
             Console.Write("Password: ");

@@ -83,11 +83,9 @@
     <Compile Include="Repositories\NullConstraintProvider.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
-    <Compile Include="Utility\CredentialProviderRegistry.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Utility\HttpUtility.cs" />
     <Compile Include="Utility\ICredentialProvider.cs" />
-    <Compile Include="Utility\ICredentialProviderRegistry.cs" />
     <Compile Include="Utility\IHttpClientEvents.cs" />
     <Compile Include="Repositories\LazyQueue.cs" />
     <Compile Include="Repositories\ProgressEventArgs.cs" />

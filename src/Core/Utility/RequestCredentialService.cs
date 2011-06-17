@@ -1,11 +1,55 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-    public class RequestCredentialService: CredentialProviderRegistry, IRequestCredentialService {
+    public class RequestCredentialService: IRequestCredentialService {
+        ///// <summary>
+        ///// Local cache of registered proxy providers to use when locating a valid proxy
+        ///// to use for the given Uri.
+        ///// </summary>
+        private readonly ISet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
+        /// <summary>
+        /// Local cache of credential objects that is used to prevent the subsequent look ups of credentials
+        /// for the already discovered credentials based on the Uri.
+        /// </summary>
         private readonly ConcurrentDictionary<Uri, ICredentials> _credentialCache = new ConcurrentDictionary<Uri, ICredentials>();
-        
+
+        /// <summary>
+        /// Returns a list of already registered ICredentialProvider instances that one can enumerate
+        /// </summary>
+        public ICollection<ICredentialProvider> RegisteredProviders {
+            get {
+                return _providerCache;
+            }
+        }
+
+        /// <summary>
+        /// Allows the consumer to provide a list of credential providers to use
+        /// for locating of different ICredentials instances.
+        /// </summary>
+        public void RegisterProvider(ICredentialProvider provider) {
+            if (provider == null) {
+                throw new ArgumentNullException("provider");
+            }
+            _providerCache.Add(provider);
+        }
+
+        /// <summary>
+        /// Unregisters the specified credential provider from the proxy finder.
+        /// </summary>
+        /// <param name="provider"></param>
+        public void UnregisterProvider(ICredentialProvider provider) {
+            if (provider == null) {
+                throw new ArgumentNullException("provider");
+            }
+            if (!_providerCache.Contains(provider)) {
+                return;
+            }
+            _providerCache.Remove(provider);
+        }
+
         public ICredentials GetCredentials(Uri uri) {
             return GetCredentials(uri, null);
         }

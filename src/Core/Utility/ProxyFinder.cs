@@ -4,18 +4,53 @@ using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-    public class ProxyFinder : CredentialProviderRegistry, IProxyFinder {
+    public class ProxyFinder : IProxyFinder {
+
+        ///// <summary>
+        ///// Local cache of registered proxy providers to use when locating a valid proxy
+        ///// to use for the given Uri.
+        ///// </summary>
+        private readonly ISet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
         /// <summary>
         /// Local Cache of Proxy objects that will store the Proxy that was discovered during the session
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
         /// for the same Uri again.
         /// </summary>
         private readonly ConcurrentDictionary<Uri, IWebProxy> _proxyCache = new ConcurrentDictionary<Uri, IWebProxy>();
-        ///// <summary>
-        ///// Local cache of registered proxy providers to use when locating a valid proxy
-        ///// to use for the given Uri.
-        ///// </summary>
-        //private readonly ISet<IProxyProvider> _providerCache = new HashSet<IProxyProvider>();
+        
+        /// <summary>
+        /// Returns a list of already registered ICredentialProvider instances that one can enumerate
+        /// </summary>
+        public ICollection<ICredentialProvider> RegisteredProviders {
+            get {
+                return _providerCache;
+            }
+        }
+
+        /// <summary>
+        /// Allows the consumer to provide a list of credential providers to use
+        /// for locating of different ICredentials instances.
+        /// </summary>
+        public void RegisterProvider(ICredentialProvider provider) {
+            if (provider == null) {
+                throw new ArgumentNullException("provider");
+            }
+            _providerCache.Add(provider);
+        }
+
+        /// <summary>
+        /// Unregisters the specified credential provider from the proxy finder.
+        /// </summary>
+        /// <param name="provider"></param>
+        public void UnregisterProvider(ICredentialProvider provider) {
+            if (provider == null) {
+                throw new ArgumentNullException("provider");
+            }
+            if (!_providerCache.Contains(provider)) {
+                return;
+            }
+            _providerCache.Remove(provider);
+        }
         /// <summary>
         /// Returns an instance of a IWebProxy interface that is to be used for creating requests to the given Uri
         /// </summary>

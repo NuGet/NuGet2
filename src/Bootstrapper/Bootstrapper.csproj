@@ -41,17 +41,11 @@
     <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
       <Link>ProgressEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Utility\CredentialProviderRegistry.cs">
-      <Link>CredentialProviderRegistry.cs</Link>
-    </Compile>
     <Compile Include="..\Core\Utility\HttpClient.cs">
       <Link>HttpClient.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\ICredentialProvider.cs">
       <Link>ICredentialProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\ICredentialProviderRegistry.cs">
-      <Link>ICredentialProviderRegistry.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\IHttpClient.cs">
       <Link>IHttpClient.cs</Link>
