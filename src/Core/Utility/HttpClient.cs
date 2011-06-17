@@ -7,12 +7,16 @@ namespace NuGet {
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
+
+        private static ICredentialProvider _integratedCredentialProvider = new IntegratedCredentialProvider();
         private static IProxyFinder _defaultProxyFinder = CreateFinder();
+        private static IRequestCredentialService _defaultCredentialService = CreateCredentialService();
 
         private Uri _uri;
 
         private HttpClient() {
             ProxyFinder = DefaultProxyFinder;
+            CredentialService = DefaultCredentialService;
         }
 
         public HttpClient(Uri uri)
@@ -38,12 +42,12 @@ namespace NuGet {
             }
         }
 
-        public IWebProxy Proxy {
+        public IProxyFinder ProxyFinder {
             get;
             set;
         }
 
-        public IProxyFinder ProxyFinder {
+        public IRequestCredentialService CredentialService {
             get;
             set;
         }
@@ -59,6 +63,15 @@ namespace NuGet {
             }
             set {
                 _defaultProxyFinder = value;
+            }
+        }
+
+        public static IRequestCredentialService DefaultCredentialService {
+            get {
+                return _defaultCredentialService;
+            }
+            set {
+                _defaultCredentialService = value;
             }
         }
 
@@ -82,11 +95,15 @@ namespace NuGet {
             // By default if the user has not set the proxy then the proxy should be set to the WebRequest.DefaultWebProxy
             // If the user has manually set or passed in a proxy as Null then we probably don't want to auto detect.
             if (ProxyFinder != null) {
-                Proxy = ProxyFinder.GetProxy(Uri);
+                // Set the request proxy.
+                request.Proxy = ProxyFinder.GetProxy(Uri) ?? request.Proxy;
             }
 
-            // Set the request proxy to the set Proxy property instance.
-            request.Proxy = Proxy;
+            if (CredentialService != null) {
+                // Set the request credentials and use the proxy that we've discovered above to ensure
+                // that we can properly communicate through the proxy.
+                request.Credentials = CredentialService.GetCredentials(Uri, request.Proxy) ?? request.Credentials;
+            }
 
             // Give clients a chance to examine/modify the request object before the request actually goes out.
             RaiseSendingRequest(request);
@@ -140,8 +157,14 @@ namespace NuGet {
         /// <returns></returns>
         private static IProxyFinder CreateFinder() {
             var proxyFinder = new ProxyFinder();
-            proxyFinder.RegisterProvider(new IntegratedCredentialProvider());
+            proxyFinder.RegisterProvider(_integratedCredentialProvider);
             return proxyFinder;
         }
+        private static IRequestCredentialService CreateCredentialService() {
+            var credentialService = new RequestCredentialService();
+            credentialService.RegisterProvider(_integratedCredentialProvider);
+            return credentialService;
+        }
+
     }
 }
