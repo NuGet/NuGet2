@@ -3,5 +3,7 @@ namespace NuGet.VisualStudio {
         IVsPackageManager CreatePackageManager();
 
         IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies);
+
+        IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool stealthMode);
     }
 }

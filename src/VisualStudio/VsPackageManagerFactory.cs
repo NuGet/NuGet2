@@ -58,11 +58,17 @@ namespace NuGet.VisualStudio {
         }
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies) {
+            return CreatePackageManager(repository, useFallbackForDependencies, stealthMode: false);
+        }
+
+        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool stealthMode) {
             if (useFallbackForDependencies) {
                 repository = CreateFallbackRepository(repository);
             }
             RepositoryInfo info = GetRepositoryInfo();
-            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository, _recentPackageRepository);
+            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository, _recentPackageRepository) {
+                StealthMode = stealthMode
+            };
         }
 
         /// <summary>
