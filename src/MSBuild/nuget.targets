@@ -122,8 +122,7 @@
 
         <!-- create the package from the spec file and return the path to the created package -->
         <!-- the working directory is the output directory for the build, so the spec file needs to be copied to output directory -->
-        <NuGet SpecFile="$(NuspecFilePath)"
-               PackageDir="$(PublishPackageDir)">
+        <NuGet SpecFile="$(NuspecFilePath)" PackageDir="$(PublishPackageDir)" Symbols="true">
             <Output TaskParameter="OutputPackage"
                   PropertyName="OutputPackagePath" />
         </NuGet>
