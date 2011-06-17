@@ -25,7 +25,7 @@ namespace NuGet.VisualStudio {
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
 
-        internal bool StealthMode { get; set; }
+        internal bool AddToRecent { get; set; }
 
         internal void EnsureCached(Project project) {
             if (_projects.ContainsKey(project.UniqueName)) {
@@ -563,7 +563,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void AddPackageToRecentRepository(IPackage package) {
-            if (StealthMode) {
+            if (!AddToRecent) {
                 return;
             }
 

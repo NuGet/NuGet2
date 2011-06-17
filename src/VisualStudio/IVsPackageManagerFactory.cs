@@ -4,6 +4,6 @@ namespace NuGet.VisualStudio {
 
         IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies);
 
-        IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool stealthMode);
+        IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool addToRecent);
     }
 }
