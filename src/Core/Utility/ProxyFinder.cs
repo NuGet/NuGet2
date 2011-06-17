@@ -37,7 +37,6 @@ namespace NuGet {
         /// <param name="uri">The Uri object that the proxy is to be used for.</param>
         /// <returns></returns>
         private IWebProxy GetProxyInternal(Uri uri) {
-            IWebProxy result = null;
             WebProxy systemProxy = GetSystemProxy(uri);
 
             IWebProxy cachedProxy;
@@ -53,9 +52,9 @@ namespace NuGet {
             // CON: If the user incorrectly types the password or an invalid proxy instance
             //      is cached then the user has to re-start the "Client" to be able to re-try
             //      connecting to a valid proxy.
-            _proxyCache.TryAdd(systemProxy.Address, result);
+            _proxyCache.TryAdd(systemProxy.Address, systemProxy);
 
-            return result;
+            return systemProxy;
         }
 
         private ICredentials GetProxyCredentials(Uri uri) {
