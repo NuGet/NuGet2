@@ -9,8 +9,7 @@ namespace NuGet {
     public class PackageServer : IPackageServer, IProgressProvider {
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
-        private const string PublichPackageService = "PublishedPackages/Publish";
-
+        private const string PublishPackageService = "PublishedPackages/Publish";
         private readonly Lazy<IHttpClient> _galleryClient;
         private readonly string _source;
         private readonly string _userAgent;
@@ -21,15 +20,13 @@ namespace NuGet {
             if (String.IsNullOrEmpty(source)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
             }
-            _source = source.TrimEnd('/');
-            _galleryClient = new Lazy<IHttpClient>(() => CreateClient(source));
+            _source = source;
             _userAgent = userAgent;
+            _galleryClient = new Lazy<IHttpClient>(() => EnsureClient(source));
         }
 
         public string Source {
-            get {
-                return _source;
-            }
+            get { return _source; }
         }
 
         public void CreatePackage(string apiKey, Stream packageStream) {
@@ -64,7 +61,7 @@ namespace NuGet {
         }
 
         public void PublishPackage(string apiKey, string packageId, string packageVersion) {
-            var request = CreateRequest(PublichPackageService, "POST", "application/json");
+            var request = CreateRequest(PublishPackageService, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new PublishData {
@@ -88,9 +85,16 @@ namespace NuGet {
             GetResponse(request);
         }
 
+        private void OnProgressAvailable(int percentage) {
+            if (ProgressAvailable != null) {
+                ProgressAvailable(this, new ProgressEventArgs(percentage));
+            }
+        }
+
         private HttpWebRequest CreateRequest(string action, string method, string contentType) {
-            var actionUrl = _galleryClient.Value.Uri.OriginalString + '/' + action;
-            var actionClient = new HttpClient(new Uri(actionUrl));
+            Uri baseUri = EnsureTrailingSlash(_galleryClient.Value.Uri);
+            var actionUrl = new Uri(baseUri, action);
+            var actionClient = new HttpClient(actionUrl);
             var request = actionClient.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
@@ -102,13 +106,25 @@ namespace NuGet {
             return request;
         }
 
+        private static Uri EnsureTrailingSlash(Uri uri) {
+            string value = uri.AbsoluteUri;
+            if (!value.EndsWith("/", StringComparison.OrdinalIgnoreCase)) {
+                value += "/";
+            }
+            return new Uri(value);
+        }
+
         private static WebResponse GetResponse(WebRequest request) {
             try {
                 return request.GetResponse();
             }
             catch (WebException e) {
-                string errorMessage = String.Empty;
+                if (e.Response == null) {
+                    throw;
+                }
+
                 var response = (HttpWebResponse)e.Response;
+                string errorMessage = String.Empty;
                 using (var stream = response.GetResponseStream()) {
                     errorMessage = stream.ReadToEnd();
                 }
@@ -117,14 +133,8 @@ namespace NuGet {
             }
         }
 
-        private void OnProgressAvailable(int percentage) {
-            if (ProgressAvailable != null) {
-                ProgressAvailable(this, new ProgressEventArgs(percentage));
-            }
-        }
-
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "uri", Justification = "Reading the Uri property causes a 403 if something failed.")]
-        private static IHttpClient CreateClient(string source) {
+        private static IHttpClient EnsureClient(string source) {
             IHttpClient client = null;
             try {
                 client = new RedirectedHttpClient(new Uri(source));
@@ -133,7 +143,7 @@ namespace NuGet {
                 var uri = client.Uri;
             }
             catch (WebException e) {
-                if (e.Status == WebExceptionStatus.Timeout) {
+                if (e.Status == WebExceptionStatus.Timeout || e.Response == null) {
                     // If we got a timeout error then throw it up to the consumer
                     // because we are not able to connect to the gallery server.
                     throw;
