@@ -5,7 +5,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "sources", "SourcesCommandDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
-        MinArgs = 1, MaxArgs = 1)]
+        MinArgs = 0, MaxArgs = 1)]
     public class SourcesCommand: Command {
 
         [Option(typeof(NuGetResources), "SourcesCommandNameDescription")]
@@ -26,8 +26,9 @@ namespace NuGet.Commands {
 
         public override void ExecuteCommand() {
             // convert to lowercase
-            var action = Arguments[0].ToLower();
+            var action = Arguments.Any() ? Arguments.First().ToLower() : null;
             switch (action) {
+                case null:
                 case "list":
                     PrintRegisteredSources();
                     break;
