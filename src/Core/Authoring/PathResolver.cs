@@ -41,7 +41,7 @@ namespace NuGet {
                 // If we aren't dealing with network paths, trim the leading slash. 
                 searchPath = searchPath.TrimStart(Path.DirectorySeparatorChar);
             }
-            basePath = NormalizeBasePath(basePath);
+            basePath = NormalizeBasePath(basePath, ref searchPath);
             string basePathToEnumerate = GetPathToEnumerateFrom(basePath, searchPath);
 
             // Append the basePath to searchPattern and get the search regex. We need to do this because the search regex is matched from line start.
@@ -120,8 +120,20 @@ namespace NuGet {
             return Path.Combine(targetPath ?? String.Empty, packagePath);
         }
 
-        private static string NormalizeBasePath(string directory) {
-            return Path.GetFullPath(String.IsNullOrEmpty(directory) ? "." : directory);
+        private static string NormalizeBasePath(string basePath, ref string searchPath) {
+            const string relativePath = @"..\";
+
+            // If no base path is provided, use the current directory.
+            basePath = String.IsNullOrEmpty(basePath) ? @".\" : basePath;
+
+            // If the search path is relative, transfer the ..\ portion to the base path. 
+            // This needs to be done because the base path determines the root for our enumeration.
+            while (searchPath.StartsWith(relativePath, StringComparison.OrdinalIgnoreCase)) {
+                basePath = Path.Combine(basePath, relativePath);
+                searchPath = searchPath.Substring(relativePath.Length);
+            }
+
+            return Path.GetFullPath(basePath);
         }
 
         /// <summary>

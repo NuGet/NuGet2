@@ -853,6 +853,89 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: ..\bin\release\*.dll
+        /// Target: lib
+        /// Expected: lib\release\baz.dll
+        /// </summary>
+        [TestMethod]
+        public void RelativePathWithWildCard() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("properties"),
+                                           new Dir("bin",
+                                               new Dir("release", new File("baz.dll"))));
+                                            
+            string searchPath = @"..\bin\release\*.dll";
+            string target = @"lib";
+            Stream manifest = GetManifest(searchPath, target);
+
+            // Act
+            string builderBase = Path.Combine(root, "properties");
+            var package = new PackageBuilder(manifest, builderBase);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\baz.dll", package.Files.Single().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: ..\..\bin\*\*.dll
+        /// Target: lib
+        /// Expected: lib\release\baz.dll
+        /// </summary>
+        [TestMethod]
+        public void DeepRelativePathWithWildCard() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("tools",
+                                                new Dir("nuspec")),
+                                           new Dir("bin",
+                                               new Dir("release", new File("baz.dll"))));
+
+            string searchPath = @"..\..\bin\release\*.dll";
+            string target = @"lib";
+            Stream manifest = GetManifest(searchPath, target);
+
+            // Act
+            string builderBase = Path.Combine(root, @"tools\nuspec");
+            var package = new PackageBuilder(manifest, builderBase);
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\baz.dll", package.Files.Single().Path);
+        }
+
+        /// <summary>
+        /// Source: bin\release\baz.dll
+        /// Search: ..\..\bin\*\*.dll
+        /// Target: lib
+        /// Expected: lib\release\baz.dll
+        /// </summary>
+        [TestMethod]
+        public void RelativePathWithRecursiveWildCard() {
+            // Arrange
+            string root = CreateFileSystem(new Dir("tools",
+                                                new Dir("nuspec")),
+                                           new Dir("bin",
+                                               new File("Output.dll"),
+                                               new Dir("release", 
+                                                   new File("baz.dll"))));
+
+            string searchPath = @"..\..\bin\**\*.dll";
+            string target = @"lib";
+            Stream manifest = GetManifest(searchPath, target);
+
+            // Act
+            string builderBase = Path.Combine(root, @"tools\nuspec");
+            var package = new PackageBuilder(manifest, builderBase);
+
+            // Assert
+            Assert.AreEqual(2, package.Files.Count);
+            Assert.AreEqual(@"lib\Output.dll", package.Files.First().Path);
+            Assert.AreEqual(@"lib\release\baz.dll", package.Files.Last().Path);
+        }
+
+        /// <summary>
         /// Source: output\foo.dll, output\output\foo.dll, output\output\output\foo.dll, output\foo\output.dll
         /// Search: output\output\foo.dll
         /// Target: lib\foo.dll
