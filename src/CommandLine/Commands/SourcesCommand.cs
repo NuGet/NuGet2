@@ -41,7 +41,7 @@ namespace NuGet.Commands {
             }
         }
 
-        void RemoveSource(string name) {
+        private void RemoveSource(string name) {
             if (String.IsNullOrWhiteSpace(name)) {
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
@@ -57,7 +57,7 @@ namespace NuGet.Commands {
             Console.WriteLine(NuGetResources.SourcesCommandSourceRemovedSuccessfully, name);
         }
 
-        void AddNewSource(string name, string source) {
+        private private void AddNewSource(string name, string source) {
             if (String.IsNullOrWhiteSpace(name)) {
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
