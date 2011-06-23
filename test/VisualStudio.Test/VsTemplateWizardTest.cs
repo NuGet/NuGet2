@@ -179,8 +179,8 @@ namespace NuGet.VisualStudio.Test {
                 BuildPackageElement("MyOtherPackage", "2.0")
             };
             var expectedPackages = new[] {
-                new VsTemplateWizard.PackageInfo("MyPackage", "1.0"),
-                new VsTemplateWizard.PackageInfo("MyOtherPackage", "2.0")
+                new VsTemplateWizardPackageInfo("MyPackage", "1.0"),
+                new VsTemplateWizardPackageInfo("MyOtherPackage", "2.0")
             };
             var document = BuildDocument("template", content);
 
@@ -190,7 +190,7 @@ namespace NuGet.VisualStudio.Test {
         [TestMethod]
         public void GetConfigurationFromXmlDocument_WorksWithDocumentWithNoNamespace() {
             var expectedPackages = new[] {
-                new VsTemplateWizard.PackageInfo("MyPackage", "1.0"),
+                new VsTemplateWizardPackageInfo("MyPackage", "1.0"),
             };
             var document =
                 new XDocument(new XElement("VSTemplate",
@@ -201,7 +201,7 @@ namespace NuGet.VisualStudio.Test {
             VerifyParsedPackages(document, expectedPackages);
         }
 
-        private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizard.PackageInfo> expectedPackages) {
+        private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages) {
             // Arrange
             var wizard = new VsTemplateWizard(null); 
 

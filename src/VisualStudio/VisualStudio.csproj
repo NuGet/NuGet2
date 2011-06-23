@@ -46,6 +46,8 @@
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="VsTemplateWizard.cs" />
+    <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />
+    <Compile Include="VsTemplateWizardPackageInfo.cs" />
     <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>

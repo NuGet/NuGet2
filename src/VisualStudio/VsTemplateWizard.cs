@@ -16,7 +16,7 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IVsTemplateWizard))]
     public class VsTemplateWizard : IVsTemplateWizard {
         private readonly IVsPackageInstaller _installer;
-        private InstallerConfiguration _configuration;
+        private VsTemplateWizardInstallerConfiguration _configuration;
         private Project _project;
 
         private DTE DTE { get; set; }
@@ -26,14 +26,14 @@ namespace NuGet.VisualStudio {
             _installer = installer;
         }
 
-        private InstallerConfiguration GetConfigurationFromVsTemplateFile(string vsTemplatePath) {
+        private VsTemplateWizardInstallerConfiguration GetConfigurationFromVsTemplateFile(string vsTemplatePath) {
             XDocument document = LoadDocument(vsTemplatePath);
 
             return GetConfigurationFromXmlDocument(document, vsTemplatePath);
         }
 
-        internal InstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath, IVsExtensionManager vsExtensionManager = null) {
-            IEnumerable<PackageInfo> packages = Enumerable.Empty<PackageInfo>();
+        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath, IVsExtensionManager vsExtensionManager = null) {
+            IEnumerable<VsTemplateWizardPackageInfo> packages = Enumerable.Empty<VsTemplateWizardPackageInfo>();
             string repositoryPath = null;
 
             // Ignore XML namespaces since VS does not check them either when loading vstemplate files.
@@ -51,10 +51,10 @@ namespace NuGet.VisualStudio {
                 }
             }
 
-            return new InstallerConfiguration(repositoryPath, packages);
+            return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages);
         }
 
-        private IEnumerable<PackageInfo> GetPackages(XElement packagesElement) {
+        private IEnumerable<VsTemplateWizardPackageInfo> GetPackages(XElement packagesElement) {
             var declarations = (from packageElement in packagesElement.ElementsNoNamespace("package")
                                 let id = packageElement.GetOptionalAttributeValue("id")
                                 let version = packageElement.GetOptionalAttributeValue("version")
@@ -75,7 +75,7 @@ namespace NuGet.VisualStudio {
             }
 
             return from declaration in declarations
-                   select new PackageInfo(declaration.id, declaration.version);
+                   select new VsTemplateWizardPackageInfo(declaration.id, declaration.version);
         }
 
         private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath, IVsExtensionManager vsExtensionManager) {
@@ -121,8 +121,8 @@ namespace NuGet.VisualStudio {
             return XDocument.Load(path);
         }
 
-        private void PerformPackageInstall(IVsPackageInstaller packageInstaller, Project project, string packageRepositoryPath, IEnumerable<PackageInfo> packages) {
-            var failedPackages = new List<PackageInfo>();
+        private void PerformPackageInstall(IVsPackageInstaller packageInstaller, Project project, string packageRepositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages) {
+            var failedPackages = new List<VsTemplateWizardPackageInfo>();
 
             foreach (var package in packages) {
                 try {
@@ -198,29 +198,6 @@ namespace NuGet.VisualStudio {
         bool IWizard.ShouldAddProjectItem(string filePath) {
             // always add all project items
             return true;
-        }
-
-        internal sealed class InstallerConfiguration {
-            public InstallerConfiguration(string repositoryPath, IEnumerable<PackageInfo> packages) {
-                Packages = packages.ToList().AsReadOnly();
-                RepositoryPath = repositoryPath;
-            }
-
-            public ICollection<PackageInfo> Packages { get; private set; }
-            public string RepositoryPath { get; private set; }
-        }
-
-        internal sealed class PackageInfo {
-            public PackageInfo(string id, string version) {
-                Debug.Assert(!String.IsNullOrWhiteSpace(id));
-                Debug.Assert(!String.IsNullOrWhiteSpace(version));
-
-                Id = id;
-                Version = new Version(version);
-            }
-
-            public string Id { get; private set; }
-            public Version Version { get; private set; }
         }
 
         private enum RepositoryType {
