@@ -40,16 +40,21 @@ namespace NuGet.VisualStudio {
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
 
-        public static bool ShowQueryMessage(string message, string title) {
+        public static bool? ShowQueryMessage(string message, string title) {
             int result = VsShellUtilities.ShowMessageBox(
                 ServiceLocator.GetInstance<IServiceProvider>(),
                 message,
                 title,
                 OLEMSGICON.OLEMSGICON_QUERY,
-                OLEMSGBUTTON.OLEMSGBUTTON_YESNO,
+                OLEMSGBUTTON.OLEMSGBUTTON_YESNOCANCEL,
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
 
-            return (result == NativeMethods.IDYES);
+            if (result == NativeMethods.IDCANCEL) {
+                return null;
+            }
+            else {
+                return (result == NativeMethods.IDYES);
+            }
         }
     }
 }

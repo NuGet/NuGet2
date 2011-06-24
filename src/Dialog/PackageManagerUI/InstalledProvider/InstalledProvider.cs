@@ -82,14 +82,18 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-            bool removeDependencies = AskRemoveDependencyAndCheckUninstallPSScript(item.PackageIdentity);
+            bool? removeDependencies = AskRemoveDependencyAndCheckUninstallPSScript(item.PackageIdentity);
+            if (removeDependencies == null) {
+                // user presses Cancel
+                return false;
+            }
             ShowProgressWindow();
-            UninstallPackageFromProject(_project, item, removeDependencies);
+            UninstallPackageFromProject(_project, item, (bool)removeDependencies);
             HideProgressWindow();
             return true;
         }
 
-        protected bool AskRemoveDependencyAndCheckUninstallPSScript(IPackage package) {
+        protected bool? AskRemoveDependencyAndCheckUninstallPSScript(IPackage package) {
             var uninstallWalker = new UninstallWalker(
                 LocalRepository,
                 new DependentsWalker(LocalRepository),
@@ -104,7 +108,7 @@ namespace NuGet.Dialog.Providers {
                                          where o.Action == PackageAction.Uninstall && !PackageEqualityComparer.IdAndVersion.Equals(o.Package, package)
                                          select o.Package.ToString()).ToList();
 
-            bool removeDependencies = false;
+            bool? removeDependencies = false;
             if (uninstallPackageNames.Count > 0) {
                 // show each dependency package on one line
                 String packageNames = String.Join(Environment.NewLine, uninstallPackageNames);
@@ -115,9 +119,12 @@ namespace NuGet.Dialog.Providers {
 
                 removeDependencies = _userNotifierServices.ShowRemoveDependenciesWindow(message);
             }
+            if (removeDependencies == null) {
+                return removeDependencies;
+            }
 
             bool hasScriptPackages;
-            if (removeDependencies) {
+            if (removeDependencies == true) {
                 // if user wants to remove dependencies, we need to check all of them for PS scripts
                 var scriptPackages = from o in operations
                                      where o.Package.HasPowerShellScript()

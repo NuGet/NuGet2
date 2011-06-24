@@ -79,10 +79,10 @@ namespace NuGet.Dialog.PackageManagerUI {
             window.ShowModal();
         }
 
-        public bool ShowRemoveDependenciesWindow(string message) {
+        public bool? ShowRemoveDependenciesWindow(string message) {
             if (!_uiDispatcher.CheckAccess()) {
                 object result = _uiDispatcher.Invoke(
-                    new Func<string, bool>(ShowRemoveDependenciesWindow),
+                    new Func<string, bool?>(ShowRemoveDependenciesWindow),
                     message);
                 return (bool)result;
             }

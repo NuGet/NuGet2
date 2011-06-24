@@ -52,11 +52,15 @@ namespace NuGet.Dialog.Providers {
         protected override bool ExecuteCore(PackageItem item) {
             IPackage package = item.PackageIdentity;
 
-            bool removeDepedencies = false;
+            bool? removeDepedencies = false;
 
             // treat solution-level packages specially
             if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
                 removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package);
+                if (removeDepedencies == null) {
+                    // user presses Cancel
+                    return false;
+                }
 
                 ShowProgressWindow();
                 try {
@@ -66,7 +70,7 @@ namespace NuGet.Dialog.Providers {
                         item.PackageIdentity.Id,
                         item.PackageIdentity.Version,
                         forceRemove: false,
-                        removeDependencies: removeDepedencies,
+                        removeDependencies: (bool)removeDepedencies,
                         logger: this);
                 }
                 finally {
@@ -129,7 +133,7 @@ namespace NuGet.Dialog.Providers {
                     }
                     else {
                         // if the project is unchecked, uninstall package from it
-                        UninstallPackageFromProject(project, item, removeDepedencies);
+                        UninstallPackageFromProject(project, item, (bool)removeDepedencies);
                     }
                 }
                 catch (Exception ex) {

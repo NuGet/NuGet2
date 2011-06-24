@@ -7,6 +7,6 @@ namespace NuGet.Dialog.PackageManagerUI {
         bool ShowLicenseWindow(IEnumerable<IPackage> packages);
         IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Predicate<Project> checkedStateSelector, Predicate<Project> enabledStateSelector);
         void ShowSummaryWindow(object failedProjects);
-        bool ShowRemoveDependenciesWindow(string message);
+        bool? ShowRemoveDependenciesWindow(string message);
     }
 }
