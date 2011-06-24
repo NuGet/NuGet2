@@ -47,6 +47,7 @@
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="MachineCacheTest.cs" />
+    <Compile Include="ManifestFileTest.cs" />
     <Compile Include="Mocks\MockUserSettingsManager.cs" />
     <Compile Include="NuGetCommandLine\Commands\PackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\Commands\UpdateCommandTest.cs" />
