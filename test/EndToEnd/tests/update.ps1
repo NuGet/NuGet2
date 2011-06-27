@@ -720,3 +720,17 @@ function Test-BindingRedirectShouldNotBeAddedForNonStrongNamedAssemblies {
     # Assert
     Assert-Null (Get-ProjectItem $p app.config)
 }
+
+function Test-UpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
+    param(
+        $context
+    )
+
+}
+
+function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
+    param(
+        $context
+    )
+
+}

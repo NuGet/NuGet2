@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
@@ -10,7 +11,6 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.PowerShell.Commands {
-
     /// <summary>
     /// This class acts as the base class for InstallPackage, UninstallPackage and UpdatePackage commands.
     /// </summary>
@@ -44,7 +44,6 @@ namespace NuGet.PowerShell.Commands {
                         projectManager = tuple.Item1;
                         if (projectManager != null) {
                             _projectManagers.Add(name, projectManager);
-                            _projectManagerToProject[projectManager] = tuple.Item2;
                         }
                     }
                 }
@@ -106,15 +105,31 @@ namespace NuGet.PowerShell.Commands {
                 return null;
             }
 
-            IProjectManager projectManager = PackageManager.GetProjectManager(project);
-            projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
-            projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
+            return GetProjectManager(project);
+        }
+
+        private Tuple<IProjectManager, Project> GetProjectManager(Project project) {
+            IProjectManager projectManager = RegisterProjectEvents(project);
 
             return Tuple.Create(projectManager, project);
         }
 
+        protected IProjectManager RegisterProjectEvents(Project project) {
+            IProjectManager projectManager = PackageManager.GetProjectManager(project);
+
+            if (!_projectManagerToProject.ContainsKey(projectManager)) {
+                projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
+                projectManager.PackageReferenceRemoving += OnPackageReferenceRemoving;
+
+                // Associate the project manager with this project
+                _projectManagerToProject[projectManager] = project;
+            }
+
+            return projectManager;
+        }
+
         private void OnPackageInstalling(object sender, PackageOperationEventArgs e) {
-            // write disclaimer text before a package is installed
+            // Write disclaimer text before a package is installed
             WriteDisclaimerText(e.Package);
         }
 
@@ -139,7 +154,7 @@ namespace NuGet.PowerShell.Commands {
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
 
-            EnvDTE.Project project;
+            Project project;
             if (!_projectManagerToProject.TryGetValue(projectManager, out project)) {
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }
@@ -147,11 +162,11 @@ namespace NuGet.PowerShell.Commands {
             ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e) {
             var projectManager = (ProjectManager)sender;
 
-            EnvDTE.Project project;
+            Project project;
             if (!_projectManagerToProject.TryGetValue(projectManager, out project)) {
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }

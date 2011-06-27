@@ -76,7 +76,7 @@ namespace NuGet.Dialog.Providers {
                 operations,
                 ignoreDependencies: false,
                 logger: this,
-                packageOperationEventListener: this);
+                eventListener: this);
 
             return true;
         }
