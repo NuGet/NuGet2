@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -242,5 +242,29 @@
   </data>
   <data name="OperationFailed" xml:space="preserve">
     <value>Operation failed.</value>
+  </data>
+  <data name="TemplateWizard_ErrorDialogTitle" xml:space="preserve">
+    <value>Package Installation Error</value>
+  </data>
+  <data name="TemplateWizard_InvalidRepositoryAttribute" xml:space="preserve">
+    <value>The "repository" attribute of the package element has an invalid value: '{0}'. Valid values are: 'template' or 'extension'.</value>
+  </data>
+  <data name="TemplateWizard_InvalidWizardRunKind" xml:space="preserve">
+    <value>This template wizard can only be applied to project templates.</value>
+  </data>
+  <data name="TemplateWizard_FailedToInstallPackage" xml:space="preserve">
+    <value>Could not add all required packages to the project. The following packages failed to install from '{0}':</value>
+  </data>
+  <data name="TemplateWizard_PackageInstallStatus" xml:space="preserve">
+    <value>Adding {0}.{1} to project...</value>
+  </data>
+  <data name="TemplateWizard_MissingExtensionId" xml:space="preserve">
+    <value>The project template is configured to use an Extension-specific package repository but the Extension ID has not been specified. Use the "repositoryId" attribute to specify the Extension ID.</value>
+  </data>
+  <data name="TemplateWizard_InvalidExtensionId" xml:space="preserve">
+    <value>The project template has a reference to a missing Extension. Could not find an Extension with ID '{0}'.</value>
+  </data>
+  <data name="TemplateWizard_InvalidPackageElementAttributes" xml:space="preserve">
+    <value>The project template lists one or more packages with missing, empty, or invalid values for the "id" or "version" attributes. Both attributes are required and must have valid values.</value>
   </data>
 </root>
