@@ -17,7 +17,7 @@
             </VisualStudio>
         </SupportedProducts>
         <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
-        <AllUsers>true</AllUsers>
+        <AllUsers>false</AllUsers>
     </Identifier>
     <References />
     <Content>

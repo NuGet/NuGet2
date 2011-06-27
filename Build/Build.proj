@@ -46,6 +46,10 @@
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
             <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
         </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">        
+            <Find><![CDATA[<AllUsers>false</AllUsers>]]></Find>
+            <ReplaceWith><![CDATA[<AllUsers>true</AllUsers>]]></ReplaceWith>
+        </RegexTransform>
         <RegexTransform Include="$(NuGetRoot)\Common\CommonAssemblyInfo.cs">
             <Find>\d+\.\d+\.\d+\.\d+</Find>
             <ReplaceWith>$(Version)</ReplaceWith>
