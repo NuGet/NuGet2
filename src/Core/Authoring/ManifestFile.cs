@@ -10,8 +10,8 @@ using NuGet.Resources;
 namespace NuGet {
     [XmlType("file")]
     public class ManifestFile : IValidatableObject {
-        private static readonly char[] _invalidPathCharacters = Path.GetInvalidPathChars();
-        private static readonly IEnumerable<char> _invalidPathCharactersExceptWildCards = _invalidPathCharacters.Except(new[] { '*', '?' });
+        private static readonly char[] _invalidTargetChars = Path.GetInvalidFileNameChars().Except(new[] { '\\', '/', '.' }).ToArray();
+        private static readonly char[] _invalidSourceCharacters = Path.GetInvalidPathChars();
 
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlAttribute("src")]
@@ -21,11 +21,11 @@ namespace NuGet {
         public string Target { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
-            if (!String.IsNullOrEmpty(Source) && Source.Any(c => _invalidPathCharactersExceptWildCards.Contains(c))) {
+            if (!String.IsNullOrEmpty(Source) && Source.IndexOfAny(_invalidSourceCharacters) != -1) {
                 yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_SourceContainsInvalidCharacters, Source));
             }
-            
-            if (!String.IsNullOrEmpty(Target) && Target.Any(c => _invalidPathCharacters.Contains(c))) {
+
+            if (!String.IsNullOrEmpty(Target) && Target.IndexOfAny(_invalidTargetChars) != -1) {
                 yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_TargetContainsInvalidCharacters, Target));
             }
         }
