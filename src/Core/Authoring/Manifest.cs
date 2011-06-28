@@ -255,7 +255,7 @@ namespace NuGet {
             return null;
         }
 
-        private static void Validate(Manifest manifest) {
+        internal static void Validate(Manifest manifest) {
             var results = new List<ValidationResult>();
 
             // Run all data annotations validations

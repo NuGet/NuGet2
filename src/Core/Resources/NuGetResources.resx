@@ -310,9 +310,9 @@
     <value>Applying constraint '{0} {1}' defined in {2}.</value>
   </data>
   <data name="Manifest_SourceContainsInvalidCharacters" xml:space="preserve">
-    <value>Source path "{0}" contains invalid characters.</value>
+    <value>Source path '{0}' contains invalid characters.</value>
   </data>
   <data name="Manifest_TargetContainsInvalidCharacters" xml:space="preserve">
-    <value>Target path "{0}" contains invalid characters.</value>
+    <value>Target path '{0}' contains invalid characters.</value>
   </data>
 </root>

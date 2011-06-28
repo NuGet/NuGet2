@@ -183,6 +183,5 @@ namespace NuGet {
             return frameworkNames.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                                  .Select(VersionUtility.ParseFrameworkName);
         }
-
     }
 }

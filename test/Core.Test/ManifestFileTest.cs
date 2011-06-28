@@ -42,7 +42,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(@"Source path ""bin\\|\\*.dll"" contains invalid characters.", result.Single().ErrorMessage);
+            Assert.AreEqual(@"Source path 'bin\\|\\*.dll' contains invalid characters.", result.Single().ErrorMessage);
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(@"Target path ""lib\\|\\net40"" contains invalid characters.", result.Single().ErrorMessage);
+            Assert.AreEqual(@"Target path 'lib\\|\\net40' contains invalid characters.", result.Single().ErrorMessage);
         }
 
         [TestMethod]
@@ -70,8 +70,8 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(2, result.Count);
-            Assert.AreEqual(@"Source path ""bin|\\**\\*.dll"" contains invalid characters.", result.First().ErrorMessage);
-            Assert.AreEqual(@"Target path ""lib\\|\\net40"" contains invalid characters.", result.Last().ErrorMessage);
+            Assert.AreEqual(@"Source path 'bin|\\**\\*.dll' contains invalid characters.", result.First().ErrorMessage);
+            Assert.AreEqual(@"Target path 'lib\\|\\net40' contains invalid characters.", result.Last().ErrorMessage);
         }
     }
 }

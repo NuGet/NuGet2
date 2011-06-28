@@ -439,7 +439,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Source path &quot;{0}&quot; contains invalid characters..
+        ///   Looks up a localized string similar to Source path &apos;{0}&apos; contains invalid characters..
         /// </summary>
         internal static string Manifest_SourceContainsInvalidCharacters {
             get {
@@ -448,7 +448,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Target path &quot;{0}&quot; contains invalid characters..
+        ///   Looks up a localized string similar to Target path &apos;{0}&apos; contains invalid characters..
         /// </summary>
         internal static string Manifest_TargetContainsInvalidCharacters {
             get {

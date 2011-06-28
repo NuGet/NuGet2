@@ -9,7 +9,7 @@ using NuGet.Resources;
 
 namespace NuGet {
     [XmlType("file")]
-    public class ManifestFile {
+    public class ManifestFile : IValidatableObject {
         private static readonly char[] _invalidPathCharacters = Path.GetInvalidPathChars();
         private static readonly IEnumerable<char> _invalidPathCharactersExceptWildCards = _invalidPathCharacters.Except(new[] { '*', '?' });
 
@@ -22,11 +22,11 @@ namespace NuGet {
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
             if (!String.IsNullOrEmpty(Source) && Source.Any(c => _invalidPathCharactersExceptWildCards.Contains(c))) {
-                yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_SourceContainsInvalidCharacters, Source), new[] { "Source" });
+                yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_SourceContainsInvalidCharacters, Source));
             }
             
             if (!String.IsNullOrEmpty(Target) && Target.Any(c => _invalidPathCharacters.Contains(c))) {
-                yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_TargetContainsInvalidCharacters, Target), new[] { "Target" });
+                yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_TargetContainsInvalidCharacters, Target));
             }
         }
      }
