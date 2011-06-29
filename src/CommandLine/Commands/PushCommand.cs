@@ -97,7 +97,7 @@ namespace NuGet.Commands {
                 }
             };
 
-            string sourceName = CommandLineUtility.GetSourceDisplayName(SourceProvider, Source); ;
+            string sourceName = CommandLineUtility.GetSourceDisplayName(Source); ;
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
 
             try {
@@ -135,7 +135,7 @@ namespace NuGet.Commands {
 
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, SourceProvider, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, source, throwIfNotFound);
             }
 
             return apiKey;

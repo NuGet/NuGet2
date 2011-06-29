@@ -37,7 +37,7 @@ namespace NuGet.Commands {
             var settings = Settings.UserSettings;
             settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, source, apiKey);
 
-            string sourceName = CommandLineUtility.GetSourceDisplayName(SourceProvider, source);
+            string sourceName = CommandLineUtility.GetSourceDisplayName(source);
 
             // Setup the symbol server key
             if (setSymbolServerKey) {
@@ -45,7 +45,7 @@ namespace NuGet.Commands {
                 Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
                                   sourceName,
-                                  CommandLineUtility.GetSourceDisplayName(SourceProvider, NuGetConstants.DefaultSymbolServerUrl));
+                                  CommandLineUtility.GetSourceDisplayName(NuGetConstants.DefaultSymbolServerUrl));
             }
             else {
                 Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, sourceName);

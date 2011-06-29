@@ -26,7 +26,7 @@ namespace NuGet {
                 };
             }
 
-            var repositories = (from item in feeds 
+            var repositories = (from item in feeds
                                 let repository = createRepository(provider.ResolveSource(item))
                                 where repository != null
                                 select repository).ToArray();
@@ -43,12 +43,6 @@ namespace NuGet {
                                    ).FirstOrDefault();
 
             return resolvedSource ?? value;
-        }
-
-        public static string GetSourceDisplayName(this IPackageSourceProvider sourceProvider, string source) {
-            return (from item in sourceProvider.LoadPackageSources()
-                    where source.Equals(item.Source, StringComparison.OrdinalIgnoreCase)
-                    select item.Name).DefaultIfEmpty(source).FirstOrDefault();
         }
     }
 }
