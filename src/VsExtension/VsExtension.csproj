@@ -102,6 +102,12 @@
       <Project>{53AB7187-CDF3-48B5-B90E-8919D3CB904D}</Project>
       <Name>Options</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
+      <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
+      <Name>VisualStudio.Interop</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
     <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
       <Name>Console.Types</Name>
