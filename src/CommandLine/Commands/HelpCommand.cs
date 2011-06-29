@@ -25,6 +25,12 @@ namespace NuGet.Commands {
             }
         }
 
+        [Option(typeof(NuGetResources), "HelpCommandAll")]
+        public bool All { get; set; }
+
+        [Option(typeof(NuGetResources), "HelpCommandMarkdown")]
+        public bool Markdown { get; set; }
+
         [ImportingConstructor]
         public HelpCommand(ICommandManager commandManager)
             : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, "http://docs.nuget.org/docs/reference/command-line-reference") {
@@ -42,6 +48,12 @@ namespace NuGet.Commands {
         public override void ExecuteCommand() {
             if (!String.IsNullOrEmpty(CommandName)) {
                 ViewHelpForCommand(CommandName);
+            }
+            else if (All && Markdown) {
+                ViewMarkdownHelp();
+            }
+            else if (All) {
+                ViewHelpForAllCommands();
             }
             else {
                 ViewHelp();
@@ -131,6 +143,47 @@ namespace NuGet.Commands {
                     Console.WriteLine("For more information, visit {0}", _helpUrl);
                 }
 
+                Console.WriteLine();
+            }
+        }
+
+        private void ViewHelpForAllCommands() {
+            var commands = from c in _commandManager.GetCommands()
+                           orderby c.CommandAttribute.CommandName
+                           select c.CommandAttribute;
+            TextInfo info = CultureInfo.CurrentCulture.TextInfo;
+
+            foreach (var command in commands) {
+                Console.WriteLine(info.ToTitleCase(command.CommandName) + " Command");
+                ViewHelpForCommand(command.CommandName);
+            }
+        }
+
+        /// <summary>
+        /// Prints help for all commands in markdown format.
+        /// </summary>
+        private void ViewMarkdownHelp() {
+            var commands = from c in _commandManager.GetCommands()
+                           orderby c.CommandAttribute.CommandName
+                           select c;
+            TextInfo info = CultureInfo.CurrentCulture.TextInfo;
+
+            foreach (var command in commands) {
+                var attrib = command.CommandAttribute;
+                Console.WriteLine("##" + info.ToTitleCase(attrib.CommandName) + " Command");
+                Console.WriteLine(attrib.GetDescription());
+                Console.WriteLine("### Usage");
+                Console.WriteLine(attrib.GetUsageDescription());
+                Console.WriteLine("    " + attrib.GetUsageSummary());
+                Console.WriteLine("### Options");
+                Console.WriteLine("<table>");
+                foreach (var option in _commandManager.GetCommandOptions(command)) {
+                    Console.WriteLine("<tr>");
+                    Console.WriteLine("<td>" + option.Value.Name + "</td>");
+                    Console.WriteLine("<td>" + GetAltText(option.Key.AltName) + "</td>");
+                    Console.WriteLine("<td>" + option.Key.GetDescription() + "</td>");
+                }
+                Console.WriteLine("</table>");
                 Console.WriteLine();
             }
         }
